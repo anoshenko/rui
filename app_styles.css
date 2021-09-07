@@ -1,0 +1,124 @@
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+  overflow: hidden;
+  min-width: 1px;
+  min-height: 1px;
+  text-overflow: ellipsis;
+}
+
+div {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+input {
+  padding: 4px;
+  overflow: auto;
+}
+
+textarea {
+  padding: 4px;
+  overflow: auto;
+}
+
+ul:focus {
+  outline: none;
+}
+
+body {
+  margin: 0 auto;
+  width: 100%;
+  height: 100vh;
+}
+
+.ruiRoot {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+}
+
+.ruiPopupLayer {
+  background-color: rgba(128,128,128,0.1);
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+}
+
+.ruiView {
+}
+
+.ruiAbsoluteLayout {
+  position: relative;
+}
+
+.ruiGridLayout {
+  display: grid;
+}
+
+.ruiListLayout {
+  display: flex;
+}
+
+.ruiStackLayout {
+  display: grid;
+}
+
+.ruiStackPageLayout {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  align-items: stretch;
+  justify-items: stretch;
+  grid-column-start: 1; 
+  grid-column-end: 2; 
+  grid-row-start: 1; 
+  grid-row-end: 2; 
+}
+
+.ruiTabsLayout {
+  display: grid;
+}
+
+.ruiImageView {
+  display: grid;
+}
+
+.ruiListView {
+  overflow: auto;
+	display: flex;
+	align-content: stretch;
+}
+/*
+@media (prefers-color-scheme: light) {
+  body {
+    background: #FFF;
+    color: #000;
+  }
+  .ruiRoot {
+    background-color: #FFFFFF;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #303030;
+    color: #F0F0F0;
+  }
+  .ruiRoot {
+    background-color: #303030;
+  }
+}
+*/

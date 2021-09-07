@@ -1,0 +1,163 @@
+theme {
+	colors = _{
+		ruiTextColor = #FF000000,
+		ruiDisabledTextColor = #FF202020,
+		ruiBackgroundColor = #FFFFFFFF,
+		ruiButtonColor = #FFE0E0E0,
+		ruiButtonActiveColor = #FFC0C0C0,
+		ruiButtonTextColor = #FF000000,
+		ruiButtonDisabledColor = #FFE0E0E0,
+		ruiButtonDisabledTextColor = #FF202020,
+		ruiHighlightColor = #FF1A74E8,
+		ruiHighlightTextColor = #FFFFFFFF,
+		ruiSelectedColor = #FFE0E0E0,
+		ruiSelectedTextColor = #FF000000,
+		ruiPopupBackgroundColor = #FFFFFFFF,
+		ruiPopupTextColor = #FF000000,
+		ruiPopupTitleColor = #FF0000FF,
+		ruiPopupTitleTextColor = #FFFFFFFF,
+
+		ruiTabsBackgroundColor = #FFEEEEEE,
+		ruiInactiveTabColor = #FFD0D0D0,
+		ruiInactiveTabTextColor = #FF202020,
+		ruiActiveTabColor = #FFFFFFFF,
+		ruiActiveTabTextColor = #FF000000,
+	},
+	colors:dark = _{
+		ruiTextColor = #FFE0E0E0,
+		ruiDisabledTextColor = #FFA0A0A0,
+		ruiBackgroundColor = #FF080808,
+		ruiButtonColor = #FF404040,
+		ruiButtonTextColor = #FFE0E0E0,
+		ruiButtonDisabledColor = #FF404040,
+		ruiButtonDisabledTextColor = #FFA0A0A0,
+		ruiHighlightColor = #FF1A74E8,
+		ruiHighlightTextColor = #FFFFFFFF,
+	},
+	constants = _{
+		ruiButtonHorizontalPadding = 16px,
+		ruiButtonVerticalPadding = 8px,
+		ruiButtonMargin = 4px,
+		ruiButtonRadius = 4px,
+		ruiButtonHighlightDilation = 1.5px, 
+		ruiButtonHighlightBlur = 2px,
+		ruiCheckboxGap = 12px,
+		ruiListItemHorizontalPadding = 12px,
+		ruiListItemVerticalPadding = 4px,
+		ruiPopupTitleHeight = 32px,
+		ruiPopupTitlePadding = 8px,
+		ruiPopupButtonGap = 4px,
+		ruiTabSpace = 2px,
+		ruiTabHeight = 32px,
+		ruiTabPadding = 2px,
+	},
+	constants:touch = _{
+		ruiButtonHorizontalPadding = 20px,
+		ruiButtonVerticalPadding = 16px
+	},
+	styles = [
+		ruiApp {
+			font-name = "Arial, Helvetica, sans-serif",
+			text-size = 12pt,
+			text-color = @ruiTextColor,
+			background-color = @ruiBackgroundColor,
+		},
+		ruiButton {
+			align = center,
+			padding = "@ruiButtonVerticalPadding, @ruiButtonHorizontalPadding, @ruiButtonVerticalPadding, @ruiButtonHorizontalPadding",
+			margin = @ruiButtonMargin,
+			radius = @ruiButtonRadius,
+			background-color = @ruiButtonColor,
+			text-color = @ruiButtonTextColor,
+			border = _{width = 1px, style = solid, color = @ruiButtonTextColor}
+		},
+		ruiDisabledButton {
+			align = center,
+			padding = "@ruiButtonVerticalPadding, @ruiButtonHorizontalPadding, @ruiButtonVerticalPadding, @ruiButtonHorizontalPadding",
+			margin = @ruiButtonMargin,
+			radius = @ruiButtonRadius,
+			background-color = @ruiButtonDisabledColor,
+			text-color = @ruiButtonDisabledTextColor,
+			border = _{width = 1px, style = solid, color = @ruiButtonDisabledTextColor}
+		},
+		ruiButton:hover {
+			text-color = @ruiTextColor,
+			background-color = @ruiBackgroundColor,
+		},
+		ruiButton:focus {
+			shadow = _{spread-radius = @ruiButtonHighlightDilation, blur = @ruiButtonHighlightBlur, color = @ruiHighlightColor },
+		},
+		ruiButton:active {
+			background-color = @ruiButtonActiveColor
+		},
+		ruiCheckbox {
+			radius = 2px,
+			padding = 1px,
+			margin = 2px,
+		},
+		ruiCheckbox:focus {
+			margin = 0,
+			border = _{style = solid, color = @ruiHighlightColor, width = 2px },
+		},
+		ruiListItem {
+			radius = 4px,
+			padding = "@ruiListItemVerticalPadding, @ruiListItemHorizontalPadding, @ruiListItemVerticalPadding, @ruiListItemHorizontalPadding",
+		},
+		ruiListItemSelected {
+			background-color=@ruiSelectedColor,
+			text-color=@ruiSelectedTextColor,
+		},
+		ruiListItemFocused {
+			background-color=@ruiHighlightColor,
+			text-color=@ruiHighlightTextColor,
+		},
+		ruiActiveTab {
+			background-color = @ruiActiveTabColor,
+			text-color = @ruiActiveTabTextColor,
+			padding-left = 8px,
+			padding-right = 8px,
+		},
+		ruiInactiveTab {
+			background-color = @ruiInactiveTabColor,
+			text-color = @ruiInactiveTabTextColor,
+			padding-left = 8px,
+			padding-right = 8px,
+		},
+		ruiActiveVerticalTab {
+			background-color = @ruiActiveTabColor,
+			text-color = @ruiActiveTabTextColor,
+			padding-top = 8px,
+			padding-bottom = 8px,
+		},
+		ruiInactiveVerticalTab {
+			background-color = @ruiInactiveTabColor,
+			text-color = @ruiInactiveTabTextColor,
+			padding-top = 8px,
+			padding-bottom = 8px,
+		},
+		ruiPopup {
+			background-color = @ruiPopupBackgroundColor,
+			text-color = @ruiPopupTextColor,
+			radius = 4px,
+			shadow = _{spread-radius=4px, blur=16px, color=#80808080},
+		}
+		ruiPopupTitle {
+			background-color = @ruiPopupTitleColor,
+			text-color = @ruiPopupTitleTextColor,
+			min-height = 24px,
+		}
+		ruiMessageText {
+			padding-left = 64px,
+			padding-right = 64px,
+			padding-top = 32px,
+			padding-bottom = 32px,
+		}
+		ruiPopupMenuItem {
+			padding-top = 4px,
+			padding-bottom = 4px,
+			padding-left = 8px,
+			padding-right = 8px,
+		}
+	],
+}
+
