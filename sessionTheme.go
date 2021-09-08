@@ -244,11 +244,11 @@ func (session *sessionData) checkboxImage(checked bool) string {
 		if backgroundColor, ok = session.Color("ruiHighlightColor"); !ok {
 			backgroundColor = 0xFF1A74E8
 		}
-	} else if backgroundColor, ok = session.Color("backgroundColor"); !ok {
+	} else if backgroundColor, ok = session.Color("ruiBackgroundColor"); !ok {
 		if session.darkTheme {
-			backgroundColor = 0xFFA0A0A0
+			backgroundColor = 0xFF040404
 		} else {
-			backgroundColor = 0xFF202020
+			backgroundColor = 0xFFF0F0F0
 		}
 	}
 
@@ -295,7 +295,7 @@ func (session *sessionData) radiobuttonOffImage() string {
 			}
 		}
 
-		if backgroundColor, ok = session.Color("backgroundColor"); !ok {
+		if backgroundColor, ok = session.Color("ruiBackgroundColor"); !ok {
 			if session.darkTheme {
 				backgroundColor = 0xFFA0A0A0
 			} else {
