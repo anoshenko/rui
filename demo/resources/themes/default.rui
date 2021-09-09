@@ -1,0 +1,88 @@
+theme {
+	colors = _{
+		optionsBackground = #FFDDDDDD,
+		optionsTextColor = #FF000000,
+	},
+	colors:dark = _{
+		optionsBackground = #FF404040,
+		optionsTextColor = #FFDDDDDD,
+	},
+	constants = _{
+		optionsFont = sans-serif,
+		optionsTextSize = 10pt,
+	},
+	styles = [
+		demoPage {
+			width = 100%, 
+			height = 100%,
+			cell-width = "1fr, auto",
+		},
+		demoPanel {
+			width = 100%, 
+			height = 100%,
+			orientation = horizontal, 
+		},
+		optionsPanel {
+			column = 1,
+			height = 100%,
+			width = auto,
+			background-color = @optionsBackground,
+			text-color = @optionsTextColor,
+			font = @optionsFont,
+			text-size = @optionsTextSize,
+			padding = 8px,
+			orientation = vertical,
+		},
+		optionsTable {
+			grid-column-gap = 8px, 
+			grid-row-gap = 8px,
+			cell-vertical-align = center,
+		},
+		optionsLine {
+			padding = 8px,
+			orientation = horizontal,
+			vertical-align = center,
+		},
+		transitionBar {
+			height = 24px, 
+			background-color = #FF00DD00, 
+			margin-top = 4px,
+			margin-bottom = 16px,
+		},
+		header1 {
+			semantics = h1,
+			text-align = center,
+			margin-bottom = 0.5em,
+		},
+		header2 {
+			semantics = h2,
+			text-align = center,
+			margin-bottom = 0.5em,
+		},
+		paragraph {
+			semantics = p,
+			text-indent = 2em,
+			margin-bottom = 0.5em,
+		},
+		tableHead1 {
+			background-color = #FFDDDDDD,
+			text-align = left,
+			table-vertical-align = top,
+			text-weight = normal,
+			italic = true,
+			border = _{ top = _{style = solid, color = black, width = 4px }, bottom = _{style = solid, color = black, width = 4px } },
+			cell-border = _{ style = dashed, color = gray, width = 1px },
+			cell-padding = 8px,
+		},
+		tableHead2 {
+
+		},
+		tableFoot1 {
+			background-color = #FFfefbd8,
+			text-align = center,
+			text-weight = bold,
+			border = _{ top = _{style = solid, color = black, width = 2px }, bottom = _{style = solid, color = black, width = 4px } },
+			cell-padding = 8px,
+		}
+	],
+}	
