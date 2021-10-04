@@ -33,7 +33,7 @@ func newColumnSeparatorProperty(value interface{}) ColumnSeparatorProperty {
 	case DataObject:
 		separator := new(columnSeparatorProperty)
 		separator.properties = map[string]interface{}{}
-		for _, tag := range []string{Style, Width, ColorProperty} {
+		for _, tag := range []string{Style, Width, ColorTag} {
 			if val, ok := value.PropertyValue(tag); ok && val != "" {
 				separator.set(tag, value)
 			}
@@ -43,9 +43,9 @@ func newColumnSeparatorProperty(value interface{}) ColumnSeparatorProperty {
 	case ViewBorder:
 		separator := new(columnSeparatorProperty)
 		separator.properties = map[string]interface{}{
-			Style:         value.Style,
-			Width:         value.Width,
-			ColorProperty: value.Color,
+			Style:    value.Style,
+			Width:    value.Width,
+			ColorTag: value.Color,
 		}
 		return separator
 	}
@@ -59,7 +59,7 @@ func NewColumnSeparator(params Params) ColumnSeparatorProperty {
 	separator := new(columnSeparatorProperty)
 	separator.properties = map[string]interface{}{}
 	if params != nil {
-		for _, tag := range []string{Style, Width, ColorProperty} {
+		for _, tag := range []string{Style, Width, ColorTag} {
 			if value, ok := params[tag]; ok && value != nil {
 				separator.Set(tag, value)
 			}
@@ -78,7 +78,7 @@ func (separator *columnSeparatorProperty) normalizeTag(tag string) string {
 		return Width
 
 	case ColumnSeparatorColor, "separator-color":
-		return ColorProperty
+		return ColorTag
 	}
 
 	return tag
@@ -86,7 +86,7 @@ func (separator *columnSeparatorProperty) normalizeTag(tag string) string {
 
 func (separator *columnSeparatorProperty) ruiString(writer ruiWriter) {
 	writer.startObject("_")
-	for _, tag := range []string{Style, Width, ColorProperty} {
+	for _, tag := range []string{Style, Width, ColorTag} {
 		if value, ok := separator.properties[tag]; ok {
 			writer.writeProperty(Style, value)
 		}
@@ -103,7 +103,7 @@ func (separator *columnSeparatorProperty) String() string {
 func (separator *columnSeparatorProperty) Remove(tag string) {
 
 	switch tag = separator.normalizeTag(tag); tag {
-	case Style, Width, ColorProperty:
+	case Style, Width, ColorTag:
 		delete(separator.properties, tag)
 
 	default:
@@ -126,8 +126,8 @@ func (separator *columnSeparatorProperty) Set(tag string, value interface{}) boo
 	case Width:
 		return separator.setSizeProperty(Width, value)
 
-	case ColorProperty:
-		return separator.setColorProperty(ColorProperty, value)
+	case ColorTag:
+		return separator.setColorProperty(ColorTag, value)
 	}
 
 	ErrorLogF(`"%s" property is not compatible with the ColumnSeparatorProperty`, tag)
@@ -147,7 +147,7 @@ func (separator *columnSeparatorProperty) Get(tag string) interface{} {
 func (separator *columnSeparatorProperty) ViewBorder(session Session) ViewBorder {
 	style, _ := valueToEnum(separator.getRaw(Style), BorderStyle, session, NoneLine)
 	width, _ := sizeProperty(separator, Width, session)
-	color, _ := colorProperty(separator, ColorProperty, session)
+	color, _ := colorProperty(separator, ColorTag, session)
 
 	return ViewBorder{
 		Style: style,

@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	// ColorProperty is the name of the color property of the shadow.
-	ColorProperty = "color"
+	// ColorTag is the name of the color property of the shadow.
+	ColorTag = "color"
 	// Inset is the name of bool property of the shadow. If it is set to "false" (default) then the shadow
 	// is assumed to be a drop shadow (as if the box were raised above the content).
 	// If it is set to  "true" then the shadow to one inside the frame (as if the content was depressed inside the box).
@@ -48,11 +48,11 @@ type viewShadowData struct {
 // color - the color of the shadow
 func NewViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Color) ViewShadow {
 	return NewShadowWithParams(Params{
-		XOffset:       offsetX,
-		YOffset:       offsetY,
-		BlurRadius:    blurRadius,
-		SpreadRadius:  spreadRadius,
-		ColorProperty: color,
+		XOffset:      offsetX,
+		YOffset:      offsetY,
+		BlurRadius:   blurRadius,
+		SpreadRadius: spreadRadius,
+		ColorTag:     color,
 	})
 }
 
@@ -63,12 +63,12 @@ func NewViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Co
 // color - the color of the shadow
 func NewInsetViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Color) ViewShadow {
 	return NewShadowWithParams(Params{
-		XOffset:       offsetX,
-		YOffset:       offsetY,
-		BlurRadius:    blurRadius,
-		SpreadRadius:  spreadRadius,
-		ColorProperty: color,
-		Inset:         true,
+		XOffset:      offsetX,
+		YOffset:      offsetY,
+		BlurRadius:   blurRadius,
+		SpreadRadius: spreadRadius,
+		ColorTag:     color,
+		Inset:        true,
 	})
 }
 
@@ -78,10 +78,10 @@ func NewInsetViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, col
 // color - the color of the shadow
 func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShadow {
 	return NewShadowWithParams(Params{
-		XOffset:       offsetX,
-		YOffset:       offsetY,
-		BlurRadius:    blurRadius,
-		ColorProperty: color,
+		XOffset:    offsetX,
+		YOffset:    offsetY,
+		BlurRadius: blurRadius,
+		ColorTag:   color,
 	})
 }
 
@@ -90,7 +90,7 @@ func NewShadowWithParams(params Params) ViewShadow {
 	shadow := new(viewShadowData)
 	shadow.propertyList.init()
 	if params != nil {
-		for _, tag := range []string{ColorProperty, Inset, XOffset, YOffset, BlurRadius, SpreadRadius} {
+		for _, tag := range []string{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius} {
 			if value, ok := params[tag]; ok && value != nil {
 				shadow.Set(tag, value)
 			}
@@ -119,7 +119,7 @@ func (shadow *viewShadowData) Set(tag string, value interface{}) bool {
 
 	tag = strings.ToLower(tag)
 	switch tag {
-	case ColorProperty, Inset, XOffset, YOffset, BlurRadius, SpreadRadius:
+	case ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius:
 		return shadow.propertyList.Set(tag, value)
 	}
 
@@ -132,7 +132,7 @@ func (shadow *viewShadowData) Get(tag string) interface{} {
 }
 
 func (shadow *viewShadowData) cssStyle(buffer *strings.Builder, session Session, lead string) bool {
-	color, _ := colorProperty(shadow, ColorProperty, session)
+	color, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
 	blurRadius, _ := sizeProperty(shadow, BlurRadius, session)
@@ -164,7 +164,7 @@ func (shadow *viewShadowData) cssStyle(buffer *strings.Builder, session Session,
 }
 
 func (shadow *viewShadowData) cssTextStyle(buffer *strings.Builder, session Session, lead string) bool {
-	color, _ := colorProperty(shadow, ColorProperty, session)
+	color, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
 	blurRadius, _ := sizeProperty(shadow, BlurRadius, session)
@@ -188,7 +188,7 @@ func (shadow *viewShadowData) cssTextStyle(buffer *strings.Builder, session Sess
 }
 
 func (shadow *viewShadowData) visible(session Session) bool {
-	color, _ := colorProperty(shadow, ColorProperty, session)
+	color, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
 	blurRadius, _ := sizeProperty(shadow, BlurRadius, session)

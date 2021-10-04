@@ -28,7 +28,7 @@ func NewOutlineProperty(params Params) OutlineProperty {
 func (outline *outlinePropertyData) ruiString(writer ruiWriter) {
 	writer.startObject("_")
 
-	for _, tag := range []string{Style, Width, ColorProperty} {
+	for _, tag := range []string{Style, Width, ColorTag} {
 		if value, ok := outline.properties[tag]; ok {
 			writer.writeProperty(Style, value)
 		}
@@ -72,8 +72,8 @@ func (outline *outlinePropertyData) Set(tag string, value interface{}) bool {
 		}
 		return outline.setSizeProperty(Width, value)
 
-	case ColorProperty:
-		return outline.setColorProperty(ColorProperty, value)
+	case ColorTag:
+		return outline.setColorProperty(ColorTag, value)
 
 	default:
 		ErrorLogF(`"%s" property is not compatible with the OutlineProperty`, tag)
@@ -88,7 +88,7 @@ func (outline *outlinePropertyData) Get(tag string) interface{} {
 func (outline *outlinePropertyData) ViewOutline(session Session) ViewOutline {
 	style, _ := valueToEnum(outline.getRaw(Style), BorderStyle, session, NoneLine)
 	width, _ := sizeProperty(outline, Width, session)
-	color, _ := colorProperty(outline, ColorProperty, session)
+	color, _ := colorProperty(outline, ColorTag, session)
 	return ViewOutline{Style: style, Width: width, Color: color}
 }
 
@@ -130,14 +130,14 @@ func (style *viewStyle) setOutline(value interface{}) bool {
 		style.properties[Outline] = value
 
 	case ViewOutline:
-		style.properties[Outline] = NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorProperty: value.Color})
+		style.properties[Outline] = NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorTag: value.Color})
 
 	case ViewBorder:
-		style.properties[Outline] = NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorProperty: value.Color})
+		style.properties[Outline] = NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorTag: value.Color})
 
 	case DataObject:
 		outline := NewOutlineProperty(nil)
-		for _, tag := range []string{Style, Width, ColorProperty} {
+		for _, tag := range []string{Style, Width, ColorTag} {
 			if text, ok := value.PropertyValue(tag); ok && text != "" {
 				outline.Set(tag, text)
 			}

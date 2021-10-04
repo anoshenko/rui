@@ -100,17 +100,17 @@ func createColumnLayoutDemo(session rui.Session) rui.View {
 		case 2:
 			rui.Set(view, "columnLayout", rui.ColumnSeparator,
 				rui.NewColumnSeparator(rui.Params{
-					rui.Width:         rui.Px(2),
-					rui.Style:         rui.DottedLine,
-					rui.ColorProperty: rui.Red,
+					rui.Width:    rui.Px(2),
+					rui.Style:    rui.DottedLine,
+					rui.ColorTag: rui.Red,
 				}))
 
 		case 3:
 			rui.Set(view, "columnLayout", rui.ColumnSeparator,
 				rui.NewColumnSeparator(rui.Params{
-					rui.Width:         rui.Px(3),
-					rui.Style:         rui.DashedLine,
-					rui.ColorProperty: rui.Blue,
+					rui.Width:    rui.Px(3),
+					rui.Style:    rui.DashedLine,
+					rui.ColorTag: rui.Blue,
 				}))
 
 		case 4:

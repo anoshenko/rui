@@ -79,7 +79,7 @@ func newBorderProperty(value interface{}) BorderProperty {
 		case ViewBorder:
 			border.properties[Style] = value.Style
 			border.properties[Width] = value.Width
-			border.properties[ColorProperty] = value.Color
+			border.properties[ColorTag] = value.Color
 
 		case ViewBorders:
 			if value.Left.Style == value.Right.Style &&
@@ -105,7 +105,7 @@ func newBorderProperty(value interface{}) BorderProperty {
 			if value.Left.Color == value.Right.Color &&
 				value.Left.Color == value.Top.Color &&
 				value.Left.Color == value.Bottom.Color {
-				border.properties[ColorProperty] = value.Left.Color
+				border.properties[ColorTag] = value.Left.Color
 			} else {
 				border.properties[LeftColor] = value.Left.Color
 				border.properties[RightColor] = value.Right.Color
@@ -126,7 +126,7 @@ func NewBorder(params Params) BorderProperty {
 	border := new(borderProperty)
 	border.properties = map[string]interface{}{}
 	if params != nil {
-		for _, tag := range []string{Style, Width, ColorProperty, Left, Right, Top, Bottom,
+		for _, tag := range []string{Style, Width, ColorTag, Left, Right, Top, Bottom,
 			LeftStyle, RightStyle, TopStyle, BottomStyle,
 			LeftWidth, RightWidth, TopWidth, BottomWidth,
 			LeftColor, RightColor, TopColor, BottomColor} {
@@ -184,7 +184,7 @@ func (border *borderProperty) normalizeTag(tag string) string {
 		return BottomWidth
 
 	case BorderColor, CellBorderColor:
-		return ColorProperty
+		return ColorTag
 
 	case BorderLeftColor, CellBorderLeftColor, "color-left":
 		return LeftColor
@@ -205,7 +205,7 @@ func (border *borderProperty) normalizeTag(tag string) string {
 func (border *borderProperty) ruiString(writer ruiWriter) {
 	writer.startObject("_")
 
-	for _, tag := range []string{Style, Width, ColorProperty} {
+	for _, tag := range []string{Style, Width, ColorTag} {
 		if value, ok := border.properties[tag]; ok {
 			writer.writeProperty(Style, value)
 		}
@@ -214,7 +214,7 @@ func (border *borderProperty) ruiString(writer ruiWriter) {
 	for _, side := range []string{Top, Right, Bottom, Left} {
 		style, okStyle := border.properties[side+"-"+Style]
 		width, okWidth := border.properties[side+"-"+Width]
-		color, okColor := border.properties[side+"-"+ColorProperty]
+		color, okColor := border.properties[side+"-"+ColorTag]
 		if okStyle || okWidth || okColor {
 			writer.startObjectProperty(side, "_")
 			if okStyle {
@@ -224,7 +224,7 @@ func (border *borderProperty) ruiString(writer ruiWriter) {
 				writer.writeProperty(Width, width)
 			}
 			if okColor {
-				writer.writeProperty(ColorProperty, color)
+				writer.writeProperty(ColorTag, color)
 			}
 			writer.endObject()
 		}
@@ -246,7 +246,7 @@ func (border *borderProperty) setSingleBorderObject(prefix string, obj DataObjec
 			result = false
 		}
 	}
-	if text, ok := obj.PropertyValue(ColorProperty); ok {
+	if text, ok := obj.PropertyValue(ColorTag); ok {
 		if !border.setColorProperty(prefix+"-color", text) {
 			result = false
 		}
@@ -297,11 +297,11 @@ func (border *borderProperty) setBorderObject(obj DataObject) bool {
 		}
 	}
 
-	if text, ok := obj.PropertyValue(ColorProperty); ok {
+	if text, ok := obj.PropertyValue(ColorTag); ok {
 		values := split4Values(text)
 		switch len(values) {
 		case 1:
-			if !border.setColorProperty(ColorProperty, values[0]) {
+			if !border.setColorProperty(ColorTag, values[0]) {
 				return false
 			}
 
@@ -313,7 +313,7 @@ func (border *borderProperty) setBorderObject(obj DataObject) bool {
 			}
 
 		default:
-			notCompatibleType(ColorProperty, text)
+			notCompatibleType(ColorTag, text)
 			result = false
 		}
 	}
@@ -356,7 +356,7 @@ func (border *borderProperty) Remove(tag string) {
 			delete(border.properties, t)
 		}
 
-	case ColorProperty:
+	case ColorTag:
 		for _, t := range []string{tag, TopColor, RightColor, BottomColor, LeftColor} {
 			delete(border.properties, t)
 		}
@@ -392,7 +392,7 @@ func (border *borderProperty) Remove(tag string) {
 
 	case LeftColor, RightColor, TopColor, BottomColor:
 		delete(border.properties, tag)
-		if color, ok := border.properties[ColorProperty]; ok && color != nil {
+		if color, ok := border.properties[ColorTag]; ok && color != nil {
 			for _, t := range []string{TopColor, RightColor, BottomColor, LeftColor} {
 				if t != tag {
 					if _, ok := border.properties[t]; !ok {
@@ -432,8 +432,8 @@ func (border *borderProperty) Set(tag string, value interface{}) bool {
 			return true
 		}
 
-	case ColorProperty:
-		if border.setColorProperty(ColorProperty, value) {
+	case ColorTag:
+		if border.setColorProperty(ColorTag, value) {
 			for _, side := range []string{TopColor, RightColor, BottomColor, LeftColor} {
 				delete(border.properties, side)
 			}
@@ -464,7 +464,7 @@ func (border *borderProperty) Set(tag string, value interface{}) bool {
 			if style := value.Get(styleTag); value != nil {
 				border.properties[styleTag] = style
 			}
-			colorTag := tag + "-" + ColorProperty
+			colorTag := tag + "-" + ColorTag
 			if color := value.Get(colorTag); value != nil {
 				border.properties[colorTag] = color
 			}
@@ -477,7 +477,7 @@ func (border *borderProperty) Set(tag string, value interface{}) bool {
 		case ViewBorder:
 			border.properties[tag+"-"+Style] = value.Style
 			border.properties[tag+"-"+Width] = value.Width
-			border.properties[tag+"-"+ColorProperty] = value.Color
+			border.properties[tag+"-"+ColorTag] = value.Color
 			return true
 		}
 		fallthrough
@@ -509,10 +509,10 @@ func (border *borderProperty) Get(tag string) interface{} {
 		} else if width, ok := border.properties[Width]; ok {
 			result.Set(Width, width)
 		}
-		if color, ok := border.properties[tag+"-"+ColorProperty]; ok {
-			result.Set(ColorProperty, color)
-		} else if color, ok := border.properties[ColorProperty]; ok {
-			result.Set(ColorProperty, color)
+		if color, ok := border.properties[tag+"-"+ColorTag]; ok {
+			result.Set(ColorTag, color)
+		} else if color, ok := border.properties[ColorTag]; ok {
+			result.Set(ColorTag, color)
 		}
 		return result
 
@@ -532,7 +532,7 @@ func (border *borderProperty) Get(tag string) interface{} {
 		if color, ok := border.properties[tag]; ok {
 			return color
 		}
-		return border.properties[ColorProperty]
+		return border.properties[ColorTag]
 	}
 
 	return nil
@@ -549,15 +549,15 @@ func (border *borderProperty) delete(tag string) {
 	case Width:
 		remove = []string{Width, LeftWidth, RightWidth, TopWidth, BottomWidth}
 
-	case ColorProperty:
-		remove = []string{ColorProperty, LeftColor, RightColor, TopColor, BottomColor}
+	case ColorTag:
+		remove = []string{ColorTag, LeftColor, RightColor, TopColor, BottomColor}
 
 	case Left, Right, Top, Bottom:
 		if border.Get(Style) != nil {
 			border.properties[tag+"-"+Style] = 0
-			remove = []string{tag + "-" + ColorProperty, tag + "-" + Width}
+			remove = []string{tag + "-" + ColorTag, tag + "-" + Width}
 		} else {
-			remove = []string{tag + "-" + Style, tag + "-" + ColorProperty, tag + "-" + Width}
+			remove = []string{tag + "-" + Style, tag + "-" + ColorTag, tag + "-" + Width}
 		}
 
 	case LeftStyle, RightStyle, TopStyle, BottomStyle:
@@ -575,7 +575,7 @@ func (border *borderProperty) delete(tag string) {
 		}
 
 	case LeftColor, RightColor, TopColor, BottomColor:
-		if border.Get(ColorProperty) != nil {
+		if border.Get(ColorTag) != nil {
 			border.properties[tag] = 0
 		} else {
 			remove = []string{tag}
@@ -591,7 +591,7 @@ func (border *borderProperty) ViewBorders(session Session) ViewBorders {
 
 	defStyle, _ := valueToEnum(border.getRaw(Style), BorderStyle, session, NoneLine)
 	defWidth, _ := sizeProperty(border, Width, session)
-	defColor, _ := colorProperty(border, ColorProperty, session)
+	defColor, _ := colorProperty(border, ColorTag, session)
 
 	getBorder := func(prefix string) ViewBorder {
 		var result ViewBorder
@@ -602,7 +602,7 @@ func (border *borderProperty) ViewBorders(session Session) ViewBorders {
 		if result.Width, ok = sizeProperty(border, prefix+Width, session); !ok {
 			result.Width = defWidth
 		}
-		if result.Color, ok = colorProperty(border, prefix+ColorProperty, session); !ok {
+		if result.Color, ok = colorProperty(border, prefix+ColorTag, session); !ok {
 			result.Color = defColor
 		}
 		return result

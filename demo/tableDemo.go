@@ -73,9 +73,9 @@ func createTableViewDemo(session rui.Session) rui.View {
 		switch number {
 		case 1:
 			rui.Set(view, "demoTableView1", borderTag, rui.NewBorder(rui.Params{
-				rui.Style:         rui.SolidLine,
-				rui.ColorProperty: rui.Black,
-				rui.Width:         rui.Px(1),
+				rui.Style:    rui.SolidLine,
+				rui.ColorTag: rui.Black,
+				rui.Width:    rui.Px(1),
 			}))
 
 		case 2:
@@ -117,9 +117,9 @@ func createTableViewDemo(session rui.Session) rui.View {
 		case 2:
 			rui.Set(view, "demoTableView1", rui.HeadStyle, rui.Params{
 				rui.CellBorder: rui.NewBorder(rui.Params{
-					rui.Style:         rui.SolidLine,
-					rui.ColorProperty: rui.Green,
-					rui.Width:         "2px",
+					rui.Style:    rui.SolidLine,
+					rui.ColorTag: rui.Green,
+					rui.Width:    "2px",
 				}),
 				rui.CellPadding:     "8px",
 				rui.BackgroundColor: rui.LightGrey,
@@ -138,9 +138,9 @@ func createTableViewDemo(session rui.Session) rui.View {
 		case 2:
 			rui.Set(view, "demoTableView1", rui.FootStyle, rui.Params{
 				rui.Border: rui.NewBorder(rui.Params{
-					rui.Style:         rui.SolidLine,
-					rui.ColorProperty: rui.Black,
-					rui.Width:         "2px",
+					rui.Style:    rui.SolidLine,
+					rui.ColorTag: rui.Black,
+					rui.Width:    "2px",
 				}),
 				rui.CellPadding:     "4px",
 				rui.BackgroundColor: rui.LightYellow,

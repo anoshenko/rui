@@ -42,7 +42,7 @@ func (picker *colorPickerData) Init(session Session) {
 func (picker *colorPickerData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {
-	case Value, ColorProperty:
+	case Value, ColorTag:
 		return ColorPickerValue
 	}
 
@@ -224,7 +224,7 @@ func GetColorPickerValue(view View, subviewID string) Color {
 		if result, ok := colorStyledProperty(view, ColorPickerValue); ok {
 			return result
 		}
-		for _, tag := range []string{Value, ColorProperty} {
+		for _, tag := range []string{Value, ColorTag} {
 			if value, ok := valueFromStyle(view, tag); ok {
 				if result, ok := valueToColor(value, view.Session()); ok {
 					return result

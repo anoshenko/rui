@@ -7,7 +7,7 @@ import (
 )
 
 var colorProperties = []string{
-	ColorProperty,
+	ColorTag,
 	BackgroundColor,
 	TextColor,
 	BorderColor,
