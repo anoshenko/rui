@@ -267,6 +267,101 @@ func (style *viewStyle) set(tag string, value interface{}) bool {
 
 	case Filter:
 		return style.setFilter(value)
+
+	case Transition:
+		setObject := func(obj DataObject) bool {
+			if obj != nil {
+				switch obj.Tag() {
+				case "", "_":
+					ErrorLog("Invalid transition property name")
+
+				default:
+					style.transitions[obj.Tag()] = parseAnimation(obj)
+					return true
+				}
+			}
+			return false
+		}
+
+		switch value := value.(type) {
+		case Params:
+			result := false
+			for tag, val := range value {
+				if animation, ok := val.(Animation); ok {
+					tag = strings.ToLower(tag)
+					if animation == nil || tag == "" {
+						ErrorLog("Invalid transition property name")
+					} else {
+						style.transitions[tag] = animation
+						result = true
+					}
+				} else {
+					notCompatibleType(Transition, val)
+				}
+			}
+			return result
+
+		case DataObject:
+			return setObject(value)
+
+		case DataNode:
+			switch value.Type() {
+			case ObjectNode:
+				return setObject(value.Object())
+
+			case ArrayNode:
+				result := true
+				for i := 0; i < value.ArraySize(); i++ {
+					if obj := value.ArrayElement(i).Object(); obj != nil {
+						result = setObject(obj) && result
+					} else {
+						notCompatibleType(tag, value.ArrayElement(i))
+						result = false
+					}
+				}
+				return result
+			}
+		}
+		notCompatibleType(tag, value)
+		return false
+
+	case AnimationTag:
+		switch value := value.(type) {
+		case Animation:
+			style.properties[tag] = []Animation{value}
+			return true
+
+		case []Animation:
+			style.properties[tag] = value
+			return true
+
+		case DataObject:
+			if animation := parseAnimation(value); animation.hasAnimatedPropery() {
+				style.properties[tag] = []Animation{animation}
+				return true
+			}
+
+		case DataNode:
+			animations := []Animation{}
+			result := true
+			for i := 0; i < value.ArraySize(); i++ {
+				if obj := value.ArrayElement(i).Object(); obj != nil {
+					if anim := parseAnimation(obj); anim.hasAnimatedPropery() {
+						animations = append(animations, anim)
+					} else {
+						result = false
+					}
+				} else {
+					notCompatibleType(tag, value.ArrayElement(i))
+					result = false
+				}
+			}
+			if result && len(animations) > 0 {
+				style.properties[tag] = animations
+			}
+			return result
+		}
+
 	}
 
 	return style.propertyList.set(tag, value)

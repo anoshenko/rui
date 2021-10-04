@@ -54,6 +54,7 @@ var boolProperties = []string{
 	Controls,
 	Loop,
 	Muted,
+	AnimationPaused,
 }
 
 var intProperties = []string{
@@ -377,6 +378,11 @@ var enumProperties = map[string]struct {
 		[]string{"to-top", "to-right-top", "to-right", "to-right-bottom", "to-bottom", "to-left-bottom", "to-left", "to-left-top"},
 		"",
 		[]string{"to top", "to right top", "to right", "to right bottom", "to bottom", "to left bottom", "to left", "to left top"},
+	},
+	AnimationDirection: {
+		[]string{"normal", "reverse", "alternate", "alternate-reverse"},
+		"",
+		[]string{"normal", "reverse", "alternate", "alternate-reverse"},
 	},
 	RadialGradientShape: {
 		[]string{"ellipse", "circle"},

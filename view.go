@@ -82,6 +82,8 @@ type View interface {
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
 
+	getTransitions() Params
+
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index int, x, y, width, height float64)
 	setNoResizeEvent()
@@ -92,18 +94,18 @@ type View interface {
 // viewData - base implementation of View interface
 type viewData struct {
 	viewStyle
-	session       Session
-	tag           string
-	viewID        string
-	_htmlID       string
-	parentID      string
-	systemClass   string
-	animation     map[string]Animation
-	addCSS        map[string]string
-	frame         Frame
-	scroll        Frame
-	noResizeEvent bool
-	created       bool
+	session          Session
+	tag              string
+	viewID           string
+	_htmlID          string
+	parentID         string
+	systemClass      string
+	singleTransition map[string]Animation
+	addCSS           map[string]string
+	frame            Frame
+	scroll           Frame
+	noResizeEvent    bool
+	created          bool
 	//animation map[string]AnimationEndListener
 }
 
@@ -142,7 +144,7 @@ func (view *viewData) Init(session Session) {
 	view.session = session
 	view.addCSS = map[string]string{}
 	//view.animation = map[string]AnimationEndListener{}
-	view.animation = map[string]Animation{}
+	view.singleTransition = map[string]Animation{}
 	view.noResizeEvent = false
 	view.created = false
 }
@@ -215,6 +217,12 @@ func (view *viewData) remove(tag string) {
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
 		view.removeTouchListener(tag)
 
+	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
+		view.removeTransitionListener(tag)
+
+	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		view.removeAnimationListener(tag)
+
 	case ResizeEvent, ScrollEvent:
 		delete(view.properties, tag)
 
@@ -276,6 +284,12 @@ func (view *viewData) set(tag string, value interface{}) bool {
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
 		return view.setTouchListener(tag, value)
 
+	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
+		return view.setTransitionListener(tag, value)
+
+	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		return view.setAnimationListener(tag, value)
+
 	case ResizeEvent, ScrollEvent:
 		return view.setFrameListener(tag, value)
 	}
@@ -304,7 +318,7 @@ func (view *viewData) propertyChanged(tag string) {
 		updateInnerHTML(view.parentHTMLID(), session)
 
 	case Background:
-		updateCSSProperty(htmlID, Background, view.backgroundCSS(view), session)
+		updateCSSProperty(htmlID, Background, view.backgroundCSS(session), session)
 		return
 
 	case Border:
@@ -428,6 +442,7 @@ func (view *viewData) propertyChanged(tag string) {
 		} else {
 			updateCSSProperty(htmlID, "font-style", "", session)
 		}
+		return
 
 	case SmallCaps:
 		if state, ok := boolProperty(view, tag, session); ok {
@@ -439,13 +454,33 @@ func (view *viewData) propertyChanged(tag string) {
 		} else {
 			updateCSSProperty(htmlID, "font-variant", "", session)
 		}
+		return
 
 	case Strikethrough, Overline, Underline:
 		updateCSSProperty(htmlID, "text-decoration", view.cssTextDecoration(session), session)
 		for _, tag2 := range []string{TextLineColor, TextLineStyle, TextLineThickness} {
 			view.propertyChanged(tag2)
 		}
+		return
 
+	case Transition:
+		view.updateTransitionCSS()
+		return
+
+	case AnimationTag:
+		updateCSSProperty(htmlID, AnimationTag, view.animationCSS(session), session)
+		return
+
+	case AnimationPaused:
+		paused, ok := boolProperty(view, AnimationPaused, session)
+		if !ok {
+			updateCSSProperty(htmlID, `animation-play-state`, ``, session)
+		} else if paused {
+			updateCSSProperty(htmlID, `animation-play-state`, `paused`, session)
+		} else {
+			updateCSSProperty(htmlID, `animation-play-state`, `running`, session)
+		}
+		return
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {
@@ -521,7 +556,7 @@ func (view *viewData) addToCSSStyle(addCSS map[string]string) {
 }
 
 func (view *viewData) cssStyle(self View, builder cssBuilder) {
-	view.viewStyle.cssViewStyle(builder, view.session, self)
+	view.viewStyle.cssViewStyle(builder, view.session)
 	switch GetVisibility(view, "") {
 	case Invisible:
 		builder.add(`visibility`, `hidden`)
@@ -600,6 +635,8 @@ func viewHTML(view View, buffer *strings.Builder) {
 	pointerEventsHtml(view, buffer)
 	touchEventsHtml(view, buffer)
 	focusEventsHtml(view, buffer)
+	transitionEventsHtml(view, buffer)
+	animationEventsHtml(view, buffer)
 
 	buffer.WriteRune('>')
 	view.htmlSubviews(view, buffer)
@@ -654,6 +691,12 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 			listener(self)
 		}
 
+	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
+		view.handleTransitionEvents(command, data)
+
+	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		view.handleAnimationEvents(command, data)
+
 	case "scroll":
 		view.onScroll(view, dataFloatProperty(data, "x"), dataFloatProperty(data, "y"), dataFloatProperty(data, "width"), dataFloatProperty(data, "height"))
 
@@ -671,17 +714,6 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 			}
 		}
 
-	case "transitionEnd":
-		if property, ok := data.PropertyValue("property"); ok {
-			if animation, ok := view.animation[property]; ok {
-				delete(view.animation, property)
-				view.updateTransitionCSS()
-				if animation.FinishListener != nil {
-					animation.FinishListener.OnAnimationFinished(self, property)
-				}
-			}
-			return true
-		}
 		/*
 			case "resize":
 				floatProperty := func(tag string) float64 {

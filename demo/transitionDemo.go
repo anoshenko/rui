@@ -43,24 +43,23 @@ func createTransitionDemo(session rui.Session) rui.View {
 	}
 
 	rui.Set(view, "startTransition", rui.ClickEvent, func(button rui.View) {
+
 		for id, timing := range bars {
+			animation := rui.NewAnimation(rui.Params{
+				rui.Duration:       2,
+				rui.TimingFunction: timing,
+			})
+
 			if bar := rui.ViewByID(view, id); bar != nil {
 				if rui.GetWidth(bar, "").Value == 100 {
-					bar.SetAnimated(rui.Width, rui.Percent(20), rui.Animation{
-						Duration:       2,
-						TimingFunction: timing,
-					})
+					bar.Remove(rui.TransitionEndEvent)
+					bar.SetAnimated(rui.Width, rui.Percent(20), animation)
 				} else {
-					bar.SetAnimated(rui.Width, rui.Percent(100), rui.Animation{
-						Duration:       2,
-						TimingFunction: timing,
-						FinishListener: rui.AnimationFinishedFunc(func(v rui.View, tag string) {
-							bar.SetAnimated(rui.Width, rui.Percent(20), rui.Animation{
-								Duration:       2,
-								TimingFunction: bars[v.ID()],
-							})
-						}),
+					bar.Set(rui.TransitionEndEvent, func(v rui.View, tag string) {
+						bar.Remove(rui.TransitionEndEvent)
+						bar.SetAnimated(rui.Width, rui.Percent(20), animation)
 					})
+					bar.SetAnimated(rui.Width, rui.Percent(100), animation)
 				}
 			}
 		}

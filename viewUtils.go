@@ -854,7 +854,8 @@ func GetSkew(view View, subviewID string) (AngleUnit, AngleUnit) {
 	if view == nil {
 		return AngleUnit{Value: 0, Type: Radian}, AngleUnit{Value: 0, Type: Radian}
 	}
-	return getSkew(view, view.Session())
+	x, y, _ := getSkew(view, view.Session())
+	return x, y
 }
 
 // GetScale returns a x-, y-, and z-axis scaling value of a 2D/3D scale. The default value is 1.
@@ -866,7 +867,8 @@ func GetScale(view View, subviewID string) (float64, float64, float64) {
 	if view == nil {
 		return 1, 1, 1
 	}
-	return getScale(view, view.Session())
+	x, y, z, _ := getScale(view, view.Session())
+	return x, y, z
 }
 
 // GetRotate returns a x-, y, z-coordinate of the vector denoting the axis of rotation, and the angle of the view rotation
@@ -878,7 +880,10 @@ func GetRotate(view View, subviewID string) (float64, float64, float64, AngleUni
 	if view == nil {
 		return 0, 0, 0, AngleUnit{Value: 0, Type: Radian}
 	}
-	return getRotate(view, view.Session())
+
+	angle, _ := angleProperty(view, Rotate, view.Session())
+	rotateX, rotateY, rotateZ := getRotateVector(view, view.Session())
+	return rotateX, rotateY, rotateZ, angle
 }
 
 // GetAvoidBreak returns "true" if avoids any break from being inserted within the principal box,

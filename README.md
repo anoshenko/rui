@@ -1765,7 +1765,7 @@ You can get lists of listeners for mouse events using the functions:
 	func GetDoubleClickListeners(view View, subviewID string) []func(View, MouseEvent)
 	func GetContextMenuListeners(view View, subviewID string) []func(View, MouseEvent)
 
-## Pointer Events
+### Pointer Events
 
 A pointer is a device-independent representation of input devices (such as a mouse, pen, 
 or point of contact on a touch surface). A pointer can point to a specific coordinate 
@@ -3760,6 +3760,296 @@ For quick access to these methods, there are global functions:
 	func IsMediaPlayerPaused(view View, playerID string) bool
 
 where view is the root View, playerID is the id of AudioPlayer or VideoPlayer
+
+## Animation
+
+The library supports two types of animation:
+
+* Animated property value changes (hereinafter "transition animation")
+* Script animated change of one or more properties (hereinafter simply "animation script")
+
+### Animation interface
+
+The Animation interface is used to set animation parameters. It extends the Properties interface.
+The interface is created using the function:
+
+	func NewAnimation(params Params) Animation
+
+Some of the properties of the Animation interface are used in both types of animation, the rest are used only 
+in animation scripts.
+
+Common properties are
+
+| Property          | Constant       | Type    | Default      | Description |
+|-------------------|----------------|---------|--------------|----------------------------------------------|
+| "duration"        | Duration       | float64 | 1            | Animation duration in seconds                |
+| "delay"           | Delay          | float64 | 0            | Delay before animation in seconds            |
+| "timing-function" | TimingFunction | string  | "ease"       | The function of changing the animation speed |
+
+Properties used only in animation scripts will be described below.
+
+#### "timing-function" property
+
+The "timing-function" property describes in text the function of changing the speed of the animation.
+Functions can be divided into 2 types: simple functions and functions with parameters.
+
+Simple functions
+
+| Function      | Constant        | Description                                                       |
+|---------------|-----------------|-------------------------------------------------------------------|
+| "ease"        | EaseTiming      | the speed increases towards the middle and slows down at the end. |
+| "ease-in"     | EaseInTiming    | the speed is slow at first, but increases in the end.             |
+| "ease-out"    | EaseOutTiming   | speed is fast at first, but decreases rapidly. Most of the slow   |
+| "ease-in-out" | EaseInOutTiming | the speed is fast at first, but quickly decreases, and at the end it increases again. |
+| "linear"      | LinearTiming    | constant speed                                                    |
+
+And there are two functions with parameters:
+
+* "steps(N)" - discrete function, where N is an integer specifying the number of steps. 
+You can specify this function either as text or using the function:
+
+	func StepsTiming(stepCount int) string
+
+For example
+
+	animation := rui.NewAnimation(rui.Params{
+		rui.TimingFunction: rui.StepsTiming(10),
+	})
+
+equivalent to 
+
+	animation := rui.NewAnimation(rui.Params{
+		rui.TimingFunction: "steps(10)",
+	})
+	
+* "cubic-bezier(x1, y1, x2, y2)" - time function of a cubic Bezier curve. x1, y1, x2, y2 are of type float64.
+x1 and x2 must be in the range [0...1]. You can specify this function either as text or using the function:
+
+	func CubicBezierTiming(x1, y1, x2, y2 float64) string
+
+### Transition animation
+
+Transition animation can be applied to properties of the type: SizeUnit, Color, AngleUnit, float64 and composite properties that contain elements of the listed types (for example, "shadow", "border", etc.).
+
+If you try to animate other types of properties (for example, bool, string), no error will occur, 
+there will simply be no animation.
+
+There are two types of transition animations:
+* single-fold;
+* constant;
+
+A one-time animation is triggered using the SetAnimated function of the View interface. 
+This function has the following description:
+
+	SetAnimated(tag string, value interface{}, animation Animation) bool
+
+It assigns a new value to the property, and the change occurs using the specified animation.
+For example,
+
+	view.SetAnimated(rui.Width, rui.Px(400), rui.NewAnimation(rui.Params{
+		rui.Duration:       0.75,
+		rui.TimingFunction: rui.EaseOutTiming,
+	}))
+
+There is also a global function for animated one-time change of the property value of the child View
+
+	func SetAnimated(rootView View, viewID, tag string, value interface{}, animation Animation) bool
+
+A persistent animation runs every time the property value changes. 
+To set the constant animation of the transition, use the "transition" property (the Transition constant). 
+As a value, this property is assigned rui.Params, where the property name should be the key, 
+and the value should be the Animation interface.
+For example,
+
+	view.Set(rui.Transition, rui.Params{
+		rui.Height: rui.NewAnimation(rui.Params{
+			rui.Duration:       0.75,
+			rui.TimingFunction: rui.EaseOutTiming,
+		},
+		rui.BackgroundColor: rui.NewAnimation(rui.Params{
+			rui.Duration:       1.5,
+			rui.Delay:          0.5,
+			rui.TimingFunction: rui.Linear,
+		},
+	})
+
+Calling the SetAnimated function does not change the value of the "transition" property.
+
+To get the current list of permanent transition animations, use the function
+
+	func GetTransition(view View, subviewID string) Params
+
+It is recommended to add new transition animations using the function 
+
+	func AddTransition(view View, subviewID, tag string, animation Animation) bool
+
+Calling this function is equivalent to the following code
+
+	transitions := rui.GetTransition(view, subviewID)
+	transitions[tag] = animation
+	rui.Set(view, subviewID, rui.Transition, transitions)
+
+#### Transition animation events
+
+The transition animation generates the following events
+
+| Event                     | Constant              | Description                                                      |
+|---------------------------|-----------------------|------------------------------------------------------------------|
+| "transition-run-event"    | TransitionRunEvent    | The transition animation loop has started, i.e. before the delay |
+| "transition-start-event"  | TransitionStartEvent  | The transition animation has actually started, i.e. after delay  |
+| "transition-end-event"    | TransitionEndEvent    | Transition animation finished                                    |
+| "transition-cancel-event" | TransitionCancelEvent | Transition animation interrupted                                 |
+
+The main event listener has the following format:
+
+	func(View, string)
+
+where the second argument is the name of the property.
+
+You can also use a listener in the following format:
+
+	func()
+	func(string)
+	func(View)
+
+Get lists of listeners for transition animation events using functions:
+
+	func GetTransitionRunListeners(view View, subviewID string) []func(View, string)
+	func GetTransitionStartListeners(view View, subviewID string) []func(View, string)
+	func GetTransitionEndListeners(view View, subviewID string) []func(View, string)
+	func GetTransitionCancelListeners(view View, subviewID string) []func(View, string)
+
+### Animation script
+
+An animation script describes a more complex animation than a transition animation. To do this, additional properties are added to Animation:
+
+#### "property" property
+
+The "property" property (constant PropertyTag) describes property changes. 
+[]AnimatedProperty or AnimatedProperty is assigned as a value. The AnimatedProperty structure describes 
+the change script of one property. She is described as
+
+	type AnimatedProperty struct {
+		Tag       string
+		From, To  interface{}
+		KeyFrames map[int]interface{}
+	}
+
+where Tag is the name of the property, From is the initial value of the property, 
+To is the final value of the property, KeyFrames is intermediate property values (keyframes).
+
+The required fields are Tag, From, To. The KeyFrames field is optional, it can be nil.
+
+The KeyFrames field describes key frames. As a key of type int, the percentage of time elapsed 
+since the beginning of the animation is used (exactly the beginning of the animation itself, 
+the time specified by the "delay" property is excluded).
+And the value is the value of the property at a given moment in time. For example
+
+	prop := rui.AnimatedProperty {
+		Tag:       rui.Width,
+		From:      rui.Px(100),
+		To:        rui.Px(200),
+		KeyFrames: map[int]interface{
+			90: rui.Px(220),
+		}
+	}
+
+In this example, the "width" property will grow from 100px to 220px 90% of the time. 
+In the remaining 10% of the time, it will decrease from 220px to 200px.
+
+The "property" property is assigned to []AnimatedProperty, which means that you can animate several properties at once.
+
+You must set at least one "property" element, otherwise the animation will be ignored.
+
+#### "id" property
+
+The "id" string property (constant ID) specifies the animation identifier. 
+Passed as a parameter to the animation event listener. If you do not plan to use event listeners for animation, 
+then you do not need to set this property.
+
+#### "iteration-count" property
+
+The "iteration-count" int property (constant IterationCount) specifies the number of animation repetitions.
+The default is 1. A value less than zero causes the animation to repeat indefinitely.
+
+#### "animation-direction" property
+
+The "animation-direction" int property (an AnimationDirection constant) specifies whether 
+the animation should play forward, backward, or alternately forward and backward between forward and 
+backward playback of the sequence. It can take the following values:
+
+| Value    | Constant                  | Description                                                             |
+|:--------:|---------------------------|-----------------------------------------------------------------------|
+| 0        | NormalAnimation           | The animation plays forward every iteration, that is, when the animation ends, it is immediately reset to its starting position and played again. |
+| 1        | ReverseAnimation          | The animation plays backwards, from the last position to the first, and then resets to the final position and plays again. |
+| 2        | AlternateAnimation        | The animation changes direction in each cycle, that is, in the first cycle, it starts from the start position, reaches the end position, and in the second cycle, it continues from the end position and reaches the start position, and so on. |
+| 3        | AlternateReverseAnimation | The animation starts playing from the end position and reaches the start position, and in the next cycle, continuing from the start position, it goes to the end position. |
+
+#### Animation start
+
+To start the animation script, you must assign the interface created by Animation to the "animation" property 
+(the AnimationTag constant). If the View is already displayed on the screen, then the animation starts immediately
+(taking into account the specified delay), otherwise the animation starts as soon as the View is displayed 
+on the screen.
+
+The "animation" property can be assigned Animation and [] Animation, ie. you can run several animations 
+at the same time for one View
+
+Example,
+
+	prop := rui.AnimatedProperty {
+		Tag:       rui.Width,
+		From:      rui.Px(100),
+		To:        rui.Px(200),
+		KeyFrames: map[int]interface{
+			90: rui.Px(220),
+		}
+	}
+	animation := rui.NewAnimation(rui.Params{
+		rui.PropertyTag:    []rui.AnimatedProperty{prop},
+		rui.Duration:       2,
+		rui.TimingFunction: LinearTiming,
+	})
+	rui.Set(view, "subview", rui.AnimationTag, animation)
+
+#### "animation-paused" property
+
+The "animation-paused" bool property of View (AnimationPaused constant) allows the animation to be paused.
+In order to pause the animation, set this property to "true", and to resume to "false".
+
+Attention. When you assign a value to the "animation" property, the "animation-paused" property is set to false.
+ 
+#### Animation events
+
+The animation script generates the following events
+
+| Event                       | Constant                | Description                            |
+|-----------------------------|-------------------------|----------------------------------------|
+| "animation-start-event"     | AnimationStartEvent     | Animation started                      |
+| "animation-end-event"       | AnimationEndEvent       | Animation finished                     |
+| "animation-cancel-event"    | AnimationCancelEvent    | Animation interrupted                  |
+| "animation-iteration-event" | AnimationIterationEvent | A new iteration of animation has begun |
+
+Attention! Not all browsers support the "animation-cancel-event" event. This is currently only Safari and Firefox.
+
+The main event data listener has the following format:
+
+	func(View, string)
+
+where the second argument is the id of the animation.
+
+You can also use a listener in the following format:
+
+	func()
+	func(string)
+	func(View)
+
+Get lists of animation event listeners using functions:
+
+	func GetAnimationStartListeners(view View, subviewID string) []func(View, string)
+	func GetAnimationEndListeners(view View, subviewID string) []func(View, string)
+	func GetAnimationCancelListeners(view View, subviewID string) []func(View, string)
+	func GetAnimationIterationListeners(view View, subviewID string) []func(View, string)
 
 ## Session
 

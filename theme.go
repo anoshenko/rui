@@ -191,7 +191,7 @@ func (theme *theme) cssText(session Session) string {
 		style.init()
 		parseProperties(&style, obj)
 		builder.startStyle(tag)
-		style.cssViewStyle(&builder, session, nil)
+		style.cssViewStyle(&builder, session)
 		builder.endStyle()
 	}
 
@@ -202,7 +202,7 @@ func (theme *theme) cssText(session Session) string {
 			style.init()
 			parseProperties(&style, obj)
 			builder.startStyle(tag)
-			style.cssViewStyle(&builder, session, nil)
+			style.cssViewStyle(&builder, session)
 			builder.endStyle()
 		}
 		builder.endMedia()

@@ -55,11 +55,11 @@ func (layout *stackLayoutData) Init(session Session) {
 	layout.viewsContainerData.Init(session)
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
+	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
 }
 
-func (layout *stackLayoutData) OnAnimationFinished(view View, tag string) {
-	switch tag {
-	case "ruiPush":
+func (layout *stackLayoutData) pushFinished(view View, tag string) {
+	if tag == "ruiPush" {
 		if layout.pushView != nil {
 			layout.pushView = nil
 			count := len(layout.views)
@@ -70,13 +70,17 @@ func (layout *stackLayoutData) OnAnimationFinished(view View, tag string) {
 			}
 			updateInnerHTML(layout.htmlID(), layout.session)
 		}
+
 		if layout.onPushFinished != nil {
 			onPushFinished := layout.onPushFinished
 			layout.onPushFinished = nil
 			onPushFinished()
 		}
+	}
+}
 
-	case "ruiPop":
+func (layout *stackLayoutData) popFinished(view View, tag string) {
+	if tag == "ruiPop" {
 		popView := layout.popView
 		layout.popView = nil
 		updateInnerHTML(layout.htmlID(), layout.session)
@@ -85,6 +89,27 @@ func (layout *stackLayoutData) OnAnimationFinished(view View, tag string) {
 			layout.onPopFinished = nil
 			onPopFinished(popView)
 		}
+	}
+}
+
+func (layout *stackLayoutData) Set(tag string, value interface{}) bool {
+	if strings.ToLower(tag) == TransitionEndEvent {
+		listeners, ok := valueToAnimationListeners(value)
+		if ok {
+			listeners = append(listeners, layout.pushFinished)
+			listeners = append(listeners, layout.popFinished)
+			layout.properties[TransitionEndEvent] = listeners
+		}
+		return ok
+	}
+	return layout.viewsContainerData.Set(tag, value)
+}
+
+func (layout *stackLayoutData) Remove(tag string) {
+	if strings.ToLower(tag) == TransitionEndEvent {
+		layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
+	} else {
+		layout.viewsContainerData.Remove(tag)
 	}
 }
 
@@ -174,7 +199,7 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 
 	layout.pushView = view
 	layout.animationType = animation
-	layout.animation["ruiPush"] = Animation{FinishListener: layout}
+	//layout.animation["ruiPush"] = Animation{FinishListener: layout}
 	layout.onPushFinished = onPushFinished
 
 	htmlID := layout.htmlID()
@@ -226,7 +251,7 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 	layout.RemoveView(layout.peek)
 
 	layout.animationType = animation
-	layout.animation["ruiPop"] = Animation{FinishListener: layout}
+	//layout.animation["ruiPop"] = Animation{FinishListener: layout}
 	layout.onPopFinished = onPopFinished
 
 	htmlID := layout.htmlID()

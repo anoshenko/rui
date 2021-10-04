@@ -259,3 +259,10 @@ func (customView *CustomViewData) setScroll(x, y, width, height float64) {
 		customView.superView.setScroll(x, y, width, height)
 	}
 }
+
+func (customView *CustomViewData) getTransitions() Params {
+	if customView.superView != nil {
+		return customView.superView.getTransitions()
+	}
+	return Params{}
+}

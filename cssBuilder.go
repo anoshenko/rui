@@ -218,6 +218,42 @@ func (builder *cssStyleBuilder) endStyle() {
 	builder.buffer.WriteString(`}\n`)
 }
 
+func (builder *cssStyleBuilder) startAnimation(name string) {
+	if builder.buffer == nil {
+		builder.init()
+	}
+
+	builder.media = true
+	builder.buffer.WriteString(`\n@keyframes `)
+	builder.buffer.WriteString(name)
+	builder.buffer.WriteString(` {\n`)
+}
+
+func (builder *cssStyleBuilder) endAnimation() {
+	if builder.buffer == nil {
+		builder.init()
+	}
+	builder.buffer.WriteString(`}\n`)
+	builder.media = false
+}
+
+func (builder *cssStyleBuilder) startAnimationFrame(name string) {
+	if builder.buffer == nil {
+		builder.init()
+	}
+
+	builder.buffer.WriteString(`\t`)
+	builder.buffer.WriteString(name)
+	builder.buffer.WriteString(` {\n`)
+}
+
+func (builder *cssStyleBuilder) endAnimationFrame() {
+	if builder.buffer == nil {
+		builder.init()
+	}
+	builder.buffer.WriteString(`\t}\n`)
+}
+
 func (builder *cssStyleBuilder) add(key, value string) {
 	if value != "" {
 		if builder.buffer == nil {

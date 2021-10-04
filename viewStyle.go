@@ -9,12 +9,12 @@ import (
 // ViewStyle interface of the style of view
 type ViewStyle interface {
 	Properties
-	cssViewStyle(buffer cssBuilder, session Session, view View)
+	cssViewStyle(buffer cssBuilder, session Session)
 }
 
 type viewStyle struct {
 	propertyList
-	//transitions map[string]ViewTransition
+	transitions map[string]Animation
 }
 
 // Range defines range limits. The First and Last value are included in the range
@@ -60,7 +60,7 @@ func (r *Range) setValue(value string) bool {
 func (style *viewStyle) init() {
 	style.propertyList.init()
 	//style.shadows = []ViewShadow{}
-	//style.transitions = map[string]ViewTransition{}
+	style.transitions = map[string]Animation{}
 }
 
 // NewViewStyle create new ViewStyle object
@@ -132,14 +132,14 @@ func split4Values(text string) []string {
 	return []string{}
 }
 
-func (style *viewStyle) backgroundCSS(view View) string {
+func (style *viewStyle) backgroundCSS(session Session) string {
 	if value, ok := style.properties[Background]; ok {
 		if backgrounds, ok := value.([]BackgroundElement); ok {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
 			for _, background := range backgrounds {
-				if value := background.cssStyle(view); value != "" {
+				if value := background.cssStyle(session); value != "" {
 					if buffer.Len() > 0 {
 						buffer.WriteString(", ")
 					}
@@ -155,7 +155,7 @@ func (style *viewStyle) backgroundCSS(view View) string {
 	return ""
 }
 
-func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session, view View) {
+func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if margin, ok := boundsProperty(style, Margin, session); ok {
 		margin.cssValue(Margin, builder)
@@ -219,7 +219,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session, view V
 		builder.add(BackgroundClip, enumProperties[BackgroundClip].values[value])
 	}
 
-	if background := style.backgroundCSS(view); background != "" {
+	if background := style.backgroundCSS(session); background != "" {
 		builder.add("background", background)
 	}
 
@@ -399,24 +399,20 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session, view V
 			}
 		}
 	}
-	/*
-		if len(style.transitions) > 0 {
-			buffer := allocStringBuilder()
-			defer freeStringBuilder(buffer)
 
-			for property, transition := range style.transitions {
-				if buffer.Len() > 0 {
-					buffer.WriteString(`, `)
-				}
-				buffer.WriteString(property)
-				transition.cssWrite(buffer, session)
-			}
+	if transition := style.transitionCSS(session); transition != "" {
+		builder.add(`transition`, transition)
+	}
 
-			if buffer.Len() > 0 {
-				builder.add(`transition`, buffer.String())
-			}
+	if animation := style.animationCSS(session); animation != "" {
+		builder.add(AnimationTag, animation)
+	}
+
+	if pause, ok := boolProperty(style, AnimationPaused, session); ok {
+		if pause {
+			builder.add(`animation-play-state`, `paused`)
+		} else {
+			builder.add(`animation-play-state`, `running`)
 		}
-	*/
-
-	// TODO text-shadow
+	}
 }

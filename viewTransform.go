@@ -91,10 +91,10 @@ func getOrigin(style Properties, session Session) (SizeUnit, SizeUnit, SizeUnit)
 	return x, y, z
 }
 
-func getSkew(style Properties, session Session) (AngleUnit, AngleUnit) {
-	skewX, _ := angleProperty(style, SkewX, session)
-	skewY, _ := angleProperty(style, SkewY, session)
-	return skewX, skewY
+func getSkew(style Properties, session Session) (AngleUnit, AngleUnit, bool) {
+	skewX, okX := angleProperty(style, SkewX, session)
+	skewY, okY := angleProperty(style, SkewY, session)
+	return skewX, skewY, okX || okY
 }
 
 func getTranslate(style Properties, session Session) (SizeUnit, SizeUnit, SizeUnit) {
@@ -104,19 +104,18 @@ func getTranslate(style Properties, session Session) (SizeUnit, SizeUnit, SizeUn
 	return x, y, z
 }
 
-func getScale(style Properties, session Session) (float64, float64, float64) {
-	scaleX, _ := floatProperty(style, ScaleX, session, 1)
-	scaleY, _ := floatProperty(style, ScaleY, session, 1)
-	scaleZ, _ := floatProperty(style, ScaleZ, session, 1)
-	return scaleX, scaleY, scaleZ
+func getScale(style Properties, session Session) (float64, float64, float64, bool) {
+	scaleX, okX := floatProperty(style, ScaleX, session, 1)
+	scaleY, okY := floatProperty(style, ScaleY, session, 1)
+	scaleZ, okZ := floatProperty(style, ScaleZ, session, 1)
+	return scaleX, scaleY, scaleZ, okX || okY || okZ
 }
 
-func getRotate(style Properties, session Session) (float64, float64, float64, AngleUnit) {
+func getRotateVector(style Properties, session Session) (float64, float64, float64) {
 	rotateX, _ := floatProperty(style, RotateX, session, 1)
 	rotateY, _ := floatProperty(style, RotateY, session, 1)
 	rotateZ, _ := floatProperty(style, RotateZ, session, 1)
-	angle, _ := angleProperty(style, Rotate, session)
-	return rotateX, rotateY, rotateZ, angle
+	return rotateX, rotateY, rotateZ
 }
 
 func (style *viewStyle) transform(session Session) string {
@@ -124,8 +123,8 @@ func (style *viewStyle) transform(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	skewX, skewY := getSkew(style, session)
-	if skewX.Value != 0 || skewY.Value != 0 {
+	skewX, skewY, skewOK := getSkew(style, session)
+	if skewOK {
 		buffer.WriteString(`skew(`)
 		buffer.WriteString(skewX.cssString())
 		buffer.WriteRune(',')
@@ -134,9 +133,9 @@ func (style *viewStyle) transform(session Session) string {
 	}
 
 	x, y, z := getTranslate(style, session)
-	scaleX, scaleY, scaleZ := getScale(style, session)
+	scaleX, scaleY, scaleZ, scaleOK := getScale(style, session)
 	if getTransform3D(style, session) {
-		if (x.Type != Auto && x.Value != 0) || (y.Type != Auto && y.Value != 0) || (z.Type != Auto && z.Value != 0) {
+		if x.Type != Auto || y.Type != Auto || z.Type != Auto {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
@@ -149,7 +148,7 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteRune(')')
 		}
 
-		if scaleX != 1 || scaleY != 1 || scaleZ != 1 {
+		if scaleOK {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
@@ -162,8 +161,8 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteRune(')')
 		}
 
-		rotateX, rotateY, rotateZ, angle := getRotate(style, session)
-		if angle.Value != 0 && (rotateX != 0 || rotateY != 0 || rotateZ != 0) {
+		if angle, ok := angleProperty(style, Rotate, session); ok {
+			rotateX, rotateY, rotateZ := getRotateVector(style, session)
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
@@ -177,8 +176,9 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteString(angle.cssString())
 			buffer.WriteRune(')')
 		}
+
 	} else {
-		if (x.Type != Auto && x.Value != 0) || (y.Type != Auto && y.Value != 0) {
+		if x.Type != Auto || y.Type != Auto {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
@@ -189,7 +189,7 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteRune(')')
 		}
 
-		if scaleX != 1 || scaleY != 1 {
+		if scaleOK {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
@@ -200,8 +200,7 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteRune(')')
 		}
 
-		angle, _ := angleProperty(style, Rotate, session)
-		if angle.Value != 0 {
+		if angle, ok := angleProperty(style, Rotate, session); ok {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}

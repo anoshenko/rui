@@ -1037,8 +1037,26 @@ function startResize(element, mx, my, event) {
 	}
 }
 
+function transitionStartEvent(element, event) {
+	var message = "transition-start-event{session=" + sessionID + ",id=" + element.id; 
+	if (event.propertyName) {
+		message += ",property=" + event.propertyName
+	}
+	sendMessage(message + "}");
+	event.stopPropagation();
+}
+
+function transitionRunEvent(element, event) {
+	var message = "transition-run-event{session=" + sessionID + ",id=" + element.id; 
+	if (event.propertyName) {
+		message += ",property=" + event.propertyName
+	}
+	sendMessage(message + "}");
+	event.stopPropagation();
+}
+
 function transitionEndEvent(element, event) {
-	var message = "transitionEnd{session=" + sessionID + ",id=" + element.id; 
+	var message = "transition-end-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.propertyName) {
 		message += ",property=" + event.propertyName
 	}
@@ -1047,7 +1065,7 @@ function transitionEndEvent(element, event) {
 }
 
 function transitionCancelEvent(element, event) {
-	var message = "transitionEnd{session=" + sessionID + ",id=" + element.id; 
+	var message = "transition-cancel-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.propertyName) {
 		message += ",property=" + event.propertyName
 	}
@@ -1055,8 +1073,44 @@ function transitionCancelEvent(element, event) {
 	event.stopPropagation();
 }
 
+function animationStartEvent(element, event) {
+	var message = "animation-start-event{session=" + sessionID + ",id=" + element.id; 
+	if (event.animationName) {
+		message += ",name=" + event.animationName
+	}
+	sendMessage(message + "}");
+	event.stopPropagation();
+}
+
+function animationEndEvent(element, event) {
+	var message = "animation-end-event{session=" + sessionID + ",id=" + element.id; 
+	if (event.animationName) {
+		message += ",name=" + event.animationName
+	}
+	sendMessage(message + "}");
+	event.stopPropagation();
+}
+
+function animationCancelEvent(element, event) {
+	var message = "animation-cancel-event{session=" + sessionID + ",id=" + element.id; 
+	if (event.animationName) {
+		message += ",name=" + event.animationName
+	}
+	sendMessage(message + "}");
+	event.stopPropagation();
+}
+
+function animationIterationEvent(element, event) {
+	var message = "animation-iteration-event{session=" + sessionID + ",id=" + element.id; 
+	if (event.animationName) {
+		message += ",name=" + event.animationName
+	}
+	sendMessage(message + "}");
+	event.stopPropagation();
+}
+
 function stackTransitionEndEvent(stackId, propertyName, event) {
-	sendMessage("transitionEnd{session=" + sessionID + ",id=" + stackId + ",property=" + propertyName + "}");
+	sendMessage("transition-end-event{session=" + sessionID + ",id=" + stackId + ",property=" + propertyName + "}");
 	event.stopPropagation();
 }
 

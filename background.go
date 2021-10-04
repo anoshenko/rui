@@ -102,7 +102,7 @@ const (
 // BackgroundElement describes the background element.
 type BackgroundElement interface {
 	Properties
-	cssStyle(view View) string
+	cssStyle(session Session) string
 	Tag() string
 }
 
@@ -238,8 +238,7 @@ func (image *backgroundImage) Get(tag string) interface{} {
 	return image.backgroundElement.Get(image.normalizeTag(tag))
 }
 
-func (image *backgroundImage) cssStyle(view View) string {
-	session := view.Session()
+func (image *backgroundImage) cssStyle(session Session) string {
 	if src, ok := stringProperty(image, Source, session); ok && src != "" {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
@@ -444,7 +443,7 @@ func (point *BackgroundGradientPoint) setValue(value string) bool {
 	return false
 }
 
-func (gradient *backgroundGradient) writeGradient(view View, buffer *strings.Builder) bool {
+func (gradient *backgroundGradient) writeGradient(session Session, buffer *strings.Builder) bool {
 
 	value, ok := gradient.properties[Gradient]
 	if !ok {
@@ -455,7 +454,7 @@ func (gradient *backgroundGradient) writeGradient(view View, buffer *strings.Bui
 
 	switch value := value.(type) {
 	case string:
-		if text, ok := view.Session().resolveConstants(value); ok && text != "" {
+		if text, ok := session.resolveConstants(value); ok && text != "" {
 			elements := strings.Split(text, `,`)
 			points := make([]BackgroundGradientPoint, len(elements))
 			for i, element := range elements {
@@ -477,7 +476,7 @@ func (gradient *backgroundGradient) writeGradient(view View, buffer *strings.Bui
 		for i, element := range value {
 			switch element := element.(type) {
 			case string:
-				if text, ok := view.Session().resolveConstants(element); ok && text != "" {
+				if text, ok := session.resolveConstants(element); ok && text != "" {
 					if !points[i].setValue(text) {
 						ErrorLogF(`Invalid gradient point #%d: "%s"`, i, text)
 						return false
@@ -535,11 +534,10 @@ func (gradient *backgroundLinearGradient) Set(tag string, value interface{}) boo
 	return gradient.backgroundGradient.Set(tag, value)
 }
 
-func (gradient *backgroundLinearGradient) cssStyle(view View) string {
+func (gradient *backgroundLinearGradient) cssStyle(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	session := view.Session()
 	if repeating, _ := boolProperty(gradient, Repeating, session); repeating {
 		buffer.WriteString(`repeating-linear-gradient(`)
 	} else {
@@ -581,7 +579,7 @@ func (gradient *backgroundLinearGradient) cssStyle(view View) string {
 		}
 	}
 
-	if !gradient.writeGradient(view, buffer) {
+	if !gradient.writeGradient(session, buffer) {
 		return ""
 	}
 
@@ -642,11 +640,10 @@ func (gradient *backgroundRadialGradient) Get(tag string) interface{} {
 	return gradient.backgroundGradient.Get(gradient.normalizeTag(tag))
 }
 
-func (gradient *backgroundRadialGradient) cssStyle(view View) string {
+func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	session := view.Session()
 	if repeating, _ := boolProperty(gradient, Repeating, session); repeating {
 		buffer.WriteString(`repeating-radial-gradient(`)
 	} else {
@@ -706,7 +703,7 @@ func (gradient *backgroundRadialGradient) cssStyle(view View) string {
 	}
 
 	buffer.WriteString(", ")
-	if !gradient.writeGradient(view, buffer) {
+	if !gradient.writeGradient(session, buffer) {
 		return ""
 	}
 

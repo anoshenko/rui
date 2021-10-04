@@ -53,6 +53,8 @@ type Session interface {
 	// a description of the error is written to the log
 	Set(viewID, tag string, value interface{}) bool
 
+	registerAnimation(props []AnimatedProperty) string
+
 	resolveConstants(value string) (string, bool)
 	checkboxOffImage() string
 	checkboxOnImage() string
@@ -88,27 +90,28 @@ type Session interface {
 }
 
 type sessionData struct {
-	customTheme    *theme
-	darkTheme      bool
-	touchScreen    bool
-	textDirection  int
-	pixelRatio     float64
-	language       string
-	languages      []string
-	checkboxOff    string
-	checkboxOn     string
-	radiobuttonOff string
-	radiobuttonOn  string
-	app            Application
-	sessionID      int
-	viewCounter    int
-	content        SessionContent
-	rootView       View
-	ignoreUpdates  bool
-	popups         *popupManager
-	images         *imageManager
-	brige          WebBrige
-	events         chan DataObject
+	customTheme      *theme
+	darkTheme        bool
+	touchScreen      bool
+	textDirection    int
+	pixelRatio       float64
+	language         string
+	languages        []string
+	checkboxOff      string
+	checkboxOn       string
+	radiobuttonOff   string
+	radiobuttonOn    string
+	app              Application
+	sessionID        int
+	viewCounter      int
+	content          SessionContent
+	rootView         View
+	ignoreUpdates    bool
+	popups           *popupManager
+	images           *imageManager
+	brige            WebBrige
+	events           chan DataObject
+	animationCounter int
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -122,6 +125,7 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.languages = []string{}
 	session.viewCounter = 0
 	session.ignoreUpdates = false
+	session.animationCounter = 0
 
 	if customTheme != "" {
 		if theme, ok := newTheme(customTheme); ok {

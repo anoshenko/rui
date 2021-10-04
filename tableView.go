@@ -804,7 +804,7 @@ func (table *tableViewData) getCellBorder() BorderProperty {
 }
 
 func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
-	table.viewData.cssViewStyle(builder, table.Session(), self)
+	table.viewData.cssViewStyle(builder, table.Session())
 
 	gap, ok := sizeProperty(table, Gap, table.Session())
 	if !ok || gap.Type == Auto || gap.Value <= 0 {
@@ -834,7 +834,7 @@ func (cell *tableCellView) set(tag string, value interface{}) bool {
 
 func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
 	session := cell.Session()
-	cell.viewData.cssViewStyle(builder, session, self)
+	cell.viewData.cssViewStyle(builder, session)
 
 	if value, ok := enumProperty(cell, TableVerticalAlign, session, 0); ok {
 		builder.add("vertical-align", enumProperties[TableVerticalAlign].values[value])
