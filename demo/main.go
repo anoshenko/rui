@@ -82,6 +82,7 @@ func createDemo(session rui.Session) rui.SessionContent {
 		{"ListView", createListViewDemo, nil},
 		{"Checkbox", createCheckboxDemo, nil},
 		{"Controls", createControlsDemo, nil},
+		{"FilePicker", createFilePickerDemo, nil},
 		{"TableView", createTableViewDemo, nil},
 		{"EditView", createEditDemo, nil},
 		{"ImageView", createImageViewDemo, nil},

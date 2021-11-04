@@ -45,8 +45,11 @@ func DebugLogF(format string, a ...interface{}) {
 	}
 }
 
+var lastError = ""
+
 // ErrorLog print the text to the error log
 func ErrorLog(text string) {
+	lastError = text
 	if errorLogFunc != nil {
 		errorLogFunc(text)
 		errorStack()
@@ -55,10 +58,16 @@ func ErrorLog(text string) {
 
 // ErrorLogF print the text to the error log
 func ErrorLogF(format string, a ...interface{}) {
+	lastError = fmt.Sprintf(format, a...)
 	if errorLogFunc != nil {
-		errorLogFunc(fmt.Sprintf(format, a...))
+		errorLogFunc(lastError)
 		errorStack()
 	}
+}
+
+// LastError returns the last error text
+func LastError() string {
+	return lastError
 }
 
 func errorStack() {

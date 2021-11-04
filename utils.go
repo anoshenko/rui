@@ -52,13 +52,13 @@ func GetLocalIP() string {
 	return "localhost"
 }
 
-func dataIntProperty(data DataObject, tag string) int {
+func dataIntProperty(data DataObject, tag string) (int, bool) {
 	if value, ok := data.PropertyValue(tag); ok {
 		if n, err := strconv.Atoi(value); err == nil {
-			return n
+			return n, true
 		}
 	}
-	return 0
+	return 0, false
 }
 
 func dataBoolProperty(data DataObject, tag string) bool {

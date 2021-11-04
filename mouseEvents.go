@@ -328,8 +328,8 @@ func getTimeStamp(data DataObject) uint64 {
 func (event *MouseEvent) init(data DataObject) {
 
 	event.TimeStamp = getTimeStamp(data)
-	event.Button = dataIntProperty(data, "button")
-	event.Buttons = dataIntProperty(data, "buttons")
+	event.Button, _ = dataIntProperty(data, "button")
+	event.Buttons, _ = dataIntProperty(data, "buttons")
 	event.X = dataFloatProperty(data, "x")
 	event.Y = dataFloatProperty(data, "y")
 	event.ClientX = dataFloatProperty(data, "clientX")

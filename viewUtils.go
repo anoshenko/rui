@@ -11,8 +11,8 @@ func Get(rootView View, viewID, tag string) interface{} {
 }
 
 // Set sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
-//  true - success,
-//  false - error (incompatible type or invalid format of a string value, see AppLog).
+// true - success,
+// false - error (incompatible type or invalid format of a string value, see AppLog).
 func Set(rootView View, viewID, tag string, value interface{}) bool {
 	if view := ViewByID(rootView, viewID); view != nil {
 		return view.Set(tag, value)
@@ -21,8 +21,8 @@ func Set(rootView View, viewID, tag string, value interface{}) bool {
 }
 
 // SetParams sets properties with name "tag" of the "rootView" subview. Result:
-//  true - all properties were set successful,
-//  false - error (incompatible type or invalid format of a string value, see AppLog).
+// true - all properties were set successful,
+// false - error (incompatible type or invalid format of a string value, see AppLog).
 func SetParams(rootView View, viewID string, params Params) bool {
 	view := ViewByID(rootView, viewID)
 	if view == nil {
@@ -678,8 +678,8 @@ func GetTextTransform(view View, subviewID string) int {
 }
 
 // GetWritingMode returns whether lines of text are laid out horizontally or vertically, as well as
-//   the direction in which blocks progress. Valid values are HorizontalTopToBottom (0),
-//   HorizontalBottomToTop (1), VerticalRightToLeft (2) and VerticalLeftToRight (3)
+// the direction in which blocks progress. Valid values are HorizontalTopToBottom (0),
+// HorizontalBottomToTop (1), VerticalRightToLeft (2) and VerticalLeftToRight (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetWritingMode(view View, subviewID string) int {
 	if subviewID != "" {
@@ -697,7 +697,7 @@ func GetWritingMode(view View, subviewID string) int {
 }
 
 // GetTextDirection - returns a direction of text, table columns, and horizontal overflow.
-//   Valid values are Inherit (0), LeftToRightDirection (1), and RightToLeftDirection (2).
+// Valid values are Inherit (0), LeftToRightDirection (1), and RightToLeftDirection (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextDirection(view View, subviewID string) int {
 	if subviewID != "" {
@@ -716,8 +716,8 @@ func GetTextDirection(view View, subviewID string) int {
 }
 
 // GetVerticalTextOrientation returns a orientation of the text characters in a line. It only affects text
-//   in vertical mode (when "writing-mode" is "vertical-right-to-left" or "vertical-left-to-right").
-//   Valid values are MixedTextOrientation (0), UprightTextOrientation (1), and SidewaysTextOrientation (2).
+// in vertical mode (when "writing-mode" is "vertical-right-to-left" or "vertical-left-to-right").
+// Valid values are MixedTextOrientation (0), UprightTextOrientation (1), and SidewaysTextOrientation (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetVerticalTextOrientation(view View, subviewID string) int {
 	if subviewID != "" {
@@ -804,8 +804,8 @@ func GetPerspectiveOrigin(view View, subviewID string) (SizeUnit, SizeUnit) {
 
 // GetBackfaceVisible returns a bool property that sets whether the back face of an element is
 // visible when turned towards the user. Values:
-//   true - the back face is visible when turned towards the user (default value).
-//   false - the back face is hidden, effectively making the element invisible when turned away from the user.
+// true - the back face is visible when turned towards the user (default value).
+// false - the back face is hidden, effectively making the element invisible when turned away from the user.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetBackfaceVisible(view View, subviewID string) bool {
 	if subviewID != "" {

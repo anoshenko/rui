@@ -989,6 +989,50 @@ function setInputValue(elementId, text) {
 	}
 }
 
+function fileSelectedEvent(element) {
+	var files = element.files;
+	if (files) {
+		var message = "fileSelected{session=" + sessionID + ",id=" + element.id + ",files=[";
+		for(var i = 0; i < files.length; i++) {
+			if (i > 0) {
+				message += ",";
+			}
+			message += "_{name=\"" + files[i].name + 
+				"\",last-modified=" + files[i].lastModified +
+				",size=" + files[i].size +
+				",mime-type=\"" + files[i].type + "\"}";
+		}
+		sendMessage(message + "]}");
+	}
+}
+
+function loadSelectedFile(elementId, index) {
+	var element = document.getElementById(elementId);
+	if (element) {
+		var files = element.files;
+		if (files && index >= 0 && index < files.length) {
+			const reader = new FileReader();
+         	reader.onload = function() { 
+				sendMessage("fileLoaded{session=" + sessionID + ",id=" + element.id + 
+					",index=" + index + 
+					",name=\"" + files[index].name + 
+					"\",last-modified=" + files[index].lastModified +
+					",size=" + files[index].size +
+					",mime-type=\"" + files[index].type + 
+					"\",data=`" + reader.result + "`}");
+			}
+         	reader.onerror = function(error) {
+				sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",index=" + index + ",error=`" + error + "`}");
+			}
+			reader.readAsDataURL(files[index]);
+		} else {
+			sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",index=" + index + ",error=`File not found`}");
+		}
+	} else {
+		sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",index=" + index + ",error=`Invalid FilePicker id`}");
+	}
+}
+
 function startResize(element, mx, my, event) {
 	var view = element.parentNode;
 	if (!view) {

@@ -277,7 +277,7 @@ func pointerEventsHtml(view View, buffer *strings.Builder) {
 func (event *PointerEvent) init(data DataObject) {
 	event.MouseEvent.init(data)
 
-	event.PointerID = dataIntProperty(data, "pointerId")
+	event.PointerID, _ = dataIntProperty(data, "pointerId")
 	event.Width = dataFloatProperty(data, "width")
 	event.Height = dataFloatProperty(data, "height")
 	event.Pressure = dataFloatProperty(data, "pressure")

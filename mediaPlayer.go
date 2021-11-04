@@ -844,7 +844,7 @@ func (player *mediaPlayerData) handleCommand(self View, command string, data Dat
 	case PlayerErrorEvent:
 		if value := player.getRaw(command); value != nil {
 			if listeners, ok := value.([]func(MediaPlayer, int, string)); ok {
-				code := dataIntProperty(data, "code")
+				code, _ := dataIntProperty(data, "code")
 				message, _ := data.PropertyValue("message")
 				for _, listener := range listeners {
 					listener(player, code, message)

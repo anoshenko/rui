@@ -55,6 +55,7 @@ var boolProperties = []string{
 	Loop,
 	Muted,
 	AnimationPaused,
+	Multiple,
 }
 
 var intProperties = []string{

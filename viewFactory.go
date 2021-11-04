@@ -24,6 +24,7 @@ var viewCreators = map[string]func(Session) View{
 	"ColorPicker":    newColorPicker,
 	"DatePicker":     newDatePicker,
 	"TimePicker":     newTimePicker,
+	"FilePicker":     newFilePicker,
 	"EditView":       newEditView,
 	"ListView":       newListView,
 	"CanvasView":     newCanvasView,
