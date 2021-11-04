@@ -9,7 +9,7 @@ type audioPlayerData struct {
 }
 
 // NewAudioPlayer create new MediaPlayer object and return it
-func NewAudioPlayer(session Session, params Params) MediaPlayer {
+func NewAudioPlayer(session Session, params Params) AudioPlayer {
 	view := new(audioPlayerData)
 	view.Init(session)
 	view.tag = "AudioPlayer"

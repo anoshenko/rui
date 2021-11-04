@@ -312,3 +312,27 @@ func VideoPlayerByID(rootView View, id string) VideoPlayer {
 	}
 	return nil
 }
+
+// ImageViewByID return a ImageView with id equal to the argument of the function or
+// nil if there is no such View or View is not ImageView
+func ImageViewByID(rootView View, id string) ImageView {
+	if view := ViewByID(rootView, id); view != nil {
+		if canvas, ok := view.(ImageView); ok {
+			return canvas
+		}
+		ErrorLog(`ImageViewByID(_, "` + id + `"): The found View is not ImageView`)
+	}
+	return nil
+}
+
+// TableViewByID return a TableView with id equal to the argument of the function or
+// nil if there is no such View or View is not TableView
+func TableViewByID(rootView View, id string) TableView {
+	if view := ViewByID(rootView, id); view != nil {
+		if canvas, ok := view.(TableView); ok {
+			return canvas
+		}
+		ErrorLog(`TableViewByID(_, "` + id + `"): The found View is not TableView`)
+	}
+	return nil
+}

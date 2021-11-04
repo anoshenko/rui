@@ -28,7 +28,7 @@ type videoPlayerData struct {
 }
 
 // NewVideoPlayer create new MediaPlayer object and return it
-func NewVideoPlayer(session Session, params Params) MediaPlayer {
+func NewVideoPlayer(session Session, params Params) VideoPlayer {
 	view := new(videoPlayerData)
 	view.Init(session)
 	view.tag = "VideoPlayer"
