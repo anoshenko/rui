@@ -19,13 +19,13 @@ const (
 	// The "list-item-checked" event occurs when a list item checkbox becomes checked/unchecked.
 	// The main listener format: func(ListView, []int), where the second argument is the array of checked item indexes.
 	ListItemCheckedEvent = "list-item-checked"
-	// ListItemStyle is the constant for "list-item-style" property tag
+	// ListItemStyle is the constant for "list-item-style" property tag.
 	// The "list-item-style" string property defines the style of an unselected item
 	ListItemStyle = "list-item-style"
-	// CurrentStyle is the constant for "current-style" property tag
+	// CurrentStyle is the constant for "current-style" property tag.
 	// The "current-style" string property defines the style of the selected item when the ListView is focused.
 	CurrentStyle = "current-style"
-	// CurrentInactiveStyle is the constant for "current-inactive-style" property tag
+	// CurrentInactiveStyle is the constant for "current-inactive-style" property tag.
 	// The "current-inactive-style" string property defines the style of the selected item when the ListView is unfocused.
 	CurrentInactiveStyle = "current-inactive-style"
 )

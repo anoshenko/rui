@@ -634,8 +634,8 @@ func (view *viewData) getTransitions() Params {
 }
 
 // SetAnimated sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
-//  true - success,
-//  false - error (incompatible type or invalid format of a string value, see AppLog).
+// true - success,
+// false - error (incompatible type or invalid format of a string value, see AppLog).
 func SetAnimated(rootView View, viewID, tag string, value interface{}, animation Animation) bool {
 	if view := ViewByID(rootView, viewID); view != nil {
 		return view.SetAnimated(tag, value, animation)

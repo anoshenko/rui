@@ -19,29 +19,29 @@ const (
 	// DoubleLine constant specifies the border/line as a double solid line
 	WavyLine = 5
 
-	// LeftStyle is the constant for "left-style" property tag
+	// LeftStyle is the constant for "left-style" property tag.
 	LeftStyle = "left-style"
-	// RightStyle is the constant for "-right-style" property tag
+	// RightStyle is the constant for "-right-style" property tag.
 	RightStyle = "right-style"
-	// TopStyle is the constant for "top-style" property tag
+	// TopStyle is the constant for "top-style" property tag.
 	TopStyle = "top-style"
-	// BottomStyle is the constant for "bottom-style" property tag
+	// BottomStyle is the constant for "bottom-style" property tag.
 	BottomStyle = "bottom-style"
-	// LeftWidth is the constant for "left-width" property tag
+	// LeftWidth is the constant for "left-width" property tag.
 	LeftWidth = "left-width"
-	// RightWidth is the constant for "-right-width" property tag
+	// RightWidth is the constant for "-right-width" property tag.
 	RightWidth = "right-width"
-	// TopWidth is the constant for "top-width" property tag
+	// TopWidth is the constant for "top-width" property tag.
 	TopWidth = "top-width"
-	// BottomWidth is the constant for "bottom-width" property tag
+	// BottomWidth is the constant for "bottom-width" property tag.
 	BottomWidth = "bottom-width"
-	// LeftColor is the constant for "left-color" property tag
+	// LeftColor is the constant for "left-color" property tag.
 	LeftColor = "left-color"
-	// RightColor is the constant for "-right-color" property tag
+	// RightColor is the constant for "-right-color" property tag.
 	RightColor = "right-color"
-	// TopColor is the constant for "top-color" property tag
+	// TopColor is the constant for "top-color" property tag.
 	TopColor = "top-color"
-	// BottomColor is the constant for "bottom-color" property tag
+	// BottomColor is the constant for "bottom-color" property tag.
 	BottomColor = "bottom-color"
 )
 

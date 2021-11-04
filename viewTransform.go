@@ -20,8 +20,8 @@ const (
 	PerspectiveOriginY = "perspective-origin-y"
 	// BackfaceVisible is the name of the bool property that sets whether the back face of an element is
 	// visible when turned towards the user. Values:
-	//   true - the back face is visible when turned towards the user (default value).
-	//   false - the back face is hidden, effectively making the element invisible when turned away from the user.
+	// true - the back face is visible when turned towards the user (default value);
+	// false - the back face is hidden, effectively making the element invisible when turned away from the user.
 	BackfaceVisible = "backface-visibility"
 	// OriginX is the name of the SizeUnit property that determines the x-coordinate of the point around which
 	// a view transformation is applied.

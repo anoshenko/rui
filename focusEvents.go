@@ -3,16 +3,20 @@ package rui
 import "strings"
 
 const (
-	// FocusEvent is the constant for "focus-event" property tag
+	// FocusEvent is the constant for "focus-event" property tag.
 	// The "focus-event" event occurs when the View takes input focus.
-	// The main listener format: func(View).
-	// The additional listener format: func().
+	// The main listener format:
+	//   func(View).
+	// The additional listener format:
+	//   func().
 	FocusEvent = "focus-event"
 
-	// LostFocusEvent is the constant for "lost-focus-event" property tag
+	// LostFocusEvent is the constant for "lost-focus-event" property tag.
 	// The "lost-focus-event" event occurs when the View lost input focus.
-	// The main listener format: func(View).
-	// The additional listener format: func().
+	// The main listener format:
+	//   func(View).
+	// The additional listener format:
+	//   func().
 	LostFocusEvent = "lost-focus-event"
 )
 

@@ -2,10 +2,12 @@ package rui
 
 import "fmt"
 
-// ScrollEvent is the constant for "scroll-event" property tag
+// ScrollEvent is the constant for "scroll-event" property tag.
 // The "resize-event" is fired when the content of the view is scrolled.
-// The main listener format: func(View, Frame).
-// The additional listener formats: func(Frame), func(View), and func().
+// The main listener format:
+//   func(View, Frame).
+// The additional listener formats:
+//   func(Frame), func(View), and func().
 const ScrollEvent = "scroll-event"
 
 func (view *viewData) onScroll(self View, x, y, width, height float64) {

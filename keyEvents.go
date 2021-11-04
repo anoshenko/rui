@@ -5,14 +5,18 @@ import "strings"
 const (
 	// KeyDown is the constant for "key-down-event" property tag.
 	// The "key-down-event" event is fired when a key is pressed.
-	// The main listener format: func(View, KeyEvent).
-	// The additional listener formats: func(KeyEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, KeyEvent).
+	// The additional listener formats:
+	//   func(KeyEvent), func(View), and func().
 	KeyDownEvent = "key-down-event"
 
-	// KeyPp is the constant for "key-up-event" property tag
+	// KeyPp is the constant for "key-up-event" property tag.
 	// The "key-up-event" event is fired when a key is released.
-	// The main listener format: func(View, KeyEvent).
-	// The additional listener formats: func(KeyEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, KeyEvent).
+	// The additional listener formats:
+	//   func(KeyEvent), func(View), and func().
 	KeyUpEvent = "key-up-event"
 )
 

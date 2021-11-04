@@ -3,21 +3,21 @@ package rui
 import "strings"
 
 const (
-	// TransitionRunEvent is the constant for "transition-run-event" property tag
+	// TransitionRunEvent is the constant for "transition-run-event" property tag.
 	// The "transition-run-event" is fired when a transition is first created,
 	// i.e. before any transition delay has begun.
 	TransitionRunEvent = "transition-run-event"
 
-	// TransitionStartEvent is the constant for "transition-end-event" property tag
+	// TransitionStartEvent is the constant for "transition-end-event" property tag.
 	// The "transition-start-event" is fired when a transition has actually started,
 	// i.e., after "delay" has ended.
 	TransitionStartEvent = "transition-start-event"
 
-	// TransitionEndEvent is the constant for "transition-end-event" property tag
+	// TransitionEndEvent is the constant for "transition-end-event" property tag.
 	// The "transition-end-event" is fired when a transition has completed.
 	TransitionEndEvent = "transition-end-event"
 
-	// TransitionCancelEvent is the constant for "transition-cancel-event" property tag
+	// TransitionCancelEvent is the constant for "transition-cancel-event" property tag.
 	// The "transition-cancel-event" is fired when a transition is cancelled. The transition is cancelled when:
 	// * A new property transition has begun.
 	// * The "visibility" property is set to "gone".

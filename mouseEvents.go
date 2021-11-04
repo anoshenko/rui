@@ -6,38 +6,48 @@ import (
 )
 
 const (
-	// ClickEvent is the constant for "click-event" property tag
+	// ClickEvent is the constant for "click-event" property tag.
 	// The "click-event" event occurs when the user clicks on the View.
-	// The main listener format: func(View, MouseEvent).
-	// The additional listener formats: func(MouseEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	ClickEvent = "click-event"
 
-	// DoubleClickEvent is the constant for "double-click-event" property tag
+	// DoubleClickEvent is the constant for "double-click-event" property tag.
 	// The "double-click-event" event occurs when the user double clicks on the View.
-	// The main listener format: func(View, MouseEvent).
-	// The additional listener formats: func(MouseEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	DoubleClickEvent = "double-click-event"
 
 	// MouseDown is the constant for "mouse-down" property tag.
 	// The "mouse-down" event is fired at a View when a pointing device button is pressed
 	// while the pointer is inside the view.
-	// The main listener format: func(View, MouseEvent).
-	// The additional listener formats: func(MouseEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	MouseDown = "mouse-down"
 
 	// MouseUp is the constant for "mouse-up" property tag.
 	// The "mouse-up" event is fired at a View when a button on a pointing device (such as a mouse
 	// or trackpad) is released while the pointer is located inside it.
 	// "mouse-up" events are the counterpoint to "mouse-down" events.
-	// The main listener format: func(View, MouseEvent).
-	// The additional listener formats: func(MouseEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	MouseUp = "mouse-up"
 
 	// MouseMove is the constant for "mouse-move" property tag.
 	// The "mouse-move" event is fired at a view when a pointing device (usually a mouse) is moved
 	// while the cursor's hotspot is inside it.
-	// The main listener format: func(View, MouseEvent).
-	// The additional listener formats: func(MouseEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	MouseMove = "mouse-move"
 
 	// MouseOut is the constant for "mouse-out" property tag.
@@ -45,19 +55,29 @@ const (
 	// the cursor so that it is no longer contained within the view or one of its children.
 	// "mouse-out" is also delivered to a view if the cursor enters a child view,
 	// because the child view obscures the visible area of the view.
-	// The main listener format: func(View, MouseEvent).
-	// The additional listener formats: func(MouseEvent), func(View), and func().
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	MouseOut = "mouse-out"
 
 	// MouseOver is the constant for "mouse-over" property tag.
 	// The "mouse-over" event is fired at a View when a pointing device (such as a mouse or trackpad)
 	// is used to move the cursor onto the view or one of its child views.
-	// The main listener formats: func(View, MouseEvent).
+	// The main listener formats:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	MouseOver = "mouse-over"
 
-	// ContextMenuEvent is the constant for "context-menu-event" property tag
+	// ContextMenuEvent is the constant for "context-menu-event" property tag.
 	// The "context-menu-event" event occurs when the user calls the context menu by the right mouse clicking.
-	// The main listener format: func(View, MouseEvent).
+	// The main listener format:
+	//   func(View, MouseEvent).
+	// The additional listener formats:
+	//   func(MouseEvent), func(View), and func().
 	ContextMenuEvent = "context-menu-event"
 
 	// PrimaryMouseButton is a number of the main pressed button, usually the left button or the un-initialized state

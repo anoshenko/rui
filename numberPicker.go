@@ -273,8 +273,8 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 }
 
 // GetNumberPickerType returns the type of NumberPicker subview. Valid values:
-//   NumberEditor (0) - NumberPicker is presented by editor (default type)
-//   NumberSlider (1) - NumberPicker is presented by slider
+// NumberEditor (0) - NumberPicker is presented by editor (default type);
+// NumberSlider (1) - NumberPicker is presented by slider.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetNumberPickerType(view View, subviewID string) int {
 	if subviewID != "" {

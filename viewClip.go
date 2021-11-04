@@ -27,11 +27,11 @@ type polygonClip struct {
 }
 
 // InsetClip creates a rectangle View clipping area.
-//   top - offset from the top border of a View;
-//   right - offset from the right border of a View;
-//   bottom - offset from the bottom border of a View;
-//   left - offset from the left border of a View;
-//   radius - corner radius, pass nil if you don't need to round corners
+// top - offset from the top border of a View;
+// right - offset from the right border of a View;
+// bottom - offset from the bottom border of a View;
+// left - offset from the left border of a View;
+// radius - corner radius, pass nil if you don't need to round corners
 func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShape {
 	clip := new(insetClip)
 	clip.init()
