@@ -53,6 +53,9 @@ type Session interface {
 	// a description of the error is written to the log
 	Set(viewID, tag string, value interface{}) bool
 
+	DownloadFile(path string)
+	DownloadFileData(filename string, data []byte)
+
 	registerAnimation(props []AnimatedProperty) string
 
 	resolveConstants(value string) (string, bool)

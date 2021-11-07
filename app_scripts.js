@@ -1327,3 +1327,12 @@ function mediaSetVolume(elementId, volume) {
 		element.volume = volume
 	}
 }
+
+function startDowndload(url, filename) {
+	var element = document.getElementById("ruiDownloader");
+	if (element) {
+		element.href = url;
+		element.setAttribute("download", filename);
+		element.click();
+	}
+}
