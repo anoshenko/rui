@@ -2735,6 +2735,87 @@ ColorChangedEvent).  Основной слушатель события имее
 
 	func GetColorChangedListeners(view View, subviewID string) []func(ColorPicker, Color)
 
+## FilePicker
+
+Элемент FilePicker расширяет интерфейс View и предназначен для выбора одного или нескольких файлов.
+
+Для создания FilePicker используется функция:
+
+	func NewFilePicker(session Session, params Params) FilePicker
+
+Булевское свойство "multiple" (константа Multiple) используется для установки режима выбора нескольких файлов.
+Значение "true" включает режим выбора нескольких файлов, "false" включает режим выбора одиночного файл.
+Значение по умолчанию "false".
+
+Вы можете ограничить выбор только определенными типами файлов. Для этого используется свойство "accept" (константа Accept).
+Данному свойству присваивается список разрешенных расширений файлов и/или mime-типов. Значение можно задавать или в виде 
+строки (элементы при этом разделяются запятыми) или в виде массива строк. Примеры
+
+	rui.Set(view, "myFilePicker", rui.Accept, "png, jpg, jpeg")
+	rui.Set(view, "myFilePicker", rui.Accept, []string{"png", "jpg", "jpeg"})
+	rui.Set(view, "myFilePicker", rui.Accept, "image/*")
+	
+Для доступа к выбранным файлам используются две функции интерфейса FilePicker:
+
+	Files() []FileInfo
+	LoadFile(file FileInfo, result func(FileInfo, []byte))
+
+а также соответствующие им глобальные функции
+
+	func GetFilePickerFiles(view View, subviewID string) []FileInfo
+	func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(FileInfo, []byte))
+
+Функции Files/GetFilePickerFiles возвращают список выбранных файлов в виде среза структур FileInfo. Структура FileInfo объявлена как
+
+	type FileInfo struct {
+		// Name - the file's name.
+		Name string
+		// LastModified specifying the date and time at which the file was last modified
+		LastModified time.Time
+		// Size - the size of the file in bytes.
+		Size int64
+		// MimeType - the file's MIME type.
+		MimeType string
+	}
+
+FileInfo содержит только информацию о файле, но не сам файл. Функция LoadFile/LoadFilePickerFile позволяет загрузить 
+содержимое одного из выбранных файлов. Функция LoadFile асинхронная. После загрузки содержимое выбранного файла 
+передается функции-аргументу LoadFile. Пример
+
+	if filePicker := rui.FilePickerByID(view, "myFilePicker"); filePicker != nil {
+		if files := filePicker.Files(); len(files) > 0 {
+			filePicker.LoadFile(files[0], func(file rui.FileInfo, data []byte) {
+				if data != nil {
+					// ... 
+				}
+			})
+		}
+	}
+
+эквивалентно
+
+	if files := rui.GetFilePickerFiles(view, "myFilePicker"); len(files) > 0 {
+		rui.LoadFilePickerFile(view, "myFilePicker", files[0], func(file rui.FileInfo, data []byte) {
+			if data != nil {
+				// ... 
+			}
+		})
+	}
+
+Если во время загрузки файла произойдет ошибка, то значение data передаваемое в функцию результата будет равно nil,
+а описание ошибки будет записано в лог
+
+Для отслеживания изменения списка выбранных файлов используется событие "file-selected-event" 
+(константа FileSelectedEvent). Основной слушатель события имеет следующий формат:
+
+	func(picker FilePicker, files []FileInfo))
+
+где второй аргумент это новое значение списка выбранных файлов.
+
+Получить текущий список слушателей изменения списка файлов можно с помощью функции
+
+	func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo)
+
 ## DropDownList
 
 Элемент DropDownList расширяет интерфейс View и предназначен для выбора значения из выпадающего списка.
@@ -4159,6 +4240,12 @@ Safari и Firefox.
 * Set(viewID, tag string, value interface{}) bool - устанавливает значение свойства View с именем tag.
 
 	rui.Set(session.RootView(), viewID, tag, value)
+
+* DownloadFile(path string) - загружает (сохраняет) на стороне клиента файл расположенный по заданному пути на сервере. 
+Используется когда клиенту надо передать с сервера какой-либо файл.
+
+* DownloadFileData(filename string, data []byte) - загружает (сохраняет) на стороне клиента файл с заданным именем и
+заданным содержимым. Обычно используется для передачи файла сгенерированного в памяти сервера.	
 
 ## Формат описания ресурсов
 

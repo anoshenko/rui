@@ -2702,6 +2702,89 @@ You can get the current list of date change listeners using the function
 
 	func GetColorChangedListeners(view View, subviewID string) []func(ColorPicker, Color)
 
+## FilePicker
+
+The FilePicker element extends the View interface to select one or more files.
+
+To create a FilePicker, the function is used:
+
+	func NewFilePicker(session Session, params Params) FilePicker
+
+The boolean property "multiple" (constant Multiple) is used to set the mode of selecting multiple files.
+The value "true" enables the selection of multiple files, "false" enables the selection of a single file.
+The default is "false".
+
+You can restrict the selection to only certain types of files. To do this, use the "accept" property (constant Accept).
+This property is assigned a list of allowed file extensions and / or mime-types. 
+The value can be specified either as a string (elements are separated by commas) or as an array of strings. Examples
+
+	rui.Set(view, "myFilePicker", rui.Accept, "png, jpg, jpeg")
+	rui.Set(view, "myFilePicker", rui.Accept, []string{"png", "jpg", "jpeg"})
+	rui.Set(view, "myFilePicker", rui.Accept, "image/*")
+	
+Two functions of the FilePicker interface are used to access the selected files:
+
+	Files() []FileInfo
+	LoadFile(file FileInfo, result func(FileInfo, []byte))
+
+as well as the corresponding global functions
+
+	func GetFilePickerFiles(view View, subviewID string) []FileInfo
+	func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(FileInfo, []byte))
+
+The Files/GetFilePickerFiles functions return a list of the selected files as a slice of FileInfo structures. 
+The FileInfo structure is declared as
+
+	type FileInfo struct {
+		// Name - the file's name.
+		Name string
+		// LastModified specifying the date and time at which the file was last modified
+		LastModified time.Time
+		// Size - the size of the file in bytes.
+		Size int64
+		// MimeType - the file's MIME type.
+		MimeType string
+	}
+
+FileInfo contains only information about the file, not the file content. 
+The LoadFile/LoadFilePickerFile function allows you to load the contents of one of the selected files. 
+The LoadFile function is asynchronous. After loading, the contents of the selected file are passed to the argument-function of the LoadFile. 
+Example
+
+	if filePicker := rui.FilePickerByID(view, "myFilePicker"); filePicker != nil {
+		if files := filePicker.Files(); len(files) > 0 {
+			filePicker.LoadFile(files[0], func(file rui.FileInfo, data []byte) {
+				if data != nil {
+					// ... 
+				}
+			})
+		}
+	}
+
+equivalent to
+
+	if files := rui.GetFilePickerFiles(view, "myFilePicker"); len(files) > 0 {
+		rui.LoadFilePickerFile(view, "myFilePicker", files[0], func(file rui.FileInfo, data []byte) {
+			if data != nil {
+				// ... 
+			}
+		})
+	}
+
+If an error occurs while loading the file, the data value passed to the result function will be nil, 
+and the error description will be written to the log
+
+The "file-selected-event" event (constant FileSelectedEvent) is used to track changes in the list of selected files. 
+The main event listener has the following format:
+
+	func(picker FilePicker, files []FileInfo))
+
+where the second argument is the new value of the list of selected files.
+
+You can get the current list of listeners of the list of files changing using the function
+
+	func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo)
+
 ## DropDownList
 
 The DropDownList element extends the View interface and is designed to select a value from a drop-down list.
@@ -4122,6 +4205,12 @@ Returns false if no topic with this name was found. Themes named "" are the defa
 * Set(viewID, tag string, value interface {}) bool sets the value of the View property named tag.
 
 	rui.Set(session.RootView(), viewID, tag, value)
+
+* DownloadFile(path string) downloads (saves) on the client side the file located at the specified path on the server.
+It is used when the client needs to transfer a file from the server.
+
+* DownloadFileData(filename string, data [] byte) downloads (saves) on the client side a file 
+with a specified name and specified content. Typically used to transfer a file generated in server memory.
 
 ## Resource description format
 
