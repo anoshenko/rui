@@ -40,8 +40,14 @@ type Session interface {
 	// GetString returns the text for the current language
 	GetString(tag string) (string, bool)
 
+	// Content returns the SessionContent of session
 	Content() SessionContent
 	setContent(content SessionContent, self Session) bool
+
+	// SetTitle sets the text of the browser title/tab
+	SetTitle(title string)
+	// SetTitleColor sets the color of the browser navigation bar. Supported only in Safari and Chrome for android
+	SetTitleColor(color Color)
 
 	// RootView returns the root view of the session
 	RootView() View
@@ -53,7 +59,9 @@ type Session interface {
 	// a description of the error is written to the log
 	Set(viewID, tag string, value interface{}) bool
 
+	// DownloadFile downloads (saves) on the client side the file located at the specified path on the server.
 	DownloadFile(path string)
+	//DownloadFileData downloads (saves) on the client side a file with a specified name and specified content.
 	DownloadFileData(filename string, data []byte)
 
 	registerAnimation(props []AnimatedProperty) string
@@ -405,4 +413,13 @@ func (session *sessionData) handleViewEvent(command string, data DataObject) {
 	} else {
 		ErrorLog(`"id" property not found. Event: ` + command)
 	}
+}
+
+func (session *sessionData) SetTitle(title string) {
+	title, _ = session.GetString(title)
+	session.runScript(`document.title = "` + title + `";`)
+}
+
+func (session *sessionData) SetTitleColor(color Color) {
+	session.runScript(`setTitleColor("` + color.cssString() + `");`)
 }

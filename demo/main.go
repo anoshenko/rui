@@ -113,6 +113,9 @@ func (demo *demoSession) CreateRootView(session rui.Session) rui.View {
 
 	rui.Set(demo.rootView, "rootTitleButton", rui.ClickEvent, demo.clickMenuButton)
 	demo.showPage(0)
+	if color, ok := rui.StringToColor("#ffc0ded9"); ok {
+		session.SetTitleColor(color)
+	}
 
 	return demo.rootView
 }
@@ -147,6 +150,7 @@ func (demo *demoSession) showPage(index int) {
 			stackLayout.MoveToFront(demo.pages[index].view)
 		}
 		rui.Set(demo.rootView, "rootTitleText", rui.Text, demo.pages[index].title)
+		demo.rootView.Session().SetTitle(demo.pages[index].title)
 	}
 	// TODO
 }

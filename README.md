@@ -4198,6 +4198,10 @@ Returns false if no topic with this name was found. Themes named "" are the defa
 
 * RootView() View returns the root View of the session
 
+* SetTitle(title string) sets the text of the browser title/tab
+
+* SetTitleColor(color Color) sets the color of the browser navigation bar. Supported only in Safari and Chrome for android
+
 * Get(viewID, tag string) interface{} returns the value of the View property named tag. Equivalent to
 
 	rui.Get(session.RootView(), viewID, tag)

@@ -4233,6 +4233,10 @@ Safari и Firefox.
 
 * RootView() View - возвращает корневой View сессии
 
+* SetTitle(title string) - устанавливает текст заголовка окна/закладки браузера.
+
+* SetTitleColor(color Color) устанавливает цвет панели навигации браузера. Поддерживается только в Safari и Chrome для Android.
+
 * Get(viewID, tag string) interface{} - возвращает значение свойства View с именем tag. Эквивалентно
 
 	rui.Get(session.RootView(), viewID, tag)

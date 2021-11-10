@@ -1336,3 +1336,19 @@ function startDowndload(url, filename) {
 		element.click();
 	}
 }
+
+function setTitleColor(color) {
+	var metas = document.getElementsByTagName('meta');
+	if (metas) {
+		var item = metas.namedItem('theme-color');
+		if (item) {
+			item.setAttribute('content', color)
+			return
+		}
+	}
+
+	var meta = document.createElement('meta');
+	meta.setAttribute('name', 'theme-color');
+	meta.setAttribute('content', color);
+	document.getElementsByTagName('head')[0].appendChild(meta);
+}
