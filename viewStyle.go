@@ -291,7 +291,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	wrap, _ := enumProperty(style, Wrap, session, 0)
-	orientation, ok := getOrientation(style, session)
+	orientation, ok := valueToOrientation(style.Get(Orientation), session)
 	if ok || wrap > 0 {
 		cssText := enumProperties[Orientation].cssValues[orientation]
 		switch wrap {
@@ -360,9 +360,9 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 		case StretchAlign:
 			if rows {
-				builder.add(hAlignTag, `stretch`)
+				builder.add(vAlignTag, `stretch`)
 			} else {
-				builder.add(hAlignTag, `space-between`)
+				builder.add(vAlignTag, `space-between`)
 			}
 		}
 	}

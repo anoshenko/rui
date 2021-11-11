@@ -215,11 +215,8 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 			return true
 		}
 
-	case Orientation, Wrap:
-		if listView.viewData.set(tag, value) {
-			updateCSSStyle(listView.htmlID(), listView.session)
-			return true
-		}
+	case Orientation, Wrap, VerticalAlign, HorizontalAlign, Style, StyleDisabled:
+		result = listView.viewData.set(tag, value)
 
 	case ItemWidth, ItemHeight:
 		result = listView.setSizeProperty(tag, value)
@@ -575,36 +572,6 @@ func (listView *listViewData) getItemFrames() []Frame {
 	return listView.itemFrame
 }
 
-func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder) {
-	buffer.WriteString(`onfocus="listViewFocusEvent(this, event)" onblur="listViewBlurEvent(this, event)"`)
-	buffer.WriteString(` onkeydown="listViewKeyDownEvent(this, event)" data-focusitemstyle="`)
-	buffer.WriteString(listView.currentStyle())
-	buffer.WriteString(`" data-bluritemstyle="`)
-	buffer.WriteString(listView.currentInactiveStyle())
-	buffer.WriteString(`"`)
-	current := GetListViewCurrent(listView, "")
-	if listView.adapter != nil && current >= 0 && current < listView.adapter.ListSize() {
-		buffer.WriteString(` data-current="`)
-		buffer.WriteString(listView.htmlID())
-		buffer.WriteRune('-')
-		buffer.WriteString(strconv.Itoa(current))
-		buffer.WriteRune('"')
-	}
-}
-
-func (listView *listViewData) cssStyle(self View, builder cssBuilder) {
-	listView.viewData.cssStyle(self, builder)
-
-	if GetListWrap(listView, "") != WrapOff {
-		switch GetListOrientation(listView, "") {
-		case TopDownOrientation, BottomUpOrientation:
-			builder.add(`max-height`, `100%`)
-		default:
-			builder.add(`max-width`, `100%`)
-		}
-	}
-}
-
 func (listView *listViewData) itemAlign(self View, buffer *strings.Builder) {
 	values := enumProperties[ItemHorizontalAlign].cssValues
 	if hAlign := GetListItemHorizontalAlign(listView, ""); hAlign >= 0 && hAlign < len(values) {
@@ -911,11 +878,40 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 	session.runScript(buffer.String())
 }
 
-func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	if listView.adapter == nil {
-		return
+func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder) {
+	buffer.WriteString(`onfocus="listViewFocusEvent(this, event)" onblur="listViewBlurEvent(this, event)"`)
+	buffer.WriteString(` onkeydown="listViewKeyDownEvent(this, event)" data-focusitemstyle="`)
+	buffer.WriteString(listView.currentStyle())
+	buffer.WriteString(`" data-bluritemstyle="`)
+	buffer.WriteString(listView.currentInactiveStyle())
+	buffer.WriteString(`"`)
+	current := GetListViewCurrent(listView, "")
+	if listView.adapter != nil && current >= 0 && current < listView.adapter.ListSize() {
+		buffer.WriteString(` data-current="`)
+		buffer.WriteString(listView.htmlID())
+		buffer.WriteRune('-')
+		buffer.WriteString(strconv.Itoa(current))
+		buffer.WriteRune('"')
 	}
-	if listView.adapter.ListSize() == 0 {
+}
+
+/*
+func (listView *listViewData) cssStyle(self View, builder cssBuilder) {
+	listView.viewData.cssStyle(self, builder)
+
+	if GetListWrap(listView, "") != WrapOff {
+		switch GetListOrientation(listView, "") {
+		case TopDownOrientation, BottomUpOrientation:
+			builder.add(`max-height`, `100%`)
+		default:
+			builder.add(`max-width`, `100%`)
+		}
+	}
+}
+*/
+
+func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	if listView.adapter == nil || listView.adapter.ListSize() == 0 {
 		return
 	}
 
@@ -924,12 +920,129 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		defer listView.session.setIgnoreViewUpdates(false)
 	}
 
+	buffer.WriteString(`<div style="display: flex; align-content: stretch;`)
+
+	wrap := GetListWrap(listView, "")
+	orientation := GetListOrientation(listView, "")
+	rows := (orientation == StartToEndOrientation || orientation == EndToStartOrientation)
+
+	if rows {
+		if wrap == WrapOff {
+			buffer.WriteString(` min-width: 100%; height: 100%;`)
+		} else {
+			buffer.WriteString(` width: 100%; min-height: 100%;`)
+		}
+	} else {
+		if wrap == WrapOff {
+			buffer.WriteString(` width: 100%; min-height: 100%;`)
+		} else {
+			buffer.WriteString(` min-width: 100%; height: 100%;`)
+		}
+	}
+
+	buffer.WriteString(` flex-flow: `)
+	buffer.WriteString(enumProperties[Orientation].cssValues[orientation])
+
+	switch wrap {
+	case WrapOn:
+		buffer.WriteString(` wrap;`)
+
+	case WrapReverse:
+		buffer.WriteString(` wrap-reverse;`)
+
+	default:
+		buffer.WriteString(`;`)
+	}
+
+	var hAlignTag, vAlignTag string
+	if rows {
+		hAlignTag = `justify-content`
+		vAlignTag = `align-items`
+	} else {
+		hAlignTag = `align-items`
+		vAlignTag = `justify-content`
+	}
+
+	value := ""
+	if align, ok := enumStyledProperty(listView, HorizontalAlign, LeftAlign); ok {
+		switch align {
+		case LeftAlign:
+			if (!rows && wrap == WrapReverse) || orientation == EndToStartOrientation {
+				value = `flex-end`
+			} else {
+				value = `flex-start`
+			}
+		case RightAlign:
+			if (!rows && wrap == WrapReverse) || orientation == EndToStartOrientation {
+				value = `flex-start`
+			} else {
+				value = `flex-end`
+			}
+		case CenterAlign:
+			value = `center`
+
+		case StretchAlign:
+			if rows {
+				value = `space-between`
+			} else {
+				value = `stretch`
+			}
+		}
+	}
+
+	if value != "" {
+		buffer.WriteRune(' ')
+		buffer.WriteString(hAlignTag)
+		buffer.WriteString(`: `)
+		buffer.WriteString(value)
+		buffer.WriteRune(';')
+	}
+
+	value = ""
+	if align, ok := enumStyledProperty(listView, VerticalAlign, TopAlign); ok {
+		switch align {
+		case TopAlign:
+			if (rows && wrap == WrapReverse) || orientation == BottomUpOrientation {
+				value = `flex-end`
+			} else {
+				value = `flex-start`
+			}
+		case BottomAlign:
+			if (rows && wrap == WrapReverse) || orientation == BottomUpOrientation {
+				value = `flex-start`
+			} else {
+				value = `flex-end`
+			}
+		case CenterAlign:
+			value = `center`
+
+		case StretchAlign:
+			if rows {
+				value = `stretch`
+			} else {
+				value = `space-between`
+			}
+		}
+	}
+
+	if value != "" {
+		buffer.WriteRune(' ')
+		buffer.WriteString(vAlignTag)
+		buffer.WriteString(`: `)
+		buffer.WriteString(value)
+		buffer.WriteRune(';')
+	}
+
+	buffer.WriteString(`">`)
+
 	checkbox := GetListViewCheckbox(listView, "")
 	if checkbox == NoneCheckbox {
 		listView.noneCheckboxSubviews(self, buffer)
 	} else {
 		listView.checkboxSubviews(self, buffer, checkbox)
 	}
+
+	buffer.WriteString(`</div>`)
 }
 
 func (listView *listViewData) handleCommand(self View, command string, data DataObject) bool {

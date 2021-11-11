@@ -4,8 +4,8 @@ import (
 	"strings"
 )
 
-func getOrientation(style Properties, session Session) (int, bool) {
-	if value := style.Get(Orientation); value != nil {
+func valueToOrientation(value interface{}, session Session) (int, bool) {
+	if value != nil {
 		switch value := value.(type) {
 		case int:
 			return value, true
@@ -30,10 +30,14 @@ func getOrientation(style Properties, session Session) (int, bool) {
 			}
 		}
 	}
-
 	return 0, false
 }
 
+/*
+func getOrientation(style Properties, session Session) (int, bool) {
+	return valueToOrientation(style.Get(Orientation), session)
+}
+*/
 func (style *viewStyle) Get(tag string) interface{} {
 	return style.get(strings.ToLower(tag))
 }

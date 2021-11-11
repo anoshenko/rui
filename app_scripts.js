@@ -609,7 +609,7 @@ function listItemClickEvent(element, event) {
 		selected = element.className.indexOf("ruiListItemFocused") >= 0 || element.className.indexOf("ruiListItemSelected") >= 0;
 	}
 
-	var list = element.parentNode
+	var list = element.parentNode.parentNode
 	if (list) {
 		if (!selected) {
 			selectListItem(list, element, true)
@@ -705,6 +705,7 @@ function selectListItem(element, item, needSendMessage) {
 }
 
 function findRightListItem(list, x, y) {
+	list = list.childNodes[0];
 	var result;
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
@@ -725,6 +726,7 @@ function findRightListItem(list, x, y) {
 }
 
 function findLeftListItem(list, x, y) {
+	list = list.childNodes[0];
 	var result;
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
@@ -745,6 +747,7 @@ function findLeftListItem(list, x, y) {
 }
 
 function findTopListItem(list, x, y) {
+	list = list.childNodes[0];
 	var result;
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
@@ -765,6 +768,7 @@ function findTopListItem(list, x, y) {
 }
 
 function findBottomListItem(list, x, y) {
+	list = list.childNodes[0];
 	var result;
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {

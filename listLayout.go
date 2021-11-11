@@ -125,11 +125,20 @@ func GetListOrientation(view View, subviewID string) int {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
-	if view == nil {
-		return 0
+
+	if view != nil {
+		if orientation, ok := valueToOrientation(view.Get(Orientation), view.Session()); ok {
+			return orientation
+		}
+
+		if value, ok := valueFromStyle(view, Orientation); ok {
+			if orientation, ok := valueToOrientation(value, view.Session()); ok {
+				return orientation
+			}
+		}
 	}
-	orientation, _ := getOrientation(view, view.Session())
-	return orientation
+
+	return 0
 }
 
 // GetListWrap returns the wrap type of a ListLayout or ListView subview:
@@ -140,7 +149,7 @@ func GetListWrap(view View, subviewID string) int {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if result, ok := enumProperty(view, Wrap, view.Session(), 0); ok {
+		if result, ok := enumStyledProperty(view, Wrap, 0); ok {
 			return result
 		}
 	}

@@ -98,8 +98,10 @@ body {
 
 .ruiListView {
   overflow: auto;
+  /*
 	display: flex;
 	align-content: stretch;
+  */
 }
 /*
 @media (prefers-color-scheme: light) {
