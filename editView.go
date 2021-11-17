@@ -484,8 +484,10 @@ func GetText(view View, subviewID string) string {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if text, ok := stringProperty(view, Text, view.Session()); ok {
-			return text
+		if value := view.getRaw(Text); value != nil {
+			if text, ok := value.(string); ok {
+				return text
+			}
 		}
 	}
 	return ""
