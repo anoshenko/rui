@@ -56,6 +56,7 @@ var boolProperties = []string{
 	Muted,
 	AnimationPaused,
 	Multiple,
+	TabCloseButton,
 }
 
 var intProperties = []string{
@@ -251,9 +252,9 @@ var enumProperties = map[string]struct {
 		[]string{"none", "solid", "dashed", "dotted", "double"},
 	},
 	Tabs: {
-		[]string{"hidden", "top", "bottom", "left", "right", "left-list", "right-list"},
+		[]string{"top", "bottom", "left", "right", "left-list", "right-list", "hidden"},
 		"",
-		[]string{"hidden", "top", "bottom", "left", "right", "left-list", "right-list"},
+		[]string{"top", "bottom", "left", "right", "left-list", "right-list", "hidden"},
 	},
 	NumberPickerType: {
 		[]string{"editor", "slider"},

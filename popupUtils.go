@@ -104,7 +104,10 @@ type popupMenuData struct {
 }
 
 func (popup *popupMenuData) itemClick(list ListView, n int) {
-	popup.popup.Dismiss()
+	if popup.popup != nil {
+		popup.popup.Dismiss()
+		popup.popup = nil
+	}
 	if popup.result != nil {
 		popup.result(n)
 	}
@@ -128,11 +131,11 @@ func (popup *popupMenuData) IsListItemEnabled(index int) bool {
 const PopupMenuResult = "popup-menu-result"
 
 // ShowMenu displays the popup with text message
-func ShowMenu(session Session, params Params) bool {
+func ShowMenu(session Session, params Params) Popup {
 	value, ok := params[Items]
 	if !ok || value == nil {
 		ErrorLog("Unable to show empty menu")
-		return false
+		return nil
 	}
 
 	var adapter ListAdapter
@@ -149,7 +152,7 @@ func ShowMenu(session Session, params Params) bool {
 
 	default:
 		notCompatibleType(Items, value)
-		return false
+		return nil
 	}
 
 	value, ok = params[PopupMenuResult]
@@ -167,5 +170,5 @@ func ShowMenu(session Session, params Params) bool {
 	data.popup = NewPopup(listView, params)
 	data.popup.Show()
 	FocusView(listView)
-	return true
+	return data.popup
 }

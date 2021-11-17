@@ -13,6 +13,7 @@ const (
 	OutsideClose = "outside-close"
 	Buttons      = "buttons"
 	ButtonsAlign = "buttons-align"
+	DismissEvent = "dismiss-event"
 )
 
 type PopupButton struct {
@@ -32,9 +33,9 @@ type Popup interface {
 }
 
 type popupData struct {
-	//propertyList
-	layerView View
-	view      View
+	layerView       View
+	view            View
+	dismissListener []func(Popup)
 }
 
 type popupManager struct {
@@ -43,17 +44,61 @@ type popupManager struct {
 
 func (popup *popupData) init(view View, params Params) {
 	popup.view = view
-
-	props := propertyList{properties: params}
 	session := view.Session()
+
+	popup.dismissListener = []func(Popup){}
+	if value, ok := params[DismissEvent]; ok && value != nil {
+		switch value := value.(type) {
+		case func(Popup):
+			popup.dismissListener = []func(Popup){value}
+
+		case func():
+			popup.dismissListener = []func(Popup){
+				func(popup Popup) {
+					value()
+				},
+			}
+
+		case []func(Popup):
+			for _, fn := range value {
+				if fn != nil {
+					popup.dismissListener = append(popup.dismissListener, fn)
+				}
+			}
+
+		case []func():
+			for _, fn := range value {
+				if fn != nil {
+					popup.dismissListener = append(popup.dismissListener, func(popup Popup) {
+						fn()
+					})
+				}
+			}
+
+		case []interface{}:
+			for _, val := range value {
+				if val != nil {
+					switch fn := val.(type) {
+					case func(Popup):
+						popup.dismissListener = append(popup.dismissListener, fn)
+
+					case func():
+						popup.dismissListener = append(popup.dismissListener, func(popup Popup) {
+							fn()
+						})
+					}
+				}
+			}
+		}
+	}
 
 	var title View = nil
 	titleStyle := "ruiPopupTitle"
-	closeButton, _ := boolProperty(&props, CloseButton, session)
-	outsideClose, _ := boolProperty(&props, OutsideClose, session)
-	vAlign, _ := enumProperty(&props, VerticalAlign, session, CenterAlign)
-	hAlign, _ := enumProperty(&props, HorizontalAlign, session, CenterAlign)
-	buttonsAlign, _ := enumProperty(&props, ButtonsAlign, session, RightAlign)
+	closeButton, _ := boolProperty(params, CloseButton, session)
+	outsideClose, _ := boolProperty(params, OutsideClose, session)
+	vAlign, _ := enumProperty(params, VerticalAlign, session, CenterAlign)
+	hAlign, _ := enumProperty(params, HorizontalAlign, session, CenterAlign)
+	buttonsAlign, _ := enumProperty(params, ButtonsAlign, session, RightAlign)
 
 	buttons := []PopupButton{}
 	if value, ok := params[Buttons]; ok && value != nil {
@@ -110,7 +155,7 @@ func (popup *popupData) init(view View, params Params) {
 	viewRow := 0
 	if title != nil || closeButton {
 		viewRow = 1
-		titleHeight, _ := sizeConstant(popup.Session(), "popupTitleHeight")
+		titleHeight, _ := sizeConstant(popup.Session(), "ruiPopupTitleHeight")
 		titleView := NewGridLayout(session, Params{
 			Row:               0,
 			Style:             titleStyle,
@@ -147,7 +192,7 @@ func (popup *popupData) init(view View, params Params) {
 
 	if buttonCount := len(buttons); buttonCount > 0 {
 		cellHeight = append(cellHeight, AutoSize())
-		gap, _ := sizeConstant(session, "popupButtonGap")
+		gap, _ := sizeConstant(session, "ruiPopupButtonGap")
 		cellWidth := []SizeUnit{}
 		for i := 0; i < buttonCount; i++ {
 			cellWidth = append(cellWidth, Fr(1))
@@ -212,6 +257,9 @@ func (popup *popupData) Session() Session {
 
 func (popup *popupData) Dismiss() {
 	popup.Session().popupManager().dismissPopup(popup)
+	for _, listener := range popup.dismissListener {
+		listener(popup)
+	}
 	// TODO
 }
 

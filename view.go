@@ -2,7 +2,6 @@ package rui
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -27,18 +26,6 @@ func (frame Frame) Right() float64 {
 // Bottom returns the bottom border
 func (frame Frame) Bottom() float64 {
 	return frame.Top + frame.Height
-}
-
-// Params defines a type of a parameters list
-type Params map[string]interface{}
-
-func (params Params) AllTags() []string {
-	tags := make([]string, 0, len(params))
-	for t := range params {
-		tags = append(tags, t)
-	}
-	sort.Strings(tags)
-	return tags
 }
 
 // View - base view interface

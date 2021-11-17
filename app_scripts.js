@@ -303,6 +303,12 @@ function tabClickEvent(layoutId, tabNumber, event) {
 	sendMessage("tabClick{session=" + sessionID + ",id=" + layoutId + ",number=" + tabNumber + "}");
 }
 
+function tabCloseClickEvent(layoutId, tabNumber, event) {
+	event.stopPropagation();
+	event.preventDefault();
+	sendMessage("tabCloseClick{session=" + sessionID + ",id=" + layoutId + ",number=" + tabNumber + "}");
+}
+
 function tabKeyClickEvent(layoutId, tabNumber, event) {
 	if (enterOrSpaceKeyClickEvent(event)) {
 		tabClickEvent(layoutId, tabNumber, event)

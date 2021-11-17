@@ -16,7 +16,7 @@ GridLayout {
 	content = [
 		GridLayout {
 			id = rootTitle, width = 100%, cell-width = "auto, 1fr", 
-			cell-vertical-align = center, background-color = #ffc0ded9,
+			cell-vertical-align = center, background-color = #ffc0ded9, text-color = black,
 			content = [
 				ImageView { 
 					id = rootTitleButton, padding = 8px, src = menu_icon.svg,
@@ -78,6 +78,7 @@ func createDemo(session rui.Session) rui.SessionContent {
 		{"GridLayout", createGridLayoutDemo, nil},
 		{"ColumnLayout", createColumnLayoutDemo, nil},
 		{"StackLayout", createStackLayoutDemo, nil},
+		{"Tabs", createTabsDemo, nil},
 		{"Resizable", createResizableDemo, nil},
 		{"ListView", createListViewDemo, nil},
 		{"Checkbox", createCheckboxDemo, nil},
@@ -99,7 +100,6 @@ func createDemo(session rui.Session) rui.SessionContent {
 		{"Mouse events", createMouseEventsDemo, nil},
 		{"Pointer events", createPointerEventsDemo, nil},
 		{"Touch events", createTouchEventsDemo, nil},
-		//{"Tabs", createTabsDemo, nil},
 	}
 
 	return sessionContent
