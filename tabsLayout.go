@@ -588,31 +588,32 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 	if view != nil {
 		tabsLayout.viewsContainerData.Append(view)
 		if len(tabsLayout.views) == 1 {
-			tabsLayout.setIntProperty(Current, 0)
+			tabsLayout.properties[Current] = 0
 			for _, listener := range tabsLayout.tabListener {
 				listener(tabsLayout, 0, -1)
 			}
+			defer tabsLayout.propertyChangedEvent(Current)
 		}
 		updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
 	}
 }
 
 // Insert inserts view to the "index" position in view list
-func (tabsLayout *tabsLayoutData) Insert(view View, index uint) {
+func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 	if tabsLayout.views == nil {
 		tabsLayout.views = []View{}
 	}
 	if view != nil {
-		tabsLayout.viewsContainerData.Insert(view, index)
-		current := tabsLayout.currentItem()
-		if current >= int(index) {
-			tabsLayout.Set(Current, current+1)
+		if current := tabsLayout.currentItem(); current >= int(index) {
+			tabsLayout.properties[Current] = current + 1
+			defer tabsLayout.propertyChangedEvent(Current)
 		}
+		tabsLayout.viewsContainerData.Insert(view, index)
 	}
 }
 
 // Remove removes view from list and return it
-func (tabsLayout *tabsLayoutData) RemoveView(index uint) View {
+func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 	if tabsLayout.views == nil {
 		tabsLayout.views = []View{}
 		return nil
@@ -629,6 +630,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index uint) View {
 		for _, listener := range tabsLayout.tabListener {
 			listener(tabsLayout, 0, 0)
 		}
+		tabsLayout.propertyChangedEvent(Current)
 		return view
 	}
 
@@ -639,6 +641,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index uint) View {
 		for _, listener := range tabsLayout.tabListener {
 			listener(tabsLayout, current-1, current)
 		}
+		defer tabsLayout.propertyChangedEvent(Current)
 	}
 
 	return tabsLayout.viewsContainerData.RemoveView(index)

@@ -1,3 +1,11 @@
+# v0.4.0
+
+* Added SetTitle and SetTitleColor function to the Session interface
+* Added a listener for changing a view property value
+* Added the "current" property to StackLayout
+* Updated TabsLayout
+* Bug fixing
+
 # v0.3.0
 
 * Added FilePicker

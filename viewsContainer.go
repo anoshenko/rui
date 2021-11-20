@@ -14,9 +14,9 @@ type ViewsContainer interface {
 	// Append appends a view to the end of the list of a view children
 	Append(view View)
 	// Insert inserts a view to the "index" position in the list of a view children
-	Insert(view View, index uint)
+	Insert(view View, index int)
 	// Remove removes a view from the list of a view children and return it
-	RemoveView(index uint) View
+	RemoveView(index int) View
 }
 
 type viewsContainerData struct {
@@ -63,10 +63,10 @@ func (container *viewsContainerData) Append(view View) {
 }
 
 // Insert inserts a view to the "index" position in the list of a view children
-func (container *viewsContainerData) Insert(view View, index uint) {
+func (container *viewsContainerData) Insert(view View, index int) {
 	if view != nil {
 		htmlID := container.htmlID()
-		if container.views == nil || index >= uint(len(container.views)) {
+		if container.views == nil || index < 0 || index >= len(container.views) {
 			container.Append(view)
 		} else if index > 0 {
 			view.setParentID(htmlID)
@@ -83,21 +83,21 @@ func (container *viewsContainerData) Insert(view View, index uint) {
 }
 
 // Remove removes view from list and return it
-func (container *viewsContainerData) RemoveView(index uint) View {
+func (container *viewsContainerData) RemoveView(index int) View {
 	if container.views == nil {
 		container.views = []View{}
 		return nil
 	}
 
-	viewsLen := uint(len(container.views))
-	if index >= viewsLen {
+	count := len(container.views)
+	if index < 0 || index >= count {
 		return nil
 	}
 
 	view := container.views[index]
 	if index == 0 {
 		container.views = container.views[1:]
-	} else if index == viewsLen-1 {
+	} else if index == count-1 {
 		container.views = container.views[:index]
 	} else {
 		container.views = append(container.views[:index], container.views[index+1:]...)
@@ -306,7 +306,7 @@ func AppendView(rootView View, containerID string, view View) bool {
 }
 
 // Insert inserts a view to the "index" position in the list of a view children
-func InsertView(rootView View, containerID string, view View, index uint) bool {
+func InsertView(rootView View, containerID string, view View, index int) bool {
 	var container ViewsContainer = nil
 	if containerID != "" {
 		container = ViewsContainerByID(rootView, containerID)
@@ -327,7 +327,7 @@ func InsertView(rootView View, containerID string, view View, index uint) bool {
 }
 
 // Remove removes a view from the list of a view children and return it
-func RemoveView(rootView View, containerID string, index uint) View {
+func RemoveView(rootView View, containerID string, index int) View {
 	var container ViewsContainer = nil
 	if containerID != "" {
 		container = ViewsContainerByID(rootView, containerID)

@@ -224,7 +224,7 @@ func (customView *CustomViewData) Append(view View) {
 }
 
 // Insert inserts a view to the "index" position in the list of a view children
-func (customView *CustomViewData) Insert(view View, index uint) {
+func (customView *CustomViewData) Insert(view View, index int) {
 	if customView.superView != nil {
 		if container, ok := customView.superView.(ViewsContainer); ok {
 			container.Insert(view, index)
@@ -233,7 +233,7 @@ func (customView *CustomViewData) Insert(view View, index uint) {
 }
 
 // Remove removes a view from the list of a view children and return it
-func (customView *CustomViewData) RemoveView(index uint) View {
+func (customView *CustomViewData) RemoveView(index int) View {
 	if customView.superView != nil {
 		if container, ok := customView.superView.(ViewsContainer); ok {
 			return container.RemoveView(index)
