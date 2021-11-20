@@ -54,13 +54,13 @@ func createBackgroundDemo(session rui.Session) rui.View {
 	updateBackground1 := func(list rui.DropDownList, number int) {
 		images := []string{"cat.jpg", "winds.png", "gifsInEmail.gif", "mountain.svg"}
 		image := rui.NewBackgroundImage(rui.Params{
-			rui.Source:          images[rui.GetDropDownCurrent(view, "backgroundImage1")],
-			rui.Fit:             rui.GetDropDownCurrent(view, "backgroundFit1"),
-			rui.HorizontalAlign: rui.GetDropDownCurrent(view, "backgroundHAlign1"),
-			rui.VerticalAlign:   rui.GetDropDownCurrent(view, "backgroundVAlign1"),
-			rui.Repeat:          rui.GetDropDownCurrent(view, "backgroundRepeat1"),
-			rui.BackgroundClip:  rui.GetDropDownCurrent(view, "backgroundClip1"),
-			rui.Attachment:      rui.GetDropDownCurrent(view, "backgroundAttachment1"),
+			rui.Source:          images[rui.GetCurrent(view, "backgroundImage1")],
+			rui.Fit:             rui.GetCurrent(view, "backgroundFit1"),
+			rui.HorizontalAlign: rui.GetCurrent(view, "backgroundHAlign1"),
+			rui.VerticalAlign:   rui.GetCurrent(view, "backgroundVAlign1"),
+			rui.Repeat:          rui.GetCurrent(view, "backgroundRepeat1"),
+			rui.BackgroundClip:  rui.GetCurrent(view, "backgroundClip1"),
+			rui.Attachment:      rui.GetCurrent(view, "backgroundAttachment1"),
 		})
 		rui.Set(view, "backgroundView", rui.Background, image)
 	}

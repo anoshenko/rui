@@ -80,12 +80,12 @@ func createAnimationDemo(session rui.Session) rui.View {
 
 		params := rui.Params{
 			rui.PropertyTag:        []rui.AnimatedProperty{prop1, prop2, prop3},
-			rui.Duration:           rui.GetDropDownCurrent(view, "animationDuration") * 4,
-			rui.Delay:              rui.GetDropDownCurrent(view, "animationDelay"),
-			rui.AnimationDirection: rui.GetDropDownCurrent(view, "animationDirection"),
+			rui.Duration:           rui.GetCurrent(view, "animationDuration") * 4,
+			rui.Delay:              rui.GetCurrent(view, "animationDelay"),
+			rui.AnimationDirection: rui.GetCurrent(view, "animationDirection"),
 		}
 
-		switch rui.GetDropDownCurrent(view, "animationTimingFunction") {
+		switch rui.GetCurrent(view, "animationTimingFunction") {
 		case 0:
 			params[rui.TimingFunction] = rui.EaseTiming
 
@@ -96,7 +96,7 @@ func createAnimationDemo(session rui.Session) rui.View {
 			params[rui.TimingFunction] = rui.StepsTiming(40)
 		}
 
-		switch rui.GetDropDownCurrent(view, "animationIterationCount") {
+		switch rui.GetCurrent(view, "animationIterationCount") {
 		case 0:
 			params[rui.IterationCount] = 1
 

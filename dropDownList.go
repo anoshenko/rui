@@ -61,7 +61,7 @@ func (list *dropDownListData) remove(tag string) {
 		}
 
 	case Current:
-		oldCurrent := GetDropDownCurrent(list, "")
+		oldCurrent := GetCurrent(list, "")
 		delete(list.properties, Current)
 		if oldCurrent != 0 {
 			if list.created {
@@ -89,12 +89,12 @@ func (list *dropDownListData) set(tag string, value interface{}) bool {
 		return list.setDropDownListener(value)
 
 	case Current:
-		oldCurrent := GetDropDownCurrent(list, "")
+		oldCurrent := GetCurrent(list, "")
 		if !list.setIntProperty(Current, value) {
 			return false
 		}
 
-		if current := GetDropDownCurrent(list, ""); oldCurrent != current {
+		if current := GetCurrent(list, ""); oldCurrent != current {
 			if list.created {
 				list.session.runScript(fmt.Sprintf(`selectDropDownListItem('%s', %d)`, list.htmlID(), current))
 			}
@@ -267,7 +267,7 @@ func (list *dropDownListData) htmlTag() string {
 
 func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 	if list.items != nil {
-		current := GetDropDownCurrent(list, "")
+		current := GetCurrent(list, "")
 		notTranslate := GetNotTranslate(list, "")
 		for i, item := range list.items {
 			if i == current {
@@ -309,7 +309,7 @@ func (list *dropDownListData) handleCommand(self View, command string, data Data
 	case "itemSelected":
 		if text, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(text); err == nil {
-				if GetDropDownCurrent(list, "") != number && number >= 0 && number < len(list.items) {
+				if GetCurrent(list, "") != number && number >= 0 && number < len(list.items) {
 					list.properties[Current] = number
 					list.onSelectedItemChanged(number)
 				}
@@ -344,16 +344,4 @@ func GetDropDownItems(view View, subviewID string) []string {
 		}
 	}
 	return []string{}
-}
-
-// func GetDropDownCurrentItem return the number of the selected item
-func GetDropDownCurrent(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		result, _ := intProperty(view, Current, view.Session(), 0)
-		return result
-	}
-	return 0
 }

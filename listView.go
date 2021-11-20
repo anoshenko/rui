@@ -141,7 +141,7 @@ func (listView *listViewData) remove(tag string) {
 		}
 
 	case Current:
-		current := GetListViewCurrent(listView, "")
+		current := GetCurrent(listView, "")
 		delete(listView.properties, tag)
 		if listView.created {
 			updateInnerHTML(listView.htmlID(), listView.session)
@@ -235,11 +235,11 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 		}
 
 	case Current:
-		oldCurrent := GetListViewCurrent(listView, "")
+		oldCurrent := GetCurrent(listView, "")
 		if !listView.setIntProperty(Current, value) {
 			return false
 		}
-		current := GetListViewCurrent(listView, "")
+		current := GetCurrent(listView, "")
 		if oldCurrent == current {
 			return true
 		}
@@ -791,7 +791,7 @@ func (listView *listViewData) checkboxSubviews(self View, buffer *strings.Builde
 	itemDiv := listView.checkboxItemDiv(self, checkbox, hCheckboxAlign, vCheckboxAlign)
 	onDiv, offDiv, contentDiv := listView.getDivs(self, checkbox, hCheckboxAlign, vCheckboxAlign)
 
-	current := GetListViewCurrent(listView, "")
+	current := GetCurrent(listView, "")
 	checkedItems := GetListViewCheckedItems(listView, "")
 	for i := 0; i < count; i++ {
 		buffer.WriteString(`<div id="`)
@@ -848,7 +848,7 @@ func (listView *listViewData) noneCheckboxSubviews(self View, buffer *strings.Bu
 	itemStyleBuilder.WriteString(`" onclick="listItemClickEvent(this, event)"`)
 	itemStyle := itemStyleBuilder.String()
 
-	current := GetListViewCurrent(listView, "")
+	current := GetCurrent(listView, "")
 	for i := 0; i < count; i++ {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
@@ -920,7 +920,7 @@ func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder)
 	buffer.WriteString(`" data-bluritemstyle="`)
 	buffer.WriteString(listView.currentInactiveStyle())
 	buffer.WriteString(`"`)
-	current := GetListViewCurrent(listView, "")
+	current := GetCurrent(listView, "")
 	if listView.adapter != nil && current >= 0 && current < listView.adapter.ListSize() {
 		buffer.WriteString(` data-current="`)
 		buffer.WriteString(listView.htmlID())
@@ -1113,7 +1113,7 @@ func (listView *listViewData) handleCommand(self View, command string, data Data
 }
 
 func (listView *listViewData) onItemClick() {
-	current := GetListViewCurrent(listView, "")
+	current := GetCurrent(listView, "")
 	if current >= 0 && !IsDisabled(listView, "") {
 		checkbox := GetListViewCheckbox(listView, "")
 	m:
@@ -1233,20 +1233,6 @@ func GetListItemCheckedListeners(view View, subviewID string) []func(ListView, [
 		}
 	}
 	return []func(ListView, []int){}
-}
-
-// GetListViewCurrent returns the index of the ListView selected item or <0 if there is no a selected item.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListViewCurrent(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := intProperty(view, Current, view.Session(), -1); ok {
-			return result
-		}
-	}
-	return -1
 }
 
 // GetListItemWidth returns the width of a ListView item.

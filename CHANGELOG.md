@@ -3,6 +3,7 @@
 * Added SetTitle and SetTitleColor function to the Session interface
 * Added a listener for changing a view property value
 * Added the "current" property to StackLayout
+* GetDropDownCurrent and GetListViewCurrent functions replaced by the GetCurrent function
 * Updated TabsLayout
 * Bug fixing
 

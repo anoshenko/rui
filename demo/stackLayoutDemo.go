@@ -40,20 +40,20 @@ func createStackLayoutDemo(session rui.Session) rui.View {
 	}
 
 	animation := func() int {
-		return rui.GetDropDownCurrent(view, "pushAnimation")
+		return rui.GetCurrent(view, "pushAnimation")
 	}
 
 	/*
 		transition := func() rui.ViewTransition {
 			timing := rui.EaseTiming
 			timings := []string{rui.EaseTiming, rui.LinearTiming}
-			if n := rui.GetDropDownCurrent(view, "pushTiming"); n >= 0 && n < len(timings) {
+			if n := rui.GetCurrent(view, "pushTiming"); n >= 0 && n < len(timings) {
 				timing = timings[n]
 			}
 
 			duration := float64(0.5)
 			durations := []float64{0.5, 1, 2}
-			if n := rui.GetDropDownCurrent(view, "pushDuration"); n >= 0 && n < len(durations) {
+			if n := rui.GetCurrent(view, "pushDuration"); n >= 0 && n < len(durations) {
 				duration = durations[n]
 			}
 

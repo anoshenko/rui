@@ -50,27 +50,10 @@ const (
 type TabsLayout interface {
 	ViewsContainer
 	ListAdapter
-	/*
-		// Current return the index of active tab
-		currentItem() int
-		// SetCurrent set the index of active tab
-		SetCurrent(current int)
-		// TabsLocation return the location of tabs. It returns one of the following values: HiddenTabs (0),
-		// TopTabs (1), BottomTabs (2), LeftTabs (3), RightTabs (4), LeftListTabs (5), RightListTabs (6)
-		tabsLocation() int
-		// TabsLocation set the location of tabs. Valid values: HiddenTabs (0), TopTabs (1),
-		// BottomTabs (2), LeftTabs (3), RightTabs (4), LeftListTabs (5), RightListTabs (6)
-		SetTabsLocation(location int)
-		// TabStyle() return styles of tab in the passive and the active state
-		TabStyle() (string, string)
-		SetTabStyle(tabStyle string, activeTabStyle string)
-	*/
 }
 
 type tabsLayoutData struct {
 	viewsContainerData
-	//currentTab, tabsLocation int
-	//tabStyle, activeTabStyle string
 	tabListener      []func(TabsLayout, int, int)
 	tabCloseListener []func(TabsLayout, int)
 }

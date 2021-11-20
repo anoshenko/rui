@@ -377,6 +377,22 @@ To simplify setting / reading properties, there are also two global functions Ge
 
 These functions get/set the value of the child View
 
+### Tracking property changes
+
+You can set a function to track the change of absolutely any View property (there are no exceptions).
+To set up a change listener, the View interface contains a function:
+
+	SetChangeListener(tag string, listener func(View, string))
+
+where the first parameter is the name of the tracked property, and the second is the function 
+that will be called every time the property value changes.
+
+For example
+
+	view.SetChangeListener(rui.BackgroundColor, listener func(view View, tag string) {
+		// The background color changed
+	})
+
 ### Events
 
 When interacting with the application, various events arise: clicks, resizing, changing input data, etc.
@@ -2342,6 +2358,23 @@ The function will return false if the StackLayout is empty and true if the curre
 
 	Peek() View
 
+You can also get the current View using its index. The "current" property (constant Current) is used to get the index. 
+Example
+
+	func peek(layout rui.StackLayout) {
+		views := layout.Views()
+		if index := rui.GetCurrent(layout, ""); index >= 0 && index < len(views) {
+			return views[index]
+		} 
+		return nil
+	}
+
+Of course, this is less convenient than the Peek function. However, the "current" property can be used to track changes to the current View:
+
+	layout.SetChangeListener(rui.Current, func(view rui.View, tag string) {
+		// current view changed
+	})
+
 In order to make any child View current (visible), the interface functions are used:
 
 	MoveToFront(view View) bool
@@ -2349,6 +2382,100 @@ In order to make any child View current (visible), the interface functions are u
 
 This function will return true if successful and false if the child View or 
 View with id does not exist and an error message will be written to the log.
+
+You can also use the "current" property to make any child View current (visible).
+
+## TabsLayout
+
+TabsLayout is a container that implements the ViewsContainer interface. All child Views are stacked 
+on top of each other and each takes up the entire container space. 
+Only one child View (current) is available at a time. Tabs, that are located along one of the sides of the container, 
+are used to select the current View.
+
+To create a TabsLayout, use the function
+
+	func NewTabsLayout(session Session, params Params) TabsLayout
+
+A bookmark is created for each View. A bookmark can display a title, an icon, and a close button.
+
+The title is set using the "title" text property (constant Title) of the child View.
+The "title" property is optional. If it is not specified, then there will be no text on the tab.
+
+The icon is set using the "icon" text property (constant Icon) of the child View.
+As a value, it is assigned the name of the icon file (if the icon is located in the application resources) or url. 
+The "icon" property is optional. If it is not specified, then there will be no icon on the tab.
+
+The display of the tab close button is controlled by the "tab-close-button" boolean property (constant TabCloseButton).
+"true" enables the display of the close button for the tab. The default is "false".
+
+The "tab-close-button" properties can be set for both the child View and the TabsLayout itself.
+Setting the value of the "tab-close-button" property for the TabsLayout enables/disables the display 
+of the close button for all tabs at once. The "tab-close-button" value set on the child View 
+takes precedence over the value set on the TabsLayout.
+
+The tab close button does not close the tab, but only generates the "tab-close-event" event (constant TabCloseEvent).
+The main handler for this event has the format
+
+	func(layout TabsLayout, index int)
+
+where the second element is the index of the child View.
+
+As already mentioned, clicking on the close tab button does not close the tab.
+You must close the tab yourself. This is done as follows
+
+	tabsView.Set(rui.TabCloseEvent, func(layout rui.TabsLayout, index int) {
+		layout.RemoveView(index)
+	})
+
+You can control the current View using the "current" integer property (constant Current).
+To programmatically switch tabs, set this property to the index of the new current View.
+You can read the value of the "current" property using the function
+
+	func GetCurrent(view View, subviewID string) int
+
+Also, the "current" property can be used to track changes to the current View:
+
+	tabsView.SetChangeListener(rui.Current, func(view rui.View, tag string) {
+		// current view changed
+	})
+
+Tabs are positioned along one side of the TabsLayout container. The tabs are positioned using 
+the "tabs" integer property (the Tabs constant). This property can take on the following values:
+
+| Value    | Constant      | Name         | Placement of tabs                                |
+|:--------:|---------------|--------------|--------------------------------------------------|
+| 0	       | TopTabs       | "top"        | Top. Default value.                              |
+| 1        | BottomTabs    | "bottom"     | Bottom.                                          |
+| 2        | LeftTabs      | "left"       | Left. Each tab is rotated 90 ° counterclockwise. |
+| 3        | RightTabs     | "right"      | On right. Each tab is rotated 90 ° clockwise.    |
+| 4        | LeftListTabs  | "left-list"  | Left. The tabs are displayed as a list.          |
+| 5        | RightListTabs | "right-list" | On right. The tabs are displayed as a list.      |
+| 6        | HiddenTabs    | "hidden"     | The tabs are hidden.                             |
+
+Why do I need the value HiddenTabs. The point is that TabsLayout implements the ListAdapter interface.
+Which makes it easy to implement tabs with a ListView. This is where the HiddenTabs value comes in.
+
+When displaying the current (selected) tabs of type TopTabs, BottomTabs, LeftListTabs and RightListTabs, 
+the style is "ruiActiveTab", and for tabs of type LeftTabs and RightTabs, the style is "ruiActiveVerticalTab".
+If you want to customize the display of tabs, you can either override these styles, or assign your own style using 
+the "current-tab-style" property (constant CurrentTabStyle).
+
+Accordingly, for an inactive tab, the "ruiInactiveTab" and "ruiInactiveVerticalTab" styles are used, 
+and you can assign your own style using the "tab-style" property (constant TabStyle).
+
+Also, when displaying tabs, the following constants and styles are used:
+
+* "ruiTabHeight" - the SizeUnit constant sets the height of the tab bar;
+
+* "ruiTabSpace" - the SizeUnit constant sets the distance between tabs;
+
+* "ruiTabsPadding" - the SizeUnit or BoundsProperty constant sets the indentation from the inside of the tab bar;
+
+* "ruiTabsBackgroundColor" - background color of the tabs bar;
+
+* "ruiTabCloseButton" - style of the button for closing the tab.
+
+You can override these constants and styles to customize the tab bar
 
 ## AbsoluteLayout
 
@@ -2809,7 +2936,7 @@ You can read the value of the "items" property using the function
 The selected value is determined by the int property "current" (Current constant). The default is 0.
 You can read the value of this property using the function
 
-	func GetDropDownCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID string) int
 
 To track the change of the "current" property, the "drop-down-event" event (DropDownEvent constant) is used. 
 The main event listener has the following format:
@@ -2990,7 +3117,7 @@ The value "current" is less than 0 means that no item is selected
 
 You can get the value of this property using the function
 
-	func GetListViewCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID string) int
 
 ### "list-item-style", "current-style", and "current-inactive-style" properties
 

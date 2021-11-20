@@ -1045,3 +1045,27 @@ func FocusViewByID(viewID string, session Session) {
 		session.runScript("focus('" + viewID + "')")
 	}
 }
+
+// GetCurrent returns the index of the selected item (<0 if there is no a selected item) or the current view index (StackLayout, TabsLayout).
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetCurrent(view View, subviewID string) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	var defaultValue int
+	switch view.Tag() {
+	case "ListView":
+		defaultValue = -1
+
+	default:
+		defaultValue = 0
+	}
+
+	if view != nil {
+		if result, ok := intProperty(view, Current, view.Session(), defaultValue); ok {
+			return result
+		}
+	}
+	return -1
+}
