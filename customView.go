@@ -68,6 +68,10 @@ func (customView *CustomViewData) SetAnimated(tag string, value interface{}, ani
 	return customView.superView.SetAnimated(tag, value, animation)
 }
 
+func (customView *CustomViewData) SetChangeListener(tag string, listener func(View, string)) {
+	customView.superView.SetChangeListener(tag, listener)
+}
+
 // Remove removes the property with name defined by the argument
 func (customView *CustomViewData) Remove(tag string) {
 	customView.superView.Remove(tag)

@@ -63,28 +63,47 @@ func (picker *datePickerData) remove(tag string) {
 	case DateChangedEvent:
 		if len(picker.dateChangedListeners) > 0 {
 			picker.dateChangedListeners = []func(DatePicker, time.Time){}
+			picker.propertyChangedEvent(tag)
 		}
+		return
 
 	case DatePickerMin:
 		delete(picker.properties, DatePickerMin)
-		removeProperty(picker.htmlID(), Min, picker.session)
+		if picker.created {
+			removeProperty(picker.htmlID(), Min, picker.session)
+		}
 
 	case DatePickerMax:
 		delete(picker.properties, DatePickerMax)
-		removeProperty(picker.htmlID(), Max, picker.session)
+		if picker.created {
+			removeProperty(picker.htmlID(), Max, picker.session)
+		}
 
 	case DatePickerStep:
 		delete(picker.properties, DatePickerMax)
-		removeProperty(picker.htmlID(), Step, picker.session)
+		if picker.created {
+			removeProperty(picker.htmlID(), Step, picker.session)
+		}
 
 	case DatePickerValue:
-		delete(picker.properties, DatePickerValue)
-		updateProperty(picker.htmlID(), Value, time.Now().Format(dateFormat), picker.session)
+		if _, ok := picker.properties[DatePickerValue]; ok {
+			delete(picker.properties, DatePickerValue)
+			date := GetDatePickerValue(picker, "")
+			if picker.created {
+				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
+			}
+			for _, listener := range picker.dateChangedListeners {
+				listener(picker, date)
+			}
+		} else {
+			return
+		}
 
 	default:
 		picker.viewData.remove(tag)
-		picker.propertyChanged(tag)
+		return
 	}
+	picker.propertyChangedEvent(tag)
 }
 
 func (picker *datePickerData) Set(tag string, value interface{}) bool {
@@ -98,7 +117,6 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 	}
 
 	setTimeValue := func(tag string) (time.Time, bool) {
-		//old, oldOK := getDateProperty(picker, tag, shortTag)
 		switch value := value.(type) {
 		case time.Time:
 			picker.properties[tag] = value
@@ -122,7 +140,10 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 		old, oldOK := getDateProperty(picker, DatePickerMin, Min)
 		if date, ok := setTimeValue(DatePickerMin); ok {
 			if !oldOK || date != old {
-				updateProperty(picker.htmlID(), Min, date.Format(dateFormat), picker.session)
+				if picker.created {
+					updateProperty(picker.htmlID(), Min, date.Format(dateFormat), picker.session)
+				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -131,7 +152,10 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 		old, oldOK := getDateProperty(picker, DatePickerMax, Max)
 		if date, ok := setTimeValue(DatePickerMax); ok {
 			if !oldOK || date != old {
-				updateProperty(picker.htmlID(), Max, date.Format(dateFormat), picker.session)
+				if picker.created {
+					updateProperty(picker.htmlID(), Max, date.Format(dateFormat), picker.session)
+				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -139,13 +163,15 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 	case DatePickerStep:
 		oldStep := GetDatePickerStep(picker, "")
 		if picker.setIntProperty(DatePickerStep, value) {
-			step := GetDatePickerStep(picker, "")
-			if oldStep != step {
-				if step > 0 {
-					updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
-				} else {
-					removeProperty(picker.htmlID(), Step, picker.session)
+			if step := GetDatePickerStep(picker, ""); oldStep != step {
+				if picker.created {
+					if step > 0 {
+						updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
+					} else {
+						removeProperty(picker.htmlID(), Step, picker.session)
+					}
 				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -153,11 +179,14 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 	case DatePickerValue:
 		oldDate := GetDatePickerValue(picker, "")
 		if date, ok := setTimeValue(DatePickerMax); ok {
-			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
 			if date != oldDate {
+				if picker.created {
+					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
+				}
 				for _, listener := range picker.dateChangedListeners {
 					listener(picker, date)
 				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -214,13 +243,11 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 			}
 			picker.dateChangedListeners = listeners
 		}
+		picker.propertyChangedEvent(tag)
 		return true
 
 	default:
-		if picker.viewData.set(tag, value) {
-			picker.propertyChanged(tag)
-			return true
-		}
+		return picker.viewData.set(tag, value)
 	}
 	return false
 }
@@ -274,7 +301,7 @@ func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *datePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)

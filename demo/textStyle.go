@@ -57,14 +57,24 @@ func createTextStyleDemo(session rui.Session) rui.View {
 		return nil
 	}
 
-	rui.Set(view, "textStyleFont", rui.DropDownEvent, func(number int) {
+	rui.SetChangeListener(view, "textStyleFont", rui.Current, func(v rui.View, tag string) {
 		fonts := []string{"", "serif", "sans-serif", "\"Courier new\", monospace", "cursive", "fantasy"}
-		if number > 0 && number < len(fonts) {
+		if number := rui.GetDropDownCurrent(v, ""); number > 0 && number < len(fonts) {
 			rui.Set(view, "textStyleText", rui.FontName, fonts[number])
 		} else {
 			rui.Set(view, "textStyleText", rui.FontName, nil)
 		}
 	})
+	/*
+		rui.Set(view, "textStyleFont", rui.DropDownEvent, func(number int) {
+			fonts := []string{"", "serif", "sans-serif", "\"Courier new\", monospace", "cursive", "fantasy"}
+			if number > 0 && number < len(fonts) {
+				rui.Set(view, "textStyleText", rui.FontName, fonts[number])
+			} else {
+				rui.Set(view, "textStyleText", rui.FontName, nil)
+			}
+		})
+	*/
 
 	rui.Set(view, "textStyleSize", rui.DropDownEvent, func(number int) {
 		sizes := []string{"1em", "14pt", "12px", "1.5em"}

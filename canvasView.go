@@ -53,6 +53,7 @@ func (canvasView *canvasViewData) remove(tag string) {
 	if tag == DrawFunction {
 		canvasView.drawer = nil
 		canvasView.Redraw()
+		canvasView.propertyChangedEvent(tag)
 	} else {
 		canvasView.viewData.remove(tag)
 	}
@@ -73,6 +74,7 @@ func (canvasView *canvasViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 		canvasView.Redraw()
+		canvasView.propertyChangedEvent(tag)
 		return true
 	}
 

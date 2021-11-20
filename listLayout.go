@@ -55,9 +55,11 @@ func (listLayout *listLayoutData) Remove(tag string) {
 
 func (listLayout *listLayoutData) remove(tag string) {
 	listLayout.viewsContainerData.remove(tag)
-	switch tag {
-	case Orientation, Wrap, HorizontalAlign, VerticalAlign:
-		updateCSSStyle(listLayout.htmlID(), listLayout.session)
+	if listLayout.created {
+		switch tag {
+		case Orientation, Wrap, HorizontalAlign, VerticalAlign:
+			updateCSSStyle(listLayout.htmlID(), listLayout.session)
+		}
 	}
 }
 
@@ -72,9 +74,11 @@ func (listLayout *listLayoutData) set(tag string, value interface{}) bool {
 	}
 
 	if listLayout.viewsContainerData.set(tag, value) {
-		switch tag {
-		case Orientation, Wrap, HorizontalAlign, VerticalAlign:
-			updateCSSStyle(listLayout.htmlID(), listLayout.session)
+		if listLayout.created {
+			switch tag {
+			case Orientation, Wrap, HorizontalAlign, VerticalAlign:
+				updateCSSStyle(listLayout.htmlID(), listLayout.session)
+			}
 		}
 		return true
 	}

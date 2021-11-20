@@ -75,8 +75,11 @@ func (resizable *resizableData) remove(tag string) {
 		oldSide := resizable.getSide()
 		delete(resizable.properties, Side)
 		if oldSide != resizable.getSide() {
-			updateInnerHTML(resizable.htmlID(), resizable.Session())
-			resizable.updateResizeBorderWidth()
+			if resizable.created {
+				updateInnerHTML(resizable.htmlID(), resizable.Session())
+				resizable.updateResizeBorderWidth()
+			}
+			resizable.propertyChangedEvent(tag)
 		}
 
 	case ResizeBorderWidth:
@@ -84,12 +87,16 @@ func (resizable *resizableData) remove(tag string) {
 		delete(resizable.properties, ResizeBorderWidth)
 		if !w.Equal(resizable.resizeBorderWidth()) {
 			resizable.updateResizeBorderWidth()
+			resizable.propertyChangedEvent(tag)
 		}
 
 	case Content:
 		if len(resizable.content) > 0 {
 			resizable.content = []View{}
-			updateInnerHTML(resizable.htmlID(), resizable.Session())
+			if resizable.created {
+				updateInnerHTML(resizable.htmlID(), resizable.Session())
+			}
+			resizable.propertyChangedEvent(tag)
 		}
 
 	default:
@@ -110,20 +117,25 @@ func (resizable *resizableData) set(tag string, value interface{}) bool {
 	switch tag {
 	case Side:
 		oldSide := resizable.getSide()
-		ok := resizable.setSide(value)
-		if ok && oldSide != resizable.getSide() {
-			updateInnerHTML(resizable.htmlID(), resizable.Session())
-			resizable.updateResizeBorderWidth()
-		} else {
+		if !resizable.setSide(value) {
 			notCompatibleType(tag, value)
+			return false
 		}
-		return ok
+		if oldSide != resizable.getSide() {
+			if resizable.created {
+				updateInnerHTML(resizable.htmlID(), resizable.Session())
+				resizable.updateResizeBorderWidth()
+			}
+			resizable.propertyChangedEvent(tag)
+		}
+		return true
 
 	case ResizeBorderWidth:
 		w := resizable.resizeBorderWidth()
 		ok := resizable.setSizeProperty(tag, value)
 		if ok && !w.Equal(resizable.resizeBorderWidth()) {
 			resizable.updateResizeBorderWidth()
+			resizable.propertyChangedEvent(tag)
 		}
 		return ok
 
@@ -139,18 +151,25 @@ func (resizable *resizableData) set(tag string, value interface{}) bool {
 		case DataObject:
 			if view := CreateViewFromObject(resizable.Session(), value); view != nil {
 				newContent = view
+			} else {
+				return false
 			}
+
+		default:
+			notCompatibleType(tag, value)
+			return false
 		}
 
-		if newContent != nil {
-			if len(resizable.content) == 0 {
-				resizable.content = []View{newContent}
-			} else {
-				resizable.content[0] = newContent
-			}
-			updateInnerHTML(resizable.htmlID(), resizable.Session())
-			return true
+		if len(resizable.content) == 0 {
+			resizable.content = []View{newContent}
+		} else {
+			resizable.content[0] = newContent
 		}
+		if resizable.created {
+			updateInnerHTML(resizable.htmlID(), resizable.Session())
+		}
+		resizable.propertyChangedEvent(tag)
+		return true
 
 	case CellWidth, CellHeight, GridRowGap, GridColumnGap, CellVerticalAlign, CellHorizontalAlign:
 		ErrorLogF(`Not supported "%s" property`, tag)
@@ -306,12 +325,14 @@ func (resizable *resizableData) resizeBorderWidth() SizeUnit {
 }
 
 func (resizable *resizableData) updateResizeBorderWidth() {
-	htmlID := resizable.htmlID()
-	session := resizable.Session()
-	column, row := resizable.cellSizeCSS()
+	if resizable.created {
+		htmlID := resizable.htmlID()
+		session := resizable.Session()
+		column, row := resizable.cellSizeCSS()
 
-	updateCSSProperty(htmlID, "grid-template-columns", column, session)
-	updateCSSProperty(htmlID, "grid-template-rows", row, session)
+		updateCSSProperty(htmlID, "grid-template-columns", column, session)
+		updateCSSProperty(htmlID, "grid-template-rows", row, session)
+	}
 }
 
 func (resizable *resizableData) cellSizeCSS() (string, string) {

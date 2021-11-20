@@ -2,6 +2,8 @@ package rui
 
 import "strings"
 
+// TODO Expanded event
+
 const (
 	// Summary is the constant for the "summary" property tag.
 	// The contents of the "summary" property are used as the label for the disclosure widget.
@@ -45,18 +47,14 @@ func (detailsView *detailsViewData) Remove(tag string) {
 }
 
 func (detailsView *detailsViewData) remove(tag string) {
-	if _, ok := detailsView.properties[tag]; ok {
+	detailsView.viewsContainerData.remove(tag)
+	if detailsView.created {
 		switch tag {
 		case Summary:
-			delete(detailsView.properties, tag)
 			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 		case Expanded:
-			delete(detailsView.properties, tag)
 			removeProperty(detailsView.htmlID(), "open", detailsView.Session())
-
-		default:
-			detailsView.viewsContainerData.remove(tag)
 		}
 	}
 }
@@ -66,6 +64,11 @@ func (detailsView *detailsViewData) Set(tag string, value interface{}) bool {
 }
 
 func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
+	if value == nil {
+		detailsView.remove(tag)
+		return true
+	}
+
 	switch tag {
 	case Summary:
 		switch value := value.(type) {
@@ -86,23 +89,29 @@ func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
 			notCompatibleType(tag, value)
 			return false
 		}
-		updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-		return true
+		if detailsView.created {
+			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
+		}
 
 	case Expanded:
-		if detailsView.setBoolProperty(tag, value) {
+		if !detailsView.setBoolProperty(tag, value) {
+			notCompatibleType(tag, value)
+			return false
+		}
+		if detailsView.created {
 			if IsDetailsExpanded(detailsView, "") {
 				updateProperty(detailsView.htmlID(), "open", "", detailsView.Session())
 			} else {
 				removeProperty(detailsView.htmlID(), "open", detailsView.Session())
 			}
-			return true
 		}
-		notCompatibleType(tag, value)
-		return false
+
+	default:
+		return detailsView.viewsContainerData.Set(tag, value)
 	}
 
-	return detailsView.viewsContainerData.Set(tag, value)
+	detailsView.propertyChangedEvent(tag)
+	return true
 }
 
 func (detailsView *detailsViewData) Get(tag string) interface{} {

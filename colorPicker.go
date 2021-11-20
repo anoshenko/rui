@@ -56,7 +56,10 @@ func (picker *colorPickerData) Remove(tag string) {
 func (picker *colorPickerData) remove(tag string) {
 	switch tag {
 	case ColorChangedEvent:
-		picker.colorChangedListeners = []func(ColorPicker, Color){}
+		if len(picker.colorChangedListeners) > 0 {
+			picker.colorChangedListeners = []func(ColorPicker, Color){}
+			picker.propertyChangedEvent(tag)
+		}
 
 	case ColorPickerValue:
 		oldColor := GetColorPickerValue(picker, "")
@@ -131,15 +134,13 @@ func (picker *colorPickerData) set(tag string, value interface{}) bool {
 			}
 			picker.colorChangedListeners = listeners
 		}
+		picker.propertyChangedEvent(tag)
 		return true
 
 	case ColorPickerValue:
 		oldColor := GetColorPickerValue(picker, "")
 		if picker.setColorProperty(ColorPickerValue, value) {
-			newValue := GetColorPickerValue(picker, "")
-			if oldColor != newValue {
-				picker.colorChanged(oldColor)
-			}
+			picker.colorChanged(oldColor)
 			return true
 		}
 
@@ -150,12 +151,14 @@ func (picker *colorPickerData) set(tag string, value interface{}) bool {
 }
 
 func (picker *colorPickerData) colorChanged(oldColor Color) {
-	newColor := GetColorPickerValue(picker, "")
-	if oldColor != newColor {
-		picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), newColor.rgbString()))
+	if newColor := GetColorPickerValue(picker, ""); oldColor != newColor {
+		if picker.created {
+			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), newColor.rgbString()))
+		}
 		for _, listener := range picker.colorChangedListeners {
 			listener(picker, newColor)
 		}
+		picker.propertyChangedEvent(ColorTag)
 	}
 }
 
@@ -188,7 +191,7 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 }
 
 func (picker *colorPickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)

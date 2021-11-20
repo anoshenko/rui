@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// TODO PeekChangedEvent
+
 const (
 	// DefaultAnimation - default animation of StackLayout push
 	DefaultAnimation = 0
@@ -93,23 +95,33 @@ func (layout *stackLayoutData) popFinished(view View, tag string) {
 }
 
 func (layout *stackLayoutData) Set(tag string, value interface{}) bool {
-	if strings.ToLower(tag) == TransitionEndEvent {
+	return layout.set(strings.ToLower(tag), value)
+}
+
+func (layout *stackLayoutData) set(tag string, value interface{}) bool {
+	if tag == TransitionEndEvent {
 		listeners, ok := valueToAnimationListeners(value)
 		if ok {
 			listeners = append(listeners, layout.pushFinished)
 			listeners = append(listeners, layout.popFinished)
 			layout.properties[TransitionEndEvent] = listeners
+			layout.propertyChangedEvent(TransitionEndEvent)
 		}
 		return ok
 	}
-	return layout.viewsContainerData.Set(tag, value)
+	return layout.viewsContainerData.set(tag, value)
 }
 
 func (layout *stackLayoutData) Remove(tag string) {
-	if strings.ToLower(tag) == TransitionEndEvent {
+	layout.remove(strings.ToLower(tag))
+}
+
+func (layout *stackLayoutData) remove(tag string) {
+	if tag == TransitionEndEvent {
 		layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
+		layout.propertyChangedEvent(TransitionEndEvent)
 	} else {
-		layout.viewsContainerData.Remove(tag)
+		layout.viewsContainerData.remove(tag)
 	}
 }
 
@@ -238,6 +250,7 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 
 	layout.views = append(layout.views, view)
 	view.setParentID(htmlID)
+	layout.propertyChangedEvent(Content)
 }
 
 func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool {
@@ -286,6 +299,7 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 	}
 
 	updateCSSProperty(htmlID+"pop", "transform", value, layout.session)
+	layout.propertyChangedEvent(Content)
 	return true
 }
 

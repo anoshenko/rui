@@ -63,28 +63,47 @@ func (picker *timePickerData) remove(tag string) {
 	case TimeChangedEvent:
 		if len(picker.timeChangedListeners) > 0 {
 			picker.timeChangedListeners = []func(TimePicker, time.Time){}
+			picker.propertyChangedEvent(tag)
 		}
+		return
 
 	case TimePickerMin:
 		delete(picker.properties, TimePickerMin)
-		removeProperty(picker.htmlID(), Min, picker.session)
+		if picker.created {
+			removeProperty(picker.htmlID(), Min, picker.session)
+		}
 
 	case TimePickerMax:
 		delete(picker.properties, TimePickerMax)
-		removeProperty(picker.htmlID(), Max, picker.session)
+		if picker.created {
+			removeProperty(picker.htmlID(), Max, picker.session)
+		}
 
 	case TimePickerStep:
 		delete(picker.properties, TimePickerMax)
-		removeProperty(picker.htmlID(), Step, picker.session)
+		if picker.created {
+			removeProperty(picker.htmlID(), Step, picker.session)
+		}
 
 	case TimePickerValue:
-		delete(picker.properties, TimePickerValue)
-		updateProperty(picker.htmlID(), Value, time.Now().Format(timeFormat), picker.session)
+		if _, ok := picker.properties[TimePickerValue]; ok {
+			delete(picker.properties, TimePickerValue)
+			time := GetTimePickerValue(picker, "")
+			if picker.created {
+				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))
+			}
+			for _, listener := range picker.timeChangedListeners {
+				listener(picker, time)
+			}
+		} else {
+			return
+		}
 
 	default:
 		picker.viewData.remove(tag)
-		picker.propertyChanged(tag)
+		return
 	}
+	picker.propertyChangedEvent(tag)
 }
 
 func (picker *timePickerData) Set(tag string, value interface{}) bool {
@@ -121,7 +140,10 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 		old, oldOK := getTimeProperty(picker, TimePickerMin, Min)
 		if time, ok := setTimeValue(TimePickerMin); ok {
 			if !oldOK || time != old {
-				updateProperty(picker.htmlID(), Min, time.Format(timeFormat), picker.session)
+				if picker.created {
+					updateProperty(picker.htmlID(), Min, time.Format(timeFormat), picker.session)
+				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -130,7 +152,10 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 		old, oldOK := getTimeProperty(picker, TimePickerMax, Max)
 		if time, ok := setTimeValue(TimePickerMax); ok {
 			if !oldOK || time != old {
-				updateProperty(picker.htmlID(), Max, time.Format(timeFormat), picker.session)
+				if picker.created {
+					updateProperty(picker.htmlID(), Max, time.Format(timeFormat), picker.session)
+				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -138,13 +163,15 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 	case TimePickerStep:
 		oldStep := GetTimePickerStep(picker, "")
 		if picker.setIntProperty(TimePickerStep, value) {
-			step := GetTimePickerStep(picker, "")
-			if oldStep != step {
-				if step > 0 {
-					updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
-				} else {
-					removeProperty(picker.htmlID(), Step, picker.session)
+			if step := GetTimePickerStep(picker, ""); oldStep != step {
+				if picker.created {
+					if step > 0 {
+						updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
+					} else {
+						removeProperty(picker.htmlID(), Step, picker.session)
+					}
 				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -152,11 +179,14 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 	case TimePickerValue:
 		oldTime := GetTimePickerValue(picker, "")
 		if time, ok := setTimeValue(TimePickerMax); ok {
-			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))
 			if time != oldTime {
+				if picker.created {
+					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))
+				}
 				for _, listener := range picker.timeChangedListeners {
 					listener(picker, time)
 				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -167,8 +197,8 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 			picker.timeChangedListeners = []func(TimePicker, time.Time){value}
 
 		case func(time.Time):
-			fn := func(view TimePicker, date time.Time) {
-				value(date)
+			fn := func(view TimePicker, time time.Time) {
+				value(time)
 			}
 			picker.timeChangedListeners = []func(TimePicker, time.Time){fn}
 
@@ -183,8 +213,8 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 					return false
 				}
 
-				listeners[i] = func(view TimePicker, date time.Time) {
-					val(date)
+				listeners[i] = func(view TimePicker, time time.Time) {
+					val(time)
 				}
 			}
 			picker.timeChangedListeners = listeners
@@ -202,8 +232,8 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 					listeners[i] = val
 
 				case func(time.Time):
-					listeners[i] = func(view TimePicker, date time.Time) {
-						val(date)
+					listeners[i] = func(view TimePicker, time time.Time) {
+						val(time)
 					}
 
 				default:
@@ -213,13 +243,11 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 			}
 			picker.timeChangedListeners = listeners
 		}
+		picker.propertyChangedEvent(tag)
 		return true
 
 	default:
-		if picker.viewData.set(tag, value) {
-			picker.propertyChanged(tag)
-			return true
-		}
+		return picker.viewData.set(tag, value)
 	}
 	return false
 }
@@ -273,7 +301,7 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *timePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)

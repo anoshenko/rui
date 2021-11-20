@@ -65,6 +65,7 @@ var intProperties = []string{
 	FootHeight,
 	RowSpan,
 	ColumnSpan,
+	ColumnCount,
 }
 
 var floatProperties = map[string]struct{ min, max float64 }{

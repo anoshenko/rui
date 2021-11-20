@@ -84,63 +84,98 @@ func (edit *editViewData) Remove(tag string) {
 }
 
 func (edit *editViewData) remove(tag string) {
-	if _, ok := edit.properties[tag]; ok {
-		switch tag {
-		case Hint:
+	_, exists := edit.properties[tag]
+	switch tag {
+	case Hint:
+		if exists {
 			delete(edit.properties, Hint)
-			removeProperty(edit.htmlID(), "placeholder", edit.session)
-
-		case MaxLength:
-			delete(edit.properties, MaxLength)
-			removeProperty(edit.htmlID(), "maxlength", edit.session)
-
-		case ReadOnly, Spellcheck:
-			delete(edit.properties, tag)
-			updateBoolProperty(edit.htmlID(), tag, false, edit.session)
-
-		case EditTextChangedEvent:
-			if len(edit.textChangeListeners) > 0 {
-				edit.textChangeListeners = []func(EditView, string){}
+			if edit.created {
+				removeProperty(edit.htmlID(), "placeholder", edit.session)
 			}
+			edit.propertyChangedEvent(tag)
+		}
 
-		case Text:
+	case MaxLength:
+		if exists {
+			delete(edit.properties, MaxLength)
+			if edit.created {
+				removeProperty(edit.htmlID(), "maxlength", edit.session)
+			}
+			edit.propertyChangedEvent(tag)
+		}
+
+	case ReadOnly, Spellcheck:
+		if exists {
+			delete(edit.properties, tag)
+			if edit.created {
+				updateBoolProperty(edit.htmlID(), tag, false, edit.session)
+			}
+			edit.propertyChangedEvent(tag)
+		}
+
+	case EditTextChangedEvent:
+		if len(edit.textChangeListeners) > 0 {
+			edit.textChangeListeners = []func(EditView, string){}
+			edit.propertyChangedEvent(tag)
+		}
+
+	case Text:
+		if exists {
 			oldText := GetText(edit, "")
 			delete(edit.properties, tag)
 			if oldText != "" {
 				edit.textChanged("")
-				edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), ""))
+				if edit.created {
+					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), ""))
+				}
 			}
+		}
 
-		case EditViewPattern:
+	case EditViewPattern:
+		if exists {
 			oldText := GetEditViewPattern(edit, "")
 			delete(edit.properties, tag)
 			if oldText != "" {
-				removeProperty(edit.htmlID(), Pattern, edit.session)
+				if edit.created {
+					removeProperty(edit.htmlID(), Pattern, edit.session)
+				}
+				edit.propertyChangedEvent(tag)
 			}
+		}
 
-		case EditViewType:
+	case EditViewType:
+		if exists {
 			oldType := GetEditViewType(edit, "")
 			delete(edit.properties, tag)
 			if oldType != 0 {
-				updateInnerHTML(edit.parentHTMLID(), edit.session)
+				if edit.created {
+					updateInnerHTML(edit.parentHTMLID(), edit.session)
+				}
+				edit.propertyChangedEvent(tag)
 			}
+		}
 
-		case Wrap:
+	case Wrap:
+		if exists {
 			oldWrap := IsEditViewWrap(edit, "")
 			delete(edit.properties, tag)
 			if GetEditViewType(edit, "") == MultiLineText {
 				if wrap := IsEditViewWrap(edit, ""); wrap != oldWrap {
-					if wrap {
-						updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
-					} else {
-						updateProperty(edit.htmlID(), "wrap", "off", edit.session)
+					if edit.created {
+						if wrap {
+							updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
+						} else {
+							updateProperty(edit.htmlID(), "wrap", "off", edit.session)
+						}
 					}
+					edit.propertyChangedEvent(tag)
 				}
 			}
-
-		default:
-			edit.viewData.remove(tag)
 		}
+
+	default:
+		edit.viewData.remove(tag)
+		return
 	}
 }
 
@@ -161,14 +196,16 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 			edit.properties[Text] = text
 			if text = GetText(edit, ""); oldText != text {
 				edit.textChanged(text)
-				if GetEditViewType(edit, "") == MultiLineText {
-					updateInnerHTML(edit.htmlID(), edit.Session())
-				} else {
-					text = strings.ReplaceAll(text, `"`, `\"`)
-					text = strings.ReplaceAll(text, `'`, `\'`)
-					text = strings.ReplaceAll(text, "\n", `\n`)
-					text = strings.ReplaceAll(text, "\r", `\r`)
-					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), text))
+				if edit.created {
+					if GetEditViewType(edit, "") == MultiLineText {
+						updateInnerHTML(edit.htmlID(), edit.Session())
+					} else {
+						text = strings.ReplaceAll(text, `"`, `\"`)
+						text = strings.ReplaceAll(text, `'`, `\'`)
+						text = strings.ReplaceAll(text, "\n", `\n`)
+						text = strings.ReplaceAll(text, "\r", `\r`)
+						edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), text))
+					}
 				}
 			}
 			return true
@@ -180,11 +217,14 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		if text, ok := value.(string); ok {
 			edit.properties[Hint] = text
 			if text = GetHint(edit, ""); oldText != text {
-				if text != "" {
-					updateProperty(edit.htmlID(), "placeholder", text, edit.session)
-				} else {
-					removeProperty(edit.htmlID(), "placeholder", edit.session)
+				if edit.created {
+					if text != "" {
+						updateProperty(edit.htmlID(), "placeholder", text, edit.session)
+					} else {
+						removeProperty(edit.htmlID(), "placeholder", edit.session)
+					}
 				}
+				edit.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -194,11 +234,14 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		oldMaxLength := GetMaxLength(edit, "")
 		if edit.setIntProperty(MaxLength, value) {
 			if maxLength := GetMaxLength(edit, ""); maxLength != oldMaxLength {
-				if maxLength > 0 {
-					updateProperty(edit.htmlID(), "maxlength", strconv.Itoa(maxLength), edit.session)
-				} else {
-					removeProperty(edit.htmlID(), "maxlength", edit.session)
+				if edit.created {
+					if maxLength > 0 {
+						updateProperty(edit.htmlID(), "maxlength", strconv.Itoa(maxLength), edit.session)
+					} else {
+						removeProperty(edit.htmlID(), "maxlength", edit.session)
+					}
 				}
+				edit.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -206,18 +249,24 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 
 	case ReadOnly:
 		if edit.setBoolProperty(ReadOnly, value) {
-			if IsReadOnly(edit, "") {
-				updateProperty(edit.htmlID(), ReadOnly, "", edit.session)
-			} else {
-				removeProperty(edit.htmlID(), ReadOnly, edit.session)
+			if edit.created {
+				if IsReadOnly(edit, "") {
+					updateProperty(edit.htmlID(), ReadOnly, "", edit.session)
+				} else {
+					removeProperty(edit.htmlID(), ReadOnly, edit.session)
+				}
 			}
+			edit.propertyChangedEvent(tag)
 			return true
 		}
 		return false
 
 	case Spellcheck:
 		if edit.setBoolProperty(Spellcheck, value) {
-			updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit, ""), edit.session)
+			if edit.created {
+				updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit, ""), edit.session)
+			}
+			edit.propertyChangedEvent(tag)
 			return true
 		}
 		return false
@@ -227,11 +276,14 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		if text, ok := value.(string); ok {
 			edit.properties[Pattern] = text
 			if text = GetEditViewPattern(edit, ""); oldText != text {
-				if text != "" {
-					updateProperty(edit.htmlID(), Pattern, text, edit.session)
-				} else {
-					removeProperty(edit.htmlID(), Pattern, edit.session)
+				if edit.created {
+					if text != "" {
+						updateProperty(edit.htmlID(), Pattern, text, edit.session)
+					} else {
+						removeProperty(edit.htmlID(), Pattern, edit.session)
+					}
 				}
+				edit.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -241,7 +293,10 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		oldType := GetEditViewType(edit, "")
 		if edit.setEnumProperty(EditViewType, value, enumProperties[EditViewType].values) {
 			if GetEditViewType(edit, "") != oldType {
-				updateInnerHTML(edit.parentHTMLID(), edit.session)
+				if edit.created {
+					updateInnerHTML(edit.parentHTMLID(), edit.session)
+				}
+				edit.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -252,11 +307,14 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		if edit.setBoolProperty(Wrap, value) {
 			if GetEditViewType(edit, "") == MultiLineText {
 				if wrap := IsEditViewWrap(edit, ""); wrap != oldWrap {
-					if wrap {
-						updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
-					} else {
-						updateProperty(edit.htmlID(), "wrap", "off", edit.session)
+					if edit.created {
+						if wrap {
+							updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
+						} else {
+							updateProperty(edit.htmlID(), "wrap", "off", edit.session)
+						}
 					}
+					edit.propertyChangedEvent(tag)
 				}
 			}
 			return true
@@ -268,6 +326,7 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		if !ok {
 			notCompatibleType(tag, value)
 		}
+		edit.propertyChangedEvent(tag)
 		return ok
 	}
 
@@ -363,6 +422,7 @@ func (edit *editViewData) textChanged(newText string) {
 	for _, listener := range edit.textChangeListeners {
 		listener(edit, newText)
 	}
+	edit.propertyChangedEvent(Text)
 }
 
 func (edit *editViewData) htmlTag() string {
@@ -446,7 +506,7 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 }
 
 func (edit *editViewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` disabled`)
 	}
 	edit.viewData.htmlDisabledProperties(self, buffer)

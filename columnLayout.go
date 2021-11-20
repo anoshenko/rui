@@ -82,12 +82,14 @@ func (columnLayout *columnLayoutData) Remove(tag string) {
 
 func (columnLayout *columnLayoutData) remove(tag string) {
 	columnLayout.viewsContainerData.remove(tag)
-	switch tag {
-	case ColumnCount, ColumnWidth, ColumnGap:
-		updateCSSProperty(columnLayout.htmlID(), tag, "", columnLayout.Session())
+	if columnLayout.created {
+		switch tag {
+		case ColumnCount, ColumnWidth, ColumnGap:
+			updateCSSProperty(columnLayout.htmlID(), tag, "", columnLayout.Session())
 
-	case ColumnSeparator:
-		updateCSSProperty(columnLayout.htmlID(), "column-rule", "", columnLayout.Session())
+		case ColumnSeparator:
+			updateCSSProperty(columnLayout.htmlID(), "column-rule", "", columnLayout.Session())
+		}
 	}
 }
 
@@ -101,22 +103,11 @@ func (columnLayout *columnLayoutData) set(tag string, value interface{}) bool {
 		return true
 	}
 
-	switch tag {
-	case ColumnCount:
-		if columnLayout.setIntProperty(tag, value) {
-			session := columnLayout.Session()
-			if count, ok := intProperty(columnLayout, tag, session, 0); ok && count > 0 {
-				updateCSSProperty(columnLayout.htmlID(), tag, strconv.Itoa(count), session)
-			} else {
-				updateCSSProperty(columnLayout.htmlID(), tag, "auto", session)
-			}
-			return true
-		}
+	if !columnLayout.viewsContainerData.set(tag, value) {
 		return false
 	}
 
-	ok := columnLayout.viewsContainerData.set(tag, value)
-	if ok {
+	if columnLayout.created {
 		switch tag {
 		case ColumnSeparator:
 			css := ""
@@ -126,9 +117,17 @@ func (columnLayout *columnLayoutData) set(tag string, value interface{}) bool {
 				css = separator.cssValue(columnLayout.Session())
 			}
 			updateCSSProperty(columnLayout.htmlID(), "column-rule", css, session)
+
+		case ColumnCount:
+			session := columnLayout.Session()
+			if count, ok := intProperty(columnLayout, tag, session, 0); ok && count > 0 {
+				updateCSSProperty(columnLayout.htmlID(), tag, strconv.Itoa(count), session)
+			} else {
+				updateCSSProperty(columnLayout.htmlID(), tag, "auto", session)
+			}
 		}
 	}
-	return ok
+	return true
 }
 
 // GetColumnCount returns int value which specifies number of columns into which the content of

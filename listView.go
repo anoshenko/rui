@@ -114,46 +114,71 @@ func (listView *listViewData) Remove(tag string) {
 func (listView *listViewData) remove(tag string) {
 	switch tag {
 	case Checked:
-		listView.checkedItem = []int{}
-		updateInnerHTML(listView.htmlID(), listView.session)
+		if len(listView.checkedItem) > 0 {
+			listView.checkedItem = []int{}
+			if listView.created {
+				updateInnerHTML(listView.htmlID(), listView.session)
+			}
+			listView.propertyChangedEvent(tag)
+		}
 
 	case Items:
-		listView.adapter = nil
-		updateInnerHTML(listView.htmlID(), listView.session)
+		if listView.adapter != nil {
+			listView.adapter = nil
+			if listView.created {
+				updateInnerHTML(listView.htmlID(), listView.session)
+			}
+			listView.propertyChangedEvent(tag)
+		}
 
 	case Orientation, Wrap:
-		delete(listView.properties, tag)
-		updateCSSStyle(listView.htmlID(), listView.session)
+		if _, ok := listView.properties[tag]; ok {
+			delete(listView.properties, tag)
+			if listView.created {
+				updateCSSStyle(listView.htmlID(), listView.session)
+			}
+			listView.propertyChangedEvent(tag)
+		}
 
 	case Current:
 		current := GetListViewCurrent(listView, "")
 		delete(listView.properties, tag)
-		updateInnerHTML(listView.htmlID(), listView.session)
+		if listView.created {
+			updateInnerHTML(listView.htmlID(), listView.session)
+		}
 		if current != -1 {
 			for _, listener := range listView.selectedListeners {
 				listener(listView, -1)
 			}
+			listView.propertyChangedEvent(tag)
 		}
 
 	case ItemWidth, ItemHeight, ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox,
 		CheckboxHorizontalAlign, CheckboxVerticalAlign, ListItemStyle, CurrentStyle, CurrentInactiveStyle:
-
-		delete(listView.properties, tag)
-		updateInnerHTML(listView.htmlID(), listView.session)
+		if _, ok := listView.properties[tag]; ok {
+			delete(listView.properties, tag)
+			if listView.created {
+				updateInnerHTML(listView.htmlID(), listView.session)
+			}
+			listView.propertyChangedEvent(tag)
+		}
 
 	case ListItemClickedEvent:
 		if len(listView.clickedListeners) > 0 {
 			listView.clickedListeners = []func(ListView, int){}
+			listView.propertyChangedEvent(tag)
 		}
 
 	case ListItemSelectedEvent:
 		if len(listView.selectedListeners) > 0 {
 			listView.selectedListeners = []func(ListView, int){}
+			listView.propertyChangedEvent(tag)
 		}
 
 	case ListItemCheckedEvent:
 		if len(listView.checkedListeners) > 0 {
 			listView.checkedListeners = []func(ListView, []int){}
+			listView.propertyChangedEvent(tag)
 		}
 
 	default:
@@ -171,10 +196,7 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 		return true
 	}
 
-	result := false
-
 	switch tag {
-
 	case ListItemClickedEvent:
 		listeners := listView.valueToItemListeners(value)
 		if listeners == nil {
@@ -182,6 +204,7 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 		listView.clickedListeners = listeners
+		listView.propertyChangedEvent(tag)
 		return true
 
 	case ListItemSelectedEvent:
@@ -191,44 +214,56 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 		listView.selectedListeners = listeners
+		listView.propertyChangedEvent(tag)
 		return true
 
 	case ListItemCheckedEvent:
-		return listView.setItemCheckedEvent(value)
+		if !listView.setItemCheckedEvent(value) {
+			return false
+		}
+		listView.propertyChangedEvent(tag)
+		return true
 
 	case Checked:
-		return listView.setChecked(value)
+		if !listView.setChecked(value) {
+			return false
+		}
 
 	case Items:
-		result = listView.setItems(value)
+		if !listView.setItems(value) {
+			return false
+		}
 
 	case Current:
 		oldCurrent := GetListViewCurrent(listView, "")
-		if listView.setIntProperty(Current, value) {
-			current := GetListViewCurrent(listView, "")
-			if oldCurrent != current {
-				updateInnerHTML(listView.htmlID(), listView.session)
-				for _, listener := range listView.selectedListeners {
-					listener(listView, current)
-				}
-			}
+		if !listView.setIntProperty(Current, value) {
+			return false
+		}
+		current := GetListViewCurrent(listView, "")
+		if oldCurrent == current {
 			return true
 		}
 
-	case Orientation, Wrap, VerticalAlign, HorizontalAlign, Style, StyleDisabled:
-		result = listView.viewData.set(tag, value)
+		for _, listener := range listView.selectedListeners {
+			listener(listView, current)
+		}
 
-	case ItemWidth, ItemHeight:
-		result = listView.setSizeProperty(tag, value)
+	case Orientation, Wrap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight:
+		result := listView.viewData.set(tag, value)
+		if result && listView.created {
+			updateInnerHTML(listView.htmlID(), listView.session)
+		}
+		return result
 
 	case ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox, CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		result = listView.setEnumProperty(tag, value, enumProperties[tag].values)
+		if !listView.setEnumProperty(tag, value, enumProperties[tag].values) {
+			return false
+		}
 
 	case ListItemStyle, CurrentStyle, CurrentInactiveStyle:
 		switch value := value.(type) {
 		case string:
 			listView.properties[tag] = value
-			result = true
 
 		default:
 			notCompatibleType(tag, value)
@@ -239,11 +274,11 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 		return listView.viewData.set(tag, value)
 	}
 
-	if result {
+	if listView.created {
 		updateInnerHTML(listView.htmlID(), listView.session)
 	}
-
-	return result
+	listView.propertyChangedEvent(tag)
+	return true
 }
 
 func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
@@ -1054,13 +1089,17 @@ func (listView *listViewData) handleCommand(self View, command string, data Data
 				for _, listener := range listView.selectedListeners {
 					listener(listView, number)
 				}
+				listView.propertyChangedEvent(Current)
 			}
 		}
 
 	case "itemUnselected":
-		delete(listView.properties, Current)
-		for _, listener := range listView.selectedListeners {
-			listener(listView, -1)
+		if _, ok := listView.properties[Current]; ok {
+			delete(listView.properties, Current)
+			for _, listener := range listView.selectedListeners {
+				listener(listView, -1)
+			}
+			listView.propertyChangedEvent(Current)
 		}
 
 	case "itemClick":
@@ -1075,7 +1114,7 @@ func (listView *listViewData) handleCommand(self View, command string, data Data
 
 func (listView *listViewData) onItemClick() {
 	current := GetListViewCurrent(listView, "")
-	if current >= 0 && !IsDisabled(listView) {
+	if current >= 0 && !IsDisabled(listView, "") {
 		checkbox := GetListViewCheckbox(listView, "")
 	m:
 		switch checkbox {
@@ -1115,6 +1154,7 @@ func (listView *listViewData) onItemClick() {
 			for _, listener := range listView.checkedListeners {
 				listener(listView, listView.checkedItem)
 			}
+			listView.propertyChangedEvent(Checked)
 		}
 		for _, listener := range listView.clickedListeners {
 			listener(listView, current)

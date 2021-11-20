@@ -168,35 +168,51 @@ func (table *tableViewData) Init(session Session) {
 	table.tag = "TableView"
 }
 
+func (table *tableViewData) normalizeTag(tag string) string {
+	switch tag = strings.ToLower(tag); tag {
+	case "top-cell-padding":
+		tag = CellPaddingTop
+
+	case "right-cell-padding":
+		tag = CellPaddingRight
+
+	case "bottom-cell-padding":
+		tag = CellPaddingBottom
+
+	case "left-cell-padding":
+		tag = CellPaddingLeft
+	}
+	return tag
+}
+
 func (table *tableViewData) Get(tag string) interface{} {
-	return table.get(strings.ToLower(tag))
+	return table.get(table.normalizeTag(tag))
 }
 
 func (table *tableViewData) Remove(tag string) {
-	table.remove(strings.ToLower(tag))
+	table.remove(table.normalizeTag(tag))
 }
 
 func (table *tableViewData) remove(tag string) {
 	switch tag {
-
-	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
-		"top-cell-padding", "right-cell-padding", "bottom-cell-padding", "left-cell-padding":
+	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
 		table.removeBoundsSide(CellPadding, tag)
+		table.propertyChanged(tag)
 
 	case Gap, CellBorder, CellPadding, RowStyle, ColumnStyle, CellStyle,
 		HeadHeight, HeadStyle, FootHeight, FootStyle:
-		delete(table.properties, tag)
+		if _, ok := table.properties[tag]; ok {
+			delete(table.properties, tag)
+			table.propertyChanged(tag)
+		}
 
 	default:
 		table.viewData.remove(tag)
-		return
 	}
-
-	table.propertyChanged(tag)
 }
 
 func (table *tableViewData) Set(tag string, value interface{}) bool {
-	return table.set(strings.ToLower(tag), value)
+	return table.set(table.normalizeTag(tag), value)
 }
 
 func (table *tableViewData) set(tag string, value interface{}) bool {
@@ -307,8 +323,7 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 
-	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
-		"top-cell-padding", "right-cell-padding", "bottom-cell-padding", "left-cell-padding":
+	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
 		if !table.setBoundsSide(CellPadding, tag, value) {
 			return false
 		}
@@ -336,26 +351,27 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 }
 
 func (table *tableViewData) propertyChanged(tag string) {
-	switch tag {
-	case Content, RowStyle, ColumnStyle, CellStyle, CellPadding, CellBorder,
-		HeadHeight, HeadStyle, FootHeight, FootStyle,
-		CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
-		"top-cell-padding", "right-cell-padding", "bottom-cell-padding", "left-cell-padding":
-		table.ReloadTableData()
+	if table.created {
+		switch tag {
+		case Content, RowStyle, ColumnStyle, CellStyle, CellPadding, CellBorder,
+			HeadHeight, HeadStyle, FootHeight, FootStyle,
+			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
+			table.ReloadTableData()
 
-	case Gap:
-		htmlID := table.htmlID()
-		session := table.Session()
-		gap, ok := sizeProperty(table, Gap, session)
-		if !ok || gap.Type == Auto || gap.Value <= 0 {
-			updateCSSProperty(htmlID, "border-spacing", "0", session)
-			updateCSSProperty(htmlID, "border-collapse", "collapse", session)
-		} else {
-			updateCSSProperty(htmlID, "border-spacing", gap.cssString("0"), session)
-			updateCSSProperty(htmlID, "border-collapse", "separate", session)
+		case Gap:
+			htmlID := table.htmlID()
+			session := table.Session()
+			gap, ok := sizeProperty(table, Gap, session)
+			if !ok || gap.Type == Auto || gap.Value <= 0 {
+				updateCSSProperty(htmlID, "border-spacing", "0", session)
+				updateCSSProperty(htmlID, "border-collapse", "collapse", session)
+			} else {
+				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0"), session)
+				updateCSSProperty(htmlID, "border-collapse", "separate", session)
+			}
 		}
-
 	}
+	table.propertyChangedEvent(tag)
 }
 
 func (table *tableViewData) htmlTag() string {

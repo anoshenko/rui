@@ -123,15 +123,26 @@ func (tabsLayout *tabsLayoutData) Remove(tag string) {
 func (tabsLayout *tabsLayoutData) remove(tag string) {
 	switch tag {
 	case CurrentTabChangedEvent:
-		tabsLayout.tabListener = []func(TabsLayout, int, int){}
+		if len(tabsLayout.tabListener) > 0 {
+			tabsLayout.tabListener = []func(TabsLayout, int, int){}
+			tabsLayout.propertyChangedEvent(tag)
+		}
+		return
 
 	case TabCloseEvent:
-		tabsLayout.tabCloseListener = []func(TabsLayout, int){}
+		if len(tabsLayout.tabCloseListener) > 0 {
+			tabsLayout.tabCloseListener = []func(TabsLayout, int){}
+			tabsLayout.propertyChangedEvent(tag)
+		}
+		return
 
 	case Current:
 		oldCurrent := tabsLayout.currentItem()
 		delete(tabsLayout.properties, Current)
-		if !tabsLayout.session.ignoreViewUpdates() && oldCurrent != 0 {
+		if oldCurrent == 0 {
+			return
+		}
+		if tabsLayout.created {
 			tabsLayout.session.runScript(fmt.Sprintf("activateTab(%v, %d);", tabsLayout.htmlID(), 0))
 			for _, listener := range tabsLayout.tabListener {
 				listener(tabsLayout, 0, oldCurrent)
@@ -140,7 +151,7 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 
 	case Tabs:
 		delete(tabsLayout.properties, Tabs)
-		if !tabsLayout.session.ignoreViewUpdates() {
+		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
 			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
 			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
@@ -150,7 +161,7 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 
 	case TabStyle, CurrentTabStyle:
 		delete(tabsLayout.properties, tag)
-		if !tabsLayout.session.ignoreViewUpdates() {
+		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
 			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
 			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
@@ -159,13 +170,16 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 
 	case TabCloseButton:
 		delete(tabsLayout.properties, tag)
-		if !tabsLayout.session.ignoreViewUpdates() {
+		if tabsLayout.created {
 			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
 		}
 
 	default:
 		tabsLayout.viewsContainerData.remove(tag)
+		return
 	}
+
+	tabsLayout.propertyChangedEvent(tag)
 }
 
 func (tabsLayout *tabsLayoutData) Set(tag string, value interface{}) bool {
@@ -201,13 +215,14 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 			return false
 		}
 
-		if !tabsLayout.session.ignoreViewUpdates() {
-			current := tabsLayout.currentItem()
-			if oldCurrent != current {
-				tabsLayout.session.runScript(fmt.Sprintf("activateTab(%v, %d);", tabsLayout.htmlID(), current))
-				for _, listener := range tabsLayout.tabListener {
-					listener(tabsLayout, current, oldCurrent)
-				}
+		current := tabsLayout.currentItem()
+		if oldCurrent == current {
+			return true
+		}
+		if tabsLayout.created {
+			tabsLayout.session.runScript(fmt.Sprintf("activateTab(%v, %d);", tabsLayout.htmlID(), current))
+			for _, listener := range tabsLayout.tabListener {
+				listener(tabsLayout, current, oldCurrent)
 			}
 		}
 
@@ -215,7 +230,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 		if !tabsLayout.setEnumProperty(Tabs, value, enumProperties[Tabs].values) {
 			return false
 		}
-		if !tabsLayout.session.ignoreViewUpdates() {
+		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
 			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
 			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
@@ -235,7 +250,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 			return false
 		}
 
-		if !tabsLayout.session.ignoreViewUpdates() {
+		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
 			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
 			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
@@ -246,7 +261,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 		if !tabsLayout.setBoolProperty(tag, value) {
 			return false
 		}
-		if !tabsLayout.session.ignoreViewUpdates() {
+		if tabsLayout.created {
 			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
 		}
 
@@ -254,6 +269,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 		return tabsLayout.viewsContainerData.set(tag, value)
 	}
 
+	tabsLayout.propertyChangedEvent(tag)
 	return true
 }
 
@@ -905,6 +921,7 @@ func (tabsLayout *tabsLayoutData) handleCommand(self View, command string, data 
 					for _, listener := range tabsLayout.tabListener {
 						listener(tabsLayout, number, current)
 					}
+					tabsLayout.propertyChangedEvent(Current)
 				}
 			}
 		}

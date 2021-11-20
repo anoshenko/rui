@@ -69,6 +69,7 @@ func (picker *numberPickerData) remove(tag string) {
 	case NumberChangedEvent:
 		if len(picker.numberChangedListeners) > 0 {
 			picker.numberChangedListeners = []func(NumberPicker, float64){}
+			picker.propertyChangedEvent(tag)
 		}
 
 	default:
@@ -135,18 +136,21 @@ func (picker *numberPickerData) set(tag string, value interface{}) bool {
 			}
 			picker.numberChangedListeners = listeners
 		}
+		picker.propertyChangedEvent(tag)
 		return true
 
 	case NumberPickerValue:
 		oldValue := GetNumberPickerValue(picker, "")
 		min, max := GetNumberPickerMinMax(picker, "")
 		if picker.setFloatProperty(NumberPickerValue, value, min, max) {
-			newValue := GetNumberPickerValue(picker, "")
-			if oldValue != newValue {
-				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), newValue))
+			if newValue := GetNumberPickerValue(picker, ""); oldValue != newValue {
+				if picker.created {
+					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), newValue))
+				}
 				for _, listener := range picker.numberChangedListeners {
 					listener(picker, newValue)
 				}
+				picker.propertyChangedEvent(tag)
 			}
 			return true
 		}
@@ -161,34 +165,36 @@ func (picker *numberPickerData) set(tag string, value interface{}) bool {
 }
 
 func (picker *numberPickerData) propertyChanged(tag string) {
-	switch tag {
-	case NumberPickerType:
-		if GetNumberPickerType(picker, "") == NumberSlider {
-			updateProperty(picker.htmlID(), "type", "range", picker.session)
-		} else {
-			updateProperty(picker.htmlID(), "type", "number", picker.session)
-		}
+	if picker.created {
+		switch tag {
+		case NumberPickerType:
+			if GetNumberPickerType(picker, "") == NumberSlider {
+				updateProperty(picker.htmlID(), "type", "range", picker.session)
+			} else {
+				updateProperty(picker.htmlID(), "type", "number", picker.session)
+			}
 
-	case NumberPickerMin:
-		min, _ := GetNumberPickerMinMax(picker, "")
-		updateProperty(picker.htmlID(), Min, strconv.FormatFloat(min, 'f', -1, 32), picker.session)
+		case NumberPickerMin:
+			min, _ := GetNumberPickerMinMax(picker, "")
+			updateProperty(picker.htmlID(), Min, strconv.FormatFloat(min, 'f', -1, 32), picker.session)
 
-	case NumberPickerMax:
-		_, max := GetNumberPickerMinMax(picker, "")
-		updateProperty(picker.htmlID(), Max, strconv.FormatFloat(max, 'f', -1, 32), picker.session)
+		case NumberPickerMax:
+			_, max := GetNumberPickerMinMax(picker, "")
+			updateProperty(picker.htmlID(), Max, strconv.FormatFloat(max, 'f', -1, 32), picker.session)
 
-	case NumberPickerStep:
-		if step := GetNumberPickerStep(picker, ""); step > 0 {
-			updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32), picker.session)
-		} else {
-			updateProperty(picker.htmlID(), Step, "any", picker.session)
-		}
+		case NumberPickerStep:
+			if step := GetNumberPickerStep(picker, ""); step > 0 {
+				updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32), picker.session)
+			} else {
+				updateProperty(picker.htmlID(), Step, "any", picker.session)
+			}
 
-	case NumberPickerValue:
-		value := GetNumberPickerValue(picker, "")
-		picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), value))
-		for _, listener := range picker.numberChangedListeners {
-			listener(picker, value)
+		case NumberPickerValue:
+			value := GetNumberPickerValue(picker, "")
+			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), value))
+			for _, listener := range picker.numberChangedListeners {
+				listener(picker, value)
+			}
 		}
 	}
 }
@@ -246,7 +252,7 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 }
 
 func (picker *numberPickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)

@@ -57,13 +57,16 @@ func (button *checkboxData) Get(tag string) interface{} {
 }
 
 func (button *checkboxData) Set(tag string, value interface{}) bool {
-	switch strings.ToLower(tag) {
+	return button.set(tag, value)
+}
+
+func (button *checkboxData) set(tag string, value interface{}) bool {
+	switch tag {
 	case CheckboxChangedEvent:
-		ok := button.setChangedListener(value)
-		if !ok {
+		if !button.setChangedListener(value) {
 			notCompatibleType(tag, value)
+			return false
 		}
-		return ok
 
 	case Checked:
 		oldChecked := button.checked()
@@ -76,46 +79,60 @@ func (button *checkboxData) Set(tag string, value interface{}) bool {
 				button.changedCheckboxState(checked)
 			}
 		}
-		return true
 
 	case CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		if button.setEnumProperty(tag, value, enumProperties[tag].values) {
-			if button.created {
-				htmlID := button.htmlID()
-				updateCSSStyle(htmlID, button.session)
-				updateInnerHTML(htmlID, button.session)
-			}
-			return true
+		if !button.setEnumProperty(tag, value, enumProperties[tag].values) {
+			return false
 		}
-		return false
+		if button.created {
+			htmlID := button.htmlID()
+			updateCSSStyle(htmlID, button.session)
+			updateInnerHTML(htmlID, button.session)
+		}
 
 	case VerticalAlign:
-		if button.setEnumProperty(tag, value, enumProperties[tag].values) {
-			if button.created {
-				updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign(), button.session)
-			}
-			return true
+		if !button.setEnumProperty(tag, value, enumProperties[tag].values) {
+			return false
 		}
-		return false
+		if button.created {
+			updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign(), button.session)
+		}
 
 	case HorizontalAlign:
-		if button.setEnumProperty(tag, value, enumProperties[tag].values) {
-			if button.created {
-				updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign(), button.session)
-			}
-			return true
+		if !button.setEnumProperty(tag, value, enumProperties[tag].values) {
+			return false
 		}
-		return false
+		if button.created {
+			updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign(), button.session)
+		}
 
 	case CellVerticalAlign, CellHorizontalAlign, CellWidth, CellHeight:
 		return false
+
+	default:
+		return button.viewsContainerData.set(tag, value)
 	}
 
-	return button.viewsContainerData.Set(tag, value)
+	button.propertyChangedEvent(tag)
+	return true
 }
 
 func (button *checkboxData) Remove(tag string) {
-	switch strings.ToLower(tag) {
+	button.remove(strings.ToLower(tag))
+}
+
+func (button *checkboxData) remove(tag string) {
+	switch tag {
+	case ClickEvent:
+		if !button.viewsContainerData.set(ClickEvent, checkboxClickListener) {
+			delete(button.properties, tag)
+		}
+
+	case KeyDownEvent:
+		if !button.viewsContainerData.set(KeyDownEvent, checkboxKeyListener) {
+			delete(button.properties, tag)
+		}
+
 	case CheckboxChangedEvent:
 		if len(button.checkedListeners) > 0 {
 			button.checkedListeners = []func(Checkbox, bool){}
@@ -124,27 +141,35 @@ func (button *checkboxData) Remove(tag string) {
 	case Checked:
 		oldChecked := button.checked()
 		delete(button.properties, tag)
-		if oldChecked {
+		if button.created && oldChecked {
 			button.changedCheckboxState(false)
 		}
 
 	case CheckboxHorizontalAlign, CheckboxVerticalAlign:
 		delete(button.properties, tag)
-		htmlID := button.htmlID()
-		updateCSSStyle(htmlID, button.session)
-		updateInnerHTML(htmlID, button.session)
+		if button.created {
+			htmlID := button.htmlID()
+			updateCSSStyle(htmlID, button.session)
+			updateInnerHTML(htmlID, button.session)
+		}
 
 	case VerticalAlign:
 		delete(button.properties, tag)
-		updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign(), button.session)
+		if button.created {
+			updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign(), button.session)
+		}
 
 	case HorizontalAlign:
 		delete(button.properties, tag)
-		updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign(), button.session)
+		if button.created {
+			updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign(), button.session)
+		}
 
 	default:
-		button.viewsContainerData.Remove(tag)
+		button.viewsContainerData.remove(tag)
+		return
 	}
+	button.propertyChangedEvent(tag)
 }
 
 func (button *checkboxData) checked() bool {

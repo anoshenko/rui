@@ -114,7 +114,17 @@ func (picker *filePickerData) Remove(tag string) {
 func (picker *filePickerData) remove(tag string) {
 	switch tag {
 	case FileSelectedEvent:
-		picker.fileSelectedListeners = []func(FilePicker, []FileInfo){}
+		if len(picker.fileSelectedListeners) > 0 {
+			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){}
+			picker.propertyChangedEvent(tag)
+		}
+
+	case Accept:
+		delete(picker.properties, tag)
+		if picker.created {
+			removeProperty(picker.htmlID(), "accept", picker.Session())
+		}
+		picker.propertyChangedEvent(tag)
 
 	default:
 		picker.viewData.remove(tag)
@@ -184,6 +194,7 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 			}
 			picker.fileSelectedListeners = listeners
 		}
+		picker.propertyChangedEvent(tag)
 		return true
 
 	case Accept:
@@ -218,6 +229,15 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 			notCompatibleType(tag, value)
 			return false
 		}
+
+		if picker.created {
+			if css := picker.acceptCSS(); css != "" {
+				updateProperty(picker.htmlID(), "accept", css, picker.Session())
+			} else {
+				removeProperty(picker.htmlID(), "accept", picker.Session())
+			}
+		}
+		picker.propertyChangedEvent(tag)
 		return true
 
 	default:
@@ -271,7 +291,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *filePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)

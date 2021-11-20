@@ -173,20 +173,8 @@ func (player *mediaPlayerData) Remove(tag string) {
 }
 
 func (player *mediaPlayerData) remove(tag string) {
-	switch tag {
-
-	case Controls, Loop, Muted, Preload, AbortEvent, LoadStartEvent, PlayerErrorEvent,
-		CanPlayEvent, CanPlayThroughEvent, CompleteEvent, DurationChangedEvent,
-		EmptiedEvent, EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent,
-		PlayingEvent, RateChangedEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent,
-		ProgressEvent, TimeUpdateEvent, VolumeChangedEvent, WaitingEvent:
-
-		player.viewData.remove(tag)
-		player.propertyChanged(tag)
-
-	default:
-		player.viewData.remove(tag)
-	}
+	player.viewData.remove(tag)
+	player.propertyChanged(tag)
 }
 
 func (player *mediaPlayerData) Set(tag string, value interface{}) bool {
@@ -216,6 +204,7 @@ func (player *mediaPlayerData) set(tag string, value interface{}) bool {
 				player.properties[tag] = listeners
 			}
 			player.propertyChanged(tag)
+			player.propertyChangedEvent(tag)
 			return true
 		}
 		notCompatibleType(tag, value)
@@ -228,6 +217,7 @@ func (player *mediaPlayerData) set(tag string, value interface{}) bool {
 				player.properties[tag] = listeners
 			}
 			player.propertyChanged(tag)
+			player.propertyChangedEvent(tag)
 			return true
 		}
 		notCompatibleType(tag, value)
@@ -240,6 +230,7 @@ func (player *mediaPlayerData) set(tag string, value interface{}) bool {
 				player.properties[tag] = listeners
 			}
 			player.propertyChanged(tag)
+			player.propertyChangedEvent(tag)
 			return true
 		}
 		notCompatibleType(tag, value)
@@ -247,14 +238,14 @@ func (player *mediaPlayerData) set(tag string, value interface{}) bool {
 	case Source:
 		if player.setSource(value) {
 			player.propertyChanged(tag)
+			player.propertyChangedEvent(tag)
 			return true
 		}
 
 	default:
-		if player.viewData.set(tag, value) {
-			return true
-		}
+		return player.viewData.set(tag, value)
 	}
+
 	return false
 }
 
@@ -657,89 +648,88 @@ func playerEvents() []struct{ tag, cssTag string } {
 }
 
 func (player *mediaPlayerData) propertyChanged(tag string) {
-	switch tag {
-	case Controls, Loop:
-		value, _ := boolProperty(player, tag, player.Session())
-		if value {
-			updateBoolProperty(player.htmlID(), tag, value, player.Session())
-		} else {
-			removeProperty(player.htmlID(), tag, player.Session())
-		}
-
-	case Muted:
-		value, _ := boolProperty(player, tag, player.Session())
-		if value {
-			player.Session().runScript("setMediaMuted('" + player.htmlID() + "', true)")
-		} else {
-			player.Session().runScript("setMediaMuted('" + player.htmlID() + "', false)")
-		}
-
-	case Preload:
-		value, _ := enumProperty(player, tag, player.Session(), 0)
-		values := enumProperties[Preload].values
-		updateProperty(player.htmlID(), tag, values[value], player.Session())
-
-	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
-		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
-		LoadStartEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
-
-		for _, event := range playerEvents() {
-			if event.tag == tag {
-				if value := player.getRaw(event.tag); value != nil {
-					switch value := value.(type) {
-					case []func(MediaPlayer):
-						if len(value) > 0 {
-							fn := fmt.Sprintf(`playerEvent(this, "%s")`, event.tag)
-							updateProperty(player.htmlID(), event.cssTag, fn, player.Session())
-							return
-						}
-					}
-				}
-				updateProperty(player.htmlID(), tag, "", player.Session())
-				break
+	if player.created {
+		switch tag {
+		case Controls, Loop:
+			value, _ := boolProperty(player, tag, player.Session())
+			if value {
+				updateBoolProperty(player.htmlID(), tag, value, player.Session())
+			} else {
+				removeProperty(player.htmlID(), tag, player.Session())
 			}
 
-		}
-	case TimeUpdateEvent:
-		if value := player.getRaw(tag); value != nil {
-			updateProperty(player.htmlID(), "ontimeupdate", "playerTimeUpdatedEvent(this)", player.Session())
-		} else {
-			updateProperty(player.htmlID(), "ontimeupdate", "", player.Session())
-		}
+		case Muted:
+			value, _ := boolProperty(player, tag, player.Session())
+			if value {
+				player.Session().runScript("setMediaMuted('" + player.htmlID() + "', true)")
+			} else {
+				player.Session().runScript("setMediaMuted('" + player.htmlID() + "', false)")
+			}
 
-	case VolumeChangedEvent:
-		if value := player.getRaw(tag); value != nil {
-			updateProperty(player.htmlID(), "onvolumechange", "playerVolumeChangedEvent(this)", player.Session())
-		} else {
-			updateProperty(player.htmlID(), "onvolumechange", "", player.Session())
+		case Preload:
+			value, _ := enumProperty(player, tag, player.Session(), 0)
+			values := enumProperties[Preload].values
+			updateProperty(player.htmlID(), tag, values[value], player.Session())
+
+		case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
+			EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
+			LoadStartEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
+
+			for _, event := range playerEvents() {
+				if event.tag == tag {
+					if value := player.getRaw(event.tag); value != nil {
+						switch value := value.(type) {
+						case []func(MediaPlayer):
+							if len(value) > 0 {
+								fn := fmt.Sprintf(`playerEvent(this, "%s")`, event.tag)
+								updateProperty(player.htmlID(), event.cssTag, fn, player.Session())
+								return
+							}
+						}
+					}
+					updateProperty(player.htmlID(), tag, "", player.Session())
+					break
+				}
+
+			}
+		case TimeUpdateEvent:
+			if value := player.getRaw(tag); value != nil {
+				updateProperty(player.htmlID(), "ontimeupdate", "playerTimeUpdatedEvent(this)", player.Session())
+			} else {
+				updateProperty(player.htmlID(), "ontimeupdate", "", player.Session())
+			}
+
+		case VolumeChangedEvent:
+			if value := player.getRaw(tag); value != nil {
+				updateProperty(player.htmlID(), "onvolumechange", "playerVolumeChangedEvent(this)", player.Session())
+			} else {
+				updateProperty(player.htmlID(), "onvolumechange", "", player.Session())
+			}
+
+		case DurationChangedEvent:
+			if value := player.getRaw(tag); value != nil {
+				updateProperty(player.htmlID(), "ondurationchange", "playerDurationChangedEvent(this)", player.Session())
+			} else {
+				updateProperty(player.htmlID(), "ondurationchange", "", player.Session())
+			}
+
+		case RateChangedEvent:
+			if value := player.getRaw(tag); value != nil {
+				updateProperty(player.htmlID(), "onratechange", "playerRateChangedEvent(this)", player.Session())
+			} else {
+				updateProperty(player.htmlID(), "onratechange", "", player.Session())
+			}
+
+		case PlayerErrorEvent:
+			if value := player.getRaw(tag); value != nil {
+				updateProperty(player.htmlID(), "onerror", "playerErrorEvent(this)", player.Session())
+			} else {
+				updateProperty(player.htmlID(), "onerror", "", player.Session())
+			}
+
+		case Source:
+			updateInnerHTML(player.htmlID(), player.Session())
 		}
-
-	case DurationChangedEvent:
-		if value := player.getRaw(tag); value != nil {
-			updateProperty(player.htmlID(), "ondurationchange", "playerDurationChangedEvent(this)", player.Session())
-		} else {
-			updateProperty(player.htmlID(), "ondurationchange", "", player.Session())
-		}
-
-	case RateChangedEvent:
-		if value := player.getRaw(tag); value != nil {
-			updateProperty(player.htmlID(), "onratechange", "playerRateChangedEvent(this)", player.Session())
-		} else {
-			updateProperty(player.htmlID(), "onratechange", "", player.Session())
-		}
-
-	case PlayerErrorEvent:
-		if value := player.getRaw(tag); value != nil {
-			updateProperty(player.htmlID(), "onerror", "playerErrorEvent(this)", player.Session())
-		} else {
-			updateProperty(player.htmlID(), "onerror", "", player.Session())
-		}
-
-	case Source:
-		updateInnerHTML(player.htmlID(), player.Session())
-
-	default:
-		player.viewData.propertyChanged(tag)
 	}
 }
 

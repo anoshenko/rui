@@ -57,6 +57,8 @@ type View interface {
 	// a description of the error is written to the log
 	SetAnimated(tag string, value interface{}, animation Animation) bool
 
+	SetChangeListener(tag string, listener func(View, string))
+
 	handleCommand(self View, command string, data DataObject) bool
 	//updateEventHandlers()
 	htmlClass(disabled bool) string
@@ -87,6 +89,7 @@ type viewData struct {
 	_htmlID          string
 	parentID         string
 	systemClass      string
+	changeListener   map[string]func(View, string)
 	singleTransition map[string]Animation
 	addCSS           map[string]string
 	frame            Frame
@@ -129,6 +132,7 @@ func (view *viewData) Init(session Session) {
 	view.viewStyle.init()
 	view.tag = "View"
 	view.session = session
+	view.changeListener = map[string]func(View, string){}
 	view.addCSS = map[string]string{}
 	//view.animation = map[string]AnimationEndListener{}
 	view.singleTransition = map[string]Animation{}
@@ -186,7 +190,7 @@ func (view *viewData) remove(tag string) {
 	case Style, StyleDisabled:
 		if _, ok := view.properties[tag]; ok {
 			delete(view.properties, tag)
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
+			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view, "")), view.session)
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -221,8 +225,62 @@ func (view *viewData) remove(tag string) {
 
 	default:
 		view.viewStyle.remove(tag)
-		view.propertyChanged(tag)
+		viewPropertyChanged(view, tag)
 	}
+
+	view.propertyChangedEvent(tag)
+}
+
+func (view *viewData) propertyChangedEvent(tag string) {
+	if listener, ok := view.changeListener[tag]; ok {
+		listener(view, tag)
+	}
+
+	switch tag {
+	case BorderLeft, BorderRight, BorderTop, BorderBottom,
+		BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle,
+		BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor,
+		BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
+		tag = Border
+
+	case CellBorderStyle, CellBorderColor, CellBorderWidth,
+		CellBorderLeft, CellBorderLeftStyle, CellBorderLeftColor, CellBorderLeftWidth,
+		CellBorderRight, CellBorderRightStyle, CellBorderRightColor, CellBorderRightWidth,
+		CellBorderTop, CellBorderTopStyle, CellBorderTopColor, CellBorderTopWidth,
+		CellBorderBottom, CellBorderBottomStyle, CellBorderBottomColor, CellBorderBottomWidth:
+		tag = CellBorder
+
+	case OutlineColor, OutlineStyle, OutlineWidth:
+		tag = Outline
+
+	case RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
+		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
+		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
+		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
+		tag = Radius
+
+	case MarginTop, MarginRight, MarginBottom, MarginLeft,
+		"top-margin", "right-margin", "bottom-margin", "left-margin":
+		tag = Margin
+
+	case PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
+		"top-padding", "right-padding", "bottom-padding", "left-padding":
+		tag = Padding
+
+	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
+		tag = CellPadding
+
+	case ColumnSeparatorStyle, ColumnSeparatorWidth, ColumnSeparatorColor:
+		tag = ColumnSeparator
+
+	default:
+		return
+	}
+
+	if listener, ok := view.changeListener[tag]; ok {
+		listener(view, tag)
+	}
+
 }
 
 func (view *viewData) Set(tag string, value interface{}) bool {
@@ -235,64 +293,71 @@ func (view *viewData) set(tag string, value interface{}) bool {
 		return true
 	}
 
+	result := func(res bool) bool {
+		if res {
+			view.propertyChangedEvent(tag)
+		}
+		return res
+	}
+
 	switch tag {
 	case ID:
-		if text, ok := value.(string); ok {
-			view.viewID = text
-			return true
+		text, ok := value.(string)
+		if !ok {
+			notCompatibleType(ID, value)
+			return false
 		}
-		notCompatibleType(ID, value)
-		return false
+		view.viewID = text
 
 	case Style, StyleDisabled:
-		if text, ok := value.(string); ok {
-			view.properties[tag] = text
-			//updateInnerHTML(view.parentID, view.session)
-			if view.created {
-				updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
-			}
-			return true
+		text, ok := value.(string)
+		if !ok {
+			notCompatibleType(ID, value)
+			return false
 		}
-		notCompatibleType(ID, value)
-		return false
+		view.properties[tag] = text
+		if view.created {
+			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view, "")), view.session)
+		}
 
 	case FocusEvent, LostFocusEvent:
-		return view.setFocusListener(tag, value)
+		return result(view.setFocusListener(tag, value))
 
 	case KeyDownEvent, KeyUpEvent:
-		return view.setKeyListener(tag, value)
+		return result(view.setKeyListener(tag, value))
 
 	case ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent:
-		return view.setMouseListener(tag, value)
+		return result(view.setMouseListener(tag, value))
 
 	case PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel:
-		return view.setPointerListener(tag, value)
+		return result(view.setPointerListener(tag, value))
 
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
-		return view.setTouchListener(tag, value)
+		return result(view.setTouchListener(tag, value))
 
 	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
-		return view.setTransitionListener(tag, value)
+		return result(view.setTransitionListener(tag, value))
 
 	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
-		return view.setAnimationListener(tag, value)
+		return result(view.setAnimationListener(tag, value))
 
 	case ResizeEvent, ScrollEvent:
-		return view.setFrameListener(tag, value)
-	}
+		return result(view.setFrameListener(tag, value))
 
-	if view.viewStyle.set(tag, value) {
-		if view.created {
-			view.propertyChanged(tag)
+	default:
+		if !view.viewStyle.set(tag, value) {
+			return false
 		}
-		return true
+		if view.created {
+			viewPropertyChanged(view, tag)
+		}
 	}
 
-	return false
+	view.propertyChangedEvent(tag)
+	return true
 }
 
-func (view *viewData) propertyChanged(tag string) {
-
+func viewPropertyChanged(view *viewData, tag string) {
 	if view.updateTransformProperty(tag) {
 		return
 	}
@@ -446,7 +511,7 @@ func (view *viewData) propertyChanged(tag string) {
 	case Strikethrough, Overline, Underline:
 		updateCSSProperty(htmlID, "text-decoration", view.cssTextDecoration(session), session)
 		for _, tag2 := range []string{TextLineColor, TextLineStyle, TextLineThickness} {
-			view.propertyChanged(tag2)
+			viewPropertyChanged(view, tag2)
 		}
 		return
 
@@ -568,7 +633,7 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 }
 
 func (view *viewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
+	if IsDisabled(self, "") {
 		buffer.WriteString(` data-disabled="1"`)
 	} else {
 		buffer.WriteString(` data-disabled="0"`)
@@ -583,7 +648,7 @@ func viewHTML(view View, buffer *strings.Builder) {
 	buffer.WriteString(view.htmlID())
 	buffer.WriteRune('"')
 
-	disabled := IsDisabled(view)
+	disabled := IsDisabled(view, "")
 
 	if cls := view.htmlClass(disabled); cls != "" {
 		buffer.WriteString(` class="`)
@@ -660,7 +725,7 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 	switch command {
 
 	case KeyDownEvent, KeyUpEvent:
-		if !IsDisabled(self) {
+		if !IsDisabled(self, "") {
 			handleKeyEvents(self, command, data)
 		}
 
@@ -767,13 +832,10 @@ func (view *viewData) String() string {
 	return writer.finish()
 }
 
-// IsDisabled returns "true" if the view is disabled
-func IsDisabled(view View) bool {
-	if disabled, _ := boolProperty(view, Disabled, view.Session()); disabled {
-		return true
+func (view *viewData) SetChangeListener(tag string, listener func(View, string)) {
+	if listener == nil {
+		delete(view.changeListener, tag)
+	} else {
+		view.changeListener[tag] = listener
 	}
-	if parent := view.Parent(); parent != nil {
-		return IsDisabled(parent)
-	}
-	return false
 }

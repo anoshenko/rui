@@ -43,12 +43,14 @@ func (textView *textViewData) Remove(tag string) {
 
 func (textView *textViewData) remove(tag string) {
 	textView.viewData.remove(tag)
-	switch tag {
-	case Text:
-		updateInnerHTML(textView.htmlID(), textView.session)
+	if textView.created {
+		switch tag {
+		case Text:
+			updateInnerHTML(textView.htmlID(), textView.session)
 
-	case TextOverflow:
-		textView.textOverflowUpdated()
+		case TextOverflow:
+			textView.textOverflowUpdated()
+		}
 	}
 }
 
@@ -90,16 +92,24 @@ func (textView *textViewData) set(tag string, value interface{}) bool {
 				return false
 			}
 		}
-		updateInnerHTML(textView.htmlID(), textView.session)
-		return true
+		if textView.created {
+			updateInnerHTML(textView.htmlID(), textView.session)
+		}
 
 	case TextOverflow:
-		if textView.viewData.set(tag, value) {
+		if !textView.viewData.set(tag, value) {
+			return false
+		}
+		if textView.created {
 			textView.textOverflowUpdated()
 		}
+
+	default:
+		return textView.viewData.set(tag, value)
 	}
 
-	return textView.viewData.set(tag, value)
+	textView.propertyChangedEvent(tag)
+	return true
 }
 
 func (textView *textViewData) textOverflowUpdated() {

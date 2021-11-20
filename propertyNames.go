@@ -367,8 +367,8 @@ const (
 	// CenterY is the constant for the "center-x" property tag.
 	CenterY = "center-y"
 	// AltText is the constant for the "alt-text" property tag.
-	AltText     = "alt-text"
-	altProperty = "alt"
+	AltText = "alt-text"
+	altTag  = "alt"
 	// AvoidBreak is the constant for the "avoid-break" property tag.
 	// The "avoid-break" bool property sets how region breaks should behave inside a generated box.
 	// If the property value is "true" then fvoids any break from being inserted within the principal box.

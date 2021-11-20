@@ -4,7 +4,13 @@ package rui
 // The type of return value depends on the property.
 // If the subview don't exists or the property is not set then nil is returned.
 func Get(rootView View, viewID, tag string) interface{} {
-	if view := ViewByID(rootView, viewID); view != nil {
+	var view View
+	if viewID != "" {
+		view = ViewByID(rootView, viewID)
+	} else {
+		view = rootView
+	}
+	if view != nil {
 		return view.Get(tag)
 	}
 	return nil
@@ -14,10 +20,27 @@ func Get(rootView View, viewID, tag string) interface{} {
 // true - success,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
 func Set(rootView View, viewID, tag string, value interface{}) bool {
-	if view := ViewByID(rootView, viewID); view != nil {
+	var view View
+	if viewID != "" {
+		view = ViewByID(rootView, viewID)
+	} else {
+		view = rootView
+	}
+	if view != nil {
 		return view.Set(tag, value)
 	}
 	return false
+}
+
+// SetChangeListener sets a listener for changing a subview property value.
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is set
+func SetChangeListener(view View, viewID, tag string, listener func(View, string)) {
+	if viewID != "" {
+		view = ViewByID(view, viewID)
+	}
+	if view != nil {
+		view.SetChangeListener(tag, listener)
+	}
 }
 
 // SetParams sets properties with name "tag" of the "rootView" subview. Result:
@@ -34,6 +57,22 @@ func SetParams(rootView View, viewID string, params Params) bool {
 		result = view.Set(tag, value) && result
 	}
 	return result
+}
+
+// IsDisabled returns "true" if the subview is disabled
+// If the second argument (subviewID) is "" then a state of the first argument (view) is returned
+func IsDisabled(view View, subviewID string) bool {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if disabled, _ := boolProperty(view, Disabled, view.Session()); disabled {
+		return true
+	}
+	if parent := view.Parent(); parent != nil {
+		return IsDisabled(parent, "")
+	}
+	return false
 }
 
 // GetSemantics returns the subview semantics.  Valid semantics values are
@@ -926,7 +965,7 @@ func valueFromStyle(view View, tag string) (string, bool) {
 		return "", false
 	}
 
-	if IsDisabled(view) {
+	if IsDisabled(view, "") {
 		if value, ok := getValue(StyleDisabled); ok {
 			return value, true
 		}

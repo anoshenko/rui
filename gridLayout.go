@@ -216,19 +216,22 @@ func (gridLayout *gridLayoutData) remove(tag string) {
 	if tag == Gap {
 		gridLayout.remove(GridRowGap)
 		gridLayout.remove(GridColumnGap)
+		gridLayout.propertyChangedEvent(Gap)
 		return
 	}
 
 	gridLayout.viewsContainerData.remove(tag)
-	switch tag {
-	case CellWidth:
-		updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
-			gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session), gridLayout.session)
+	if gridLayout.created {
+		switch tag {
+		case CellWidth:
+			updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
+				gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session), gridLayout.session)
 
-	case CellHeight:
-		updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
-			gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session), gridLayout.session)
+		case CellHeight:
+			updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
+				gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session), gridLayout.session)
 
+		}
 	}
 }
 
@@ -243,19 +246,25 @@ func (gridLayout *gridLayoutData) set(tag string, value interface{}) bool {
 	}
 
 	if tag == Gap {
-		return gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value)
+		if gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value) {
+			gridLayout.propertyChangedEvent(Gap)
+			return true
+		}
+		return false
 	}
 
 	if gridLayout.viewsContainerData.set(tag, value) {
-		switch tag {
-		case CellWidth:
-			updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
-				gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session), gridLayout.session)
+		if gridLayout.created {
+			switch tag {
+			case CellWidth:
+				updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
+					gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session), gridLayout.session)
 
-		case CellHeight:
-			updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
-				gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session), gridLayout.session)
+			case CellHeight:
+				updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
+					gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session), gridLayout.session)
 
+			}
 		}
 		return true
 	}

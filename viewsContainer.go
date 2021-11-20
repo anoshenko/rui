@@ -39,16 +39,6 @@ func (container *viewsContainerData) setParentID(parentID string) {
 	}
 }
 
-// SetDisabled set the View disabled state
-func (container *viewsContainerData) SetDisabled(disabled bool) {
-	container.viewData.Set(Disabled, disabled)
-	if container.views != nil {
-		for _, view := range container.views {
-			view.Set(Disabled, disabled)
-		}
-	}
-}
-
 // Views return a list of child views
 func (container *viewsContainerData) Views() []View {
 	if container.views == nil {
@@ -68,6 +58,7 @@ func (container *viewsContainerData) Append(view View) {
 			container.views = append(container.views, view)
 		}
 		updateInnerHTML(container.htmlID(), container.session)
+		container.propertyChangedEvent(Content)
 	}
 }
 
@@ -81,10 +72,12 @@ func (container *viewsContainerData) Insert(view View, index uint) {
 			view.setParentID(htmlID)
 			container.views = append(container.views[:index], append([]View{view}, container.views[index:]...)...)
 			updateInnerHTML(container.htmlID(), container.session)
+			container.propertyChangedEvent(Content)
 		} else {
 			view.setParentID(htmlID)
 			container.views = append([]View{view}, container.views...)
 			updateInnerHTML(container.htmlID(), container.session)
+			container.propertyChangedEvent(Content)
 		}
 	}
 }
@@ -112,6 +105,7 @@ func (container *viewsContainerData) RemoveView(index uint) View {
 
 	view.setParentID("")
 	updateInnerHTML(container.htmlID(), container.session)
+	container.propertyChangedEvent(Content)
 	return view
 }
 
@@ -151,6 +145,18 @@ func (container *viewsContainerData) remove(tag string) {
 			container.views = []View{}
 			updateInnerHTML(container.htmlID(), container.Session())
 		}
+		container.propertyChangedEvent(Content)
+
+	case Disabled:
+		if _, ok := container.properties[Disabled]; ok {
+			delete(container.properties, Disabled)
+			if container.views != nil {
+				for _, view := range container.views {
+					view.Remove(Disabled)
+				}
+			}
+			container.propertyChangedEvent(tag)
+		}
 
 	default:
 		container.viewData.remove(tag)
@@ -167,7 +173,27 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 		return true
 	}
 
-	if tag != Content {
+	switch tag {
+	case Content:
+		// do nothing
+
+	case Disabled:
+		oldDisabled := IsDisabled(container, "")
+		if container.viewData.Set(Disabled, value) {
+			disabled := IsDisabled(container, "")
+			if oldDisabled != disabled {
+				if container.views != nil {
+					for _, view := range container.views {
+						view.Set(Disabled, disabled)
+					}
+				}
+			}
+			container.propertyChangedEvent(tag)
+			return true
+		}
+		return false
+
+	default:
 		return container.viewData.set(tag, value)
 	}
 
@@ -239,6 +265,8 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 	if container.created {
 		updateInnerHTML(htmlID, container.session)
 	}
+
+	container.propertyChangedEvent(Content)
 	return true
 }
 

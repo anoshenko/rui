@@ -58,12 +58,14 @@ func (progress *progressBarData) remove(tag string) {
 }
 
 func (progress *progressBarData) propertyChanged(tag string) {
-	switch tag {
-	case ProgressBarMax:
-		updateProperty(progress.htmlID(), Max, strconv.FormatFloat(GetProgressBarMax(progress, ""), 'f', -1, 32), progress.session)
+	if progress.created {
+		switch tag {
+		case ProgressBarMax:
+			updateProperty(progress.htmlID(), Max, strconv.FormatFloat(GetProgressBarMax(progress, ""), 'f', -1, 32), progress.session)
 
-	case ProgressBarValue:
-		updateProperty(progress.htmlID(), Value, strconv.FormatFloat(GetProgressBarValue(progress, ""), 'f', -1, 32), progress.session)
+		case ProgressBarValue:
+			updateProperty(progress.htmlID(), Value, strconv.FormatFloat(GetProgressBarValue(progress, ""), 'f', -1, 32), progress.session)
+		}
 	}
 }
 

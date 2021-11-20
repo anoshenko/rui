@@ -48,19 +48,31 @@ func (list *dropDownListData) remove(tag string) {
 	case Items:
 		if len(list.items) > 0 {
 			list.items = []string{}
-			updateInnerHTML(list.htmlID(), list.session)
+			if list.created {
+				updateInnerHTML(list.htmlID(), list.session)
+			}
+			list.propertyChangedEvent(tag)
 		}
-
-	case Current:
-		list.set(Current, 0)
 
 	case DropDownEvent:
 		if len(list.dropDownListener) > 0 {
 			list.dropDownListener = []func(DropDownList, int){}
+			list.propertyChangedEvent(tag)
+		}
+
+	case Current:
+		oldCurrent := GetDropDownCurrent(list, "")
+		delete(list.properties, Current)
+		if oldCurrent != 0 {
+			if list.created {
+				list.session.runScript(fmt.Sprintf(`selectDropDownListItem('%s', %d)`, list.htmlID(), 0))
+			}
+			list.onSelectedItemChanged(0)
 		}
 
 	default:
 		list.viewData.remove(tag)
+		return
 	}
 }
 
@@ -73,23 +85,22 @@ func (list *dropDownListData) set(tag string, value interface{}) bool {
 	case Items:
 		return list.setItems(value)
 
+	case DropDownEvent:
+		return list.setDropDownListener(value)
+
 	case Current:
 		oldCurrent := GetDropDownCurrent(list, "")
 		if !list.setIntProperty(Current, value) {
 			return false
 		}
 
-		if !list.session.ignoreViewUpdates() {
-			current := GetDropDownCurrent(list, "")
-			if oldCurrent != current {
+		if current := GetDropDownCurrent(list, ""); oldCurrent != current {
+			if list.created {
 				list.session.runScript(fmt.Sprintf(`selectDropDownListItem('%s', %d)`, list.htmlID(), current))
-				list.onSelectedItemChanged(current)
 			}
+			list.onSelectedItemChanged(current)
 		}
 		return true
-
-	case DropDownEvent:
-		return list.setDropDownListener(value)
 	}
 
 	return list.viewData.set(tag, value)
@@ -160,9 +171,11 @@ func (list *dropDownListData) setItems(value interface{}) bool {
 		return false
 	}
 
-	if !list.session.ignoreViewUpdates() {
+	if list.created {
 		updateInnerHTML(list.htmlID(), list.session)
 	}
+
+	list.propertyChangedEvent(Items)
 	return true
 }
 
@@ -170,17 +183,14 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 	switch value := value.(type) {
 	case func(DropDownList, int):
 		list.dropDownListener = []func(DropDownList, int){value}
-		return true
 
 	case func(int):
 		list.dropDownListener = []func(DropDownList, int){func(list DropDownList, index int) {
 			value(index)
 		}}
-		return true
 
 	case []func(DropDownList, int):
 		list.dropDownListener = value
-		return true
 
 	case []func(int):
 		listeners := make([]func(DropDownList, int), len(value))
@@ -194,7 +204,6 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 			}
 		}
 		list.dropDownListener = listeners
-		return true
 
 	case []interface{}:
 		listeners := make([]func(DropDownList, int), len(value))
@@ -216,13 +225,16 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 				notCompatibleType(DropDownEvent, value)
 				return false
 			}
-			list.dropDownListener = listeners
 		}
-		return true
+		list.dropDownListener = listeners
+
+	default:
+		notCompatibleType(DropDownEvent, value)
+		return false
 	}
 
-	notCompatibleType(DropDownEvent, value)
-	return false
+	list.propertyChangedEvent(DropDownEvent)
+	return true
 }
 
 func (list *dropDownListData) Get(tag string) interface{} {
@@ -280,7 +292,7 @@ func (list *dropDownListData) htmlProperties(self View, buffer *strings.Builder)
 
 func (list *dropDownListData) htmlDisabledProperties(self View, buffer *strings.Builder) {
 	list.viewData.htmlDisabledProperties(self, buffer)
-	if IsDisabled(list) {
+	if IsDisabled(list, "") {
 		buffer.WriteString(`disabled`)
 	}
 }
@@ -289,6 +301,7 @@ func (list *dropDownListData) onSelectedItemChanged(number int) {
 	for _, listener := range list.dropDownListener {
 		listener(list, number)
 	}
+	list.propertyChangedEvent(Current)
 }
 
 func (list *dropDownListData) handleCommand(self View, command string, data DataObject) bool {

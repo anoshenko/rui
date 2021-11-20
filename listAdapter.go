@@ -77,7 +77,7 @@ func (adapter *viewListAdapter) ListItem(index int, session Session) View {
 
 func (adapter *viewListAdapter) IsListItemEnabled(index int) bool {
 	if index >= 0 && index < len(adapter.items) {
-		return !IsDisabled(adapter.items[index])
+		return !IsDisabled(adapter.items[index], "")
 	}
 	return true
 }

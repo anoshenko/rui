@@ -67,7 +67,7 @@ func (imageView *imageViewData) normalizeTag(tag string) string {
 	case HorizontalAlign:
 		tag = ImageHorizontalAlign
 
-	case altProperty:
+	case altTag:
 		tag = AltText
 	}
 	return tag
@@ -79,16 +79,18 @@ func (imageView *imageViewData) Remove(tag string) {
 
 func (imageView *imageViewData) remove(tag string) {
 	imageView.viewData.remove(tag)
-	switch tag {
-	case Source:
-		updateProperty(imageView.htmlID(), "src", "", imageView.session)
-		removeProperty(imageView.htmlID(), "srcset", imageView.session)
+	if imageView.created {
+		switch tag {
+		case Source:
+			updateProperty(imageView.htmlID(), "src", "", imageView.session)
+			removeProperty(imageView.htmlID(), "srcset", imageView.session)
 
-	case AltText:
-		updateInnerHTML(imageView.htmlID(), imageView.session)
+		case AltText:
+			updateInnerHTML(imageView.htmlID(), imageView.session)
 
-	case ImageVerticalAlign, ImageHorizontalAlign:
-		updateCSSStyle(imageView.htmlID(), imageView.session)
+		case ImageVerticalAlign, ImageHorizontalAlign:
+			updateCSSStyle(imageView.htmlID(), imageView.session)
+		}
 	}
 }
 
@@ -106,29 +108,37 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 	case Source:
 		if text, ok := value.(string); ok {
 			imageView.properties[Source] = text
-			updateProperty(imageView.htmlID(), "src", text, imageView.session)
-			if srcset := imageView.srcSet(text); srcset != "" {
-				updateProperty(imageView.htmlID(), "srcset", srcset, imageView.session)
-			} else {
-				removeProperty(imageView.htmlID(), "srcset", imageView.session)
+			if imageView.created {
+				updateProperty(imageView.htmlID(), "src", text, imageView.session)
+				if srcset := imageView.srcSet(text); srcset != "" {
+					updateProperty(imageView.htmlID(), "srcset", srcset, imageView.session)
+				} else {
+					removeProperty(imageView.htmlID(), "srcset", imageView.session)
+				}
 			}
+			imageView.propertyChangedEvent(Source)
 			return true
 		}
-		notCompatibleType(tag, value)
+		notCompatibleType(Source, value)
 
 	case AltText:
 		if text, ok := value.(string); ok {
 			imageView.properties[AltText] = text
-			updateInnerHTML(imageView.htmlID(), imageView.session)
+			if imageView.created {
+				updateInnerHTML(imageView.htmlID(), imageView.session)
+			}
+			imageView.propertyChangedEvent(Source)
 			return true
 		}
 		notCompatibleType(tag, value)
 
 	default:
 		if imageView.viewData.set(tag, value) {
-			switch tag {
-			case ImageVerticalAlign, ImageHorizontalAlign:
-				updateCSSStyle(imageView.htmlID(), imageView.session)
+			if imageView.created {
+				switch tag {
+				case ImageVerticalAlign, ImageHorizontalAlign:
+					updateCSSStyle(imageView.htmlID(), imageView.session)
+				}
 			}
 			return true
 		}
