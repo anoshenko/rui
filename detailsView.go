@@ -2,8 +2,6 @@ package rui
 
 import "strings"
 
-// TODO Expanded event
-
 const (
 	// Summary is the constant for the "summary" property tag.
 	// The contents of the "summary" property are used as the label for the disclosure widget.

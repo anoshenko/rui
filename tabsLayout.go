@@ -557,7 +557,6 @@ func (tabsLayout *tabsLayoutData) ListItem(index int, session Session) View {
 			Column:  2,
 			Content: "✕",
 			ClickEvent: func() {
-				// TODO close menu
 				for _, listener := range tabsLayout.tabCloseListener {
 					listener(tabsLayout, index)
 				}
@@ -580,6 +579,10 @@ func (tabsLayout *tabsLayoutData) IsListItemEnabled(index int) bool {
 	return true
 }
 
+func (tabsLayout *tabsLayoutData) updateContent(view View, tag string) {
+	updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
+}
+
 // Append appends view to the end of view list
 func (tabsLayout *tabsLayoutData) Append(view View) {
 	if tabsLayout.views == nil {
@@ -587,6 +590,9 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 	}
 	if view != nil {
 		tabsLayout.viewsContainerData.Append(view)
+		view.SetChangeListener(Title, tabsLayout.updateContent)
+		view.SetChangeListener(Icon, tabsLayout.updateContent)
+		view.SetChangeListener(TabCloseButton, tabsLayout.updateContent)
 		if len(tabsLayout.views) == 1 {
 			tabsLayout.properties[Current] = 0
 			for _, listener := range tabsLayout.tabListener {
@@ -609,6 +615,9 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 			defer tabsLayout.propertyChangedEvent(Current)
 		}
 		tabsLayout.viewsContainerData.Insert(view, index)
+		view.SetChangeListener(Title, tabsLayout.updateContent)
+		view.SetChangeListener(Icon, tabsLayout.updateContent)
+		view.SetChangeListener(TabCloseButton, tabsLayout.updateContent)
 	}
 }
 
@@ -624,27 +633,32 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 		return nil
 	}
 
+	var view View
 	if count == 1 {
-		view := tabsLayout.views[0]
+		view = tabsLayout.views[0]
 		tabsLayout.views = []View{}
 		for _, listener := range tabsLayout.tabListener {
 			listener(tabsLayout, 0, 0)
 		}
 		tabsLayout.propertyChangedEvent(Current)
-		return view
-	}
 
-	current := tabsLayout.currentItem()
-	removeCurrent := (i == current)
-	if i < current || (removeCurrent && i == count-1) {
-		tabsLayout.properties[Current] = current - 1
-		for _, listener := range tabsLayout.tabListener {
-			listener(tabsLayout, current-1, current)
+	} else {
+		current := tabsLayout.currentItem()
+		removeCurrent := (i == current)
+		if i < current || (removeCurrent && i == count-1) {
+			tabsLayout.properties[Current] = current - 1
+			for _, listener := range tabsLayout.tabListener {
+				listener(tabsLayout, current-1, current)
+			}
+			defer tabsLayout.propertyChangedEvent(Current)
 		}
-		defer tabsLayout.propertyChangedEvent(Current)
+		view = tabsLayout.viewsContainerData.RemoveView(index)
 	}
 
-	return tabsLayout.viewsContainerData.RemoveView(index)
+	view.SetChangeListener(Title, nil)
+	view.SetChangeListener(Icon, nil)
+	view.SetChangeListener(TabCloseButton, nil)
+	return view
 }
 
 func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Builder) {
