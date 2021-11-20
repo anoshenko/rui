@@ -12,7 +12,6 @@ type TextView interface {
 
 type textViewData struct {
 	viewData
-	// TODO textShadow
 }
 
 // NewTextView create new TextView object and return it

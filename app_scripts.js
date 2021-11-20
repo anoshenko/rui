@@ -1362,3 +1362,7 @@ function setTitleColor(color) {
 	meta.setAttribute('content', color);
 	document.getElementsByTagName('head')[0].appendChild(meta);
 }
+
+function detailsEvent(element) {
+	sendMessage("details-open{session=" + sessionID + ",id=" + element.id + ",open=" + (element.open ? "1}" : "0}"));
+}

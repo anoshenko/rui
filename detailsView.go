@@ -128,6 +128,7 @@ func (detailsView *detailsViewData) htmlTag() string {
 
 func (detailsView *detailsViewData) htmlProperties(self View, buffer *strings.Builder) {
 	detailsView.viewsContainerData.htmlProperties(self, buffer)
+	buffer.WriteString(` ontoggle="detailsEvent(this)"`)
 	if IsDetailsExpanded(detailsView, "") {
 		buffer.WriteString(` open`)
 	}
@@ -149,6 +150,17 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 	}
 
 	detailsView.viewsContainerData.htmlSubviews(self, buffer)
+}
+
+func (detailsView *detailsViewData) handleCommand(self View, command string, data DataObject) bool {
+	if command == "details-open" {
+		if n, ok := dataIntProperty(data, "open"); ok {
+			detailsView.properties[Expanded] = (n != 0)
+			detailsView.propertyChangedEvent(Expanded)
+		}
+		return true
+	}
+	return detailsView.viewsContainerData.handleCommand(self, command, data)
 }
 
 // GetDetailsSummary returns a value of the Summary property of DetailsView.
