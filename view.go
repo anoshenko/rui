@@ -56,11 +56,10 @@ type View interface {
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
 	SetAnimated(tag string, value interface{}, animation Animation) bool
-
+	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag string, listener func(View, string))
 
 	handleCommand(self View, command string, data DataObject) bool
-	//updateEventHandlers()
 	htmlClass(disabled bool) string
 	htmlTag() string
 	closeHTMLTag() bool

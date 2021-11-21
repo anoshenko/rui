@@ -316,6 +316,8 @@ func (manager *popupManager) showPopup(popup Popup) {
 	} else {
 		manager.popups = append(manager.popups, popup)
 	}
+
+	session.runScript(`if (document.activeElement != document.body) document.activeElement.blur();`)
 	manager.updatePopupLayerInnerHTML(session)
 	updateCSSProperty("ruiPopupLayer", "visibility", "visible", session)
 }
