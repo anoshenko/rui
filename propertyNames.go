@@ -395,12 +395,6 @@ const (
 	Anchor = "anchor"
 	// Gap is the constant for the "gap" property tag.
 	Gap = "gap"
-	// Tabs is the constant for the "tabs" property tag.
-	Tabs = "tabs"
-	// TabStyle is the constant for the "tab-style" property tag.
-	TabStyle = "tab-style"
-	// CurrentTabStyle is the constant for the "current-tab-style" property tag.
-	CurrentTabStyle = "current-tab-style"
 	// Text is the constant for the "text" property tag.
 	Text = "text"
 	// VerticalAlign is the constant for the "vertical-align" property tag.

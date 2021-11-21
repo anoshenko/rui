@@ -2455,27 +2455,16 @@ the "tabs" integer property (the Tabs constant). This property can take on the f
 Why do I need the value HiddenTabs. The point is that TabsLayout implements the ListAdapter interface.
 Which makes it easy to implement tabs with a ListView. This is where the HiddenTabs value comes in.
 
-When displaying the current (selected) tabs of type TopTabs, BottomTabs, LeftListTabs and RightListTabs, 
-the style is "ruiActiveTab", and for tabs of type LeftTabs and RightTabs, the style is "ruiActiveVerticalTab".
+For displaying the current (selected) tab of type TopTabs, BottomTabs, LeftListTabs and RightListTabs, 
+the "ruiCurrentTab" style is used, and for tab of type LeftTabs and RightTabs, the "ruiCurrentVerticalTab" style is used.
 If you want to customize the display of tabs, you can either override these styles, or assign your own style using 
 the "current-tab-style" property (constant CurrentTabStyle).
 
-Accordingly, for an inactive tab, the "ruiInactiveTab" and "ruiInactiveVerticalTab" styles are used, 
+Accordingly, for an inactive tab, the "ruiTab" and "ruiVerticalTab" styles are used, 
 and you can assign your own style using the "tab-style" property (constant TabStyle).
 
-Also, when displaying tabs, the following constants and styles are used:
-
-* "ruiTabHeight" - the SizeUnit constant sets the height of the tab bar;
-
-* "ruiTabSpace" - the SizeUnit constant sets the distance between tabs;
-
-* "ruiTabsPadding" - the SizeUnit or BoundsProperty constant sets the indentation from the inside of the tab bar;
-
-* "ruiTabsBackgroundColor" - background color of the tabs bar;
-
-* "ruiTabCloseButton" - style of the button for closing the tab.
-
-You can override these constants and styles to customize the tab bar
+The "ruiTabBar" style is used to display the tab bar, and you can assign your own style 
+using the "tab-bar-style" property (constant TabBarStyle).
 
 ## AbsoluteLayout
 

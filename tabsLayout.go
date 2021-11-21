@@ -27,6 +27,26 @@ const (
 	// The main listener format: func(TabsLayout, int), where the second argument is the index of the tab.
 	TabCloseEvent = "tab-close-event"
 
+	// Tabs is the constant for the "tabs" property tag.
+	// The "tabs" is the int property that sets where the tabs are located.
+	// Valid values: TopTabs (0), BottomTabs (1), LeftTabs (2), RightTabs (3), LeftListTabs (4), RightListTabs (5), and HiddenTabs (6).
+	Tabs = "tabs"
+
+	// TabBarStyle is the constant for the "tab-bar-style" property tag.
+	// The "tab-bar-style" is the string property that sets the style for the display of the tab bar.
+	// The default value is "ruiTabBar".
+	TabBarStyle = "tab-bar-style"
+
+	// TabStyle is the constant for the "tab-style" property tag.
+	// The "tab-style" is the string property that sets the style for the display of the tab.
+	// The default value is "ruiTab" or "ruiVerticalTab".
+	TabStyle = "tab-style"
+
+	// CurrentTabStyle is the constant for the "current-tab-style" property tag.
+	// The "current-tab-style" is the string property that sets the style for the display of the current (selected) tab.
+	// The default value is "ruiCurrentTab" or "ruiCurrentVerticalTab".
+	CurrentTabStyle = "current-tab-style"
+
 	// TopTabs - tabs of TabsLayout are on the top
 	TopTabs = 0
 	// BottomTabs - tabs of TabsLayout are on the bottom
@@ -463,15 +483,22 @@ func (tabsLayout *tabsLayoutData) tabsLocation() int {
 	return tabs
 }
 
+func (tabsLayout *tabsLayoutData) tabBarStyle() string {
+	if style, ok := stringProperty(tabsLayout, TabBarStyle, tabsLayout.session); ok {
+		return style
+	}
+	return "ruiTabBar"
+}
+
 func (tabsLayout *tabsLayoutData) inactiveTabStyle() string {
 	if style, ok := stringProperty(tabsLayout, TabStyle, tabsLayout.session); ok {
 		return style
 	}
 	switch tabsLayout.tabsLocation() {
 	case LeftTabs, RightTabs:
-		return "ruiInactiveVerticalTab"
+		return "ruiVerticalTab"
 	}
-	return "ruiInactiveTab"
+	return "ruiTab"
 }
 
 func (tabsLayout *tabsLayoutData) activeTabStyle() string {
@@ -480,9 +507,9 @@ func (tabsLayout *tabsLayoutData) activeTabStyle() string {
 	}
 	switch tabsLayout.tabsLocation() {
 	case LeftTabs, RightTabs:
-		return "ruiActiveVerticalTab"
+		return "ruiCurrentVerticalTab"
 	}
-	return "ruiActiveTab"
+	return "ruiCurrentTab"
 }
 
 func (tabsLayout *tabsLayoutData) ListSize() int {
@@ -685,10 +712,10 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	tabsLayoutID := tabsLayout.htmlID()
 
 	if location != HiddenTabs {
-		tabsHeight, _ := sizeConstant(tabsLayout.session, "ruiTabHeight")
-		tabsSpace, _ := sizeConstant(tabsLayout.session, "ruiTabSpace")
-		rowLayout := false
-		buffer.WriteString(`<div style="display: flex;`)
+
+		buffer.WriteString(`<div class="`)
+		buffer.WriteString(tabsLayout.tabBarStyle())
+		buffer.WriteString(`" style="display: flex;`)
 
 		switch location {
 		case LeftTabs, LeftListTabs, TopTabs:
@@ -708,40 +735,6 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 
 		default:
 			buffer.WriteString(`row nowrap; justify-content: flex-start; align-items: stretch;`)
-			if tabsHeight.Type != Auto {
-				buffer.WriteString(` height: `)
-				buffer.WriteString(tabsHeight.cssString(""))
-				buffer.WriteByte(';')
-			}
-			rowLayout = true
-		}
-
-		switch location {
-		case LeftTabs, RightTabs:
-			if tabsHeight.Type != Auto {
-				buffer.WriteString(` width: `)
-				buffer.WriteString(tabsHeight.cssString(""))
-				buffer.WriteByte(';')
-			}
-		}
-
-		var tabsPadding Bounds
-		if value, ok := tabsLayout.session.Constant("ruiTabsPadding"); ok {
-			if tabsPadding.parse(value, tabsLayout.session) {
-				if !tabsPadding.allFieldsAuto() {
-					buffer.WriteByte(' ')
-					buffer.WriteString(Padding)
-					buffer.WriteString(`: `)
-					tabsPadding.writeCSSString(buffer, "0")
-					buffer.WriteByte(';')
-				}
-			}
-		}
-
-		if tabsBackground, ok := tabsLayout.session.Color("ruiTabsBackgroundColor"); ok {
-			buffer.WriteString(` background-color: `)
-			buffer.WriteString(tabsBackground.cssString())
-			buffer.WriteByte(';')
 		}
 
 		buffer.WriteString(`">`)
@@ -752,32 +745,16 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		notTranslate := GetNotTranslate(tabsLayout, "")
 		closeButton, _ := boolProperty(tabsLayout, TabCloseButton, tabsLayout.session)
 
-		tabMargin := ""
-		if tabsSpace.Type != Auto && tabsSpace.Value > 0 {
-			if rowLayout {
-				tabMargin = ` margin-right: ` + tabsSpace.cssString("") + ";"
-			} else {
-				tabMargin = ` margin-bottom: ` + tabsSpace.cssString("") + ";"
-			}
-		}
-
 		var tabStyle, titleDiv string
 		switch location {
 		case LeftTabs, RightTabs:
 			tabStyle = `display: grid; grid-template-rows: auto 1fr auto; align-items: center; justify-items: center; grid-row-gap: 8px;`
 
 		case LeftListTabs, RightListTabs:
-			tabStyle = `display: grid; grid-template-columns: auto 1fr auto; align-items: start; justify-items: center; grid-column-gap: 8px;`
+			tabStyle = `display: grid; grid-template-columns: auto 1fr auto; align-items: center; justify-items: start; grid-column-gap: 8px;`
 
 		default:
 			tabStyle = `display: grid; grid-template-columns: auto 1fr auto; align-items: center; justify-items: center; grid-column-gap: 8px;`
-		}
-
-		switch location {
-		case LeftListTabs, RightListTabs:
-			if tabsHeight.Type != Auto {
-				tabStyle += ` height: ` + tabsHeight.cssString("") + ";"
-			}
 		}
 
 		switch location {
@@ -791,7 +768,6 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			titleDiv = `<div style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 2; grid-column-end: 3;">`
 		}
 
-		last := len(tabsLayout.views) - 1
 		for n, view := range tabsLayout.views {
 			icon, _ := stringProperty(view, Icon, tabsLayout.session)
 			title, _ := stringProperty(view, Title, tabsLayout.session)
@@ -819,11 +795,6 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(strconv.Itoa(n))
 			buffer.WriteString(`, event)" style="`)
 			buffer.WriteString(tabStyle)
-
-			if n != last {
-				buffer.WriteString(tabMargin)
-			}
-
 			buffer.WriteString(`" data-container="`)
 			buffer.WriteString(tabsLayoutID)
 			buffer.WriteString(`" data-view="`)

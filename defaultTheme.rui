@@ -17,11 +17,11 @@ theme {
 		ruiPopupTitleColor = #FF0000FF,
 		ruiPopupTitleTextColor = #FFFFFFFF,
 
-		ruiTabsBackgroundColor = #FFEEEEEE,
-		ruiInactiveTabColor = #FFD0D0D0,
-		ruiInactiveTabTextColor = #FF202020,
-		ruiActiveTabColor = #FFFFFFFF,
-		ruiActiveTabTextColor = #FF000000,
+		ruiTabBarBackgroundColor = #FFEEEEEE,
+		ruiTabColor = #FFD0D0D0,
+		ruiTabTextColor = #FF202020,
+		ruiCurrentTabColor = #FFFFFFFF,
+		ruiCurrentTabTextColor = #FF000000,
 	},
 	colors:dark = _{
 		ruiTextColor = #FFE0E0E0,
@@ -34,11 +34,11 @@ theme {
 		ruiHighlightColor = #FF1A74E8,
 		ruiHighlightTextColor = #FFFFFFFF,
 
-		ruiTabsBackgroundColor = #FF303030,
-		ruiInactiveTabColor = #FF606060,
-		ruiInactiveTabTextColor = #FFE0E0E0,
-		ruiActiveTabColor = #FF000000,
-		ruiActiveTabTextColor = #FFFFFFFF,
+		ruiTabBarBackgroundColor = #FF303030,
+		ruiTabColor = #FF606060,
+		ruiTabTextColor = #FFE0E0E0,
+		ruiCurrentTabColor = #FF000000,
+		ruiCurrentTabTextColor = #FFFFFFFF,
 	},
 	constants = _{
 		ruiButtonHorizontalPadding = 16px,
@@ -53,9 +53,9 @@ theme {
 		ruiPopupTitleHeight = 32px,
 		ruiPopupTitlePadding = 8px,
 		ruiPopupButtonGap = 4px,
-		ruiTabSpace = 2px,
+		ruiTabMargin = 1px,
 		ruiTabHeight = 32px,
-		ruiTabsPadding = 2px,
+		ruiTabBarPadding = 2px,
 		ruiTabRadius = 2px,
 	},
 	constants:touch = _{
@@ -118,32 +118,43 @@ theme {
 			background-color=@ruiHighlightColor,
 			text-color=@ruiHighlightTextColor,
 		},
-		ruiActiveTab {
-			background-color = @ruiActiveTabColor,
-			text-color = @ruiActiveTabTextColor,
+		ruiTabBar {
+			background-color = @ruiTabBarBackgroundColor,
+		}
+		ruiCurrentTab {
+			min-height = @ruiTabHeight,
+			background-color = @ruiCurrentTabColor,
+			text-color = @ruiCurrentTabTextColor,
 			padding-left = 4px,
 			padding-right = 4px,
+			margin = @ruiTabMargin,
 			radius = @ruiTabRadius,
 		},
-		ruiInactiveTab {
-			background-color = @ruiInactiveTabColor,
-			text-color = @ruiInactiveTabTextColor,
+		ruiTab {
+			min-height = @ruiTabHeight,
+			background-color = @ruiTabColor,
+			text-color = @ruiTabTextColor,
 			padding-left = 4px,
 			padding-right = 4px,
+			margin = @ruiTabMargin,
 			radius = @ruiTabRadius,
 		},
-		ruiActiveVerticalTab {
-			background-color = @ruiActiveTabColor,
-			text-color = @ruiActiveTabTextColor,
+		ruiCurrentVerticalTab {
+			min-width = @ruiTabHeight,
+			background-color = @ruiCurrentTabColor,
+			text-color = @ruiCurrentTabTextColor,
 			padding-top = 4px,
 			padding-bottom = 4px,
+			margin = @ruiTabMargin,
 			radius = @ruiTabRadius,
 		},
-		ruiInactiveVerticalTab {
-			background-color = @ruiInactiveTabColor,
-			text-color = @ruiInactiveTabTextColor,
+		ruiVerticalTab {
+			min-width = @ruiTabHeight,
+			background-color = @ruiTabColor,
+			text-color = @ruiTabTextColor,
 			padding-top = 4px,
 			padding-bottom = 4px,
+			margin = @ruiTabMargin,
 			radius = @ruiTabRadius,
 		},
 		ruiTabCloseButton {
@@ -155,7 +166,7 @@ theme {
 			text-size = 16px,
 		},
 		ruiTabCloseButton:hover {
-			background-color = @ruiTabsBackgroundColor,
+			background-color = @ruiTabBarBackgroundColor,
 			radius = 3px,
 		},
 		ruiPopup {
