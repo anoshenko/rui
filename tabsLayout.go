@@ -789,7 +789,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(tabsLayoutID)
 			buffer.WriteString(`\', `)
 			buffer.WriteString(strconv.Itoa(n))
-			buffer.WriteString(`, event)" onclick="tabKeyClickEvent(\'`)
+			buffer.WriteString(`, event)" onkeydown="tabKeyClickEvent(\'`)
 			buffer.WriteString(tabsLayoutID)
 			buffer.WriteString(`\', `)
 			buffer.WriteString(strconv.Itoa(n))
@@ -827,7 +827,11 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 				close = closeButton
 			}
 			if close {
-				buffer.WriteString(`<div class="ruiTabCloseButton" onclick="tabCloseClickEvent(\'`)
+				buffer.WriteString(`<div class="ruiTabCloseButton" tabindex="0" onclick="tabCloseClickEvent(\'`)
+				buffer.WriteString(tabsLayoutID)
+				buffer.WriteString(`\', `)
+				buffer.WriteString(strconv.Itoa(n))
+				buffer.WriteString(`, event)" onkeydown="tabCloseKeyClickEvent(\'`)
 				buffer.WriteString(tabsLayoutID)
 				buffer.WriteString(`\', `)
 				buffer.WriteString(strconv.Itoa(n))

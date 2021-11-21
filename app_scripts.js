@@ -303,17 +303,24 @@ function tabClickEvent(layoutId, tabNumber, event) {
 	sendMessage("tabClick{session=" + sessionID + ",id=" + layoutId + ",number=" + tabNumber + "}");
 }
 
+function tabKeyClickEvent(layoutId, tabNumber, event) {
+	if (enterOrSpaceKeyClickEvent(event)) {
+		tabClickEvent(layoutId, tabNumber, event)
+	}
+}
+
 function tabCloseClickEvent(layoutId, tabNumber, event) {
 	event.stopPropagation();
 	event.preventDefault();
 	sendMessage("tabCloseClick{session=" + sessionID + ",id=" + layoutId + ",number=" + tabNumber + "}");
 }
 
-function tabKeyClickEvent(layoutId, tabNumber, event) {
+function tabCloseKeyClickEvent(layoutId, tabNumber, event) {
 	if (enterOrSpaceKeyClickEvent(event)) {
-		tabClickEvent(layoutId, tabNumber, event)
+		tabCloseClickEvent(layoutId, tabNumber, event)
 	}
 }
+
 
 function keyEvent(element, event, tag) {
 	event.stopPropagation();
