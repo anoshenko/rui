@@ -914,6 +914,7 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 }
 
 func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder) {
+	listView.viewData.htmlProperties(self, buffer)
 	buffer.WriteString(`onfocus="listViewFocusEvent(this, event)" onblur="listViewBlurEvent(this, event)"`)
 	buffer.WriteString(` onkeydown="listViewKeyDownEvent(this, event)" data-focusitemstyle="`)
 	buffer.WriteString(listView.currentStyle())
