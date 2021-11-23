@@ -143,7 +143,7 @@ func (popup *popupData) init(view View, params Params) {
 				notCompatibleType(TitleStyle, value)
 			}
 
-		case CloseButton, OutsideClose, VerticalAlign, HorizontalAlign:
+		case CloseButton, OutsideClose, VerticalAlign, HorizontalAlign, Buttons:
 			// do nothing
 
 		default:
