@@ -139,11 +139,13 @@ const (
 // TableView - text View
 type TableView interface {
 	View
+	ParanetView
 	ReloadTableData()
 }
 
 type tableViewData struct {
 	viewData
+	cellViews []View
 }
 
 type tableCellView struct {
@@ -166,6 +168,7 @@ func newTableView(session Session) View {
 func (table *tableViewData) Init(session Session) {
 	table.viewData.Init(session)
 	table.tag = "TableView"
+	table.cellViews = []View{}
 }
 
 func (table *tableViewData) normalizeTag(tag string) string {
@@ -379,6 +382,8 @@ func (table *tableViewData) htmlTag() string {
 }
 
 func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	table.cellViews = []View{}
+
 	content := table.getRaw(Content)
 	if content == nil {
 		return
@@ -556,6 +561,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 					case View:
 						viewHTML(value, buffer)
+						table.cellViews = append(table.cellViews, value)
 
 					case Color:
 						buffer.WriteString(`<div style="display: inline; height: 1em; background-color: `)
@@ -855,4 +861,8 @@ func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
 	if value, ok := enumProperty(cell, TableVerticalAlign, session, 0); ok {
 		builder.add("vertical-align", enumProperties[TableVerticalAlign].values[value])
 	}
+}
+
+func (table *tableViewData) Views() []View {
+	return table.cellViews
 }
