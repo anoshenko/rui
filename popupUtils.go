@@ -167,7 +167,19 @@ func ShowMenu(session Session, params Params) Popup {
 		Orientation:          TopDownOrientation,
 		ListItemClickedEvent: data.itemClick,
 	})
-	data.popup = NewPopup(listView, params)
+
+	popupParams := Params{}
+	for tag, value := range params {
+		switch tag {
+		case Items, PopupMenuResult:
+			// do nothing
+
+		default:
+			popupParams[tag] = value
+		}
+	}
+
+	data.popup = NewPopup(listView, popupParams)
 	data.popup.Show()
 	FocusView(listView)
 	return data.popup
