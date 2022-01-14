@@ -214,11 +214,14 @@ type TableView interface {
 	View
 	ParanetView
 	ReloadTableData()
+	CellFrame(row, column int) Frame
+	getCurrent() CellIndex
 }
 
 type tableViewData struct {
 	viewData
 	cellViews                                 []View
+	cellFrame                                 []Frame
 	cellSelectedListener, cellClickedListener []func(TableView, int, int)
 	rowSelectedListener, rowClickedListener   []func(TableView, int)
 	current                                   CellIndex
@@ -245,6 +248,7 @@ func (table *tableViewData) Init(session Session) {
 	table.viewData.Init(session)
 	table.tag = "TableView"
 	table.cellViews = []View{}
+	table.cellFrame = []Frame{}
 	table.cellSelectedListener = []func(TableView, int, int){}
 	table.cellClickedListener = []func(TableView, int, int){}
 	table.rowSelectedListener = []func(TableView, int){}
@@ -268,6 +272,10 @@ func (table *tableViewData) normalizeTag(tag string) string {
 		tag = CellPaddingLeft
 	}
 	return tag
+}
+
+func (table *tableViewData) Focusable() bool {
+	return GetSelectionMode(table, "") != NoneSelection
 }
 
 func (table *tableViewData) Get(tag string) interface{} {
@@ -310,6 +318,10 @@ func (table *tableViewData) remove(tag string) {
 	case Current:
 		table.current.Row = -1
 		table.current.Column = -1
+		table.propertyChanged(tag)
+
+	case SelectionMode:
+		table.viewData.remove(tag)
 		table.propertyChanged(tag)
 
 	default:
@@ -486,14 +498,51 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 		}
 
 	case Current:
-		switch GetSelectionMode(table, "") {
-		case NoneSelection:
+		switch value := value.(type) {
+		case int:
+			table.current.Row = value
+			table.current.Column = -1
 
-		case CellSelection:
-			// TODO
+		case CellIndex:
+			table.current = value
 
-		case RowSelection:
-			// TODO
+		case DataObject:
+			if row, ok := dataIntProperty(value, "row"); ok {
+				table.current.Row = row
+			}
+			if column, ok := dataIntProperty(value, "column"); ok {
+				table.current.Column = column
+			}
+
+		case string:
+			if strings.Contains(value, ",") {
+				if values := strings.Split(value, ","); len(values) == 2 {
+					var n = []int{0, 0}
+					for i := 0; i < 2; i++ {
+						var err error
+						if n[i], err = strconv.Atoi(values[i]); err != nil {
+							ErrorLog(err.Error())
+							return false
+						}
+					}
+					table.current.Row = n[0]
+					table.current.Column = n[1]
+				} else {
+					notCompatibleType(tag, value)
+				}
+			} else {
+				n, err := strconv.Atoi(value)
+				if err != nil {
+					ErrorLog(err.Error())
+					return false
+				}
+				table.current.Row = n
+				table.current.Column = -1
+			}
+
+		default:
+			notCompatibleType(tag, value)
+			return false
 		}
 
 	default:
@@ -524,9 +573,73 @@ func (table *tableViewData) propertyChanged(tag string) {
 				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0"), session)
 				updateCSSProperty(htmlID, "border-collapse", "separate", session)
 			}
+
+		case SelectionMode:
+			htmlID := table.htmlID()
+			session := table.Session()
+
+			switch GetSelectionMode(table, "") {
+			case CellSelection:
+				updateProperty(htmlID, "tabindex", "0", session)
+				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
+				updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)", session)
+				updateProperty(htmlID, "data-selection", "cell", session)
+				updateProperty(htmlID, "data-focusitemstyle", table.currentStyle(), session)
+				updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle(), session)
+
+				if table.current.Row >= 0 && table.current.Column >= 0 {
+					updateProperty(htmlID, "data-current", table.cellID(table.current.Row, table.current.Column), session)
+				} else {
+					removeProperty(htmlID, "data-current", session)
+				}
+				updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)", session)
+
+			case RowSelection:
+				updateProperty(htmlID, "tabindex", "0", session)
+				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
+				updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)", session)
+				updateProperty(htmlID, "data-selection", "cell", session)
+				updateProperty(htmlID, "data-focusitemstyle", table.currentStyle(), session)
+				updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle(), session)
+
+				if table.current.Row >= 0 {
+					updateProperty(htmlID, "data-current", table.rowID(table.current.Row), session)
+				} else {
+					removeProperty(htmlID, "data-current", session)
+				}
+				updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)", session)
+
+			default: // NoneSelection
+				for _, prop := range []string{"tabindex", "data-current", "onfocus", "onblur", "onkeydown", "data-selection"} {
+					removeProperty(htmlID, prop, session)
+				}
+			}
+			updateInnerHTML(htmlID, session)
 		}
 	}
 	table.propertyChangedEvent(tag)
+}
+
+func (table *tableViewData) currentStyle() string {
+	if value := table.getRaw(CurrentStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = table.session.resolveConstants(style); ok {
+				return style
+			}
+		}
+	}
+	return "ruiCurrentTableCellFocused"
+}
+
+func (table *tableViewData) currentInactiveStyle() string {
+	if value := table.getRaw(CurrentInactiveStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = table.session.resolveConstants(style); ok {
+				return style
+			}
+		}
+	}
+	return "ruiCurrentTableCell"
 }
 
 func (table *tableViewData) valueToCellListeners(value interface{}) []func(TableView, int, int) {
@@ -643,16 +756,69 @@ func (table *tableViewData) htmlTag() string {
 	return "table"
 }
 
-func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	table.cellViews = []View{}
+func (table *tableViewData) rowID(index int) string {
+	return fmt.Sprintf("%s-%d", table.htmlID(), index)
+}
 
-	content := table.getRaw(Content)
-	if content == nil {
-		return
+func (table *tableViewData) cellID(row, column int) string {
+	return fmt.Sprintf("%s-%d-%d", table.htmlID(), row, column)
+}
+
+func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
+
+	if content := table.content(); content != nil {
+		buffer.WriteString(` data-rows="`)
+		buffer.WriteString(strconv.Itoa(content.RowCount()))
+		buffer.WriteString(`" data-columns="`)
+		buffer.WriteString(strconv.Itoa(content.ColumnCount()))
+		buffer.WriteRune('"')
 	}
 
-	adapter, ok := content.(TableAdapter)
-	if !ok {
+	if selectionMode := GetSelectionMode(table, ""); selectionMode != NoneSelection {
+		buffer.WriteString(` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`)
+		buffer.WriteString(table.currentStyle())
+		buffer.WriteString(`" data-bluritemstyle="`)
+		buffer.WriteString(table.currentInactiveStyle())
+		buffer.WriteRune('"')
+
+		switch selectionMode {
+		case RowSelection:
+			buffer.WriteString(` data-selection="row" onkeydown="tableViewRowKeyDownEvent(this, event)"`)
+			if table.current.Row >= 0 {
+				buffer.WriteString(` data-current="`)
+				buffer.WriteString(table.rowID(table.current.Row))
+				buffer.WriteRune('"')
+			}
+
+		case CellSelection:
+			buffer.WriteString(` data-selection="cell" onkeydown="tableViewCellKeyDownEvent(this, event)"`)
+			if table.current.Row >= 0 && table.current.Column >= 0 {
+				buffer.WriteString(` data-current="`)
+				buffer.WriteString(table.cellID(table.current.Row, table.current.Column))
+				buffer.WriteRune('"')
+			}
+		}
+	}
+
+	table.viewData.htmlProperties(self, buffer)
+}
+
+func (table *tableViewData) content() TableAdapter {
+	if content := table.getRaw(Content); content != nil {
+		if adapter, ok := content.(TableAdapter); ok {
+			return adapter
+		}
+	}
+
+	return nil
+}
+
+func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	table.cellViews = []View{}
+	table.cellFrame = []Frame{}
+
+	adapter := table.content()
+	if adapter == nil {
 		return
 	}
 
@@ -662,10 +828,12 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		return
 	}
 
+	table.cellFrame = make([]Frame, rowCount*columnCount)
+
 	rowStyle := table.getRowStyle()
 
 	var cellStyle1 TableCellStyle = nil
-	if style, ok := content.(TableCellStyle); ok {
+	if style, ok := adapter.(TableCellStyle); ok {
 		cellStyle1 = style
 	}
 
@@ -691,6 +859,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	view.Init(session)
 
 	ignorCells := []struct{ row, column int }{}
+	selectionMode := GetSelectionMode(table, "")
 
 	tableCSS := func(startRow, endRow int, cellTag string, cellBorder BorderProperty, cellPadding BoundsProperty) {
 		for row := startRow; row < endRow; row++ {
@@ -706,13 +875,30 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				}
 			}
 
-			if cssBuilder.buffer.Len() > 0 {
-				buffer.WriteString(`<tr style="`)
-				buffer.WriteString(cssBuilder.buffer.String())
-				buffer.WriteString(`">`)
-			} else {
-				buffer.WriteString("<tr>")
+			buffer.WriteString(`<tr id="`)
+			buffer.WriteString(table.rowID(row))
+			buffer.WriteRune('"')
+
+			if selectionMode == RowSelection {
+				if row == table.current.Row {
+					buffer.WriteString(` class="`)
+					if table.HasFocus() {
+						buffer.WriteString(table.currentStyle())
+					} else {
+						buffer.WriteString(table.currentInactiveStyle())
+					}
+					buffer.WriteRune('"')
+				}
+
+				buffer.WriteString(` onclick="tableRowClickEvent(this, event)"`)
 			}
+
+			if cssBuilder.buffer.Len() > 0 {
+				buffer.WriteString(` style="`)
+				buffer.WriteString(cssBuilder.buffer.String())
+				buffer.WriteString(`"`)
+			}
+			buffer.WriteString(">")
 
 			for column := 0; column < columnCount; column++ {
 				ignore := false
@@ -748,7 +934,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 											return value
 
 										case string:
-											if value, ok = session.resolveConstants(value); ok {
+											if value, ok := session.resolveConstants(value); ok {
 												if n, err := strconv.Atoi(value); err == nil {
 													return n
 												}
@@ -780,6 +966,23 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 					buffer.WriteRune('<')
 					buffer.WriteString(cellTag)
+					buffer.WriteString(` id="`)
+					buffer.WriteString(table.cellID(row, column))
+					buffer.WriteString(`" class="ruiView`)
+
+					if selectionMode == CellSelection && row == table.current.Row && column == table.current.Column {
+						buffer.WriteRune(' ')
+						if table.HasFocus() {
+							buffer.WriteString(table.currentStyle())
+						} else {
+							buffer.WriteString(table.currentInactiveStyle())
+						}
+					}
+					buffer.WriteRune('"')
+
+					if selectionMode == CellSelection {
+						buffer.WriteString(` onclick="tableCellClickEvent(this, event)"`)
+					}
 
 					if columnSpan > 1 {
 						buffer.WriteString(` colspan="`)
@@ -1087,6 +1290,10 @@ func (table *tableViewData) getCellBorder() BorderProperty {
 	return nil
 }
 
+func (table *tableViewData) getCurrent() CellIndex {
+	return table.current
+}
+
 func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
 	table.viewData.cssViewStyle(builder, table.Session())
 
@@ -1101,30 +1308,93 @@ func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
 }
 
 func (table *tableViewData) ReloadTableData() {
+	if content := table.content(); content != nil {
+		updateProperty(table.htmlID(), "data-rows", strconv.Itoa(content.RowCount()), table.Session())
+		updateProperty(table.htmlID(), "data-columns", strconv.Itoa(content.ColumnCount()), table.Session())
+	}
 	updateInnerHTML(table.htmlID(), table.Session())
 }
 
-func (cell *tableCellView) Set(tag string, value interface{}) bool {
-	return cell.set(strings.ToLower(tag), value)
+func (table *tableViewData) onItemResize(self View, index string, x, y, width, height float64) {
+	if n := strings.IndexRune(index, '-'); n > 0 {
+		if row, err := strconv.Atoi(index[:n]); err == nil {
+			if column, err := strconv.Atoi(index[n+1:]); err == nil {
+				if content := table.content(); content != nil {
+					i := row*content.ColumnCount() + column
+					if i < len(table.cellFrame) {
+						table.cellFrame[i].Left = x
+						table.cellFrame[i].Top = y
+						table.cellFrame[i].Width = width
+						table.cellFrame[i].Height = height
+					}
+				}
+			} else {
+				ErrorLog(err.Error())
+			}
+		} else {
+			ErrorLog(err.Error())
+		}
+	} else {
+		ErrorLogF(`Invalid cell index: %s`, index)
+	}
 }
 
-func (cell *tableCellView) set(tag string, value interface{}) bool {
-	switch tag {
-	case VerticalAlign:
-		tag = TableVerticalAlign
+func (table *tableViewData) CellFrame(row, column int) Frame {
+	if content := table.content(); content != nil {
+		i := row*content.ColumnCount() + column
+		if i < len(table.cellFrame) {
+			return table.cellFrame[i]
+		}
 	}
-	return cell.viewData.set(tag, value)
-}
-
-func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
-	session := cell.Session()
-	cell.viewData.cssViewStyle(builder, session)
-
-	if value, ok := enumProperty(cell, TableVerticalAlign, session, 0); ok {
-		builder.add("vertical-align", enumProperties[TableVerticalAlign].values[value])
-	}
+	return Frame{}
 }
 
 func (table *tableViewData) Views() []View {
 	return table.cellViews
+}
+
+func (table *tableViewData) handleCommand(self View, command string, data DataObject) bool {
+	switch command {
+	case "currentRow":
+		if row, ok := dataIntProperty(data, "row"); ok && row != table.current.Row {
+			table.current.Row = row
+			for _, listener := range table.rowSelectedListener {
+				listener(table, row)
+			}
+		}
+
+	case "currentCell":
+		if row, ok := dataIntProperty(data, "row"); ok {
+			if column, ok := dataIntProperty(data, "column"); ok {
+				if row != table.current.Row || column != table.current.Column {
+					table.current.Row = row
+					table.current.Column = column
+					for _, listener := range table.cellSelectedListener {
+						listener(table, row, column)
+					}
+				}
+			}
+		}
+
+	case "rowClick":
+		if row, ok := dataIntProperty(data, "row"); ok {
+			for _, listener := range table.rowClickedListener {
+				listener(table, row)
+			}
+		}
+
+	case "cellClick":
+		if row, ok := dataIntProperty(data, "row"); ok {
+			if column, ok := dataIntProperty(data, "column"); ok {
+				for _, listener := range table.cellClickedListener {
+					listener(table, row, column)
+				}
+			}
+		}
+
+	default:
+		return table.viewData.handleCommand(self, command, data)
+	}
+
+	return true
 }

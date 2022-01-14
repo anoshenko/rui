@@ -32,6 +32,8 @@ GridLayout {
 						DropDownList { row = 5, column = 1, id = tableFootStyle, current = 0, items = ["none", "tableFoot1", "rui.Params"]},
 						Checkbox { row = 6, column = 0:1, id = tableRowStyle, content = "Row style" },
 						Checkbox { row = 7, column = 0:1, id = tableColumnStyle, content = "Column style" },
+						TextView { row = 8, text = "Selection mode" },
+						DropDownList { row = 8, column = 1, id = tableSelectionMode, current = 0, items = ["none", "cell", "row"]},
 					]
 				}
 			]
@@ -92,6 +94,10 @@ func createTableViewDemo(session rui.Session) rui.View {
 			rui.Set(view, "demoTableView1", borderTag, nil)
 		}
 	}
+
+	rui.Set(view, "tableSelectionMode", rui.DropDownEvent, func(list rui.DropDownList, number int) {
+		rui.Set(view, "demoTableView1", rui.SelectionMode, number)
+	})
 
 	rui.Set(view, "tableCellGap", rui.DropDownEvent, func(list rui.DropDownList, number int) {
 		if number == 0 {

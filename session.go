@@ -378,14 +378,10 @@ func (session *sessionData) handleResize(data DataObject) {
 				}
 				if viewID, ok := obj.PropertyValue("id"); ok {
 					if n := strings.IndexRune(viewID, '-'); n > 0 {
-						if index, err := strconv.Atoi(viewID[n+1:]); err == nil {
-							if view := session.viewByHTMLID(viewID[:n]); view != nil {
-								view.onItemResize(view, index, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
-							} else {
-								ErrorLogF(`View with id == %s not found`, viewID[:n])
-							}
+						if view := session.viewByHTMLID(viewID[:n]); view != nil {
+							view.onItemResize(view, viewID[n+1:], getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
 						} else {
-							ErrorLogF(`Invalid view id == %s not found`, viewID)
+							ErrorLogF(`View with id == %s not found`, viewID[:n])
 						}
 					} else if view := session.viewByHTMLID(viewID); view != nil {
 						view.onResize(view, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))

@@ -1,3 +1,7 @@
+# v0.5.0
+
+* Added HasFocus function to the View interface
+
 # v0.4.0
 
 * Added SetTitle and SetTitleColor function to the Session interface
