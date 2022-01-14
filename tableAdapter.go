@@ -18,6 +18,14 @@ type TableCellStyle interface {
 	CellStyle(row, column int) Params
 }
 
+type TableAllowCellSelection interface {
+	AllowCellSelection(row, column int) bool
+}
+
+type TableAllowRowSelection interface {
+	AllowRowSelection(row int) bool
+}
+
 type SimpleTableAdapter interface {
 	TableAdapter
 	TableCellStyle

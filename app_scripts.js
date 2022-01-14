@@ -1402,7 +1402,7 @@ function tableViewBlurEvent(element, event) {
 function setTableCellCursor(element, row, column) {
 	const cellID = element.id + "-" + row + "-" + column;
 	var cell = document.getElementById(cellID);
-	if (!cell) {
+	if (!cell || cell.getAttribute("data-disabled")) {
 		return false;
 	}
 
@@ -1573,7 +1573,7 @@ function tableViewCellKeyDownEvent(element, event) {
 function setTableRowCursor(element, row) {
 	const tableRowID = element.id + "-" + row;
 	var tableRow = document.getElementById(tableRowID);
-	if (!tableRow) {
+	if (!tableRow || tableRow.getAttribute("data-disabled")) {
 		return false;
 	}
 

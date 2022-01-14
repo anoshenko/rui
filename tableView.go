@@ -196,6 +196,12 @@ const (
 	// The main listener format: func(TableView, int), where the second argument is the row number.
 	TableRowSelectedEvent = "table-row-selected"
 
+	// AllowSelection is the constant for the "allow-selection" property tag.
+	// The "allow-selection" property sets the adapter which specifies styles of each table row.
+	// This property can be assigned or by an implementation of TableAllowCellSelection
+	// or TableAllowRowSelection interface.
+	AllowSelection = "allow-selection"
+
 	// NoneSelection is the value of "selection-mode" property: the selection is forbidden.
 	NoneSelection = 0
 	// CellSelection is the value of "selection-mode" property: the selection of a single cell only is enabled.
@@ -293,7 +299,7 @@ func (table *tableViewData) remove(tag string) {
 		table.propertyChanged(tag)
 
 	case Gap, CellBorder, CellPadding, RowStyle, ColumnStyle, CellStyle,
-		HeadHeight, HeadStyle, FootHeight, FootStyle:
+		HeadHeight, HeadStyle, FootHeight, FootStyle, AllowSelection:
 		if _, ok := table.properties[tag]; ok {
 			delete(table.properties, tag)
 			table.propertyChanged(tag)
@@ -497,6 +503,19 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 
+	case AllowSelection:
+		switch value.(type) {
+		case TableAllowCellSelection:
+			table.properties[tag] = value
+
+		case TableAllowRowSelection:
+			table.properties[tag] = value
+
+		default:
+			notCompatibleType(tag, value)
+			return false
+		}
+
 	case Current:
 		switch value := value.(type) {
 		case int:
@@ -559,7 +578,8 @@ func (table *tableViewData) propertyChanged(tag string) {
 		case Content, RowStyle, ColumnStyle, CellStyle, CellPadding, CellBorder,
 			HeadHeight, HeadStyle, FootHeight, FootStyle,
 			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
-			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent, TableRowSelectedEvent:
+			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
+			TableRowSelectedEvent, AllowSelection:
 			table.ReloadTableData()
 
 		case Gap:
@@ -861,6 +881,26 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	ignorCells := []struct{ row, column int }{}
 	selectionMode := GetSelectionMode(table, "")
 
+	var allowCellSelection TableAllowCellSelection = nil
+	if allow, ok := adapter.(TableAllowCellSelection); ok {
+		allowCellSelection = allow
+	}
+	if value := table.getRaw(AllowSelection); value != nil {
+		if style, ok := value.(TableAllowCellSelection); ok {
+			allowCellSelection = style
+		}
+	}
+
+	var allowRowSelection TableAllowRowSelection = nil
+	if allow, ok := adapter.(TableAllowRowSelection); ok {
+		allowRowSelection = allow
+	}
+	if value := table.getRaw(AllowSelection); value != nil {
+		if style, ok := value.(TableAllowRowSelection); ok {
+			allowRowSelection = style
+		}
+	}
+
 	tableCSS := func(startRow, endRow int, cellTag string, cellBorder BorderProperty, cellPadding BoundsProperty) {
 		for row := startRow; row < endRow; row++ {
 
@@ -891,6 +931,10 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				}
 
 				buffer.WriteString(` onclick="tableRowClickEvent(this, event)"`)
+
+				if allowRowSelection != nil && !allowRowSelection.AllowRowSelection(row) {
+					buffer.WriteString(` data-disabled="1"`)
+				}
 			}
 
 			if cssBuilder.buffer.Len() > 0 {
@@ -982,6 +1026,9 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 					if selectionMode == CellSelection {
 						buffer.WriteString(` onclick="tableCellClickEvent(this, event)"`)
+						if allowCellSelection != nil && !allowCellSelection.AllowCellSelection(row, column) {
+							buffer.WriteString(` data-disabled="1"`)
+						}
 					}
 
 					if columnSpan > 1 {
