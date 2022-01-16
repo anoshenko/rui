@@ -668,8 +668,6 @@ function selectListItem(element, item, needSendMessage) {
 		if (current) {
 			if (current.classList) {
 				current.classList.remove(focusStyle, blurStyle);
-			} else { // IE < 10
-				current.className = "ruiListItem";
 			}
 			if (sendMessage) {
 				message = "itemUnselected{session=" + sessionID + ",id=" + element.id + "}";
@@ -681,14 +679,10 @@ function selectListItem(element, item, needSendMessage) {
 		if (element === document.activeElement) {
 			if (item.classList) {
 				item.classList.add(focusStyle);
-			} else { // IE < 10
-				item.className = "ruiListItem " + focusStyle
 			}
 		} else {
 			if (item.classList) {
 				item.classList.add(blurStyle);
-			} else { // IE < 10
-				item.className = "ruiListItem " + blurStyle
 			}
 		}
 
@@ -700,6 +694,12 @@ function selectListItem(element, item, needSendMessage) {
 			}
 		}
 
+		if (item.scrollIntoViewIfNeeded) {
+			item.scrollIntoViewIfNeeded()
+		} else {
+			item.scrollIntoView({block: "nearest", inline: "nearest"});
+		}
+	/*
 		var left = item.offsetLeft - element.offsetLeft;
 		if (left < element.scrollLeft) {
 			element.scrollLeft = left;
@@ -718,7 +718,7 @@ function selectListItem(element, item, needSendMessage) {
 		var bottom = top + item.offsetHeight
 		if (bottom > element.scrollTop + element.clientHeight) {
 			element.scrollTop = bottom - element.clientHeight;
-		}
+		}*/
 	}
 
 	if (needSendMessage && message != undefined) {
@@ -1418,6 +1418,11 @@ function setTableCellCursor(element, row, column) {
 
 	cell.classList.add(focusStyle);
 	element.setAttribute("data-current", cellID);
+	if (cell.scrollIntoViewIfNeeded) {
+		cell.scrollIntoViewIfNeeded()
+	} else {
+		cell.scrollIntoView({block: "nearest", inline: "nearest"});
+	}
 
 	sendMessage("currentCell{session=" + sessionID + ",id=" + element.id + 
 			",row=" + row + ",column=" + column + "}");
@@ -1466,108 +1471,107 @@ function moveTableCellCursor(element, row, column, dr, dc) {
 
 function tableViewCellKeyDownEvent(element, event) {
 	const key = getKey(event);
-	if (key) {
-		const currentId = element.getAttribute("data-current");
-		if (currentId) {
-			const elements = currentId.split("-");
-			if (elements.length >= 3) {
-				const row = parseInt(elements[1], 10)
-				const column = parseInt(elements[2], 10)
-
-				switch (key) {
-				case " ": 
-				case "Enter":
-					sendMessage("cellClick{session=" + sessionID + ",id=" + element.id + 
-								",row=" + row + ",column=" + column + "}");
-					break;
-	
-				case "ArrowLeft":
-					moveTableCellCursor(element, row, column, 0, -1)
-					break;
-				
-				case "ArrowRight":
-					moveTableCellCursor(element, row, column, 0, 1)
-					break;
-		
-				case "ArrowDown":
-					moveTableCellCursor(element, row, column, 1, 0)
-					break;
-	
-				case "ArrowUp":
-					moveTableCellCursor(element, row, column, -1, 0)
-					break;
-	
-				case "Home":
-					// TODO
-					break;
-	
-				case "End":
-					/*var newRow = rowCount-1;
-					while (newRow > row) {
-						if (setTableRowCursor(element, newRow)) {
-							break;
-						}
-						newRow--;
-					}*/
-					// TODO
-					break;
-	
-				case "PageUp":
-					// TODO
-					break;
-	
-				case "PageDown":
-					// TODO
-					break;
-	
-				default:
-					return;
-				}
-				
-				event.stopPropagation();
-				event.preventDefault();
-				return;
-			}
-		}
-		
-		switch (key) {
-		case "ArrowLeft":
-		case "ArrowRight":
-		case "ArrowDown":
-		case "ArrowUp":
-		case "Home":
-		case "End":
-		case "PageUp":
-		case "PageDown":
-			const rows = element.getAttribute("data-rows");
-			const columns = element.getAttribute("data-columns");
-			if (rows && columns) {
-				const rowCount = parseInt(rows);
-				const columnCount = parseInt(rows);
-				row = 0;
-				while (row < rowCount) {
-					column = 0;
-					while (columns < columnCount) {
-						if (setTableCellCursor(element, row, column)) {
-							event.stopPropagation();
-							event.preventDefault();
-							return;
-						}
-						column++;
-					}
-					row++;
-				}
-			}
-			break;
-
-		default:
-			return;
-		}
-		
+	if (!key) {
+		return;
 	}
 
-	event.stopPropagation();
-	event.preventDefault();
+	const currentId = element.getAttribute("data-current");
+	if (!currentId || currentId == "") {
+		switch (key) {
+			case "ArrowLeft":
+			case "ArrowRight":
+			case "ArrowDown":
+			case "ArrowUp":
+			case "Home":
+			case "End":
+			case "PageUp":
+			case "PageDown":
+				const rows = element.getAttribute("data-rows");
+				const columns = element.getAttribute("data-columns");
+				if (rows && columns) {
+					const rowCount = parseInt(rows);
+					const columnCount = parseInt(rows);
+					row = 0;
+					while (row < rowCount) {
+						column = 0;
+						while (columns < columnCount) {
+							if (setTableCellCursor(element, row, column)) {
+								event.stopPropagation();
+								event.preventDefault();
+								return;
+							}
+							column++;
+						}
+						row++;
+					}
+				}
+				event.stopPropagation();
+				event.preventDefault();
+				break;
+		}
+		return;
+	}
+
+	const elements = currentId.split("-");
+	if (elements.length >= 3) {
+		const row = parseInt(elements[1], 10)
+		const column = parseInt(elements[2], 10)
+
+		switch (key) {
+			case " ": 
+			case "Enter":
+				sendMessage("cellClick{session=" + sessionID + ",id=" + element.id + 
+							",row=" + row + ",column=" + column + "}");
+				break;
+
+			case "ArrowLeft":
+				moveTableCellCursor(element, row, column, 0, -1)
+				break;
+			
+			case "ArrowRight":
+				moveTableCellCursor(element, row, column, 0, 1)
+				break;
+
+			case "ArrowDown":
+				moveTableCellCursor(element, row, column, 1, 0)
+				break;
+
+			case "ArrowUp":
+				moveTableCellCursor(element, row, column, -1, 0)
+				break;
+
+			case "Home":
+				// TODO
+				break;
+
+			case "End":
+				/*var newRow = rowCount-1;
+				while (newRow > row) {
+					if (setTableRowCursor(element, newRow)) {
+						break;
+					}
+					newRow--;
+				}*/
+				// TODO
+				break;
+
+			case "PageUp":
+				// TODO
+				break;
+
+			case "PageDown":
+				// TODO
+				break;
+
+			default:
+				return;
+		}
+
+		event.stopPropagation();
+		event.preventDefault();
+	} else {
+		element.setAttribute("data-current", "");
+	}
 }
 
 function setTableRowCursor(element, row) {
@@ -1590,6 +1594,11 @@ function setTableRowCursor(element, row) {
 
 	tableRow.classList.add(focusStyle);
 	element.setAttribute("data-current", tableRowID);
+	if (tableRow.scrollIntoViewIfNeeded) {
+		tableRow.scrollIntoViewIfNeeded()
+	} else {
+		tableRow.scrollIntoView({block: "nearest", inline: "nearest"});
+	}
 
 	sendMessage("currentRow{session=" + sessionID + ",id=" + element.id + ",row=" + row + "}");
 	return true;

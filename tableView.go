@@ -9,7 +9,7 @@ import (
 const (
 	// TableVerticalAlign is the constant for the "table-vertical-align" property tag.
 	// The "table-vertical-align" int property sets the vertical alignment of the content inside a table cell.
-	// Valid values are LeftAlign (0), RightAlign (1), CenterAlign (2), and BaselineAlign (3, 4)
+	// Valid values are TopAlign (0), BottomAlign (1), CenterAlign (2), and BaselineAlign (3, 4)
 	TableVerticalAlign = "table-vertical-align"
 
 	// HeadHeight is the constant for the "head-height" property tag.
@@ -221,7 +221,12 @@ type TableView interface {
 	ParanetView
 	ReloadTableData()
 	CellFrame(row, column int) Frame
+
+	content() TableAdapter
 	getCurrent() CellIndex
+	getRowStyle() TableRowStyle
+	getColumnStyle() TableColumnStyle
+	getCellStyle() TableCellStyle
 }
 
 type tableViewData struct {
@@ -298,8 +303,8 @@ func (table *tableViewData) remove(tag string) {
 		table.removeBoundsSide(CellPadding, tag)
 		table.propertyChanged(tag)
 
-	case Gap, CellBorder, CellPadding, RowStyle, ColumnStyle, CellStyle,
-		HeadHeight, HeadStyle, FootHeight, FootStyle, AllowSelection:
+	case SelectionMode, TableVerticalAlign, Gap, CellBorder, CellPadding, RowStyle,
+		ColumnStyle, CellStyle, HeadHeight, HeadStyle, FootHeight, FootStyle, AllowSelection:
 		if _, ok := table.properties[tag]; ok {
 			delete(table.properties, tag)
 			table.propertyChanged(tag)
@@ -324,10 +329,6 @@ func (table *tableViewData) remove(tag string) {
 	case Current:
 		table.current.Row = -1
 		table.current.Column = -1
-		table.propertyChanged(tag)
-
-	case SelectionMode:
-		table.viewData.remove(tag)
 		table.propertyChanged(tag)
 
 	default:
@@ -489,17 +490,12 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 
-	case CellBorder, CellBorderStyle, CellBorderColor, CellBorderWidth,
+	case SelectionMode, TableVerticalAlign, CellBorder, CellBorderStyle, CellBorderColor, CellBorderWidth,
 		CellBorderLeft, CellBorderLeftStyle, CellBorderLeftColor, CellBorderLeftWidth,
 		CellBorderRight, CellBorderRightStyle, CellBorderRightColor, CellBorderRightWidth,
 		CellBorderTop, CellBorderTopStyle, CellBorderTopColor, CellBorderTopWidth,
 		CellBorderBottom, CellBorderBottomStyle, CellBorderBottomColor, CellBorderBottomWidth:
 		if !table.viewData.set(tag, value) {
-			return false
-		}
-
-	case SelectionMode:
-		if !table.setEnumProperty(SelectionMode, value, enumProperties[SelectionMode].values) {
 			return false
 		}
 
@@ -575,8 +571,8 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 func (table *tableViewData) propertyChanged(tag string) {
 	if table.created {
 		switch tag {
-		case Content, RowStyle, ColumnStyle, CellStyle, CellPadding, CellBorder,
-			HeadHeight, HeadStyle, FootHeight, FootStyle,
+		case Content, TableVerticalAlign, RowStyle, ColumnStyle, CellStyle, CellPadding,
+			CellBorder, HeadHeight, HeadStyle, FootHeight, FootStyle,
 			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
 			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
 			TableRowSelectedEvent, AllowSelection:
@@ -851,18 +847,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	table.cellFrame = make([]Frame, rowCount*columnCount)
 
 	rowStyle := table.getRowStyle()
-
-	var cellStyle1 TableCellStyle = nil
-	if style, ok := adapter.(TableCellStyle); ok {
-		cellStyle1 = style
-	}
-
-	var cellStyle2 TableCellStyle = nil
-	if value := table.getRaw(CellStyle); value != nil {
-		if style, ok := value.(TableCellStyle); ok {
-			cellStyle2 = style
-		}
-	}
+	cellStyle := table.getCellStyle()
 
 	session := table.Session()
 
@@ -900,6 +885,14 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 			allowRowSelection = style
 		}
 	}
+
+	vAlignCss := enumProperties[TableVerticalAlign].cssValues
+	vAlignValue := GetTableVerticalAlign(table, "")
+	if vAlignValue < 0 || vAlignValue >= len(vAlignCss) {
+		vAlignValue = 0
+	}
+
+	vAlign := vAlignCss[vAlignValue]
 
 	tableCSS := func(startRow, endRow int, cellTag string, cellBorder BorderProperty, cellPadding BoundsProperty) {
 		for row := startRow; row < endRow; row++ {
@@ -968,41 +961,37 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						view.set(Padding, cellPadding)
 					}
 
-					appendFrom := func(cellStyle TableCellStyle) {
-						if cellStyle != nil {
-							if styles := cellStyle.CellStyle(row, column); styles != nil {
-								for tag, value := range styles {
-									valueToInt := func() int {
-										switch value := value.(type) {
-										case int:
-											return value
+					if cellStyle != nil {
+						if styles := cellStyle.CellStyle(row, column); styles != nil {
+							for tag, value := range styles {
+								valueToInt := func() int {
+									switch value := value.(type) {
+									case int:
+										return value
 
-										case string:
-											if value, ok := session.resolveConstants(value); ok {
-												if n, err := strconv.Atoi(value); err == nil {
-													return n
-												}
+									case string:
+										if value, ok := session.resolveConstants(value); ok {
+											if n, err := strconv.Atoi(value); err == nil {
+												return n
 											}
 										}
-										return 0
 									}
+									return 0
+								}
 
-									switch tag = strings.ToLower(tag); tag {
-									case RowSpan:
-										rowSpan = valueToInt()
+								switch tag = strings.ToLower(tag); tag {
+								case RowSpan:
+									rowSpan = valueToInt()
 
-									case ColumnSpan:
-										columnSpan = valueToInt()
+								case ColumnSpan:
+									columnSpan = valueToInt()
 
-									default:
-										view.set(tag, value)
-									}
+								default:
+									view.set(tag, value)
 								}
 							}
 						}
 					}
-					appendFrom(cellStyle1)
-					appendFrom(cellStyle2)
 
 					if len(view.properties) > 0 {
 						view.cssStyle(&view, &cssBuilder)
@@ -1162,13 +1151,17 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				if style, ok := session.resolveConstants(value); ok {
 					buffer.WriteString(` class="`)
 					buffer.WriteString(style)
-					buffer.WriteString(`">`)
+					buffer.WriteString(`" style="vertical-align: `)
+					buffer.WriteString(vAlign)
+					buffer.WriteString(`;">`)
+
 					return table.cellBorderFromStyle(style), table.cellPaddingFromStyle(style)
 				}
 
 			case Params:
 				cssBuilder.buffer.Reset()
 				view.Clear()
+				view.Set(TableVerticalAlign, vAlignValue)
 				for tag, val := range value {
 					view.Set(tag, val)
 				}
@@ -1203,7 +1196,10 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				return border, padding
 			}
 		}
-		buffer.WriteRune('>')
+
+		buffer.WriteString(` style="vertical-align: `)
+		buffer.WriteString(vAlign)
+		buffer.WriteString(`;">`)
 		return nil, nil
 	}
 
@@ -1231,7 +1227,9 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	if rowCount > footHeight+headHeight {
-		buffer.WriteString("<tbody>")
+		buffer.WriteString(`<tbody  style="vertical-align: `)
+		buffer.WriteString(vAlign)
+		buffer.WriteString(`;">`)
 		tableCSS(headHeight, rowCount-footHeight, "td", cellBorder, cellPadding)
 		buffer.WriteString("</tbody>")
 	}

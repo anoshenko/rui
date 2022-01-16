@@ -928,6 +928,8 @@ func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder)
 		buffer.WriteString(strconv.Itoa(current))
 		buffer.WriteRune('"')
 	}
+
+	listView.viewData.htmlProperties(self, buffer)
 }
 
 /*

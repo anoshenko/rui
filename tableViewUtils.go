@@ -23,6 +23,70 @@ func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
 	}
 }
 
+// GetTableContent returns a TableAdapter which defines the TableView content.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetTableContent(view View, subviewID string) TableAdapter {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		if tableView, ok := view.(TableView); ok {
+			return tableView.content()
+		}
+	}
+
+	return nil
+}
+
+// GetTableRowStyle returns a TableRowStyle which defines styles of TableView rows.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetTableRowStyle(view View, subviewID string) TableRowStyle {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		if tableView, ok := view.(TableView); ok {
+			return tableView.getRowStyle()
+		}
+	}
+
+	return nil
+}
+
+// GetTableColumnStyle returns a TableColumnStyle which defines styles of TableView columns.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetTableColumnStyle(view View, subviewID string) TableColumnStyle {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		if tableView, ok := view.(TableView); ok {
+			return tableView.getColumnStyle()
+		}
+	}
+
+	return nil
+}
+
+// GetTableCellStyle returns a TableCellStyle which defines styles of TableView cells.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetTableCellStyle(view View, subviewID string) TableCellStyle {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		if tableView, ok := view.(TableView); ok {
+			return tableView.getCellStyle()
+		}
+	}
+
+	return nil
+}
+
 // GetSelectionMode returns the mode of the TableView elements selection.
 // Valid values are NoneSelection (0), CellSelection (1), and RowSelection (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
@@ -38,28 +102,36 @@ func GetSelectionMode(view View, subviewID string) int {
 	return NoneSelection
 }
 
-// GetSelectionMode returns the index of the TableView selected row.
-// If there is no selected row, then a value less than 0 are returned.
+// GetTableVerticalAlign returns a vertical align in a TavleView cell. Returns one of next values:
+// TopAlign (0), BottomAlign (1), CenterAlign (2), and BaselineAlign (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCurrentTableRow(view View, subviewID string) int {
+func GetTableVerticalAlign(view View, subviewID string) int {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
-
 	if view != nil {
-		if selectionMode := GetSelectionMode(view, ""); selectionMode != NoneSelection {
-			if tableView, ok := view.(TableView); ok {
-				return tableView.getCurrent().Row
-			}
+		if result, ok := enumStyledProperty(view, TableVerticalAlign, TopAlign); ok {
+			return result
 		}
 	}
-	return -1
+	return TopAlign
 }
 
-// GetCurrentTableCell returns the row and column index of the TableView selected cell.
-// If there is no selected cell, then a value of the row and column index less than 0 is returned.
+//
+//HeadHeight = "head-height"
+
+//HeadStyle = "head-style"
+
+//FootHeight = "foot-height"
+
+//FootStyle = "foot-style"
+
+// GetTableCurrent returns the row and column index of the TableView selected cell/row.
+// If there is no selected cell/row or the selection mode is NoneSelection (0),
+// then a value of the row and column index less than 0 is returned.
+// If the selection mode is RowSelection (2) then the returned column index is less than 0.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCurrentTableCell(view View, subviewID string) CellIndex {
+func GetTableCurrent(view View, subviewID string) CellIndex {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}

@@ -36,6 +36,8 @@ GridLayout {
 						DropDownList { row = 8, column = 1, id = tableSelectionMode, current = 0, items = ["none", "cell", "row"]},
 						Checkbox { row = 9, column = 0:1, id = tableDisableHead, content = "Disable head selection" },
 						Checkbox { row = 10, column = 0:1, id = tableDisableFoot, content = "Disable foot selection" },
+						TextView { row = 11, text = "Vertical align in cells" },
+						DropDownList { row = 11, column = 1, id = tableVerticalAlign, current = 0, items = ["top", "bottom", "center", "baseline"]},
 					]
 				}
 			]
@@ -272,6 +274,10 @@ func createTableViewDemo(session rui.Session) rui.View {
 		} else {
 			rui.Set(view, "demoTableView1", rui.RowStyle, nil)
 		}
+	})
+
+	rui.Set(view, "tableVerticalAlign", rui.DropDownEvent, func(list rui.DropDownList, number int) {
+		rui.Set(view, "demoTableView1", rui.TableVerticalAlign, number)
 	})
 
 	return view
