@@ -117,14 +117,31 @@ func GetTableVerticalAlign(view View, subviewID string) int {
 	return TopAlign
 }
 
-//
-//HeadHeight = "head-height"
+// GetTableHeadHeight returns the number of rows in the table header.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetTableHeadHeight(view View, subviewID string) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view != nil {
+		headHeight, _ := intStyledProperty(view, HeadHeight, 0)
+		return headHeight
+	}
+	return 0
+}
 
-//HeadStyle = "head-style"
-
-//FootHeight = "foot-height"
-
-//FootStyle = "foot-style"
+// GetTableFootHeight returns the number of rows in the table footer.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetTableFootHeight(view View, subviewID string) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view != nil {
+		headHeight, _ := intStyledProperty(view, FootHeight, 0)
+		return headHeight
+	}
+	return 0
+}
 
 // GetTableCurrent returns the row and column index of the TableView selected cell/row.
 // If there is no selected cell/row or the selection mode is NoneSelection (0),

@@ -1130,8 +1130,8 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		buffer.WriteString("</colgroup>")
 	}
 
-	headHeight, _ := intProperty(table, HeadHeight, table.Session(), 0)
-	footHeight, _ := intProperty(table, FootHeight, table.Session(), 0)
+	headHeight := GetTableHeadHeight(table, "")
+	footHeight := GetTableFootHeight(table, "")
 	cellBorder := table.getCellBorder()
 	cellPadding := table.boundsProperty(CellPadding)
 	if cellPadding == nil {
