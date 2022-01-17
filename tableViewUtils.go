@@ -87,10 +87,10 @@ func GetTableCellStyle(view View, subviewID string) TableCellStyle {
 	return nil
 }
 
-// GetSelectionMode returns the mode of the TableView elements selection.
+// GetTableSelectionMode returns the mode of the TableView elements selection.
 // Valid values are NoneSelection (0), CellSelection (1), and RowSelection (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetSelectionMode(view View, subviewID string) int {
+func GetTableSelectionMode(view View, subviewID string) int {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
@@ -154,7 +154,7 @@ func GetTableCurrent(view View, subviewID string) CellIndex {
 	}
 
 	if view != nil {
-		if selectionMode := GetSelectionMode(view, ""); selectionMode != NoneSelection {
+		if selectionMode := GetTableSelectionMode(view, ""); selectionMode != NoneSelection {
 			if tableView, ok := view.(TableView); ok {
 				return tableView.getCurrent()
 			}

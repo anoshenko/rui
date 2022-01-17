@@ -286,7 +286,7 @@ func (table *tableViewData) normalizeTag(tag string) string {
 }
 
 func (table *tableViewData) Focusable() bool {
-	return GetSelectionMode(table, "") != NoneSelection
+	return GetTableSelectionMode(table, "") != NoneSelection
 }
 
 func (table *tableViewData) Get(tag string) interface{} {
@@ -594,7 +594,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 			htmlID := table.htmlID()
 			session := table.Session()
 
-			switch GetSelectionMode(table, "") {
+			switch GetTableSelectionMode(table, "") {
 			case CellSelection:
 				updateProperty(htmlID, "tabindex", "0", session)
 				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
@@ -790,7 +790,7 @@ func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteRune('"')
 	}
 
-	if selectionMode := GetSelectionMode(table, ""); selectionMode != NoneSelection {
+	if selectionMode := GetTableSelectionMode(table, ""); selectionMode != NoneSelection {
 		buffer.WriteString(` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`)
 		buffer.WriteString(table.currentStyle())
 		buffer.WriteString(`" data-bluritemstyle="`)
@@ -864,7 +864,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	view.Init(session)
 
 	ignorCells := []struct{ row, column int }{}
-	selectionMode := GetSelectionMode(table, "")
+	selectionMode := GetTableSelectionMode(table, "")
 
 	var allowCellSelection TableAllowCellSelection = nil
 	if allow, ok := adapter.(TableAllowCellSelection); ok {
