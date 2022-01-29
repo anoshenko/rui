@@ -27,17 +27,22 @@ var defaultThemeText string
 
 // Application - app interface
 type Application interface {
-	// Start - start the application life cycle
-	Start(addr string)
 	Finish()
 	nextSessionID() int
 	removeSession(id int)
 }
 
 type application struct {
-	name, icon        string
+	params            AppParams
 	createContentFunc func(Session) SessionContent
 	sessions          map[int]Session
+}
+
+// AppParams defines parameters of the app
+type AppParams struct {
+	Title      string
+	TitleColor Color
+	Icon       string
 }
 
 func (app *application) getStartPage() string {
@@ -49,12 +54,19 @@ func (app *application) getStartPage() string {
 	<head>
 		<meta charset="utf-8">
 		<title>`)
-	buffer.WriteString(app.name)
+	buffer.WriteString(app.params.Title)
 	buffer.WriteString("</title>")
-	if app.icon != "" {
+	if app.params.Icon != "" {
 		buffer.WriteString(`
 		<link rel="icon" href="`)
-		buffer.WriteString(app.icon)
+		buffer.WriteString(app.params.Icon)
+		buffer.WriteString(`">`)
+	}
+
+	if app.params.TitleColor != 0 {
+		buffer.WriteString(`
+		<meta name="theme-color" content="`)
+		buffer.WriteString(app.params.TitleColor.cssString())
 		buffer.WriteString(`">`)
 	}
 
@@ -78,9 +90,8 @@ func (app *application) getStartPage() string {
 	return buffer.String()
 }
 
-func (app *application) init(name, icon string) {
-	app.name = name
-	app.icon = icon
+func (app *application) init(params AppParams) {
+	app.params = params
 	app.sessions = map[int]Session{}
 }
 
@@ -277,12 +288,14 @@ func (app *application) startSession(params DataObject, events chan DataObject, 
 	return session, answerText
 }
 
-// NewApplication - create the new application of the single view type.
-func NewApplication(name, icon string, createContentFunc func(Session) SessionContent) Application {
+// NewApplication - create the new application and start it
+func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
 	app := new(application)
-	app.init(name, icon)
+	app.init(params)
 	app.createContentFunc = createContentFunc
-	return app
+
+	http.Handle("/", app)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
 
 func OpenBrowser(url string) bool {
