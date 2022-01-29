@@ -42,9 +42,19 @@ function socketOpen() {
 		}
 	}
 
-	const lang = window.navigator.languages;
+	const lang = window.navigator.language;
 	if (lang) {
-		message += ",languages=\"" + lang + "\"";
+		message += ",language=\"" + lang + "\"";
+	}
+
+	const langs = window.navigator.languages;
+	if (langs) {
+		message += ",languages=\"" + langs + "\"";
+	}
+
+	const userAgent = window.navigator.userAgent
+	if (userAgent) {
+		message += ",user-agent=\"" + userAgent + "\"";
 	}
 
 	const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");

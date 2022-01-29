@@ -33,6 +33,8 @@ type Session interface {
 	Color(tag string) (Color, bool)
 	// SetCustomTheme set the custom theme
 	SetCustomTheme(name string) bool
+	// UserAgent() returns the "user-agent" text of the client browser
+	UserAgent() string
 	// Language returns the current session language
 	Language() string
 	// SetLanguage set the current session language
@@ -106,6 +108,7 @@ type sessionData struct {
 	touchScreen      bool
 	textDirection    int
 	pixelRatio       float64
+	userAgent        string
 	language         string
 	languages        []string
 	checkboxOff      string
@@ -148,10 +151,18 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 		session.touchScreen = (value == "1" || value == "true")
 	}
 
+	if value, ok := params.PropertyValue("user-agent"); ok {
+		session.userAgent = value
+	}
+
 	if value, ok := params.PropertyValue("direction"); ok {
 		if value == "rtl" {
 			session.textDirection = RightToLeftDirection
 		}
+	}
+
+	if value, ok := params.PropertyValue("language"); ok {
+		session.language = value
 	}
 
 	if value, ok := params.PropertyValue("languages"); ok {

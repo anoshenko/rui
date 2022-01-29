@@ -328,6 +328,10 @@ func (session *sessionData) radiobuttonOnImage() string {
 	return session.radiobuttonOn
 }
 
+func (session *sessionData) UserAgent() string {
+	return session.userAgent
+}
+
 func (session *sessionData) Language() string {
 	if session.language != "" {
 		return session.language
