@@ -17,7 +17,7 @@ GridLayout {
 			content = [
 				GridLayout {
 					id = mouseEventsTest, cell-horizontal-align = center, cell-vertical-align = center,
-					height = 150%,
+					height = 100%,
 					border = _{ style = solid, width = 1px, color = gray},
 					content = [
 						TextView {
