@@ -21,28 +21,33 @@
 	}
 
 	func main() {
-		app := rui.NewApplication("Hello world", "icon.svg", createHelloWorldSession)
-		app.Start("localhost:8000")
+		rui.StartApp("localhost:8000", createHelloWorldSession, rui.AppParams{
+			Title: "Hello world",
+			Icon:  "icon.svg",
+		})
 	}
 
-В функции main создается rui приложение и запускается основной цикл.
-При создании приложения задаются 3 параметра: имя приложения, имя иконки и функция createHelloWorldSession.
-Функция createHelloWorldSession создает структуру реализующую интерфейс SessionContent:
+В функции main вызывается функция StartApp. Она создает rui приложение и запускает его основной цикл.
+Функция StartApp имеет 3 параметра:
+1) IP адрес по которому будет доступно приложение (в нашем примере это "localhost:8000")
+2) Фуекция создает структуру реализующую интерфейс SessionContent
+3) Дополнительные опциональные параметры (в нашем примере это заголовок и имя файла иконки)
+
+Интерфейс SessionContent объявлен как:
 
 	type SessionContent interface {
 		CreateRootView(session rui.Session) rui.View
 	}
 
-Для каждой новой сессии создается свой экземпляр структуры.
-
 Функция CreateRootView интерфейса SessionContent создает корневой элемент.
+
 Когда пользователь обращается к приложению набрав в браузере адрес "localhost:8000", то создается новая сессия,
 для нее создается новый экземпляр структуры helloWorldSession и в конце вызывается функция CreateRootView.
 Функция createRootView возвращает представление строки текста, создаваемое с помощью функции NewTextView.
 
 Если вы хотите чтобы приложение было видно вне вашего компьютера, то поменяйте адрес в функции Start:
 
-	app.Start(rui.GetLocalIP() + ":80")
+	rui.StartApp(rui.GetLocalIP() + ":80", ...
 
 ## Используемые типы данных
 

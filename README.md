@@ -21,13 +21,19 @@ and the browser is used as a thin client. WebSocket is used for client-server co
 	}
 
 	func main() {
-		app := rui.NewApplication("Hello world", "icon.svg", createHelloWorldSession)
-		app.Start("localhost:8000")
+		rui.StartApp("localhost:8000", createHelloWorldSession, rui.AppParams{
+			Title:      "Hello world",
+			Icon:       "icon.svg",
+		})
 	}
 
-In the main function, a rui application is created and the main loop is started.
-When creating an application, 3 parameters are set: the name of the application, the name of the icon, and the createHelloWorldSession function.
-The createHelloWorldSession function creates a structure that implements the SessionContent interface:
+In the main function, the StartApp function is called. It creates a rui app and runs its main loop.
+The StartApp function has 3 parameters:
+1) IP address where the application will be available (in our example it is "localhost:8000")
+2) The function creates a structure that implements the SessionContent interface
+3) Additional optional parameters (in our example, this is the title and the icon file name)
+
+The SessionContent interface is declared as:
 
 	type SessionContent interface {
 		CreateRootView(session rui.Session) rui.View
@@ -42,7 +48,7 @@ The createRootView function returns a representation of a text that is created u
 
 If you want the application to be visible outside your computer, then change the address in the Start function:
 
-	app.Start(rui.GetLocalIP() + ":80")
+	rui.StartApp(rui.GetLocalIP() + ":80", ...
 
 ## Used data types
 
