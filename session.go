@@ -33,6 +33,10 @@ type Session interface {
 	Color(tag string) (Color, bool)
 	// SetCustomTheme set the custom theme
 	SetCustomTheme(name string) bool
+	// UserAgent returns the "user-agent" text of the client browser
+	UserAgent() string
+	// RemoteAddr returns the client address.
+	RemoteAddr() string
 	// Language returns the current session language
 	Language() string
 	// SetLanguage set the current session language
@@ -106,6 +110,7 @@ type sessionData struct {
 	touchScreen      bool
 	textDirection    int
 	pixelRatio       float64
+	userAgent        string
 	language         string
 	languages        []string
 	checkboxOff      string
@@ -148,10 +153,18 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 		session.touchScreen = (value == "1" || value == "true")
 	}
 
+	if value, ok := params.PropertyValue("user-agent"); ok {
+		session.userAgent = value
+	}
+
 	if value, ok := params.PropertyValue("direction"); ok {
 		if value == "rtl" {
 			session.textDirection = RightToLeftDirection
 		}
+	}
+
+	if value, ok := params.PropertyValue("language"); ok {
+		session.language = value
 	}
 
 	if value, ok := params.PropertyValue("languages"); ok {
@@ -378,14 +391,10 @@ func (session *sessionData) handleResize(data DataObject) {
 				}
 				if viewID, ok := obj.PropertyValue("id"); ok {
 					if n := strings.IndexRune(viewID, '-'); n > 0 {
-						if index, err := strconv.Atoi(viewID[n+1:]); err == nil {
-							if view := session.viewByHTMLID(viewID[:n]); view != nil {
-								view.onItemResize(view, index, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
-							} else {
-								ErrorLogF(`View with id == %s not found`, viewID[:n])
-							}
+						if view := session.viewByHTMLID(viewID[:n]); view != nil {
+							view.onItemResize(view, viewID[n+1:], getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
 						} else {
-							ErrorLogF(`Invalid view id == %s not found`, viewID)
+							ErrorLogF(`View with id == %s not found`, viewID[:n])
 						}
 					} else if view := session.viewByHTMLID(viewID); view != nil {
 						view.onResize(view, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
@@ -422,4 +431,8 @@ func (session *sessionData) SetTitle(title string) {
 
 func (session *sessionData) SetTitleColor(color Color) {
 	session.runScript(`setTitleColor("` + color.cssString() + `");`)
+}
+
+func (session *sessionData) RemoteAddr() string {
+	return session.brige.remoteAddr()
 }

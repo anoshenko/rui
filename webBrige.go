@@ -14,6 +14,7 @@ type WebBrige interface {
 	RunGetterScript(script string) DataObject
 	AnswerReceived(answer DataObject)
 	Close()
+	remoteAddr() string
 }
 
 type wsBrige struct {
@@ -121,4 +122,8 @@ func (brige *wsBrige) AnswerReceived(answer DataObject) {
 	} else {
 		ErrorLog("answerID not found")
 	}
+}
+
+func (brige *wsBrige) remoteAddr() string {
+	return brige.conn.RemoteAddr().String()
 }

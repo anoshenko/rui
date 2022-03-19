@@ -168,6 +168,10 @@ func (player *mediaPlayerData) Init(session Session) {
 	player.tag = "MediaPlayer"
 }
 
+func (player *mediaPlayerData) Focusable() bool {
+	return true
+}
+
 func (player *mediaPlayerData) Remove(tag string) {
 	player.remove(strings.ToLower(tag))
 }

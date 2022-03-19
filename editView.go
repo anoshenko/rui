@@ -63,6 +63,10 @@ func (edit *editViewData) Init(session Session) {
 	edit.tag = "EditView"
 }
 
+func (edit *editViewData) Focusable() bool {
+	return true
+}
+
 func (edit *editViewData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

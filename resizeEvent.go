@@ -18,7 +18,7 @@ func (view *viewData) onResize(self View, x, y, width, height float64) {
 	}
 }
 
-func (view *viewData) onItemResize(self View, index int, x, y, width, height float64) {
+func (view *viewData) onItemResize(self View, index string, x, y, width, height float64) {
 }
 
 func (view *viewData) setFrameListener(tag string, value interface{}) bool {

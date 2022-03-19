@@ -148,11 +148,15 @@ func (customView *CustomViewData) Scroll() Frame {
 	return customView.superView.Scroll()
 }
 
+func (customView *CustomViewData) HasFocus() bool {
+	return customView.superView.HasFocus()
+}
+
 func (customView *CustomViewData) onResize(self View, x, y, width, height float64) {
 	customView.superView.onResize(customView.superView, x, y, width, height)
 }
 
-func (customView *CustomViewData) onItemResize(self View, index int, x, y, width, height float64) {
+func (customView *CustomViewData) onItemResize(self View, index string, x, y, width, height float64) {
 	customView.superView.onItemResize(customView.superView, index, x, y, width, height)
 }
 

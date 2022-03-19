@@ -213,24 +213,32 @@ theme {
 			text-color = @ruiPopupTextColor,
 			radius = 4px,
 			shadow = _{spread-radius=4px, blur=16px, color=#80808080},
-		}
+		},
 		ruiPopupTitle {
 			background-color = @ruiPopupTitleColor,
 			text-color = @ruiPopupTitleTextColor,
 			min-height = 24px,
-		}
+		},
 		ruiMessageText {
 			padding-left = 64px,
 			padding-right = 64px,
 			padding-top = 32px,
 			padding-bottom = 32px,
-		}
+		},
 		ruiPopupMenuItem {
 			padding-top = 4px,
 			padding-bottom = 4px,
 			padding-left = 8px,
 			padding-right = 8px,
-		}
+		},
+		ruiCurrentTableCell {
+			background-color=@ruiSelectedColor,
+			text-color=@ruiSelectedTextColor,
+		},
+		ruiCurrentTableCellFocused {
+			background-color=@ruiHighlightColor,
+			text-color=@ruiHighlightTextColor,
+		},
 	],
 }
 

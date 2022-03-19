@@ -412,6 +412,11 @@ var enumProperties = map[string]struct {
 		"",
 		[]string{"none", "metadata", "auto"},
 	},
+	SelectionMode: {
+		[]string{"none", "cell", "row"},
+		"",
+		[]string{"none", "cell", "row"},
+	},
 }
 
 func notCompatibleType(tag string, value interface{}) {

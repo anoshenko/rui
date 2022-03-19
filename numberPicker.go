@@ -50,6 +50,10 @@ func (picker *numberPickerData) Init(session Session) {
 	picker.numberChangedListeners = []func(NumberPicker, float64){}
 }
 
+func (picker *numberPickerData) Focusable() bool {
+	return true
+}
+
 func (picker *numberPickerData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

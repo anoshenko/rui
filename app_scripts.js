@@ -42,9 +42,19 @@ function socketOpen() {
 		}
 	}
 
-	const lang = window.navigator.languages;
+	const lang = window.navigator.language;
 	if (lang) {
-		message += ",languages=\"" + lang + "\"";
+		message += ",language=\"" + lang + "\"";
+	}
+
+	const langs = window.navigator.languages;
+	if (langs) {
+		message += ",languages=\"" + langs + "\"";
+	}
+
+	const userAgent = window.navigator.userAgent
+	if (userAgent) {
+		message += ",user-agent=\"" + userAgent + "\"";
 	}
 
 	const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -615,12 +625,13 @@ function selectDropDownListItem(elementId, number) {
 
 function listItemClickEvent(element, event) {
 	event.stopPropagation();
+	
 	var selected = false;
 	if (element.classList) {
-		selected = (element.classList.contains("ruiListItemFocused") || element.classList.contains("ruiListItemSelected"));
-	} else {
-		selected = element.className.indexOf("ruiListItemFocused") >= 0 || element.className.indexOf("ruiListItemSelected") >= 0;
-	}
+		const focusStyle = getListFocusedItemStyle(element);
+		const blurStyle = getListSelectedItemStyle(element);
+		selected = (element.classList.contains(focusStyle) || element.classList.contains(blurStyle));
+	} 
 
 	var list = element.parentNode.parentNode
 	if (list) {
@@ -640,26 +651,33 @@ function getListItemNumber(itemId) {
 	}
 }
 
+function getStyleAttribute(element, attr, defValue) {
+	var result = element.getAttribute(attr);
+	if (result) {
+		return result;
+	}
+	return defValue;
+}
+
+function getListFocusedItemStyle(element) {
+	return getStyleAttribute(element, "data-focusitemstyle", "ruiListItemFocused");
+}
+
+function getListSelectedItemStyle(element) {
+	return getStyleAttribute(element, "data-bluritemstyle", "ruiListItemSelected");
+}
+
 function selectListItem(element, item, needSendMessage) {
 	var currentId = element.getAttribute("data-current");
 	var message;
-	var focusStyle = element.getAttribute("data-focusitemstyle");
-	var blurStyle = element.getAttribute("data-bluritemstyle");
-
-	if (!focusStyle) {
-		focusStyle = "ruiListItemFocused"
-	}
-	if (!blurStyle) {
-		blurStyle = "ruiListItemSelected"
-	}
+	const focusStyle = getListFocusedItemStyle(element);
+	const blurStyle = getListSelectedItemStyle(element);
 
 	if (currentId) {
 		var current = document.getElementById(currentId);
 		if (current) {
 			if (current.classList) {
 				current.classList.remove(focusStyle, blurStyle);
-			} else { // IE < 10
-				current.className = "ruiListItem";
 			}
 			if (sendMessage) {
 				message = "itemUnselected{session=" + sessionID + ",id=" + element.id + "}";
@@ -671,14 +689,10 @@ function selectListItem(element, item, needSendMessage) {
 		if (element === document.activeElement) {
 			if (item.classList) {
 				item.classList.add(focusStyle);
-			} else { // IE < 10
-				item.className = "ruiListItem " + focusStyle
 			}
 		} else {
 			if (item.classList) {
 				item.classList.add(blurStyle);
-			} else { // IE < 10
-				item.className = "ruiListItem " + blurStyle
 			}
 		}
 
@@ -690,6 +704,12 @@ function selectListItem(element, item, needSendMessage) {
 			}
 		}
 
+		if (item.scrollIntoViewIfNeeded) {
+			item.scrollIntoViewIfNeeded()
+		} else {
+			item.scrollIntoView({block: "nearest", inline: "nearest"});
+		}
+	/*
 		var left = item.offsetLeft - element.offsetLeft;
 		if (left < element.scrollLeft) {
 			element.scrollLeft = left;
@@ -708,7 +728,7 @@ function selectListItem(element, item, needSendMessage) {
 		var bottom = top + item.offsetHeight
 		if (bottom > element.scrollTop + element.clientHeight) {
 			element.scrollTop = bottom - element.clientHeight;
-		}
+		}*/
 	}
 
 	if (needSendMessage && message != undefined) {
@@ -801,24 +821,29 @@ function findBottomListItem(list, x, y) {
 	return result
 }
 
-function listViewKeyDownEvent(element, event) {
-	var key;
+function getKey(event) {
 	if (event.key) {
-		key = event.key;
-	} else if (event.keyCode) {
+		return event.key;
+	}
+
+	if (event.keyCode) {
 		switch (event.keyCode) {
-			case 13: key = "Enter"; break;
-			case 32: key = " "; break;
-			case 33: key = "PageUp"; break;
-			case 34: key = "PageDown"; break;
-			case 35: key = "End"; break;
-			case 36: key = "Home"; break;
-			case 37: key = "ArrowLeft"; break;
-			case 38: key = "ArrowUp"; break;
-			case 39: key = "ArrowRight"; break;
-			case 40: key = "ArrowDown"; break;
+			case 13: return "Enter";
+			case 32: return " ";
+			case 33: return "PageUp";
+			case 34: return "PageDown";
+			case 35: return "End";
+			case 36: return "Home";
+			case 37: return "ArrowLeft";
+			case 38: return "ArrowUp";
+			case 39: return "ArrowRight";
+			case 40: return "ArrowDown";
 		}
 	}
+}
+
+function listViewKeyDownEvent(element, event) {
+	const key = getKey(event);
 	if (key) {
 		var currentId = element.getAttribute("data-current");
 		var current
@@ -885,21 +910,10 @@ function listViewFocusEvent(element, event) {
 	if (currentId) {
 		var current = document.getElementById(currentId);
 		if (current) {
-			var focusStyle = element.getAttribute("data-focusitemstyle");
-			var blurStyle = element.getAttribute("data-bluritemstyle");
-			if (!focusStyle) {
-				focusStyle = "ruiListItemFocused"
-			}
-			if (!blurStyle) {
-				blurStyle = "ruiListItemSelected"
-			}
-			
 			if (current.classList) {
-				current.classList.remove(blurStyle);
-				current.classList.add(focusStyle);
-			} else { // IE < 10
-				current.className = "ruiListItem " + focusStyle;
-			}
+				current.classList.remove(getListSelectedItemStyle(element));
+				current.classList.add(getListFocusedItemStyle(element));
+			} 
 		}
 	}
 }
@@ -909,20 +923,9 @@ function listViewBlurEvent(element, event) {
 	if (currentId) {
 		var current = document.getElementById(currentId);
 		if (current) {
-			var focusStyle = element.getAttribute("data-focusitemstyle");
-			var blurStyle = element.getAttribute("data-bluritemstyle");
-			if (!focusStyle) {
-				focusStyle = "ruiListItemFocused"
-			}
-			if (!blurStyle) {
-				blurStyle = "ruiListItemSelected"
-			}
-
 			if (current.classList) {
-				current.classList.remove(focusStyle);
-				current.classList.add(blurStyle);
-			} else { // IE < 10
-				current.className = "ruiListItem " + blurStyle;
+				current.classList.remove(getListFocusedItemStyle(element));
+				current.classList.add(getListSelectedItemStyle(element));
 			}
 		}
 	}
@@ -1372,4 +1375,397 @@ function setTitleColor(color) {
 
 function detailsEvent(element) {
 	sendMessage("details-open{session=" + sessionID + ",id=" + element.id + ",open=" + (element.open ? "1}" : "0}"));
+}
+
+function getTableFocusedItemStyle(element) {
+	return getStyleAttribute(element, "data-focusitemstyle", "ruiCurrentTableCellFocused");
+}
+
+function getTableSelectedItemStyle(element) {
+	return getStyleAttribute(element, "data-bluritemstyle", "ruiCurrentTableCell");
+}
+
+function tableViewFocusEvent(element, event) {
+	var currentId = element.getAttribute("data-current");
+	if (currentId) {
+		var current = document.getElementById(currentId);
+		if (current) {
+			if (current.classList) {
+				current.classList.remove(getTableSelectedItemStyle(element));
+				current.classList.add(getTableFocusedItemStyle(element));
+			} 
+		}
+	}
+}
+
+function tableViewBlurEvent(element, event) {
+	var currentId = element.getAttribute("data-current");
+	if (currentId) {
+		var current = document.getElementById(currentId);
+		if (current && current.classList) {
+			current.classList.remove(getTableFocusedItemStyle(element));
+			current.classList.add(getTableSelectedItemStyle(element));
+		}
+	}
+}
+
+function setTableCellCursor(element, row, column) {
+	const cellID = element.id + "-" + row + "-" + column;
+	var cell = document.getElementById(cellID);
+	if (!cell || cell.getAttribute("data-disabled")) {
+		return false;
+	}
+
+	const focusStyle = getTableFocusedItemStyle(element);
+	const oldCellID = element.getAttribute("data-current");
+	if (oldCellID) {
+		const oldCell = document.getElementById(oldCellID);
+		if (oldCell && oldCell.classList) {
+			oldCell.classList.remove(focusStyle);
+			oldCell.classList.remove(getTableSelectedItemStyle(element));
+		}
+	}
+
+	cell.classList.add(focusStyle);
+	element.setAttribute("data-current", cellID);
+	if (cell.scrollIntoViewIfNeeded) {
+		cell.scrollIntoViewIfNeeded()
+	} else {
+		cell.scrollIntoView({block: "nearest", inline: "nearest"});
+	}
+
+	sendMessage("currentCell{session=" + sessionID + ",id=" + element.id + 
+			",row=" + row + ",column=" + column + "}");
+	return true;
+}
+
+function moveTableCellCursor(element, row, column, dr, dc) {
+	const rows = element.getAttribute("data-rows");
+	if (!rows) {
+		return;
+	}
+	const columns = element.getAttribute("data-columns");
+	if (!columns) {
+		return;
+	}
+
+	const rowCount = parseInt(rows);
+	const columnCount = parseInt(columns);
+	
+	row += dr;
+	column += dc;
+	while (row >= 0 && row < rowCount && column >= 0 && column < columnCount) {
+		if (setTableCellCursor(element, row, column)) {
+			return;
+		} else if (dr == 0) {
+			var r2 = row - 1;
+			while (r2 >= 0) {
+				if (setTableCellCursor(element, r2, column)) {
+					return;
+				}
+				r2--;
+			}
+		} else if (dc == 0) {
+			var c2 = column - 1;
+			while (c2 >= 0) {
+				if (setTableCellCursor(element, row, c2)) {
+					return;
+				}
+				c2--;
+			}
+		}
+		row += dr;
+		column += dc;
+	}
+}
+
+function tableViewCellKeyDownEvent(element, event) {
+	const key = getKey(event);
+	if (!key) {
+		return;
+	}
+
+	const currentId = element.getAttribute("data-current");
+	if (!currentId || currentId == "") {
+		switch (key) {
+			case "ArrowLeft":
+			case "ArrowRight":
+			case "ArrowDown":
+			case "ArrowUp":
+			case "Home":
+			case "End":
+			case "PageUp":
+			case "PageDown":
+				const rows = element.getAttribute("data-rows");
+				const columns = element.getAttribute("data-columns");
+				if (rows && columns) {
+					const rowCount = parseInt(rows);
+					const columnCount = parseInt(rows);
+					row = 0;
+					while (row < rowCount) {
+						column = 0;
+						while (columns < columnCount) {
+							if (setTableCellCursor(element, row, column)) {
+								event.stopPropagation();
+								event.preventDefault();
+								return;
+							}
+							column++;
+						}
+						row++;
+					}
+				}
+				event.stopPropagation();
+				event.preventDefault();
+				break;
+		}
+		return;
+	}
+
+	const elements = currentId.split("-");
+	if (elements.length >= 3) {
+		const row = parseInt(elements[1], 10)
+		const column = parseInt(elements[2], 10)
+
+		switch (key) {
+			case " ": 
+			case "Enter":
+				sendMessage("cellClick{session=" + sessionID + ",id=" + element.id + 
+							",row=" + row + ",column=" + column + "}");
+				break;
+
+			case "ArrowLeft":
+				moveTableCellCursor(element, row, column, 0, -1)
+				break;
+			
+			case "ArrowRight":
+				moveTableCellCursor(element, row, column, 0, 1)
+				break;
+
+			case "ArrowDown":
+				moveTableCellCursor(element, row, column, 1, 0)
+				break;
+
+			case "ArrowUp":
+				moveTableCellCursor(element, row, column, -1, 0)
+				break;
+
+			case "Home":
+				// TODO
+				break;
+
+			case "End":
+				/*var newRow = rowCount-1;
+				while (newRow > row) {
+					if (setTableRowCursor(element, newRow)) {
+						break;
+					}
+					newRow--;
+				}*/
+				// TODO
+				break;
+
+			case "PageUp":
+				// TODO
+				break;
+
+			case "PageDown":
+				// TODO
+				break;
+
+			default:
+				return;
+		}
+
+		event.stopPropagation();
+		event.preventDefault();
+	} else {
+		element.setAttribute("data-current", "");
+	}
+}
+
+function setTableRowCursor(element, row) {
+	const tableRowID = element.id + "-" + row;
+	var tableRow = document.getElementById(tableRowID);
+	if (!tableRow || tableRow.getAttribute("data-disabled")) {
+		return false;
+	}
+
+	const focusStyle = getTableFocusedItemStyle(element);
+	const oldRowID = element.getAttribute("data-current");
+	if (oldRowID) {
+		const oldRow = document.getElementById(oldRowID);
+		if (oldRow && oldRow.classList) {
+			oldRow.classList.remove(focusStyle);
+			oldRow.classList.remove(getTableSelectedItemStyle(element));
+
+		}
+	}
+
+	tableRow.classList.add(focusStyle);
+	element.setAttribute("data-current", tableRowID);
+	if (tableRow.scrollIntoViewIfNeeded) {
+		tableRow.scrollIntoViewIfNeeded()
+	} else {
+		tableRow.scrollIntoView({block: "nearest", inline: "nearest"});
+	}
+
+	sendMessage("currentRow{session=" + sessionID + ",id=" + element.id + ",row=" + row + "}");
+	return true;
+}
+
+function moveTableRowCursor(element, row, dr) {
+	const rows = element.getAttribute("data-rows");
+	if (!rows) {
+		return;
+	}
+
+	const rowCount = parseInt(rows);
+	row += dr;
+	while (row >= 0 && row < rowCount) {
+		if (setTableRowCursor(element, row)) {
+			return;
+		}
+		row += dr;
+	}
+}
+
+function tableViewRowKeyDownEvent(element, event) {
+	const key = getKey(event);
+	if (key) {
+		const currentId = element.getAttribute("data-current");
+		if (currentId) {
+			const elements = currentId.split("-");
+			if (elements.length >= 2) {
+				const row = parseInt(elements[1], 10);
+				switch (key) {
+					case " ": 
+					case "Enter":
+						sendMessage("rowClick{session=" + sessionID + ",id=" + element.id + ",row=" + row + "}");
+						break;
+		
+					case "ArrowDown":
+						moveTableRowCursor(element, row, 1)
+						break;
+		
+					case "ArrowUp":
+						moveTableRowCursor(element, row, -1)
+						break;
+		
+					case "Home":
+						var newRow = 0;
+						while (newRow < row) {
+							if (setTableRowCursor(element, newRow)) {
+								break;
+							}
+							newRow++;
+						}
+						break;
+		
+					case "End":
+						var newRow = rowCount-1;
+						while (newRow > row) {
+							if (setTableRowCursor(element, newRow)) {
+								break;
+							}
+							newRow--;
+						}
+						break;
+		
+					case "PageUp":
+						// TODO
+						break;
+		
+					case "PageDown":
+						// TODO
+						break;
+		
+					default:
+						return;
+				}
+				event.stopPropagation();
+				event.preventDefault();
+				return;
+			}
+		}
+
+		switch (key) {
+			case "ArrowLeft":
+			case "ArrowRight":
+			case "ArrowDown":
+			case "ArrowUp":
+			case "Home":
+			case "End":
+			case "PageUp":
+			case "PageDown":
+				const rows = element.getAttribute("data-rows");
+				if (rows) {
+					const rowCount = parseInt(rows);
+					row = 0;
+					while (row < rowCount) {
+						if (setTableRowCursor(element, row)) {
+							break;
+						}
+						row++;
+					}
+				}
+				break;
+
+			default:
+				return;
+		}
+	} 
+
+	event.stopPropagation();
+	event.preventDefault();
+}
+
+function tableCellClickEvent(element, event) {
+	event.preventDefault();
+
+	const elements = element.id.split("-");
+	if (elements.length < 3) {
+		return
+	}
+
+	const tableID = elements[0];
+	const row = parseInt(elements[1], 10);
+	const column = parseInt(elements[2], 10);
+	const table = document.getElementById(tableID);
+	if (table) {
+		const selection = table.getAttribute("data-selection");
+		if (selection == "cell") {
+			const currentID = table.getAttribute("data-current");
+			if (!currentID || currentID != element.ID) {
+				setTableCellCursor(table, row, column)
+			}
+		}
+	}
+
+	sendMessage("cellClick{session=" + sessionID + ",id=" + tableID + 
+				",row=" + row + ",column=" + column + "}");
+}
+
+function tableRowClickEvent(element, event) {
+	event.preventDefault();
+
+	const elements = element.id.split("-");
+	if (elements.length < 2) {
+		return
+	}
+
+	const tableID = elements[0];
+	const row = parseInt(elements[1], 10);
+	const table = document.getElementById(tableID);
+	if (table) {
+		const selection = table.getAttribute("data-selection");
+		if (selection == "cell") {
+			const currentID = table.getAttribute("data-current");
+			if (!currentID || currentID != element.ID) {
+				setTableRowCursor(table, row)
+			}
+		}
+	}
+
+	sendMessage("rowClick{session=" + sessionID + ",id=" + tableID + ",row=" + row + "}");
 }

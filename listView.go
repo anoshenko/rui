@@ -929,6 +929,8 @@ func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder)
 		buffer.WriteString(strconv.Itoa(current))
 		buffer.WriteRune('"')
 	}
+
+	listView.viewData.htmlProperties(self, buffer)
 }
 
 /*
@@ -1084,14 +1086,12 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 func (listView *listViewData) handleCommand(self View, command string, data DataObject) bool {
 	switch command {
 	case "itemSelected":
-		if text, ok := data.PropertyValue(`number`); ok {
-			if number, err := strconv.Atoi(text); err == nil {
-				listView.properties[Current] = number
-				for _, listener := range listView.selectedListeners {
-					listener(listView, number)
-				}
-				listView.propertyChangedEvent(Current)
+		if number, ok := dataIntProperty(data, `number`); ok {
+			listView.properties[Current] = number
+			for _, listener := range listView.selectedListeners {
+				listener(listView, number)
 			}
+			listView.propertyChangedEvent(Current)
 		}
 
 	case "itemUnselected":
@@ -1163,9 +1163,14 @@ func (listView *listViewData) onItemClick() {
 	}
 }
 
-func (listView *listViewData) onItemResize(self View, index int, x, y, width, height float64) {
-	if index >= 0 && index < len(listView.itemFrame) {
-		listView.itemFrame[index] = Frame{Left: x, Top: y, Width: width, Height: height}
+func (listView *listViewData) onItemResize(self View, index string, x, y, width, height float64) {
+	n, err := strconv.Atoi(index)
+	if err != nil {
+		ErrorLog(err.Error())
+	} else if n >= 0 && n < len(listView.itemFrame) {
+		listView.itemFrame[n] = Frame{Left: x, Top: y, Width: width, Height: height}
+	} else {
+		ErrorLogF(`Invalid ListView item index: %d`, n)
 	}
 }
 

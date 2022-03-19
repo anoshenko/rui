@@ -1,6 +1,6 @@
 # RUI library
 
-The RUI (Remoute User Interface) library is designed to create web applications in the go language.
+The RUI (Remote User Interface) library is designed to create web applications in the go language.
 
 The peculiarity of the library is that all data processing is carried out on the server,
 and the browser is used as a thin client. WebSocket is used for client-server communication.
@@ -21,13 +21,19 @@ and the browser is used as a thin client. WebSocket is used for client-server co
 	}
 
 	func main() {
-		app := rui.NewApplication("Hello world", "icon.svg", createHelloWorldSession)
-		app.Start("localhost:8000")
+		rui.StartApp("localhost:8000", createHelloWorldSession, rui.AppParams{
+			Title:      "Hello world",
+			Icon:       "icon.svg",
+		})
 	}
 
-In the main function, a rui application is created and the main loop is started.
-When creating an application, 3 parameters are set: the name of the application, the name of the icon, and the createHelloWorldSession function.
-The createHelloWorldSession function creates a structure that implements the SessionContent interface:
+In the main function, the StartApp function is called. It creates a rui app and runs its main loop.
+The StartApp function has 3 parameters:
+1) IP address where the application will be available (in our example it is "localhost:8000")
+2) The function creates a structure that implements the SessionContent interface
+3) Additional optional parameters (in our example, this is the title and the icon file name)
+
+The SessionContent interface is declared as:
 
 	type SessionContent interface {
 		CreateRootView(session rui.Session) rui.View
@@ -42,7 +48,7 @@ The createRootView function returns a representation of a text that is created u
 
 If you want the application to be visible outside your computer, then change the address in the Start function:
 
-	app.Start(rui.GetLocalIP() + ":80")
+	rui.StartApp(rui.GetLocalIP() + ":80", ...
 
 ## Used data types
 
@@ -768,12 +774,12 @@ For this, the following properties of the SizeUnit type are used:
 
 If the x- and y-radii are the same, then you can use the auxiliary properties
 
-| Property       | Constant     | Description                |
-|----------------|--------------|----------------------------|
-| "top-left"     | TopLeft      | top left corner radius     |
-| "top-right"    | TopRight     | top right corner radius    |
-| "bottom-left"  | BottomLeft   | bottom left corner radius  |
-| "bottom-right" | BottomRight  | bottom right corner radius |
+| Property       | Constant    | Description                |
+|----------------|-------------|----------------------------|
+| "top-left"     | TopLeft     | top left corner radius     |
+| "top-right"    | TopRight    | top right corner radius    |
+| "bottom-left"  | BottomLeft  | bottom left corner radius  |
+| "bottom-right" | BottomRight | bottom right corner radius |
 
 To set all radii to the same values, use the "x" and "y" properties
 
@@ -1301,7 +1307,7 @@ Lines are split on newlines, on "br" elements, and optionally to fill inline box
 * Lines are wrapped on any spaces, including in the middle of a sequence of spaces.
 * Spaces take up space and do not hang at the ends of lines, which means they affect the internal dimensions (min-content and max-content).
 
-The table below shows the behavior of various values ​​of the "white-space" property.
+The table below shows the behavior of various values of the "white-space" property.
 
 |                       | New lines | Spaces and Tabs | Text wrapping | End of line spaces | End-of-line other space separators |
 |-----------------------|-----------|-----------------|---------------|--------------------|------------------------------------|
@@ -1448,7 +1454,8 @@ You can get the value of this property using the function
 
 #### "text-indent" property
 
-The "text-indent" (TextIndent constant) SizeUnit property determines the size of the indent (empty space) before the first line of text.
+The "text-indent" (TextIndent constant) SizeUnit property determines the size of the indent (empty space) 
+before the first line of text.
 
 You can get the value of this property using the function
 
@@ -1514,7 +1521,7 @@ You can get the value of this property using the function
 #### "writing-mode" property
 The "writing-mode" (WritingMode constant) int property defines how the lines of text are arranged 
 vertically or horizontally, as well as the direction in which the lines are displayed.
-Possible values ​​are:
+Possible values are:
 
 | Value | Constant              | Description                                                      |
 |:-----:|-----------------------|------------------------------------------------------------------|
@@ -1871,8 +1878,8 @@ The Touch structure describes a single touch and has the following fields
 | ClientY       | float64 | The vertical position of the mouse relative to the upper left corner of the application                 |
 | ScreenX       | float64 | Horizontal position of the mouse relative to the upper left corner of the screen                        |
 | ScreenY       | float64 | Vertical position of the mouse relative to the upper left corner of the screen                          |
-| RadiusX       | float64 | The x-radius of the ellipse, in pixels, that most closely delimits the area of ​​contact with the screen. |
-| RadiusY       | float64 | The y-radius of the ellipse, in pixels, that most closely delimits the area of ​​contact with the screen. |
+| RadiusX       | float64 | The x-radius of the ellipse, in pixels, that most closely delimits the area of contact with the screen. |
+| RadiusY       | float64 | The y-radius of the ellipse, in pixels, that most closely delimits the area of contact with the screen. |
 | RotationAngle | float64 | The angle (in degrees) to rotate the ellipse clockwise, described by the radiusX and radiusY parameters, to best cover the contact area between the user and the surface. |
 | Force         | float64 | The amount of pressure from 0.0 (no pressure) to 1.0 (maximum pressure) that the user applies to the surface. |
 
@@ -2038,8 +2045,8 @@ relative to each other. The property can take the following values:
 | 3     | EndToStartOrientation | Child elements are laid out in a line from end to beginning. |
 
 The start and end positions for StartToEndOrientation and EndToStartOrientation depend on the value 
-of the "text-direction" property. For languages ​​written from right to left (Arabic, Hebrew), 
-the beginning is on the right, for other languages ​​- on the left.
+of the "text-direction" property. For languages written from right to left (Arabic, Hebrew), 
+the beginning is on the right, for other languages - on the left.
 
 ### "wrap" property
 
@@ -2610,7 +2617,7 @@ For a multi-line editor, auto-wrap mode can be enabled. The bool property "wrap"
 If "wrap" is off (default), then horizontal scrolling is used. 
 If enabled, the text wraps to a new line when the EditView border is reached.
 
-The following functions can be used to get the values ​​of the properties of an EditView:
+The following functions can be used to get the values of the properties of an EditView:
 
 	func GetText(view View, subviewID string) string
 	func GetHint(view View, subviewID string) string
@@ -2665,7 +2672,7 @@ The value of the "date-picker-value" property can also be read using the functio
 
 	func GetNumberPickerValue(view View, subviewID string) float64
 
-The entered values ​​may be subject to restrictions. For this, the following properties are used:
+The entered values may be subject to restrictions. For this, the following properties are used:
 
 | Property           | Constant         | Restriction       |
 |--------------------|------------------|-------------------|
@@ -2678,7 +2685,7 @@ Assignments to these properties can be the same value types as "date-picker-valu
 By default, if "date-picker-type" is equal to NumberSlider, the minimum value is 0, maximum is 1. 
 If "date-picker-type" is equal to NumberEditor, then the entered numbers, by default, are limited only by the range of float64 values.
 
-You can read the values ​​of these properties using the functions:
+You can read the values of these properties using the functions:
 
 	func GetNumberPickerMinMax(view View, subviewID string) (float64, float64)
 	func GetNumberPickerStep(view View, subviewID string) float64
@@ -3027,8 +3034,8 @@ will be positioned relative to each other. The property can take the following v
 | 3     | EndToStartOrientation | Elements are arranged in a row from end to beginning.  |
 
 The start and end positions for StartToEndOrientation and EndToStartOrientation depend 
-on the value of the "text-direction" property. For languages ​​written from right to left 
-(Arabic, Hebrew), the beginning is on the right, for other languages ​​- on the left.
+on the value of the "text-direction" property. For languages written from right to left 
+(Arabic, Hebrew), the beginning is on the right, for other languages - on the left.
 
 You can get the value of this property using the function
 
@@ -3224,6 +3231,7 @@ Cell(row, column int) returns the contents of a table cell. The Cell() function 
 * rui.Color
 * rui.View
 * fmt.Stringer
+* rui.VerticalTableJoin, rui.HorizontalTableJoin
 
 The "content" property can also be assigned the following data types
 
@@ -3277,11 +3285,11 @@ The "row-span" property specifies how many cells to merge vertically, and the "c
 
 In this case, the table will look like this
 
-|------|----------------|
-|      |                |
-|      |-------|--------|
-|      |       |        |
-|------|-------|--------|
+	|------+----------------|
+	|      |                |
+	|      +-------+--------|
+	|      |       |        |
+	|------+-------+--------|
 
 If [][]interface{} is used as the value of the "content" property, then empty structures are used to merge cells
 
@@ -3384,6 +3392,101 @@ the vertical alignment of data within a table cell. Valid values:
 | 3, 4  | BaselineAlign | "baseline" | Baseline alignment |
 
 For horizontal alignment, use the "text-align" property
+
+You can get the value of this property using the function
+
+	func GetTableVerticalAlign(view View, subviewID string) int
+
+### "selection-mode" property
+
+The "selection-mode" property (SelectionMode constant) of the int type determines the mode of selection (highlighting) of table elements. Available modes:
+
+* NoneSelection (0). Default mode. In this mode, you cannot select table elements. The table cannot receive input focus.
+
+* CellSelection (1). In this mode, one table cell can be selected (highlighted).
+The cell is selected interactively using the mouse or keyboard (using the cursor keys).
+In this mode, the table can receive input focus. In this mode, the table generates two types of events: "table-cell-selected" and "table-cell-clicked" (see below).
+
+* RowSelection (2). In this mode, only the entire table row can be selected (highlighted).
+In this mode, the table is similar to a ListView. The row is selected interactively 
+with the mouse or keyboard (using the cursor keys). In this mode, the table can receive input focus.
+In this mode, the table generates two types of events: "table-row-selected" and "table-row-clicked" (see below).
+
+You can get the value of this property using the function
+
+	func GetSelectionMode(view View, subviewID string) int
+
+### "current" property
+
+The "current" property (Current constant) sets the coordinates of the selected cell/row as a structure
+
+	type CellIndex struct {
+		Row, Column int
+	}
+
+If the cell is not selected, then the values of the Row and Column fields will be less than 0.
+
+In RowSelection mode, the value of the Column field is ignored. Also in this mode, 
+the "current" property can be assigned a value of type int (row index).
+
+You can get the value of this property using the function
+
+	func GetTableCurrent(view View, subviewID string) CellIndex
+
+### "allow-selection" property
+
+By default, you can select any cell/row of the table. However, it is often necessary to disable the selection of certain elements. The "selection-mode" property (SelectionMode constant) allows you to set such a rule.
+
+In CellSelection mode, this property is assigned the implementation of the interface
+
+	type TableAllowCellSelection interface {
+		AllowCellSelection(row, column int) bool
+	}
+
+and in RowSelection mode this property is assigned the implementation of the interface
+
+	type TableAllowRowSelection interface {
+		AllowRowSelection(row int) bool
+	}
+
+The AllowCellSelection/AllowRowSelection function must return "true" 
+if the cell/row can be selected and "false" if the cell/row cannot be selected.
+
+### "table-cell-selected" and "table-cell-clicked" events
+
+The "table-cell-selected" event is fired in CellSelection mode when the user has selected 
+a table cell with the mouse or keyboard.
+
+The "table-cell-clicked" event occurs if the user clicks on a table cell (and if it is not selected, 
+the "table-cell-selected" event occurs first) or presses the Enter or Space key.
+
+The main listener for these events has the following format:
+
+	func(TableView, int, int)
+
+where the second argument is the cell row index, the third argument is the column index
+
+You can also use a listener in the following format:
+
+	func(int, int)
+
+### "table-row-selected" and "table-row-clicked" events
+
+The "table-row-selected" event is fired in RowSelection mode when the user has selected 
+a table row with the mouse or keyboard.
+
+The "table-row-clicked" event occurs if the user clicks on a table row (if it is not selected, 
+the "table-row-selected" event fires first) or presses the Enter or Space key.
+
+The main listener for these events has the following format:
+
+	func(TableView, int)
+
+where the second argument is the row index.
+
+You can also use a listener in the following format:
+
+	func(int)
 
 ## Custom View
 

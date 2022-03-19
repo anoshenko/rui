@@ -39,6 +39,10 @@ func (list *dropDownListData) Init(session Session) {
 	list.dropDownListener = []func(DropDownList, int){}
 }
 
+func (list *dropDownListData) Focusable() bool {
+	return true
+}
+
 func (list *dropDownListData) Remove(tag string) {
 	list.remove(strings.ToLower(tag))
 }

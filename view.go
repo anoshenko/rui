@@ -58,6 +58,8 @@ type View interface {
 	SetAnimated(tag string, value interface{}, animation Animation) bool
 	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag string, listener func(View, string))
+	// HasFocus returns 'true' if the view has focus
+	HasFocus() bool
 
 	handleCommand(self View, command string, data DataObject) bool
 	htmlClass(disabled bool) string
@@ -73,7 +75,7 @@ type View interface {
 	getTransitions() Params
 
 	onResize(self View, x, y, width, height float64)
-	onItemResize(self View, index int, x, y, width, height float64)
+	onItemResize(self View, index string, x, y, width, height float64)
 	setNoResizeEvent()
 	isNoResizeEvent() bool
 	setScroll(x, y, width, height float64)
@@ -95,6 +97,7 @@ type viewData struct {
 	scroll           Frame
 	noResizeEvent    bool
 	created          bool
+	hasFocus         bool
 	//animation map[string]AnimationEndListener
 }
 
@@ -737,7 +740,14 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
 		handleTouchEvents(self, command, data)
 
-	case FocusEvent, LostFocusEvent:
+	case FocusEvent:
+		view.hasFocus = true
+		for _, listener := range getFocusListeners(view, "", command) {
+			listener(self)
+		}
+
+	case LostFocusEvent:
+		view.hasFocus = false
 		for _, listener := range getFocusListeners(view, "", command) {
 			listener(self)
 		}
@@ -837,4 +847,8 @@ func (view *viewData) SetChangeListener(tag string, listener func(View, string))
 	} else {
 		view.changeListener[tag] = listener
 	}
+}
+
+func (view *viewData) HasFocus() bool {
+	return view.hasFocus
 }

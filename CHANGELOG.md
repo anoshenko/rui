@@ -1,3 +1,12 @@
+# v0.5.0
+
+* NewApplication function and  Start function of the Application interface were replaced by StartApp function
+* Added HasFocus function to the View interface
+* Added the UserAgent function to the Session interface
+* Added the following properties to TableView: "selection-mode", "allow-selection", "current", "current-style", "current-inactive-style"
+* Added the following events to TableView: "table-cell-selected", "table-cell-clicked", "table-row-selected", "table-row-clicked"
+* Bug fixing
+
 # v0.4.0
 
 * Added SetTitle and SetTitleColor function to the Session interface

@@ -32,6 +32,12 @@ GridLayout {
 						DropDownList { row = 5, column = 1, id = tableFootStyle, current = 0, items = ["none", "tableFoot1", "rui.Params"]},
 						Checkbox { row = 6, column = 0:1, id = tableRowStyle, content = "Row style" },
 						Checkbox { row = 7, column = 0:1, id = tableColumnStyle, content = "Column style" },
+						TextView { row = 8, text = "Selection mode" },
+						DropDownList { row = 8, column = 1, id = tableSelectionMode, current = 0, items = ["none", "cell", "row"]},
+						Checkbox { row = 9, column = 0:1, id = tableDisableHead, content = "Disable head selection" },
+						Checkbox { row = 10, column = 0:1, id = tableDisableFoot, content = "Disable foot selection" },
+						TextView { row = 11, text = "Vertical align in cells" },
+						DropDownList { row = 11, column = 1, id = tableVerticalAlign, current = 0, items = ["top", "bottom", "center", "baseline"]},
 					]
 				}
 			]
@@ -39,6 +45,31 @@ GridLayout {
 	]
 }
 `
+
+type demoTableAllowSelection struct {
+	index []int
+}
+
+func (allow *demoTableAllowSelection) AllowCellSelection(row, column int) bool {
+	return allow.AllowRowSelection(row)
+}
+
+func (allow *demoTableAllowSelection) AllowRowSelection(row int) bool {
+	if allow.index != nil {
+		for _, index := range allow.index {
+			if index == row {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func newDemoTableAllowSelection(index []int) *demoTableAllowSelection {
+	result := new(demoTableAllowSelection)
+	result.index = index
+	return result
+}
 
 func createTableViewDemo(session rui.Session) rui.View {
 	view := rui.CreateViewFromText(session, tableViewDemoText)
@@ -92,6 +123,49 @@ func createTableViewDemo(session rui.Session) rui.View {
 			rui.Set(view, "demoTableView1", borderTag, nil)
 		}
 	}
+
+	rui.Set(view, "tableSelectionMode", rui.DropDownEvent, func(list rui.DropDownList, number int) {
+		rui.Set(view, "demoTableView1", rui.SelectionMode, number)
+		switch rui.GetCurrent(view, "tableSelectionMode") {
+		case rui.CellSelection:
+			// TODO
+
+		case rui.RowSelection:
+			// TODO
+		}
+	})
+
+	rui.Set(view, "tableDisableHead", rui.CheckboxChangedEvent, func(checked bool) {
+		if checked {
+			if rui.IsCheckboxChecked(view, "tableDisableFoot") {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, newDemoTableAllowSelection([]int{0, 1, 11}))
+			} else {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, newDemoTableAllowSelection([]int{0, 1}))
+			}
+		} else {
+			if rui.IsCheckboxChecked(view, "tableDisableFoot") {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, newDemoTableAllowSelection([]int{11}))
+			} else {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, nil)
+			}
+		}
+	})
+
+	rui.Set(view, "tableDisableFoot", rui.CheckboxChangedEvent, func(checked bool) {
+		if checked {
+			if rui.IsCheckboxChecked(view, "tableDisableHead") {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, newDemoTableAllowSelection([]int{0, 1, 11}))
+			} else {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, newDemoTableAllowSelection([]int{11}))
+			}
+		} else {
+			if rui.IsCheckboxChecked(view, "tableDisableHead") {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, newDemoTableAllowSelection([]int{0, 1}))
+			} else {
+				rui.Set(view, "demoTableView1", rui.AllowSelection, nil)
+			}
+		}
+	})
 
 	rui.Set(view, "tableCellGap", rui.DropDownEvent, func(list rui.DropDownList, number int) {
 		if number == 0 {
@@ -200,6 +274,10 @@ func createTableViewDemo(session rui.Session) rui.View {
 		} else {
 			rui.Set(view, "demoTableView1", rui.RowStyle, nil)
 		}
+	})
+
+	rui.Set(view, "tableVerticalAlign", rui.DropDownEvent, func(list rui.DropDownList, number int) {
+		rui.Set(view, "demoTableView1", rui.TableVerticalAlign, number)
 	})
 
 	return view

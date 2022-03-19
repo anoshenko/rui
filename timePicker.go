@@ -44,6 +44,10 @@ func (picker *timePickerData) Init(session Session) {
 	picker.timeChangedListeners = []func(TimePicker, time.Time){}
 }
 
+func (picker *timePickerData) Focusable() bool {
+	return true
+}
+
 func (picker *timePickerData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

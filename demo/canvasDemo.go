@@ -74,7 +74,13 @@ func textCanvasDemo(canvas rui.Canvas) {
 	canvas.SetTextAlign(rui.LeftAlign)
 	canvas.SetTextBaseline(rui.TopBaseline)
 
-	canvas.SetSolidColorFillStyle(0xFF000000)
+	if canvas.View().Session().DarkTheme() {
+		canvas.SetSolidColorFillStyle(0xFFFFFFFF)
+		canvas.SetSolidColorStrokeStyle(0xFFFFFFFF)
+	} else {
+		canvas.SetSolidColorFillStyle(0xFF000000)
+		canvas.SetSolidColorStrokeStyle(0xFF000000)
+	}
 	canvas.FillText(10, 10, "Default font")
 	canvas.StrokeText(300, 10, "Default font")
 
@@ -136,7 +142,11 @@ func textCanvasDemo(canvas rui.Canvas) {
 func textAlignCanvasDemo(canvas rui.Canvas) {
 	canvas.Save()
 	canvas.SetFont("sans-serif", rui.Pt(10))
-	canvas.SetSolidColorFillStyle(0xFF000000)
+	if canvas.View().Session().DarkTheme() {
+		canvas.SetSolidColorFillStyle(0xFFFFFFFF)
+	} else {
+		canvas.SetSolidColorFillStyle(0xFF000000)
+	}
 	canvas.SetSolidColorStrokeStyle(0xFF00FFFF)
 
 	baseline := []string{"Alphabetic", "Top", "Middle", "Bottom", "Hanging", "Ideographic"}
@@ -176,18 +186,28 @@ func lineStyleCanvasDemo(canvas rui.Canvas) {
 		canvas.SetLineWidth(1)
 		y := float64(40 + 20*i)
 		canvas.DrawLine(10, y, 180, y)
-		canvas.SetSolidColorStrokeStyle(0xFF000000)
+		if canvas.View().Session().DarkTheme() {
+			canvas.SetSolidColorStrokeStyle(0xFFFFFFFF)
+		} else {
+			canvas.SetSolidColorStrokeStyle(0xFF000000)
+		}
+
 		canvas.SetLineWidth(10)
 		canvas.SetLineCap(i)
 		canvas.DrawLine(20, y, 170, y)
 		canvas.FillText(200, y, cap)
 	}
 
-	canvas.SetSolidColorStrokeStyle(0xFF0000FF)
+	if canvas.View().Session().DarkTheme() {
+		canvas.SetSolidColorStrokeStyle(0xFFFFFFFF)
+		canvas.SetSolidColorFillStyle(0xFF00FFFF)
+	} else {
+		canvas.SetSolidColorStrokeStyle(0xFF000000)
+		canvas.SetSolidColorFillStyle(0xFF0000FF)
+	}
 	canvas.SetFont("courier", rui.Pt(12))
 	canvas.FillText(80, 115, "SetLineJoin(...)")
 
-	canvas.SetSolidColorStrokeStyle(0xFF000000)
 	canvas.SetLineWidth(10)
 	canvas.SetLineCap(rui.ButtCap)
 
@@ -206,14 +226,11 @@ func lineStyleCanvasDemo(canvas rui.Canvas) {
 		canvas.StrokePath(path)
 		canvas.FillText(210, y+20, join)
 	}
-
-	canvas.SetSolidColorStrokeStyle(0xFF0000FF)
 	canvas.SetFont("courier", rui.Pt(12))
 	canvas.FillText(20, 300, "SetLineDash([]float64{16, 8, 4, 8}, ...)")
 
 	canvas.SetFont("courier", rui.Pt(10))
 	canvas.SetLineDash([]float64{16, 8, 4, 8}, 0)
-	canvas.SetSolidColorStrokeStyle(0xFF000000)
 	canvas.SetLineWidth(4)
 
 	canvas.SetLineCap(rui.ButtCap)
@@ -246,8 +263,13 @@ func transformCanvasDemo(canvas rui.Canvas) {
 		y1 := y0 + float64((ny-1)*20)
 
 		canvas.SetFont("serif", rui.Pt(10))
-		canvas.SetSolidColorFillStyle(rui.Black)
-
+		if canvas.View().Session().DarkTheme() {
+			canvas.SetSolidColorStrokeStyle(0xFFFFFFFF)
+			canvas.SetSolidColorFillStyle(0xFFFFFFFF)
+		} else {
+			canvas.SetSolidColorStrokeStyle(0xFF000000)
+			canvas.SetSolidColorFillStyle(0xFF000000)
+		}
 		canvas.SetTextAlign(rui.CenterAlign)
 		canvas.SetTextBaseline(rui.BottomBaseline)
 		for i := 0; i < nx; i++ {
@@ -266,7 +288,11 @@ func transformCanvasDemo(canvas rui.Canvas) {
 	}
 
 	canvas.SetFont("courier", rui.Pt(14))
-	canvas.SetSolidColorFillStyle(rui.Black)
+	if canvas.View().Session().DarkTheme() {
+		canvas.SetSolidColorFillStyle(0xFFFFFFFF)
+	} else {
+		canvas.SetSolidColorFillStyle(0xFF000000)
+	}
 	canvas.SetTextAlign(rui.CenterAlign)
 	canvas.SetTextBaseline(rui.TopBaseline)
 

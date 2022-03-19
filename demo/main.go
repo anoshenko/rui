@@ -113,10 +113,6 @@ func (demo *demoSession) CreateRootView(session rui.Session) rui.View {
 
 	rui.Set(demo.rootView, "rootTitleButton", rui.ClickEvent, demo.clickMenuButton)
 	demo.showPage(0)
-	if color, ok := rui.StringToColor("#ffc0ded9"); ok {
-		session.SetTitleColor(color)
-	}
-
 	return demo.rootView
 }
 
@@ -158,11 +154,14 @@ func (demo *demoSession) showPage(index int) {
 func main() {
 	rui.ProtocolInDebugLog = true
 	rui.AddEmbedResources(&resources)
-	app := rui.NewApplication("RUI demo", "icon.svg", createDemo)
 
 	//addr := rui.GetLocalIP() + ":8080"
 	addr := "localhost:8000"
 	fmt.Print(addr)
 	rui.OpenBrowser("http://" + addr)
-	app.Start(addr)
+	rui.StartApp(addr, createDemo, rui.AppParams{
+		Title:      "RUI demo",
+		Icon:       "icon.svg",
+		TitleColor: rui.Color(0xffc0ded9),
+	})
 }
