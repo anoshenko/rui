@@ -33,8 +33,10 @@ type Session interface {
 	Color(tag string) (Color, bool)
 	// SetCustomTheme set the custom theme
 	SetCustomTheme(name string) bool
-	// UserAgent() returns the "user-agent" text of the client browser
+	// UserAgent returns the "user-agent" text of the client browser
 	UserAgent() string
+	// RemoteAddr returns the client address.
+	RemoteAddr() string
 	// Language returns the current session language
 	Language() string
 	// SetLanguage set the current session language
@@ -429,4 +431,8 @@ func (session *sessionData) SetTitle(title string) {
 
 func (session *sessionData) SetTitleColor(color Color) {
 	session.runScript(`setTitleColor("` + color.cssString() + `");`)
+}
+
+func (session *sessionData) RemoteAddr() string {
+	return session.brige.remoteAddr()
 }
