@@ -1,6 +1,6 @@
 # RUI library
 
-The RUI (Remoute User Interface) library is designed to create web applications in the go language.
+The RUI (Remote User Interface) library is designed to create web applications in the go language.
 
 The peculiarity of the library is that all data processing is carried out on the server,
 and the browser is used as a thin client. WebSocket is used for client-server communication.
@@ -774,12 +774,12 @@ For this, the following properties of the SizeUnit type are used:
 
 If the x- and y-radii are the same, then you can use the auxiliary properties
 
-| Property       | Constant     | Description                |
-|----------------|--------------|----------------------------|
-| "top-left"     | TopLeft      | top left corner radius     |
-| "top-right"    | TopRight     | top right corner radius    |
-| "bottom-left"  | BottomLeft   | bottom left corner radius  |
-| "bottom-right" | BottomRight  | bottom right corner radius |
+| Property       | Constant    | Description                |
+|----------------|-------------|----------------------------|
+| "top-left"     | TopLeft     | top left corner radius     |
+| "top-right"    | TopRight    | top right corner radius    |
+| "bottom-left"  | BottomLeft  | bottom left corner radius  |
+| "bottom-right" | BottomRight | bottom right corner radius |
 
 To set all radii to the same values, use the "x" and "y" properties
 
