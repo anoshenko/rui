@@ -4,5 +4,9 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"go.buildFlags": [
+			"-buildvcs=false"
+		]
+	}
 }
