@@ -169,7 +169,7 @@ var enumProperties = map[string]struct {
 	},
 	Visibility: {
 		[]string{"visible", "invisible", "gone"},
-		Visibility,
+		"",
 		[]string{"visible", "invisible", "gone"},
 	},
 	TextAlign: {

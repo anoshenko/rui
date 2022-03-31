@@ -66,6 +66,20 @@ ListLayout {
 				TextView { id = controlsDateResult, margin-left = 12px }
 			]
 		},
+		ListLayout { orientation = horizontal, margin-top = 16px, padding = 8px, vertical-align = center,
+			border = _{ width = 1px, style = solid, color = #FF000000 }, radius = 4px,
+			content = [
+				View { 
+					id = controlsHiddable, width = 32px, height = 16px, margin-right = 16px, 
+					background-color = red 
+				},
+				"Visibility",
+				DropDownList { 
+					id = controlsHiddableList, margin-left = 16px, current = 0, 
+					items = ["visible", "invisible", "gone"]
+				},
+			]
+		},
 		Button {
 			id = controlsMessage, margin-top = 16px, content = "Show message"
 		}
@@ -142,6 +156,9 @@ func createControlsDemo(session rui.Session) rui.View {
 		rui.ShowMessage("Hello", "Hello world!!!", session)
 	})
 
+	rui.Set(view, "controlsHiddableList", rui.DropDownEvent, func(list rui.DropDownList, number int) {
+		rui.Set(view, "controlsHiddable", rui.Visibility, number)
+	})
 	return view
 }
 

@@ -370,6 +370,23 @@ func viewPropertyChanged(view *viewData, tag string) {
 	switch tag {
 	case Disabled:
 		updateInnerHTML(view.parentHTMLID(), session)
+		return
+
+	case Visibility:
+		switch GetVisibility(view, "") {
+		case Invisible:
+			updateCSSProperty(htmlID, Visibility, "hidden", session)
+			updateCSSProperty(htmlID, "display", "", session)
+
+		case Gone:
+			updateCSSProperty(htmlID, Visibility, "hidden", session)
+			updateCSSProperty(htmlID, "display", "none", session)
+
+		default:
+			updateCSSProperty(htmlID, Visibility, "visible", session)
+			updateCSSProperty(htmlID, "display", "", session)
+		}
+		return
 
 	case Background:
 		updateCSSProperty(htmlID, Background, view.backgroundCSS(session), session)
