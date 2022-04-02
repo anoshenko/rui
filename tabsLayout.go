@@ -79,14 +79,15 @@ type tabsLayoutData struct {
 }
 
 // NewTabsLayout create new TabsLayout object and return it
-func NewTabsLayout(session Session) TabsLayout {
+func NewTabsLayout(session Session, params Params) TabsLayout {
 	view := new(tabsLayoutData)
 	view.Init(session)
+	setInitParams(view, params)
 	return view
 }
 
 func newTabsLayout(session Session) View {
-	return NewTabsLayout(session)
+	return NewTabsLayout(session, nil)
 }
 
 // Init initialize fields of ViewsContainer by default values
