@@ -36,6 +36,7 @@ GridLayout {
 						DropDownList { row = 7, column = 1, id = listCheckboxVAlign, current = 0, items = ["top", "bottom", "center"]},
 						TextView { row = 8, text = "Checkbox horizontal align" },
 						DropDownList { row = 8, column = 1, id = listCheckboxHAlign, current = 0, items = ["left", "right", "center"]},
+						Button { row = 9, column = 0:1, id = listSetChecked, content = "set checked 1,4,8" }
 					]
 				}
 			]
@@ -89,6 +90,10 @@ func createListViewDemo(session rui.Session) rui.View {
 
 	rui.Set(view, "listCheckboxHAlign", rui.DropDownEvent, func(list rui.DropDownList, number int) {
 		rui.Set(view, "listView", rui.CheckboxHorizontalAlign, number)
+	})
+
+	rui.Set(view, "listSetChecked", rui.ClickEvent, func() {
+		rui.Set(view, "listView", rui.Checked, "1, 4, 8")
 	})
 
 	return view

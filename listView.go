@@ -514,6 +514,18 @@ func (listView *listViewData) setChecked(value interface{}) bool {
 		checked = []int{}
 	} else {
 		switch value := value.(type) {
+		case string:
+			checked = []int{}
+			for _, val := range strings.Split(value, ",") {
+				n, err := strconv.Atoi(strings.Trim(val, " \t"))
+				if err != nil {
+					invalidPropertyValue(Checked, value)
+					ErrorLog(err.Error())
+					return false
+				}
+				checked = append(checked, n)
+			}
+
 		case int:
 			checked = []int{value}
 
