@@ -1,5 +1,7 @@
 package rui
 
+import "sort"
+
 const (
 	// Black color constant
 	Black Color = 0xff000000
@@ -445,4 +447,24 @@ var colorConstants = map[string]Color{
 	"wheat":                0xfff5deb3,
 	"whitesmoke":           0xfff5f5f5,
 	"yellowgreen":          0xff9acd32,
+}
+
+type NamedColor struct {
+	Name  string
+	Color Color
+}
+
+// NamedColors returns the list of named colors
+func NamedColors() []NamedColor {
+	count := len(colorConstants)
+	result := make([]NamedColor, 0, count)
+	for name, color := range colorConstants {
+		result = append(result, NamedColor{Name: name, Color: color})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Name < result[j].Name
+	})
+
+	return result
 }
