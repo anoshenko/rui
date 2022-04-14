@@ -1,3 +1,9 @@
+# v0.6.0
+
+* Added "user-data" property
+* Added "focusable" property
+* Added ReloadTableViewData function
+
 # v0.5.0
 
 * NewApplication function and  Start function of the Application interface were replaced by StartApp function

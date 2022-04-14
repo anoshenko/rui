@@ -16,7 +16,7 @@ type mediaStyle struct {
 	orientation int
 	width       int
 	height      int
-	styles      map[string]DataObject
+	styles      map[string]Params
 }
 
 func (rule mediaStyle) cssText() string {
@@ -47,7 +47,7 @@ func (rule mediaStyle) cssText() string {
 }
 
 func parseMediaRule(text string) (mediaStyle, bool) {
-	rule := mediaStyle{orientation: defaultMedia, width: 0, height: 0, styles: map[string]DataObject{}}
+	rule := mediaStyle{orientation: defaultMedia, width: 0, height: 0, styles: map[string]Params{}}
 	elements := strings.Split(text, ":")
 	for i := 1; i < len(elements); i++ {
 		switch element := elements[i]; element {
@@ -111,7 +111,7 @@ type theme struct {
 	touchConstants map[string]string
 	colors         map[string]string
 	darkColors     map[string]string
-	styles         map[string]DataObject
+	styles         map[string]Params
 	mediaStyles    []mediaStyle
 }
 
@@ -129,7 +129,7 @@ func (theme *theme) init() {
 	theme.touchConstants = map[string]string{}
 	theme.colors = map[string]string{}
 	theme.darkColors = map[string]string{}
-	theme.styles = map[string]DataObject{}
+	theme.styles = map[string]Params{}
 	theme.mediaStyles = []mediaStyle{}
 }
 
@@ -189,7 +189,9 @@ func (theme *theme) cssText(session Session) string {
 	for tag, obj := range theme.styles {
 		var style viewStyle
 		style.init()
-		parseProperties(&style, obj)
+		for tag, value := range obj {
+			style.Set(tag, value)
+		}
 		builder.startStyle(tag)
 		style.cssViewStyle(&builder, session)
 		builder.endStyle()
@@ -200,7 +202,9 @@ func (theme *theme) cssText(session Session) string {
 		for tag, obj := range media.styles {
 			var style viewStyle
 			style.init()
-			parseProperties(&style, obj)
+			for tag, value := range obj {
+				style.Set(tag, value)
+			}
 			builder.startStyle(tag)
 			style.cssViewStyle(&builder, session)
 			builder.endStyle()
@@ -233,6 +237,25 @@ func (theme *theme) addData(data DataObject) {
 
 func (theme *theme) parseThemeData(data DataObject) {
 	count := data.PropertyCount()
+
+	objToParams := func(obj DataObject) Params {
+		params := Params{}
+		for i := 0; i < obj.PropertyCount(); i++ {
+			if node := obj.Property(i); node != nil {
+				switch node.Type() {
+				case ArrayNode:
+					params[node.Tag()] = node.ArrayElements()
+
+				case ObjectNode:
+					params[node.Tag()] = node.Object()
+
+				default:
+					params[node.Tag()] = node.Text()
+				}
+			}
+		}
+		return params
+	}
 
 	for i := 0; i < count; i++ {
 		if d := data.Property(i); d != nil {
@@ -291,7 +314,7 @@ func (theme *theme) parseThemeData(data DataObject) {
 					for k := 0; k < arraySize; k++ {
 						if element := d.ArrayElement(k); element != nil && element.IsObject() {
 							if obj := element.Object(); obj != nil {
-								theme.styles[obj.Tag()] = obj
+								theme.styles[obj.Tag()] = objToParams(obj)
 							}
 						}
 					}
@@ -304,7 +327,7 @@ func (theme *theme) parseThemeData(data DataObject) {
 						for k := 0; k < arraySize; k++ {
 							if element := d.ArrayElement(k); element != nil && element.IsObject() {
 								if obj := element.Object(); obj != nil {
-									rule.styles[obj.Tag()] = obj
+									rule.styles[obj.Tag()] = objToParams(obj)
 								}
 							}
 						}

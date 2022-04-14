@@ -65,7 +65,7 @@ theme {
 	styles = [
 		ruiApp {
 			font-name = "Arial, Helvetica, sans-serif",
-			text-size = 12pt,
+			text-size = 10pt,
 			text-color = @ruiTextColor,
 			background-color = @ruiBackgroundColor,
 		},

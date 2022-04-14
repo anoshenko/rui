@@ -9,6 +9,9 @@ const (
 	StyleDisabled = "style-disabled"
 	// Disabled is the constant for the "disabled" property tag.
 	Disabled = "disabled"
+	// Focusable is the constant for the "disabled" property tag.
+	// The bool "focusable" determines whether the view will receive focus.
+	Focusable = "focusable"
 	// Semantics is the constant for the "semantics" property tag.
 	Semantics = "semantics"
 	// Visibility is the constant for the "visibility" property tag.
@@ -440,4 +443,7 @@ const (
 	// The "float" property places a View on the left or right side of its container,
 	// allowing text and inline Views to wrap around it.
 	Float = "float"
+	// UsetData is the constant for the "user-data" property tag.
+	// This property can contain any user data
+	UserData = "user-data"
 )

@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -131,6 +132,14 @@ func CreateViewFromResources(session Session, name string) View {
 						return CreateViewFromObject(session, data)
 					}
 				}
+			}
+		}
+	}
+
+	if resources.path != "" {
+		if data, err := os.ReadFile(resources.path + viewDir + "/" + name); err == nil {
+			if data := ParseDataText(string(data)); data != nil {
+				return CreateViewFromObject(session, data)
 			}
 		}
 	}

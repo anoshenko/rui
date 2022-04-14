@@ -1759,7 +1759,7 @@ function tableRowClickEvent(element, event) {
 	const table = document.getElementById(tableID);
 	if (table) {
 		const selection = table.getAttribute("data-selection");
-		if (selection == "cell") {
+		if (selection == "row") {
 			const currentID = table.getAttribute("data-current");
 			if (!currentID || currentID != element.ID) {
 				setTableRowCursor(table, row)

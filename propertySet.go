@@ -37,6 +37,7 @@ var angleProperties = []string{
 
 var boolProperties = []string{
 	Disabled,
+	Focusable,
 	Inset,
 	BackfaceVisible,
 	ReadOnly,

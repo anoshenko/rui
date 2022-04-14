@@ -29,8 +29,12 @@ type Session interface {
 	TextDirection() int
 	// Constant returns the constant with "tag" name or "" if it is not exists
 	Constant(tag string) (string, bool)
+	// ConstantTags returns the list of all available constants
+	ConstantTags() []string
 	// Color returns the color with "tag" name or 0 if it is not exists
 	Color(tag string) (Color, bool)
+	// ColorTags returns the list of all available color constants
+	ColorTags() []string
 	// SetCustomTheme set the custom theme
 	SetCustomTheme(name string) bool
 	// UserAgent returns the "user-agent" text of the client browser
@@ -106,6 +110,7 @@ type Session interface {
 
 type sessionData struct {
 	customTheme      *theme
+	currentTheme     *theme
 	darkTheme        bool
 	touchScreen      bool
 	textDirection    int
@@ -146,6 +151,7 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	if customTheme != "" {
 		if theme, ok := newTheme(customTheme); ok {
 			session.customTheme = theme
+			session.currentTheme = nil
 		}
 	}
 
@@ -206,18 +212,11 @@ func (session *sessionData) close() {
 }
 
 func (session *sessionData) styleProperty(styleTag, propertyTag string) (string, bool) {
-	var style DataObject
-	ok := false
-	if session.customTheme != nil {
-		style, ok = session.customTheme.styles[styleTag]
-	}
-	if !ok {
-		style, ok = defaultTheme.styles[styleTag]
-	}
-
-	if ok {
-		if node := style.PropertyWithTag(propertyTag); node != nil && node.Type() == TextNode {
-			return session.resolveConstants(node.Text())
+	if style, ok := session.getCurrentTheme().styles[styleTag]; ok {
+		if value, ok := style[propertyTag]; ok {
+			if text, ok := value.(string); ok {
+				return session.resolveConstants(text)
+			}
 		}
 	}
 
@@ -226,17 +225,12 @@ func (session *sessionData) styleProperty(styleTag, propertyTag string) (string,
 }
 
 func (session *sessionData) stylePropertyNode(styleTag, propertyTag string) DataNode {
-	var style DataObject
-	ok := false
-	if session.customTheme != nil {
-		style, ok = session.customTheme.styles[styleTag]
-	}
-	if !ok {
-		style, ok = defaultTheme.styles[styleTag]
-	}
-
-	if ok {
-		return style.PropertyWithTag(propertyTag)
+	if style, ok := session.getCurrentTheme().styles[styleTag]; ok {
+		if value, ok := style[propertyTag]; ok {
+			if node, ok := value.(DataNode); ok {
+				return node
+			}
+		}
 	}
 
 	return nil
@@ -280,17 +274,7 @@ func (session *sessionData) RootView() View {
 }
 
 func (session *sessionData) writeInitScript(writer *strings.Builder) {
-	var workTheme *theme
-	if session.customTheme == nil {
-		workTheme = defaultTheme
-	} else {
-		workTheme = new(theme)
-		workTheme.init()
-		workTheme.concat(defaultTheme)
-		workTheme.concat(session.customTheme)
-	}
-
-	if css := workTheme.cssText(session); css != "" {
+	if css := session.getCurrentTheme().cssText(session); css != "" {
 		writer.WriteString(`document.querySelector('style').textContent += "`)
 		writer.WriteString(css)
 		writer.WriteString("\";\n")

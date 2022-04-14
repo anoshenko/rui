@@ -177,6 +177,9 @@ func (view *viewData) ViewByID(id string) View {
 }
 
 func (view *viewData) Focusable() bool {
+	if focus, ok := boolProperty(view, Focusable, view.session); ok {
+		return focus
+	}
 	return false
 }
 
@@ -188,6 +191,9 @@ func (view *viewData) remove(tag string) {
 	switch tag {
 	case ID:
 		view.viewID = ""
+
+	case UserData:
+		delete(view.properties, tag)
 
 	case Style, StyleDisabled:
 		if _, ok := view.properties[tag]; ok {
@@ -310,6 +316,9 @@ func (view *viewData) set(tag string, value interface{}) bool {
 			return false
 		}
 		view.viewID = text
+
+	case UserData:
+		view.properties[tag] = value
 
 	case Style, StyleDisabled:
 		text, ok := value.(string)

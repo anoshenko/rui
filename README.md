@@ -1654,6 +1654,10 @@ You can get the value of these properties using the function
 
 	func GetSkew(view View, subviewID string) (AngleUnit, AngleUnit)
 
+### User data
+
+You can save any of your data as "user-data" property (UserData constant)
+
 ### Keyboard events
 
 Two kinds of keyboard events can be generated for a View that has received input focus.
@@ -2648,16 +2652,16 @@ To create a NumberPicker, the function is used:
 	func NewNumberPicker(session Session, params Params) NumberPicker
 
 NumberPicker can work in two modes: text editor and slider.
-The mode sets the int property "date-picker-type" (NumberPickerType constant).
-The "date-picker-type" property can take the following values:
+The mode sets the int property "number-picker-type" (NumberPickerType constant).
+The "number-picker-type" property can take the following values:
 
 | Value | Constant     | Name     | Editor type                |
 |:-----:|--------------|----------|----------------------------|
 | 0     | NumberEditor | "editor" | Text editor. Default value |
 | 1     | NumberSlider | "slider" | Slider                     |
 
-You can set/get the current value using the "date-picker-value" property (NumberPickerValue constant). 
-The following can be passed as a value to the "date-picker-value" property:
+You can set/get the current value using the "number-picker-value" property (NumberPickerValue constant). 
+The following can be passed as a value to the "number-picker-value" property:
 
 * float64
 * float32
@@ -2668,29 +2672,29 @@ The following can be passed as a value to the "date-picker-value" property:
 * textual representation of any of the above types
 
 All of these types are cast to float64. Accordingly, the Get function always returns a float64 value.
-The value of the "date-picker-value" property can also be read using the function:
+The value of the "number-picker-value" property can also be read using the function:
 
 	func GetNumberPickerValue(view View, subviewID string) float64
 
 The entered values may be subject to restrictions. For this, the following properties are used:
 
-| Property           | Constant         | Restriction       |
-|--------------------|------------------|-------------------|
-| "date-picker-min"  | NumberPickerMin  | Minimum value     |
-| "date-picker-max"  | NumberPickerMax  | Maximum value     |
-| "date-picker-step" | NumberPickerStep | Value change step |
+| Property             | Constant         | Restriction       |
+|----------------------|------------------|-------------------|
+| "number-picker-min"  | NumberPickerMin  | Minimum value     |
+| "number-picker-max"  | NumberPickerMax  | Maximum value     |
+| "number-picker-step" | NumberPickerStep | Value change step |
 
-Assignments to these properties can be the same value types as "date-picker-value".
+Assignments to these properties can be the same value types as "number-picker-value".
 
-By default, if "date-picker-type" is equal to NumberSlider, the minimum value is 0, maximum is 1. 
-If "date-picker-type" is equal to NumberEditor, then the entered numbers, by default, are limited only by the range of float64 values.
+By default, if "number-picker-type" is equal to NumberSlider, the minimum value is 0, maximum is 1. 
+If "number-picker-type" is equal to NumberEditor, then the entered numbers, by default, are limited only by the range of float64 values.
 
 You can read the values of these properties using the functions:
 
 	func GetNumberPickerMinMax(view View, subviewID string) (float64, float64)
 	func GetNumberPickerStep(view View, subviewID string) float64
 
-The "date-changed" event (NumberChangedEvent constant) is used to track the change in the entered value. 
+The "number-changed" event (NumberChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
 
 	func(picker NumberPicker, newValue float64)

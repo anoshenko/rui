@@ -230,3 +230,21 @@ func GetTableRowSelectedListeners(view View, subviewID string) []func(TableView,
 	}
 	return []func(TableView, int){}
 }
+
+// ReloadTableViewData updates TableView
+func ReloadTableViewData(view View, subviewID string) bool {
+	var tableView TableView
+	if subviewID != "" {
+		if tableView = TableViewByID(view, subviewID); tableView == nil {
+			return false
+		}
+	} else {
+		var ok bool
+		if tableView, ok = view.(TableView); !ok {
+			return false
+		}
+	}
+
+	tableView.ReloadTableData()
+	return true
+}

@@ -9,8 +9,8 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceRoot}/demo",
-            //"program": "${workspaceRoot}/editor",
+            //"program": "${workspaceRoot}/demo",
+            "program": "${workspaceRoot}/ruiEditor",
             "env": {},
             "args": []
         }

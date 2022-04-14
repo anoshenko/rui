@@ -2,24 +2,10 @@ package rui
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
-/*
-type Session struct {
-	customTheme    *theme
-	darkTheme      bool
-	touchScreen    bool
-	textDirection  int
-	pixelRatio     float64
-	language       string
-	languages      []string
-	checkboxOff    string
-	checkboxOn     string
-	radiobuttonOff string
-	radiobuttonOn  string
-}
-*/
 func (session *sessionData) DarkTheme() bool {
 	return session.darkTheme
 }
@@ -39,27 +25,17 @@ func (session *sessionData) TextDirection() int {
 func (session *sessionData) constant(tag string, prevTags []string) (string, bool) {
 	tags := append(prevTags, tag)
 	result := ""
-	themes := session.themes()
+	theme := session.getCurrentTheme()
 	for {
 		ok := false
 		if session.touchScreen {
-			for _, theme := range themes {
-				if theme.touchConstants != nil {
-					if result, ok = theme.touchConstants[tag]; ok {
-						break
-					}
-				}
+			if theme.touchConstants != nil {
+				result, ok = theme.touchConstants[tag]
 			}
 		}
 
 		if !ok {
-			for _, theme := range themes {
-				if theme.constants != nil {
-					if result, ok = theme.constants[tag]; ok {
-						break
-					}
-				}
-			}
+			result, ok = theme.constants[tag]
 		}
 
 		if !ok {
@@ -149,38 +125,38 @@ func (session *sessionData) Constant(tag string) (string, bool) {
 	return session.constant(tag, []string{})
 }
 
-func (session *sessionData) themes() []*theme {
-	if session.customTheme != nil {
-		return []*theme{session.customTheme, defaultTheme}
+func (session *sessionData) getCurrentTheme() *theme {
+	if session.currentTheme != nil {
+		return session.currentTheme
 	}
 
-	return []*theme{defaultTheme}
+	if session.customTheme != nil {
+		session.currentTheme = new(theme)
+		session.currentTheme.init()
+		session.currentTheme.concat(defaultTheme)
+		session.currentTheme.concat(session.customTheme)
+		return session.currentTheme
+	}
+
+	return defaultTheme
 }
 
 // Color return the color with "tag" name or 0 if it is not exists
 func (session *sessionData) Color(tag string) (Color, bool) {
 	tags := []string{tag}
 	result := ""
-	themes := session.themes()
+	theme := session.getCurrentTheme()
 	for {
 		ok := false
 		if session.darkTheme {
-			for _, theme := range themes {
-				if theme.darkColors != nil {
-					if result, ok = theme.darkColors[tag]; ok {
-						break
-					}
-				}
+			if theme.darkColors != nil {
+				result, ok = theme.darkColors[tag]
 			}
 		}
 
 		if !ok {
-			for _, theme := range themes {
-				if theme.colors != nil {
-					if result, ok = theme.colors[tag]; ok {
-						break
-					}
-				}
+			if theme.colors != nil {
+				result, ok = theme.colors[tag]
 			}
 		}
 
@@ -217,6 +193,7 @@ func (session *sessionData) SetCustomTheme(name string) bool {
 		}
 	} else if theme, ok := resources.themes[name]; ok {
 		session.customTheme = theme
+		session.currentTheme = nil
 	} else {
 		return false
 	}
@@ -360,4 +337,40 @@ func (session *sessionData) SetLanguage(lang string) {
 			session.runScript(buffer.String())
 		}
 	}
+}
+
+func (session *sessionData) ConstantTags() []string {
+	theme := session.getCurrentTheme()
+
+	keys := make([]string, 0, len(theme.constants))
+	for k := range theme.constants {
+		keys = append(keys, k)
+	}
+
+	for tag := range theme.touchConstants {
+		if _, ok := theme.constants[tag]; !ok {
+			keys = append(keys, tag)
+		}
+	}
+
+	sort.Strings(keys)
+	return keys
+}
+
+func (session *sessionData) ColorTags() []string {
+	theme := session.getCurrentTheme()
+
+	keys := make([]string, 0, len(theme.colors))
+	for k := range theme.colors {
+		keys = append(keys, k)
+	}
+
+	for tag := range theme.darkColors {
+		if _, ok := theme.colors[tag]; !ok {
+			keys = append(keys, tag)
+		}
+	}
+
+	sort.Strings(keys)
+	return keys
 }

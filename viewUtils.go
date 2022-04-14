@@ -1053,19 +1053,13 @@ func GetCurrent(view View, subviewID string) int {
 		view = ViewByID(view, subviewID)
 	}
 
-	var defaultValue int
-	switch view.Tag() {
-	case "ListView":
-		defaultValue = -1
-
-	default:
-		defaultValue = 0
-	}
-
+	defaultValue := -1
 	if view != nil {
 		if result, ok := intProperty(view, Current, view.Session(), defaultValue); ok {
 			return result
+		} else if view.Tag() != "ListView" {
+			defaultValue = 0
 		}
 	}
-	return -1
+	return defaultValue
 }

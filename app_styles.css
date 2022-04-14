@@ -21,13 +21,25 @@ div:focus {
 }
 
 input {
-  padding: 4px;
-  overflow: auto;
+  margin: 2px;
+  padding: 1px;
+  font-size: inherit;
+}
+
+select {
+  margin: 2px;
+  font-size: inherit;
+}
+
+button {
+  font-size: inherit;
 }
 
 textarea {
-  padding: 4px;
+  margin: 2px;
+  padding: 1px;
   overflow: auto;
+  font-size: inherit;
 }
 
 ul:focus {
