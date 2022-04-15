@@ -302,6 +302,9 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
+	if picker.getRaw(ClickEvent) == nil {
+		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
+	}
 }
 
 func (picker *timePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {

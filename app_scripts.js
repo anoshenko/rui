@@ -1769,3 +1769,7 @@ function tableRowClickEvent(element, event) {
 
 	sendMessage("rowClick{session=" + sessionID + ",id=" + tableID + ",row=" + row + "}");
 }
+
+function stopEventPropagation(element, event) {
+	event.stopPropagation()
+}

@@ -292,6 +292,9 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 
 	buffer.WriteString(` oninput="fileSelectedEvent(this)"`)
+	if picker.getRaw(ClickEvent) == nil {
+		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
+	}
 }
 
 func (picker *filePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
