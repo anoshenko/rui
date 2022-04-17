@@ -190,6 +190,12 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 			buffer.WriteString(`"`)
 		}
 	}
+
+	if text := GetImageViewAltText(imageView, ""); text != "" {
+		buffer.WriteString(` alt="`)
+		buffer.WriteString(textToJS(text))
+		buffer.WriteString(`"`)
+	}
 }
 
 func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {

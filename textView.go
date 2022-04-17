@@ -123,16 +123,30 @@ func (textView *textViewData) textOverflowUpdated() {
 	updateCSSProperty(textView.htmlID(), TextOverflow, "", session)
 }
 
+func textToJS(text string) string {
+	for _, ch := range []struct{ old, new string }{
+		{old: "\\", new: `\\`},
+		{old: "\"", new: `\"`},
+		{old: "'", new: `\'`},
+		{old: "\n", new: `\n`},
+		{old: "\r", new: `\r`},
+		{old: "\t", new: `\t`},
+		{old: "\x00", new: `\x00`},
+	} {
+		if strings.Contains(text, ch.old) {
+			text = strings.ReplaceAll(text, ch.old, ch.new)
+		}
+	}
+	return text
+}
+
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value, ok := stringProperty(textView, Text, textView.Session()); ok {
 		if !GetNotTranslate(textView, "") {
 			value, _ = textView.session.GetString(value)
 		}
 
-		text := strings.ReplaceAll(value, `"`, `\"`)
-		text = strings.ReplaceAll(text, "\n", `\n`)
-		text = strings.ReplaceAll(text, "\r", `\r`)
-		buffer.WriteString(strings.ReplaceAll(text, `'`, `\'`))
+		buffer.WriteString(textToJS(value))
 	}
 }
 

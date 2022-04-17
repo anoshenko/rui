@@ -538,7 +538,7 @@ For the properties "width", "height", "min-width", "min-height", "max-width", "m
 	func GetMaxWidth(view View, subviewID string) SizeUnit
 	func GetMaxHeight(view View, subviewID string) SizeUnit
 
-### "margin" и "padding" properties
+### "margin" and "padding" properties
 
 The "margin" property determines the outer margins from this View to its neighbors.
 The "padding" property sets the padding from the border of the View to the content.
@@ -621,7 +621,7 @@ equivalent to
 
 	view.Set(rui.Margin, rui.Bounds{Top: rui.Px(12), Right: rui.Px(8), Bottom: rui.Px(8), Left: rui.Px(8)})
 
-### Свойство "border"
+### "border" property
 
 The "border" property defines a border around the View. The frame line is described by three attributes:
 line style, thickness and color.
@@ -3136,7 +3136,7 @@ The "checkbox" properties allow you to add a checkbox to each item in the list w
 you can select several items in the list. The "checkbox" int property (ItemCheckbox constant) 
 can take the following values
 
-| Value | Constant | Name | Checkbox view |
+| Value    | Constant         | Name       | Checkbox view                                      |
 |:--------:|------------------|------------|----------------------------------------------------|
 | 0	       | NoneCheckbox     | "none"     | There is no checkbox. Default value                |
 | 1	       | SingleCheckbox   | "single"   | ◉ A checkbox that allows you to mark only one item |
