@@ -2,7 +2,7 @@
 
 * Added "user-data" property
 * Added "focusable" property
-* Added ReloadTableViewData function
+* Added ReloadTableViewData, AllImageResources functions
 
 # v0.5.0
 

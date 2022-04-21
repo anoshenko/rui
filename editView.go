@@ -489,21 +489,21 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 
 	if hint := GetHint(edit, ""); hint != "" {
 		buffer.WriteString(` placeholder="`)
-		buffer.WriteString(hint)
+		buffer.WriteString(textToJS(hint))
 		buffer.WriteByte('"')
 	}
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 	if pattern := GetEditViewPattern(edit, ""); pattern != "" {
 		buffer.WriteString(` pattern="`)
-		buffer.WriteString(pattern)
+		buffer.WriteString(textToJS(pattern))
 		buffer.WriteByte('"')
 	}
 
 	if editType != MultiLineText {
 		if text := GetText(edit, ""); text != "" {
 			buffer.WriteString(` value="`)
-			buffer.WriteString(text)
+			buffer.WriteString(textToJS(text))
 			buffer.WriteByte('"')
 		}
 	}
@@ -518,10 +518,7 @@ func (edit *editViewData) htmlDisabledProperties(self View, buffer *strings.Buil
 
 func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if GetEditViewType(edit, "") == MultiLineText {
-		text := strings.ReplaceAll(GetText(edit, ""), `"`, `\"`)
-		text = strings.ReplaceAll(text, "\n", `\n`)
-		text = strings.ReplaceAll(text, "\r", `\r`)
-		buffer.WriteString(strings.ReplaceAll(text, `'`, `\'`))
+		buffer.WriteString(textToJS(GetText(edit, "")))
 	}
 }
 

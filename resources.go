@@ -416,3 +416,11 @@ func AllRawResources() []string {
 
 	return result
 }
+
+func AllImageResources() []string {
+	result := make([]string, 0, len(resources.images))
+	for image := range resources.images {
+		result = append(result, image)
+	}
+	return result
+}

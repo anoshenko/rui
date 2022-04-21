@@ -15,11 +15,11 @@ div {
   -ms-user-select: none;
   user-select: none;
 }
-
+/*
 div:focus {
   outline: none;
 }
-
+*/
 input {
   margin: 2px;
   padding: 1px;

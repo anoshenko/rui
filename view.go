@@ -561,6 +561,12 @@ func viewPropertyChanged(view *viewData, tag string) {
 			updateCSSProperty(htmlID, `animation-play-state`, `running`, session)
 		}
 		return
+
+	case ZIndex:
+		if i, ok := intProperty(view, ZIndex, session, 0); ok {
+			updateCSSProperty(htmlID, ZIndex, strconv.Itoa(i), session)
+		}
+		return
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {
@@ -589,7 +595,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 	}
 
-	for _, floatTag := range []string{ScaleX, ScaleY, ScaleZ, RotateX, RotateY, RotateZ} {
+	for _, floatTag := range []string{Opacity, ScaleX, ScaleY, ScaleZ, RotateX, RotateY, RotateZ} {
 		if tag == floatTag {
 			if f, ok := floatProperty(view, floatTag, session, 0); ok {
 				updateCSSProperty(htmlID, floatTag, strconv.FormatFloat(f, 'g', -1, 64), session)

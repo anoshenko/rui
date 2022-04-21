@@ -1,13 +1,13 @@
 theme {
 	colors = _{
 		ruiTextColor = #FF000000,
-		ruiDisabledTextColor = #FF202020,
+		ruiDisabledTextColor = #FF808080,
 		ruiBackgroundColor = #FFFFFFFF,
 		ruiButtonColor = #FFE0E0E0,
 		ruiButtonActiveColor = #FFC0C0C0,
 		ruiButtonTextColor = #FF000000,
 		ruiButtonDisabledColor = #FFE0E0E0,
-		ruiButtonDisabledTextColor = #FF202020,
+		ruiButtonDisabledTextColor = #FF808080,
 		ruiHighlightColor = #FF1A74E8,
 		ruiHighlightTextColor = #FFFFFFFF,
 		ruiSelectedColor = #FFE0E0E0,
@@ -19,7 +19,7 @@ theme {
 
 		ruiTabBarBackgroundColor = #FFEEEEEE,
 		ruiTabColor = #FFD0D0D0,
-		ruiTabTextColor = #FF202020,
+		ruiTabTextColor = #FF808080,
 		ruiCurrentTabColor = #FFFFFFFF,
 		ruiCurrentTabTextColor = #FF000000,
 	},

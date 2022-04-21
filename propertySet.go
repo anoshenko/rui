@@ -70,6 +70,7 @@ var intProperties = []string{
 }
 
 var floatProperties = map[string]struct{ min, max float64 }{
+	Opacity:           {min: 0, max: 1},
 	ScaleX:            {min: -math.MaxFloat64, max: math.MaxFloat64},
 	ScaleY:            {min: -math.MaxFloat64, max: math.MaxFloat64},
 	ScaleZ:            {min: -math.MaxFloat64, max: math.MaxFloat64},
