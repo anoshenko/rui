@@ -186,6 +186,45 @@ func (session *sessionData) Color(tag string) (Color, bool) {
 	}
 }
 
+func (session *sessionData) ImageConstant(tag string) (string, bool) {
+	tags := []string{tag}
+	result := ""
+	theme := session.getCurrentTheme()
+	for {
+		ok := false
+		if session.darkTheme {
+			if theme.darkImages != nil {
+				result, ok = theme.darkImages[tag]
+			}
+		}
+
+		if !ok {
+			if theme.images != nil {
+				result, ok = theme.images[tag]
+			}
+		}
+
+		if !ok {
+			ErrorLogF(`"%v" image not found`, tag)
+			return "", false
+		}
+
+		if result == "" || result[0] != '@' {
+			return result, true
+		}
+
+		tag = result[1:]
+		for _, t := range tags {
+			if t == tag {
+				ErrorLogF(`"%v" image is cyclic`, tag)
+				return "", false
+			}
+		}
+
+		tags = append(tags, tag)
+	}
+}
+
 func (session *sessionData) SetCustomTheme(name string) bool {
 	if name == "" {
 		if session.customTheme == nil {
@@ -367,6 +406,24 @@ func (session *sessionData) ColorTags() []string {
 
 	for tag := range theme.darkColors {
 		if _, ok := theme.colors[tag]; !ok {
+			keys = append(keys, tag)
+		}
+	}
+
+	sort.Strings(keys)
+	return keys
+}
+
+func (session *sessionData) ImageConstantTags() []string {
+	theme := session.getCurrentTheme()
+
+	keys := make([]string, 0, len(theme.colors))
+	for k := range theme.images {
+		keys = append(keys, k)
+	}
+
+	for tag := range theme.darkImages {
+		if _, ok := theme.images[tag]; !ok {
 			keys = append(keys, tag)
 		}
 	}

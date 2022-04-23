@@ -35,6 +35,10 @@ type Session interface {
 	Color(tag string) (Color, bool)
 	// ColorTags returns the list of all available color constants
 	ColorTags() []string
+	// ImageConstant returns the image constant with "tag" name or "" if it is not exists
+	ImageConstant(tag string) (string, bool)
+	// ImageConstantTags returns the list of all available image constants
+	ImageConstantTags() []string
 	// SetCustomTheme set the custom theme
 	SetCustomTheme(name string) bool
 	// UserAgent returns the "user-agent" text of the client browser

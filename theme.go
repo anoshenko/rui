@@ -111,6 +111,8 @@ type theme struct {
 	touchConstants map[string]string
 	colors         map[string]string
 	darkColors     map[string]string
+	images         map[string]string
+	darkImages     map[string]string
 	styles         map[string]Params
 	mediaStyles    []mediaStyle
 }
@@ -129,6 +131,8 @@ func (theme *theme) init() {
 	theme.touchConstants = map[string]string{}
 	theme.colors = map[string]string{}
 	theme.darkColors = map[string]string{}
+	theme.images = map[string]string{}
+	theme.darkImages = map[string]string{}
 	theme.styles = map[string]Params{}
 	theme.mediaStyles = []mediaStyle{}
 }
@@ -152,6 +156,14 @@ func (theme *theme) concat(anotherTheme *theme) {
 
 	for tag, color := range anotherTheme.darkColors {
 		theme.darkColors[tag] = color
+	}
+
+	for tag, image := range anotherTheme.images {
+		theme.images[tag] = image
+	}
+
+	for tag, image := range anotherTheme.darkImages {
+		theme.darkImages[tag] = image
 	}
 
 	for tag, style := range anotherTheme.styles {
@@ -303,6 +315,30 @@ func (theme *theme) parseThemeData(data DataObject) {
 						for k := 0; k < objCount; k++ {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.darkColors[prop.Tag()] = prop.Text()
+							}
+						}
+					}
+				}
+
+			case "images":
+				if d.Type() == ObjectNode {
+					if obj := d.Object(); obj != nil {
+						objCount := obj.PropertyCount()
+						for k := 0; k < objCount; k++ {
+							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
+								theme.images[prop.Tag()] = prop.Text()
+							}
+						}
+					}
+				}
+
+			case "images:dark":
+				if d.Type() == ObjectNode {
+					if obj := d.Object(); obj != nil {
+						objCount := obj.PropertyCount()
+						for k := 0; k < objCount; k++ {
+							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
+								theme.darkImages[prop.Tag()] = prop.Text()
 							}
 						}
 					}

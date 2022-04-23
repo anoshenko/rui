@@ -128,5 +128,10 @@ func (manager *imageManager) imageLoadError(obj DataObject, session Session) {
 
 // LoadImage starts the async image loading by url
 func LoadImage(url string, onLoaded func(Image), session Session) Image {
+	if url != "" && url[0] == '@' {
+		if image, ok := session.ImageConstant(url[1:]); ok {
+			url = image
+		}
+	}
 	return session.imageManager().loadImage(url, onLoaded, session)
 }

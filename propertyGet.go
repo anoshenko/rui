@@ -14,6 +14,23 @@ func stringProperty(properties Properties, tag string, session Session) (string,
 	return "", false
 }
 
+func imageProperty(properties Properties, tag string, session Session) (string, bool) {
+	if value := properties.getRaw(tag); value != nil {
+		if text, ok := value.(string); ok {
+			if text != "" && text[0] == '@' {
+				if image, ok := session.ImageConstant(text[1:]); ok {
+					return image, true
+				} else {
+					return "", false
+				}
+			}
+
+			return text, true
+		}
+	}
+	return "", false
+}
+
 func valueToSizeUnit(value interface{}, session Session) (SizeUnit, bool) {
 	if value != nil {
 		switch value := value.(type) {

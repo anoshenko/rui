@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -422,5 +423,6 @@ func AllImageResources() []string {
 	for image := range resources.images {
 		result = append(result, image)
 	}
+	sort.Strings(result)
 	return result
 }

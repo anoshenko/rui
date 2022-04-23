@@ -239,7 +239,7 @@ func (image *backgroundImage) Get(tag string) interface{} {
 }
 
 func (image *backgroundImage) cssStyle(session Session) string {
-	if src, ok := stringProperty(image, Source, session); ok && src != "" {
+	if src, ok := imageProperty(image, Source, session); ok && src != "" {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
 

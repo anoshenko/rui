@@ -109,8 +109,12 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 		if text, ok := value.(string); ok {
 			imageView.properties[Source] = text
 			if imageView.created {
-				updateProperty(imageView.htmlID(), "src", text, imageView.session)
-				if srcset := imageView.srcSet(text); srcset != "" {
+				src := text
+				if src != "" && src[0] == '@' {
+					src, _ = imageProperty(imageView, Source, imageView.session)
+				}
+				updateProperty(imageView.htmlID(), "src", src, imageView.session)
+				if srcset := imageView.srcSet(src); srcset != "" {
 					updateProperty(imageView.htmlID(), "srcset", srcset, imageView.session)
 				} else {
 					removeProperty(imageView.htmlID(), "srcset", imageView.session)
@@ -179,15 +183,25 @@ func (imageView *imageViewData) closeHTMLTag() bool {
 
 func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builder) {
 	imageView.viewData.htmlProperties(self, buffer)
-	imageResource := GetImageViewSource(imageView, "")
-	if imageResource != "" {
-		buffer.WriteString(` src="`)
-		buffer.WriteString(imageResource)
-		buffer.WriteString(`"`)
-		if srcset := imageView.srcSet(imageResource); srcset != "" {
-			buffer.WriteString(` srcset="`)
-			buffer.WriteString(srcset)
+
+	if imageResource, ok := imageProperty(imageView, Source, imageView.Session()); ok && imageResource != "" {
+		if imageResource[0] == '@' {
+			if image, ok := imageView.Session().ImageConstant(imageResource[1:]); ok {
+				imageResource = image
+			} else {
+				imageResource = ""
+			}
+		}
+
+		if imageResource != "" {
+			buffer.WriteString(` src="`)
+			buffer.WriteString(imageResource)
 			buffer.WriteString(`"`)
+			if srcset := imageView.srcSet(imageResource); srcset != "" {
+				buffer.WriteString(` srcset="`)
+				buffer.WriteString(srcset)
+				buffer.WriteString(`"`)
+			}
 		}
 	}
 
@@ -236,9 +250,16 @@ func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
 // GetImageViewSource returns the image URL of an ImageView subview.
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
 func GetImageViewSource(view View, subviewID string) string {
-	if image, ok := stringProperty(view, Source, view.Session()); ok {
-		return image
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
+
+	if view != nil {
+		if image, ok := imageProperty(view, Source, view.Session()); ok {
+			return image
+		}
+	}
+
 	return ""
 }
 
