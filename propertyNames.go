@@ -359,6 +359,8 @@ const (
 	Direction = "direction"
 	// Repeating is the constant for the "repeating" property tag.
 	Repeating = "repeating"
+	// Repeating is the constant for the "repeating" property tag.
+	From = "from"
 	// RadialGradientRadius is the constant for the "radial-gradient-radius" property tag.
 	RadialGradientRadius = "radial-gradient-radius"
 	// RadialGradientShape is the constant for the "radial-gradient-shape" property tag.

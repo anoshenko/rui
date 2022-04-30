@@ -33,6 +33,7 @@ var angleProperties = []string{
 	Rotate,
 	SkewX,
 	SkewY,
+	From,
 }
 
 var boolProperties = []string{
@@ -58,6 +59,7 @@ var boolProperties = []string{
 	AnimationPaused,
 	Multiple,
 	TabCloseButton,
+	Repeating,
 }
 
 var intProperties = []string{

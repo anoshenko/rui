@@ -972,11 +972,11 @@ Optional parameter. The default direction is from bottom to top. It can be eithe
 
 | Value | Constant              | Name              | Description                                   |
 |:-----:|-----------------------|-------------------|-----------------------------------------------|
-| 0     | ToTopGradient         | "to-top"          | Line goes from bottom to top (default)        |
+| 0     | ToTopGradient         | "to-top"          | Line goes from bottom to top                  |
 | 1     | ToRightTopGradient    | "to-right-top"    | From bottom left to top right                 |
 | 2     | ToRightGradient       | "to-right"        | From left to right                            |
 | 3     | ToRightBottomGradient | "to-right-bottom" | From top left to bottom right                 |
-| 4     | ToBottomGradient      | "to-bottom"       | From top to bottom                            |
+| 4     | ToBottomGradient      | "to-bottom"       | From top to bottom (default)                  |
 | 5     | ToLeftBottomGradient  | "to-left-bottom"  | From the upper right corner to the lower left |
 | 6     | ToLeftGradient        | "to-left"         | From right to left                            |
 | 7     | ToLeftTopGradient     | "to-left-top"     | From the bottom right corner to the top left  |
@@ -988,7 +988,7 @@ You can also pass a Color array as the gradient value. In this case, the points 
 You can also use an array of []interface{} as an array of cue points.
 The elements of this array can be BackgroundGradientPoint, Color, BackgroundGradientPoint or Color text representation, and the name of the constant
 
-* Repeat ("repeat") - a boolean value that determines whether the gradient will repeat after the last key point. 
+* Repeating ("repeating") - a boolean value that determines whether the gradient will repeat after the last key point. 
 Optional parameter. The default is false (do not repeat)
 
 The linear gradient text representation is as follows:
@@ -1005,7 +1005,7 @@ The radial gradient has the following parameters:
 
 * Gradient ("gradient") - array of gradient key points (required parameter). Identical to the linear gradient parameter of the same name.
 
-* Repeat ("repeat") - a boolean value that determines whether the gradient will repeat after the last key point. 
+* Repeating ("repeating") - a boolean value that determines whether the gradient will repeat after the last key point. 
 Optional parameter. The default is false (do not repeat)
 
 * RadialGradientShape ("radial-gradient-shape") or Shape ("shape") - defines the shape of the gradient.
@@ -1028,7 +1028,7 @@ Can be either SizeUnit or one of the following int values:
 | 2     | FarthestSideGradient   | "farthest-side"   | Similar to ClosestSideGradient, except that the size of the shape is determined by the farthest side from its center (or vertical and horizontal sides) |
 | 3     | FarthestCornerGradient | "farthest-corner" | The final shape of the gradient is defined so that it exactly matches the farthest corner of the rectangle from its center |
 
-Optional parameter. The default is ClosestSideGradient
+Optional parameter. The default is FarthestCornerGradient
 
 * CenterX ("center-x"), CenterY ("center-y") - sets the center of the gradient relative to the upper left corner of the View. Takes in a SizeUnit value. Optional parameter.
 The default value is "50%", i.e. the center of the gradient is the center of the View.
@@ -1037,6 +1037,45 @@ The linear gradient text representation is as follows:
 
 	radial-gradient { gradient = <Value> [, repeat = <Value>] [, shape = <Value>]
 		[, radius = <Value>][, center-x = <Value>][, center-y = <Value>]}
+
+#### Conic gradient
+
+The conic gradient is created using the function
+
+	func NewBackgroundConicGradient(params Params) BackgroundElement
+
+The radial gradient has the following options:
+
+* Gradient ("gradient") - array of gradient key angles (required parameter). 
+Each key angle is described by a BackgroundGradientAngle structure:
+
+	type BackgroundGradientAngle struct {
+		Color interface{}
+		Angle interface{}
+	}
+
+where Color specifies the color of the key corner and can take a value of Color type or 
+string (color constant or textual description of the color);
+Angle sets the angle relative to the initial angle specified by the From parameter 
+and can take a value of the AngleUnit type or string (an angle constant or a textual description of the angle).
+
+The Color field is required and cannot be nil. 
+
+The Angle field is optional. If it is nil, then the angle is set as the midpoint between adjacent corners.
+For the first element, the default angle is 0°, for the last element it is 360°.
+
+* Repeating ("repeating") is a boolean value that determines whether the gradient will repeat after the last key corner. 
+Optional parameter. Default value is false (don't repeat)
+
+* CenterX ("center-x"), CenterY ("center-y") - sets the center of the gradient relative to the upper left corner of the View. 
+Takes a value of SizeUnit type. Optional parameter.
+The default value is "50%", i.e. the center of the gradient is the same as the center of the View.
+
+The textual representation of a conic gradient looks like this:
+
+	conic-gradient { gradient = <Value> [, repeating = <Value>] [, from = <Value>]
+		[, center-x = <Value>][, center-y = <Value>]}
+
 
 #### Image
 
