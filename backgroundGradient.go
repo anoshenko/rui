@@ -48,10 +48,12 @@ const (
 
 // BackgroundGradientPoint define point on gradient straight line
 type BackgroundGradientPoint struct {
-	// Pos - the distance from the start of the gradient straight line
-	Pos SizeUnit
-	// Color - the color of the point
-	Color Color
+	// Color - the color of the point. Must not be nil.
+	// Can take a value of Color type or string (color constant or textual description of the color)
+	Color interface{}
+	// Pos - the distance from the start of the gradient straight line. Optional (may be nil).
+	// Can take a value of SizeUnit type or string (angle constant or textual description of the SizeUnit)
+	Pos interface{}
 }
 
 type backgroundGradient struct {
@@ -86,6 +88,24 @@ func NewBackgroundRadialGradient(params Params) BackgroundElement {
 	return result
 }
 
+func (gradient *backgroundGradient) parseGradientText(value string) []BackgroundGradientPoint {
+	elements := strings.Split(value, ",")
+	count := len(elements)
+	if count < 2 {
+		ErrorLog("The gradient must contain at least 2 points")
+		return nil
+	}
+
+	points := make([]BackgroundGradientPoint, count)
+	for i, element := range elements {
+		if !points[i].setValue(element) {
+			ErrorLogF(`Ivalid %d element of the conic gradient: "%s"`, i, element)
+			return nil
+		}
+	}
+	return points
+}
+
 func (gradient *backgroundGradient) Set(tag string, value interface{}) bool {
 
 	switch tag = strings.ToLower(tag); tag {
@@ -96,29 +116,13 @@ func (gradient *backgroundGradient) Set(tag string, value interface{}) bool {
 		switch value := value.(type) {
 		case string:
 			if value != "" {
-				elements := strings.Split(value, `,`)
-				if count := len(elements); count > 1 {
-					points := make([]interface{}, count)
-					for i, element := range elements {
-						if strings.Contains(element, "@") {
-							points[i] = element
-						} else {
-							var point BackgroundGradientPoint
-							if point.setValue(element) {
-								points[i] = point
-							} else {
-								ErrorLogF("Invalid gradient element #%d: %s", i, element)
-								return false
-							}
-						}
+				if strings.Contains(value, " ") || strings.Contains(value, ",") {
+					if points := gradient.parseGradientText(value); len(points) >= 2 {
+						gradient.properties[Gradient] = points
+						return true
 					}
-					gradient.properties[Gradient] = points
-					return true
-				}
-
-				text := strings.Trim(value, " \n\r\t")
-				if text[0] == '@' {
-					gradient.properties[Gradient] = text
+				} else if value[0] == '@' {
+					gradient.properties[Gradient] = value
 					return true
 				}
 			}
@@ -135,7 +139,6 @@ func (gradient *backgroundGradient) Set(tag string, value interface{}) bool {
 				points := make([]BackgroundGradientPoint, count)
 				for i, color := range value {
 					points[i].Color = color
-					points[i].Pos = AutoSize()
 				}
 				gradient.properties[Gradient] = points
 				return true
@@ -152,74 +155,72 @@ func (gradient *backgroundGradient) Set(tag string, value interface{}) bool {
 				gradient.properties[Gradient] = points
 				return true
 			}
-
-		case []interface{}:
-			if count := len(value); count > 1 {
-				points := make([]interface{}, count)
-				for i, element := range value {
-					switch element := element.(type) {
-					case string:
-						if strings.Contains(element, "@") {
-							points[i] = element
-						} else {
-							var point BackgroundGradientPoint
-							if !point.setValue(element) {
-								ErrorLogF("Invalid gradient element #%d: %s", i, element)
-								return false
-							}
-							points[i] = point
-						}
-
-					case BackgroundGradientPoint:
-						points[i] = element
-
-					case GradientPoint:
-						points[i] = BackgroundGradientPoint{Color: element.Color, Pos: Percent(element.Offset * 100)}
-
-					case Color:
-						points[i] = BackgroundGradientPoint{Color: element, Pos: AutoSize()}
-
-					default:
-						ErrorLogF("Invalid gradient element #%d: %v", i, element)
-						return false
-					}
-				}
-				gradient.properties[Gradient] = points
-				return true
-			}
-
-		default:
-			ErrorLogF("Invalid gradient %v", value)
-			return false
 		}
+
+		ErrorLogF("Invalid gradient %v", value)
+		return false
 	}
 
 	return gradient.backgroundElement.Set(tag, value)
 }
 
-func (point *BackgroundGradientPoint) setValue(value string) bool {
-	var ok bool
+func (point *BackgroundGradientPoint) setValue(text string) bool {
+	text = strings.Trim(text, " ")
 
-	switch elements := strings.Split(value, `:`); len(elements) {
-	case 2:
-		if point.Color, ok = StringToColor(elements[0]); !ok {
-			return false
-		}
-		if point.Pos, ok = StringToSizeUnit(elements[1]); !ok {
-			return false
-		}
+	colorText := text
+	pointText := ""
 
-	case 1:
-		if point.Color, ok = StringToColor(elements[0]); !ok {
-			return false
-		}
-		point.Pos = AutoSize()
+	if index := strings.Index(text, " "); index > 0 {
+		colorText = text[:index]
+		pointText = strings.Trim(text[index+1:], " ")
+	}
 
-	default:
+	if colorText == "" {
 		return false
 	}
 
-	return false
+	if colorText[0] == '@' {
+		point.Color = colorText
+	} else if color, ok := StringToColor(colorText); ok {
+		point.Color = color
+	} else {
+		return false
+	}
+
+	if pointText == "" {
+		point.Pos = nil
+	} else if pointText[0] == '@' {
+		point.Pos = pointText
+	} else if pos, ok := StringToSizeUnit(pointText); ok {
+		point.Pos = pos
+	} else {
+		return false
+	}
+
+	return true
+}
+
+func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
+	if point.Color != nil {
+		switch color := point.Color.(type) {
+		case string:
+			if color != "" {
+				if color[0] == '@' {
+					if clr, ok := session.Color(color[1:]); ok {
+						return clr, true
+					}
+				} else {
+					if clr, ok := StringToColor(color); ok {
+						return clr, true
+					}
+				}
+			}
+
+		case Color:
+			return color, true
+		}
+	}
+	return 0, false
 }
 
 func (gradient *backgroundGradient) writeGradient(session Session, buffer *strings.Builder) bool {
@@ -229,46 +230,18 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 		return false
 	}
 
-	points := []BackgroundGradientPoint{}
+	var points []BackgroundGradientPoint = nil
 
 	switch value := value.(type) {
 	case string:
-		if text, ok := session.resolveConstants(value); ok && text != "" {
-			elements := strings.Split(text, `,`)
-			points := make([]BackgroundGradientPoint, len(elements))
-			for i, element := range elements {
-				if !points[i].setValue(element) {
-					ErrorLogF(`Invalid gradient point #%d: "%s"`, i, element)
-					return false
-				}
+		if value != "" && value[0] == '@' {
+			if text, ok := session.Constant(value[1:]); ok {
+				points = gradient.parseGradientText(text)
 			}
-		} else {
-			ErrorLog(`Invalid gradient: ` + value)
-			return false
 		}
 
 	case []BackgroundGradientPoint:
 		points = value
-
-	case []interface{}:
-		points = make([]BackgroundGradientPoint, len(value))
-		for i, element := range value {
-			switch element := element.(type) {
-			case string:
-				if text, ok := session.resolveConstants(element); ok && text != "" {
-					if !points[i].setValue(text) {
-						ErrorLogF(`Invalid gradient point #%d: "%s"`, i, text)
-						return false
-					}
-				} else {
-					ErrorLogF(`Invalid gradient point #%d: "%s"`, i, text)
-					return false
-				}
-
-			case BackgroundGradientPoint:
-				points[i] = element
-			}
-		}
 	}
 
 	if len(points) > 0 {
@@ -277,10 +250,31 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 				buffer.WriteString(`, `)
 			}
 
-			buffer.WriteString(point.Color.cssString())
-			if point.Pos.Type != Auto {
-				buffer.WriteRune(' ')
-				buffer.WriteString(point.Pos.cssString(""))
+			if color, ok := point.color(session); ok {
+				buffer.WriteString(color.cssString())
+			} else {
+				return false
+			}
+
+			if point.Pos != nil {
+				switch value := point.Pos.(type) {
+				case string:
+					if value != "" {
+						if value[0] == '@' {
+							value, _ = session.Constant(value[1:])
+						}
+						if pos, ok := StringToSizeUnit(value); ok && pos.Type != Auto {
+							buffer.WriteRune(' ')
+							buffer.WriteString(pos.cssString(""))
+						}
+					}
+
+				case SizeUnit:
+					if value.Type != Auto {
+						buffer.WriteRune(' ')
+						buffer.WriteString(value.cssString(""))
+					}
+				}
 			}
 		}
 		return true
