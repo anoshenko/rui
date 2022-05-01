@@ -166,9 +166,9 @@ func (session *sessionData) Color(tag string) (Color, bool) {
 		}
 
 		if len(result) == 0 || result[0] != '@' {
-			color, ok := StringToColor(result)
-			if !ok {
-				ErrorLogF(`invalid value "%v" of "%v" color constant`, result, tag)
+			color, err := stringToColor(result)
+			if err != nil {
+				ErrorLogF(`invalid value "%v" of "%v" color constant (%s)`, result, tag, err.Error())
 				return 0, false
 			}
 			return color, true

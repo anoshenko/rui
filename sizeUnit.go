@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -120,15 +121,23 @@ func sizeUnitSuffixes() map[SizeUnitType]string {
 
 // StringToSizeUnit converts the string argument to SizeUnit
 func StringToSizeUnit(value string) (SizeUnit, bool) {
+	size, err := stringToSizeUnit(value)
+	if err != nil {
+		ErrorLog(err.Error())
+		return size, false
+	}
+	return size, true
+}
 
+func stringToSizeUnit(value string) (SizeUnit, error) {
 	value = strings.Trim(value, " \t\n\r")
 
 	switch value {
 	case "auto", "none", "":
-		return SizeUnit{Type: Auto, Value: 0}, true
+		return SizeUnit{Type: Auto, Value: 0}, nil
 
 	case "0":
-		return SizeUnit{Type: SizeInPixel, Value: 0}, true
+		return SizeUnit{Type: SizeInPixel, Value: 0}, nil
 	}
 
 	suffixes := sizeUnitSuffixes()
@@ -137,15 +146,13 @@ func StringToSizeUnit(value string) (SizeUnit, bool) {
 			var err error
 			var val float64
 			if val, err = strconv.ParseFloat(value[:len(value)-len(suffix)], 64); err != nil {
-				ErrorLog(err.Error())
-				return SizeUnit{Type: Auto, Value: 0}, false
+				return SizeUnit{Type: Auto, Value: 0}, err
 			}
-			return SizeUnit{Type: unitType, Value: val}, true
+			return SizeUnit{Type: unitType, Value: val}, nil
 		}
 	}
 
-	ErrorLog(`Invalid SizeUnit value: "` + value + `"`)
-	return SizeUnit{Type: Auto, Value: 0}, false
+	return SizeUnit{Type: Auto, Value: 0}, errors.New(`Invalid SizeUnit value: "` + value + `"`)
 }
 
 // String - convert SizeUnit to string

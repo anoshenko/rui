@@ -67,31 +67,27 @@ func angleUnitSuffixes() map[AngleUnitType]string {
 
 // StringToAngleUnit converts the string argument to AngleUnit
 func StringToAngleUnit(value string) (AngleUnit, bool) {
-	var angle AngleUnit
-	ok, err := angle.setValue(value)
-	if !ok {
-		ErrorLog(err)
+	angle, err := stringToAngleUnit(value)
+	if err != nil {
+		ErrorLog(err.Error())
+		return angle, false
 	}
-	return angle, ok
+	return angle, true
 }
 
-func (angle *AngleUnit) setValue(value string) (bool, string) {
+func stringToAngleUnit(value string) (AngleUnit, error) {
 	value = strings.ToLower(strings.Trim(value, " \t\n\r"))
 
-	setValue := func(suffix string, unitType AngleUnitType) (bool, string) {
+	setValue := func(suffix string, unitType AngleUnitType) (AngleUnit, error) {
 		val, err := strconv.ParseFloat(value[:len(value)-len(suffix)], 64)
 		if err != nil {
-			return false, `AngleUnit.SetValue("` + value + `") error: ` + err.Error()
+			return AngleUnit{}, err
 		}
-		angle.Value = val
-		angle.Type = unitType
-		return true, ""
+		return AngleUnit{Value: val, Type: unitType}, nil
 	}
 
 	if value == "π" {
-		angle.Value = 1
-		angle.Type = PiRadian
-		return true, ""
+		return AngleUnit{Value: 1, Type: PiRadian}, nil
 	}
 
 	if strings.HasSuffix(value, "π") {
@@ -108,13 +104,12 @@ func (angle *AngleUnit) setValue(value string) (bool, string) {
 		}
 	}
 
-	if val, err := strconv.ParseFloat(value, 64); err == nil {
-		angle.Value = val
-		angle.Type = Radian
-		return true, ""
+	val, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return AngleUnit{}, err
 	}
 
-	return false, `AngleUnit.SetValue("` + value + `") error: invalid argument`
+	return AngleUnit{Value: val, Type: Radian}, nil
 }
 
 // String - convert AngleUnit to string

@@ -2,6 +2,7 @@ package rui
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -71,43 +72,49 @@ func (color Color) cssString() string {
 
 // StringToColor converts the string argument to Color value
 func StringToColor(text string) (Color, bool) {
+	color, err := stringToColor(text)
+	if err != nil {
+		ErrorLog(err.Error())
+		return color, false
+	}
+	return color, true
+}
+
+func stringToColor(text string) (Color, error) {
 
 	text = strings.Trim(text, " \t\r\n")
 	if text == "" {
-		ErrorLog(`Invalid color value: ""`)
-		return 0, false
+		return 0, errors.New(`Invalid color value: ""`)
 	}
 
 	if text[0] == '#' {
 		c, err := strconv.ParseUint(text[1:], 16, 32)
 		if err != nil {
-			ErrorLog("Set color value error: " + err.Error())
-			return 0, false
+			return 0, errors.New("Set color value error: " + err.Error())
 		}
 
 		switch len(text) - 1 {
 		case 8:
-			return Color(c), true
+			return Color(c), nil
 
 		case 6:
-			return Color(c | 0xFF000000), true
+			return Color(c | 0xFF000000), nil
 
 		case 4:
 			a := (c >> 12) & 0xF
 			r := (c >> 8) & 0xF
 			g := (c >> 4) & 0xF
 			b := c & 0xF
-			return Color((a << 28) | (a << 24) | (r << 20) | (r << 16) | (g << 12) | (g << 8) | (b << 4) | b), true
+			return Color((a << 28) | (a << 24) | (r << 20) | (r << 16) | (g << 12) | (g << 8) | (b << 4) | b), nil
 
 		case 3:
 			r := (c >> 8) & 0xF
 			g := (c >> 4) & 0xF
 			b := c & 0xF
-			return Color(0xFF000000 | (r << 20) | (r << 16) | (g << 12) | (g << 8) | (b << 4) | b), true
+			return Color(0xFF000000 | (r << 20) | (r << 16) | (g << 12) | (g << 8) | (b << 4) | b), nil
 		}
 
-		ErrorLog(`Invalid color format: "` + text + `". Valid formats: #AARRGGBB, #RRGGBB, #ARGB, #RGB`)
-		return 0, false
+		return 0, errors.New(`Invalid color format: "` + text + `". Valid formats: #AARRGGBB, #RRGGBB, #ARGB, #RGB`)
 	}
 
 	parseRGB := func(args string) []int {
@@ -155,23 +162,22 @@ func StringToColor(text string) (Color, bool) {
 	if strings.HasPrefix(text, "rgba") {
 		args := parseRGB(text[4:])
 		if len(args) == 4 {
-			return Color((args[3] << 24) | (args[0] << 16) | (args[1] << 8) | args[2]), true
+			return Color((args[3] << 24) | (args[0] << 16) | (args[1] << 8) | args[2]), nil
 		}
 	}
 
 	if strings.HasPrefix(text, "rgb") {
 		args := parseRGB(text[3:])
 		if len(args) == 3 {
-			return Color(0xFF000000 | (args[0] << 16) | (args[1] << 8) | args[2]), true
+			return Color(0xFF000000 | (args[0] << 16) | (args[1] << 8) | args[2]), nil
 		}
 	}
 
 	// TODO hsl(360,100%,50%), hsla(360,100%,50%,.5)
 
 	if color, ok := colorConstants[text]; ok {
-		return color, true
+		return color, nil
 	}
 
-	ErrorLog(`Invalid color format: "` + text + `"`)
-	return 0, false
+	return 0, errors.New(`Invalid color format: "` + text + `"`)
 }

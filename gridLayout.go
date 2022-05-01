@@ -42,7 +42,7 @@ func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
 				val = strings.Trim(val, " \t\n\r")
 				if isConstantName(val) {
 					sizes[i] = val
-				} else if size, ok := StringToSizeUnit(val); ok {
+				} else if size, err := stringToSizeUnit(val); err == nil {
 					sizes[i] = size
 				} else {
 					invalidPropertyValue(tag, value)
@@ -52,7 +52,7 @@ func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
 			style.properties[tag] = sizes
 		} else if isConstantName(values[0]) {
 			style.properties[tag] = values[0]
-		} else if size, ok := StringToSizeUnit(values[0]); ok {
+		} else if size, err := stringToSizeUnit(values[0]); err == nil {
 			style.properties[tag] = size
 		} else {
 			invalidPropertyValue(tag, value)
@@ -110,7 +110,7 @@ func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
 				case string:
 					if isConstantName(val) {
 						sizes[i] = val
-					} else if size, ok := StringToSizeUnit(val); ok {
+					} else if size, err := stringToSizeUnit(val); err == nil {
 						sizes[i] = size
 					} else {
 						invalidPropertyValue(tag, value)
@@ -291,7 +291,7 @@ func gridCellSizes(properties Properties, tag string, session Session) []SizeUni
 
 				case string:
 					if text, ok := session.resolveConstants(val); ok {
-						result[i], _ = StringToSizeUnit(text)
+						result[i], _ = stringToSizeUnit(text)
 					}
 				}
 			}
@@ -302,7 +302,7 @@ func gridCellSizes(properties Properties, tag string, session Session) []SizeUni
 				values := strings.Split(text, ",")
 				result := make([]SizeUnit, len(values))
 				for i, val := range values {
-					result[i], _ = StringToSizeUnit(val)
+					result[i], _ = stringToSizeUnit(val)
 				}
 				return result
 			}

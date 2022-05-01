@@ -161,7 +161,8 @@ func (gradient *backgroundGradient) Set(tag string, value interface{}) bool {
 		return false
 	}
 
-	return gradient.backgroundElement.Set(tag, value)
+	ErrorLogF("Property %s is not supported by a background gradient", tag)
+	return false
 }
 
 func (point *BackgroundGradientPoint) setValue(text string) bool {
@@ -303,8 +304,10 @@ func (gradient *backgroundLinearGradient) Set(tag string, value interface{}) boo
 			return true
 
 		case string:
-			var angle AngleUnit
-			if ok, _ := angle.setValue(value); ok {
+			if gradient.setSimpleProperty(tag, value) {
+				return true
+			}
+			if angle, ok := StringToAngleUnit(value); ok {
 				gradient.properties[Direction] = angle
 				return true
 			}
@@ -404,8 +407,60 @@ func (gradient *backgroundRadialGradient) Set(tag string, value interface{}) boo
 	switch tag {
 	case RadialGradientRadius:
 		switch value := value.(type) {
-		case string, SizeUnit:
-			return gradient.propertyList.Set(RadialGradientRadius, value)
+		case []SizeUnit:
+			switch len(value) {
+			case 0:
+				delete(gradient.properties, RadialGradientRadius)
+				return true
+
+			case 1:
+				if value[0].Type == Auto {
+					delete(gradient.properties, RadialGradientRadius)
+				} else {
+					gradient.properties[RadialGradientRadius] = value[0]
+				}
+				return true
+
+			default:
+				gradient.properties[RadialGradientRadius] = value
+				return true
+			}
+
+		case []interface{}:
+			switch len(value) {
+			case 0:
+				delete(gradient.properties, RadialGradientRadius)
+				return true
+
+			case 1:
+				return gradient.Set(RadialGradientRadius, value[0])
+
+			default:
+				gradient.properties[RadialGradientRadius] = value
+				return true
+			}
+
+		case string:
+			if gradient.setSimpleProperty(RadialGradientRadius, value) {
+				return true
+			}
+			if size, err := stringToSizeUnit(value); err == nil {
+				if size.Type == Auto {
+					delete(gradient.properties, RadialGradientRadius)
+				} else {
+					gradient.properties[RadialGradientRadius] = size
+				}
+				return true
+			}
+			return gradient.setEnumProperty(RadialGradientRadius, value, enumProperties[RadialGradientRadius].values)
+
+		case SizeUnit:
+			if value.Type == Auto {
+				delete(gradient.properties, RadialGradientRadius)
+			} else {
+				gradient.properties[RadialGradientRadius] = value
+			}
+			return true
 
 		case int:
 			n := value
@@ -415,10 +470,7 @@ func (gradient *backgroundRadialGradient) Set(tag string, value interface{}) boo
 		}
 		ErrorLogF(`Invalid value of "%s" property: %v`, tag, value)
 
-	case RadialGradientShape:
-		return gradient.propertyList.Set(RadialGradientShape, value)
-
-	case CenterX, CenterY:
+	case RadialGradientShape, CenterX, CenterY:
 		return gradient.propertyList.Set(tag, value)
 	}
 
@@ -439,10 +491,11 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 		buffer.WriteString(`radial-gradient(`)
 	}
 
+	var shapeText string
 	if shape, ok := enumProperty(gradient, RadialGradientShape, session, EllipseGradient); ok && shape == CircleGradient {
-		buffer.WriteString(`circle `)
+		shapeText = `circle `
 	} else {
-		buffer.WriteString(`ellipse `)
+		shapeText = `ellipse `
 	}
 
 	if value, ok := gradient.properties[RadialGradientRadius]; ok {
@@ -451,10 +504,16 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			if text, ok := session.resolveConstants(value); ok {
 				values := enumProperties[RadialGradientRadius]
 				if n, ok := enumStringToInt(text, values.values, false); ok {
+					buffer.WriteString(shapeText)
+					shapeText = ""
 					buffer.WriteString(values.cssValues[n])
 					buffer.WriteString(" ")
 				} else {
 					if r, ok := StringToSizeUnit(text); ok && r.Type != Auto {
+						buffer.WriteString("ellipse ")
+						shapeText = ""
+						buffer.WriteString(r.cssString(""))
+						buffer.WriteString(" ")
 						buffer.WriteString(r.cssString(""))
 						buffer.WriteString(" ")
 					} else {
@@ -468,6 +527,8 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 		case int:
 			values := enumProperties[RadialGradientRadius].cssValues
 			if value >= 0 && value < len(values) {
+				buffer.WriteString(shapeText)
+				shapeText = ""
 				buffer.WriteString(values[value])
 				buffer.WriteString(" ")
 			} else {
@@ -476,8 +537,55 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 
 		case SizeUnit:
 			if value.Type != Auto {
+				buffer.WriteString("ellipse ")
+				shapeText = ""
 				buffer.WriteString(value.cssString(""))
 				buffer.WriteString(" ")
+				buffer.WriteString(value.cssString(""))
+				buffer.WriteString(" ")
+			}
+
+		case []SizeUnit:
+			count := len(value)
+			if count > 2 {
+				count = 2
+			}
+			buffer.WriteString("ellipse ")
+			shapeText = ""
+			for i := 0; i < count; i++ {
+				buffer.WriteString(value[i].cssString("50%"))
+				buffer.WriteString(" ")
+			}
+
+		case []interface{}:
+			count := len(value)
+			if count > 2 {
+				count = 2
+			}
+			buffer.WriteString("ellipse ")
+			shapeText = ""
+			for i := 0; i < count; i++ {
+				if value[i] != nil {
+					switch value := value[i].(type) {
+					case SizeUnit:
+						buffer.WriteString(value.cssString("50%"))
+						buffer.WriteString(" ")
+
+					case string:
+						if text, ok := session.resolveConstants(value); ok {
+							if size, err := stringToSizeUnit(text); err == nil {
+								buffer.WriteString(size.cssString("50%"))
+								buffer.WriteString(" ")
+							} else {
+								buffer.WriteString("50% ")
+							}
+						} else {
+							buffer.WriteString("50% ")
+						}
+					}
+				} else {
+					buffer.WriteString("50% ")
+				}
 			}
 		}
 	}
@@ -485,6 +593,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 	x, _ := sizeProperty(gradient, CenterX, session)
 	y, _ := sizeProperty(gradient, CenterX, session)
 	if x.Type != Auto || y.Type != Auto {
+		if shapeText != "" {
+			buffer.WriteString(shapeText)
+		}
 		buffer.WriteString("at ")
 		buffer.WriteString(x.cssString("50%"))
 		buffer.WriteString(" ")

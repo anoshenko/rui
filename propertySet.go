@@ -586,8 +586,8 @@ func (properties *propertyList) setColorProperty(tag string, value interface{}) 
 		var result Color
 		switch value := value.(type) {
 		case string:
-			var ok bool
-			if result, ok = StringToColor(value); !ok {
+			var err error
+			if result, err = stringToColor(value); err != nil {
 				invalidPropertyValue(tag, value)
 				return false
 			}
