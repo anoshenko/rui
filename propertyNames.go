@@ -396,8 +396,6 @@ const (
 	Value = "value"
 	// Orientation is the constant for the "orientation" property tag.
 	Orientation = "orientation"
-	// Anchor is the constant for the "anchor" property tag.
-	Anchor = "anchor"
 	// Gap is the constant for the "gap" property tag.
 	Gap = "gap"
 	// Text is the constant for the "text" property tag.

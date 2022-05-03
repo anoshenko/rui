@@ -84,7 +84,7 @@ func stringToColor(text string) (Color, error) {
 
 	text = strings.Trim(text, " \t\r\n")
 	if text == "" {
-		return 0, errors.New(`Invalid color value: ""`)
+		return 0, errors.New(`invalid color value: ""`)
 	}
 
 	if text[0] == '#' {

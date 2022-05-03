@@ -567,6 +567,12 @@ func viewPropertyChanged(view *viewData, tag string) {
 			updateCSSProperty(htmlID, ZIndex, strconv.Itoa(i), session)
 		}
 		return
+
+	case Row, Column:
+		if parent := view.parentHTMLID(); parent != "" {
+			updateInnerHTML(parent, session)
+		}
+		return
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {

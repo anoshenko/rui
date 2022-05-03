@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -231,13 +232,17 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 	}
 
 	min, max := GetNumberPickerMinMax(picker, "")
-	buffer.WriteString(` min="`)
-	buffer.WriteString(strconv.FormatFloat(min, 'f', -1, 64))
-	buffer.WriteByte('"')
+	if min != math.Inf(-1) {
+		buffer.WriteString(` min="`)
+		buffer.WriteString(strconv.FormatFloat(min, 'f', -1, 64))
+		buffer.WriteByte('"')
+	}
 
-	buffer.WriteString(` max="`)
-	buffer.WriteString(strconv.FormatFloat(max, 'f', -1, 64))
-	buffer.WriteByte('"')
+	if max != math.Inf(1) {
+		buffer.WriteString(` max="`)
+		buffer.WriteString(strconv.FormatFloat(max, 'f', -1, 64))
+		buffer.WriteByte('"')
+	}
 
 	step := GetNumberPickerStep(picker, "")
 	if step != 0 {
@@ -305,14 +310,24 @@ func GetNumberPickerMinMax(view View, subviewID string) (float64, float64) {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		min, ok := floatStyledProperty(view, NumberPickerMin, 0)
+		t, _ := enumStyledProperty(view, NumberPickerType, NumberEditor)
+		var defMin, defMax float64
+
+		if t == NumberSlider {
+			defMin = 0
+			defMax = 1
+		} else {
+			defMin = math.Inf(-1)
+			defMax = math.Inf(1)
+		}
+		min, ok := floatStyledProperty(view, NumberPickerMin, defMin)
 		if !ok {
-			min, _ = floatStyledProperty(view, Min, 0)
+			min, _ = floatStyledProperty(view, Min, defMin)
 		}
 
-		max, ok := floatStyledProperty(view, NumberPickerMax, 1)
+		max, ok := floatStyledProperty(view, NumberPickerMax, defMax)
 		if !ok {
-			min, _ = floatStyledProperty(view, Max, 1)
+			max, _ = floatStyledProperty(view, Max, defMax)
 		}
 
 		if min > max {
