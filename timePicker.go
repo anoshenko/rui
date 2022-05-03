@@ -13,7 +13,7 @@ const (
 	TimePickerMax    = "time-picker-max"
 	TimePickerStep   = "time-picker-step"
 	TimePickerValue  = "time-picker-value"
-	timeFormat       = "15:04"
+	timeFormat       = "15:04:05"
 )
 
 // TimePicker - TimePicker view
@@ -84,7 +84,7 @@ func (picker *timePickerData) remove(tag string) {
 		}
 
 	case TimePickerStep:
-		delete(picker.properties, TimePickerMax)
+		delete(picker.properties, TimePickerStep)
 		if picker.created {
 			removeProperty(picker.htmlID(), Step, picker.session)
 		}
@@ -182,7 +182,7 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 
 	case TimePickerValue:
 		oldTime := GetTimePickerValue(picker, "")
-		if time, ok := setTimeValue(TimePickerMax); ok {
+		if time, ok := setTimeValue(TimePickerValue); ok {
 			if time != oldTime {
 				if picker.created {
 					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))

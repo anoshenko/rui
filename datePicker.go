@@ -84,7 +84,7 @@ func (picker *datePickerData) remove(tag string) {
 		}
 
 	case DatePickerStep:
-		delete(picker.properties, DatePickerMax)
+		delete(picker.properties, DatePickerStep)
 		if picker.created {
 			removeProperty(picker.htmlID(), Step, picker.session)
 		}
@@ -182,7 +182,7 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 
 	case DatePickerValue:
 		oldDate := GetDatePickerValue(picker, "")
-		if date, ok := setTimeValue(DatePickerMax); ok {
+		if date, ok := setTimeValue(DatePickerValue); ok {
 			if date != oldDate {
 				if picker.created {
 					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
