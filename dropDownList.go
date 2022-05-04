@@ -17,6 +17,7 @@ type DropDownList interface {
 type dropDownListData struct {
 	viewData
 	items            []string
+	disabledItems    []interface{}
 	dropDownListener []func(DropDownList, int)
 }
 
@@ -36,6 +37,7 @@ func (list *dropDownListData) Init(session Session) {
 	list.viewData.Init(session)
 	list.tag = "DropDownList"
 	list.items = []string{}
+	list.disabledItems = []interface{}{}
 	list.dropDownListener = []func(DropDownList, int){}
 }
 
@@ -52,6 +54,15 @@ func (list *dropDownListData) remove(tag string) {
 	case Items:
 		if len(list.items) > 0 {
 			list.items = []string{}
+			if list.created {
+				updateInnerHTML(list.htmlID(), list.session)
+			}
+			list.propertyChangedEvent(tag)
+		}
+
+	case DisabledItems:
+		if len(list.disabledItems) > 0 {
+			list.disabledItems = []interface{}{}
 			if list.created {
 				updateInnerHTML(list.htmlID(), list.session)
 			}
@@ -85,9 +96,17 @@ func (list *dropDownListData) Set(tag string, value interface{}) bool {
 }
 
 func (list *dropDownListData) set(tag string, value interface{}) bool {
+	if value == nil {
+		list.remove(tag)
+		return true
+	}
+
 	switch tag {
 	case Items:
 		return list.setItems(value)
+
+	case DisabledItems:
+		return list.setDisabledItems(value)
 
 	case DropDownEvent:
 		return list.setDropDownListener(value)
@@ -119,7 +138,7 @@ func (list *dropDownListData) setItems(value interface{}) bool {
 		list.items = value
 
 	case []DataValue:
-		list.items = []string{}
+		list.items = make([]string, 0, len(value))
 		for _, val := range value {
 			if !val.IsObject() {
 				list.items = append(list.items, val.Value())
@@ -133,7 +152,7 @@ func (list *dropDownListData) setItems(value interface{}) bool {
 		}
 
 	case []interface{}:
-		items := []string{}
+		items := make([]string, 0, len(value))
 		for _, v := range value {
 			switch val := v.(type) {
 			case string:
@@ -181,6 +200,91 @@ func (list *dropDownListData) setItems(value interface{}) bool {
 
 	list.propertyChangedEvent(Items)
 	return true
+}
+
+func (list *dropDownListData) setDisabledItems(value interface{}) bool {
+	switch value := value.(type) {
+	case []int:
+		list.disabledItems = make([]interface{}, len(value))
+		for i, n := range value {
+			list.disabledItems[i] = n
+		}
+
+	case []interface{}:
+		disabledItems := make([]interface{}, len(value))
+		for i, val := range value {
+			if val == nil {
+				notCompatibleType(DisabledItems, value)
+				return false
+			}
+
+			switch val := val.(type) {
+			case string:
+				if isConstantName(val) {
+					disabledItems[i] = val
+				} else {
+					n, err := strconv.Atoi(val)
+					if err != nil {
+						notCompatibleType(DisabledItems, value)
+						return false
+					}
+					disabledItems[i] = n
+				}
+			default:
+				if n, ok := isInt(val); ok {
+					disabledItems[i] = n
+				} else {
+					notCompatibleType(DisabledItems, value)
+					return false
+				}
+			}
+
+		}
+		list.disabledItems = disabledItems
+
+	case string:
+		values := strings.Split(value, ",")
+		disabledItems := make([]interface{}, len(values))
+		for i, str := range values {
+			str = strings.Trim(str, " ")
+			if str == "" {
+				notCompatibleType(DisabledItems, value)
+				return false
+			}
+			if isConstantName(str) {
+				disabledItems[i] = str
+			} else {
+				n, err := strconv.Atoi(str)
+				if err != nil {
+					notCompatibleType(DisabledItems, value)
+					return false
+				}
+				disabledItems[i] = n
+			}
+		}
+		list.disabledItems = disabledItems
+
+	case []DataValue:
+		disabledItems := make([]string, 0, len(value))
+		for _, val := range value {
+			if !val.IsObject() {
+				disabledItems = append(disabledItems, val.Value())
+			}
+		}
+		return list.setDisabledItems(disabledItems)
+
+	default:
+		notCompatibleType(DisabledItems, value)
+		return false
+	}
+
+	if list.created {
+		updateInnerHTML(list.htmlID(), list.session)
+	}
+
+	list.propertyChangedEvent(Items)
+	return true
+
 }
 
 func (list *dropDownListData) setDropDownListener(value interface{}) bool {
@@ -250,6 +354,9 @@ func (list *dropDownListData) get(tag string) interface{} {
 	case Items:
 		return list.items
 
+	case DisabledItems:
+		return list.disabledItems
+
 	case Current:
 		result, _ := intProperty(list, Current, list.session, 0)
 		return result
@@ -273,8 +380,19 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 	if list.items != nil {
 		current := GetCurrent(list, "")
 		notTranslate := GetNotTranslate(list, "")
+		disabledItems := GetDropDownDisabledItems(list, "")
 		for i, item := range list.items {
-			if i == current {
+			disabled := false
+			for _, index := range disabledItems {
+				if i == index {
+					disabled = true
+					break
+				}
+			}
+
+			if disabled {
+				buffer.WriteString("<option disabled>")
+			} else if i == current {
 				buffer.WriteString("<option selected>")
 			} else {
 				buffer.WriteString("<option>")
@@ -348,4 +466,38 @@ func GetDropDownItems(view View, subviewID string) []string {
 		}
 	}
 	return []string{}
+}
+
+// func GetDropDownDisabledItems return the list of disabled item indexes
+func GetDropDownDisabledItems(view View, subviewID string) []int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view != nil {
+		if value := view.Get(DisabledItems); value != nil {
+			if values, ok := value.([]interface{}); ok {
+				count := len(values)
+				if count > 0 {
+					result := make([]int, 0, count)
+					for _, value := range values {
+						switch value := value.(type) {
+						case int:
+							result = append(result, value)
+
+						case string:
+							if value != "" && value[0] == '@' {
+								if val, ok := view.Session().Constant(value[1:]); ok {
+									if n, err := strconv.Atoi(val); err == nil {
+										result = append(result, n)
+									}
+								}
+							}
+						}
+					}
+					return result
+				}
+			}
+		}
+	}
+	return []int{}
 }

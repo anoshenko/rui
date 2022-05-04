@@ -2972,6 +2972,20 @@ You can read the value of the "items" property using the function
 
 	func GetDropDownItems(view View, subviewID string) []string
 
+You can disable the selection of individual items. For this, the "disabled-items" property (constant DisabledItems) is used.
+This property is assigned an array of disabled item indices. The index can be specified either as a number, as text, or as a constant. Therefore, the following data types can be assigned to the "disabled-items" property:
+
+* []int
+* int
+* []string
+* string - can contain multiple indexes separated by commas
+* []interface{} - containing as elements only: string, int, int8…int64, uint, uint8…uint64.
+
+All of these data types are converted to []interface{} and assigned to the "disabled-items" property.
+You can read the value of the "disabled-items" property using the function
+
+	func GetDropDownDisabledItems(view View, subviewID string) []int
+
 The selected value is determined by the int property "current" (Current constant). The default is 0.
 You can read the value of this property using the function
 

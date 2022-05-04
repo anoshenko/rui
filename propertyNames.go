@@ -328,6 +328,8 @@ const (
 	Content = "content"
 	// Items is the constant for the "items" property tag.
 	Items = "items"
+	// DisabledItems is the constant for the "disabled-items" property tag.
+	DisabledItems = "disabled-items"
 	// Current is the constant for the "current" property tag.
 	Current = "current"
 	// Type is the constant for the "type" property tag.
