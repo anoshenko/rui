@@ -87,13 +87,15 @@ type viewFilter struct {
 
 // NewViewFilter creates the new ViewFilter
 func NewViewFilter(params Params) ViewFilter {
-	filter := new(viewFilter)
-	filter.init()
-	for tag, value := range params {
-		filter.Set(tag, value)
-	}
-	if len(filter.properties) > 0 {
-		return filter
+	if params != nil {
+		filter := new(viewFilter)
+		filter.init()
+		for tag, value := range params {
+			filter.Set(tag, value)
+		}
+		if len(filter.properties) > 0 {
+			return filter
+		}
 	}
 	return nil
 }
