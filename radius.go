@@ -331,6 +331,17 @@ func (radius *radiusPropertyData) Get(tag string) interface{} {
 		}
 	}
 
+	switch tag {
+	case TopLeftX, TopRightX, BottomLeftX, BottomRightX:
+		if value, ok := radius.properties[X]; ok {
+			return value
+		}
+	case TopLeftY, TopRightY, BottomLeftY, BottomRightY:
+		if value, ok := radius.properties[Y]; ok {
+			return value
+		}
+	}
+
 	return nil
 }
 
