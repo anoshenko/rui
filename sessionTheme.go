@@ -2,7 +2,6 @@ package rui
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 )
 
@@ -24,21 +23,10 @@ func (session *sessionData) TextDirection() int {
 
 func (session *sessionData) constant(tag string, prevTags []string) (string, bool) {
 	tags := append(prevTags, tag)
-	result := ""
 	theme := session.getCurrentTheme()
 	for {
-		ok := false
-		if session.touchScreen {
-			if theme.touchConstants != nil {
-				result, ok = theme.touchConstants[tag]
-			}
-		}
-
-		if !ok {
-			result, ok = theme.constants[tag]
-		}
-
-		if !ok {
+		result := theme.constant(tag, session.touchScreen)
+		if result == "" {
 			ErrorLogF(`"%v" constant not found`, tag)
 			return "", false
 		}
@@ -49,8 +37,7 @@ func (session *sessionData) constant(tag string, prevTags []string) (string, boo
 
 		for _, separator := range []string{",", " ", ":", ";", "|", "/"} {
 			if strings.Contains(result, separator) {
-				result, ok = session.resolveConstantsNext(result, tags)
-				return result, ok
+				return session.resolveConstantsNext(result, tags)
 			}
 		}
 
@@ -125,14 +112,13 @@ func (session *sessionData) Constant(tag string) (string, bool) {
 	return session.constant(tag, []string{})
 }
 
-func (session *sessionData) getCurrentTheme() *theme {
+func (session *sessionData) getCurrentTheme() Theme {
 	if session.currentTheme != nil {
 		return session.currentTheme
 	}
 
 	if session.customTheme != nil {
-		session.currentTheme = new(theme)
-		session.currentTheme.init()
+		session.currentTheme = NewTheme("")
 		session.currentTheme.concat(defaultTheme)
 		session.currentTheme.concat(session.customTheme)
 		return session.currentTheme
@@ -144,23 +130,10 @@ func (session *sessionData) getCurrentTheme() *theme {
 // Color return the color with "tag" name or 0 if it is not exists
 func (session *sessionData) Color(tag string) (Color, bool) {
 	tags := []string{tag}
-	result := ""
 	theme := session.getCurrentTheme()
 	for {
-		ok := false
-		if session.darkTheme {
-			if theme.darkColors != nil {
-				result, ok = theme.darkColors[tag]
-			}
-		}
-
-		if !ok {
-			if theme.colors != nil {
-				result, ok = theme.colors[tag]
-			}
-		}
-
-		if !ok {
+		result := theme.color(tag, session.darkTheme)
+		if result == "" {
 			ErrorLogF(`"%v" color not found`, tag)
 			return 0, false
 		}
@@ -188,23 +161,10 @@ func (session *sessionData) Color(tag string) (Color, bool) {
 
 func (session *sessionData) ImageConstant(tag string) (string, bool) {
 	tags := []string{tag}
-	result := ""
 	theme := session.getCurrentTheme()
 	for {
-		ok := false
-		if session.darkTheme {
-			if theme.darkImages != nil {
-				result, ok = theme.darkImages[tag]
-			}
-		}
-
-		if !ok {
-			if theme.images != nil {
-				result, ok = theme.images[tag]
-			}
-		}
-
-		if !ok {
+		result := theme.image(tag, session.darkTheme)
+		if result == "" {
 			ErrorLogF(`"%v" image not found`, tag)
 			return "", false
 		}
@@ -379,55 +339,13 @@ func (session *sessionData) SetLanguage(lang string) {
 }
 
 func (session *sessionData) ConstantTags() []string {
-	theme := session.getCurrentTheme()
-
-	keys := make([]string, 0, len(theme.constants))
-	for k := range theme.constants {
-		keys = append(keys, k)
-	}
-
-	for tag := range theme.touchConstants {
-		if _, ok := theme.constants[tag]; !ok {
-			keys = append(keys, tag)
-		}
-	}
-
-	sort.Strings(keys)
-	return keys
+	return session.getCurrentTheme().ConstantTags()
 }
 
 func (session *sessionData) ColorTags() []string {
-	theme := session.getCurrentTheme()
-
-	keys := make([]string, 0, len(theme.colors))
-	for k := range theme.colors {
-		keys = append(keys, k)
-	}
-
-	for tag := range theme.darkColors {
-		if _, ok := theme.colors[tag]; !ok {
-			keys = append(keys, tag)
-		}
-	}
-
-	sort.Strings(keys)
-	return keys
+	return session.getCurrentTheme().ColorTags()
 }
 
 func (session *sessionData) ImageConstantTags() []string {
-	theme := session.getCurrentTheme()
-
-	keys := make([]string, 0, len(theme.colors))
-	for k := range theme.images {
-		keys = append(keys, k)
-	}
-
-	for tag := range theme.darkImages {
-		if _, ok := theme.images[tag]; !ok {
-			keys = append(keys, tag)
-		}
-	}
-
-	sort.Strings(keys)
-	return keys
+	return session.getCurrentTheme().ImageConstantTags()
 }

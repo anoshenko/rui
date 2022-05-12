@@ -7,63 +7,105 @@ import (
 )
 
 const (
-	defaultMedia   = 0
-	portraitMedia  = 1
-	landscapeMedia = 2
+	DefaultMedia   = 0
+	PortraitMedia  = 1
+	LandscapeMedia = 2
 )
 
-type mediaStyle struct {
-	orientation int
-	width       int
-	height      int
-	styles      map[string]Params
+type MediaStyle struct {
+	Orientation int
+	MaxWidth    int
+	MaxHeight   int
+	Styles      map[string]Params
 }
 
-func (rule mediaStyle) cssText() string {
+type theme struct {
+	name           string
+	constants      map[string]string
+	touchConstants map[string]string
+	colors         map[string]string
+	darkColors     map[string]string
+	images         map[string]string
+	darkImages     map[string]string
+	styles         map[string]Params
+	mediaStyles    []MediaStyle
+}
+
+type Theme interface {
+	Name() string
+	Constant(tag string) (string, string)
+	SetConstant(tag string, value, touchUIValue string)
+	// ConstantTags returns the list of all available constants
+	ConstantTags() []string
+	Color(tag string) (string, string)
+	SetColor(tag, color, darkUIColor string)
+	// ColorTags returns the list of all available color constants
+	ColorTags() []string
+	Image(tag string) (string, string)
+	SetImage(tag, image, darkUIImage string)
+	// ImageConstantTags returns the list of all available image constants
+	ImageConstantTags() []string
+
+	constant(tag string, touchUI bool) string
+	color(tag string, darkUI bool) string
+	image(tag string, darkUI bool) string
+	style(tag string) Params
+	concat(anotherTheme Theme)
+	cssText(session Session) string
+	data() *theme
+}
+
+func (rule MediaStyle) cssText() string {
 	builder := allocStringBuilder()
 	defer freeStringBuilder(builder)
 
-	switch rule.orientation {
-	case portraitMedia:
+	switch rule.Orientation {
+	case PortraitMedia:
 		builder.WriteString(" and (orientation: portrait)")
 
-	case landscapeMedia:
+	case LandscapeMedia:
 		builder.WriteString(" and (orientation: landscape)")
 	}
 
-	if rule.width > 0 {
+	if rule.MaxWidth > 0 {
 		builder.WriteString(" and (max-width: ")
-		builder.WriteString(strconv.Itoa(rule.width))
+		builder.WriteString(strconv.Itoa(rule.MaxWidth))
 		builder.WriteString("px)")
 	}
 
-	if rule.height > 0 {
+	if rule.MaxHeight > 0 {
 		builder.WriteString(" and (max-height: ")
-		builder.WriteString(strconv.Itoa(rule.height))
+		builder.WriteString(strconv.Itoa(rule.MaxHeight))
 		builder.WriteString("px)")
 	}
 
 	return builder.String()
 }
 
-func parseMediaRule(text string) (mediaStyle, bool) {
-	rule := mediaStyle{orientation: defaultMedia, width: 0, height: 0, styles: map[string]Params{}}
+func parseMediaRule(text string) (MediaStyle, bool) {
+	rule := MediaStyle{
+		Orientation: DefaultMedia,
+		MaxWidth:    0,
+		MaxHeight:   0,
+		Styles:      map[string]Params{},
+	}
+
 	elements := strings.Split(text, ":")
 	for i := 1; i < len(elements); i++ {
 		switch element := elements[i]; element {
 		case "portrait":
-			if rule.orientation != defaultMedia {
+			if rule.Orientation != DefaultMedia {
 				ErrorLog(`Duplicate orientation tag in the style section "` + text + `"`)
 				return rule, false
 			}
-			rule.orientation = portraitMedia
+			rule.Orientation = PortraitMedia
 
 		case "landscape":
-			if rule.orientation != defaultMedia {
+			if rule.Orientation != DefaultMedia {
 				ErrorLog(`Duplicate orientation tag in the style section "` + text + `"`)
 				return rule, false
 			}
-			rule.orientation = landscapeMedia
+			rule.Orientation = LandscapeMedia
 
 		default:
 			elementSize := func(name string) (int, bool) {
@@ -82,20 +124,20 @@ func parseMediaRule(text string) (mediaStyle, bool) {
 				if !ok {
 					return rule, false
 				}
-				if rule.width != 0 {
+				if rule.MaxWidth != 0 {
 					ErrorLog(`Duplicate "width" tag in the style section "` + text + `"`)
 					return rule, false
 				}
-				rule.width = size
+				rule.MaxWidth = size
 			} else if size, ok := elementSize("height"); !ok || size > 0 {
 				if !ok {
 					return rule, false
 				}
-				if rule.height != 0 {
+				if rule.MaxHeight != 0 {
 					ErrorLog(`Duplicate "height" tag in the style section "` + text + `"`)
 					return rule, false
 				}
-				rule.height = size
+				rule.MaxHeight = size
 			} else {
 				ErrorLogF(`Unknown elemnet "%s" in the style section name "%s"`, element, text)
 				return rule, false
@@ -105,21 +147,16 @@ func parseMediaRule(text string) (mediaStyle, bool) {
 	return rule, true
 }
 
-type theme struct {
-	name           string
-	constants      map[string]string
-	touchConstants map[string]string
-	colors         map[string]string
-	darkColors     map[string]string
-	images         map[string]string
-	darkImages     map[string]string
-	styles         map[string]Params
-	mediaStyles    []mediaStyle
+var defaultTheme = NewTheme("")
+
+func NewTheme(name string) Theme {
+	result := new(theme)
+	result.init()
+	result.name = name
+	return result
 }
 
-var defaultTheme = new(theme)
-
-func newTheme(text string) (*theme, bool) {
+func CreateThemeFromText(text string) (Theme, bool) {
 	result := new(theme)
 	result.init()
 	ok := result.addText(text)
@@ -134,50 +171,167 @@ func (theme *theme) init() {
 	theme.images = map[string]string{}
 	theme.darkImages = map[string]string{}
 	theme.styles = map[string]Params{}
-	theme.mediaStyles = []mediaStyle{}
+	theme.mediaStyles = []MediaStyle{}
 }
 
-func (theme *theme) concat(anotherTheme *theme) {
+func (theme *theme) Name() string {
+	return theme.name
+}
+
+func (theme *theme) Constant(tag string) (string, string) {
+	return theme.constants[tag], theme.touchConstants[tag]
+}
+
+func (theme *theme) SetConstant(tag, value, touchUIValue string) {
+	value = strings.Trim(value, " \t")
+	if value == "" {
+		delete(theme.constants, tag)
+		delete(theme.touchConstants, tag)
+	} else {
+		theme.constants[tag] = value
+		touchUIValue = strings.Trim(touchUIValue, " \t")
+		if touchUIValue == "" {
+			delete(theme.touchConstants, tag)
+		} else {
+			theme.touchConstants[tag] = touchUIValue
+		}
+	}
+}
+
+func (theme *theme) Color(tag string) (string, string) {
+	return theme.colors[tag], theme.darkColors[tag]
+}
+
+func (theme *theme) SetColor(tag, color, darkUIColor string) {
+	color = strings.Trim(color, " \t")
+	if color == "" {
+		delete(theme.colors, tag)
+		delete(theme.darkColors, tag)
+	} else {
+		theme.colors[tag] = color
+		darkUIColor = strings.Trim(darkUIColor, " \t")
+		if darkUIColor == "" {
+			delete(theme.darkColors, tag)
+		} else {
+			theme.darkColors[tag] = darkUIColor
+		}
+	}
+}
+
+func (theme *theme) Image(tag string) (string, string) {
+	return theme.images[tag], theme.darkImages[tag]
+}
+
+func (theme *theme) SetImage(tag, image, darkUIImage string) {
+	image = strings.Trim(image, " \t")
+	if image == "" {
+		delete(theme.images, tag)
+		delete(theme.darkImages, tag)
+	} else {
+		theme.images[tag] = image
+		darkUIImage = strings.Trim(darkUIImage, " \t")
+		if darkUIImage == "" {
+			delete(theme.darkImages, tag)
+		} else {
+			theme.darkImages[tag] = darkUIImage
+		}
+	}
+}
+
+func (theme *theme) ConstantTags() []string {
+	keys := make([]string, 0, len(theme.constants))
+	for k := range theme.constants {
+		keys = append(keys, k)
+	}
+
+	for tag := range theme.touchConstants {
+		if _, ok := theme.constants[tag]; !ok {
+			keys = append(keys, tag)
+		}
+	}
+
+	sort.Strings(keys)
+	return keys
+}
+
+func (theme *theme) ColorTags() []string {
+	keys := make([]string, 0, len(theme.colors))
+	for k := range theme.colors {
+		keys = append(keys, k)
+	}
+
+	for tag := range theme.darkColors {
+		if _, ok := theme.colors[tag]; !ok {
+			keys = append(keys, tag)
+		}
+	}
+
+	sort.Strings(keys)
+	return keys
+}
+
+func (theme *theme) ImageConstantTags() []string {
+	keys := make([]string, 0, len(theme.colors))
+	for k := range theme.images {
+		keys = append(keys, k)
+	}
+
+	for tag := range theme.darkImages {
+		if _, ok := theme.images[tag]; !ok {
+			keys = append(keys, tag)
+		}
+	}
+
+	sort.Strings(keys)
+	return keys
+}
+
+func (theme *theme) data() *theme {
+	return theme
+}
+
+func (theme *theme) concat(anotherTheme Theme) {
 	if theme.constants == nil {
 		theme.init()
 	}
 
-	for tag, constant := range anotherTheme.constants {
+	another := anotherTheme.data()
+	for tag, constant := range another.constants {
 		theme.constants[tag] = constant
 	}
 
-	for tag, constant := range anotherTheme.touchConstants {
+	for tag, constant := range another.touchConstants {
 		theme.touchConstants[tag] = constant
 	}
 
-	for tag, color := range anotherTheme.colors {
+	for tag, color := range another.colors {
 		theme.colors[tag] = color
 	}
 
-	for tag, color := range anotherTheme.darkColors {
+	for tag, color := range another.darkColors {
 		theme.darkColors[tag] = color
 	}
 
-	for tag, image := range anotherTheme.images {
+	for tag, image := range another.images {
 		theme.images[tag] = image
 	}
 
-	for tag, image := range anotherTheme.darkImages {
+	for tag, image := range another.darkImages {
 		theme.darkImages[tag] = image
 	}
 
-	for tag, style := range anotherTheme.styles {
+	for tag, style := range another.styles {
 		theme.styles[tag] = style
 	}
 
-	for _, anotherMedia := range anotherTheme.mediaStyles {
+	for _, anotherMedia := range another.mediaStyles {
 		exists := false
 		for _, media := range theme.mediaStyles {
-			if anotherMedia.height == media.height &&
-				anotherMedia.width == media.width &&
-				anotherMedia.orientation == media.orientation {
-				for tag, style := range anotherMedia.styles {
-					media.styles[tag] = style
+			if anotherMedia.MaxHeight == media.MaxHeight &&
+				anotherMedia.MaxWidth == media.MaxWidth &&
+				anotherMedia.Orientation == media.Orientation {
+				for tag, style := range anotherMedia.Styles {
+					media.Styles[tag] = style
 				}
 				exists = true
 				break
@@ -211,7 +365,7 @@ func (theme *theme) cssText(session Session) string {
 
 	for _, media := range theme.mediaStyles {
 		builder.startMedia(media.cssText())
-		for tag, obj := range media.styles {
+		for tag, obj := range media.Styles {
 			var style viewStyle
 			style.init()
 			for tag, value := range obj {
@@ -363,7 +517,7 @@ func (theme *theme) parseThemeData(data DataObject) {
 						for k := 0; k < arraySize; k++ {
 							if element := d.ArrayElement(k); element != nil && element.IsObject() {
 								if obj := element.Object(); obj != nil {
-									rule.styles[obj.Tag()] = objToParams(obj)
+									rule.Styles[obj.Tag()] = objToParams(obj)
 								}
 							}
 						}
@@ -376,13 +530,66 @@ func (theme *theme) parseThemeData(data DataObject) {
 
 	if len(theme.mediaStyles) > 0 {
 		sort.SliceStable(theme.mediaStyles, func(i, j int) bool {
-			if theme.mediaStyles[i].orientation != theme.mediaStyles[j].orientation {
-				return theme.mediaStyles[i].orientation < theme.mediaStyles[j].orientation
+			if theme.mediaStyles[i].Orientation != theme.mediaStyles[j].Orientation {
+				return theme.mediaStyles[i].Orientation < theme.mediaStyles[j].Orientation
 			}
-			if theme.mediaStyles[i].width != theme.mediaStyles[j].width {
-				return theme.mediaStyles[i].width < theme.mediaStyles[j].width
+			if theme.mediaStyles[i].MaxWidth != theme.mediaStyles[j].MaxWidth {
+				return theme.mediaStyles[i].MaxWidth < theme.mediaStyles[j].MaxWidth
 			}
-			return theme.mediaStyles[i].height < theme.mediaStyles[j].height
+			return theme.mediaStyles[i].MaxHeight < theme.mediaStyles[j].MaxHeight
 		})
 	}
+}
+
+func (theme *theme) constant(tag string, touchUI bool) string {
+	result := ""
+	if touchUI {
+		if value, ok := theme.touchConstants[tag]; ok {
+			result = value
+		}
+	}
+	if result == "" {
+		if value, ok := theme.constants[tag]; ok {
+			result = value
+		}
+	}
+	return result
+}
+
+func (theme *theme) color(tag string, darkUI bool) string {
+	result := ""
+	if darkUI {
+		if value, ok := theme.darkColors[tag]; ok {
+			result = value
+		}
+	}
+	if result == "" {
+		if value, ok := theme.colors[tag]; ok {
+			result = value
+		}
+	}
+	return result
+}
+
+func (theme *theme) image(tag string, darkUI bool) string {
+	result := ""
+	if darkUI {
+		if value, ok := theme.darkImages[tag]; ok {
+			result = value
+		}
+	}
+	if result == "" {
+		if value, ok := theme.images[tag]; ok {
+			result = value
+		}
+	}
+	return result
+}
+
+func (theme *theme) style(tag string) Params {
+	if style, ok := theme.styles[tag]; ok {
+		return style
+	}
+
+	return Params{}
 }

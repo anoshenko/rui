@@ -94,6 +94,7 @@ type Session interface {
 	runScript(script string)
 	runGetterScript(script string) DataObject //, answer chan DataObject)
 	handleAnswer(data DataObject)
+	handleRootSize(data DataObject)
 	handleResize(data DataObject)
 	handleViewEvent(command string, data DataObject)
 	close()
@@ -113,10 +114,12 @@ type Session interface {
 }
 
 type sessionData struct {
-	customTheme      *theme
-	currentTheme     *theme
+	customTheme      Theme
+	currentTheme     Theme
 	darkTheme        bool
 	touchScreen      bool
+	screenWidth      int
+	screenHeight     int
 	textDirection    int
 	pixelRatio       float64
 	userAgent        string
@@ -137,6 +140,7 @@ type sessionData struct {
 	brige            WebBrige
 	events           chan DataObject
 	animationCounter int
+	animationCSS     string
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -151,9 +155,10 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.viewCounter = 0
 	session.ignoreUpdates = false
 	session.animationCounter = 0
+	session.animationCSS = ""
 
 	if customTheme != "" {
-		if theme, ok := newTheme(customTheme); ok {
+		if theme, ok := CreateThemeFromText(customTheme); ok {
 			session.customTheme = theme
 			session.currentTheme = nil
 		}
@@ -216,11 +221,10 @@ func (session *sessionData) close() {
 }
 
 func (session *sessionData) styleProperty(styleTag, propertyTag string) (string, bool) {
-	if style, ok := session.getCurrentTheme().styles[styleTag]; ok {
-		if value, ok := style[propertyTag]; ok {
-			if text, ok := value.(string); ok {
-				return session.resolveConstants(text)
-			}
+	style := session.getCurrentTheme().style(styleTag)
+	if value, ok := style[propertyTag]; ok {
+		if text, ok := value.(string); ok {
+			return session.resolveConstants(text)
 		}
 	}
 
@@ -229,11 +233,10 @@ func (session *sessionData) styleProperty(styleTag, propertyTag string) (string,
 }
 
 func (session *sessionData) stylePropertyNode(styleTag, propertyTag string) DataNode {
-	if style, ok := session.getCurrentTheme().styles[styleTag]; ok {
-		if value, ok := style[propertyTag]; ok {
-			if node, ok := value.(DataNode); ok {
-				return node
-			}
+	style := session.getCurrentTheme().style(styleTag)
+	if value, ok := style[propertyTag]; ok {
+		if node, ok := value.(DataNode); ok {
+			return node
 		}
 	}
 
@@ -279,6 +282,8 @@ func (session *sessionData) RootView() View {
 
 func (session *sessionData) writeInitScript(writer *strings.Builder) {
 	if css := session.getCurrentTheme().cssText(session); css != "" {
+		css = strings.ReplaceAll(css, "\n", `\n`)
+		css = strings.ReplaceAll(css, "\t", `\t`)
 		writer.WriteString(`document.querySelector('style').textContent += "`)
 		writer.WriteString(css)
 		writer.WriteString("\";\n")
@@ -295,7 +300,19 @@ func (session *sessionData) reload() {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	session.writeInitScript(buffer)
+	css := appStyles + session.getCurrentTheme().cssText(session) + session.animationCSS
+	css = strings.ReplaceAll(css, "\n", `\n`)
+	css = strings.ReplaceAll(css, "\t", `\t`)
+	buffer.WriteString(`document.querySelector('style').textContent = "`)
+	buffer.WriteString(css)
+	buffer.WriteString("\";\n")
+
+	if session.rootView != nil {
+		buffer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
+		viewHTML(session.rootView, buffer)
+		buffer.WriteString("';\nscanElementsSize();")
+	}
+
 	session.runScript(buffer.String())
 }
 
@@ -358,6 +375,28 @@ func (session *sessionData) runGetterScript(script string) DataObject { //}, ans
 
 func (session *sessionData) handleAnswer(data DataObject) {
 	session.brige.AnswerReceived(data)
+}
+
+func (session *sessionData) handleRootSize(data DataObject) {
+	getValue := func(tag string) int {
+		if value, ok := data.PropertyValue(tag); ok {
+			float, err := strconv.ParseFloat(value, 64)
+			if err == nil {
+				return int(float)
+			}
+			ErrorLog(`Resize event error: ` + err.Error())
+		} else {
+			ErrorLogF(`Resize event error: the property "%s" not found`, tag)
+		}
+		return 0
+	}
+
+	if w := getValue("width"); w > 0 {
+		session.screenWidth = w
+	}
+	if h := getValue("height"); h > 0 {
+		session.screenHeight = h
+	}
 }
 
 func (session *sessionData) handleResize(data DataObject) {

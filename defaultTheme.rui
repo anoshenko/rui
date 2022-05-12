@@ -12,10 +12,11 @@ theme {
 		ruiHighlightTextColor = #FFFFFFFF,
 		ruiSelectedColor = #FFE0E0E0,
 		ruiSelectedTextColor = #FF000000,
-		ruiPopupBackgroundColor = #FFFFFFFF,
-		ruiPopupTextColor = #FF000000,
+		ruiPopupBackgroundColor = #FFF5F5F5,
+		ruiPopupTextColor = black,
 		ruiPopupTitleColor = #FF0000FF,
 		ruiPopupTitleTextColor = #FFFFFFFF,
+		ruiPopupShadow = #80808080,
 
 		ruiTabBarBackgroundColor = #FFEEEEEE,
 		ruiTabColor = #FFD0D0D0,
@@ -33,6 +34,9 @@ theme {
 		ruiButtonDisabledTextColor = #FFA0A0A0,
 		ruiHighlightColor = #FF1A74E8,
 		ruiHighlightTextColor = #FFFFFFFF,
+		ruiPopupBackgroundColor = #FF424242,
+		ruiPopupTextColor = white,
+		ruiPopupShadow = #80EEEEEE,
 
 		ruiTabBarBackgroundColor = #FF303030,
 		ruiTabColor = #FF606060,
@@ -212,7 +216,7 @@ theme {
 			background-color = @ruiPopupBackgroundColor,
 			text-color = @ruiPopupTextColor,
 			radius = 4px,
-			shadow = _{spread-radius=4px, blur=16px, color=#80808080},
+			shadow = _{spread-radius=4px, blur=16px, color=@ruiPopupShadow },
 		},
 		ruiPopupTitle {
 			background-color = @ruiPopupTitleColor,

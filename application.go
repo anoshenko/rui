@@ -90,11 +90,6 @@ func (app *application) getStartPage() string {
 	return buffer.String()
 }
 
-func (app *application) init(params AppParams) {
-	app.params = params
-	app.sessions = map[int]Session{}
-}
-
 func (app *application) Start(addr string) {
 	http.Handle("/", app)
 	log.Fatal(http.ListenAndServe(addr, nil))
@@ -104,7 +99,6 @@ func (app *application) Finish() {
 	for _, session := range app.sessions {
 		session.close()
 	}
-
 }
 
 func (app *application) nextSessionID() int {
@@ -250,6 +244,9 @@ func sessionEventHandler(session Session, events chan DataObject, brige WebBrige
 		case "session-resume":
 			session.onResume()
 
+		case "root-size":
+			session.handleRootSize(data)
+
 		case "resize":
 			session.handleResize(data)
 
@@ -291,7 +288,8 @@ func (app *application) startSession(params DataObject, events chan DataObject, 
 // NewApplication - create the new application and start it
 func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
 	app := new(application)
-	app.init(params)
+	app.params = params
+	app.sessions = map[int]Session{}
 	app.createContentFunc = createContentFunc
 
 	http.Handle("/", app)

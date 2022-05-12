@@ -40,6 +40,17 @@ func (detailsView *detailsViewData) Init(session Session) {
 	//detailsView.systemClass = "ruiDetailsView"
 }
 
+func (detailsView *detailsViewData) Views() []View {
+	views := detailsView.viewsContainerData.Views()
+	if summary := detailsView.get(Summary); summary != nil {
+		switch summary := summary.(type) {
+		case View:
+			return append([]View{summary}, views...)
+		}
+	}
+	return views
+}
+
 func (detailsView *detailsViewData) Remove(tag string) {
 	detailsView.remove(strings.ToLower(tag))
 }
@@ -75,10 +86,12 @@ func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
 
 		case View:
 			detailsView.properties[Summary] = value
+			value.setParentID(detailsView.htmlID())
 
 		case DataObject:
 			if view := CreateViewFromObject(detailsView.Session(), value); view != nil {
 				detailsView.properties[Summary] = view
+				view.setParentID(detailsView.htmlID())
 			} else {
 				return false
 			}

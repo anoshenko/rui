@@ -32,7 +32,7 @@ type imagePath struct {
 
 type resourceManager struct {
 	embedFS      []*embed.FS
-	themes       map[string]*theme
+	themes       map[string]Theme
 	images       map[string]imagePath
 	imageSrcSets map[string][]scaledImage
 	path         string
@@ -40,7 +40,7 @@ type resourceManager struct {
 
 var resources = resourceManager{
 	embedFS:      []*embed.FS{},
-	themes:       map[string]*theme{},
+	themes:       map[string]Theme{},
 	images:       map[string]imagePath{},
 	imageSrcSets: map[string][]scaledImage{},
 }
@@ -107,7 +107,7 @@ func scanEmbedThemesDir(fs *embed.FS, dir string) {
 				scanEmbedThemesDir(fs, path)
 			} else if strings.ToLower(filepath.Ext(name)) == ".rui" {
 				if data, err := fs.ReadFile(path); err == nil {
-					RegisterThemeText(string(data))
+					registerThemeText(string(data))
 				}
 			}
 		}
@@ -198,7 +198,7 @@ func scanThemesDir(path string) {
 					scanThemesDir(newPath)
 				} else if strings.ToLower(filepath.Ext(newPath)) == ".rui" {
 					if data, err := ioutil.ReadFile(newPath); err == nil {
-						RegisterThemeText(string(data))
+						registerThemeText(string(data))
 					} else {
 						ErrorLog(err.Error())
 					}
@@ -223,32 +223,19 @@ func SetResourcePath(path string) {
 	scanStringsDir(resources.path + stringsDir)
 }
 
-// RegisterThemeText parse text and add result to the theme list
-func RegisterThemeText(text string) bool {
-	data := ParseDataText(text)
-	if data == nil {
+func registerThemeText(text string) bool {
+	theme, ok := CreateThemeFromText(text)
+	if !ok {
 		return false
 	}
 
-	if !data.IsObject() {
-		ErrorLog(`Root element is not object`)
-		return false
-	}
-	if data.Tag() != "theme" {
-		ErrorLog(`Invalid the root object tag. Must be "theme"`)
-		return false
-	}
-
-	if name, ok := data.PropertyValue("name"); ok && name != "" {
-		t := resources.themes[name]
-		if t == nil {
-			t = new(theme)
-			t.init()
-			resources.themes[name] = t
-		}
-		t.addData(data)
+	name := theme.Name()
+	if name == "" {
+		defaultTheme.concat(theme)
+	} else if t, ok := resources.themes[name]; ok {
+		t.concat(theme)
 	} else {
-		defaultTheme.addData(data)
+		resources.themes[name] = theme
 	}
 
 	return true
@@ -425,4 +412,17 @@ func AllImageResources() []string {
 	}
 	sort.Strings(result)
 	return result
+}
+
+func AddTheme(theme Theme) {
+	if theme != nil {
+		name := theme.Name()
+		if name == "" {
+			defaultTheme.concat(theme)
+		} else if t, ok := resources.themes[name]; ok {
+			t.concat(theme)
+		} else {
+			resources.themes[name] = theme
+		}
+	}
 }

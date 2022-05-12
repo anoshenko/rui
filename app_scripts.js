@@ -137,6 +137,18 @@ function getIntAttribute(element, tag) {
 }
 
 function scanElementsSize() {
+	var element = document.getElementById("ruiRootView");
+	if (element) {
+		let rect = element.getBoundingClientRect();
+		let width = getIntAttribute(element, "data-width");
+		let height = getIntAttribute(element, "data-height");
+		if (rect.width > 0 && rect.height > 0 && (width != rect.width || height != rect.height)) {
+			element.setAttribute("data-width", rect.width);
+			element.setAttribute("data-height", rect.height);
+			sendMessage("root-size{session=" + sessionID + ",width=" + rect.width + ",height=" + rect.height +"}");
+		}
+	}
+	
 	var views = document.getElementsByClassName("ruiView");
 	if (views) {
 		var message = "resize{session=" + sessionID + ",views=["
