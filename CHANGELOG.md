@@ -2,8 +2,12 @@
 
 * Added "user-data" property
 * Added "focusable" property
-* Added ReloadTableViewData, AllImageResources functions
+* Added "disabled-items" property to DropDownList
+* Added ReloadTableViewData, AllImageResources, NamedColors functions
 * Added Theme interface, NewTheme, CreateThemeFromText, and AddTheme functions
+* Added image constants to the theme
+* Changed BackgroundGradientPoint struct
+* Added the background conic gradient
 
 # v0.5.0
 
