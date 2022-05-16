@@ -119,8 +119,8 @@ func (session *sessionData) getCurrentTheme() Theme {
 
 	if session.customTheme != nil {
 		session.currentTheme = NewTheme("")
-		session.currentTheme.concat(defaultTheme)
-		session.currentTheme.concat(session.customTheme)
+		session.currentTheme.Append(defaultTheme)
+		session.currentTheme.Append(session.customTheme)
 		return session.currentTheme
 	}
 
@@ -336,16 +336,4 @@ func (session *sessionData) SetLanguage(lang string) {
 			session.runScript(buffer.String())
 		}
 	}
-}
-
-func (session *sessionData) ConstantTags() []string {
-	return session.getCurrentTheme().ConstantTags()
-}
-
-func (session *sessionData) ColorTags() []string {
-	return session.getCurrentTheme().ColorTags()
-}
-
-func (session *sessionData) ImageConstantTags() []string {
-	return session.getCurrentTheme().ImageConstantTags()
 }

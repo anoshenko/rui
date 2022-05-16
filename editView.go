@@ -278,7 +278,7 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 	case EditViewPattern:
 		oldText := GetEditViewPattern(edit, "")
 		if text, ok := value.(string); ok {
-			edit.properties[Pattern] = text
+			edit.properties[EditViewPattern] = text
 			if text = GetEditViewPattern(edit, ""); oldText != text {
 				if edit.created {
 					if text != "" {

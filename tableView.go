@@ -895,8 +895,9 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	vAlign := vAlignCss[vAlignValue]
 
 	tableCSS := func(startRow, endRow int, cellTag string, cellBorder BorderProperty, cellPadding BoundsProperty) {
-		for row := startRow; row < endRow; row++ {
+		var namedColors []NamedColor = nil
 
+		for row := startRow; row < endRow; row++ {
 			cssBuilder.buffer.Reset()
 			if rowStyle != nil {
 				if styles := rowStyle.RowStyle(row); styles != nil {
@@ -1069,6 +1070,17 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						buffer.WriteString(value.cssString())
 						buffer.WriteString(`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `)
 						buffer.WriteString(value.String())
+						if namedColors == nil {
+							namedColors = NamedColors()
+						}
+						for _, namedColor := range namedColors {
+							if namedColor.Color == value {
+								buffer.WriteString(" (")
+								buffer.WriteString(namedColor.Name)
+								buffer.WriteRune(')')
+								break
+							}
+						}
 
 					case fmt.Stringer:
 						buffer.WriteString(textToJS(value.String()))

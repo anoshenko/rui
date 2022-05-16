@@ -231,9 +231,9 @@ func registerThemeText(text string) bool {
 
 	name := theme.Name()
 	if name == "" {
-		defaultTheme.concat(theme)
+		defaultTheme.Append(theme)
 	} else if t, ok := resources.themes[name]; ok {
-		t.concat(theme)
+		t.Append(theme)
 	} else {
 		resources.themes[name] = theme
 	}
@@ -418,9 +418,9 @@ func AddTheme(theme Theme) {
 	if theme != nil {
 		name := theme.Name()
 		if name == "" {
-			defaultTheme.concat(theme)
+			defaultTheme.Append(theme)
 		} else if t, ok := resources.themes[name]; ok {
-			t.concat(theme)
+			t.Append(theme)
 		} else {
 			resources.themes[name] = theme
 		}

@@ -45,12 +45,12 @@ type Theme interface {
 	SetImage(tag, image, darkUIImage string)
 	// ImageConstantTags returns the list of all available image constants
 	ImageConstantTags() []string
+	Append(anotherTheme Theme)
 
 	constant(tag string, touchUI bool) string
 	color(tag string, darkUI bool) string
 	image(tag string, darkUI bool) string
 	style(tag string) Params
-	concat(anotherTheme Theme)
 	cssText(session Session) string
 	data() *theme
 }
@@ -290,7 +290,7 @@ func (theme *theme) data() *theme {
 	return theme
 }
 
-func (theme *theme) concat(anotherTheme Theme) {
+func (theme *theme) Append(anotherTheme Theme) {
 	if theme.constants == nil {
 		theme.init()
 	}
