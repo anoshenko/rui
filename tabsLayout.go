@@ -214,6 +214,11 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 		tabsLayout.tabCloseListener = listeners
 
 	case Current:
+		if current, ok := value.(int); ok && current < 0 {
+			tabsLayout.remove(Current)
+			return true
+		}
+
 		oldCurrent := tabsLayout.currentItem()
 		if !tabsLayout.setIntProperty(Current, value) {
 			return false
@@ -611,7 +616,6 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 			}
 			defer tabsLayout.propertyChangedEvent(Current)
 		}
-		updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
 	}
 }
 
@@ -621,7 +625,7 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 		tabsLayout.views = []View{}
 	}
 	if view != nil {
-		if current := tabsLayout.currentItem(); current >= int(index) {
+		if current := tabsLayout.currentItem(); current >= index {
 			tabsLayout.properties[Current] = current + 1
 			defer tabsLayout.propertyChangedEvent(Current)
 		}
@@ -638,38 +642,44 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 		tabsLayout.views = []View{}
 		return nil
 	}
-	i := int(index)
+
 	count := len(tabsLayout.views)
-	if i >= count {
+	if index < 0 || index >= count {
 		return nil
 	}
 
-	var view View
-	if count == 1 {
-		view = tabsLayout.views[0]
-		tabsLayout.views = []View{}
-		for _, listener := range tabsLayout.tabListener {
-			listener(tabsLayout, 0, 0)
-		}
-		tabsLayout.propertyChangedEvent(Current)
-
-	} else {
-		current := tabsLayout.currentItem()
-		removeCurrent := (i == current)
-		if i < current || (removeCurrent && i == count-1) {
-			tabsLayout.properties[Current] = current - 1
-			for _, listener := range tabsLayout.tabListener {
-				listener(tabsLayout, current-1, current)
-			}
-			defer tabsLayout.propertyChangedEvent(Current)
-		}
-		view = tabsLayout.viewsContainerData.RemoveView(index)
-	}
-
+	view := tabsLayout.views[index]
+	view.setParentID("")
 	view.SetChangeListener(Title, nil)
 	view.SetChangeListener(Icon, nil)
 	view.SetChangeListener(TabCloseButton, nil)
+
+	current := tabsLayout.currentItem()
+	if index < current || (index == current && current > 0) {
+		current--
+	}
+
+	if len(tabsLayout.views) == 1 {
+		tabsLayout.views = []View{}
+		current = -1
+	} else if index == 0 {
+		tabsLayout.views = tabsLayout.views[1:]
+	} else if index == count-1 {
+		tabsLayout.views = tabsLayout.views[:index]
+	} else {
+		tabsLayout.views = append(tabsLayout.views[:index], tabsLayout.views[index+1:]...)
+	}
+
+	updateInnerHTML(tabsLayout.parentHTMLID(), tabsLayout.session)
+	tabsLayout.propertyChangedEvent(Content)
+
+	delete(tabsLayout.properties, Current)
+	tabsLayout.set(Current, current)
 	return view
+}
+
+func (tabsLayout *tabsLayoutData) currentID() string {
+	return fmt.Sprintf("%s-%d", tabsLayout.htmlID(), tabsLayout.currentItem())
 }
 
 func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Builder) {
@@ -679,9 +689,7 @@ func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Buil
 	buffer.WriteString(`" data-activeTabStyle="`)
 	buffer.WriteString(tabsLayout.activeTabStyle())
 	buffer.WriteString(`" data-current="`)
-	buffer.WriteString(tabsLayout.htmlID())
-	buffer.WriteRune('-')
-	buffer.WriteString(strconv.Itoa(tabsLayout.currentItem()))
+	buffer.WriteString(tabsLayout.currentID())
 	buffer.WriteRune('"')
 }
 

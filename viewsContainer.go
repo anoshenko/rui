@@ -44,7 +44,12 @@ func (container *viewsContainerData) Views() []View {
 	if container.views == nil {
 		container.views = []View{}
 	}
-	return container.views
+	if count := len(container.views); count > 0 {
+		views := make([]View, count)
+		copy(views, container.views)
+		return views
+	}
+	return []View{}
 }
 
 // Append appends a view to the end of the list of a view children

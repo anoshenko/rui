@@ -266,8 +266,17 @@ func GetImageViewSource(view View, subviewID string) string {
 // GetImageViewAltText returns an alternative text description of an ImageView subview.
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
 func GetImageViewAltText(view View, subviewID string) string {
-	if text, ok := stringProperty(view, AltText, view.Session()); ok {
-		return text
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		if value := view.getRaw(AltText); value != nil {
+			if text, ok := value.(string); ok {
+				text, _ = view.Session().GetString(text)
+				return text
+			}
+		}
 	}
 	return ""
 }

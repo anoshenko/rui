@@ -264,6 +264,7 @@ func (session *sessionData) setContent(content SessionContent, self Session) boo
 		session.content = content
 		session.rootView = content.CreateRootView(self)
 		if session.rootView != nil {
+			session.rootView.setParentID("ruiRootView")
 			return true
 		}
 	}

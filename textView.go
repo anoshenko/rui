@@ -141,12 +141,11 @@ func textToJS(text string) string {
 }
 
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	if value, ok := stringProperty(textView, Text, textView.Session()); ok {
-		if !GetNotTranslate(textView, "") {
-			value, _ = textView.session.GetString(value)
+	if value := textView.getRaw(Text); value != nil {
+		if text, ok := value.(string); ok {
+			text, _ = textView.session.GetString(text)
+			buffer.WriteString(textToJS(text))
 		}
-
-		buffer.WriteString(textToJS(value))
 	}
 }
 

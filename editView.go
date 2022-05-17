@@ -538,7 +538,7 @@ func (edit *editViewData) handleCommand(self View, command string, data DataObje
 	return edit.viewData.handleCommand(self, command, data)
 }
 
-// GetText returns a text of the subview.
+// GetText returns a text of the EditView subview.
 // If the second argument (subviewID) is "" then a text of the first argument (view) is returned.
 func GetText(view View, subviewID string) string {
 	if subviewID != "" {

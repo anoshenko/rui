@@ -29,7 +29,13 @@ func updateCSSStyle(htmlID string, session Session) {
 
 func updateInnerHTML(htmlID string, session Session) {
 	if !session.ignoreViewUpdates() {
-		if view := session.viewByHTMLID(htmlID); view != nil {
+		var view View
+		if htmlID == "ruiRootView" {
+			view = session.RootView()
+		} else {
+			view = session.viewByHTMLID(htmlID)
+		}
+		if view != nil {
 			script := allocStringBuilder()
 			defer freeStringBuilder(script)
 
