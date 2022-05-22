@@ -36,6 +36,10 @@ func (canvasView *canvasViewData) Init(session Session) {
 	canvasView.tag = "CanvasView"
 }
 
+func (canvasView *canvasViewData) String() string {
+	return getViewString(canvasView)
+}
+
 func (canvasView *canvasViewData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

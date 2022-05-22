@@ -1,5 +1,6 @@
 package rui
 
+/*
 import (
 	"fmt"
 	"strconv"
@@ -10,6 +11,8 @@ type ruiWriter interface {
 	startObject(tag string)
 	startObjectProperty(tag, objectTag string)
 	endObject()
+	startArrayProperty(tag string)
+	endObArray()
 	writeProperty(tag string, value interface{})
 	finish() string
 }
@@ -41,23 +44,22 @@ func (writer *ruiWriterData) writeIndent() {
 }
 
 func (writer *ruiWriterData) writeString(str string) {
-	esc := map[string]string{"\t": `\t`, "\r": `\r`, "\n": `\n`, "\"": `"`}
-	hasEsc := false
-	for s := range esc {
-		if strings.Contains(str, s) {
-			hasEsc = true
-			break
-		}
-	}
-	if hasEsc || strings.Contains(str, " ") || strings.Contains(str, ",") {
+	hasEsc := strings.ContainsAny(str, "\t\"\r\n")
+	if hasEsc || strings.ContainsAny(str, " ,;'`[]{}()") {
 		if !strings.Contains(str, "`") && (hasEsc || strings.Contains(str, `\`)) {
 			writer.buffer.WriteRune('`')
 			writer.buffer.WriteString(str)
 			writer.buffer.WriteRune('`')
 		} else {
-			str = strings.Replace(str, `\`, `\\`, -1)
-			for oldStr, newStr := range esc {
-				str = strings.Replace(str, oldStr, newStr, -1)
+			replace := []struct{ old, new string }{
+				{old: `\`, new: `\\`},
+				{old: "\t", new: `\t`},
+				{old: "\r", new: `\r`},
+				{old: "\n", new: `\n`},
+				{old: "\"", new: `\"`},
+			}
+			for _, s := range replace {
+				str = strings.Replace(str, s.old, s.new, -1)
 			}
 			writer.buffer.WriteRune('"')
 			writer.buffer.WriteString(str)
@@ -80,6 +82,9 @@ func (writer *ruiWriterData) startObjectProperty(tag, objectTag string) {
 	writer.indent += "\t"
 	writer.writeString(tag)
 	writer.writeString(" = ")
+	if objectTag == "" {
+		objectTag = "_"
+	}
 	writer.writeString(objectTag)
 	writer.buffer.WriteString(" {\n")
 }
@@ -90,6 +95,21 @@ func (writer *ruiWriterData) endObject() {
 	}
 	writer.writeIndent()
 	writer.buffer.WriteRune('}')
+}
+
+func (writer *ruiWriterData) startArrayProperty(tag string) {
+	writer.writeIndent()
+	writer.writeString(tag)
+	writer.buffer.WriteString(" = [\n")
+	writer.indent += "\t"
+}
+
+func (writer *ruiWriterData) endObArray() {
+	if len(writer.indent) > 0 {
+		writer.indent = writer.indent[1:]
+	}
+	writer.writeIndent()
+	writer.buffer.WriteString("],\n")
 }
 
 func (writer *ruiWriterData) writeValue(value interface{}) {
@@ -201,3 +221,4 @@ func (writer *ruiWriterData) finish() string {
 	}
 	return result
 }
+*/

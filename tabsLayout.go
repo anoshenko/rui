@@ -99,6 +99,10 @@ func (tabsLayout *tabsLayoutData) Init(session Session) {
 	tabsLayout.tabCloseListener = []func(TabsLayout, int){}
 }
 
+func (tabsLayout *tabsLayoutData) String() string {
+	return getViewString(tabsLayout)
+}
+
 func (tabsLayout *tabsLayoutData) currentItem() int {
 	result, _ := intProperty(tabsLayout, Current, tabsLayout.session, 0)
 	return result

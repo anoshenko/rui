@@ -8,8 +8,8 @@ import (
 // BorderProperty is the interface of a bounds property data
 type BoundsProperty interface {
 	Properties
-	ruiStringer
 	fmt.Stringer
+	stringWriter
 	Bounds(session Session) Bounds
 }
 
@@ -54,22 +54,25 @@ func (bounds *boundsPropertyData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (bounds *boundsPropertyData) ruiString(writer ruiWriter) {
-	writer.startObject("_")
-
-	for _, tag := range []string{Top, Right, Bottom, Left} {
-		if value, ok := bounds.properties[tag]; ok {
-			writer.writeProperty(Style, value)
-		}
-	}
-
-	writer.endObject()
+func (bounds *boundsPropertyData) String() string {
+	return runStringWriter(bounds)
 }
 
-func (bounds *boundsPropertyData) String() string {
-	writer := newRUIWriter()
-	bounds.ruiString(writer)
-	return writer.finish()
+func (bounds *boundsPropertyData) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
+	for _, tag := range []string{Top, Right, Bottom, Left} {
+		if value, ok := bounds.properties[tag]; ok {
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
+		}
+	}
+	buffer.WriteString(" }")
 }
 
 func (bounds *boundsPropertyData) Remove(tag string) {
@@ -135,50 +138,6 @@ func (bounds *Bounds) SetAll(value SizeUnit) {
 	bounds.Left = value
 }
 
-func (bounds *Bounds) parse(value string, session Session) bool {
-	var ok bool
-	if value, ok = session.resolveConstants(value); !ok {
-		return false
-	}
-
-	values := strings.Split(value, ",")
-	switch len(values) {
-	case 1:
-		if bounds.Left, ok = StringToSizeUnit(values[0]); !ok {
-			return false
-		}
-		bounds.Right.Type = bounds.Left.Type
-		bounds.Right.Value = bounds.Left.Value
-		bounds.Top.Type = bounds.Left.Type
-		bounds.Top.Value = bounds.Left.Value
-		bounds.Bottom.Type = bounds.Left.Type
-		bounds.Bottom.Value = bounds.Left.Value
-		return true
-
-	case 5:
-		if values[4] != "" {
-			ErrorLog("invalid Bounds value '" + value + "' (needs 1 or 4 elements separeted by comma)")
-			return false
-		}
-		fallthrough
-
-	case 4:
-		if bounds.Top, ok = StringToSizeUnit(values[0]); ok {
-			if bounds.Right, ok = StringToSizeUnit(values[1]); ok {
-				if bounds.Bottom, ok = StringToSizeUnit(values[2]); ok {
-					if bounds.Left, ok = StringToSizeUnit(values[3]); ok {
-						return true
-					}
-				}
-			}
-		}
-		return false
-	}
-
-	ErrorLog("invalid Bounds value '" + value + "' (needs 1 or 4 elements separeted by comma)")
-	return false
-}
-
 func (bounds *Bounds) setFromProperties(tag, topTag, rightTag, bottomTag, leftTag string, properties Properties, session Session) {
 	bounds.Top = AutoSize()
 	if size, ok := sizeProperty(properties, tag, session); ok {
@@ -202,6 +161,7 @@ func (bounds *Bounds) setFromProperties(tag, topTag, rightTag, bottomTag, leftTa
 	}
 }
 
+/*
 func (bounds *Bounds) allFieldsAuto() bool {
 	return bounds.Left.Type == Auto &&
 		bounds.Top.Type == Auto &&
@@ -209,7 +169,6 @@ func (bounds *Bounds) allFieldsAuto() bool {
 		bounds.Bottom.Type == Auto
 }
 
-/*
 func (bounds *Bounds) allFieldsZero() bool {
 	return (bounds.Left.Type == Auto || bounds.Left.Value == 0) &&
 		(bounds.Top.Type == Auto || bounds.Top.Value == 0) &&
@@ -231,6 +190,7 @@ func (bounds *Bounds) allFieldsEqual() bool {
 	return false
 }
 
+/*
 func (bounds Bounds) writeCSSString(buffer *strings.Builder, textForAuto string) {
 	buffer.WriteString(bounds.Top.cssString(textForAuto))
 	if !bounds.allFieldsEqual() {
@@ -242,6 +202,7 @@ func (bounds Bounds) writeCSSString(buffer *strings.Builder, textForAuto string)
 		buffer.WriteString(bounds.Left.cssString(textForAuto))
 	}
 }
+*/
 
 // String convert Bounds to string
 func (bounds *Bounds) String() string {

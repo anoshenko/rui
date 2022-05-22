@@ -31,6 +31,10 @@ func (container *viewsContainerData) Init(session Session) {
 	container.views = []View{}
 }
 
+func (container *viewsContainerData) String() string {
+	return getViewString(container)
+}
+
 func (container *viewsContainerData) setParentID(parentID string) {
 	container.viewData.setParentID(parentID)
 	htmlID := container.htmlID()

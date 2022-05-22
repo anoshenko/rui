@@ -9,7 +9,7 @@ import (
 type ClipShape interface {
 	Properties
 	fmt.Stringer
-	ruiStringer
+	stringWriter
 	cssStyle(session Session) string
 	valid(session Session) bool
 }
@@ -19,6 +19,10 @@ type insetClip struct {
 }
 
 type ellipseClip struct {
+	propertyList
+}
+
+type circleClip struct {
 	propertyList
 }
 
@@ -47,7 +51,7 @@ func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipSha
 
 // CircleClip creates a circle View clipping area.
 func CircleClip(x, y, radius SizeUnit) ClipShape {
-	clip := new(ellipseClip)
+	clip := new(circleClip)
 	clip.init()
 	clip.Set(X, x)
 	clip.Set(Y, y)
@@ -112,39 +116,25 @@ func (clip *insetClip) Set(tag string, value interface{}) bool {
 }
 
 func (clip *insetClip) String() string {
-	writer := newRUIWriter()
-	clip.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(clip)
 }
 
-func (clip *insetClip) ruiString(writer ruiWriter) {
-	writer.startObject("inset")
-	for _, tag := range []string{Top, Right, Bottom, Left} {
+func (clip *insetClip) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("inset { ")
+	comma := false
+	for _, tag := range []string{Top, Right, Bottom, Left, Radius} {
 		if value, ok := clip.properties[tag]; ok {
-			switch value := value.(type) {
-			case string:
-				writer.writeProperty(tag, value)
-
-			case fmt.Stringer:
-				writer.writeProperty(tag, value.String())
+			if comma {
+				buffer.WriteString(", ")
 			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
 		}
 	}
 
-	if value := clip.Get(Radius); value != nil {
-		switch value := value.(type) {
-		case RadiusProperty:
-			writer.writeProperty(Radius, value.String())
-
-		case SizeUnit:
-			writer.writeProperty(Radius, value.String())
-
-		case string:
-			writer.writeProperty(Radius, value)
-		}
-	}
-
-	writer.endObject()
+	buffer.WriteString(" }")
 }
 
 func (clip *insetClip) cssStyle(session Session) string {
@@ -178,83 +168,108 @@ func (clip *insetClip) valid(session Session) bool {
 	return false
 }
 
+func (clip *circleClip) Set(tag string, value interface{}) bool {
+	if value == nil {
+		clip.Remove(tag)
+	}
+
+	switch strings.ToLower(tag) {
+	case X, Y, Radius:
+		return clip.setSizeProperty(tag, value)
+	}
+
+	ErrorLogF(`"%s" property is not supported by the circle clip shape`, tag)
+	return false
+}
+
+func (clip *circleClip) String() string {
+	return runStringWriter(clip)
+}
+
+func (clip *circleClip) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("circle { ")
+	comma := false
+	for _, tag := range []string{Radius, X, Y} {
+		if value, ok := clip.properties[tag]; ok {
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
+		}
+	}
+
+	buffer.WriteString(" }")
+}
+
+func (clip *circleClip) cssStyle(session Session) string {
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	buffer.WriteString("circle(")
+	r, _ := sizeProperty(clip, Radius, session)
+	buffer.WriteString(r.cssString("50%"))
+
+	buffer.WriteString(" at ")
+	x, _ := sizeProperty(clip, X, session)
+	buffer.WriteString(x.cssString("50%"))
+	buffer.WriteRune(' ')
+
+	y, _ := sizeProperty(clip, Y, session)
+	buffer.WriteString(y.cssString("50%"))
+	buffer.WriteRune(')')
+
+	return buffer.String()
+}
+
+func (clip *circleClip) valid(session Session) bool {
+	if value, ok := sizeProperty(clip, Radius, session); ok && value.Value == 0 {
+		return false
+	}
+	return true
+}
+
 func (clip *ellipseClip) Set(tag string, value interface{}) bool {
 	if value == nil {
 		clip.Remove(tag)
 	}
 
 	switch strings.ToLower(tag) {
-	case X, Y:
+	case X, Y, RadiusX, RadiusY:
 		return clip.setSizeProperty(tag, value)
 
 	case Radius:
-		result := clip.setSizeProperty(tag, value)
-		if result {
-			delete(clip.properties, RadiusX)
-			delete(clip.properties, RadiusY)
-		}
-		return result
-
-	case RadiusX:
-		result := clip.setSizeProperty(tag, value)
-		if result {
-			if r, ok := clip.properties[Radius]; ok {
-				clip.properties[RadiusY] = r
-				delete(clip.properties, Radius)
-			}
-		}
-		return result
-
-	case RadiusY:
-		result := clip.setSizeProperty(tag, value)
-		if result {
-			if r, ok := clip.properties[Radius]; ok {
-				clip.properties[RadiusX] = r
-				delete(clip.properties, Radius)
-			}
-		}
-		return result
+		return clip.setSizeProperty(RadiusX, value) &&
+			clip.setSizeProperty(RadiusY, value)
 	}
 
-	ErrorLogF(`"%s" property is not supported by the inset clip shape`, tag)
+	ErrorLogF(`"%s" property is not supported by the ellipse clip shape`, tag)
 	return false
 }
 
 func (clip *ellipseClip) String() string {
-	writer := newRUIWriter()
-	clip.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(clip)
 }
 
-func (clip *ellipseClip) ruiString(writer ruiWriter) {
-	writeProperty := func(tag string, value interface{}) {
-		switch value := value.(type) {
-		case string:
-			writer.writeProperty(tag, value)
-
-		case fmt.Stringer:
-			writer.writeProperty(tag, value.String())
-		}
-	}
-
-	if r, ok := clip.properties[Radius]; ok {
-		writer.startObject("circle")
-		writeProperty(Radius, r)
-	} else {
-		writer.startObject("ellipse")
-		for _, tag := range []string{RadiusX, RadiusY} {
-			if value, ok := clip.properties[tag]; ok {
-				writeProperty(tag, value)
-			}
-		}
-	}
-
-	for _, tag := range []string{X, Y} {
+func (clip *ellipseClip) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("ellipse { ")
+	comma := false
+	for _, tag := range []string{RadiusX, RadiusY, X, Y} {
 		if value, ok := clip.properties[tag]; ok {
-			writeProperty(tag, value)
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
 		}
 	}
-	writer.endObject()
+
+	buffer.WriteString(" }")
 }
 
 func (clip *ellipseClip) cssStyle(session Session) string {
@@ -262,38 +277,29 @@ func (clip *ellipseClip) cssStyle(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	if r, ok := sizeProperty(clip, Radius, session); ok {
-		buffer.WriteString("circle(")
-		buffer.WriteString(r.cssString("0"))
-	} else {
-		rx, _ := sizeProperty(clip, RadiusX, session)
-		ry, _ := sizeProperty(clip, RadiusX, session)
-		buffer.WriteString("ellipse(")
-		buffer.WriteString(rx.cssString("0"))
-		buffer.WriteRune(' ')
-		buffer.WriteString(ry.cssString("0"))
-	}
+	rx, _ := sizeProperty(clip, RadiusX, session)
+	ry, _ := sizeProperty(clip, RadiusX, session)
+	buffer.WriteString("ellipse(")
+	buffer.WriteString(rx.cssString("50%"))
+	buffer.WriteRune(' ')
+	buffer.WriteString(ry.cssString("50%"))
 
 	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("0"))
+	buffer.WriteString(x.cssString("50%"))
 	buffer.WriteRune(' ')
 
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("0"))
+	buffer.WriteString(y.cssString("50%"))
 	buffer.WriteRune(')')
 
 	return buffer.String()
 }
 
 func (clip *ellipseClip) valid(session Session) bool {
-	if value, ok := sizeProperty(clip, Radius, session); ok && value.Type != Auto && value.Value != 0 {
-		return true
-	}
-
-	rx, okX := sizeProperty(clip, RadiusX, session)
-	ry, okY := sizeProperty(clip, RadiusY, session)
-	return okX && okY && rx.Type != Auto && rx.Value != 0 && ry.Type != Auto && ry.Value != 0
+	rx, _ := sizeProperty(clip, RadiusX, session)
+	ry, _ := sizeProperty(clip, RadiusY, session)
+	return rx.Value != 0 && ry.Value != 0
 }
 
 func (clip *polygonClip) Get(tag string) interface{} {
@@ -383,46 +389,30 @@ func (clip *polygonClip) AllTags() []string {
 }
 
 func (clip *polygonClip) String() string {
-	writer := newRUIWriter()
-	clip.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(clip)
 }
 
-func (clip *polygonClip) ruiString(writer ruiWriter) {
+func (clip *polygonClip) writeString(buffer *strings.Builder, indent string) {
 
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-
-	writer.startObject("polygon")
+	buffer.WriteString("inset { ")
 
 	if clip.points != nil {
+		buffer.WriteString(Points)
+		buffer.WriteString(` = "`)
 		for i, value := range clip.points {
 			if i > 0 {
 				buffer.WriteString(", ")
 			}
-			switch value := value.(type) {
-			case string:
-				buffer.WriteString(value)
-
-			case fmt.Stringer:
-				buffer.WriteString(value.String())
-
-			default:
-				buffer.WriteString("0px")
-			}
+			writePropertyValue(buffer, "", value, indent)
 		}
 
-		writer.writeProperty(Points, buffer.String())
+		buffer.WriteString(`" `)
 	}
 
-	writer.endObject()
+	buffer.WriteRune('}')
 }
 
 func (clip *polygonClip) cssStyle(session Session) string {
-
-	if clip.points == nil {
-		return ""
-	}
 
 	count := len(clip.points)
 	if count < 2 {

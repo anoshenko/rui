@@ -63,6 +63,10 @@ func (edit *editViewData) Init(session Session) {
 	edit.tag = "EditView"
 }
 
+func (edit *editViewData) String() string {
+	return getViewString(edit)
+}
+
 func (edit *editViewData) Focusable() bool {
 	return true
 }

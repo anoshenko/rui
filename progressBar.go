@@ -36,6 +36,10 @@ func (progress *progressBarData) Init(session Session) {
 	progress.tag = "ProgressBar"
 }
 
+func (progress *progressBarData) String() string {
+	return getViewString(progress)
+}
+
 func (progress *progressBarData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

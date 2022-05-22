@@ -7,7 +7,7 @@ import (
 
 type OutlineProperty interface {
 	Properties
-	ruiStringer
+	stringWriter
 	fmt.Stringer
 	ViewOutline(session Session) ViewOutline
 }
@@ -25,22 +25,26 @@ func NewOutlineProperty(params Params) OutlineProperty {
 	return outline
 }
 
-func (outline *outlinePropertyData) ruiString(writer ruiWriter) {
-	writer.startObject("_")
-
+func (outline *outlinePropertyData) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
 	for _, tag := range []string{Style, Width, ColorTag} {
 		if value, ok := outline.properties[tag]; ok {
-			writer.writeProperty(Style, value)
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, BorderStyle, value, indent)
+			comma = true
 		}
 	}
 
-	writer.endObject()
+	buffer.WriteString(" }")
 }
 
 func (outline *outlinePropertyData) String() string {
-	writer := newRUIWriter()
-	outline.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(outline)
 }
 
 func (outline *outlinePropertyData) normalizeTag(tag string) string {

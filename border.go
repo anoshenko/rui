@@ -48,8 +48,8 @@ const (
 // BorderProperty is the interface of a view border data
 type BorderProperty interface {
 	Properties
-	ruiStringer
 	fmt.Stringer
+	stringWriter
 	ViewBorders(session Session) ViewBorders
 	delete(tag string)
 	cssStyle(builder cssBuilder, session Session)
@@ -202,12 +202,23 @@ func (border *borderProperty) normalizeTag(tag string) string {
 	return tag
 }
 
-func (border *borderProperty) ruiString(writer ruiWriter) {
-	writer.startObject("_")
+func (border *borderProperty) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
+
+	write := func(tag string, value interface{}) {
+		if comma {
+			buffer.WriteString(", ")
+		}
+		buffer.WriteString(tag)
+		buffer.WriteString(" = ")
+		writePropertyValue(buffer, BorderStyle, value, indent)
+		comma = true
+	}
 
 	for _, tag := range []string{Style, Width, ColorTag} {
 		if value, ok := border.properties[tag]; ok {
-			writer.writeProperty(Style, value)
+			write(tag, value)
 		}
 	}
 
@@ -216,27 +227,32 @@ func (border *borderProperty) ruiString(writer ruiWriter) {
 		width, okWidth := border.properties[side+"-"+Width]
 		color, okColor := border.properties[side+"-"+ColorTag]
 		if okStyle || okWidth || okColor {
-			writer.startObjectProperty(side, "_")
+			if comma {
+				buffer.WriteString(", ")
+				comma = false
+			}
+
+			buffer.WriteString(side)
+			buffer.WriteString(" = _{ ")
 			if okStyle {
-				writer.writeProperty(Style, style)
+				write(Style, style)
 			}
 			if okWidth {
-				writer.writeProperty(Width, width)
+				write(Width, width)
 			}
 			if okColor {
-				writer.writeProperty(ColorTag, color)
+				write(ColorTag, color)
 			}
-			writer.endObject()
+			buffer.WriteString(" }")
+			comma = true
 		}
 	}
-	// TODO
-	writer.endObject()
+
+	buffer.WriteString(" }")
 }
 
 func (border *borderProperty) String() string {
-	writer := newRUIWriter()
-	border.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(border)
 }
 
 func (border *borderProperty) setSingleBorderObject(prefix string, obj DataObject) bool {

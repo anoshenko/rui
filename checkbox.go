@@ -43,6 +43,10 @@ func (button *checkboxData) Init(session Session) {
 	button.checkedListeners = []func(Checkbox, bool){}
 }
 
+func (button *checkboxData) String() string {
+	return getViewString(button)
+}
+
 func (button *checkboxData) Focusable() bool {
 	return true
 }

@@ -97,7 +97,7 @@ const (
 
 type RadiusProperty interface {
 	Properties
-	ruiStringer
+	stringWriter
 	fmt.Stringer
 	BoxRadius(session Session) BoxRadius
 }
@@ -125,23 +125,27 @@ func (radius *radiusPropertyData) normalizeTag(tag string) string {
 	return strings.TrimPrefix(strings.ToLower(tag), "radius-")
 }
 
-func (radius *radiusPropertyData) ruiString(writer ruiWriter) {
-	writer.startObject("_")
-
+func (radius *radiusPropertyData) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
 	for _, tag := range []string{X, Y, TopLeft, TopLeftX, TopLeftY, TopRight, TopRightX, TopRightY,
 		BottomLeft, BottomLeftX, BottomLeftY, BottomRight, BottomRightX, BottomRightY} {
 		if value, ok := radius.properties[tag]; ok {
-			writer.writeProperty(Style, value)
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
 		}
 	}
 
-	writer.endObject()
+	buffer.WriteString(" }")
 }
 
 func (radius *radiusPropertyData) String() string {
-	writer := newRUIWriter()
-	radius.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(radius)
 }
 
 func (radius *radiusPropertyData) delete(tags []string) {

@@ -124,7 +124,7 @@ type animationData struct {
 type Animation interface {
 	Properties
 	fmt.Stringer
-	ruiStringer
+	writeTransitionString(tag string, buffer *strings.Builder)
 	animationCSS(session Session) string
 	transitionCSS(buffer *strings.Builder, session Session)
 	hasAnimatedPropery() bool
@@ -176,13 +176,21 @@ func (animation *animationData) animationName() string {
 	return animation.keyFramesName
 }
 
+func (animation *animationData) normalizeTag(tag string) string {
+	tag = strings.ToLower(tag)
+	if tag == Direction {
+		return AnimationDirection
+	}
+	return tag
+}
+
 func (animation *animationData) Set(tag string, value interface{}) bool {
 	if value == nil {
 		animation.Remove(tag)
 		return true
 	}
 
-	switch tag = strings.ToLower(tag); tag {
+	switch tag = animation.normalizeTag(tag); tag {
 	case ID:
 		if text, ok := value.(string); ok {
 			text = strings.Trim(text, " \t\n\r")
@@ -337,7 +345,7 @@ func (animation *animationData) Set(tag string, value interface{}) bool {
 	case IterationCount:
 		return animation.setIntProperty(tag, value)
 
-	case AnimationDirection, Direction:
+	case AnimationDirection:
 		return animation.setEnumProperty(AnimationDirection, value, enumProperties[AnimationDirection].values)
 
 	default:
@@ -348,31 +356,23 @@ func (animation *animationData) Set(tag string, value interface{}) bool {
 }
 
 func (animation *animationData) Remove(tag string) {
-	tag = strings.ToLower(tag)
-	if tag == Direction {
-		tag = AnimationDirection
-	}
-	delete(animation.properties, tag)
+	delete(animation.properties, animation.normalizeTag(tag))
 }
 
 func (animation *animationData) Get(tag string) interface{} {
-	tag = strings.ToLower(tag)
-	if tag == Direction {
-		tag = AnimationDirection
-	}
-	return animation.getRaw(tag)
+	return animation.getRaw(animation.normalizeTag(tag))
 }
 
 func (animation *animationData) String() string {
-	writer := newRUIWriter()
-	animation.ruiString(writer)
-	return writer.finish()
-}
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
 
-func (animation *animationData) ruiString(writer ruiWriter) {
-	writer.startObject("animation")
+	buffer.WriteString("animation {")
+
 	// TODO
-	writer.endObject()
+
+	buffer.WriteString("}")
+	return buffer.String()
 }
 
 func (animation *animationData) animationCSS(session Session) string {
@@ -446,6 +446,46 @@ func (animation *animationData) transitionCSS(buffer *strings.Builder, session S
 	if delay, _ := floatProperty(animation, Delay, session, 0); delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
 	}
+}
+
+func (animation *animationData) writeTransitionString(tag string, buffer *strings.Builder) {
+	buffer.WriteString(tag)
+	buffer.WriteString("{")
+	lead := " "
+
+	writeFloatProperty := func(name string) bool {
+		if value := animation.getRaw(name); value != nil {
+			buffer.WriteString(lead)
+			buffer.WriteString(name)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, name, value, "")
+			lead = ", "
+			return true
+		}
+		return false
+	}
+
+	if !writeFloatProperty(Duration) {
+		buffer.WriteString(" duration = 1")
+		lead = ", "
+	}
+
+	writeFloatProperty(Delay)
+
+	if value := animation.getRaw(TimingFunction); value != nil {
+		if timingFunction, ok := value.(string); ok && timingFunction != "" {
+			buffer.WriteString(lead)
+			buffer.WriteString(TimingFunction)
+			buffer.WriteString(" = ")
+			if strings.ContainsAny(timingFunction, " ,()") {
+				buffer.WriteRune('"')
+				buffer.WriteString(timingFunction)
+				buffer.WriteRune('"')
+			}
+		}
+	}
+
+	buffer.WriteString(" }")
 }
 
 func (animation *animationData) timingFunctionCSS(session Session) string {

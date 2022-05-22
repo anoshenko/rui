@@ -51,6 +51,10 @@ func (picker *numberPickerData) Init(session Session) {
 	picker.numberChangedListeners = []func(NumberPicker, float64){}
 }
 
+func (picker *numberPickerData) String() string {
+	return getViewString(picker)
+}
+
 func (picker *numberPickerData) Focusable() bool {
 	return true
 }

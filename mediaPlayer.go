@@ -168,6 +168,10 @@ func (player *mediaPlayerData) Init(session Session) {
 	player.tag = "MediaPlayer"
 }
 
+func (player *mediaPlayerData) String() string {
+	return getViewString(player)
+}
+
 func (player *mediaPlayerData) Focusable() bool {
 	return true
 }

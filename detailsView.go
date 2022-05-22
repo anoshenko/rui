@@ -117,6 +117,14 @@ func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
 			}
 		}
 
+	case NotTranslate:
+		if !detailsView.viewData.set(tag, value) {
+			return false
+		}
+		if detailsView.created {
+			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
+		}
+
 	default:
 		return detailsView.viewsContainerData.Set(tag, value)
 	}
@@ -149,6 +157,9 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 	if value, ok := detailsView.properties[Summary]; ok {
 		switch value := value.(type) {
 		case string:
+			if !GetNotTranslate(detailsView, "") {
+				value, _ = detailsView.session.GetString(value)
+			}
 			buffer.WriteString("<summary>")
 			buffer.WriteString(value)
 			buffer.WriteString("</summary>")

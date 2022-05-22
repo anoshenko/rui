@@ -77,7 +77,7 @@ const (
 type ViewFilter interface {
 	Properties
 	fmt.Stringer
-	ruiStringer
+	stringWriter
 	cssStyle(session Session) string
 }
 
@@ -155,17 +155,25 @@ func (filter *viewFilter) Set(tag string, value interface{}) bool {
 }
 
 func (filter *viewFilter) String() string {
-	writer := newRUIWriter()
-	filter.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(filter)
 }
 
-func (filter *viewFilter) ruiString(writer ruiWriter) {
-	writer.startObject("filter")
-	for tag, value := range filter.properties {
-		writer.writeProperty(tag, value)
+func (filter *viewFilter) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("filter { ")
+	comma := false
+	tags := filter.AllTags()
+	for _, tag := range tags {
+		if value, ok := filter.properties[tag]; ok {
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
+		}
 	}
-	writer.endObject()
+	buffer.WriteString(" }")
 }
 
 func (filter *viewFilter) cssStyle(session Session) string {

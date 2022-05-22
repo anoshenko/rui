@@ -26,6 +26,10 @@ func (player *audioPlayerData) Init(session Session) {
 	player.tag = "AudioPlayer"
 }
 
+func (player *audioPlayerData) String() string {
+	return getViewString(player)
+}
+
 func (player *audioPlayerData) htmlTag() string {
 	return "audio"
 }

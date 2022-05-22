@@ -33,6 +33,10 @@ func (gridLayout *gridLayoutData) Init(session Session) {
 	gridLayout.systemClass = "ruiGridLayout"
 }
 
+func (gridLayout *gridLayoutData) String() string {
+	return getViewString(gridLayout)
+}
+
 func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
 	setValues := func(values []string) bool {
 		count := len(values)

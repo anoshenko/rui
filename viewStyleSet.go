@@ -271,12 +271,13 @@ func (style *viewStyle) set(tag string, value interface{}) bool {
 	case Transition:
 		setObject := func(obj DataObject) bool {
 			if obj != nil {
-				switch obj.Tag() {
+				tag := strings.ToLower(tag)
+				switch tag {
 				case "", "_":
 					ErrorLog("Invalid transition property name")
 
 				default:
-					style.transitions[obj.Tag()] = parseAnimation(obj)
+					style.transitions[tag] = parseAnimation(obj)
 					return true
 				}
 			}
@@ -285,18 +286,19 @@ func (style *viewStyle) set(tag string, value interface{}) bool {
 
 		switch value := value.(type) {
 		case Params:
-			result := false
+			result := true
 			for tag, val := range value {
-				if animation, ok := val.(Animation); ok {
-					tag = strings.ToLower(tag)
-					if animation == nil || tag == "" {
-						ErrorLog("Invalid transition property name")
-					} else {
-						style.transitions[tag] = animation
-						result = true
-					}
+				tag = strings.ToLower(strings.Trim(tag, " \t"))
+				if tag == "" {
+					ErrorLog("Invalid transition property name")
+					result = false
+				} else if val == nil {
+					delete(style.transitions, tag)
+				} else if animation, ok := val.(Animation); ok {
+					style.transitions[tag] = animation
 				} else {
 					notCompatibleType(Transition, val)
+					result = false
 				}
 			}
 			return result

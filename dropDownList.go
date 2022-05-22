@@ -41,6 +41,10 @@ func (list *dropDownListData) Init(session Session) {
 	list.dropDownListener = []func(DropDownList, int){}
 }
 
+func (list *dropDownListData) String() string {
+	return getViewString(list)
+}
+
 func (list *dropDownListData) Focusable() bool {
 	return true
 }

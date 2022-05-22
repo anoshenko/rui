@@ -55,6 +55,10 @@ func (imageView *imageViewData) Init(session Session) {
 
 }
 
+func (imageView *imageViewData) String() string {
+	return getViewString(imageView)
+}
+
 func (imageView *imageViewData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

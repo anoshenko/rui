@@ -32,6 +32,10 @@ func (textView *textViewData) Init(session Session) {
 	textView.tag = "TextView"
 }
 
+func (textView *textViewData) String() string {
+	return getViewString(textView)
+}
+
 func (textView *textViewData) Get(tag string) interface{} {
 	return textView.get(strings.ToLower(tag))
 }
@@ -103,6 +107,14 @@ func (textView *textViewData) set(tag string, value interface{}) bool {
 			textView.textOverflowUpdated()
 		}
 
+	case NotTranslate:
+		if !textView.viewData.set(tag, value) {
+			return false
+		}
+		if textView.created {
+			updateInnerHTML(textView.htmlID(), textView.Session())
+		}
+
 	default:
 		return textView.viewData.set(tag, value)
 	}
@@ -143,7 +155,9 @@ func textToJS(text string) string {
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value := textView.getRaw(Text); value != nil {
 		if text, ok := value.(string); ok {
-			text, _ = textView.session.GetString(text)
+			if !GetNotTranslate(textView, "") {
+				text, _ = textView.session.GetString(text)
+			}
 			buffer.WriteString(textToJS(text))
 		}
 	}

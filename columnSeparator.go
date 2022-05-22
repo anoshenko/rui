@@ -8,8 +8,8 @@ import (
 // ColumnSeparatorProperty is the interface of a view separator data
 type ColumnSeparatorProperty interface {
 	Properties
-	ruiStringer
 	fmt.Stringer
+	stringWriter
 	ViewBorder(session Session) ViewBorder
 	cssValue(session Session) string
 }
@@ -84,20 +84,26 @@ func (separator *columnSeparatorProperty) normalizeTag(tag string) string {
 	return tag
 }
 
-func (separator *columnSeparatorProperty) ruiString(writer ruiWriter) {
-	writer.startObject("_")
+func (separator *columnSeparatorProperty) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
 	for _, tag := range []string{Style, Width, ColorTag} {
 		if value, ok := separator.properties[tag]; ok {
-			writer.writeProperty(Style, value)
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, BorderStyle, value, indent)
+			comma = true
 		}
 	}
-	writer.endObject()
+
+	buffer.WriteString(" }")
 }
 
 func (separator *columnSeparatorProperty) String() string {
-	writer := newRUIWriter()
-	separator.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(separator)
 }
 
 func (separator *columnSeparatorProperty) Remove(tag string) {

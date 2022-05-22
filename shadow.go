@@ -31,7 +31,7 @@ const (
 type ViewShadow interface {
 	Properties
 	fmt.Stringer
-	ruiStringer
+	stringWriter
 	cssStyle(buffer *strings.Builder, session Session, lead string) bool
 	cssTextStyle(buffer *strings.Builder, session Session, lead string) bool
 	visible(session Session) bool
@@ -205,19 +205,24 @@ func (shadow *viewShadowData) visible(session Session) bool {
 }
 
 func (shadow *viewShadowData) String() string {
-	writer := newRUIWriter()
-	shadow.ruiString(writer)
-	return writer.finish()
+	return runStringWriter(shadow)
 }
 
-func (shadow *viewShadowData) ruiString(writer ruiWriter) {
-	writer.startObject("_")
+func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
 	for _, tag := range shadow.AllTags() {
-		if value := shadow.Get(tag); value != nil {
-			writer.writeProperty(tag, value)
+		if value, ok := shadow.properties[tag]; ok {
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
 		}
 	}
-	writer.endObject()
+	buffer.WriteString(" }")
 }
 
 func (properties *propertyList) setShadow(tag string, value interface{}) bool {

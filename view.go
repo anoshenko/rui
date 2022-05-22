@@ -30,9 +30,8 @@ func (frame Frame) Bottom() float64 {
 
 // View - base view interface
 type View interface {
-	Properties
+	ViewStyle
 	fmt.Stringer
-	ruiStringer
 
 	// Init initializes fields of View by default values
 	Init(session Session)
@@ -616,6 +615,13 @@ func (view *viewData) Get(tag string) interface{} {
 }
 
 func (view *viewData) get(tag string) interface{} {
+	if tag == ID {
+		if view.viewID != "" {
+			return view.viewID
+		} else {
+			return nil
+		}
+	}
 	return view.viewStyle.get(tag)
 }
 
@@ -834,51 +840,6 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 
 }
 
-func ruiViewString(view View, viewTag string, writer ruiWriter) {
-	writer.startObject(viewTag)
-
-	tags := view.AllTags()
-	count := len(tags)
-	if count > 0 {
-		if count > 1 {
-			tagToStart := func(tag string) {
-				for i, t := range tags {
-					if t == tag {
-						if i > 0 {
-							for n := i; n > 0; n-- {
-								tags[n] = tags[n-1]
-							}
-							tags[0] = tag
-						}
-						return
-					}
-				}
-			}
-			tagToStart(StyleDisabled)
-			tagToStart(Style)
-			tagToStart(ID)
-		}
-
-		for _, tag := range tags {
-			if value := view.Get(tag); value != nil {
-				writer.writeProperty(tag, value)
-			}
-		}
-	}
-
-	writer.endObject()
-}
-
-func (view *viewData) ruiString(writer ruiWriter) {
-	ruiViewString(view, view.Tag(), writer)
-}
-
-func (view *viewData) String() string {
-	writer := newRUIWriter()
-	view.ruiString(writer)
-	return writer.finish()
-}
-
 func (view *viewData) SetChangeListener(tag string, listener func(View, string)) {
 	if listener == nil {
 		delete(view.changeListener, tag)
@@ -889,4 +850,8 @@ func (view *viewData) SetChangeListener(tag string, listener func(View, string))
 
 func (view *viewData) HasFocus() bool {
 	return view.hasFocus
+}
+
+func (view *viewData) String() string {
+	return getViewString(view)
 }

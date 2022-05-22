@@ -268,6 +268,10 @@ func (table *tableViewData) Init(session Session) {
 	table.current.Column = -1
 }
 
+func (table *tableViewData) String() string {
+	return getViewString(table)
+}
+
 func (table *tableViewData) normalizeTag(tag string) string {
 	switch tag = strings.ToLower(tag); tag {
 	case "top-cell-padding":

@@ -89,6 +89,10 @@ func (picker *filePickerData) Init(session Session) {
 	picker.fileSelectedListeners = []func(FilePicker, []FileInfo){}
 }
 
+func (picker *filePickerData) String() string {
+	return getViewString(picker)
+}
+
 func (picker *filePickerData) Focusable() bool {
 	return true
 }

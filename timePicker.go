@@ -44,6 +44,10 @@ func (picker *timePickerData) Init(session Session) {
 	picker.timeChangedListeners = []func(TimePicker, time.Time){}
 }
 
+func (picker *timePickerData) String() string {
+	return getViewString(picker)
+}
+
 func (picker *timePickerData) Focusable() bool {
 	return true
 }

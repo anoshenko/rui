@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,10 @@ type viewStyle struct {
 // Range defines range limits. The First and Last value are included in the range
 type Range struct {
 	First, Last int
+}
+
+type stringWriter interface {
+	writeString(buffer *strings.Builder, indent string)
 }
 
 // String returns a string representation of the Range struct
@@ -415,4 +420,404 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 			builder.add(`animation-play-state`, `running`)
 		}
 	}
+}
+
+func valueToOrientation(value interface{}, session Session) (int, bool) {
+	if value != nil {
+		switch value := value.(type) {
+		case int:
+			return value, true
+
+		case string:
+			text, ok := session.resolveConstants(value)
+			if !ok {
+				return 0, false
+			}
+
+			text = strings.ToLower(strings.Trim(text, " \t\n\r"))
+			switch text {
+			case "vertical":
+				return TopDownOrientation, true
+
+			case "horizontal":
+				return StartToEndOrientation, true
+			}
+
+			if result, ok := enumStringToInt(text, enumProperties[Orientation].values, true); ok {
+				return result, true
+			}
+		}
+	}
+	return 0, false
+}
+
+func (style *viewStyle) Get(tag string) interface{} {
+	return style.get(strings.ToLower(tag))
+}
+
+func (style *viewStyle) get(tag string) interface{} {
+	switch tag {
+	case Border, CellBorder:
+		return getBorder(&style.propertyList, tag)
+
+	case BorderLeft, BorderRight, BorderTop, BorderBottom,
+		BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle,
+		BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor,
+		BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
+		if border := getBorder(style, Border); border != nil {
+			return border.Get(tag)
+		}
+		return nil
+
+	case CellBorderLeft, CellBorderRight, CellBorderTop, CellBorderBottom,
+		CellBorderStyle, CellBorderLeftStyle, CellBorderRightStyle, CellBorderTopStyle, CellBorderBottomStyle,
+		CellBorderColor, CellBorderLeftColor, CellBorderRightColor, CellBorderTopColor, CellBorderBottomColor,
+		CellBorderWidth, CellBorderLeftWidth, CellBorderRightWidth, CellBorderTopWidth, CellBorderBottomWidth:
+		if border := getBorder(style, CellBorder); border != nil {
+			return border.Get(tag)
+		}
+		return nil
+
+	case RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
+		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
+		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
+		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
+		return getRadiusElement(style, tag)
+
+	case ColumnSeparator:
+		if val, ok := style.properties[ColumnSeparator]; ok {
+			return val.(ColumnSeparatorProperty)
+		}
+		return nil
+
+	case ColumnSeparatorStyle, ColumnSeparatorWidth, ColumnSeparatorColor:
+		if val, ok := style.properties[ColumnSeparator]; ok {
+			separator := val.(ColumnSeparatorProperty)
+			return separator.Get(tag)
+		}
+		return nil
+
+	case Transition:
+		if len(style.transitions) == 0 {
+			return nil
+		}
+		result := map[string]Animation{}
+		for tag, animation := range style.transitions {
+			result[tag] = animation
+		}
+		return result
+	}
+
+	return style.propertyList.getRaw(tag)
+}
+
+func (style *viewStyle) AllTags() []string {
+	result := style.propertyList.AllTags()
+	if len(style.transitions) > 0 {
+		result = append(result, Transition)
+	}
+	return result
+}
+
+func supportedPropertyValue(value interface{}) bool {
+	switch value.(type) {
+	case string:
+	case []string:
+	case bool:
+	case float32:
+	case float64:
+	case int:
+	case stringWriter:
+	case fmt.Stringer:
+	case []ViewShadow:
+	case []View:
+	case []interface{}:
+	case map[string]Animation:
+	default:
+		return false
+	}
+	return true
+}
+
+func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, indent string) {
+
+	writeString := func(text string) {
+		simple := (tag != Text && tag != Title && tag != Summary)
+		if simple {
+			if len(text) == 1 {
+				simple = (text[0] >= '0' && text[0] <= '9') || (text[0] >= 'A' && text[0] <= 'Z') || (text[0] >= 'a' && text[0] <= 'z')
+			} else {
+				for _, ch := range text {
+					if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+						ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == ':' {
+					} else {
+						simple = false
+						break
+					}
+				}
+			}
+		}
+
+		if !simple {
+			replace := []struct{ old, new string }{
+				{old: "\\", new: `\\`},
+				{old: "\t", new: `\t`},
+				{old: "\r", new: `\r`},
+				{old: "\n", new: `\n`},
+				{old: "\"", new: `\"`},
+			}
+			for _, s := range replace {
+				text = strings.Replace(text, s.old, s.new, -1)
+			}
+			buffer.WriteRune('"')
+			buffer.WriteString(text)
+			buffer.WriteRune('"')
+		} else {
+			buffer.WriteString(text)
+		}
+	}
+
+	switch value := value.(type) {
+	case string:
+		writeString(value)
+
+	case []string:
+		if len(value) == 0 {
+			buffer.WriteString("[]")
+		} else {
+			size := 0
+			for _, text := range value {
+				size += len(text) + 2
+			}
+
+			if size < 80 {
+				lead := "["
+				for _, text := range value {
+					buffer.WriteString(lead)
+					writeString(text)
+					lead = ", "
+				}
+			} else {
+				buffer.WriteString("[\n")
+				for _, text := range value {
+					buffer.WriteString(indent)
+					buffer.WriteRune('\t')
+					writeString(text)
+					buffer.WriteString(",\n")
+				}
+			}
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
+
+	case bool:
+		if value {
+			buffer.WriteString("true")
+		} else {
+			buffer.WriteString("false")
+		}
+
+	case float32:
+		buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+
+	case float64:
+		buffer.WriteString(fmt.Sprintf("%g", value))
+
+	case int:
+		if prop, ok := enumProperties[tag]; ok && value >= 0 && value < len(prop.values) {
+			buffer.WriteString(prop.values[value])
+		} else {
+			buffer.WriteString(strconv.Itoa(value))
+		}
+
+	case stringWriter:
+		value.writeString(buffer, indent+"\t")
+
+	case fmt.Stringer:
+		buffer.WriteString(value.String())
+
+	case []ViewShadow:
+		switch len(value) {
+		case 0:
+			// do nothing
+
+		case 1:
+			value[0].writeString(buffer, indent)
+
+		default:
+			buffer.WriteString("[")
+			indent2 := "\n" + indent + "\t"
+			for _, shadow := range value {
+				buffer.WriteString(indent2)
+				shadow.writeString(buffer, indent)
+			}
+			buffer.WriteRune('\n')
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
+
+	case []View:
+		switch len(value) {
+		case 0:
+			buffer.WriteString("[]\n")
+
+		case 1:
+			writeViewStyle(value[0].Tag(), value[0], buffer, indent)
+
+		default:
+			buffer.WriteString("[\n")
+			indent2 := indent + "\t"
+			for _, v := range value {
+				buffer.WriteString(indent2)
+				writeViewStyle(v.Tag(), v, buffer, indent2)
+				buffer.WriteString(",\n")
+			}
+
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
+
+	case []interface{}:
+		switch count := len(value); count {
+		case 0:
+			buffer.WriteString("[]")
+
+		case 1:
+			writePropertyValue(buffer, tag, value[0], indent)
+
+		default:
+			buffer.WriteString("[ ")
+			comma := false
+			for _, v := range value {
+				if comma {
+					buffer.WriteString(", ")
+				}
+				writePropertyValue(buffer, tag, v, indent)
+				comma = true
+			}
+			buffer.WriteString(" ]")
+		}
+
+	case map[string]Animation:
+		switch count := len(value); count {
+		case 0:
+			buffer.WriteString("[]")
+
+		case 1:
+			for tag, animation := range value {
+				animation.writeTransitionString(tag, buffer)
+				break
+			}
+
+		default:
+			tags := make([]string, 0, len(value))
+			for tag := range value {
+				tags = append(tags, tag)
+			}
+			sort.Strings(tags)
+			buffer.WriteString("[\n")
+			indent2 := indent + "\t"
+			for _, tag := range tags {
+				if animation := value[tag]; animation != nil {
+					buffer.WriteString(indent2)
+					animation.writeTransitionString(tag, buffer)
+					buffer.WriteString("\n")
+				}
+			}
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
+	}
+}
+
+func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent string) {
+	buffer.WriteString(name)
+	buffer.WriteString(" {\n")
+	indent += "\t"
+
+	writeProperty := func(tag string, value interface{}) {
+		if supportedPropertyValue(value) {
+			buffer.WriteString(indent)
+			buffer.WriteString(tag)
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			buffer.WriteString(",\n")
+		}
+	}
+
+	tags := view.AllTags()
+	removeTag := func(tag string) {
+		for i, t := range tags {
+			if t == tag {
+				if i == 0 {
+					tags = tags[1:]
+				} else if i == len(tags)-1 {
+					tags = tags[:i]
+				} else {
+					tags = append(tags[:i], tags[i+1:]...)
+				}
+				return
+			}
+		}
+	}
+
+	tagOrder := []string{
+		ID, Row, Column, Top, Right, Bottom, Left, Semantics, Cursor, Visibility,
+		Opacity, ZIndex, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
+		Margin, Padding, BackgroundClip, BackgroundColor, Background, Border, Radius, Outline, Shadow,
+		Orientation, Wrap, VerticalAlign, HorizontalAlign, CellWidth, CellHeight,
+		CellVerticalAlign, CellHorizontalAlign, GridRowGap, GridColumnGap,
+		ColumnCount, ColumnWidth, ColumnSeparator, ColumnGap, AvoidBreak,
+		Current, Expanded, Side, ResizeBorderWidth, EditViewType, MaxLength, Hint, Text,
+		TextOverflow, FontName, TextSize, TextColor, TextWeight, Italic, SmallCaps,
+		Strikethrough, Overline, Underline, TextLineStyle, TextLineThickness,
+		TextLineColor, TextTransform, TextAlign, WhiteSpace, WordBreak, TextShadow, TextIndent,
+		LetterSpacing, WordSpacing, LineHeight, TextDirection, WritingMode, VerticalTextOrientation,
+	}
+
+	for _, tag := range tagOrder {
+		if value := view.Get(tag); value != nil {
+			removeTag(tag)
+			writeProperty(tag, value)
+		}
+	}
+
+	finalTags := []string{
+		Perspective, PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible, OriginX, OriginY, OriginZ,
+		TranslateX, TranslateY, TranslateZ, ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ,
+		SkewX, SkewY, Clip, Filter, Summary, Content, Transition}
+	for _, tag := range finalTags {
+		removeTag(tag)
+	}
+
+	for _, tag := range tags {
+		if value := view.Get(tag); value != nil {
+			writeProperty(tag, value)
+		}
+	}
+
+	for _, tag := range finalTags {
+		if value := view.Get(tag); value != nil {
+			writeProperty(tag, value)
+		}
+	}
+
+	indent = indent[:len(indent)-1]
+	buffer.WriteString(indent)
+	buffer.WriteString("}")
+}
+
+func getViewString(view View) string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	writeViewStyle(view.Tag(), view, buffer, "")
+	return buffer.String()
+
+}
+
+func runStringWriter(writer stringWriter) string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	writer.writeString(buffer, "")
+	return buffer.String()
 }

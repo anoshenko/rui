@@ -91,6 +91,10 @@ func (listView *listViewData) Init(session Session) {
 	listView.checkedListeners = []func(ListView, []int){}
 }
 
+func (listView *listViewData) String() string {
+	return getViewString(listView)
+}
+
 func (listView *listViewData) Views() []View {
 	return listView.items
 }

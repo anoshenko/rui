@@ -44,6 +44,10 @@ func (picker *datePickerData) Init(session Session) {
 	picker.dateChangedListeners = []func(DatePicker, time.Time){}
 }
 
+func (picker *datePickerData) String() string {
+	return getViewString(picker)
+}
+
 func (picker *datePickerData) Focusable() bool {
 	return true
 }

@@ -39,6 +39,10 @@ func (picker *colorPickerData) Init(session Session) {
 	picker.properties[Padding] = Px(0)
 }
 
+func (picker *colorPickerData) String() string {
+	return getViewString(picker)
+}
+
 func (picker *colorPickerData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

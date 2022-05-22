@@ -49,6 +49,10 @@ func (listLayout *listLayoutData) Init(session Session) {
 	listLayout.systemClass = "ruiListLayout"
 }
 
+func (listLayout *listLayoutData) String() string {
+	return getViewString(listLayout)
+}
+
 func (listLayout *listLayoutData) Remove(tag string) {
 	listLayout.remove(strings.ToLower(tag))
 }

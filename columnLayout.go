@@ -63,6 +63,10 @@ func (ColumnLayout *columnLayoutData) Init(session Session) {
 	//ColumnLayout.systemClass = "ruiColumnLayout"
 }
 
+func (columnLayout *columnLayoutData) String() string {
+	return getViewString(columnLayout)
+}
+
 func (columnLayout *columnLayoutData) normalizeTag(tag string) string {
 	tag = strings.ToLower(tag)
 	switch tag {

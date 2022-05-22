@@ -91,6 +91,10 @@ func (customView *CustomViewData) Clear() {
 func (customView *CustomViewData) Init(session Session) {
 }
 
+func (customView *CustomViewData) cssViewStyle(buffer cssBuilder, session Session) {
+	customView.superView.cssViewStyle(buffer, session)
+}
+
 // Session returns a current Session interface
 func (customView *CustomViewData) Session() Session {
 	return customView.superView.Session()
@@ -249,17 +253,9 @@ func (customView *CustomViewData) RemoveView(index int) View {
 
 func (customView *CustomViewData) String() string {
 	if customView.superView != nil {
-		writer := newRUIWriter()
-		customView.ruiString(writer)
-		return writer.finish()
+		return getViewString(customView)
 	}
 	return customView.tag + " { }"
-}
-
-func (customView *CustomViewData) ruiString(writer ruiWriter) {
-	if customView.superView != nil {
-		ruiViewString(customView.superView, customView.tag, writer)
-	}
 }
 
 func (customView *CustomViewData) setScroll(x, y, width, height float64) {

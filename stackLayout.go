@@ -58,6 +58,10 @@ func (layout *stackLayoutData) Init(session Session) {
 	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
 }
 
+func (layout *stackLayoutData) String() string {
+	return getViewString(layout)
+}
+
 func (layout *stackLayoutData) pushFinished(view View, tag string) {
 	if tag == "ruiPush" {
 		if layout.pushView != nil {

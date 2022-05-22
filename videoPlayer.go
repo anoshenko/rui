@@ -45,6 +45,10 @@ func (player *videoPlayerData) Init(session Session) {
 	player.tag = "VideoPlayer"
 }
 
+func (player *videoPlayerData) String() string {
+	return getViewString(player)
+}
+
 func (player *videoPlayerData) htmlTag() string {
 	return "video"
 }
