@@ -73,6 +73,13 @@ func newBorderProperty(value interface{}) BorderProperty {
 		case BorderProperty:
 			return value
 
+		case DataNode:
+			if value.Type() == ObjectNode {
+				_ = border.setBorderObject(value.Object())
+			} else {
+				return nil
+			}
+
 		case DataObject:
 			_ = border.setBorderObject(value)
 

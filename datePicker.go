@@ -361,7 +361,7 @@ func getDateProperty(view View, mainTag, shortTag string) (time.Time, bool) {
 			return result, true
 		}
 
-		if value, ok := valueFromStyle(view, shortTag); ok {
+		if value := valueFromStyle(view, shortTag); value != nil {
 			if result, ok := valueToTime(value); ok {
 				return result, true
 			}

@@ -261,7 +261,20 @@ func (properties *propertyList) setBounds(tag string, value interface{}) bool {
 			properties.properties[tag] = value
 
 		case Bounds:
-			properties.properties[tag] = value
+			bounds := NewBoundsProperty(nil)
+			if value.Top.Type != Auto {
+				bounds.Set(Top, value.Top)
+			}
+			if value.Right.Type != Auto {
+				bounds.Set(Right, value.Right)
+			}
+			if value.Bottom.Type != Auto {
+				bounds.Set(Bottom, value.Bottom)
+			}
+			if value.Left.Type != Auto {
+				bounds.Set(Left, value.Left)
+			}
+			properties.properties[tag] = bounds
 
 		case BoundsProperty:
 			properties.properties[tag] = value

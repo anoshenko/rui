@@ -235,7 +235,7 @@ func GetColorPickerValue(view View, subviewID string) Color {
 			return result
 		}
 		for _, tag := range []string{Value, ColorTag} {
-			if value, ok := valueFromStyle(view, tag); ok {
+			if value := valueFromStyle(view, tag); value != nil {
 				if result, ok := valueToColor(value, view.Session()); ok {
 					return result
 				}

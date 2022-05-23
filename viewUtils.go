@@ -410,8 +410,10 @@ func GetFontName(view View, subviewID string) string {
 		if font, ok := stringProperty(view, FontName, view.Session()); ok {
 			return font
 		}
-		if font, ok := valueFromStyle(view, FontName); ok {
-			return font
+		if value := valueFromStyle(view, FontName); value != nil {
+			if font, ok := value.(string); ok {
+				return font
+			}
 		}
 		if parent := view.Parent(); parent != nil {
 			return GetFontName(parent, "")
@@ -784,7 +786,7 @@ func GetRow(view View, subviewID string) Range {
 		if result, ok := rangeProperty(view, Row, session); ok {
 			return result
 		}
-		if value, ok := valueFromStyle(view, Row); ok {
+		if value := valueFromStyle(view, Row); value != nil {
 			if result, ok := valueToRange(value, session); ok {
 				return result
 			}
@@ -804,7 +806,7 @@ func GetColumn(view View, subviewID string) Range {
 		if result, ok := rangeProperty(view, Column, session); ok {
 			return result
 		}
-		if value, ok := valueFromStyle(view, Column); ok {
+		if value := valueFromStyle(view, Column); value != nil {
 			if result, ok := valueToRange(value, session); ok {
 				return result
 			}
@@ -954,20 +956,20 @@ func GetNotTranslate(view View, subviewID string) bool {
 	return false
 }
 
-func valueFromStyle(view View, tag string) (string, bool) {
+func valueFromStyle(view View, tag string) interface{} {
 	session := view.Session()
-	getValue := func(styleTag string) (string, bool) {
+	getValue := func(styleTag string) interface{} {
 		if style, ok := stringProperty(view, styleTag, session); ok {
 			if style, ok := session.resolveConstants(style); ok {
 				return session.styleProperty(style, tag)
 			}
 		}
-		return "", false
+		return nil
 	}
 
 	if IsDisabled(view, "") {
-		if value, ok := getValue(StyleDisabled); ok {
-			return value, true
+		if value := getValue(StyleDisabled); value != nil {
+			return value
 		}
 	}
 	return getValue(Style)
@@ -977,7 +979,7 @@ func sizeStyledProperty(view View, tag string) (SizeUnit, bool) {
 	if value, ok := sizeProperty(view, tag, view.Session()); ok {
 		return value, true
 	}
-	if value, ok := valueFromStyle(view, tag); ok {
+	if value := valueFromStyle(view, tag); value != nil {
 		return valueToSizeUnit(value, view.Session())
 	}
 	return AutoSize(), false
@@ -987,7 +989,7 @@ func enumStyledProperty(view View, tag string, defaultValue int) (int, bool) {
 	if value, ok := enumProperty(view, tag, view.Session(), defaultValue); ok {
 		return value, true
 	}
-	if value, ok := valueFromStyle(view, tag); ok {
+	if value := valueFromStyle(view, tag); value != nil {
 		return valueToEnum(value, tag, view.Session(), defaultValue)
 	}
 	return defaultValue, false
@@ -997,7 +999,7 @@ func boolStyledProperty(view View, tag string) (bool, bool) {
 	if value, ok := boolProperty(view, tag, view.Session()); ok {
 		return value, true
 	}
-	if value, ok := valueFromStyle(view, tag); ok {
+	if value := valueFromStyle(view, tag); value != nil {
 		return valueToBool(value, view.Session())
 	}
 	return false, false
@@ -1007,7 +1009,7 @@ func intStyledProperty(view View, tag string, defaultValue int) (int, bool) {
 	if value, ok := intProperty(view, tag, view.Session(), defaultValue); ok {
 		return value, true
 	}
-	if value, ok := valueFromStyle(view, tag); ok {
+	if value := valueFromStyle(view, tag); value != nil {
 		return valueToInt(value, view.Session(), defaultValue)
 	}
 	return defaultValue, false
@@ -1017,7 +1019,7 @@ func floatStyledProperty(view View, tag string, defaultValue float64) (float64, 
 	if value, ok := floatProperty(view, tag, view.Session(), defaultValue); ok {
 		return value, true
 	}
-	if value, ok := valueFromStyle(view, tag); ok {
+	if value := valueFromStyle(view, tag); value != nil {
 		return valueToFloat(value, view.Session(), defaultValue)
 	}
 
@@ -1028,7 +1030,7 @@ func colorStyledProperty(view View, tag string) (Color, bool) {
 	if value, ok := colorProperty(view, tag, view.Session()); ok {
 		return value, true
 	}
-	if value, ok := valueFromStyle(view, tag); ok {
+	if value := valueFromStyle(view, tag); value != nil {
 		return valueToColor(value, view.Session())
 	}
 	return Color(0), false

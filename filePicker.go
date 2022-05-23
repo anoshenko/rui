@@ -260,8 +260,11 @@ func (picker *filePickerData) htmlTag() string {
 func (picker *filePickerData) acceptCSS() string {
 	accept, ok := stringProperty(picker, Accept, picker.Session())
 	if !ok {
-		accept, ok = valueFromStyle(picker, Accept)
+		if value := valueFromStyle(picker, Accept); value != nil {
+			accept, ok = value.(string)
+		}
 	}
+
 	if ok {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
@@ -414,7 +417,9 @@ func GetFilePickerAccept(view View, subviewID string) []string {
 	if view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
 		if !ok {
-			accept, ok = valueFromStyle(view, Accept)
+			if value := valueFromStyle(view, Accept); value != nil {
+				accept, ok = value.(string)
+			}
 		}
 		if ok {
 			result := strings.Split(accept, ",")

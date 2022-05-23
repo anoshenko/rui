@@ -186,7 +186,7 @@ func GetColumnSeparator(view View, subviewID string) ViewBorder {
 	if view != nil {
 		value := view.Get(ColumnSeparator)
 		if value == nil {
-			value, _ = valueFromStyle(view, ColumnSeparator)
+			value = valueFromStyle(view, ColumnSeparator)
 		}
 
 		if value != nil {

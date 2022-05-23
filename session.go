@@ -80,8 +80,7 @@ type Session interface {
 
 	viewByHTMLID(id string) View
 	nextViewID() string
-	styleProperty(styleTag, property string) (string, bool)
-	stylePropertyNode(styleTag, propertyTag string) DataNode
+	styleProperty(styleTag, property string) interface{}
 
 	setBrige(events chan DataObject, brige WebBrige)
 	writeInitScript(writer *strings.Builder)
@@ -214,26 +213,11 @@ func (session *sessionData) close() {
 	}
 }
 
-func (session *sessionData) styleProperty(styleTag, propertyTag string) (string, bool) {
-	style := session.getCurrentTheme().style(styleTag)
-	if value, ok := style[propertyTag]; ok {
-		if text, ok := value.(string); ok {
-			return session.resolveConstants(text)
-		}
+func (session *sessionData) styleProperty(styleTag, propertyTag string) interface{} {
+	if style := session.getCurrentTheme().style(styleTag); style != nil {
+		return style.getRaw(propertyTag)
 	}
-
 	//errorLogF(`property "%v" not found`, propertyTag)
-	return "", false
-}
-
-func (session *sessionData) stylePropertyNode(styleTag, propertyTag string) DataNode {
-	style := session.getCurrentTheme().style(styleTag)
-	if value, ok := style[propertyTag]; ok {
-		if node, ok := value.(DataNode); ok {
-			return node
-		}
-	}
-
 	return nil
 }
 

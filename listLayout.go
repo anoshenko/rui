@@ -139,7 +139,7 @@ func GetListOrientation(view View, subviewID string) int {
 			return orientation
 		}
 
-		if value, ok := valueFromStyle(view, Orientation); ok {
+		if value := valueFromStyle(view, Orientation); value != nil {
 			if orientation, ok := valueToOrientation(value, view.Session()); ok {
 				return orientation
 			}

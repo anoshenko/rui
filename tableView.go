@@ -1267,72 +1267,68 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 }
 
 func (table *tableViewData) cellPaddingFromStyle(style string) BoundsProperty {
-	session := table.Session()
-	var result BoundsProperty = nil
+	if value := table.Session().styleProperty(style, CellPadding); value != nil {
+		switch value := value.(type) {
+		case SizeUnit:
+			return NewBoundsProperty(Params{
+				Top:    value,
+				Right:  value,
+				Bottom: value,
+				Left:   value,
+			})
 
-	if node := session.stylePropertyNode(style, CellPadding); node != nil && node.Type() == ObjectNode {
-		for _, tag := range []string{Left, Right, Top, Bottom} {
-			if node := node.Object().PropertyWithTag(tag); node != nil && node.Type() == TextNode {
-				if result == nil {
-					result = NewBoundsProperty(nil)
+		case BoundsProperty:
+			return value
+
+		case string:
+			if value, ok := table.Session().resolveConstants(value); ok {
+				if strings.Contains(value, ",") {
+					values := split4Values(value)
+					switch len(values) {
+					case 1:
+						value = values[0]
+
+					case 4:
+						result := NewBoundsProperty(nil)
+						n := 0
+						for i, tag := range []string{Top, Right, Bottom, Left} {
+							if size, ok := StringToSizeUnit(values[i]); ok && size.Type != Auto {
+								result.Set(tag, size)
+								n++
+							}
+						}
+						if n > 0 {
+							return result
+						}
+						return nil
+
+					default:
+						return nil
+					}
 				}
-				result.Set(tag, node.Text())
+
+				if size, ok := StringToSizeUnit(value); ok && size.Type != Auto {
+					return NewBoundsProperty(Params{
+						Top:    size,
+						Right:  size,
+						Bottom: size,
+						Left:   size,
+					})
+				}
 			}
 		}
 	}
 
-	for _, tag := range []string{CellPaddingLeft, CellPaddingRight, CellPaddingTop, CellPaddingBottom} {
-		if value, ok := session.styleProperty(style, CellPadding); ok {
-			if result == nil {
-				result = NewBoundsProperty(nil)
-			}
-			result.Set(tag, value)
-		}
-	}
-
-	return result
+	return nil
 }
 
 func (table *tableViewData) cellBorderFromStyle(style string) BorderProperty {
-
-	border := new(borderProperty)
-	border.properties = map[string]interface{}{}
-
-	session := table.Session()
-	if node := session.stylePropertyNode(style, CellBorder); node != nil && node.Type() == ObjectNode {
-		border.setBorderObject(node.Object())
-	}
-
-	for _, tag := range []string{
-		CellBorderLeft,
-		CellBorderRight,
-		CellBorderTop,
-		CellBorderBottom,
-		CellBorderStyle,
-		CellBorderLeftStyle,
-		CellBorderRightStyle,
-		CellBorderTopStyle,
-		CellBorderBottomStyle,
-		CellBorderWidth,
-		CellBorderLeftWidth,
-		CellBorderRightWidth,
-		CellBorderTopWidth,
-		CellBorderBottomWidth,
-		CellBorderColor,
-		CellBorderLeftColor,
-		CellBorderRightColor,
-		CellBorderTopColor,
-		CellBorderBottomColor,
-	} {
-		if value, ok := session.styleProperty(style, tag); ok {
-			border.Set(tag, value)
+	if value := table.Session().styleProperty(style, CellBorder); value != nil {
+		if border, ok := value.(BorderProperty); ok {
+			return border
 		}
 	}
-
-	if len(border.properties) == 0 {
-		return nil
-	}
-	return border
+	return nil
 }
 
 func (table *tableViewData) getCellBorder() BorderProperty {

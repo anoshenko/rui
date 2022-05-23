@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,7 +17,7 @@ type MediaStyle struct {
 	Orientation int
 	MaxWidth    int
 	MaxHeight   int
-	Styles      map[string]Params
+	Styles      map[string]ViewStyle
 }
 
 type theme struct {
@@ -27,11 +28,12 @@ type theme struct {
 	darkColors     map[string]string
 	images         map[string]string
 	darkImages     map[string]string
-	styles         map[string]Params
+	styles         map[string]ViewStyle
 	mediaStyles    []MediaStyle
 }
 
 type Theme interface {
+	fmt.Stringer
 	Name() string
 	Constant(tag string) (string, string)
 	SetConstant(tag string, value, touchUIValue string)
@@ -50,7 +52,7 @@ type Theme interface {
 	constant(tag string, touchUI bool) string
 	color(tag string, darkUI bool) string
 	image(tag string, darkUI bool) string
-	style(tag string) Params
+	style(tag string) ViewStyle
 	cssText(session Session) string
 	data() *theme
 }
@@ -87,7 +89,7 @@ func parseMediaRule(text string) (MediaStyle, bool) {
 		Orientation: DefaultMedia,
 		MaxWidth:    0,
 		MaxHeight:   0,
-		Styles:      map[string]Params{},
+		Styles:      map[string]ViewStyle{},
 	}
 
 	elements := strings.Split(text, ":")
@@ -170,7 +172,7 @@ func (theme *theme) init() {
 	theme.darkColors = map[string]string{}
 	theme.images = map[string]string{}
 	theme.darkImages = map[string]string{}
-	theme.styles = map[string]Params{}
+	theme.styles = map[string]ViewStyle{}
 	theme.mediaStyles = []MediaStyle{}
 }
 
@@ -352,12 +354,12 @@ func (theme *theme) cssText(session Session) string {
 	var builder cssStyleBuilder
 	builder.init()
 
-	for tag, obj := range theme.styles {
-		var style viewStyle
+	for tag, style := range theme.styles {
+		/*var style viewStyle
 		style.init()
 		for tag, value := range obj {
 			style.Set(tag, value)
-		}
+		}*/
 		builder.startStyle(tag)
 		style.cssViewStyle(&builder, session)
 		builder.endStyle()
@@ -365,12 +367,12 @@ func (theme *theme) cssText(session Session) string {
 
 	for _, media := range theme.mediaStyles {
 		builder.startMedia(media.cssText())
-		for tag, obj := range media.Styles {
-			var style viewStyle
+		for tag, style := range media.Styles {
+			/*var style viewStyle
 			style.init()
 			for tag, value := range obj {
 				style.Set(tag, value)
-			}
+			}*/
 			builder.startStyle(tag)
 			style.cssViewStyle(&builder, session)
 			builder.endStyle()
@@ -404,7 +406,7 @@ func (theme *theme) addData(data DataObject) {
 func (theme *theme) parseThemeData(data DataObject) {
 	count := data.PropertyCount()
 
-	objToParams := func(obj DataObject) Params {
+	objToStyle := func(obj DataObject) ViewStyle {
 		params := Params{}
 		for i := 0; i < obj.PropertyCount(); i++ {
 			if node := obj.Property(i); node != nil {
@@ -420,7 +422,7 @@ func (theme *theme) parseThemeData(data DataObject) {
 				}
 			}
 		}
-		return params
+		return NewViewStyle(params)
 	}
 
 	for i := 0; i < count; i++ {
@@ -504,7 +506,7 @@ func (theme *theme) parseThemeData(data DataObject) {
 					for k := 0; k < arraySize; k++ {
 						if element := d.ArrayElement(k); element != nil && element.IsObject() {
 							if obj := element.Object(); obj != nil {
-								theme.styles[obj.Tag()] = objToParams(obj)
+								theme.styles[obj.Tag()] = objToStyle(obj)
 							}
 						}
 					}
@@ -517,7 +519,7 @@ func (theme *theme) parseThemeData(data DataObject) {
 						for k := 0; k < arraySize; k++ {
 							if element := d.ArrayElement(k); element != nil && element.IsObject() {
 								if obj := element.Object(); obj != nil {
-									rule.Styles[obj.Tag()] = objToParams(obj)
+									rule.Styles[obj.Tag()] = objToStyle(obj)
 								}
 							}
 						}
@@ -586,10 +588,74 @@ func (theme *theme) image(tag string, darkUI bool) string {
 	return result
 }
 
-func (theme *theme) style(tag string) Params {
+func (theme *theme) style(tag string) ViewStyle {
 	if style, ok := theme.styles[tag]; ok {
 		return style
 	}
 
-	return Params{}
+	return nil
+}
+
+func (theme *theme) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	writeString := func(text string) {
+		if strings.ContainsAny(text, " \t\n\r\\\"'`,;{}[]()") {
+			replace := []struct{ old, new string }{
+				{old: "\\", new: `\\`},
+				{old: "\t", new: `\t`},
+				{old: "\r", new: `\r`},
+				{old: "\n", new: `\n`},
+				{old: "\"", new: `\"`},
+			}
+			for _, s := range replace {
+				text = strings.Replace(text, s.old, s.new, -1)
+			}
+			buffer.WriteRune('"')
+			buffer.WriteString(text)
+			buffer.WriteRune('"')
+		} else {
+			buffer.WriteString(text)
+		}
+	}
+
+	writeConstants := func(tag string, constants map[string]string) {
+		count := len(constants)
+		if count == 0 {
+			return
+		}
+
+		buffer.WriteString("\t")
+		buffer.WriteString(tag)
+		buffer.WriteString(" = _{\n")
+
+		tags := make([]string, 0, count)
+		for name := range constants {
+			tags = append(tags, name)
+		}
+		sort.Strings(tags)
+		for _, name := range tags {
+			if value, ok := constants[name]; ok && value != "" {
+				buffer.WriteString("\t\t")
+				writeString(name)
+				buffer.WriteString(" = ")
+				writeString(value)
+				buffer.WriteString(",\n")
+			}
+		}
+
+		buffer.WriteString("\t},\n")
+	}
+
+	buffer.WriteString("theme {\n")
+	writeConstants("colors", theme.colors)
+	writeConstants("colors:dark", theme.darkColors)
+	writeConstants("images", theme.images)
+	writeConstants("images:dark", theme.darkImages)
+	writeConstants("constants", theme.constants)
+	writeConstants("constants:touch", theme.touchConstants)
+
+	buffer.WriteString("}\n")
+	return buffer.String()
 }

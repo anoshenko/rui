@@ -568,9 +568,11 @@ func GetHint(view View, subviewID string) string {
 		if text, ok := stringProperty(view, Hint, view.Session()); ok {
 			return text
 		}
-		if text, ok := valueFromStyle(view, Hint); ok {
-			if text, ok = view.Session().resolveConstants(text); ok {
-				return text
+		if value := valueFromStyle(view, Hint); value != nil {
+			if text, ok := value.(string); ok {
+				if text, ok = view.Session().resolveConstants(text); ok {
+					return text
+				}
 			}
 		}
 	}
@@ -659,9 +661,11 @@ func GetEditViewPattern(view View, subviewID string) string {
 		if pattern, ok := stringProperty(view, EditViewPattern, view.Session()); ok {
 			return pattern
 		}
-		if pattern, ok := valueFromStyle(view, EditViewPattern); ok {
-			if pattern, ok = view.Session().resolveConstants(pattern); ok {
-				return pattern
+		if value := valueFromStyle(view, EditViewPattern); value != nil {
+			if pattern, ok := value.(string); ok {
+				if pattern, ok = view.Session().resolveConstants(pattern); ok {
+					return pattern
+				}
 			}
 		}
 	}
