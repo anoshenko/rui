@@ -1,5 +1,7 @@
 package rui
 
+import "strings"
+
 // ViewByID return a View with id equal to the argument of the function or nil if there is no such View
 func ViewByID(rootView View, id string) View {
 	if rootView == nil {
@@ -9,11 +11,23 @@ func ViewByID(rootView View, id string) View {
 	if rootView.ID() == id {
 		return rootView
 	}
+
 	if container, ok := rootView.(ParanetView); ok {
 		if view := viewByID(container, id); view != nil {
 			return view
 		}
 	}
+
+	if index := strings.IndexRune(id, '/'); index > 0 {
+		if view2 := ViewByID(rootView, id[:index]); view2 != nil {
+			if view := ViewByID(view2, id[index+1:]); view != nil {
+				return view
+			}
+			return nil
+		}
+		return nil
+	}
+
 	ErrorLog(`ViewByID(_, "` + id + `"): View not found`)
 	return nil
 }
