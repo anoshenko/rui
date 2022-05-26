@@ -469,6 +469,18 @@ To do this, use the ViewByID function
 This function looks for a child View with id. The search starts from rootView.
 If View is not found, the function returns nil and an error message is written to the log.
 
+When searching, you can specify a chain of identifiers. In this case, they must be separated by the '/' character.
+For example
+
+	view := rui.ViewByID(rootView, "id1/id2")
+
+equivalent to
+
+	var view rui.View = nil
+	if view1 := rui.ViewByID(rootView, "id1"); view1 != nil {
+		view = rui.ViewByID(view1, "id2")
+	}
+
 Usually id is set when the View is created and is not changed later.
 But this is an optional condition. You can change the id at any time.
 
