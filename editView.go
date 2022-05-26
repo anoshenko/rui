@@ -491,23 +491,30 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteByte('"')
 	}
 
+	convertText := func(text string) string {
+		if strings.ContainsRune(text, '"') {
+			text = strings.ReplaceAll(text, `"`, `&#34;`)
+		}
+		return textToJS(text)
+	}
+
 	if hint := GetHint(edit, ""); hint != "" {
 		buffer.WriteString(` placeholder="`)
-		buffer.WriteString(textToJS(hint))
+		buffer.WriteString(convertText(hint))
 		buffer.WriteByte('"')
 	}
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 	if pattern := GetEditViewPattern(edit, ""); pattern != "" {
 		buffer.WriteString(` pattern="`)
-		buffer.WriteString(textToJS(pattern))
+		buffer.WriteString(convertText(pattern))
 		buffer.WriteByte('"')
 	}
 
 	if editType != MultiLineText {
 		if text := GetText(edit, ""); text != "" {
 			buffer.WriteString(` value="`)
-			buffer.WriteString(textToJS(text))
+			buffer.WriteString(convertText(text))
 			buffer.WriteByte('"')
 		}
 	}

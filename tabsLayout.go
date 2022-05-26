@@ -251,7 +251,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 			updateInnerHTML(htmlID, tabsLayout.session)
 		}
 
-	case TabStyle, CurrentTabStyle:
+	case TabStyle, CurrentTabStyle, TabBarStyle:
 		if text, ok := value.(string); ok {
 			if text == "" {
 				delete(tabsLayout.properties, tag)
