@@ -52,6 +52,10 @@ type Theme interface {
 	MediaStyle(tag string, orientation, maxWidth, maxHeight int) ViewStyle
 	SetMediaStyle(tag string, orientation, maxWidth, maxHeight int, style ViewStyle)
 	StyleTags() []string
+	MediaStyles(tag string) []struct {
+		Selectors                        string
+		Orientation, MaxWidth, MaxHeight int
+	}
 	Append(anotherTheme Theme)
 
 	constant(tag string, touchUI bool) string
@@ -268,6 +272,10 @@ func (theme *theme) MediaStyle(tag string, orientation, maxWidth, maxHeight int)
 			}
 		}
 	}
+	if orientation == 0 && maxWidth <= 0 && maxHeight <= 0 {
+		return theme.style(tag)
+	}
+
 	return nil
 }
 
@@ -395,6 +403,60 @@ func (theme *theme) StyleTags() []string {
 		}
 	}
 	return keys
+}
+
+func (theme *theme) MediaStyles(tag string) []struct {
+	Selectors                        string
+	Orientation, MaxWidth, MaxHeight int
+} {
+	result := []struct {
+		Selectors                        string
+		Orientation, MaxWidth, MaxHeight int
+	}{}
+
+	prefix := tag + ":"
+	prefixLen := len(prefix)
+	for themeTag := range theme.styles {
+		if strings.HasPrefix(themeTag, prefix) {
+			result = append(result, struct {
+				Selectors                        string
+				Orientation, MaxWidth, MaxHeight int
+			}{
+				Selectors:   themeTag[prefixLen:],
+				Orientation: DefaultMedia,
+				MaxWidth:    0,
+				MaxHeight:   0,
+			})
+		}
+	}
+
+	for _, media := range theme.mediaStyles {
+		if _, ok := media.styles[tag]; ok {
+			result = append(result, struct {
+				Selectors                        string
+				Orientation, MaxWidth, MaxHeight int
+			}{
+				Selectors:   "",
+				Orientation: media.orientation,
+				MaxWidth:    media.maxWidth,
+				MaxHeight:   media.maxHeight,
+			})
+		}
+		for themeTag := range media.styles {
+			if strings.HasPrefix(themeTag, prefix) {
+				result = append(result, struct {
+					Selectors                        string
+					Orientation, MaxWidth, MaxHeight int
+				}{
+					Selectors:   themeTag[prefixLen:],
+					Orientation: media.orientation,
+					MaxWidth:    media.maxWidth,
+					MaxHeight:   media.maxHeight,
+				})
+			}
+		}
+	}
+	return result
 }
 
 func (theme *theme) data() *theme {

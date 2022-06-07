@@ -241,6 +241,20 @@ func GetMaxHeight(view View, subviewID string) SizeUnit {
 	return result
 }
 
+// GetResize returns the "resize" property value if the subview. One of the following values is returned:
+// NoneResize (0), BothResize (1), HorizontalResize (2), or VerticalResize (3)
+// If the second argument (subviewID) is "" then a value of the first argument (view) is returned
+func GetResize(view View, subviewID string) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view == nil {
+		return 0
+	}
+	result, _ := enumStyledProperty(view, Resize, 0)
+	return result
+}
+
 // GetLeft returns a left position of the subview in an AbsoluteLayout container.
 // If a parent view is not an AbsoluteLayout container then this value is ignored.
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
@@ -1036,15 +1050,33 @@ func colorStyledProperty(view View, tag string) (Color, bool) {
 	return Color(0), false
 }
 
+// FocusView sets focus on the specified View, if it can be focused.
+// The focused View is the View which will receive keyboard events by default.
 func FocusView(view View) {
 	if view != nil {
 		view.Session().runScript("focus('" + view.htmlID() + "')")
 	}
 }
 
+// FocusView sets focus on the View with the specified viewID, if it can be focused.
+// The focused View is the View which will receive keyboard events by default.
 func FocusViewByID(viewID string, session Session) {
 	if viewID != "" {
 		session.runScript("focus('" + viewID + "')")
+	}
+}
+
+// BlurView removes keyboard focus from the specified View.
+func BlurView(view View) {
+	if view != nil {
+		view.Session().runScript("blur('" + view.htmlID() + "')")
+	}
+}
+
+// BlurViewByID removes keyboard focus from the View with the specified viewID.
+func BlurViewByID(viewID string, session Session) {
+	if viewID != "" {
+		session.runScript("blur('" + viewID + "')")
 	}
 }
 

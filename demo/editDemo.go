@@ -63,7 +63,7 @@ func createEditDemo(session rui.Session) rui.View {
 	})
 
 	rui.Set(view, "editMultiLineWrap", rui.CheckboxChangedEvent, func(checkbox rui.Checkbox, checked bool) {
-		rui.Set(view, "editMultiLine", rui.Wrap, checked)
+		rui.Set(view, "editMultiLine", rui.EditWrap, checked)
 	})
 
 	return view

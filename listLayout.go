@@ -13,12 +13,12 @@ const (
 	BottomUpOrientation = 2
 	// EndToStartOrientation - subviews are arranged from right to left
 	EndToStartOrientation = 3
-	// WrapOff - subviews are scrolled and "true" if a new row/column starts
-	WrapOff = 0
-	// WrapOn - the new row/column starts at bottom/right
-	WrapOn = 1
-	// WrapReverse - the new row/column starts at top/left
-	WrapReverse = 2
+	// ListWrapOff - subviews are scrolled and "true" if a new row/column starts
+	ListWrapOff = 0
+	// ListWrapOn - the new row/column starts at bottom/right
+	ListWrapOn = 1
+	// ListWrapReverse - the new row/column starts at top/left
+	ListWrapReverse = 2
 )
 
 // ListLayout - list-container of View
@@ -53,22 +53,35 @@ func (listLayout *listLayoutData) String() string {
 	return getViewString(listLayout)
 }
 
+func (listLayout *listLayoutData) normalizeTag(tag string) string {
+	tag = strings.ToLower(tag)
+	switch tag {
+	case "wrap":
+		tag = ListWrap
+	}
+	return tag
+}
+
+func (listLayout *listLayoutData) Get(tag string) interface{} {
+	return listLayout.get(listLayout.normalizeTag(tag))
+}
+
 func (listLayout *listLayoutData) Remove(tag string) {
-	listLayout.remove(strings.ToLower(tag))
+	listLayout.remove(listLayout.normalizeTag(tag))
 }
 
 func (listLayout *listLayoutData) remove(tag string) {
 	listLayout.viewsContainerData.remove(tag)
 	if listLayout.created {
 		switch tag {
-		case Orientation, Wrap, HorizontalAlign, VerticalAlign:
+		case Orientation, ListWrap, HorizontalAlign, VerticalAlign:
 			updateCSSStyle(listLayout.htmlID(), listLayout.session)
 		}
 	}
 }
 
 func (listLayout *listLayoutData) Set(tag string, value interface{}) bool {
-	return listLayout.set(strings.ToLower(tag), value)
+	return listLayout.set(listLayout.normalizeTag(tag), value)
 }
 
 func (listLayout *listLayoutData) set(tag string, value interface{}) bool {
@@ -80,7 +93,7 @@ func (listLayout *listLayoutData) set(tag string, value interface{}) bool {
 	if listLayout.viewsContainerData.set(tag, value) {
 		if listLayout.created {
 			switch tag {
-			case Orientation, Wrap, HorizontalAlign, VerticalAlign:
+			case Orientation, ListWrap, HorizontalAlign, VerticalAlign:
 				updateCSSStyle(listLayout.htmlID(), listLayout.session)
 			}
 		}
@@ -157,9 +170,9 @@ func GetListWrap(view View, subviewID string) int {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if result, ok := enumStyledProperty(view, Wrap, 0); ok {
+		if result, ok := enumStyledProperty(view, ListWrap, 0); ok {
 			return result
 		}
 	}
-	return WrapOff
+	return ListWrapOff
 }

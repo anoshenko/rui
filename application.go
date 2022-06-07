@@ -2,6 +2,7 @@ package rui
 
 import (
 	"bytes"
+	"context"
 	_ "embed"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -33,6 +35,7 @@ type Application interface {
 }
 
 type application struct {
+	server            *http.Server
 	params            AppParams
 	createContentFunc func(Session) SessionContent
 	sessions          map[int]Session
@@ -40,9 +43,22 @@ type application struct {
 
 // AppParams defines parameters of the app
 type AppParams struct {
-	Title      string
+	// Title - title of the app window/tab
+	Title string
+	// TitleColor - background color of the app window/tab (applied only for Safari and Chrome for Android)
 	TitleColor Color
-	Icon       string
+	// Icon - the icon file name
+	Icon string
+	// CertFile - path of a certificate for the server must be provided
+	// if neither the Server's TLSConfig.Certificates nor TLSConfig.GetCertificate are populated.
+	// If the certificate is signed by a certificate authority, the certFile should be the concatenation
+	// of the server's certificate, any intermediates, and the CA's certificate.
+	CertFile string
+	// KeyFile - path of a private key for the server must be provided
+	// if neither the Server's TLSConfig.Certificates nor TLSConfig.GetCertificate are populated.
+	KeyFile string
+	// Redirect80 - if true then the function of redirect from port 80 to 443 is created
+	Redirect80 bool
 }
 
 func (app *application) getStartPage() string {
@@ -90,14 +106,16 @@ func (app *application) getStartPage() string {
 	return buffer.String()
 }
 
-func (app *application) Start(addr string) {
-	http.Handle("/", app)
-	log.Fatal(http.ListenAndServe(addr, nil))
-}
-
 func (app *application) Finish() {
 	for _, session := range app.sessions {
 		session.close()
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := app.server.Shutdown(ctx); err != nil {
+		log.Println(err.Error())
 	}
 }
 
@@ -285,15 +303,62 @@ func (app *application) startSession(params DataObject, events chan DataObject, 
 	return session, answerText
 }
 
-// NewApplication - create the new application and start it
+var apps = []*application{}
+
+// StartApp - create the new application and start it
 func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
 	app := new(application)
 	app.params = params
 	app.sessions = map[int]Session{}
 	app.createContentFunc = createContentFunc
+	apps = append(apps, app)
 
+	redirectAddr := ""
+	if index := strings.IndexRune(addr, ':'); index >= 0 {
+		redirectAddr = addr[:index] + ":80"
+	} else {
+		redirectAddr = addr + ":80"
+		if params.CertFile != "" && params.KeyFile != "" {
+			addr += ":443"
+		} else {
+			addr += ":80"
+		}
+	}
+
+	app.server = &http.Server{Addr: addr}
 	http.Handle("/", app)
-	log.Fatal(http.ListenAndServe(addr, nil))
+
+	serverRun := func(err error) {
+		if err != nil {
+			if err == http.ErrServerClosed {
+				log.Println(err)
+			} else {
+				log.Fatal(err)
+			}
+		}
+	}
+
+	if params.CertFile != "" && params.KeyFile != "" {
+		if params.Redirect80 {
+			redirectTLS := func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, "https://"+addr+r.RequestURI, http.StatusMovedPermanently)
+			}
+
+			go func() {
+				serverRun(http.ListenAndServe(redirectAddr, http.HandlerFunc(redirectTLS)))
+			}()
+		}
+		serverRun(app.server.ListenAndServeTLS(params.CertFile, params.KeyFile))
+	} else {
+		serverRun(app.server.ListenAndServe())
+	}
+}
+
+func FinishApp() {
+	for _, app := range apps {
+		app.Finish()
+	}
+	apps = []*application{}
 }
 
 func OpenBrowser(url string) bool {
@@ -301,11 +366,20 @@ func OpenBrowser(url string) bool {
 
 	switch runtime.GOOS {
 	case "linux":
-		err = exec.Command("xdg-open", url).Start()
+		for _, provider := range []string{"xdg-open", "x-www-browser", "www-browser"} {
+			if _, err = exec.LookPath(provider); err == nil {
+				if exec.Command(provider, url).Start(); err == nil {
+					return true
+				}
+			}
+		}
+
 	case "windows":
 		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+
 	case "darwin":
 		err = exec.Command("open", url).Start()
+
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}

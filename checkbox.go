@@ -195,6 +195,7 @@ func (button *checkboxData) changedCheckboxState(state bool) {
 
 func checkboxClickListener(view View) {
 	view.Set(Checked, !IsCheckboxChecked(view, ""))
+	BlurView(view)
 }
 
 func checkboxKeyListener(view View, event KeyEvent) {

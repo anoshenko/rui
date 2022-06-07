@@ -495,12 +495,23 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	case Filter:
 		text := ""
-		if value := view.getRaw(Filter); value != nil {
+		if value := view.getRaw(tag); value != nil {
 			if filter, ok := value.(ViewFilter); ok {
 				text = filter.cssStyle(session)
 			}
 		}
-		updateCSSProperty(htmlID, Filter, text, session)
+		updateCSSProperty(htmlID, tag, text, session)
+		return
+
+	case BackdropFilter:
+		text := ""
+		if value := view.getRaw(tag); value != nil {
+			if filter, ok := value.(ViewFilter); ok {
+				text = filter.cssStyle(session)
+			}
+		}
+		updateCSSProperty(htmlID, "-webkit-backdrop-filter", text, session)
+		updateCSSProperty(htmlID, tag, text, session)
 		return
 
 	case FontName:
@@ -584,6 +595,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		BackgroundColor: BackgroundColor,
 		TextColor:       "color",
 		TextLineColor:   "text-decoration-color",
+		CaretColor:      CaretColor,
 	}
 	if cssTag, ok := colorTags[tag]; ok {
 		if color, ok := colorProperty(view, tag, session); ok {

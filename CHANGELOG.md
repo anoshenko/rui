@@ -1,3 +1,11 @@
+# v0.7.0
+
+* Added "resize", "grid-auto-flow", "caret-color", and "backdrop-filter" properties 
+* Added BlurView, BlurViewByID, GetResize, GetGridAutoFlow, GetCaretColor, GetBackdropFilter functions
+* The "warp" property for ListView and ListLayout renamed to "list-warp"
+* The "warp" property for EditView renamed to "edit-warp"
+* Added CertFile and KeyFile optional fields to the AppParams struct.If they are set, then an https connection is created, otherwise http.
+
 # v0.6.0
 
 * Added "user-data" property

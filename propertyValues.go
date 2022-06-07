@@ -196,4 +196,33 @@ const (
 	LeftFloat = 1
 	// RightFloat - value of the view "float" property: the View must float on the right side of its containing block.
 	RightFloat = 2
+
+	// NoneResize - value of the view "resize" property: the View The offers no user-controllable method for resizing it.
+	NoneResize = 0
+	// BothResize - value of the view "resize" property: the View displays a mechanism for allowing
+	// the user to resize it, which may be resized both horizontally and vertically.
+	BothResize = 1
+	// HorizontalResize - value of the view "resize" property: the View displays a mechanism for allowing
+	// the user to resize it in the horizontal direction.
+	HorizontalResize = 2
+	// VerticalResize - value of the view "resize" property: the View displays a mechanism for allowing
+	// the user to resize it in the vertical direction.
+	VerticalResize = 3
+
+	// RowAutoFlow - value of the "grid-auto-flow" property of the GridLayout:
+	// Views are placed by filling each row in turn, adding new rows as necessary.
+	RowAutoFlow = 0
+	// ColumnAutoFlow - value of the "grid-auto-flow" property of the GridLayout:
+	// Views are placed by filling each column in turn, adding new columns as necessary.
+	ColumnAutoFlow = 1
+	// RowDenseAutoFlow - value of the "grid-auto-flow" property of the GridLayout:
+	// Views are placed by filling each row, adding new rows as necessary.
+	// "dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later.
+	// This may cause views to appear out-of-order, when doing so would fill in holes left by larger views.
+	RowDenseAutoFlow = 2
+	// ColumnDenseAutoFlow - value of the "grid-auto-flow" property of the GridLayout:
+	// Views are placed by filling each column, adding new columns as necessary.
+	// "dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later.
+	// This may cause views to appear out-of-order, when doing so would fill in holes left by larger views.
+	ColumnDenseAutoFlow = 3
 )

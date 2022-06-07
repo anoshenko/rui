@@ -82,6 +82,9 @@ func (edit *editViewData) normalizeTag(tag string) string {
 
 	case "maxlength", "maxlen":
 		return MaxLength
+
+	case "wrap":
+		return EditWrap
 	}
 
 	return tag
@@ -163,7 +166,7 @@ func (edit *editViewData) remove(tag string) {
 			}
 		}
 
-	case Wrap:
+	case EditWrap:
 		if exists {
 			oldWrap := IsEditViewWrap(edit, "")
 			delete(edit.properties, tag)
@@ -310,9 +313,9 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 		}
 		return false
 
-	case Wrap:
+	case EditWrap:
 		oldWrap := IsEditViewWrap(edit, "")
-		if edit.setBoolProperty(Wrap, value) {
+		if edit.setBoolProperty(EditWrap, value) {
 			if GetEditViewType(edit, "") == MultiLineText {
 				if wrap := IsEditViewWrap(edit, ""); wrap != oldWrap {
 					if edit.created {
@@ -679,14 +682,14 @@ func GetEditViewPattern(view View, subviewID string) string {
 	return ""
 }
 
-// IsEditViewWrap returns a value of the Wrap property of MultiLineEditView.
+// IsEditViewWrap returns a value of the EditWrap property of MultiLineEditView.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsEditViewWrap(view View, subviewID string) bool {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if wrap, ok := boolStyledProperty(view, Wrap); ok {
+		if wrap, ok := boolStyledProperty(view, EditWrap); ok {
 			return wrap
 		}
 	}
@@ -707,4 +710,17 @@ func AppendEditText(view View, subviewID string, text string) {
 	if edit, ok := view.(EditView); ok {
 		edit.AppendText(text)
 	}
+}
+
+// GetCaretColor returns the color of the text input carret.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetCaretColor(view View, subviewID string) Color {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view == nil {
+		return 0
+	}
+	t, _ := colorStyledProperty(view, CaretColor)
+	return t
 }

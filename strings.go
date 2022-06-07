@@ -45,7 +45,7 @@ func scanStringsDir(path string) {
 			}
 		}
 	} else {
-		ErrorLog(err.Error())
+		DebugLog(err.Error())
 	}
 }
 

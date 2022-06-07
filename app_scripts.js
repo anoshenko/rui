@@ -92,14 +92,6 @@ function socketClose(event) {
 	if (!event.wasClean && windowFocus) {
 		window.setTimeout(socketReconnect, 10000);
 	}
-	/*
-	if (event.wasClean) {
-		alert('Connection was clean closed');
-	} else {
-		alert('Connection was lost');
-	}
-	alert('Code: ' + event.code + ' reason: ' + event.reason);
-	*/
 }
 
 function socketError(error) {
@@ -318,28 +310,34 @@ function activateTab(layoutId, tabNumber) {
 	}
 }
 
-function tabClickEvent(layoutId, tabNumber, event) {
+function tabClickEvent(tab, layoutId, tabNumber, event) {
 	event.stopPropagation();
 	event.preventDefault();
 	activateTab(layoutId, tabNumber)
+	if (tab) {
+		tab.blur()
+	}
 	sendMessage("tabClick{session=" + sessionID + ",id=" + layoutId + ",number=" + tabNumber + "}");
 }
 
 function tabKeyClickEvent(layoutId, tabNumber, event) {
 	if (enterOrSpaceKeyClickEvent(event)) {
-		tabClickEvent(layoutId, tabNumber, event)
+		tabClickEvent(null, layoutId, tabNumber, event)
 	}
 }
 
-function tabCloseClickEvent(layoutId, tabNumber, event) {
+function tabCloseClickEvent(button, layoutId, tabNumber, event) {
 	event.stopPropagation();
 	event.preventDefault();
+	if (button) {
+		button.blur()
+	}
 	sendMessage("tabCloseClick{session=" + sessionID + ",id=" + layoutId + ",number=" + tabNumber + "}");
 }
 
 function tabCloseKeyClickEvent(layoutId, tabNumber, event) {
 	if (enterOrSpaceKeyClickEvent(event)) {
-		tabCloseClickEvent(layoutId, tabNumber, event)
+		tabCloseClickEvent(null, layoutId, tabNumber, event)
 	}
 }
 
@@ -1257,6 +1255,13 @@ function focus(elementId) {
 	var element = document.getElementById(elementId);
 	if (element) {
 		element.focus();
+	}
+}
+
+function blur(elementId) {
+	var element = document.getElementById(elementId);
+	if (element) {
+		element.blur();
 	}
 }
 

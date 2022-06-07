@@ -265,8 +265,8 @@ func (style *viewStyle) set(tag string, value interface{}) bool {
 	case Clip, ShapeOutside:
 		return style.setClipShape(tag, value)
 
-	case Filter:
-		return style.setFilter(value)
+	case Filter, BackdropFilter:
+		return style.setFilter(tag, value)
 
 	case Transition:
 		setObject := func(obj DataObject) bool {

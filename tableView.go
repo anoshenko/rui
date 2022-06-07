@@ -579,7 +579,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 			CellBorder, HeadHeight, HeadStyle, FootHeight, FootStyle,
 			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
 			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
-			TableRowSelectedEvent, AllowSelection:
+			TableRowSelectedEvent, AllowSelection, Current:
 			table.ReloadTableData()
 
 		case Gap:
@@ -648,11 +648,25 @@ func (table *tableViewData) currentStyle() string {
 			}
 		}
 	}
+	if value := valueFromStyle(table, CurrentStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = table.session.resolveConstants(style); ok {
+				return style
+			}
+		}
+	}
 	return "ruiCurrentTableCellFocused"
 }
 
 func (table *tableViewData) currentInactiveStyle() string {
 	if value := table.getRaw(CurrentInactiveStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = table.session.resolveConstants(style); ok {
+				return style
+			}
+		}
+	}
+	if value := valueFromStyle(table, CurrentInactiveStyle); value != nil {
 		if style, ok := value.(string); ok {
 			if style, ok = table.session.resolveConstants(style); ok {
 				return style
@@ -1161,7 +1175,11 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	headFootStart := func(htmlTag, styleTag string) (BorderProperty, BoundsProperty) {
 		buffer.WriteRune('<')
 		buffer.WriteString(htmlTag)
-		if value := table.getRaw(styleTag); value != nil {
+		value := table.getRaw(styleTag)
+		if value == nil {
+			value = valueFromStyle(table, styleTag)
+		}
+		if value != nil {
 			switch value := value.(type) {
 			case string:
 				if style, ok := session.resolveConstants(value); ok {

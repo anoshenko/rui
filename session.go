@@ -400,13 +400,13 @@ func (session *sessionData) handleResize(data DataObject) {
 						if view := session.viewByHTMLID(viewID[:n]); view != nil {
 							view.onItemResize(view, viewID[n+1:], getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
 						} else {
-							ErrorLogF(`View with id == %s not found`, viewID[:n])
+							DebugLogF(`View with id == %s not found`, viewID[:n])
 						}
 					} else if view := session.viewByHTMLID(viewID); view != nil {
 						view.onResize(view, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
 						view.setScroll(getFloat("scroll-x"), getFloat("scroll-y"), getFloat("scroll-width"), getFloat("scroll-height"))
 					} else {
-						ErrorLogF(`View with id == %s not found`, viewID)
+						DebugLogF(`View with id == %s not found`, viewID)
 					}
 				} else {
 					ErrorLog(`"id" property not found`)

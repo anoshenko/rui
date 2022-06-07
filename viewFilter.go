@@ -224,35 +224,35 @@ func (filter *viewFilter) cssStyle(session Session) string {
 	return buffer.String()
 }
 
-func (style *viewStyle) setFilter(value interface{}) bool {
+func (style *viewStyle) setFilter(tag string, value interface{}) bool {
 	switch value := value.(type) {
 	case ViewFilter:
-		style.properties[Filter] = value
+		style.properties[tag] = value
 		return true
 
 	case string:
 		if obj := NewDataObject(value); obj == nil {
 			if filter := newViewFilter(obj); filter != nil {
-				style.properties[Filter] = filter
+				style.properties[tag] = filter
 				return true
 			}
 		}
 	case DataObject:
 		if filter := newViewFilter(value); filter != nil {
-			style.properties[Filter] = filter
+			style.properties[tag] = filter
 			return true
 		}
 
 	case DataValue:
 		if value.IsObject() {
 			if filter := newViewFilter(value.Object()); filter != nil {
-				style.properties[Filter] = filter
+				style.properties[tag] = filter
 				return true
 			}
 		}
 	}
 
-	notCompatibleType(Filter, value)
+	notCompatibleType(tag, value)
 	return false
 }
 
@@ -264,6 +264,23 @@ func GetFilter(view View, subviewID string) ViewFilter {
 	}
 	if view != nil {
 		if value := view.getRaw(Filter); value != nil {
+			if filter, ok := value.(ViewFilter); ok {
+				return filter
+			}
+		}
+	}
+
+	return nil
+}
+
+// GetBackdropFilter returns the area behind a View graphical effects like blur or color shift.
+// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
+func GetBackdropFilter(view View, subviewID string) ViewFilter {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view != nil {
+		if value := view.getRaw(BackdropFilter); value != nil {
 			if filter, ok := value.(ViewFilter); ok {
 				return filter
 			}

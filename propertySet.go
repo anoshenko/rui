@@ -10,6 +10,7 @@ var colorProperties = []string{
 	ColorTag,
 	BackgroundColor,
 	TextColor,
+	CaretColor,
 	BorderColor,
 	BorderLeftColor,
 	BorderRightColor,
@@ -42,6 +43,7 @@ var boolProperties = []string{
 	Inset,
 	BackfaceVisible,
 	ReadOnly,
+	EditWrap,
 	Spellcheck,
 	CloseButton,
 	OutsideClose,
@@ -276,7 +278,7 @@ var enumProperties = map[string]struct {
 		"",
 		[]string{"column", "row", "column-reverse", "row-reverse"},
 	},
-	Wrap: {
+	ListWrap: {
 		[]string{"off", "on", "reverse"},
 		"",
 		[]string{"nowrap", "wrap", "wrap-reverse"},
@@ -310,6 +312,11 @@ var enumProperties = map[string]struct {
 		[]string{"left", "right", "center", "stretch"},
 		"justify-items",
 		[]string{"start", "end", "center", "stretch"},
+	},
+	GridAutoFlow: {
+		[]string{"row", "column", "row-dense", "column-dense"},
+		GridAutoFlow,
+		[]string{"row", "column", "row dense", "column dense"},
 	},
 	ImageVerticalAlign: {
 		[]string{"top", "bottom", "center"},
@@ -415,6 +422,11 @@ var enumProperties = map[string]struct {
 		[]string{"none", "cell", "row"},
 		"",
 		[]string{"none", "cell", "row"},
+	},
+	Resize: {
+		[]string{"none", "both", "horizontal", "vertical"},
+		"resize",
+		[]string{"none", "both", "horizontal", "vertical"},
 	},
 }
 

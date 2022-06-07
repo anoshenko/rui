@@ -55,7 +55,7 @@ func createListViewDemo(session rui.Session) rui.View {
 	})
 
 	rui.Set(view, "listWrap", rui.DropDownEvent, func(list rui.DropDownList, number int) {
-		rui.Set(view, "listView", rui.Wrap, number)
+		rui.Set(view, "listView", rui.ListWrap, number)
 	})
 
 	setItemSize := func(tag string, number int, values []rui.SizeUnit) {

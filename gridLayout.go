@@ -329,7 +329,7 @@ func GetCellVerticalAlign(view View, subviewID string) int {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if align, ok := enumProperty(view, CellVerticalAlign, view.Session(), StretchAlign); ok {
+		if align, ok := enumStyledProperty(view, CellVerticalAlign, StretchAlign); ok {
 			return align
 		}
 	}
@@ -343,11 +343,25 @@ func GetCellHorizontalAlign(view View, subviewID string) int {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if align, ok := enumProperty(view, CellHorizontalAlign, view.Session(), StretchAlign); ok {
+		if align, ok := enumStyledProperty(view, CellHorizontalAlign, StretchAlign); ok {
 			return align
 		}
 	}
 	return StretchAlign
+}
+
+// GetGridAutoFlow returns the value of the  "grid-auto-flow" property
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetGridAutoFlow(view View, subviewID string) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view != nil {
+		if align, ok := enumStyledProperty(view, GridAutoFlow, 0); ok {
+			return align
+		}
+	}
+	return 0
 }
 
 // GetCellWidth returns the width of a GridLayout cell. If the result is an empty array, then the width is not set.
@@ -383,7 +397,7 @@ func GetGridRowGap(view View, subviewID string) SizeUnit {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if result, ok := sizeProperty(view, GridRowGap, view.Session()); ok {
+		if result, ok := sizeStyledProperty(view, GridRowGap); ok {
 			return result
 		}
 	}
@@ -397,7 +411,7 @@ func GetGridColumnGap(view View, subviewID string) SizeUnit {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if result, ok := sizeProperty(view, GridColumnGap, view.Session()); ok {
+		if result, ok := sizeStyledProperty(view, GridColumnGap); ok {
 			return result
 		}
 	}

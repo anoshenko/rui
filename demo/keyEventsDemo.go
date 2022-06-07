@@ -44,7 +44,7 @@ func createKeyEventsDemo(session rui.Session) rui.View {
 		rui.Width:        rui.Percent(100),
 		rui.Height:       rui.Percent(100),
 		rui.ReadOnly:     true,
-		rui.Wrap:         true,
+		rui.EditWrap:     true,
 		rui.Hint:         "Set the focus and press a key",
 		rui.EditViewType: rui.MultiLineText,
 		rui.KeyDownEvent: func(view rui.View, event rui.KeyEvent) {

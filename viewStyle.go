@@ -213,6 +213,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		{BackgroundColor, BackgroundColor},
 		{TextColor, "color"},
 		{TextLineColor, "text-decoration-color"},
+		{CaretColor, CaretColor},
 	}
 	for _, p := range colorProperties {
 		if color, ok := colorProperty(style, p.property, session); ok && color != 0 {
@@ -235,8 +236,8 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	writingMode := 0
 	for _, tag := range []string{
 		TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
-		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, Cursor, WhiteSpace,
-		WordBreak, TextOverflow, Float, TableVerticalAlign} {
+		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
+		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize} {
 
 		if data, ok := enumProperties[tag]; ok {
 			if tag != VerticalTextOrientation || (writingMode != VerticalLeftToRight && writingMode != VerticalRightToLeft) {
@@ -295,15 +296,15 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	wrap, _ := enumProperty(style, Wrap, session, 0)
+	wrap, _ := enumProperty(style, ListWrap, session, 0)
 	orientation, ok := valueToOrientation(style.Get(Orientation), session)
 	if ok || wrap > 0 {
 		cssText := enumProperties[Orientation].cssValues[orientation]
 		switch wrap {
-		case WrapOn:
+		case ListWrapOn:
 			cssText += " wrap"
 
-		case WrapReverse:
+		case ListWrapReverse:
 			cssText += " wrap-reverse"
 		}
 		builder.add(`flex-flow`, cssText)
@@ -323,13 +324,13 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	if align, ok := enumProperty(style, HorizontalAlign, session, LeftAlign); ok {
 		switch align {
 		case LeftAlign:
-			if (!rows && wrap == WrapReverse) || orientation == EndToStartOrientation {
+			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
 				builder.add(hAlignTag, `flex-end`)
 			} else {
 				builder.add(hAlignTag, `flex-start`)
 			}
 		case RightAlign:
-			if (!rows && wrap == WrapReverse) || orientation == EndToStartOrientation {
+			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
 				builder.add(hAlignTag, `flex-start`)
 			} else {
 				builder.add(hAlignTag, `flex-end`)
@@ -349,13 +350,13 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	if align, ok := enumProperty(style, VerticalAlign, session, LeftAlign); ok {
 		switch align {
 		case TopAlign:
-			if (rows && wrap == WrapReverse) || orientation == BottomUpOrientation {
+			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
 				builder.add(vAlignTag, `flex-end`)
 			} else {
 				builder.add(vAlignTag, `flex-start`)
 			}
 		case BottomAlign:
-			if (rows && wrap == WrapReverse) || orientation == BottomUpOrientation {
+			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
 				builder.add(vAlignTag, `flex-start`)
 			} else {
 				builder.add(vAlignTag, `flex-end`)
@@ -400,7 +401,16 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	if value := style.getRaw(Filter); value != nil {
 		if filter, ok := value.(ViewFilter); ok {
 			if text := filter.cssStyle(session); text != "" {
-				builder.add(`filter`, text)
+				builder.add(Filter, text)
+			}
+		}
+	}
+
+	if value := style.getRaw(BackdropFilter); value != nil {
+		if filter, ok := value.(ViewFilter); ok {
+			if text := filter.cssStyle(session); text != "" {
+				builder.add(`-webkit-backdrop-filter`, text)
+				builder.add(BackdropFilter, text)
 			}
 		}
 	}
@@ -765,10 +775,10 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		ID, Row, Column, Top, Right, Bottom, Left, Semantics, Cursor, Visibility,
 		Opacity, ZIndex, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
 		Margin, Padding, BackgroundClip, BackgroundColor, Background, Border, Radius, Outline, Shadow,
-		Orientation, Wrap, VerticalAlign, HorizontalAlign, CellWidth, CellHeight,
+		Orientation, ListWrap, VerticalAlign, HorizontalAlign, CellWidth, CellHeight,
 		CellVerticalAlign, CellHorizontalAlign, GridRowGap, GridColumnGap,
 		ColumnCount, ColumnWidth, ColumnSeparator, ColumnGap, AvoidBreak,
-		Current, Expanded, Side, ResizeBorderWidth, EditViewType, MaxLength, Hint, Text,
+		Current, Expanded, Side, ResizeBorderWidth, EditViewType, MaxLength, Hint, Text, EditWrap,
 		TextOverflow, FontName, TextSize, TextColor, TextWeight, Italic, SmallCaps,
 		Strikethrough, Overline, Underline, TextLineStyle, TextLineThickness,
 		TextLineColor, TextTransform, TextAlign, WhiteSpace, WordBreak, TextShadow, TextIndent,
@@ -785,7 +795,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 	finalTags := []string{
 		Perspective, PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible, OriginX, OriginY, OriginZ,
 		TranslateX, TranslateY, TranslateZ, ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ,
-		SkewX, SkewY, Clip, Filter, Summary, Content, Transition}
+		SkewX, SkewY, Clip, Filter, BackdropFilter, Summary, Content, Transition}
 	for _, tag := range finalTags {
 		removeTag(tag)
 	}

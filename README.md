@@ -550,6 +550,25 @@ For the properties "width", "height", "min-width", "min-height", "max-width", "m
 	func GetMaxWidth(view View, subviewID string) SizeUnit
 	func GetMaxHeight(view View, subviewID string) SizeUnit
 
+### "resize" property
+
+The int "resize" property (Resize constant) sets whether the View can be resized, and if so, in which directions. 
+Valid values
+
+|Value     | Constant         | Name         | Description             |
+|:--------:|------------------|--------------|-------------------------|
+| 0        | NoneResize       | "none"       | View cannot be resized. |
+| 1        | BothResize       | "both"       | The View displays a mechanism for allowing the user to resize it, which may be resized both horizontally and vertically. |
+| 2        | HorizontalResize | "horizontal" | The View displays a mechanism for allowing the user to resize it in the horizontal direction. |
+| 3        | VerticalResize   | "vertical"   | The View displays a mechanism for allowing the user to resize it in the vertical direction.   |
+
+The default value for all View types except multiline text editor is NoneResize(0).
+The default value for a multiline text editor is BothResize(1).
+
+You can get the value of this property using the function
+
+	func GetResize(view View, subviewID string) int
+
 ### "margin" and "padding" properties
 
 The "margin" property determines the outer margins from this View to its neighbors.
@@ -1207,7 +1226,7 @@ You can get the value of this property using the function
 
 ### "visibility" property
 
-The "visibility" property (constant Visibility) of type int specifies the visibility of the View. Valid values
+The "visibility" int property (constant Visibility) specifies the visibility of the View. Valid values
 
 | Value | Constant  | Name        | Visibility                                     |
 |:-----:|-----------|-------------|------------------------------------------------|
@@ -1219,10 +1238,12 @@ You can get the value of this property using the function
 
 	func GetVisibility(view View, subviewID string) int
 
-### "filter" property
+### "filter" and "backdrop-filter" properties
 
-The "filter" property (Filter constant) applies graphical effects such as blur and color shift to the View.
-Only the ViewFilter interface is used as the value of the "filter" property. 
+The "filter" property (Filter constant) applies graphical effects to the View, such as blurring, color shifting, changing brightness/contrast, etc.
+The "backdrop-filter" property (BackdropFilter constant) applies the same effects but to the area behind a View.
+
+Only the ViewFilter interface is used as the value of the "filter" properties. 
 ViewFilter is created using the function
 
 	func NewViewFilter(params Params) ViewFilter
@@ -1249,9 +1270,10 @@ Example
         rui.Contrast: 150,
     }))
 
-You can get the value of the current filter using the function
+You can get the value of the current filter using functions
 
 	func GetFilter(view View, subviewID string) ViewFilter
+	func GetBackdropFilter(view View, subviewID string) ViewFilter
 
 ### "semantics" property
 
@@ -2103,17 +2125,17 @@ The start and end positions for StartToEndOrientation and EndToStartOrientation 
 of the "text-direction" property. For languages written from right to left (Arabic, Hebrew), 
 the beginning is on the right, for other languages - on the left.
 
-### "wrap" property
+### "list-wrap" property
 
-The "wrap" int property (Wrap constant) defines the position of elements in case of reaching 
+The "list-wrap" int property (ListWrap constant) defines the position of elements in case of reaching 
 the border of the container. There are three options:
 
-* WrapOff (0) - the column / row of elements continues and goes beyond the bounds of the visible area.
+* ListWrapOff (0) - the column / row of elements continues and goes beyond the bounds of the visible area.
 
-* WrapOn (1) - starts a new column / row of items. The new column is positioned towards the end 
+* ListWrapOn (1) - starts a new column / row of items. The new column is positioned towards the end 
 (for the position of the beginning and end, see above), the new line is at the bottom.
 
-* WrapReverse (2) - starts a new column / row of elements. The new column is positioned towards the beginning 
+* ListWrapReverse (2) - starts a new column / row of elements. The new column is positioned towards the beginning 
 (for the position of the beginning and end, see above), the new line is at the top.
 
 ### "vertical-align" property
@@ -2191,6 +2213,24 @@ Example
 	})
 
 In this example, view1 occupies columns 1 and 2 in row 0, and view1 occupies rows 0, 1, and 2 in column 0.
+
+### "grid-auto-flow"
+
+If the "row" and "column" properties are not set for child Views, then the automatic View placement algorithm is used.
+There are four variants of this algorithm. The variant to use is specified using the "grid-auto-flow" int property.
+The "grid-auto-flow" property can take the following values:
+
+* RowAutoFlow (0) (text name "row") - Views are placed by filling each row in turn, adding new columns as necessary;
+
+* ColumnAutoFlow (1) (text name "colunm") - Views are placed by filling each column in turn, adding new columns as necessary;
+
+* RowDenseAutoFlow (2) (text name "row-dense") - Views are placed by filling each row, adding new rows as necessary.
+"dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later.
+This may cause views to appear out-of-order, when doing so would fill in holes left by larger views.
+
+* ColumnDenseAutoFlow (3) (text name "column-dense") - Views are placed by filling each column, adding new columns as necessary. 
+"dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later.
+This may cause views to appear out-of-order, when doing so would fill in holes left by larger views.
 
 ### "cell-width" and "cell-height" properties
 
@@ -2668,9 +2708,13 @@ Spell checking can only be enabled if the editor type is set to SingleLineText o
 For the editor, you can set a hint that will be shown while the editor is empty.
 To do this, use the string property "hint" (Hint constant).
 
-For a multi-line editor, auto-wrap mode can be enabled. The bool property "wrap" (constant Wrap) is used for this. 
-If "wrap" is off (default), then horizontal scrolling is used. 
+For a multi-line editor, auto-wrap mode can be enabled. The bool property "edit-wrap" (EditWrap constant) is used for this. 
+If "edit-wrap" is false (default), then horizontal scrolling is used. 
 If enabled, the text wraps to a new line when the EditView border is reached.
+
+To change the color of the text input caret, use the Color property "caret-color" (CaretColor constant).
+The "caret-color" property can be set not only for EditView, but for any container. 
+In this case, the color of the caret changes for all child EditViews placed in this container.
 
 The following functions can be used to get the values of the properties of an EditView:
 
@@ -2682,6 +2726,7 @@ The following functions can be used to get the values of the properties of an Ed
 	func IsReadOnly(view View, subviewID string) bool
 	func IsEditViewWrap(view View, subviewID string) bool
 	func IsSpellcheck(view View, subviewID string) bool
+	func GetCaretColor(view View, subviewID string) Color
 
 The "edit-text-changed" event (EditTextChangedEvent constant) is used to track changes to the text. 
 The main event listener has the following format:

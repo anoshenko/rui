@@ -103,8 +103,8 @@ func (tabsLayout *tabsLayoutData) String() string {
 	return getViewString(tabsLayout)
 }
 
-func (tabsLayout *tabsLayoutData) currentItem() int {
-	result, _ := intProperty(tabsLayout, Current, tabsLayout.session, 0)
+func (tabsLayout *tabsLayoutData) currentItem(defaultValue int) int {
+	result, _ := intProperty(tabsLayout, Current, tabsLayout.session, defaultValue)
 	return result
 }
 
@@ -145,7 +145,7 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 		return
 
 	case Current:
-		oldCurrent := tabsLayout.currentItem()
+		oldCurrent := tabsLayout.currentItem(0)
 		delete(tabsLayout.properties, Current)
 		if oldCurrent == 0 {
 			return
@@ -223,12 +223,12 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 			return true
 		}
 
-		oldCurrent := tabsLayout.currentItem()
+		oldCurrent := tabsLayout.currentItem(-1)
 		if !tabsLayout.setIntProperty(Current, value) {
 			return false
 		}
 
-		current := tabsLayout.currentItem()
+		current := tabsLayout.currentItem(0)
 		if oldCurrent == current {
 			return true
 		}
@@ -497,12 +497,26 @@ func (tabsLayout *tabsLayoutData) tabBarStyle() string {
 	if style, ok := stringProperty(tabsLayout, TabBarStyle, tabsLayout.session); ok {
 		return style
 	}
+	if value := valueFromStyle(tabsLayout, TabBarStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = tabsLayout.session.resolveConstants(style); ok {
+				return style
+			}
+		}
+	}
 	return "ruiTabBar"
 }
 
 func (tabsLayout *tabsLayoutData) inactiveTabStyle() string {
 	if style, ok := stringProperty(tabsLayout, TabStyle, tabsLayout.session); ok {
 		return style
+	}
+	if value := valueFromStyle(tabsLayout, TabStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = tabsLayout.session.resolveConstants(style); ok {
+				return style
+			}
+		}
 	}
 	switch tabsLayout.tabsLocation() {
 	case LeftTabs, RightTabs:
@@ -514,6 +528,13 @@ func (tabsLayout *tabsLayoutData) inactiveTabStyle() string {
 func (tabsLayout *tabsLayoutData) activeTabStyle() string {
 	if style, ok := stringProperty(tabsLayout, CurrentTabStyle, tabsLayout.session); ok {
 		return style
+	}
+	if value := valueFromStyle(tabsLayout, CurrentTabStyle); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = tabsLayout.session.resolveConstants(style); ok {
+				return style
+			}
+		}
 	}
 	switch tabsLayout.tabsLocation() {
 	case LeftTabs, RightTabs:
@@ -629,7 +650,7 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 		tabsLayout.views = []View{}
 	}
 	if view != nil {
-		if current := tabsLayout.currentItem(); current >= index {
+		if current := tabsLayout.currentItem(0); current >= index {
 			tabsLayout.properties[Current] = current + 1
 			defer tabsLayout.propertyChangedEvent(Current)
 		}
@@ -658,7 +679,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 	view.SetChangeListener(Icon, nil)
 	view.SetChangeListener(TabCloseButton, nil)
 
-	current := tabsLayout.currentItem()
+	current := tabsLayout.currentItem(0)
 	if index < current || (index == current && current > 0) {
 		current--
 	}
@@ -683,7 +704,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 }
 
 func (tabsLayout *tabsLayoutData) currentID() string {
-	return fmt.Sprintf("%s-%d", tabsLayout.htmlID(), tabsLayout.currentItem())
+	return fmt.Sprintf("%s-%d", tabsLayout.htmlID(), tabsLayout.currentItem(0))
 }
 
 func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Builder) {
@@ -720,7 +741,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	}
 
 	//viewCount := len(tabsLayout.views)
-	current := tabsLayout.currentItem()
+	current := tabsLayout.currentItem(0)
 	location := tabsLayout.tabsLocation()
 	tabsLayoutID := tabsLayout.htmlID()
 
@@ -798,7 +819,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			} else {
 				buffer.WriteString(inactiveStyle)
 			}
-			buffer.WriteString(`" tabindex="0" onclick="tabClickEvent(\'`)
+			buffer.WriteString(`" tabindex="0" onclick="tabClickEvent(this, \'`)
 			buffer.WriteString(tabsLayoutID)
 			buffer.WriteString(`\', `)
 			buffer.WriteString(strconv.Itoa(n))
@@ -840,7 +861,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 				close = closeButton
 			}
 			if close {
-				buffer.WriteString(`<div class="ruiTabCloseButton" tabindex="0" onclick="tabCloseClickEvent(\'`)
+				buffer.WriteString(`<div class="ruiTabCloseButton" tabindex="0" onclick="tabCloseClickEvent(this, \'`)
 				buffer.WriteString(tabsLayoutID)
 				buffer.WriteString(`\', `)
 				buffer.WriteString(strconv.Itoa(n))
@@ -903,7 +924,7 @@ func (tabsLayout *tabsLayoutData) handleCommand(self View, command string, data 
 	case "tabClick":
 		if numberText, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(numberText); err == nil {
-				current := tabsLayout.currentItem()
+				current := tabsLayout.currentItem(0)
 				if current != number {
 					tabsLayout.properties[Current] = number
 					for _, listener := range tabsLayout.tabListener {

@@ -107,6 +107,9 @@ func (listView *listViewData) normalizeTag(tag string) string {
 
 	case VerticalAlign:
 		tag = ItemVerticalAlign
+
+	case "wrap":
+		tag = ListWrap
 	}
 	return tag
 }
@@ -135,7 +138,7 @@ func (listView *listViewData) remove(tag string) {
 			listView.propertyChangedEvent(tag)
 		}
 
-	case Orientation, Wrap:
+	case Orientation, ListWrap:
 		if _, ok := listView.properties[tag]; ok {
 			delete(listView.properties, tag)
 			if listView.created {
@@ -252,7 +255,7 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 			listener(listView, current)
 		}
 
-	case Orientation, Wrap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight:
+	case Orientation, ListWrap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight:
 		result := listView.viewData.set(tag, value)
 		if result && listView.created {
 			updateInnerHTML(listView.htmlID(), listView.session)
@@ -764,37 +767,34 @@ func (listView *listViewData) getItemView(index int) View {
 	return listView.items[index]
 }
 
-func (listView *listViewData) listItemStyle() string {
-	if value := listView.getRaw(ListItemStyle); value != nil {
+func (listView *listViewData) itemStyle(tag, defaultStyle string) string {
+	if value := listView.getRaw(tag); value != nil {
 		if style, ok := value.(string); ok {
 			if style, ok = listView.session.resolveConstants(style); ok {
 				return style
 			}
 		}
 	}
-	return "ruiListItem"
+	if value := valueFromStyle(listView, tag); value != nil {
+		if style, ok := value.(string); ok {
+			if style, ok = listView.session.resolveConstants(style); ok {
+				return style
+			}
+		}
+	}
+	return defaultStyle
+}
+
+func (listView *listViewData) listItemStyle() string {
+	return listView.itemStyle(ListItemStyle, "ruiListItem")
 }
 
 func (listView *listViewData) currentStyle() string {
-	if value := listView.getRaw(CurrentStyle); value != nil {
-		if style, ok := value.(string); ok {
-			if style, ok = listView.session.resolveConstants(style); ok {
-				return style
-			}
-		}
-	}
-	return "ruiListItemFocused"
+	return listView.itemStyle(CurrentStyle, "ruiListItemFocused")
 }
 
 func (listView *listViewData) currentInactiveStyle() string {
-	if value := listView.getRaw(CurrentInactiveStyle); value != nil {
-		if style, ok := value.(string); ok {
-			if style, ok = listView.session.resolveConstants(style); ok {
-				return style
-			}
-		}
-	}
-	return "ruiListItemSelected"
+	return listView.itemStyle(CurrentInactiveStyle, "ruiListItemSelected")
 }
 
 func (listView *listViewData) checkboxSubviews(self View, buffer *strings.Builder, checkbox int) {
@@ -981,13 +981,13 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	rows := (orientation == StartToEndOrientation || orientation == EndToStartOrientation)
 
 	if rows {
-		if wrap == WrapOff {
+		if wrap == ListWrapOff {
 			buffer.WriteString(` min-width: 100%; height: 100%;`)
 		} else {
 			buffer.WriteString(` width: 100%; min-height: 100%;`)
 		}
 	} else {
-		if wrap == WrapOff {
+		if wrap == ListWrapOff {
 			buffer.WriteString(` width: 100%; min-height: 100%;`)
 		} else {
 			buffer.WriteString(` min-width: 100%; height: 100%;`)
@@ -998,10 +998,10 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	buffer.WriteString(enumProperties[Orientation].cssValues[orientation])
 
 	switch wrap {
-	case WrapOn:
+	case ListWrapOn:
 		buffer.WriteString(` wrap;`)
 
-	case WrapReverse:
+	case ListWrapReverse:
 		buffer.WriteString(` wrap-reverse;`)
 
 	default:
@@ -1021,13 +1021,13 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if align, ok := enumStyledProperty(listView, HorizontalAlign, LeftAlign); ok {
 		switch align {
 		case LeftAlign:
-			if (!rows && wrap == WrapReverse) || orientation == EndToStartOrientation {
+			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
 				value = `flex-end`
 			} else {
 				value = `flex-start`
 			}
 		case RightAlign:
-			if (!rows && wrap == WrapReverse) || orientation == EndToStartOrientation {
+			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
 				value = `flex-start`
 			} else {
 				value = `flex-end`
@@ -1056,13 +1056,13 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if align, ok := enumStyledProperty(listView, VerticalAlign, TopAlign); ok {
 		switch align {
 		case TopAlign:
-			if (rows && wrap == WrapReverse) || orientation == BottomUpOrientation {
+			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
 				value = `flex-end`
 			} else {
 				value = `flex-start`
 			}
 		case BottomAlign:
-			if (rows && wrap == WrapReverse) || orientation == BottomUpOrientation {
+			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
 				value = `flex-start`
 			} else {
 				value = `flex-end`

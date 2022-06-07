@@ -75,7 +75,7 @@ func createListLayoutDemo(session rui.Session) rui.View {
 	})
 
 	rui.Set(view, "listWrap", rui.DropDownEvent, func(list rui.DropDownList, number int) {
-		rui.Set(view, "listLayout", rui.Wrap, number)
+		rui.Set(view, "listLayout", rui.ListWrap, number)
 	})
 
 	rui.Set(view, "listHAlign", rui.DropDownEvent, func(list rui.DropDownList, number int) {
