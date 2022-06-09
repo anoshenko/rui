@@ -132,10 +132,33 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 
 		case string:
 			if text, ok := picker.Session().resolveConstants(value); ok {
-				if time, err := time.Parse(timeFormat, text); err == nil {
+				lowText := strings.ToLower(text)
+				pm := strings.HasSuffix(lowText, "pm") || strings.HasSuffix(lowText, "am")
+
+				var format string
+				switch len(strings.Split(text, ":")) {
+				case 2:
+					if pm {
+						format = "3:04 PM"
+					} else {
+						format = "15:04"
+					}
+
+				default:
+					if pm {
+						format = "03:04:05 PM"
+					} else {
+						format = "15:04:05"
+					}
+				}
+
+				if time, err := time.Parse(format, text); err == nil {
 					picker.properties[tag] = value
 					return time, true
+				} else {
+					ErrorLog(err.Error())
 				}
+				return time.Now(), false
 			}
 		}
 

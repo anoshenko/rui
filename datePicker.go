@@ -132,7 +132,42 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 
 		case string:
 			if text, ok := picker.Session().resolveConstants(value); ok {
-				if date, err := time.Parse(dateFormat, text); err == nil {
+				format := "20060102"
+				if strings.ContainsRune(text, '-') {
+					if part := strings.Split(text, "-"); len(part) == 3 {
+						if part[0] != "" && part[0][0] > '9' {
+							if len(part[2]) == 2 {
+								format = "Jan-02-06"
+							} else {
+								format = "Jan-02-2006"
+							}
+						} else if part[1] != "" && part[1][0] > '9' {
+							format = "02-Jan-2006"
+						} else {
+							format = "2006-01-02"
+						}
+					}
+				} else if strings.ContainsRune(text, ' ') {
+					if part := strings.Split(text, " "); len(part) == 3 {
+						if part[0] != "" && part[0][0] > '9' {
+							format = "January 02, 2006"
+						} else {
+							format = "02 January 2006"
+						}
+					}
+				} else if strings.ContainsRune(text, '/') {
+					if part := strings.Split(text, "/"); len(part) == 3 {
+						if len(part[2]) == 2 {
+							format = "01/02/06"
+						} else {
+							format = "01/02/2006"
+						}
+					}
+				} else if len(text) == 6 {
+					format = "010206"
+				}
+
+				if date, err := time.Parse(format, text); err == nil {
 					picker.properties[tag] = value
 					return date, true
 				}
