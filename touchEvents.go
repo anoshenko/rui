@@ -246,7 +246,7 @@ func (view *viewData) removeTouchListener(tag string) {
 	delete(view.properties, tag)
 	if view.created {
 		if js, ok := touchEvents[tag]; ok {
-			updateProperty(view.htmlID(), js.jsEvent, "", view.Session())
+			removeProperty(view.htmlID(), js.jsEvent, view.Session())
 		}
 	}
 }

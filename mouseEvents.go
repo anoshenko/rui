@@ -304,7 +304,7 @@ func (view *viewData) removeMouseListener(tag string) {
 	delete(view.properties, tag)
 	if view.created {
 		if js, ok := mouseEvents[tag]; ok {
-			updateProperty(view.htmlID(), js.jsEvent, "", view.Session())
+			removeProperty(view.htmlID(), js.jsEvent, view.Session())
 		}
 	}
 }

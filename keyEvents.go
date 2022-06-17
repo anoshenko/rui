@@ -204,7 +204,7 @@ func (view *viewData) removeKeyListener(tag string) {
 	delete(view.properties, tag)
 	if view.created {
 		if js, ok := keyEvents[tag]; ok {
-			updateProperty(view.htmlID(), js.jsEvent, "", view.Session())
+			removeProperty(view.htmlID(), js.jsEvent, view.Session())
 		}
 	}
 }
