@@ -564,7 +564,7 @@ func (tabsLayout *tabsLayoutData) ListItem(index int, session Session) View {
 	views := []View{}
 	page := tabsLayout.views[index]
 
-	if icon, ok := stringProperty(page, Icon, session); ok && icon != "" {
+	if icon, ok := imageProperty(page, Icon, session); ok && icon != "" {
 		views = append(views, NewImageView(session, Params{
 			Source: icon,
 			Row:    0,
@@ -803,7 +803,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		}
 
 		for n, view := range tabsLayout.views {
-			icon, _ := stringProperty(view, Icon, tabsLayout.session)
+			icon, _ := imageProperty(view, Icon, tabsLayout.session)
 			title, _ := stringProperty(view, Title, tabsLayout.session)
 			if !notTranslate {
 				title, _ = tabsLayout.Session().GetString(title)
