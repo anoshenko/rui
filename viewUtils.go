@@ -70,12 +70,13 @@ func IsDisabled(view View, subviewID string) bool {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
-
-	if disabled, _ := boolProperty(view, Disabled, view.Session()); disabled {
-		return true
-	}
-	if parent := view.Parent(); parent != nil {
-		return IsDisabled(parent, "")
+	if view != nil {
+		if disabled, _ := boolProperty(view, Disabled, view.Session()); disabled {
+			return true
+		}
+		if parent := view.Parent(); parent != nil {
+			return IsDisabled(parent, "")
+		}
 	}
 	return false
 }

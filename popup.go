@@ -235,7 +235,7 @@ func (popup *popupData) init(view View, params Params) {
 		Style:               "ruiPopupLayer",
 		CellVerticalAlign:   vAlign,
 		CellHorizontalAlign: hAlign,
-		Content:             popupView,
+		Content:             NewColumnLayout(session, Params{Content: popupView}),
 		MaxWidth:            Percent(100),
 		MaxHeight:           Percent(100),
 	})
