@@ -583,6 +583,21 @@ func viewPropertyChanged(view *viewData, tag string) {
 			updateInnerHTML(parent, session)
 		}
 		return
+
+	case UserSelect:
+		if userSelect, ok := boolProperty(view, UserSelect, session); ok {
+			if userSelect {
+				updateCSSProperty(htmlID, "-webkit-user-select", "auto", session)
+				updateCSSProperty(htmlID, "user-select", "auto", session)
+			} else {
+				updateCSSProperty(htmlID, "-webkit-user-select", "none", session)
+				updateCSSProperty(htmlID, "user-select", "none", session)
+			}
+		} else {
+			updateCSSProperty(htmlID, "-webkit-user-select", "", session)
+			updateCSSProperty(htmlID, "user-select", "", session)
+		}
+		return
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {

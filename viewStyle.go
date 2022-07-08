@@ -272,6 +272,16 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		builder.add("text-decoration", text)
 	}
 
+	if userSelect, ok := boolProperty(style, UserSelect, session); ok {
+		if userSelect {
+			builder.add("-webkit-user-select", "auto")
+			builder.add("user-select", "auto")
+		} else {
+			builder.add("-webkit-user-select", "none")
+			builder.add("user-select", "none")
+		}
+	}
+
 	if css := shadowCSS(style, Shadow, session); css != "" {
 		builder.add("box-shadow", css)
 	}

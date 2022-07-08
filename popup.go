@@ -3,19 +3,42 @@ package rui
 import "strings"
 
 const (
-	// Title is the Popup string property
+	// Title is the constant for the "title" property tag.
+	// The "title" property is defined the Popup/Tabs title
 	Title = "title"
-	// TitleStyle is the Popup string property
+
+	// TitleStyle is the constant for the "title-style" property tag.
+	// The "title-style" string property is used to set the title style of the Popup.
 	TitleStyle = "title-style"
-	// CloseButton is the Popup bool property
+
+	// CloseButton is the constant for the "close-button" property tag.
+	// The "close-button" bool property allow to add the close button to the Popup.
+	// Setting this property to "true" adds a window close button to the title bar (the default value is "false").
 	CloseButton = "close-button"
-	// OutsideClose is the Popup bool property
+
+	// OutsideClose is the constant for the "outside-close" property tag.
+	// The "outside-close" is a bool property. If it is set to "true",
+	// then clicking outside the popup window automatically calls the Dismiss() method.
 	OutsideClose = "outside-close"
-	Buttons      = "buttons"
+
+	// Buttons is the constant for the "buttons" property tag.
+	// Using the "buttons" property you can add buttons that will be placed at the bottom of the Popup.
+	// The "buttons" property can be assigned the following data types: PopupButton and []PopupButton
+	Buttons = "buttons"
+
+	// ButtonsAlign is the constant for the "buttons-align" property tag.
+	// The "buttons-align" int property is used for set the horizontal alignment of Popup buttons.
+	// Valid values: LeftAlign (0), RightAlign (1), CenterAlign (2), and StretchAlign (3)
 	ButtonsAlign = "buttons-align"
+
+	// DismissEvent is the constant for the "dismiss-event" property tag.
+	// The "dismiss-event" event is used to track the closing of the Popup.
+	// It occurs after the Popup disappears from the screen.
+	// The main listener for this event has the following format: func(Popup)
 	DismissEvent = "dismiss-event"
 )
 
+// PopupButton describes a button that will be placed at the bottom of the window.
 type PopupButton struct {
 	Title   string
 	OnClick func(Popup)
@@ -23,11 +46,11 @@ type PopupButton struct {
 
 // Popup interface
 type Popup interface {
-	//Properties
 	View() View
 	Session() Session
 	Show()
 	Dismiss()
+	onDismiss()
 	html(buffer *strings.Builder)
 	viewByHTMLID(id string) View
 }
@@ -45,6 +68,10 @@ type popupManager struct {
 func (popup *popupData) init(view View, params Params) {
 	popup.view = view
 	session := view.Session()
+
+	if params == nil {
+		params = Params{}
+	}
 
 	popup.dismissListener = []func(Popup){}
 	if value, ok := params[DismissEvent]; ok && value != nil {
@@ -98,7 +125,6 @@ func (popup *popupData) init(view View, params Params) {
 	outsideClose, _ := boolProperty(params, OutsideClose, session)
 	vAlign, _ := enumProperty(params, VerticalAlign, session, CenterAlign)
 	hAlign, _ := enumProperty(params, HorizontalAlign, session, CenterAlign)
-	buttonsAlign, _ := enumProperty(params, ButtonsAlign, session, RightAlign)
 
 	buttons := []PopupButton{}
 	if value, ok := params[Buttons]; ok && value != nil {
@@ -191,6 +217,7 @@ func (popup *popupData) init(view View, params Params) {
 	popupView.Append(view)
 
 	if buttonCount := len(buttons); buttonCount > 0 {
+		buttonsAlign, _ := enumProperty(params, ButtonsAlign, session, RightAlign)
 		cellHeight = append(cellHeight, AutoSize())
 		gap, _ := sizeConstant(session, "ruiPopupButtonGap")
 		cellWidth := []SizeUnit{}
@@ -276,6 +303,12 @@ func (popup *popupData) viewByHTMLID(id string) View {
 	return viewByHTMLID(id, popup.layerView)
 }
 
+func (popup *popupData) onDismiss() {
+	for _, listener := range popup.dismissListener {
+		listener(popup)
+	}
+}
+
 // NewPopup creates a new Popup
 func NewPopup(view View, param Params) Popup {
 	if view == nil {
@@ -284,6 +317,15 @@ func NewPopup(view View, param Params) Popup {
 
 	popup := new(popupData)
 	popup.init(view, param)
+	return popup
+}
+
+// ShowPopup creates a new Popup and shows it
+func ShowPopup(view View, param Params) Popup {
+	popup := NewPopup(view, param)
+	if popup != nil {
+		popup.Show()
+	}
 	return popup
 }
 
@@ -343,6 +385,7 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 			manager.popups = manager.popups[:count-1]
 			manager.updatePopupLayerInnerHTML(session)
 		}
+		popup.onDismiss()
 		return
 	}
 
@@ -354,6 +397,7 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 				manager.popups = append(manager.popups[:n], manager.popups[n+1:]...)
 			}
 			manager.updatePopupLayerInnerHTML(session)
+			popup.onDismiss()
 			return
 		}
 	}

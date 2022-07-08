@@ -1787,6 +1787,15 @@ function tableRowClickEvent(element, event) {
 	sendMessage("rowClick{session=" + sessionID + ",id=" + tableID + ",row=" + row + "}");
 }
 
-function stopEventPropagation(element, event) {
-	event.stopPropagation()
+function imageLoaded(element, event) {
+	var message = "imageViewLoaded{session=" + sessionID + ",id=" + element.id +
+		",natural-width=" + element.naturalWidth +
+		",natural-height=" + element.naturalHeight +
+		",current-src=\"" + element.currentSrc +  "\"}";
+	sendMessage(message);
+}
+
+function imageError(element, event) {
+	var message = "imageViewError{session=" + sessionID + ",id=" + element.id + "}";
+	sendMessage(message);
 }

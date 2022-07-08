@@ -6,6 +6,13 @@ import (
 )
 
 const (
+	// LoadedEvent is the constant for the "loaded-event" property tag.
+	// The "loaded-event" event occurs event occurs when the image has been loaded.
+	LoadedEvent = "loaded-event"
+	// ErrorEvent is the constant for the "error-event" property tag.
+	// The "error-event" event occurs event occurs when the image loading failed.
+	ErrorEvent = "error-event"
+
 	// NoneFit - value of the "object-fit" property of an ImageView. The replaced content is not resized
 	NoneFit = 0
 	// ContainFit - value of the "object-fit" property of an ImageView. The replaced content
@@ -29,10 +36,19 @@ const (
 // ImageView - image View
 type ImageView interface {
 	View
+	// NaturalSize returns the intrinsic, density-corrected size (width, height) of the image in pixels.
+	// If the image hasn't been loaded yet or an load error has occurred, then (0, 0) is returned.
+	NaturalSize() (float64, float64)
+	// CurrentSource() return the full URL of the image currently visible in the ImageView.
+	// If the image hasn't been loaded yet or an load error has occurred, then "" is returned.
+	CurrentSource() string
 }
 
 type imageViewData struct {
 	viewData
+	naturalWidth  float64
+	naturalHeight float64
+	currentSrc    string
 }
 
 // NewImageView create new ImageView object and return it
@@ -102,6 +118,77 @@ func (imageView *imageViewData) Set(tag string, value interface{}) bool {
 	return imageView.set(imageView.normalizeTag(tag), value)
 }
 
+func valueToImageListeners(value interface{}) ([]func(ImageView), bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case func(ImageView):
+		return []func(ImageView){value}, true
+
+	case func():
+		fn := func(ImageView) {
+			value()
+		}
+		return []func(ImageView){fn}, true
+
+	case []func(ImageView):
+		if len(value) == 0 {
+			return nil, true
+		}
+		for _, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+		}
+		return value, true
+
+	case []func():
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(ImageView), count)
+		for i, v := range value {
+			if v == nil {
+				return nil, false
+			}
+			listeners[i] = func(ImageView) {
+				v()
+			}
+		}
+		return listeners, true
+
+	case []interface{}:
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(ImageView), count)
+		for i, v := range value {
+			if v == nil {
+				return nil, false
+			}
+			switch v := v.(type) {
+			case func(ImageView):
+				listeners[i] = v
+
+			case func():
+				listeners[i] = func(ImageView) {
+					v()
+				}
+
+			default:
+				return nil, false
+			}
+		}
+		return listeners, true
+	}
+
+	return nil, false
+}
+
 func (imageView *imageViewData) set(tag string, value interface{}) bool {
 	if value == nil {
 		imageView.remove(tag)
@@ -140,6 +227,12 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 		}
 		notCompatibleType(tag, value)
 
+	case LoadedEvent, ErrorEvent:
+		if listeners, ok := valueToImageListeners(value); ok {
+			imageView.properties[tag] = listeners
+			return true
+		}
+
 	default:
 		if imageView.viewData.set(tag, value) {
 			if imageView.created {
@@ -157,6 +250,15 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 
 func (imageView *imageViewData) Get(tag string) interface{} {
 	return imageView.viewData.get(imageView.normalizeTag(tag))
+}
+
+func (imageView *imageViewData) imageListeners(tag string) []func(ImageView) {
+	if value := imageView.getRaw(tag); value != nil {
+		if listeners, ok := value.([]func(ImageView)); ok {
+			return listeners
+		}
+	}
+	return []func(ImageView){}
 }
 
 func (imageView *imageViewData) srcSet(path string) string {
@@ -214,6 +316,12 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 		buffer.WriteString(textToJS(text))
 		buffer.WriteString(`"`)
 	}
+
+	buffer.WriteString(` onload="imageLoaded(this, event)"`)
+
+	if len(imageView.imageListeners(ErrorEvent)) > 0 {
+		buffer.WriteString(` onerror="imageError(this, event)"`)
+	}
 }
 
 func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
@@ -249,6 +357,36 @@ func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
 
 		builder.add("object-position", position)
 	}
+}
+
+func (imageView *imageViewData) handleCommand(self View, command string, data DataObject) bool {
+	switch command {
+	case "imageViewError":
+		for _, listener := range imageView.imageListeners(ErrorEvent) {
+			listener(imageView)
+		}
+
+	case "imageViewLoaded":
+		imageView.naturalWidth = dataFloatProperty(data, "natural-width")
+		imageView.naturalHeight = dataFloatProperty(data, "natural-height")
+		imageView.currentSrc, _ = data.PropertyValue("current-src")
+
+		for _, listener := range imageView.imageListeners(LoadedEvent) {
+			listener(imageView)
+		}
+
+	default:
+		return imageView.viewData.handleCommand(self, command, data)
+	}
+	return true
+}
+
+func (imageView *imageViewData) NaturalSize() (float64, float64) {
+	return imageView.naturalWidth, imageView.naturalHeight
+}
+
+func (imageView *imageViewData) CurrentSource() string {
+	return imageView.currentSrc
 }
 
 // GetImageViewSource returns the image URL of an ImageView subview.

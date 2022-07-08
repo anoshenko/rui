@@ -466,13 +466,7 @@ const (
 	// The "grid-column-gap" SizeUnit properties allow to set the distance between the columns of the GridLayout container.
 	// The default is 0px.
 	GridColumnGap = "grid-column-gap"
-	/*
-		// GridAutoRows is the constant for the "grid-auto-rows" property tag.
-		GridAutoRows = "grid-auto-rows"
 
-		// GridAutoColumns is the constant for the "grid-auto-columns" property tag.
-		GridAutoColumns = "grid-auto-columns"
-	*/
 	// Source is the constant for the "src" property tag.
 	Source = "src"
 
@@ -638,4 +632,9 @@ const (
 	// The "resize" int property sets whether an element is resizable, and if so, in which directions.
 	// Valid values are "none" (0), "both" (1), horizontal (2), and "vertical" (3)
 	Resize = "resize"
+
+	// UserSelect is the constant for the "user-select" property tag.
+	// The "user-select" bool property controls whether the user can select text.
+	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
+	UserSelect = "user-select"
 )

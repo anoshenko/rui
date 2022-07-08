@@ -1,6 +1,6 @@
 package rui
 
-// ShowMessage displays the popup with text message
+// ShowMessage displays the popup with the title given in the "title" argument and the message text given in the "text" argument.
 func ShowMessage(title, text string, session Session) {
 	textView := NewTextView(session, Params{
 		Text:  text,
@@ -16,6 +16,9 @@ func ShowMessage(title, text string, session Session) {
 	NewPopup(textView, params).Show()
 }
 
+// ShowQuestion displays a message with the given title and text and two buttons "Yes" and "No".
+// When the "Yes" button is clicked, the message is closed and the onYes function is called (if it is not nil).
+// When the "No" button is pressed, the message is closed and the onNo function is called (if it is not nil).
 func ShowQuestion(title, text string, session Session, onYes func(), onNo func()) {
 	textView := NewTextView(session, Params{
 		Text:  text,
@@ -51,6 +54,9 @@ func ShowQuestion(title, text string, session Session, onYes func(), onNo func()
 	NewPopup(textView, params).Show()
 }
 
+// ShowCancellableQuestion displays a message with the given title and text and three buttons "Yes", "No" and "Cancel".
+// When the "Yes", "No" or "Cancel" button is pressed, the message is closed and the onYes, onNo or onCancel function
+// (if it is not nil) is called, respectively.
 func ShowCancellableQuestion(title, text string, session Session, onYes func(), onNo func(), onCancel func()) {
 	textView := NewTextView(session, Params{
 		Text:  text,
@@ -128,9 +134,13 @@ func (popup *popupMenuData) IsListItemEnabled(index int) bool {
 	return true
 }
 
+// PopupMenuResult is the constant for the "popup-menu-result" property tag.
+// The "popup-menu-result" property sets the function (format: func(int)) to be called when
+// a menu item of popup menu is selected.
 const PopupMenuResult = "popup-menu-result"
 
-// ShowMenu displays the popup with text message
+// ShowMenu displays the menu. Menu items are set using the Items property.
+// The "popup-menu-result" property sets the function (format: func(int)) to be called when a menu item is selected.
 func ShowMenu(session Session, params Params) Popup {
 	value, ok := params[Items]
 	if !ok || value == nil {

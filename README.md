@@ -1622,6 +1622,22 @@ You can get the value of this property using the function
 
 	func GetVerticalTextOrientation(view View, subviewID string) int
 
+#### "user-select" property
+
+The "user-select" property (UserSelect constant) of type bool determines whether the user can select text.
+Accordingly, if the property is set to true, then the user can select text. If it's false, then it can't.
+
+The default value depends on the value of the "semantics" property. If "semantics" is set to "p", "h1"..."h6", 
+"blockquote" or "code", then the default value is "true", otherwise the default value is "false".
+The exception is TableView. Its default value is "true".
+
+Like all text properties, the "user-select" property is inherited, i.e. if you set it for a container, 
+it will also apply to all child elements
+
+You can get the value of this property using the function
+
+	func IsUserSelect(view View, subviewID string) bool
+
 ### Transformation properties
 
 These properties are used to transform (skew, scale, etc.) the content of the View.
@@ -2666,6 +2682,81 @@ This property of type int can take the following values
 |:-----:|----------------------| -----------|-------------------------------------------------------------|
 | 0     | TextOverflowClip     | "clip"     | Text is clipped at the border (default)                     |
 | 1     | TextOverflowEllipsis | "ellipsis" | At the end of the visible part of the text '…' is displayed |
+
+## ImageView
+
+The ImageView element extending the View interface is designed to display images.
+
+To create an ImageView function is used:
+
+	func NewImageView(session Session, params Params) ImageView
+
+The displayed image is specified by the string property "src" (Source constant).
+As a value, this property is assigned either the name of the image in the "images" folder of the resources, or the url of the image.
+
+ImageView allows you to display different images depending on screen density
+(See section "Images for screens with different pixel densities").
+In this regard, the ImageView interface has two additional methods that allow you to find out which image is displayed:
+
+	CurrentSource() string
+	NaturalSize() (float64, float64)
+
+CurrentSource returns the url of the rendered image. Until the image is loaded, this method returns an empty string.
+
+NaturalSize() returns the original width and height of the rendered image, in screen pixels.
+Those if the original image is 100x200 and the screen density is 2, then the NaturalSize method will return (50, 100).
+Until the image is loaded, this method returns the value (0, 0).
+
+Two events are used to track the loading of an image:
+
+* "loaded-event" (LoadedEvent constant). This event fires right after the image is loaded.
+
+* "error-event" (ErrorEvent constant). This event occurs when an error occurs while loading an image.
+
+The main listener for these events has the following format:
+
+	func(ImageView)
+
+The "alt-text" property (AltText constant) of the string type allows you to set a description of the image.
+This text is displayed if the browser was unable to load the image.
+Also, this text is used in the sound system for the blind.
+
+The "fit" property (Fit constant) of type int defines the image scaling parameters.
+Valid values:
+
+| Value | Constant     | Name         | Resizing                     |
+|:-----:|--------------|--------------|------------------------------|
+| 0     | NoneFit      | "none"       | The image is not resized     |
+| 1     | ContainFit   | "contain"    | The image is scaled to maintain its aspect ratio while fitting within the element’s content box. The entire object is made to fill the box, while preserving its aspect ratio, so the object will be "letterboxed" if its aspect ratio does not match the aspect ratio of the box |
+| 2     | CoverFit     | "cover"      | The image is sized to maintain its aspect ratio while filling the element’s entire content box. If the object's aspect ratio does not match the aspect ratio of its box, then the object will be clipped to fit |
+| 3     | FillFit      | "fill"       | The image to fill the element’s content box. The entire object will completely fill the box. If the object's aspect ratio does not match the aspect ratio of its box, then the object will be stretched to fit |
+| 4     | ScaleDownFit | "scale-down" | The image is sized as if NoneFit or ContainFit were specified, whichever would result in a smaller concrete object size |
+
+The "image-vertical-align" int property (ImageVerticalAlign constant) sets the vertical alignment of the image 
+relative to the bounds of the ImageView. Valid values:
+
+| Value | Constant     | Name      | Alignment        |
+|:-----:|--------------|-----------|------------------|
+| 0     | TopAlign     | "top"     | Top alignment    |
+| 1     | BottomAlign  | "bottom"  | Bottom alignment |
+| 2     | CenterAlign  | "center"  | Center alignment |
+
+The "image-horizontal-align" int property (ImageHorizontalAlign constant) sets the horizontal alignment of the image 
+relative to the bounds of the ImageView. Valid values:
+
+| Value | Constant     | Name      | Alignment        |
+|:-----:|--------------|-----------|------------------|
+| 0	    | LeftAlign    | "left"    | Left alignment   |
+| 1     | RightAlign   | "right"   | Right alignment  |
+| 2     | CenterAlign  | "center"  | Center alignment |
+
+The following functions can be used to retrieve ImageView property values:
+
+	func GetImageViewSource(view View, subviewID string) string
+	func GetImageViewAltText(view View, subviewID string) string
+	func GetImageViewFit(view View, subviewID string) int
+	func GetImageViewVerticalAlign(view View, subviewID string) int
+	func GetImageViewHorizontalAlign(view View, subviewID string) int
 
 ## EditView
 
@@ -4176,6 +4267,171 @@ For quick access to these methods, there are global functions:
 	func IsMediaPlayerPaused(view View, playerID string) bool
 
 where view is the root View, playerID is the id of AudioPlayer or VideoPlayer
+
+## Popup
+
+Popup is an interface that allows you to display an arbitrary View as a popup window.
+To create the Popup interface, use the function
+
+	NewPopup(view View, param Params) Popup
+
+where view - View of popup content (cannot be nil);
+params - parameters of the popup window (may be nil). As parameters of the pop-up window, either any View properties 
+or a number of additional properties (they will be described below) can be used.
+
+Once a Popup has been created, it needs to be displayed. To do this, use the Show() method of the Popup interface.
+To simplify the code, you can use the ShowPopup function, which is defined as
+
+	func ShowPopup(view View, param Params) Popup {
+		popup := NewPopup(view, param)
+		if popup != nil {
+			popup.Show()
+		}
+		return popup
+	}
+
+To close a popup window, use the Dismiss() method of the Popup interface.
+
+In addition to the Show() and Dismiss() methods, the Popup interface has the following methods:
+
+* Session() Session - returns the current session;
+* View() View - returns the contents of the popup window.
+
+### Popup header
+
+The popup window can have a title. In order to add a title, you need to add title text.
+For this, the "title" property (Title constant) is used, which can take two types of values:
+
+* string
+* view
+
+The "title-style" string property (TitleStyle constant) is used to set the title style.
+The default title style is "ruiPopupTitle". If you want all your popups to have the same style, it's better 
+not to use the "title-style" property, but to override the "ruiPopupTitle" style.
+
+The header can also have a window close button. To add it to the header, use the "close-button" bool property.
+Setting this property to "true" adds a window close button to the title bar (the default value is "false").
+
+### Close Popup
+
+As it was said above, the Dismiss() method of the Popup interface is used to close the popup window.
+
+If a close button is added to the window title, clicking on it automatically calls the Dismiss() method.
+You cannot override the behavior of the window's close button.
+If you still need to redefine the behavior of this button, then this can be done by creating a custom header and creating your own close button in it.
+
+There is another way to automatically call the Dismiss() method. This is the "outside-close" bool property (OutsideClose constant).
+If this property is set to "true", then clicking outside the popup window automatically calls the Dismiss() method.
+
+The "dismiss-event" event (DismissEvent constant) is used to track the closing of the popup.
+It occurs after the Popup disappears from the screen.
+The main listener for this event has the following format:
+
+	func(Popup)
+
+### Button area
+
+It is often necessary to add buttons such as "OK", "Cancel", etc. to the popup window.
+Using the "buttons" property (Buttons constant) you can add buttons that will be placed at the bottom of the window.
+The "buttons" property can be assigned the following data types:
+
+* PopupButton
+* []PopupButton
+
+Where the PopupButton structure is declared as
+
+	type PopupButton struct {
+		Title   string
+		OnClick func(Popup)
+	}
+
+where Title is the text of the button, OnClick is the function called when the button is clicked.
+
+By default, buttons are aligned to the right edge of the popup window. However, this behavior can be overridden.
+For this, the "buttons-align" int property (ButtonsAlign constant) is used, which can take the following values:
+
+| Value | Constant     | Name      | Alignment        |
+|:-----:|--------------|-----------|------------------|
+| 0     | LeftAlign    | "left"    | Left alignment   |
+| 1     | RightAlign   | "right"   | Right alignment  |
+| 2     | CenterAlign  | "center"  | Center alignment |
+| 3     | StretchAlign | "stretch" | Width alignment  |
+
+The distance between the buttons is set using the "ruiPopupButtonGap" constant of the SizeUnit type. You can override it in your theme.
+
+### Popup alignment
+
+By default, the popup is positioned in the center of the browser window. You can change this behavior using 
+the "vertical-align" (VerticalAlign constant) and "horizontal-align" (HorizontalAlign constant) int properties.
+
+The "vertical-align" property can take the following values:
+
+| Value | Constant     | Name      | Alignment        |
+|:-----:|--------------|-----------|------------------|
+| 0     | TopAlign     | "top"     | Top alignment    |
+| 1     | BottomAlign  | "bottom"  | Bottom alignment |
+| 2     | CenterAlign  | "center"  | Center alignment |
+| 3     | StretchAlign | "stretch" | Height alignment |
+
+The "horizontal-align" property can take the following values:
+
+| Value | Constant     | Name      | Alignment        |
+|:-----:|--------------|-----------|------------------|
+| 0     | LeftAlign    | "left"    | Left alignment   |
+| 1     | RightAlign   | "right"   | Right alignment  |
+| 2     | CenterAlign  | "center"  | Center alignment |
+| 3     | StretchAlign | "stretch" | Width alignment  |
+
+The "margin" property can be used to move the window.
+
+For example, you can organize a popup window attached to a button like this
+
+	rui.ShowPopup(myPopupView, rui.Params{
+		rui.HorizontalAlign: rui.LeftAlign,
+		rui.VerticalAlign:   rui.TopAlign,
+		rui.MarginLeft:      rui.Px(myButton.Frame().Left),
+		rui.MarginTop:       rui.Px(myButton.Frame().Bottom()),
+	})
+
+### Standard Popup
+
+The rui library already implements some standard popups.
+The following functions are used to display them.
+
+	func ShowMessage(title, text string, session Session)
+
+This function displays a message with the title given in the "title" argument and the message text given in the "text" argument.
+
+	func ShowQuestion(title, text string, session Session, onYes func(), onNo func())
+
+This function displays a message with the given title and text and two buttons "Yes" and "No".
+When the "Yes" button is clicked, the message is closed and the onYes function is called (if it is not nil).
+When the "No" button is pressed, the message is closed and the onNo function is called (if it is not nil).
+
+	func ShowCancellableQuestion(title, text string, session Session, onYes func(), onNo func(), onCancel func())
+
+This function displays a message with the given title and text and three buttons "Yes", "No" and "Cancel".
+When the "Yes", "No" or "Cancel" button is pressed, the message is closed and the onYes, onNo or onCancel function 
+(if it is not nil) is called, respectively.
+
+	func ShowMenu(session Session, params Params) Popup
+
+This function displays the menu. Menu items are set using the Items property.
+The property is identical to Items and is identical to the ListView property of the same name.
+The "popup-menu-result" property (PopupMenuResult constant) sets the function to be called when a menu item is selected.
+Its format:
+
+	func(int)
+
+Menu example:
+
+	rui.ShowMenu(session, rui.Params{
+		rui.OutsideClose:    true,
+		rui.Items:           []string{"Item 1", "Item 2", "Item 3"},
+		rui.PopupMenuResult: func(index int) {
+			// ...
+		},
+	})
 
 ## Animation
 

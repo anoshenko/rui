@@ -1,3 +1,10 @@
+# v0.8.0
+
+* Added "loaded-event" and "error-event" events to ImageView
+* Added NaturalSize and CurrentSource methods to ImageView
+* Added "user-select" property and IsUserSelect function
+* Renamed "LightGoldenrodYellow" color constant to "LightGoldenRodYellow"
+
 # v0.7.0
 
 * Added "resize", "grid-auto-flow", "caret-color", and "backdrop-filter" properties 

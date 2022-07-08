@@ -166,7 +166,7 @@ const (
 	// LightCyan color constant
 	LightCyan Color = 0xffe0ffff
 	// LightGoldenrodYellow color constant
-	LightGoldenrodYellow Color = 0xfffafad2
+	LightGoldenRodYellow Color = 0xfffafad2
 	// LightGray color constant
 	LightGray Color = 0xffd3d3d3
 	// LightGreen color constant

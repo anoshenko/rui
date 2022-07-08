@@ -1103,3 +1103,46 @@ func GetCurrent(view View, subviewID string) int {
 	}
 	return defaultValue
 }
+
+// IsUserSelect returns "true" if the user can select text, "false" otherwise.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func IsUserSelect(view View, subviewID string) bool {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		value, _ := isUserSelect(view)
+		return value
+	}
+
+	return false
+}
+
+func isUserSelect(view View) (bool, bool) {
+	result, ok := boolStyledProperty(view, UserSelect)
+	if ok {
+		return result, true
+	}
+
+	if parent := view.Parent(); parent != nil {
+		result, ok = isUserSelect(parent)
+		if ok {
+			return result, true
+		}
+	}
+
+	if !result {
+		switch GetSemantics(view, "") {
+		case ParagraphSemantics, H1Semantics, H2Semantics, H3Semantics, H4Semantics, H5Semantics,
+			H6Semantics, BlockquoteSemantics, CodeSemantics:
+			return true, false
+		}
+
+		if _, ok := view.(TableView); ok {
+			return true, false
+		}
+	}
+
+	return result, false
+}

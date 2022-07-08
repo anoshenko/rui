@@ -8,27 +8,31 @@
   text-overflow: ellipsis;
 }
 
-div {
+body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
+  margin: 0 auto;
+  width: 100%;
+  height: 100vh;
 }
 
-p, h1, h2, h3, h4, h5, h6, blockquote, code {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
+div {
+  cursor: default;
 }
 
+p, h1, h2, h3, h4, h5, h6, blockquote, code, table {
+  cursor: text;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
 
 /*
 div:focus {
   outline: none;
 }
 */
+
 input {
   margin: 2px;
   padding: 1px;
@@ -55,11 +59,6 @@ ul:focus {
   outline: none;
 }
 
-body {
-  margin: 0 auto;
-  width: 100%;
-  height: 100vh;
-}
 
 .ruiRoot {
   position: absolute;
