@@ -362,6 +362,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 	session.runScript(`if (document.activeElement != document.body) document.activeElement.blur();`)
 	manager.updatePopupLayerInnerHTML(session)
 	updateCSSProperty("ruiPopupLayer", "visibility", "visible", session)
+	updateCSSProperty("ruiRoot", "pointer-events", "none", session)
 }
 
 func (manager *popupManager) dismissPopup(popup Popup) {
@@ -379,6 +380,7 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 	if manager.popups[count-1] == popup {
 		if count == 1 {
 			manager.popups = []Popup{}
+			updateCSSProperty("ruiRoot", "pointer-events", "auto", session)
 			updateCSSProperty("ruiPopupLayer", "visibility", "hidden", session)
 			session.runScript(`updateInnerHTML('ruiPopupLayer', '');`)
 		} else {
