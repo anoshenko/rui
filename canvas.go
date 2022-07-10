@@ -645,26 +645,34 @@ func (canvas *canvasData) SetFontWithParams(name string, size SizeUnit, params F
 }
 
 func (canvas *canvasData) TextWidth(text string, fontName string, fontSize SizeUnit) float64 {
-	script := allocStringBuilder()
-	defer freeStringBuilder(script)
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
 
-	script.WriteString(`const canvas = document.getElementById('`)
-	script.WriteString(canvas.View().htmlID())
-	script.WriteString(`');
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-var gradient;
-var path;
-ctx.save()
-ctx.scale(dpr, dpr);`)
+	canvas.setFontWithParams(fontName, fontSize, FontParams{}, buffer)
+	fontParams := buffer.String()
 
-	canvas.setFontWithParams(fontName, fontSize, FontParams{}, script)
-	script.WriteString("\nvar w = ctx.measureText('")
-	canvas.writeStringArgs(text, script)
-	script.WriteString(`').width;
-sendMessage('answer{width=' + w + ', answerID=' + answerID + '}')`)
+	buffer.Reset()
+	canvas.writeStringArgs(text, buffer)
+	str := buffer.String()
 
-	result := canvas.View().Session().runGetterScript(script.String())
+	script := fmt.Sprintf(`
+var w = 0;	
+const canvas = document.getElementById('%s');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.save()
+    const dpr = window.devicePixelRatio || 1;
+    ctx.scale(dpr, dpr);
+    %s;
+    w = ctx.measureText('%s').width;
+	ctx.restore();
+  }
+}
+sendMessage('answer{width=' + w + ', answerID=' + answerID + '}');
+`, canvas.View().htmlID(), fontParams, str)
+
+	result := canvas.View().Session().runGetterScript(script)
 	switch result.Tag() {
 	case "answer":
 		if value, ok := result.PropertyValue("width"); ok {
