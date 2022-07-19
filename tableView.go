@@ -686,7 +686,7 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 		return []func(TableView, int, int){value}
 
 	case func(int, int):
-		fn := func(view TableView, row, column int) {
+		fn := func(_ TableView, row, column int) {
 			value(row, column)
 		}
 		return []func(TableView, int, int){fn}
@@ -700,7 +700,7 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TableView, row, column int) {
+			listeners[i] = func(_ TableView, row, column int) {
 				val(row, column)
 			}
 		}
@@ -717,7 +717,7 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 				listeners[i] = val
 
 			case func(int, int):
-				listeners[i] = func(view TableView, row, column int) {
+				listeners[i] = func(_ TableView, row, column int) {
 					val(row, column)
 				}
 
@@ -741,7 +741,7 @@ func (table *tableViewData) valueToRowListeners(value interface{}) []func(TableV
 		return []func(TableView, int){value}
 
 	case func(int):
-		fn := func(view TableView, index int) {
+		fn := func(_ TableView, index int) {
 			value(index)
 		}
 		return []func(TableView, int){fn}
@@ -755,7 +755,7 @@ func (table *tableViewData) valueToRowListeners(value interface{}) []func(TableV
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TableView, index int) {
+			listeners[i] = func(_ TableView, index int) {
 				val(index)
 			}
 		}
@@ -772,7 +772,7 @@ func (table *tableViewData) valueToRowListeners(value interface{}) []func(TableV
 				listeners[i] = val
 
 			case func(int):
-				listeners[i] = func(view TableView, index int) {
+				listeners[i] = func(_ TableView, index int) {
 					val(index)
 				}
 

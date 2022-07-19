@@ -61,19 +61,19 @@ func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
 		return []func(View, string){value}, true
 
 	case func(string):
-		fn := func(view View, event string) {
+		fn := func(_ View, event string) {
 			value(event)
 		}
 		return []func(View, string){fn}, true
 
 	case func(View):
-		fn := func(view View, event string) {
+		fn := func(view View, _ string) {
 			value(view)
 		}
 		return []func(View, string){fn}, true
 
 	case func():
-		fn := func(view View, event string) {
+		fn := func(View, string) {
 			value()
 		}
 		return []func(View, string){fn}, true
@@ -99,7 +99,7 @@ func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event string) {
+			listeners[i] = func(_ View, event string) {
 				v(event)
 			}
 		}
@@ -115,7 +115,7 @@ func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event string) {
+			listeners[i] = func(view View, _ string) {
 				v(view)
 			}
 		}
@@ -131,7 +131,7 @@ func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event string) {
+			listeners[i] = func(View, string) {
 				v()
 			}
 		}
@@ -152,17 +152,17 @@ func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
 				listeners[i] = v
 
 			case func(string):
-				listeners[i] = func(view View, event string) {
+				listeners[i] = func(_ View, event string) {
 					v(event)
 				}
 
 			case func(View):
-				listeners[i] = func(view View, event string) {
+				listeners[i] = func(view View, _ string) {
 					v(view)
 				}
 
 			case func():
-				listeners[i] = func(view View, event string) {
+				listeners[i] = func(View, string) {
 					v()
 				}
 

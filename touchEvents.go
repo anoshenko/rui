@@ -100,19 +100,19 @@ func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
 		return []func(View, TouchEvent){value}, true
 
 	case func(TouchEvent):
-		fn := func(view View, event TouchEvent) {
+		fn := func(_ View, event TouchEvent) {
 			value(event)
 		}
 		return []func(View, TouchEvent){fn}, true
 
 	case func(View):
-		fn := func(view View, event TouchEvent) {
+		fn := func(view View, _ TouchEvent) {
 			value(view)
 		}
 		return []func(View, TouchEvent){fn}, true
 
 	case func():
-		fn := func(view View, event TouchEvent) {
+		fn := func(View, TouchEvent) {
 			value()
 		}
 		return []func(View, TouchEvent){fn}, true
@@ -138,7 +138,7 @@ func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event TouchEvent) {
+			listeners[i] = func(_ View, event TouchEvent) {
 				v(event)
 			}
 		}
@@ -154,7 +154,7 @@ func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event TouchEvent) {
+			listeners[i] = func(view View, _ TouchEvent) {
 				v(view)
 			}
 		}
@@ -170,7 +170,7 @@ func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event TouchEvent) {
+			listeners[i] = func(View, TouchEvent) {
 				v()
 			}
 		}
@@ -191,17 +191,17 @@ func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
 				listeners[i] = v
 
 			case func(TouchEvent):
-				listeners[i] = func(view View, event TouchEvent) {
+				listeners[i] = func(_ View, event TouchEvent) {
 					v(event)
 				}
 
 			case func(View):
-				listeners[i] = func(view View, event TouchEvent) {
+				listeners[i] = func(view View, _ TouchEvent) {
 					v(view)
 				}
 
 			case func():
-				listeners[i] = func(view View, event TouchEvent) {
+				listeners[i] = func(View, TouchEvent) {
 					v()
 				}
 

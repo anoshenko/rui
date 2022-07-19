@@ -297,7 +297,7 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 		list.dropDownListener = []func(DropDownList, int){value}
 
 	case func(int):
-		list.dropDownListener = []func(DropDownList, int){func(list DropDownList, index int) {
+		list.dropDownListener = []func(DropDownList, int){func(_ DropDownList, index int) {
 			value(index)
 		}}
 
@@ -311,7 +311,7 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 				notCompatibleType(DropDownEvent, value)
 				return false
 			}
-			listeners[i] = func(list DropDownList, index int) {
+			listeners[i] = func(_ DropDownList, index int) {
 				val(index)
 			}
 		}
@@ -329,7 +329,7 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 				listeners[i] = val
 
 			case func(int):
-				listeners[i] = func(list DropDownList, index int) {
+				listeners[i] = func(_ DropDownList, index int) {
 					val(index)
 				}
 

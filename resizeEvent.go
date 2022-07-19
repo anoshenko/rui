@@ -40,7 +40,7 @@ func (view *viewData) setFrameListener(tag string, value interface{}) bool {
 		}
 
 	case func(Frame):
-		fn := func(view View, frame Frame) {
+		fn := func(_ View, frame Frame) {
 			value(frame)
 		}
 		view.properties[tag] = []func(View, Frame){fn}
@@ -59,14 +59,14 @@ func (view *viewData) setFrameListener(tag string, value interface{}) bool {
 				return false
 			}
 
-			listeners[i] = func(view View, frame Frame) {
+			listeners[i] = func(_ View, frame Frame) {
 				val(frame)
 			}
 		}
 		view.properties[tag] = listeners
 
 	case func(View):
-		fn := func(view View, frame Frame) {
+		fn := func(view View, _ Frame) {
 			value(view)
 		}
 		view.properties[tag] = []func(View, Frame){fn}
@@ -85,14 +85,14 @@ func (view *viewData) setFrameListener(tag string, value interface{}) bool {
 				return false
 			}
 
-			listeners[i] = func(view View, frame Frame) {
+			listeners[i] = func(view View, _ Frame) {
 				val(view)
 			}
 		}
 		view.properties[tag] = listeners
 
 	case func():
-		fn := func(view View, frame Frame) {
+		fn := func(View, Frame) {
 			value()
 		}
 		view.properties[tag] = []func(View, Frame){fn}
@@ -111,7 +111,7 @@ func (view *viewData) setFrameListener(tag string, value interface{}) bool {
 				return false
 			}
 
-			listeners[i] = func(view View, frame Frame) {
+			listeners[i] = func(View, Frame) {
 				val()
 			}
 		}
@@ -136,17 +136,17 @@ func (view *viewData) setFrameListener(tag string, value interface{}) bool {
 				listeners[i] = val
 
 			case func(Frame):
-				listeners[i] = func(view View, frame Frame) {
+				listeners[i] = func(_ View, frame Frame) {
 					val(frame)
 				}
 
 			case func(View):
-				listeners[i] = func(view View, frame Frame) {
+				listeners[i] = func(view View, _ Frame) {
 					val(view)
 				}
 
 			case func():
-				listeners[i] = func(view View, frame Frame) {
+				listeners[i] = func(View, Frame) {
 					val()
 				}
 

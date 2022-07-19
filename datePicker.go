@@ -240,7 +240,7 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 			picker.dateChangedListeners = []func(DatePicker, time.Time){value}
 
 		case func(time.Time):
-			fn := func(view DatePicker, date time.Time) {
+			fn := func(_ DatePicker, date time.Time) {
 				value(date)
 			}
 			picker.dateChangedListeners = []func(DatePicker, time.Time){fn}
@@ -256,7 +256,7 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 					return false
 				}
 
-				listeners[i] = func(view DatePicker, date time.Time) {
+				listeners[i] = func(_ DatePicker, date time.Time) {
 					val(date)
 				}
 			}
@@ -275,7 +275,7 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 					listeners[i] = val
 
 				case func(time.Time):
-					listeners[i] = func(view DatePicker, date time.Time) {
+					listeners[i] = func(_ DatePicker, date time.Time) {
 						val(date)
 					}
 

@@ -294,7 +294,7 @@ func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
 		listView.checkedListeners = []func(ListView, []int){value}
 
 	case func([]int):
-		fn := func(view ListView, date []int) {
+		fn := func(_ ListView, date []int) {
 			value(date)
 		}
 		listView.checkedListeners = []func(ListView, []int){fn}
@@ -310,7 +310,7 @@ func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
 				return false
 			}
 
-			listeners[i] = func(view ListView, date []int) {
+			listeners[i] = func(_ ListView, date []int) {
 				val(date)
 			}
 		}
@@ -329,7 +329,7 @@ func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
 				listeners[i] = val
 
 			case func([]int):
-				listeners[i] = func(view ListView, checked []int) {
+				listeners[i] = func(_ ListView, checked []int) {
 					val(checked)
 				}
 
@@ -470,7 +470,7 @@ func (listView *listViewData) valueToItemListeners(value interface{}) []func(Lis
 		return []func(ListView, int){value}
 
 	case func(int):
-		fn := func(view ListView, index int) {
+		fn := func(_ ListView, index int) {
 			value(index)
 		}
 		return []func(ListView, int){fn}
@@ -484,7 +484,7 @@ func (listView *listViewData) valueToItemListeners(value interface{}) []func(Lis
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view ListView, index int) {
+			listeners[i] = func(_ ListView, index int) {
 				val(index)
 			}
 		}
@@ -501,7 +501,7 @@ func (listView *listViewData) valueToItemListeners(value interface{}) []func(Lis
 				listeners[i] = val
 
 			case func(int):
-				listeners[i] = func(view ListView, index int) {
+				listeners[i] = func(_ ListView, index int) {
 					val(index)
 				}
 

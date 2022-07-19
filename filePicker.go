@@ -156,7 +156,7 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){value}
 
 		case func([]FileInfo):
-			fn := func(view FilePicker, files []FileInfo) {
+			fn := func(_ FilePicker, files []FileInfo) {
 				value(files)
 			}
 			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){fn}
@@ -172,7 +172,7 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 					return false
 				}
 
-				listeners[i] = func(view FilePicker, files []FileInfo) {
+				listeners[i] = func(_ FilePicker, files []FileInfo) {
 					val(files)
 				}
 			}
@@ -191,7 +191,7 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 					listeners[i] = val
 
 				case func([]FileInfo):
-					listeners[i] = func(view FilePicker, files []FileInfo) {
+					listeners[i] = func(_ FilePicker, files []FileInfo) {
 						val(files)
 					}
 

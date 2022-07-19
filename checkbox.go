@@ -218,7 +218,7 @@ func (button *checkboxData) setChangedListener(value interface{}) bool {
 		button.checkedListeners = []func(Checkbox, bool){value}
 
 	case func(bool):
-		fn := func(view Checkbox, checked bool) {
+		fn := func(_ Checkbox, checked bool) {
 			value(checked)
 		}
 		button.checkedListeners = []func(Checkbox, bool){fn}
@@ -233,7 +233,7 @@ func (button *checkboxData) setChangedListener(value interface{}) bool {
 				return false
 			}
 
-			listeners[i] = func(view Checkbox, checked bool) {
+			listeners[i] = func(_ Checkbox, checked bool) {
 				val(checked)
 			}
 		}
@@ -251,7 +251,7 @@ func (button *checkboxData) setChangedListener(value interface{}) bool {
 				listeners[i] = val
 
 			case func(bool):
-				listeners[i] = func(view Checkbox, date bool) {
+				listeners[i] = func(_ Checkbox, date bool) {
 					val(date)
 				}
 

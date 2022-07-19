@@ -228,7 +228,7 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 			picker.timeChangedListeners = []func(TimePicker, time.Time){value}
 
 		case func(time.Time):
-			fn := func(view TimePicker, time time.Time) {
+			fn := func(_ TimePicker, time time.Time) {
 				value(time)
 			}
 			picker.timeChangedListeners = []func(TimePicker, time.Time){fn}
@@ -244,7 +244,7 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 					return false
 				}
 
-				listeners[i] = func(view TimePicker, time time.Time) {
+				listeners[i] = func(_ TimePicker, time time.Time) {
 					val(time)
 				}
 			}
@@ -263,7 +263,7 @@ func (picker *timePickerData) set(tag string, value interface{}) bool {
 					listeners[i] = val
 
 				case func(time.Time):
-					listeners[i] = func(view TimePicker, time time.Time) {
+					listeners[i] = func(_ TimePicker, time time.Time) {
 						val(time)
 					}
 

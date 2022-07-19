@@ -81,7 +81,7 @@ func (popup *popupData) init(view View, params Params) {
 
 		case func():
 			popup.dismissListener = []func(Popup){
-				func(popup Popup) {
+				func(_ Popup) {
 					value()
 				},
 			}
@@ -96,7 +96,7 @@ func (popup *popupData) init(view View, params Params) {
 		case []func():
 			for _, fn := range value {
 				if fn != nil {
-					popup.dismissListener = append(popup.dismissListener, func(popup Popup) {
+					popup.dismissListener = append(popup.dismissListener, func(_ Popup) {
 						fn()
 					})
 				}
@@ -110,7 +110,7 @@ func (popup *popupData) init(view View, params Params) {
 						popup.dismissListener = append(popup.dismissListener, fn)
 
 					case func():
-						popup.dismissListener = append(popup.dismissListener, func(popup Popup) {
+						popup.dismissListener = append(popup.dismissListener, func(_ Popup) {
 							fn()
 						})
 					}

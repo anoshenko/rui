@@ -296,31 +296,31 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 		return []func(TabsLayout, int, int){value}
 
 	case func(TabsLayout, int):
-		fn := func(view TabsLayout, current, old int) {
+		fn := func(view TabsLayout, current, _ int) {
 			value(view, current)
 		}
 		return []func(TabsLayout, int, int){fn}
 
 	case func(TabsLayout):
-		fn := func(view TabsLayout, current, old int) {
+		fn := func(view TabsLayout, _, _ int) {
 			value(view)
 		}
 		return []func(TabsLayout, int, int){fn}
 
 	case func(int, int):
-		fn := func(view TabsLayout, current, old int) {
+		fn := func(_ TabsLayout, current, old int) {
 			value(current, old)
 		}
 		return []func(TabsLayout, int, int){fn}
 
 	case func(int):
-		fn := func(view TabsLayout, current, old int) {
+		fn := func(_ TabsLayout, current, _ int) {
 			value(current)
 		}
 		return []func(TabsLayout, int, int){fn}
 
 	case func():
-		fn := func(view TabsLayout, current, old int) {
+		fn := func(TabsLayout, int, int) {
 			value()
 		}
 		return []func(TabsLayout, int, int){fn}
@@ -334,7 +334,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TabsLayout, current, old int) {
+			listeners[i] = func(view TabsLayout, current, _ int) {
 				val(view, current)
 			}
 		}
@@ -346,7 +346,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TabsLayout, current, old int) {
+			listeners[i] = func(view TabsLayout, _, _ int) {
 				val(view)
 			}
 		}
@@ -358,7 +358,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TabsLayout, current, old int) {
+			listeners[i] = func(_ TabsLayout, current, old int) {
 				val(current, old)
 			}
 		}
@@ -370,7 +370,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TabsLayout, current, old int) {
+			listeners[i] = func(_ TabsLayout, current, _ int) {
 				val(current)
 			}
 		}
@@ -382,7 +382,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TabsLayout, current, old int) {
+			listeners[i] = func(TabsLayout, int, int) {
 				val()
 			}
 		}
@@ -399,27 +399,27 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 				listeners[i] = val
 
 			case func(TabsLayout, int):
-				listeners[i] = func(view TabsLayout, current, old int) {
+				listeners[i] = func(view TabsLayout, current, _ int) {
 					val(view, current)
 				}
 
 			case func(TabsLayout):
-				listeners[i] = func(view TabsLayout, current, old int) {
+				listeners[i] = func(view TabsLayout, _, _ int) {
 					val(view)
 				}
 
 			case func(int, int):
-				listeners[i] = func(view TabsLayout, current, old int) {
+				listeners[i] = func(_ TabsLayout, current, old int) {
 					val(current, old)
 				}
 
 			case func(int):
-				listeners[i] = func(view TabsLayout, current, old int) {
+				listeners[i] = func(_ TabsLayout, current, _ int) {
 					val(current)
 				}
 
 			case func():
-				listeners[i] = func(view TabsLayout, current, old int) {
+				listeners[i] = func(TabsLayout, int, int) {
 					val()
 				}
 
@@ -443,7 +443,7 @@ func (tabsLayout *tabsLayoutData) valueToCloseListeners(value interface{}) []fun
 		return []func(TabsLayout, int){value}
 
 	case func(int):
-		fn := func(view TabsLayout, index int) {
+		fn := func(_ TabsLayout, index int) {
 			value(index)
 		}
 		return []func(TabsLayout, int){fn}
@@ -457,7 +457,7 @@ func (tabsLayout *tabsLayoutData) valueToCloseListeners(value interface{}) []fun
 			if val == nil {
 				return nil
 			}
-			listeners[i] = func(view TabsLayout, index int) {
+			listeners[i] = func(_ TabsLayout, index int) {
 				val(index)
 			}
 		}
@@ -474,7 +474,7 @@ func (tabsLayout *tabsLayoutData) valueToCloseListeners(value interface{}) []fun
 				listeners[i] = val
 
 			case func(int):
-				listeners[i] = func(view TabsLayout, index int) {
+				listeners[i] = func(_ TabsLayout, index int) {
 					val(index)
 				}
 

@@ -97,19 +97,19 @@ func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), boo
 		return []func(View, PointerEvent){value}, true
 
 	case func(PointerEvent):
-		fn := func(view View, event PointerEvent) {
+		fn := func(_ View, event PointerEvent) {
 			value(event)
 		}
 		return []func(View, PointerEvent){fn}, true
 
 	case func(View):
-		fn := func(view View, event PointerEvent) {
+		fn := func(view View, _ PointerEvent) {
 			value(view)
 		}
 		return []func(View, PointerEvent){fn}, true
 
 	case func():
-		fn := func(view View, event PointerEvent) {
+		fn := func(View, PointerEvent) {
 			value()
 		}
 		return []func(View, PointerEvent){fn}, true
@@ -135,7 +135,7 @@ func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), boo
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event PointerEvent) {
+			listeners[i] = func(_ View, event PointerEvent) {
 				v(event)
 			}
 		}
@@ -151,7 +151,7 @@ func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), boo
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event PointerEvent) {
+			listeners[i] = func(view View, _ PointerEvent) {
 				v(view)
 			}
 		}
@@ -167,7 +167,7 @@ func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), boo
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event PointerEvent) {
+			listeners[i] = func(View, PointerEvent) {
 				v()
 			}
 		}
@@ -188,17 +188,17 @@ func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), boo
 				listeners[i] = v
 
 			case func(PointerEvent):
-				listeners[i] = func(view View, event PointerEvent) {
+				listeners[i] = func(_ View, event PointerEvent) {
 					v(event)
 				}
 
 			case func(View):
-				listeners[i] = func(view View, event PointerEvent) {
+				listeners[i] = func(view View, _ PointerEvent) {
 					v(view)
 				}
 
 			case func():
-				listeners[i] = func(view View, event PointerEvent) {
+				listeners[i] = func(View, PointerEvent) {
 					v()
 				}
 

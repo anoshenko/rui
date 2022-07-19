@@ -350,7 +350,7 @@ func (edit *editViewData) setChangeListeners(value interface{}) bool {
 		edit.textChangeListeners = []func(EditView, string){value}
 
 	case func(string):
-		fn := func(view EditView, text string) {
+		fn := func(_ EditView, text string) {
 			value(text)
 		}
 		edit.textChangeListeners = []func(EditView, string){fn}
@@ -364,7 +364,7 @@ func (edit *editViewData) setChangeListeners(value interface{}) bool {
 			if v == nil {
 				return false
 			}
-			listeners[i] = func(view EditView, text string) {
+			listeners[i] = func(_ EditView, text string) {
 				v(text)
 			}
 		}
@@ -381,7 +381,7 @@ func (edit *editViewData) setChangeListeners(value interface{}) bool {
 				listeners[i] = v
 
 			case func(string):
-				listeners[i] = func(view EditView, text string) {
+				listeners[i] = func(_ EditView, text string) {
 					v(text)
 				}
 

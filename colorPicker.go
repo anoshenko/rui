@@ -92,7 +92,7 @@ func (picker *colorPickerData) set(tag string, value interface{}) bool {
 			picker.colorChangedListeners = []func(ColorPicker, Color){value}
 
 		case func(Color):
-			fn := func(view ColorPicker, date Color) {
+			fn := func(_ ColorPicker, date Color) {
 				value(date)
 			}
 			picker.colorChangedListeners = []func(ColorPicker, Color){fn}
@@ -108,7 +108,7 @@ func (picker *colorPickerData) set(tag string, value interface{}) bool {
 					return false
 				}
 
-				listeners[i] = func(view ColorPicker, date Color) {
+				listeners[i] = func(_ ColorPicker, date Color) {
 					val(date)
 				}
 			}
@@ -127,7 +127,7 @@ func (picker *colorPickerData) set(tag string, value interface{}) bool {
 					listeners[i] = val
 
 				case func(Color):
-					listeners[i] = func(view ColorPicker, date Color) {
+					listeners[i] = func(_ ColorPicker, date Color) {
 						val(date)
 					}
 

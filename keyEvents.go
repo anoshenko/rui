@@ -60,19 +60,19 @@ func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
 		return []func(View, KeyEvent){value}, true
 
 	case func(KeyEvent):
-		fn := func(view View, event KeyEvent) {
+		fn := func(_ View, event KeyEvent) {
 			value(event)
 		}
 		return []func(View, KeyEvent){fn}, true
 
 	case func(View):
-		fn := func(view View, event KeyEvent) {
+		fn := func(view View, _ KeyEvent) {
 			value(view)
 		}
 		return []func(View, KeyEvent){fn}, true
 
 	case func():
-		fn := func(view View, event KeyEvent) {
+		fn := func(View, KeyEvent) {
 			value()
 		}
 		return []func(View, KeyEvent){fn}, true
@@ -98,7 +98,7 @@ func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event KeyEvent) {
+			listeners[i] = func(_ View, event KeyEvent) {
 				v(event)
 			}
 		}
@@ -114,7 +114,7 @@ func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event KeyEvent) {
+			listeners[i] = func(view View, _ KeyEvent) {
 				v(view)
 			}
 		}
@@ -130,7 +130,7 @@ func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, event KeyEvent) {
+			listeners[i] = func(View, KeyEvent) {
 				v()
 			}
 		}
@@ -151,17 +151,17 @@ func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
 				listeners[i] = v
 
 			case func(KeyEvent):
-				listeners[i] = func(view View, event KeyEvent) {
+				listeners[i] = func(_ View, event KeyEvent) {
 					v(event)
 				}
 
 			case func(View):
-				listeners[i] = func(view View, event KeyEvent) {
+				listeners[i] = func(view View, _ KeyEvent) {
 					v(view)
 				}
 
 			case func():
-				listeners[i] = func(view View, event KeyEvent) {
+				listeners[i] = func(View, KeyEvent) {
 					v()
 				}
 

@@ -336,26 +336,19 @@ func ReadRawResource(filename string) []byte {
 		}
 	}
 
-	readFile := func(path string) []byte {
-		if data, err := os.ReadFile(resources.path + rawDir + "/" + filename); err == nil {
-			return data
-		}
-		return nil
-	}
-
 	if resources.path != "" {
-		if data := readFile(resources.path + rawDir + "/" + filename); data != nil {
+		if data, err := os.ReadFile(resources.path + rawDir + "/" + filename); err == nil {
 			return data
 		}
 	}
 
 	if exe, err := os.Executable(); err == nil {
-		if data := readFile(filepath.Dir(exe) + "/resources/" + rawDir + "/" + filename); data != nil {
+		if data, err := os.ReadFile(filepath.Dir(exe) + "/resources/" + rawDir + "/" + filename); err == nil {
 			return data
 		}
 	}
 
-	ErrorLogF(`The raw file "%s" don't found`, filename)
+	ErrorLogF(`The "%s" raw file don't found`, filename)
 	return nil
 }
 

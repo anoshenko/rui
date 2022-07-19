@@ -104,7 +104,7 @@ func (picker *numberPickerData) set(tag string, value interface{}) bool {
 			picker.numberChangedListeners = []func(NumberPicker, float64){value}
 
 		case func(float64):
-			fn := func(view NumberPicker, newValue float64) {
+			fn := func(_ NumberPicker, newValue float64) {
 				value(newValue)
 			}
 			picker.numberChangedListeners = []func(NumberPicker, float64){fn}
@@ -120,7 +120,7 @@ func (picker *numberPickerData) set(tag string, value interface{}) bool {
 					return false
 				}
 
-				listeners[i] = func(view NumberPicker, newValue float64) {
+				listeners[i] = func(_ NumberPicker, newValue float64) {
 					val(newValue)
 				}
 			}

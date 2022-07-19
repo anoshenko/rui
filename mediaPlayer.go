@@ -392,19 +392,19 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 		return []func(MediaPlayer, float64){value}, true
 
 	case func(float64):
-		fn := func(player MediaPlayer, time float64) {
+		fn := func(_ MediaPlayer, time float64) {
 			value(time)
 		}
 		return []func(MediaPlayer, float64){fn}, true
 
 	case func(MediaPlayer):
-		fn := func(player MediaPlayer, time float64) {
+		fn := func(player MediaPlayer, _ float64) {
 			value(player)
 		}
 		return []func(MediaPlayer, float64){fn}, true
 
 	case func():
-		fn := func(player MediaPlayer, time float64) {
+		fn := func(MediaPlayer, float64) {
 			value()
 		}
 		return []func(MediaPlayer, float64){fn}, true
@@ -430,7 +430,7 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(player MediaPlayer, time float64) {
+			listeners[i] = func(_ MediaPlayer, time float64) {
 				v(time)
 			}
 		}
@@ -446,7 +446,7 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(player MediaPlayer, time float64) {
+			listeners[i] = func(player MediaPlayer, _ float64) {
 				v(player)
 			}
 		}
@@ -462,7 +462,7 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(player MediaPlayer, time float64) {
+			listeners[i] = func(MediaPlayer, float64) {
 				v()
 			}
 		}
@@ -483,17 +483,17 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 				listeners[i] = v
 
 			case func(float64):
-				listeners[i] = func(player MediaPlayer, time float64) {
+				listeners[i] = func(_ MediaPlayer, time float64) {
 					v(time)
 				}
 
 			case func(MediaPlayer):
-				listeners[i] = func(player MediaPlayer, time float64) {
+				listeners[i] = func(player MediaPlayer, _ float64) {
 					v(player)
 				}
 
 			case func():
-				listeners[i] = func(player MediaPlayer, time float64) {
+				listeners[i] = func(MediaPlayer, float64) {
 					v()
 				}
 
@@ -517,19 +517,19 @@ func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, st
 		return []func(MediaPlayer, int, string){value}, true
 
 	case func(int, string):
-		fn := func(player MediaPlayer, code int, message string) {
+		fn := func(_ MediaPlayer, code int, message string) {
 			value(code, message)
 		}
 		return []func(MediaPlayer, int, string){fn}, true
 
 	case func(MediaPlayer):
-		fn := func(player MediaPlayer, code int, message string) {
+		fn := func(player MediaPlayer, _ int, _ string) {
 			value(player)
 		}
 		return []func(MediaPlayer, int, string){fn}, true
 
 	case func():
-		fn := func(player MediaPlayer, code int, message string) {
+		fn := func(MediaPlayer, int, string) {
 			value()
 		}
 		return []func(MediaPlayer, int, string){fn}, true
@@ -555,7 +555,7 @@ func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, st
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(player MediaPlayer, code int, message string) {
+			listeners[i] = func(_ MediaPlayer, code int, message string) {
 				v(code, message)
 			}
 		}
@@ -571,7 +571,7 @@ func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, st
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(player MediaPlayer, code int, message string) {
+			listeners[i] = func(player MediaPlayer, _ int, _ string) {
 				v(player)
 			}
 		}
@@ -587,7 +587,7 @@ func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, st
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(player MediaPlayer, code int, message string) {
+			listeners[i] = func(MediaPlayer, int, string) {
 				v()
 			}
 		}
@@ -608,17 +608,17 @@ func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, st
 				listeners[i] = v
 
 			case func(int, string):
-				listeners[i] = func(player MediaPlayer, code int, message string) {
+				listeners[i] = func(_ MediaPlayer, code int, message string) {
 					v(code, message)
 				}
 
 			case func(MediaPlayer):
-				listeners[i] = func(player MediaPlayer, code int, message string) {
+				listeners[i] = func(player MediaPlayer, _ int, _ string) {
 					v(player)
 				}
 
 			case func():
-				listeners[i] = func(player MediaPlayer, code int, message string) {
+				listeners[i] = func(MediaPlayer, int, string) {
 					v()
 				}
 
