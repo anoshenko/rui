@@ -231,7 +231,7 @@ function updateProperty(elementId, property, value) {
 	}
 }
 
-function removeProperty(elementId, property, value) {
+function removeProperty(elementId, property) {
 	var element = document.getElementById(elementId);
 	if (element && element.hasAttribute(property)) {
 		element.removeAttribute(property);

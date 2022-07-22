@@ -402,18 +402,32 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	case Border:
 		if getBorder(view, Border) == nil {
+			buffer := session.updateScript(htmlID)
+			if buffer == nil {
+				session.startUpdateScript(htmlID)
+			}
 			updateCSSProperty(htmlID, BorderWidth, "", session)
 			updateCSSProperty(htmlID, BorderColor, "", session)
 			updateCSSProperty(htmlID, BorderStyle, "none", session)
+			if buffer == nil {
+				session.finishUpdateScript(htmlID)
+			}
 			return
 		}
 		fallthrough
 
 	case BorderLeft, BorderRight, BorderTop, BorderBottom:
 		if border := getBorder(view, Border); border != nil {
+			buffer := session.updateScript(htmlID)
+			if buffer == nil {
+				session.startUpdateScript(htmlID)
+			}
 			updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session), session)
 			updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session), session)
 			updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session), session)
+			if buffer == nil {
+				session.finishUpdateScript(htmlID)
+			}
 		}
 		return
 
@@ -510,8 +524,15 @@ func viewPropertyChanged(view *viewData, tag string) {
 				text = filter.cssStyle(session)
 			}
 		}
+		buffer := session.updateScript(htmlID)
+		if buffer == nil {
+			session.startUpdateScript(htmlID)
+		}
 		updateCSSProperty(htmlID, "-webkit-backdrop-filter", text, session)
 		updateCSSProperty(htmlID, tag, text, session)
+		if buffer == nil {
+			session.finishUpdateScript(htmlID)
+		}
 		return
 
 	case FontName:
@@ -585,6 +606,10 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case UserSelect:
+		buffer := session.updateScript(htmlID)
+		if buffer == nil {
+			session.startUpdateScript(htmlID)
+		}
 		if userSelect, ok := boolProperty(view, UserSelect, session); ok {
 			if userSelect {
 				updateCSSProperty(htmlID, "-webkit-user-select", "auto", session)
@@ -596,6 +621,9 @@ func viewPropertyChanged(view *viewData, tag string) {
 		} else {
 			updateCSSProperty(htmlID, "-webkit-user-select", "", session)
 			updateCSSProperty(htmlID, "user-select", "", session)
+		}
+		if buffer == nil {
+			session.finishUpdateScript(htmlID)
 		}
 		return
 	}

@@ -607,8 +607,12 @@ func (view *viewData) SetAnimated(tag string, value interface{}, animation Anima
 		return view.Set(tag, value)
 	}
 
-	updateProperty(view.htmlID(), "ontransitionend", "transitionEndEvent(this, event)", view.session)
-	updateProperty(view.htmlID(), "ontransitioncancel", "transitionCancelEvent(this, event)", view.session)
+	session := view.Session()
+	htmlID := view.htmlID()
+	session.startUpdateScript(htmlID)
+
+	updateProperty(htmlID, "ontransitionend", "transitionEndEvent(this, event)", view.session)
+	updateProperty(htmlID, "ontransitioncancel", "transitionCancelEvent(this, event)", view.session)
 
 	if prevAnimation, ok := view.transitions[tag]; ok {
 		view.singleTransition[tag] = prevAnimation
@@ -617,6 +621,8 @@ func (view *viewData) SetAnimated(tag string, value interface{}, animation Anima
 	}
 	view.transitions[tag] = animation
 	view.updateTransitionCSS()
+
+	session.finishUpdateScript(htmlID)
 
 	result := view.Set(tag, value)
 	if !result {

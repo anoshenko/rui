@@ -47,20 +47,20 @@ func SetChangeListener(view View, viewID, tag string, listener func(View, string
 // true - all properties were set successful,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
 func SetParams(rootView View, viewID string, params Params) bool {
-	var view View
 	if viewID != "" {
-		view = ViewByID(rootView, viewID)
-	} else {
-		view = rootView
+		rootView = ViewByID(rootView, viewID)
 	}
-	if view == nil {
+	if rootView == nil {
 		return false
 	}
 
+	session := rootView.Session()
+	session.startUpdateScript(rootView.htmlID())
 	result := true
 	for tag, value := range params {
-		result = view.Set(tag, value) && result
+		result = rootView.Set(tag, value) && result
 	}
+	session.finishUpdateScript(rootView.htmlID())
 	return result
 }
 

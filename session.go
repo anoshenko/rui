@@ -104,6 +104,10 @@ type Session interface {
 
 	popupManager() *popupManager
 	imageManager() *imageManager
+
+	startUpdateScript(htmlID string)
+	updateScript(htmlID string) *strings.Builder
+	finishUpdateScript(htmlID string)
 }
 
 type sessionData struct {
@@ -134,6 +138,7 @@ type sessionData struct {
 	events           chan DataObject
 	animationCounter int
 	animationCSS     string
+	updateScripts    map[string]*strings.Builder
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -149,6 +154,7 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.ignoreUpdates = false
 	session.animationCounter = 0
 	session.animationCSS = ""
+	session.updateScripts = map[string]*strings.Builder{}
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {

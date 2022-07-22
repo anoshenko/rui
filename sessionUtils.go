@@ -2,7 +2,32 @@ package rui
 
 import (
 	"fmt"
+	"strings"
 )
+
+func (session *sessionData) startUpdateScript(htmlID string) {
+	buffer := allocStringBuilder()
+	session.updateScripts[htmlID] = buffer
+	buffer.WriteString("var element = document.getElementById('")
+	buffer.WriteString(htmlID)
+	buffer.WriteString("');\nif (element) {\n")
+}
+
+func (session *sessionData) updateScript(htmlID string) *strings.Builder {
+	if buffer, ok := session.updateScripts[htmlID]; ok {
+		return buffer
+	}
+	return nil
+}
+
+func (session *sessionData) finishUpdateScript(htmlID string) {
+	if buffer, ok := session.updateScripts[htmlID]; ok {
+		buffer.WriteString("scanElementsSize();\n}\n")
+		session.runScript(buffer.String())
+		freeStringBuilder(buffer)
+		delete(session.updateScripts, htmlID)
+	}
+}
 
 func sizeConstant(session Session, tag string) (SizeUnit, bool) {
 	if text, ok := session.Constant(tag); ok {
@@ -58,19 +83,36 @@ func appendToInnerHTML(htmlID, content string, session Session) {
 
 func updateProperty(htmlID, property, value string, session Session) {
 	if !session.ignoreViewUpdates() {
-		session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', '%v');`, htmlID, property, value))
+		if buffer := session.updateScript(htmlID); buffer != nil {
+			buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', '%v');`, property, value))
+			buffer.WriteRune('\n')
+		} else {
+			session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', '%v');`, htmlID, property, value))
+		}
 	}
 }
 
 func updateCSSProperty(htmlID, property, value string, session Session) {
 	if !session.ignoreViewUpdates() {
-		session.runScript(fmt.Sprintf(`updateCSSProperty('%v', '%v', '%v');`, htmlID, property, value))
+		if buffer := session.updateScript(htmlID); buffer != nil {
+			buffer.WriteString(fmt.Sprintf(`element.style['%v'] = '%v';`, property, value))
+			buffer.WriteRune('\n')
+		} else {
+			session.runScript(fmt.Sprintf(`updateCSSProperty('%v', '%v', '%v');`, htmlID, property, value))
+		}
 	}
 }
 
 func updateBoolProperty(htmlID, property string, value bool, session Session) {
 	if !session.ignoreViewUpdates() {
-		if value {
+		if buffer := session.updateScript(htmlID); buffer != nil {
+			if value {
+				buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', true);`, property))
+			} else {
+				buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', false);`, property))
+			}
+			buffer.WriteRune('\n')
+		} else if value {
 			session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', true);`, htmlID, property))
 		} else {
 			session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', false);`, htmlID, property))
@@ -80,7 +122,12 @@ func updateBoolProperty(htmlID, property string, value bool, session Session) {
 
 func removeProperty(htmlID, property string, session Session) {
 	if !session.ignoreViewUpdates() {
-		session.runScript(fmt.Sprintf(`removeProperty('%v', '%v');`, htmlID, property))
+		if buffer := session.updateScript(htmlID); buffer != nil {
+			buffer.WriteString(fmt.Sprintf(`if (element.hasAttribute('%v')) { element.removeAttribute('%v');}`, property, property))
+			buffer.WriteRune('\n')
+		} else {
+			session.runScript(fmt.Sprintf(`removeProperty('%v', '%v');`, htmlID, property))
+		}
 	}
 }
 
