@@ -81,22 +81,22 @@ func createBackground(obj DataObject) BackgroundElement {
 	switch obj.Tag() {
 	case "image":
 		image := new(backgroundImage)
-		image.properties = map[string]interface{}{}
+		image.properties = map[string]any{}
 		result = image
 
 	case "linear-gradient":
 		gradient := new(backgroundLinearGradient)
-		gradient.properties = map[string]interface{}{}
+		gradient.properties = map[string]any{}
 		result = gradient
 
 	case "radial-gradient":
 		gradient := new(backgroundRadialGradient)
-		gradient.properties = map[string]interface{}{}
+		gradient.properties = map[string]any{}
 		result = gradient
 
 	case "conic-gradient":
 		gradient := new(backgroundConicGradient)
-		gradient.properties = map[string]interface{}{}
+		gradient.properties = map[string]any{}
 		result = gradient
 
 	default:
@@ -118,7 +118,7 @@ func createBackground(obj DataObject) BackgroundElement {
 // NewBackgroundImage creates the new background image
 func NewBackgroundImage(params Params) BackgroundElement {
 	result := new(backgroundImage)
-	result.properties = map[string]interface{}{}
+	result.properties = map[string]any{}
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
@@ -156,7 +156,7 @@ func (image *backgroundImage) normalizeTag(tag string) string {
 	return tag
 }
 
-func (image *backgroundImage) Set(tag string, value interface{}) bool {
+func (image *backgroundImage) Set(tag string, value any) bool {
 	tag = image.normalizeTag(tag)
 	switch tag {
 	case Attachment, Width, Height, Repeat, ImageHorizontalAlign, ImageVerticalAlign,
@@ -167,7 +167,7 @@ func (image *backgroundImage) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (image *backgroundImage) Get(tag string) interface{} {
+func (image *backgroundImage) Get(tag string) any {
 	return image.backgroundElement.Get(image.normalizeTag(tag))
 }
 

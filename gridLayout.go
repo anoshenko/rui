@@ -37,11 +37,11 @@ func (gridLayout *gridLayoutData) String() string {
 	return getViewString(gridLayout)
 }
 
-func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
+func (style *viewStyle) setGridCellSize(tag string, value any) bool {
 	setValues := func(values []string) bool {
 		count := len(values)
 		if count > 1 {
-			sizes := make([]interface{}, count)
+			sizes := make([]any, count)
 			for i, val := range values {
 				val = strings.Trim(val, " \t\n\r")
 				if isConstantName(val) {
@@ -99,13 +99,13 @@ func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
 				return false
 			}
 
-		case []interface{}:
+		case []any:
 			count := len(value)
 			if count == 0 {
 				invalidPropertyValue(tag, value)
 				return false
 			}
-			sizes := make([]interface{}, count)
+			sizes := make([]any, count)
 			for i, val := range value {
 				switch val := val.(type) {
 				case SizeUnit:
@@ -195,11 +195,11 @@ func (gridLayout *gridLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gridLayout *gridLayoutData) Get(tag string) interface{} {
+func (gridLayout *gridLayoutData) Get(tag string) any {
 	return gridLayout.get(gridLayout.normalizeTag(tag))
 }
 
-func (gridLayout *gridLayoutData) get(tag string) interface{} {
+func (gridLayout *gridLayoutData) get(tag string) any {
 	if tag == Gap {
 		rowGap := GetGridRowGap(gridLayout, "")
 		columnGap := GetGridColumnGap(gridLayout, "")
@@ -239,11 +239,11 @@ func (gridLayout *gridLayoutData) remove(tag string) {
 	}
 }
 
-func (gridLayout *gridLayoutData) Set(tag string, value interface{}) bool {
+func (gridLayout *gridLayoutData) Set(tag string, value any) bool {
 	return gridLayout.set(gridLayout.normalizeTag(tag), value)
 }
 
-func (gridLayout *gridLayoutData) set(tag string, value interface{}) bool {
+func (gridLayout *gridLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		gridLayout.remove(tag)
 		return true
@@ -285,7 +285,7 @@ func gridCellSizes(properties Properties, tag string, session Session) []SizeUni
 		case SizeUnit:
 			return []SizeUnit{value}
 
-		case []interface{}:
+		case []any:
 			result := make([]SizeUnit, len(value))
 			for i, val := range value {
 				result[i] = AutoSize()

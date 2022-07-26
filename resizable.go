@@ -108,11 +108,11 @@ func (resizable *resizableData) remove(tag string) {
 	}
 }
 
-func (resizable *resizableData) Set(tag string, value interface{}) bool {
+func (resizable *resizableData) Set(tag string, value any) bool {
 	return resizable.set(strings.ToLower(tag), value)
 }
 
-func (resizable *resizableData) set(tag string, value interface{}) bool {
+func (resizable *resizableData) set(tag string, value any) bool {
 	if value == nil {
 		resizable.remove(tag)
 		return true
@@ -183,7 +183,7 @@ func (resizable *resizableData) set(tag string, value interface{}) bool {
 	return resizable.viewData.set(tag, value)
 }
 
-func (resizable *resizableData) Get(tag string) interface{} {
+func (resizable *resizableData) Get(tag string) any {
 	return resizable.get(strings.ToLower(tag))
 }
 
@@ -235,7 +235,7 @@ func (resizable *resizableData) getSide() int {
 	return AllSides
 }
 
-func (resizable *resizableData) setSide(value interface{}) bool {
+func (resizable *resizableData) setSide(value any) bool {
 	switch value := value.(type) {
 	case string:
 		if n, err := strconv.Atoi(value); err == nil {

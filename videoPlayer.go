@@ -77,11 +77,11 @@ func (player *videoPlayerData) remove(tag string) {
 	}
 }
 
-func (player *videoPlayerData) Set(tag string, value interface{}) bool {
+func (player *videoPlayerData) Set(tag string, value any) bool {
 	return player.set(strings.ToLower(tag), value)
 }
 
-func (player *videoPlayerData) set(tag string, value interface{}) bool {
+func (player *videoPlayerData) set(tag string, value any) bool {
 	if value == nil {
 		player.remove(tag)
 		return true

@@ -20,7 +20,7 @@ const (
 	LostFocusEvent = "lost-focus-event"
 )
 
-func valueToFocusListeners(value interface{}) ([]func(View), bool) {
+func valueToFocusListeners(value any) ([]func(View), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -62,7 +62,7 @@ func valueToFocusListeners(value interface{}) ([]func(View), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -96,7 +96,7 @@ var focusEvents = map[string]struct{ jsEvent, jsFunc string }{
 	LostFocusEvent: {jsEvent: "onblur", jsFunc: "blurEvent"},
 }
 
-func (view *viewData) setFocusListener(tag string, value interface{}) bool {
+func (view *viewData) setFocusListener(tag string, value any) bool {
 	listeners, ok := valueToFocusListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)

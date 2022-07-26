@@ -50,7 +50,7 @@ type KeyEvent struct {
 	MetaKey bool
 }
 
-func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
+func valueToKeyListeners(value any) ([]func(View, KeyEvent), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -136,7 +136,7 @@ func valueToKeyListeners(value interface{}) ([]func(View, KeyEvent), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -180,7 +180,7 @@ var keyEvents = map[string]struct{ jsEvent, jsFunc string }{
 	KeyUpEvent:   {jsEvent: "onkeyup", jsFunc: "keyUpEvent"},
 }
 
-func (view *viewData) setKeyListener(tag string, value interface{}) bool {
+func (view *viewData) setKeyListener(tag string, value any) bool {
 	listeners, ok := valueToKeyListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)

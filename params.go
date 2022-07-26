@@ -3,25 +3,25 @@ package rui
 import "sort"
 
 // Params defines a type of a parameters list
-type Params map[string]interface{}
+type Params map[string]any
 
-func (params Params) Get(tag string) interface{} {
+func (params Params) Get(tag string) any {
 	return params.getRaw(tag)
 }
 
-func (params Params) getRaw(tag string) interface{} {
+func (params Params) getRaw(tag string) any {
 	if value, ok := params[tag]; ok {
 		return value
 	}
 	return nil
 }
 
-func (params Params) Set(tag string, value interface{}) bool {
+func (params Params) Set(tag string, value any) bool {
 	params.setRaw(tag, value)
 	return true
 }
 
-func (params Params) setRaw(tag string, value interface{}) {
+func (params Params) setRaw(tag string, value any) {
 	if value != nil {
 		params[tag] = value
 	} else {

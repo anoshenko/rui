@@ -75,11 +75,11 @@ func (picker *colorPickerData) remove(tag string) {
 	}
 }
 
-func (picker *colorPickerData) Set(tag string, value interface{}) bool {
+func (picker *colorPickerData) Set(tag string, value any) bool {
 	return picker.set(picker.normalizeTag(tag), value)
 }
 
-func (picker *colorPickerData) set(tag string, value interface{}) bool {
+func (picker *colorPickerData) set(tag string, value any) bool {
 	if value == nil {
 		picker.remove(tag)
 		return true
@@ -114,7 +114,7 @@ func (picker *colorPickerData) set(tag string, value interface{}) bool {
 			}
 			picker.colorChangedListeners = listeners
 
-		case []interface{}:
+		case []any:
 			listeners := make([]func(ColorPicker, Color), len(value))
 			for i, val := range value {
 				if val == nil {
@@ -166,11 +166,11 @@ func (picker *colorPickerData) colorChanged(oldColor Color) {
 	}
 }
 
-func (picker *colorPickerData) Get(tag string) interface{} {
+func (picker *colorPickerData) Get(tag string) any {
 	return picker.get(picker.normalizeTag(tag))
 }
 
-func (picker *colorPickerData) get(tag string) interface{} {
+func (picker *colorPickerData) get(tag string) any {
 	switch tag {
 	case ColorChangedEvent:
 		return picker.colorChangedListeners

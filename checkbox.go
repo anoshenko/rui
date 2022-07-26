@@ -51,7 +51,7 @@ func (button *checkboxData) Focusable() bool {
 	return true
 }
 
-func (button *checkboxData) Get(tag string) interface{} {
+func (button *checkboxData) Get(tag string) any {
 	switch strings.ToLower(tag) {
 	case CheckboxChangedEvent:
 		return button.checkedListeners
@@ -60,11 +60,11 @@ func (button *checkboxData) Get(tag string) interface{} {
 	return button.viewsContainerData.Get(tag)
 }
 
-func (button *checkboxData) Set(tag string, value interface{}) bool {
+func (button *checkboxData) Set(tag string, value any) bool {
 	return button.set(tag, value)
 }
 
-func (button *checkboxData) set(tag string, value interface{}) bool {
+func (button *checkboxData) set(tag string, value any) bool {
 	switch tag {
 	case CheckboxChangedEvent:
 		if !button.setChangedListener(value) {
@@ -205,7 +205,7 @@ func checkboxKeyListener(view View, event KeyEvent) {
 	}
 }
 
-func (button *checkboxData) setChangedListener(value interface{}) bool {
+func (button *checkboxData) setChangedListener(value any) bool {
 	if value == nil {
 		if len(button.checkedListeners) > 0 {
 			button.checkedListeners = []func(Checkbox, bool){}
@@ -239,7 +239,7 @@ func (button *checkboxData) setChangedListener(value interface{}) bool {
 		}
 		button.checkedListeners = listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(Checkbox, bool), len(value))
 		for i, val := range value {
 			if val == nil {

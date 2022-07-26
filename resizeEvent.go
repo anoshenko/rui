@@ -21,7 +21,7 @@ func (view *viewData) onResize(self View, x, y, width, height float64) {
 func (view *viewData) onItemResize(self View, index string, x, y, width, height float64) {
 }
 
-func (view *viewData) setFrameListener(tag string, value interface{}) bool {
+func (view *viewData) setFrameListener(tag string, value any) bool {
 	if value == nil {
 		delete(view.properties, tag)
 		return true
@@ -117,7 +117,7 @@ func (view *viewData) setFrameListener(tag string, value interface{}) bool {
 		}
 		view.properties[tag] = listeners
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			delete(view.properties, tag)

@@ -36,7 +36,7 @@ func (textView *textViewData) String() string {
 	return getViewString(textView)
 }
 
-func (textView *textViewData) Get(tag string) interface{} {
+func (textView *textViewData) Get(tag string) any {
 	return textView.get(strings.ToLower(tag))
 }
 
@@ -57,11 +57,11 @@ func (textView *textViewData) remove(tag string) {
 	}
 }
 
-func (textView *textViewData) Set(tag string, value interface{}) bool {
+func (textView *textViewData) Set(tag string, value any) bool {
 	return textView.set(strings.ToLower(tag), value)
 }
 
-func (textView *textViewData) set(tag string, value interface{}) bool {
+func (textView *textViewData) set(tag string, value any) bool {
 	switch tag {
 	case Text:
 		switch value := value.(type) {

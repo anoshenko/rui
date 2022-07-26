@@ -20,7 +20,7 @@ type boundsPropertyData struct {
 // NewBoundsProperty creates the new BoundsProperty object
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
-	bounds.properties = map[string]interface{}{}
+	bounds.properties = map[string]any{}
 	if params != nil {
 		for _, tag := range []string{Top, Right, Bottom, Left} {
 			if value, ok := params[tag]; ok {
@@ -79,7 +79,7 @@ func (bounds *boundsPropertyData) Remove(tag string) {
 	bounds.propertyList.Remove(bounds.normalizeTag(tag))
 }
 
-func (bounds *boundsPropertyData) Set(tag string, value interface{}) bool {
+func (bounds *boundsPropertyData) Set(tag string, value any) bool {
 	if value == nil {
 		bounds.Remove(tag)
 		return true
@@ -98,7 +98,7 @@ func (bounds *boundsPropertyData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (bounds *boundsPropertyData) Get(tag string) interface{} {
+func (bounds *boundsPropertyData) Get(tag string) any {
 	tag = bounds.normalizeTag(tag)
 	if value, ok := bounds.properties[tag]; ok {
 		return value
@@ -228,7 +228,7 @@ func (bounds *Bounds) cssString() string {
 	return builder.finish()
 }
 
-func (properties *propertyList) setBounds(tag string, value interface{}) bool {
+func (properties *propertyList) setBounds(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		switch value := value.(type) {
 		case string:
@@ -340,7 +340,7 @@ func (properties *propertyList) removeBoundsSide(mainTag, sideTag string) {
 	}
 }
 
-func (properties *propertyList) setBoundsSide(mainTag, sideTag string, value interface{}) bool {
+func (properties *propertyList) setBoundsSide(mainTag, sideTag string, value any) bool {
 	bounds := properties.boundsProperty(mainTag)
 	if bounds.Set(sideTag, value) {
 		properties.properties[mainTag] = bounds

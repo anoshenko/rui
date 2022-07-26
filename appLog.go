@@ -39,7 +39,7 @@ func DebugLog(text string) {
 }
 
 // DebugLogF print the text to the debug log
-func DebugLogF(format string, a ...interface{}) {
+func DebugLogF(format string, a ...any) {
 	if debugLogFunc != nil {
 		debugLogFunc(fmt.Sprintf(format, a...))
 	}
@@ -57,7 +57,7 @@ func ErrorLog(text string) {
 }
 
 // ErrorLogF print the text to the error log
-func ErrorLogF(format string, a ...interface{}) {
+func ErrorLogF(format string, a ...any) {
 	lastError = fmt.Sprintf(format, a...)
 	if errorLogFunc != nil {
 		errorLogFunc(lastError)

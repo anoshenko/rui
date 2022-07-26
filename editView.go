@@ -190,11 +190,11 @@ func (edit *editViewData) remove(tag string) {
 	}
 }
 
-func (edit *editViewData) Set(tag string, value interface{}) bool {
+func (edit *editViewData) Set(tag string, value any) bool {
 	return edit.set(edit.normalizeTag(tag), value)
 }
 
-func (edit *editViewData) set(tag string, value interface{}) bool {
+func (edit *editViewData) set(tag string, value any) bool {
 	if value == nil {
 		edit.remove(tag)
 		return true
@@ -344,7 +344,7 @@ func (edit *editViewData) set(tag string, value interface{}) bool {
 	return edit.viewData.set(tag, value)
 }
 
-func (edit *editViewData) setChangeListeners(value interface{}) bool {
+func (edit *editViewData) setChangeListeners(value any) bool {
 	switch value := value.(type) {
 	case func(EditView, string):
 		edit.textChangeListeners = []func(EditView, string){value}
@@ -370,7 +370,7 @@ func (edit *editViewData) setChangeListeners(value interface{}) bool {
 		}
 		edit.textChangeListeners = listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(EditView, string), len(value))
 		for i, v := range value {
 			if v == nil {
@@ -397,11 +397,11 @@ func (edit *editViewData) setChangeListeners(value interface{}) bool {
 	return true
 }
 
-func (edit *editViewData) Get(tag string) interface{} {
+func (edit *editViewData) Get(tag string) any {
 	return edit.get(edit.normalizeTag(tag))
 }
 
-func (edit *editViewData) get(tag string) interface{} {
+func (edit *editViewData) get(tag string) any {
 	return edit.viewData.get(tag)
 }
 

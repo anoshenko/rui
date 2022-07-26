@@ -130,7 +130,7 @@ func newViewFilter(obj DataObject) ViewFilter {
 	return nil
 }
 
-func (filter *viewFilter) Set(tag string, value interface{}) bool {
+func (filter *viewFilter) Set(tag string, value any) bool {
 	if value == nil {
 		filter.Remove(tag)
 		return true
@@ -224,7 +224,7 @@ func (filter *viewFilter) cssStyle(session Session) string {
 	return buffer.String()
 }
 
-func (style *viewStyle) setFilter(tag string, value interface{}) bool {
+func (style *viewStyle) setFilter(tag string, value any) bool {
 	switch value := value.(type) {
 	case ViewFilter:
 		style.properties[tag] = value

@@ -193,11 +193,11 @@ func (listView *listViewData) remove(tag string) {
 	}
 }
 
-func (listView *listViewData) Set(tag string, value interface{}) bool {
+func (listView *listViewData) Set(tag string, value any) bool {
 	return listView.set(listView.normalizeTag(tag), value)
 }
 
-func (listView *listViewData) set(tag string, value interface{}) bool {
+func (listView *listViewData) set(tag string, value any) bool {
 	if value == nil {
 		listView.remove(tag)
 		return true
@@ -288,7 +288,7 @@ func (listView *listViewData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
+func (listView *listViewData) setItemCheckedEvent(value any) bool {
 	switch value := value.(type) {
 	case func(ListView, []int):
 		listView.checkedListeners = []func(ListView, []int){value}
@@ -316,7 +316,7 @@ func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
 		}
 		listView.checkedListeners = listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(ListView, []int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -343,11 +343,11 @@ func (listView *listViewData) setItemCheckedEvent(value interface{}) bool {
 	return true
 }
 
-func (listView *listViewData) Get(tag string) interface{} {
+func (listView *listViewData) Get(tag string) any {
 	return listView.get(listView.normalizeTag(tag))
 }
 
-func (listView *listViewData) get(tag string) interface{} {
+func (listView *listViewData) get(tag string) any {
 	switch tag {
 	case ListItemClickedEvent:
 		return listView.clickedListeners
@@ -376,7 +376,7 @@ func (listView *listViewData) get(tag string) interface{} {
 	return listView.viewData.get(tag)
 }
 
-func (listView *listViewData) setItems(value interface{}) bool {
+func (listView *listViewData) setItems(value any) bool {
 	switch value := value.(type) {
 	case []string:
 		listView.adapter = NewTextListAdapter(value, nil)
@@ -412,7 +412,7 @@ func (listView *listViewData) setItems(value interface{}) bool {
 			listView.adapter = NewTextListAdapter(items, nil)
 		}
 
-	case []interface{}:
+	case []any:
 		items := make([]View, len(value))
 		for i, val := range value {
 			switch value := val.(type) {
@@ -460,7 +460,7 @@ func (listView *listViewData) setItems(value interface{}) bool {
 	return true
 }
 
-func (listView *listViewData) valueToItemListeners(value interface{}) []func(ListView, int) {
+func (listView *listViewData) valueToItemListeners(value any) []func(ListView, int) {
 	if value == nil {
 		return []func(ListView, int){}
 	}
@@ -490,7 +490,7 @@ func (listView *listViewData) valueToItemListeners(value interface{}) []func(Lis
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(ListView, int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -515,7 +515,7 @@ func (listView *listViewData) valueToItemListeners(value interface{}) []func(Lis
 	return nil
 }
 
-func (listView *listViewData) setChecked(value interface{}) bool {
+func (listView *listViewData) setChecked(value any) bool {
 	var checked []int
 	if value == nil {
 		checked = []int{}

@@ -442,7 +442,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 }
 
-func valueToOrientation(value interface{}, session Session) (int, bool) {
+func valueToOrientation(value any, session Session) (int, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case int:
@@ -471,11 +471,11 @@ func valueToOrientation(value interface{}, session Session) (int, bool) {
 	return 0, false
 }
 
-func (style *viewStyle) Get(tag string) interface{} {
+func (style *viewStyle) Get(tag string) any {
 	return style.get(strings.ToLower(tag))
 }
 
-func (style *viewStyle) get(tag string) interface{} {
+func (style *viewStyle) get(tag string) any {
 	switch tag {
 	case Border, CellBorder:
 		return getBorder(&style.propertyList, tag)
@@ -539,7 +539,7 @@ func (style *viewStyle) AllTags() []string {
 	return result
 }
 
-func supportedPropertyValue(value interface{}) bool {
+func supportedPropertyValue(value any) bool {
 	switch value.(type) {
 	case string:
 	case []string:
@@ -551,7 +551,7 @@ func supportedPropertyValue(value interface{}) bool {
 	case fmt.Stringer:
 	case []ViewShadow:
 	case []View:
-	case []interface{}:
+	case []any:
 	case map[string]Animation:
 	default:
 		return false
@@ -559,7 +559,7 @@ func supportedPropertyValue(value interface{}) bool {
 	return true
 }
 
-func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, indent string) {
+func writePropertyValue(buffer *strings.Builder, tag string, value any, indent string) {
 
 	writeString := func(text string) {
 		simple := (tag != Text && tag != Title && tag != Summary)
@@ -697,7 +697,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, 
 			buffer.WriteRune(']')
 		}
 
-	case []interface{}:
+	case []any:
 		switch count := len(value); count {
 		case 0:
 			buffer.WriteString("[]")
@@ -755,7 +755,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 	buffer.WriteString(" {\n")
 	indent += "\t"
 
-	writeProperty := func(tag string, value interface{}) {
+	writeProperty := func(tag string, value any) {
 		if supportedPropertyValue(value) {
 			buffer.WriteString(indent)
 			buffer.WriteString(tag)

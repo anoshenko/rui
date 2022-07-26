@@ -102,7 +102,7 @@ func (popup *popupData) init(view View, params Params) {
 				}
 			}
 
-		case []interface{}:
+		case []any:
 			for _, val := range value {
 				if val != nil {
 					switch fn := val.(type) {

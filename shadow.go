@@ -111,7 +111,7 @@ func (shadow *viewShadowData) Remove(tag string) {
 	delete(shadow.properties, strings.ToLower(tag))
 }
 
-func (shadow *viewShadowData) Set(tag string, value interface{}) bool {
+func (shadow *viewShadowData) Set(tag string, value any) bool {
 	if value == nil {
 		shadow.Remove(tag)
 		return true
@@ -127,7 +127,7 @@ func (shadow *viewShadowData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (shadow *viewShadowData) Get(tag string) interface{} {
+func (shadow *viewShadowData) Get(tag string) any {
 	return shadow.propertyList.Get(strings.ToLower(tag))
 }
 
@@ -225,7 +225,7 @@ func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string
 	buffer.WriteString(" }")
 }
 
-func (properties *propertyList) setShadow(tag string, value interface{}) bool {
+func (properties *propertyList) setShadow(tag string, value any) bool {
 
 	if value == nil {
 		delete(properties.properties, tag)

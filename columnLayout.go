@@ -76,7 +76,7 @@ func (columnLayout *columnLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (columnLayout *columnLayoutData) Get(tag string) interface{} {
+func (columnLayout *columnLayoutData) Get(tag string) any {
 	return columnLayout.get(columnLayout.normalizeTag(tag))
 }
 
@@ -97,11 +97,11 @@ func (columnLayout *columnLayoutData) remove(tag string) {
 	}
 }
 
-func (columnLayout *columnLayoutData) Set(tag string, value interface{}) bool {
+func (columnLayout *columnLayoutData) Set(tag string, value any) bool {
 	return columnLayout.set(columnLayout.normalizeTag(tag), value)
 }
 
-func (columnLayout *columnLayoutData) set(tag string, value interface{}) bool {
+func (columnLayout *columnLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		columnLayout.remove(tag)
 		return true

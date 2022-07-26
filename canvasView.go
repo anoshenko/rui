@@ -63,11 +63,11 @@ func (canvasView *canvasViewData) remove(tag string) {
 	}
 }
 
-func (canvasView *canvasViewData) Set(tag string, value interface{}) bool {
+func (canvasView *canvasViewData) Set(tag string, value any) bool {
 	return canvasView.set(canvasView.normalizeTag(tag), value)
 }
 
-func (canvasView *canvasViewData) set(tag string, value interface{}) bool {
+func (canvasView *canvasViewData) set(tag string, value any) bool {
 	if tag == DrawFunction {
 		if value == nil {
 			canvasView.drawer = nil
@@ -85,11 +85,11 @@ func (canvasView *canvasViewData) set(tag string, value interface{}) bool {
 	return canvasView.viewData.set(tag, value)
 }
 
-func (canvasView *canvasViewData) Get(tag string) interface{} {
+func (canvasView *canvasViewData) Get(tag string) any {
 	return canvasView.get(canvasView.normalizeTag(tag))
 }
 
-func (canvasView *canvasViewData) get(tag string) interface{} {
+func (canvasView *canvasViewData) get(tag string) any {
 	if tag == DrawFunction {
 		return canvasView.drawer
 	}

@@ -90,7 +90,7 @@ type TouchEvent struct {
 	MetaKey bool
 }
 
-func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
+func valueToTouchListeners(value any) ([]func(View, TouchEvent), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -176,7 +176,7 @@ func valueToTouchListeners(value interface{}) ([]func(View, TouchEvent), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -222,7 +222,7 @@ var touchEvents = map[string]struct{ jsEvent, jsFunc string }{
 	TouchCancel: {jsEvent: "ontouchcancel", jsFunc: "touchCancelEvent"},
 }
 
-func (view *viewData) setTouchListener(tag string, value interface{}) bool {
+func (view *viewData) setTouchListener(tag string, value any) bool {
 	listeners, ok := valueToTouchListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)

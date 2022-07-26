@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func (style *viewStyle) setRange(tag string, value interface{}) bool {
+func (style *viewStyle) setRange(tag string, value any) bool {
 	switch value := value.(type) {
 	case string:
 		if strings.Contains(value, "@") {
@@ -31,7 +31,7 @@ func (style *viewStyle) setRange(tag string, value interface{}) bool {
 	return true
 }
 
-func (style *viewStyle) setBackground(value interface{}) bool {
+func (style *viewStyle) setBackground(value any) bool {
 	switch value := value.(type) {
 	case BackgroundElement:
 		style.properties[Background] = []BackgroundElement{value}
@@ -122,11 +122,11 @@ func (style *viewStyle) remove(tag string) {
 	}
 }
 
-func (style *viewStyle) Set(tag string, value interface{}) bool {
+func (style *viewStyle) Set(tag string, value any) bool {
 	return style.set(strings.ToLower(tag), value)
 }
 
-func (style *viewStyle) set(tag string, value interface{}) bool {
+func (style *viewStyle) set(tag string, value any) bool {
 	if value == nil {
 		style.remove(tag)
 		return true

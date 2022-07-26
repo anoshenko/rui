@@ -109,7 +109,7 @@ type radiusPropertyData struct {
 // NewRadiusProperty creates the new RadiusProperty
 func NewRadiusProperty(params Params) RadiusProperty {
 	result := new(radiusPropertyData)
-	result.properties = map[string]interface{}{}
+	result.properties = map[string]any{}
 	if params != nil {
 		for _, tag := range []string{X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
 			TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY} {
@@ -172,7 +172,7 @@ func (radius *radiusPropertyData) deleteUnusedTags() {
 		}
 	}
 
-	equalValue := func(value1, value2 interface{}) bool {
+	equalValue := func(value1, value2 any) bool {
 		switch value1 := value1.(type) {
 		case string:
 			switch value2 := value2.(type) {
@@ -243,7 +243,7 @@ func (radius *radiusPropertyData) Remove(tag string) {
 
 }
 
-func (radius *radiusPropertyData) Set(tag string, value interface{}) bool {
+func (radius *radiusPropertyData) Set(tag string, value any) bool {
 	if value == nil {
 		radius.Remove(tag)
 		return true
@@ -318,7 +318,7 @@ func (radius *radiusPropertyData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (radius *radiusPropertyData) Get(tag string) interface{} {
+func (radius *radiusPropertyData) Get(tag string) any {
 	tag = radius.normalizeTag(tag)
 	if value, ok := radius.properties[tag]; ok {
 		return value
@@ -570,7 +570,7 @@ func getRadiusProperty(style Properties) RadiusProperty {
 	return NewRadiusProperty(nil)
 }
 
-func (properties *propertyList) setRadius(value interface{}) bool {
+func (properties *propertyList) setRadius(value any) bool {
 
 	if value == nil {
 		delete(properties.properties, Radius)
@@ -664,7 +664,7 @@ func (properties *propertyList) removeRadiusElement(tag string) {
 	}
 }
 
-func (properties *propertyList) setRadiusElement(tag string, value interface{}) bool {
+func (properties *propertyList) setRadiusElement(tag string, value any) bool {
 	if value == nil {
 		properties.removeRadiusElement(tag)
 		return true
@@ -679,7 +679,7 @@ func (properties *propertyList) setRadiusElement(tag string, value interface{}) 
 	return false
 }
 
-func getRadiusElement(style Properties, tag string) interface{} {
+func getRadiusElement(style Properties, tag string) any {
 	value := style.Get(Radius)
 	if value != nil {
 		switch value := value.(type) {

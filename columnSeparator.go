@@ -18,11 +18,11 @@ type columnSeparatorProperty struct {
 	propertyList
 }
 
-func newColumnSeparatorProperty(value interface{}) ColumnSeparatorProperty {
+func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 
 	if value == nil {
 		separator := new(columnSeparatorProperty)
-		separator.properties = map[string]interface{}{}
+		separator.properties = map[string]any{}
 		return separator
 	}
 
@@ -32,7 +32,7 @@ func newColumnSeparatorProperty(value interface{}) ColumnSeparatorProperty {
 
 	case DataObject:
 		separator := new(columnSeparatorProperty)
-		separator.properties = map[string]interface{}{}
+		separator.properties = map[string]any{}
 		for _, tag := range []string{Style, Width, ColorTag} {
 			if val, ok := value.PropertyValue(tag); ok && val != "" {
 				separator.set(tag, value)
@@ -42,7 +42,7 @@ func newColumnSeparatorProperty(value interface{}) ColumnSeparatorProperty {
 
 	case ViewBorder:
 		separator := new(columnSeparatorProperty)
-		separator.properties = map[string]interface{}{
+		separator.properties = map[string]any{
 			Style:    value.Style,
 			Width:    value.Width,
 			ColorTag: value.Color,
@@ -57,7 +57,7 @@ func newColumnSeparatorProperty(value interface{}) ColumnSeparatorProperty {
 // NewColumnSeparator creates the new ColumnSeparatorProperty
 func NewColumnSeparator(params Params) ColumnSeparatorProperty {
 	separator := new(columnSeparatorProperty)
-	separator.properties = map[string]interface{}{}
+	separator.properties = map[string]any{}
 	if params != nil {
 		for _, tag := range []string{Style, Width, ColorTag} {
 			if value, ok := params[tag]; ok && value != nil {
@@ -117,7 +117,7 @@ func (separator *columnSeparatorProperty) Remove(tag string) {
 	}
 }
 
-func (separator *columnSeparatorProperty) Set(tag string, value interface{}) bool {
+func (separator *columnSeparatorProperty) Set(tag string, value any) bool {
 	tag = separator.normalizeTag(tag)
 
 	if value == nil {
@@ -140,7 +140,7 @@ func (separator *columnSeparatorProperty) Set(tag string, value interface{}) boo
 	return false
 }
 
-func (separator *columnSeparatorProperty) Get(tag string) interface{} {
+func (separator *columnSeparatorProperty) Get(tag string) any {
 	tag = separator.normalizeTag(tag)
 
 	if result, ok := separator.properties[tag]; ok {

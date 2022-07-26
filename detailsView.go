@@ -68,11 +68,11 @@ func (detailsView *detailsViewData) remove(tag string) {
 	}
 }
 
-func (detailsView *detailsViewData) Set(tag string, value interface{}) bool {
+func (detailsView *detailsViewData) Set(tag string, value any) bool {
 	return detailsView.set(strings.ToLower(tag), value)
 }
 
-func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
+func (detailsView *detailsViewData) set(tag string, value any) bool {
 	if value == nil {
 		detailsView.remove(tag)
 		return true
@@ -133,11 +133,11 @@ func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (detailsView *detailsViewData) Get(tag string) interface{} {
+func (detailsView *detailsViewData) Get(tag string) any {
 	return detailsView.get(strings.ToLower(tag))
 }
 
-func (detailsView *detailsViewData) get(tag string) interface{} {
+func (detailsView *detailsViewData) get(tag string) any {
 	return detailsView.viewsContainerData.get(tag)
 }
 

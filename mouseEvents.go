@@ -144,7 +144,7 @@ type MouseEvent struct {
 	MetaKey bool
 }
 
-func valueToMouseListeners(value interface{}) ([]func(View, MouseEvent), bool) {
+func valueToMouseListeners(value any) ([]func(View, MouseEvent), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -230,7 +230,7 @@ func valueToMouseListeners(value interface{}) ([]func(View, MouseEvent), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -280,7 +280,7 @@ var mouseEvents = map[string]struct{ jsEvent, jsFunc string }{
 	ContextMenuEvent: {jsEvent: "oncontextmenu", jsFunc: "contextMenuEvent"},
 }
 
-func (view *viewData) setMouseListener(tag string, value interface{}) bool {
+func (view *viewData) setMouseListener(tag string, value any) bool {
 	listeners, ok := valueToMouseListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)

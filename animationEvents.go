@@ -51,7 +51,7 @@ const (
 	AnimationIterationEvent = "animation-iteration-event"
 )
 
-func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
+func valueToAnimationListeners(value any) ([]func(View, string), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -137,7 +137,7 @@ func valueToAnimationListeners(value interface{}) ([]func(View, string), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -183,7 +183,7 @@ var transitionEvents = map[string]struct{ jsEvent, jsFunc string }{
 	TransitionCancelEvent: {jsEvent: "ontransitioncancel", jsFunc: "transitionCancelEvent"},
 }
 
-func (view *viewData) setTransitionListener(tag string, value interface{}) bool {
+func (view *viewData) setTransitionListener(tag string, value any) bool {
 	listeners, ok := valueToAnimationListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)
@@ -263,7 +263,7 @@ var animationEvents = map[string]struct{ jsEvent, jsFunc string }{
 	AnimationCancelEvent:    {jsEvent: "onanimationcancel", jsFunc: "animationCancelEvent"},
 }
 
-func (view *viewData) setAnimationListener(tag string, value interface{}) bool {
+func (view *viewData) setAnimationListener(tag string, value any) bool {
 	listeners, ok := valueToAnimationListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)

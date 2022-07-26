@@ -97,11 +97,11 @@ func (layout *stackLayoutData) popFinished(view View, tag string) {
 	}
 }
 
-func (layout *stackLayoutData) Set(tag string, value interface{}) bool {
+func (layout *stackLayoutData) Set(tag string, value any) bool {
 	return layout.set(strings.ToLower(tag), value)
 }
 
-func (layout *stackLayoutData) set(tag string, value interface{}) bool {
+func (layout *stackLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		layout.remove(tag)
 		return true
@@ -179,11 +179,11 @@ func (layout *stackLayoutData) remove(tag string) {
 	}
 }
 
-func (layout *stackLayoutData) Get(tag string) interface{} {
+func (layout *stackLayoutData) Get(tag string) any {
 	return layout.get(strings.ToLower(tag))
 }
 
-func (layout *stackLayoutData) get(tag string) interface{} {
+func (layout *stackLayoutData) get(tag string) any {
 	if tag == Current {
 		return layout.peek
 	}

@@ -114,11 +114,11 @@ func (imageView *imageViewData) remove(tag string) {
 	}
 }
 
-func (imageView *imageViewData) Set(tag string, value interface{}) bool {
+func (imageView *imageViewData) Set(tag string, value any) bool {
 	return imageView.set(imageView.normalizeTag(tag), value)
 }
 
-func valueToImageListeners(value interface{}) ([]func(ImageView), bool) {
+func valueToImageListeners(value any) ([]func(ImageView), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -160,7 +160,7 @@ func valueToImageListeners(value interface{}) ([]func(ImageView), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -189,7 +189,7 @@ func valueToImageListeners(value interface{}) ([]func(ImageView), bool) {
 	return nil, false
 }
 
-func (imageView *imageViewData) set(tag string, value interface{}) bool {
+func (imageView *imageViewData) set(tag string, value any) bool {
 	if value == nil {
 		imageView.remove(tag)
 		return true
@@ -248,7 +248,7 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 	return false
 }
 
-func (imageView *imageViewData) Get(tag string) interface{} {
+func (imageView *imageViewData) Get(tag string) any {
 	return imageView.viewData.get(imageView.normalizeTag(tag))
 }
 

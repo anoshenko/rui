@@ -293,7 +293,7 @@ func (table *tableViewData) Focusable() bool {
 	return GetTableSelectionMode(table, "") != NoneSelection
 }
 
-func (table *tableViewData) Get(tag string) interface{} {
+func (table *tableViewData) Get(tag string) any {
 	return table.get(table.normalizeTag(tag))
 }
 
@@ -340,11 +340,11 @@ func (table *tableViewData) remove(tag string) {
 	}
 }
 
-func (table *tableViewData) Set(tag string, value interface{}) bool {
+func (table *tableViewData) Set(tag string, value any) bool {
 	return table.set(table.normalizeTag(tag), value)
 }
 
-func (table *tableViewData) set(tag string, value interface{}) bool {
+func (table *tableViewData) set(tag string, value any) bool {
 	if value == nil {
 		table.remove(tag)
 		return true
@@ -356,7 +356,7 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 		case TableAdapter:
 			table.properties[Content] = value
 
-		case [][]interface{}:
+		case [][]any:
 			table.properties[Content] = NewSimpleTableAdapter(val)
 
 		case [][]string:
@@ -676,7 +676,7 @@ func (table *tableViewData) currentInactiveStyle() string {
 	return "ruiCurrentTableCell"
 }
 
-func (table *tableViewData) valueToCellListeners(value interface{}) []func(TableView, int, int) {
+func (table *tableViewData) valueToCellListeners(value any) []func(TableView, int, int) {
 	if value == nil {
 		return []func(TableView, int, int){}
 	}
@@ -706,7 +706,7 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(TableView, int, int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -731,7 +731,7 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 	return nil
 }
 
-func (table *tableViewData) valueToRowListeners(value interface{}) []func(TableView, int) {
+func (table *tableViewData) valueToRowListeners(value any) []func(TableView, int) {
 	if value == nil {
 		return []func(TableView, int){}
 	}
@@ -761,7 +761,7 @@ func (table *tableViewData) valueToRowListeners(value interface{}) []func(TableV
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(TableView, int), len(value))
 		for i, val := range value {
 			if val == nil {

@@ -59,11 +59,11 @@ type Session interface {
 	RootView() View
 	// Get returns a value of the view (with id defined by the first argument) property with name defined by the second argument.
 	// The type of return value depends on the property. If the property is not set then nil is returned.
-	Get(viewID, tag string) interface{}
+	Get(viewID, tag string) any
 	// Set sets the value (third argument) of the property (second argument) of the view with id defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
-	Set(viewID, tag string, value interface{}) bool
+	Set(viewID, tag string, value any) bool
 
 	// DownloadFile downloads (saves) on the client side the file located at the specified path on the server.
 	DownloadFile(path string)
@@ -80,7 +80,7 @@ type Session interface {
 
 	viewByHTMLID(id string) View
 	nextViewID() string
-	styleProperty(styleTag, property string) interface{}
+	styleProperty(styleTag, property string) any
 
 	setBrige(events chan DataObject, brige WebBrige)
 	writeInitScript(writer *strings.Builder)
@@ -219,7 +219,7 @@ func (session *sessionData) close() {
 	}
 }
 
-func (session *sessionData) styleProperty(styleTag, propertyTag string) interface{} {
+func (session *sessionData) styleProperty(styleTag, propertyTag string) any {
 	if style := session.getCurrentTheme().style(styleTag); style != nil {
 		return style.getRaw(propertyTag)
 	}
@@ -309,14 +309,14 @@ func (session *sessionData) setIgnoreViewUpdates(ignore bool) {
 	session.ignoreUpdates = ignore
 }
 
-func (session *sessionData) Get(viewID, tag string) interface{} {
+func (session *sessionData) Get(viewID, tag string) any {
 	if view := ViewByID(session.RootView(), viewID); view != nil {
 		return view.Get(tag)
 	}
 	return nil
 }
 
-func (session *sessionData) Set(viewID, tag string, value interface{}) bool {
+func (session *sessionData) Set(viewID, tag string, value any) bool {
 	if view := ViewByID(session.RootView(), viewID); view != nil {
 		return view.Set(tag, value)
 	}

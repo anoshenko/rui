@@ -2,11 +2,11 @@ package rui
 
 import "strings"
 
-func (cell *tableCellView) Set(tag string, value interface{}) bool {
+func (cell *tableCellView) Set(tag string, value any) bool {
 	return cell.set(strings.ToLower(tag), value)
 }
 
-func (cell *tableCellView) set(tag string, value interface{}) bool {
+func (cell *tableCellView) set(tag string, value any) bool {
 	switch tag {
 	case VerticalAlign:
 		tag = TableVerticalAlign

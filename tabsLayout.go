@@ -108,11 +108,11 @@ func (tabsLayout *tabsLayoutData) currentItem(defaultValue int) int {
 	return result
 }
 
-func (tabsLayout *tabsLayoutData) Get(tag string) interface{} {
+func (tabsLayout *tabsLayoutData) Get(tag string) any {
 	return tabsLayout.get(strings.ToLower(tag))
 }
 
-func (tabsLayout *tabsLayoutData) get(tag string) interface{} {
+func (tabsLayout *tabsLayoutData) get(tag string) any {
 	switch tag {
 	case CurrentTabChangedEvent:
 		return tabsLayout.tabListener
@@ -190,11 +190,11 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 	tabsLayout.propertyChangedEvent(tag)
 }
 
-func (tabsLayout *tabsLayoutData) Set(tag string, value interface{}) bool {
+func (tabsLayout *tabsLayoutData) Set(tag string, value any) bool {
 	return tabsLayout.set(strings.ToLower(tag), value)
 }
 
-func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
+func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		tabsLayout.remove(tag)
 		return true
@@ -286,7 +286,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(TabsLayout, int, int) {
+func (tabsLayout *tabsLayoutData) valueToTabListeners(value any) []func(TabsLayout, int, int) {
 	if value == nil {
 		return []func(TabsLayout, int, int){}
 	}
@@ -388,7 +388,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(TabsLayout, int, int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -433,7 +433,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 	return nil
 }
 
-func (tabsLayout *tabsLayoutData) valueToCloseListeners(value interface{}) []func(TabsLayout, int) {
+func (tabsLayout *tabsLayoutData) valueToCloseListeners(value any) []func(TabsLayout, int) {
 	if value == nil {
 		return []func(TabsLayout, int){}
 	}
@@ -463,7 +463,7 @@ func (tabsLayout *tabsLayoutData) valueToCloseListeners(value interface{}) []fun
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(TabsLayout, int), len(value))
 		for i, val := range value {
 			if val == nil {

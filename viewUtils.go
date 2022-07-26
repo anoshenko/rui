@@ -3,7 +3,7 @@ package rui
 // Get returns a value of the property with name "tag" of the "rootView" subview with "viewID" id value.
 // The type of return value depends on the property.
 // If the subview don't exists or the property is not set then nil is returned.
-func Get(rootView View, viewID, tag string) interface{} {
+func Get(rootView View, viewID, tag string) any {
 	var view View
 	if viewID != "" {
 		view = ViewByID(rootView, viewID)
@@ -19,7 +19,7 @@ func Get(rootView View, viewID, tag string) interface{} {
 // Set sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
 // true - success,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
-func Set(rootView View, viewID, tag string, value interface{}) bool {
+func Set(rootView View, viewID, tag string, value any) bool {
 	var view View
 	if viewID != "" {
 		view = ViewByID(rootView, viewID)
@@ -976,9 +976,9 @@ func GetNotTranslate(view View, subviewID string) bool {
 	return false
 }
 
-func valueFromStyle(view View, tag string) interface{} {
+func valueFromStyle(view View, tag string) any {
 	session := view.Session()
-	getValue := func(styleTag string) interface{} {
+	getValue := func(styleTag string) any {
 		if style, ok := stringProperty(view, styleTag, session); ok {
 			if style, ok := session.resolveConstants(style); ok {
 				return session.styleProperty(style, tag)

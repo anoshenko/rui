@@ -87,7 +87,7 @@ type PointerEvent struct {
 	IsPrimary bool
 }
 
-func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), bool) {
+func valueToPointerListeners(value any) ([]func(View, PointerEvent), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -173,7 +173,7 @@ func valueToPointerListeners(value interface{}) ([]func(View, PointerEvent), boo
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -221,7 +221,7 @@ var pointerEvents = map[string]struct{ jsEvent, jsFunc string }{
 	PointerOver:   {jsEvent: "onpointerover", jsFunc: "pointerOverEvent"},
 }
 
-func (view *viewData) setPointerListener(tag string, value interface{}) bool {
+func (view *viewData) setPointerListener(tag string, value any) bool {
 	listeners, ok := valueToPointerListeners(value)
 	if !ok {
 		notCompatibleType(tag, value)

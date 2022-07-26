@@ -139,11 +139,11 @@ func (picker *filePickerData) remove(tag string) {
 	}
 }
 
-func (picker *filePickerData) Set(tag string, value interface{}) bool {
+func (picker *filePickerData) Set(tag string, value any) bool {
 	return picker.set(strings.ToLower(tag), value)
 }
 
-func (picker *filePickerData) set(tag string, value interface{}) bool {
+func (picker *filePickerData) set(tag string, value any) bool {
 	if value == nil {
 		picker.remove(tag)
 		return true
@@ -178,7 +178,7 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 			}
 			picker.fileSelectedListeners = listeners
 
-		case []interface{}:
+		case []any:
 			listeners := make([]func(FilePicker, []FileInfo), len(value))
 			for i, val := range value {
 				if val == nil {

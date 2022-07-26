@@ -87,11 +87,11 @@ func (picker *numberPickerData) remove(tag string) {
 	}
 }
 
-func (picker *numberPickerData) Set(tag string, value interface{}) bool {
+func (picker *numberPickerData) Set(tag string, value any) bool {
 	return picker.set(picker.normalizeTag(tag), value)
 }
 
-func (picker *numberPickerData) set(tag string, value interface{}) bool {
+func (picker *numberPickerData) set(tag string, value any) bool {
 	if value == nil {
 		picker.remove(tag)
 		return true
@@ -126,7 +126,7 @@ func (picker *numberPickerData) set(tag string, value interface{}) bool {
 			}
 			picker.numberChangedListeners = listeners
 
-		case []interface{}:
+		case []any:
 			listeners := make([]func(NumberPicker, float64), len(value))
 			for i, val := range value {
 				if val == nil {
@@ -208,11 +208,11 @@ func (picker *numberPickerData) propertyChanged(tag string) {
 	}
 }
 
-func (picker *numberPickerData) Get(tag string) interface{} {
+func (picker *numberPickerData) Get(tag string) any {
 	return picker.get(picker.normalizeTag(tag))
 }
 
-func (picker *numberPickerData) get(tag string) interface{} {
+func (picker *numberPickerData) get(tag string) any {
 	switch tag {
 	case NumberChangedEvent:
 		return picker.numberChangedListeners

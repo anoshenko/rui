@@ -185,11 +185,11 @@ func (player *mediaPlayerData) remove(tag string) {
 	player.propertyChanged(tag)
 }
 
-func (player *mediaPlayerData) Set(tag string, value interface{}) bool {
+func (player *mediaPlayerData) Set(tag string, value any) bool {
 	return player.set(strings.ToLower(tag), value)
 }
 
-func (player *mediaPlayerData) set(tag string, value interface{}) bool {
+func (player *mediaPlayerData) set(tag string, value any) bool {
 	if value == nil {
 		player.remove(tag)
 		return true
@@ -257,7 +257,7 @@ func (player *mediaPlayerData) set(tag string, value interface{}) bool {
 	return false
 }
 
-func (player *mediaPlayerData) setSource(value interface{}) bool {
+func (player *mediaPlayerData) setSource(value any) bool {
 	switch value := value.(type) {
 	case string:
 		src := MediaSource{Url: value, MimeType: ""}
@@ -311,7 +311,7 @@ func (player *mediaPlayerData) setSource(value interface{}) bool {
 	return true
 }
 
-func valueToPlayerListeners(value interface{}) ([]func(MediaPlayer), bool) {
+func valueToPlayerListeners(value any) ([]func(MediaPlayer), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -353,7 +353,7 @@ func valueToPlayerListeners(value interface{}) ([]func(MediaPlayer), bool) {
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -382,7 +382,7 @@ func valueToPlayerListeners(value interface{}) ([]func(MediaPlayer), bool) {
 	return nil, false
 }
 
-func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64), bool) {
+func valueToPlayerTimeListeners(value any) ([]func(MediaPlayer, float64), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -468,7 +468,7 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true
@@ -507,7 +507,7 @@ func valueToPlayerTimeListeners(value interface{}) ([]func(MediaPlayer, float64)
 	return nil, false
 }
 
-func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, string), bool) {
+func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -593,7 +593,7 @@ func valueToPlayerErrorListeners(value interface{}) ([]func(MediaPlayer, int, st
 		}
 		return listeners, true
 
-	case []interface{}:
+	case []any:
 		count := len(value)
 		if count == 0 {
 			return nil, true

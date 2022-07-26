@@ -73,11 +73,11 @@ func (progress *progressBarData) propertyChanged(tag string) {
 	}
 }
 
-func (progress *progressBarData) Set(tag string, value interface{}) bool {
+func (progress *progressBarData) Set(tag string, value any) bool {
 	return progress.set(progress.normalizeTag(tag), value)
 }
 
-func (progress *progressBarData) set(tag string, value interface{}) bool {
+func (progress *progressBarData) set(tag string, value any) bool {
 	if progress.viewData.set(tag, value) {
 		progress.propertyChanged(tag)
 		return true
@@ -85,7 +85,7 @@ func (progress *progressBarData) set(tag string, value interface{}) bool {
 	return false
 }
 
-func (progress *progressBarData) Get(tag string) interface{} {
+func (progress *progressBarData) Get(tag string) any {
 	return progress.get(progress.normalizeTag(tag))
 }
 

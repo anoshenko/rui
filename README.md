@@ -362,8 +362,8 @@ View has a number of properties like height, width, color, text parameters, etc.
 The Properties interface is used to read and write the property value (View implements this interface):
 
 	type Properties interface {
-		Get(tag string) interface{}
-		Set(tag string, value interface{}) bool
+		Get(tag string) any
+		Set(tag string, value any) bool
 		Remove(tag string)
 		Clear()
 		AllTags() []string
@@ -378,8 +378,8 @@ The Remove function removes property value, equivalent to Set(nil)
 
 To simplify setting / reading properties, there are also two global functions Get and Set:
 
-	func Get(rootView View, viewID, tag string) interface{}
-	func Set(rootView View, viewID, tag string, value interface{}) bool
+	func Get(rootView View, viewID, tag string) any
+	func Set(rootView View, viewID, tag string, value any) bool
 
 These functions get/set the value of the child View
 
@@ -441,7 +441,7 @@ Each event can have multiple listeners. In this regard, five data types can be u
 * func([< parameters>])
 * []func(< View >[, < parameters >])
 * []func([< parameters >])
-* []interface{} which only contains func(< View >[, < parameters >]) and func([< parameters >])
+* []any which only contains func(< View >[, < parameters >]) and func([< parameters >])
 
 After being assigned to a property, all these types are converted to an array of []func(< View >, [< parameters >]).
 Accordingly, the Get function always returns an array of []func(< View >, [< parameters >]).
@@ -453,7 +453,7 @@ For the "edit-text-changed" event, this
 * func(newText string)
 * []func(editor EditView, newText string)
 * []func(newText string)
-* []interface{} содержащий только func(editor EditView, newText string) и func(newText string)
+* []any содержащий только func(editor EditView, newText string) и func(newText string)
 
 And the "edit-text-changed" property always stores and returns []func(EditView, string).
 
@@ -1016,7 +1016,7 @@ Optional parameter. The default direction is from bottom to top. It can be eithe
 Each point is described by a BackgroundGradientPoint structure, which has two fields: Pos of type SizeUnit and Color. 
 Pos defines the position of the point relative to the start of the gradient line. The array must have at least 2 points.
 You can also pass a Color array as the gradient value. In this case, the points are evenly distributed along the gradient line.
-You can also use an array of []interface{} as an array of cue points.
+You can also use an array of []any as an array of cue points.
 The elements of this array can be BackgroundGradientPoint, Color, BackgroundGradientPoint or Color text representation, and the name of the constant
 
 * Repeating ("repeating") - a boolean value that determines whether the gradient will repeat after the last key point. 
@@ -1081,8 +1081,8 @@ The radial gradient has the following options:
 Each key angle is described by a BackgroundGradientAngle structure:
 
 	type BackgroundGradientAngle struct {
-		Color interface{}
-		Angle interface{}
+		Color any
+		Angle any
 	}
 
 where Color specifies the color of the key corner and can take a value of Color type or 
@@ -1194,7 +1194,7 @@ The textual description of the elliptical clipping region is in the following fo
 
 Polygonal cropping area. Created using functions:
 
-	func PolygonClip(points []interface{}) ClipShape
+	func PolygonClip(points []any) ClipShape
 	func PolygonPointsClip(points []SizeUnit) ClipShape
 
 an array of corner points of the polygon is passed as an argument in the following order: x1, y1, x2, y2, …
@@ -2091,7 +2091,7 @@ Next, a []View is created containing the resulting View;
 
 * []string - each element of the array is converted to View as described in the previous paragraph;
 
-* []interface{} - this array must contain only View and string. Each string element is converted to 
+* []any - this array must contain only View and string. Each string element is converted to 
 a View as described above. If the array contains invalid values, the "content" property will not be set, 
 and the Set function will return false and an error message will be written to the log.
 
@@ -3112,7 +3112,7 @@ The following data types can be passed as a value to the "items" property
 
 * []string
 * []fmt.Stringer
-* []interface{} containing as elements only: string, fmt.Stringer, bool, rune,
+* []any containing as elements only: string, fmt.Stringer, bool, rune,
 float32, float64, int, int8 … int64, uint, uint8 … uint64.
 
 All of these data types are converted to []string and assigned to the "items" property.
@@ -3127,9 +3127,9 @@ This property is assigned an array of disabled item indices. The index can be sp
 * int
 * []string
 * string - can contain multiple indexes separated by commas
-* []interface{} - containing as elements only: string, int, int8…int64, uint, uint8…uint64.
+* []any - containing as elements only: string, int, int8…int64, uint, uint8…uint64.
 
-All of these data types are converted to []interface{} and assigned to the "disabled-items" property.
+All of these data types are converted to []any and assigned to the "disabled-items" property.
 You can read the value of the "disabled-items" property using the function
 
 	func GetDropDownDisabledItems(view View, subviewID string) []int
@@ -3422,7 +3422,7 @@ To describe the content, you need to implement the TableAdapter interface declar
 	type TableAdapter interface {
 		RowCount() int
 		ColumnCount() int
-		Cell(row, column int) interface{}
+		Cell(row, column int) any
 	}
 
 where RowCount() and ColumnCount() functions must return the number of rows and columns in the table;
@@ -3441,10 +3441,10 @@ Cell(row, column int) returns the contents of a table cell. The Cell() function 
 The "content" property can also be assigned the following data types
 
 * TableAdapter
-* [][]interface{}
+* [][]any
 * [][]string
 
-[][]interface{} and [][]string are converted to a TableAdapter when assigned.
+[][]any and [][]string are converted to a TableAdapter when assigned.
 
 ### "cell-style" property
 
@@ -3496,7 +3496,7 @@ In this case, the table will look like this
 	|      |       |        |
 	|------+-------+--------|
 
-If [][]interface{} is used as the value of the "content" property, then empty structures are used to merge cells
+If [][]any is used as the value of the "content" property, then empty structures are used to merge cells
 
 	type VerticalTableJoin struct {
 	}
@@ -3506,7 +3506,7 @@ If [][]interface{} is used as the value of the "content" property, then empty st
 
 These structures attach the cell to the top/left, respectively. The description of the above table will be as follows
 
-	content := [][]interface{} {
+	content := [][]any {
 		{"", "", rui.HorizontalTableJoin{}},
 		{rui.VerticalTableJoin{}, "", ""},
 	}
@@ -4513,7 +4513,7 @@ There are two types of transition animations:
 A one-time animation is triggered using the SetAnimated function of the View interface. 
 This function has the following description:
 
-	SetAnimated(tag string, value interface{}, animation Animation) bool
+	SetAnimated(tag string, value any, animation Animation) bool
 
 It assigns a new value to the property, and the change occurs using the specified animation.
 For example,
@@ -4525,7 +4525,7 @@ For example,
 
 There is also a global function for animated one-time change of the property value of the child View
 
-	func SetAnimated(rootView View, viewID, tag string, value interface{}, animation Animation) bool
+	func SetAnimated(rootView View, viewID, tag string, value any, animation Animation) bool
 
 A persistent animation runs every time the property value changes. 
 To set the constant animation of the transition, use the "transition" property (the Transition constant). 
@@ -4603,8 +4603,8 @@ the change script of one property. She is described as
 
 	type AnimatedProperty struct {
 		Tag       string
-		From, To  interface{}
-		KeyFrames map[int]interface{}
+		From, To  any
+		KeyFrames map[int]any
 	}
 
 where Tag is the name of the property, From is the initial value of the property, 
@@ -4791,7 +4791,7 @@ Returns false if no topic with this name was found. Themes named "" are the defa
 
 * SetTitleColor(color Color) sets the color of the browser navigation bar. Supported only in Safari and Chrome for android
 
-* Get(viewID, tag string) interface{} returns the value of the View property named tag. Equivalent to
+* Get(viewID, tag string) any returns the value of the View property named tag. Equivalent to
 
 	rui.Get(session.RootView(), viewID, tag)
 

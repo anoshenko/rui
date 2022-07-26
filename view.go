@@ -54,7 +54,7 @@ type View interface {
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
-	SetAnimated(tag string, value interface{}, animation Animation) bool
+	SetAnimated(tag string, value any, animation Animation) bool
 	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag string, listener func(View, string))
 	// HasFocus returns 'true' if the view has focus
@@ -290,11 +290,11 @@ func (view *viewData) propertyChangedEvent(tag string) {
 
 }
 
-func (view *viewData) Set(tag string, value interface{}) bool {
+func (view *viewData) Set(tag string, value any) bool {
 	return view.set(strings.ToLower(tag), value)
 }
 
-func (view *viewData) set(tag string, value interface{}) bool {
+func (view *viewData) set(tag string, value any) bool {
 	if value == nil {
 		view.remove(tag)
 		return true
@@ -665,11 +665,11 @@ func viewPropertyChanged(view *viewData, tag string) {
 	}
 }
 
-func (view *viewData) Get(tag string) interface{} {
+func (view *viewData) Get(tag string) any {
 	return view.get(strings.ToLower(tag))
 }
 
-func (view *viewData) get(tag string) interface{} {
+func (view *viewData) get(tag string) any {
 	if tag == ID {
 		if view.viewID != "" {
 			return view.viewID

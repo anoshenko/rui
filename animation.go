@@ -107,11 +107,11 @@ type AnimatedProperty struct {
 	// Tag is the name of the property
 	Tag string
 	// From is the initial value of the property
-	From interface{}
+	From any
 	// To is the final value of the property
-	To interface{}
+	To any
 	// KeyFrames is intermediate property values
-	KeyFrames map[int]interface{}
+	KeyFrames map[int]any
 }
 
 type animationData struct {
@@ -184,7 +184,7 @@ func (animation *animationData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (animation *animationData) Set(tag string, value interface{}) bool {
+func (animation *animationData) Set(tag string, value any) bool {
 	if value == nil {
 		animation.Remove(tag)
 		return true
@@ -285,7 +285,7 @@ func (animation *animationData) Set(tag string, value interface{}) bool {
 								ErrorLogF(`key-frame "%d" is out of range`, n)
 							} else {
 								if result.KeyFrames == nil {
-									result.KeyFrames = map[int]interface{}{n: node.Text()}
+									result.KeyFrames = map[int]any{n: node.Text()}
 								} else {
 									result.KeyFrames[n] = node.Text()
 								}
@@ -359,7 +359,7 @@ func (animation *animationData) Remove(tag string) {
 	delete(animation.properties, animation.normalizeTag(tag))
 }
 
-func (animation *animationData) Get(tag string) interface{} {
+func (animation *animationData) Get(tag string) any {
 	return animation.getRaw(animation.normalizeTag(tag))
 }
 
@@ -602,7 +602,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 	return name
 }
 
-func (view *viewData) SetAnimated(tag string, value interface{}, animation Animation) bool {
+func (view *viewData) SetAnimated(tag string, value any, animation Animation) bool {
 	if animation == nil {
 		return view.Set(tag, value)
 	}
@@ -684,7 +684,7 @@ func (view *viewData) getTransitions() Params {
 // SetAnimated sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
 // true - success,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
-func SetAnimated(rootView View, viewID, tag string, value interface{}, animation Animation) bool {
+func SetAnimated(rootView View, viewID, tag string, value any, animation Animation) bool {
 	if view := ViewByID(rootView, viewID); view != nil {
 		return view.SetAnimated(tag, value, animation)
 	}

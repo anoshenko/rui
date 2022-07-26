@@ -172,11 +172,11 @@ func (container *viewsContainerData) remove(tag string) {
 	}
 }
 
-func (container *viewsContainerData) Set(tag string, value interface{}) bool {
+func (container *viewsContainerData) Set(tag string, value any) bool {
 	return container.set(strings.ToLower(tag), value)
 }
 
-func (container *viewsContainerData) set(tag string, value interface{}) bool {
+func (container *viewsContainerData) set(tag string, value any) bool {
 	if value == nil {
 		container.remove(tag)
 		return true
@@ -224,7 +224,7 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 		}
 		container.views = views
 
-	case []interface{}:
+	case []any:
 		views := []View{}
 		for _, v := range value {
 			switch v := v.(type) {
@@ -279,11 +279,11 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (container *viewsContainerData) Get(tag string) interface{} {
+func (container *viewsContainerData) Get(tag string) any {
 	return container.get(strings.ToLower(tag))
 }
 
-func (container *viewsContainerData) get(tag string) interface{} {
+func (container *viewsContainerData) get(tag string) any {
 	switch tag {
 	case Content:
 		return container.views

@@ -114,11 +114,11 @@ func (picker *datePickerData) remove(tag string) {
 	picker.propertyChangedEvent(tag)
 }
 
-func (picker *datePickerData) Set(tag string, value interface{}) bool {
+func (picker *datePickerData) Set(tag string, value any) bool {
 	return picker.set(picker.normalizeTag(tag), value)
 }
 
-func (picker *datePickerData) set(tag string, value interface{}) bool {
+func (picker *datePickerData) set(tag string, value any) bool {
 	if value == nil {
 		picker.remove(tag)
 		return true
@@ -262,7 +262,7 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 			}
 			picker.dateChangedListeners = listeners
 
-		case []interface{}:
+		case []any:
 			listeners := make([]func(DatePicker, time.Time), len(value))
 			for i, val := range value {
 				if val == nil {
@@ -295,11 +295,11 @@ func (picker *datePickerData) set(tag string, value interface{}) bool {
 	return false
 }
 
-func (picker *datePickerData) Get(tag string) interface{} {
+func (picker *datePickerData) Get(tag string) any {
 	return picker.get(picker.normalizeTag(tag))
 }
 
-func (picker *datePickerData) get(tag string) interface{} {
+func (picker *datePickerData) get(tag string) any {
 	switch tag {
 	case DateChangedEvent:
 		return picker.dateChangedListeners
@@ -374,7 +374,7 @@ func (picker *datePickerData) handleCommand(self View, command string, data Data
 }
 
 func getDateProperty(view View, mainTag, shortTag string) (time.Time, bool) {
-	valueToTime := func(value interface{}) (time.Time, bool) {
+	valueToTime := func(value any) (time.Time, bool) {
 		if value != nil {
 			switch value := value.(type) {
 			case time.Time:

@@ -18,7 +18,7 @@ type outlinePropertyData struct {
 
 func NewOutlineProperty(params Params) OutlineProperty {
 	outline := new(outlinePropertyData)
-	outline.properties = map[string]interface{}{}
+	outline.properties = map[string]any{}
 	for tag, value := range params {
 		outline.Set(tag, value)
 	}
@@ -55,7 +55,7 @@ func (outline *outlinePropertyData) Remove(tag string) {
 	delete(outline.properties, outline.normalizeTag(tag))
 }
 
-func (outline *outlinePropertyData) Set(tag string, value interface{}) bool {
+func (outline *outlinePropertyData) Set(tag string, value any) bool {
 	if value == nil {
 		outline.Remove(tag)
 		return true
@@ -85,7 +85,7 @@ func (outline *outlinePropertyData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (outline *outlinePropertyData) Get(tag string) interface{} {
+func (outline *outlinePropertyData) Get(tag string) any {
 	return outline.propertyList.Get(outline.normalizeTag(tag))
 }
 
@@ -128,7 +128,7 @@ func getOutline(properties Properties) OutlineProperty {
 	return nil
 }
 
-func (style *viewStyle) setOutline(value interface{}) bool {
+func (style *viewStyle) setOutline(value any) bool {
 	switch value := value.(type) {
 	case OutlineProperty:
 		style.properties[Outline] = value

@@ -62,7 +62,7 @@ func (listLayout *listLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (listLayout *listLayoutData) Get(tag string) interface{} {
+func (listLayout *listLayoutData) Get(tag string) any {
 	return listLayout.get(listLayout.normalizeTag(tag))
 }
 
@@ -80,11 +80,11 @@ func (listLayout *listLayoutData) remove(tag string) {
 	}
 }
 
-func (listLayout *listLayoutData) Set(tag string, value interface{}) bool {
+func (listLayout *listLayoutData) Set(tag string, value any) bool {
 	return listLayout.set(listLayout.normalizeTag(tag), value)
 }
 
-func (listLayout *listLayoutData) set(tag string, value interface{}) bool {
+func (listLayout *listLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		listLayout.remove(tag)
 		return true

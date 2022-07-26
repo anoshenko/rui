@@ -17,7 +17,7 @@ type DropDownList interface {
 type dropDownListData struct {
 	viewData
 	items            []string
-	disabledItems    []interface{}
+	disabledItems    []any
 	dropDownListener []func(DropDownList, int)
 }
 
@@ -37,7 +37,7 @@ func (list *dropDownListData) Init(session Session) {
 	list.viewData.Init(session)
 	list.tag = "DropDownList"
 	list.items = []string{}
-	list.disabledItems = []interface{}{}
+	list.disabledItems = []any{}
 	list.dropDownListener = []func(DropDownList, int){}
 }
 
@@ -66,7 +66,7 @@ func (list *dropDownListData) remove(tag string) {
 
 	case DisabledItems:
 		if len(list.disabledItems) > 0 {
-			list.disabledItems = []interface{}{}
+			list.disabledItems = []any{}
 			if list.created {
 				updateInnerHTML(list.htmlID(), list.session)
 			}
@@ -95,11 +95,11 @@ func (list *dropDownListData) remove(tag string) {
 	}
 }
 
-func (list *dropDownListData) Set(tag string, value interface{}) bool {
+func (list *dropDownListData) Set(tag string, value any) bool {
 	return list.set(strings.ToLower(tag), value)
 }
 
-func (list *dropDownListData) set(tag string, value interface{}) bool {
+func (list *dropDownListData) set(tag string, value any) bool {
 	if value == nil {
 		list.remove(tag)
 		return true
@@ -133,7 +133,7 @@ func (list *dropDownListData) set(tag string, value interface{}) bool {
 	return list.viewData.set(tag, value)
 }
 
-func (list *dropDownListData) setItems(value interface{}) bool {
+func (list *dropDownListData) setItems(value any) bool {
 	switch value := value.(type) {
 	case string:
 		list.items = []string{value}
@@ -155,7 +155,7 @@ func (list *dropDownListData) setItems(value interface{}) bool {
 			list.items[i] = str.String()
 		}
 
-	case []interface{}:
+	case []any:
 		items := make([]string, 0, len(value))
 		for _, v := range value {
 			switch val := v.(type) {
@@ -206,16 +206,16 @@ func (list *dropDownListData) setItems(value interface{}) bool {
 	return true
 }
 
-func (list *dropDownListData) setDisabledItems(value interface{}) bool {
+func (list *dropDownListData) setDisabledItems(value any) bool {
 	switch value := value.(type) {
 	case []int:
-		list.disabledItems = make([]interface{}, len(value))
+		list.disabledItems = make([]any, len(value))
 		for i, n := range value {
 			list.disabledItems[i] = n
 		}
 
-	case []interface{}:
-		disabledItems := make([]interface{}, len(value))
+	case []any:
+		disabledItems := make([]any, len(value))
 		for i, val := range value {
 			if val == nil {
 				notCompatibleType(DisabledItems, value)
@@ -248,7 +248,7 @@ func (list *dropDownListData) setDisabledItems(value interface{}) bool {
 
 	case string:
 		values := strings.Split(value, ",")
-		disabledItems := make([]interface{}, len(values))
+		disabledItems := make([]any, len(values))
 		for i, str := range values {
 			str = strings.Trim(str, " ")
 			if str == "" {
@@ -291,7 +291,7 @@ func (list *dropDownListData) setDisabledItems(value interface{}) bool {
 
 }
 
-func (list *dropDownListData) setDropDownListener(value interface{}) bool {
+func (list *dropDownListData) setDropDownListener(value any) bool {
 	switch value := value.(type) {
 	case func(DropDownList, int):
 		list.dropDownListener = []func(DropDownList, int){value}
@@ -317,7 +317,7 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 		}
 		list.dropDownListener = listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(DropDownList, int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -349,11 +349,11 @@ func (list *dropDownListData) setDropDownListener(value interface{}) bool {
 	return true
 }
 
-func (list *dropDownListData) Get(tag string) interface{} {
+func (list *dropDownListData) Get(tag string) any {
 	return list.get(strings.ToLower(tag))
 }
 
-func (list *dropDownListData) get(tag string) interface{} {
+func (list *dropDownListData) get(tag string) any {
 	switch tag {
 	case Items:
 		return list.items
@@ -479,7 +479,7 @@ func GetDropDownDisabledItems(view View, subviewID string) []int {
 	}
 	if view != nil {
 		if value := view.Get(DisabledItems); value != nil {
-			if values, ok := value.([]interface{}); ok {
+			if values, ok := value.([]any); ok {
 				count := len(values)
 				if count > 0 {
 					result := make([]int, 0, count)
