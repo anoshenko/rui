@@ -201,6 +201,7 @@ func (popup *popupData) init(view View, params Params) {
 				CellVerticalAlign:   CenterAlign,
 				TextSize:            Px(20),
 				Content:             "✕",
+				NotTranslate:        true,
 				ClickEvent: func(View) {
 					popup.Dismiss()
 				},
