@@ -333,68 +333,19 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case EditTextChangedEvent:
-		ok := edit.setChangeListeners(value)
+		listeners, ok := valueToEventListeners[EditView, string](value)
 		if !ok {
 			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(EditView, string){}
 		}
+		edit.textChangeListeners = listeners
 		edit.propertyChangedEvent(tag)
-		return ok
+		return true
 	}
 
 	return edit.viewData.set(tag, value)
-}
-
-func (edit *editViewData) setChangeListeners(value any) bool {
-	switch value := value.(type) {
-	case func(EditView, string):
-		edit.textChangeListeners = []func(EditView, string){value}
-
-	case func(string):
-		fn := func(_ EditView, text string) {
-			value(text)
-		}
-		edit.textChangeListeners = []func(EditView, string){fn}
-
-	case []func(EditView, string):
-		edit.textChangeListeners = value
-
-	case []func(string):
-		listeners := make([]func(EditView, string), len(value))
-		for i, v := range value {
-			if v == nil {
-				return false
-			}
-			listeners[i] = func(_ EditView, text string) {
-				v(text)
-			}
-		}
-		edit.textChangeListeners = listeners
-
-	case []any:
-		listeners := make([]func(EditView, string), len(value))
-		for i, v := range value {
-			if v == nil {
-				return false
-			}
-			switch v := v.(type) {
-			case func(EditView, string):
-				listeners[i] = v
-
-			case func(string):
-				listeners[i] = func(_ EditView, text string) {
-					v(text)
-				}
-
-			default:
-				return false
-			}
-		}
-		edit.textChangeListeners = listeners
-
-	default:
-		return false
-	}
-	return true
 }
 
 func (edit *editViewData) Get(tag string) any {
@@ -402,6 +353,9 @@ func (edit *editViewData) Get(tag string) any {
 }
 
 func (edit *editViewData) get(tag string) any {
+	if tag == EditTextChangedEvent {
+		return edit.textChangeListeners
+	}
 	return edit.viewData.get(tag)
 }
 
@@ -635,17 +589,7 @@ func IsSpellcheck(view View, subviewID string) bool {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextChangedListeners(view View, subviewID string) []func(EditView, string) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(EditTextChangedEvent); value != nil {
-			if result, ok := value.([]func(EditView, string)); ok {
-				return result
-			}
-		}
-	}
-	return []func(EditView, string){}
+	return getEventListeners[EditView, string](view, subviewID, EditTextChangedEvent)
 }
 
 // GetEditViewType returns a value of the Type property of EditView.

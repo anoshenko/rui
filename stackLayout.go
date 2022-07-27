@@ -109,8 +109,8 @@ func (layout *stackLayoutData) set(tag string, value any) bool {
 
 	switch tag {
 	case TransitionEndEvent:
-		listeners, ok := valueToAnimationListeners(value)
-		if ok {
+		listeners, ok := valueToEventListeners[View, string](value)
+		if ok && listeners != nil {
 			listeners = append(listeners, layout.pushFinished)
 			listeners = append(listeners, layout.popFinished)
 			layout.properties[TransitionEndEvent] = listeners

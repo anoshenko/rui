@@ -87,57 +87,14 @@ func (picker *colorPickerData) set(tag string, value any) bool {
 
 	switch tag {
 	case ColorChangedEvent:
-		switch value := value.(type) {
-		case func(ColorPicker, Color):
-			picker.colorChangedListeners = []func(ColorPicker, Color){value}
-
-		case func(Color):
-			fn := func(_ ColorPicker, date Color) {
-				value(date)
-			}
-			picker.colorChangedListeners = []func(ColorPicker, Color){fn}
-
-		case []func(ColorPicker, Color):
-			picker.colorChangedListeners = value
-
-		case []func(Color):
-			listeners := make([]func(ColorPicker, Color), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				listeners[i] = func(_ ColorPicker, date Color) {
-					val(date)
-				}
-			}
-			picker.colorChangedListeners = listeners
-
-		case []any:
-			listeners := make([]func(ColorPicker, Color), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				switch val := val.(type) {
-				case func(ColorPicker, Color):
-					listeners[i] = val
-
-				case func(Color):
-					listeners[i] = func(_ ColorPicker, date Color) {
-						val(date)
-					}
-
-				default:
-					notCompatibleType(tag, val)
-					return false
-				}
-			}
-			picker.colorChangedListeners = listeners
+		listeners, ok := valueToEventListeners[ColorPicker, Color](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(ColorPicker, Color){}
 		}
+		picker.colorChangedListeners = listeners
 		picker.propertyChangedEvent(tag)
 		return true
 
@@ -249,15 +206,5 @@ func GetColorPickerValue(view View, subviewID string) Color {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetColorChangedListeners(view View, subviewID string) []func(ColorPicker, Color) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(ColorChangedEvent); value != nil {
-			if listeners, ok := value.([]func(ColorPicker, Color)); ok {
-				return listeners
-			}
-		}
-	}
-	return []func(ColorPicker, Color){}
+	return getEventListeners[ColorPicker, Color](view, subviewID, ColorChangedEvent)
 }

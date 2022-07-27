@@ -235,57 +235,14 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		}
 
 	case DateChangedEvent:
-		switch value := value.(type) {
-		case func(DatePicker, time.Time):
-			picker.dateChangedListeners = []func(DatePicker, time.Time){value}
-
-		case func(time.Time):
-			fn := func(_ DatePicker, date time.Time) {
-				value(date)
-			}
-			picker.dateChangedListeners = []func(DatePicker, time.Time){fn}
-
-		case []func(DatePicker, time.Time):
-			picker.dateChangedListeners = value
-
-		case []func(time.Time):
-			listeners := make([]func(DatePicker, time.Time), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				listeners[i] = func(_ DatePicker, date time.Time) {
-					val(date)
-				}
-			}
-			picker.dateChangedListeners = listeners
-
-		case []any:
-			listeners := make([]func(DatePicker, time.Time), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				switch val := val.(type) {
-				case func(DatePicker, time.Time):
-					listeners[i] = val
-
-				case func(time.Time):
-					listeners[i] = func(_ DatePicker, date time.Time) {
-						val(date)
-					}
-
-				default:
-					notCompatibleType(tag, val)
-					return false
-				}
-			}
-			picker.dateChangedListeners = listeners
+		listeners, ok := valueToEventListeners[DatePicker, time.Time](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(DatePicker, time.Time){}
 		}
+		picker.dateChangedListeners = listeners
 		picker.propertyChangedEvent(tag)
 		return true
 
@@ -463,15 +420,5 @@ func GetDatePickerValue(view View, subviewID string) time.Time {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetDateChangedListeners(view View, subviewID string) []func(DatePicker, time.Time) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(DateChangedEvent); value != nil {
-			if listeners, ok := value.([]func(DatePicker, time.Time)); ok {
-				return listeners
-			}
-		}
-	}
-	return []func(DatePicker, time.Time){}
+	return getEventListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
 }

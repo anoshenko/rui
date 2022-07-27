@@ -118,77 +118,6 @@ func (imageView *imageViewData) Set(tag string, value any) bool {
 	return imageView.set(imageView.normalizeTag(tag), value)
 }
 
-func valueToImageListeners(value any) ([]func(ImageView), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(ImageView):
-		return []func(ImageView){value}, true
-
-	case func():
-		fn := func(ImageView) {
-			value()
-		}
-		return []func(ImageView){fn}, true
-
-	case []func(ImageView):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(ImageView), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(ImageView) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(ImageView), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(ImageView):
-				listeners[i] = v
-
-			case func():
-				listeners[i] = func(ImageView) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
 func (imageView *imageViewData) set(tag string, value any) bool {
 	if value == nil {
 		imageView.remove(tag)
@@ -228,8 +157,12 @@ func (imageView *imageViewData) set(tag string, value any) bool {
 		notCompatibleType(tag, value)
 
 	case LoadedEvent, ErrorEvent:
-		if listeners, ok := valueToImageListeners(value); ok {
-			imageView.properties[tag] = listeners
+		if listeners, ok := valueToNoParamListeners[ImageView](value); ok {
+			if listeners == nil {
+				delete(imageView.properties, tag)
+			} else {
+				imageView.properties[tag] = listeners
+			}
 			return true
 		}
 

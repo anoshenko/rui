@@ -384,20 +384,24 @@ func (table *tableViewData) set(tag string, value any) bool {
 		table.cellSelectedListener = listeners
 
 	case TableRowClickedEvent:
-		listeners := table.valueToRowListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[TableView, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(TableView, int){}
 		}
 		table.rowClickedListener = listeners
 
 	case TableRowSelectedEvent:
-		listeners := table.valueToRowListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[TableView, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(TableView, int){}
 		}
-		table.rowSelectedListener = []func(TableView, int){}
+		table.rowSelectedListener = listeners
 
 	case CellStyle:
 		if style, ok := value.(TableCellStyle); ok {
@@ -719,61 +723,6 @@ func (table *tableViewData) valueToCellListeners(value any) []func(TableView, in
 			case func(int, int):
 				listeners[i] = func(_ TableView, row, column int) {
 					val(row, column)
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
-}
-
-func (table *tableViewData) valueToRowListeners(value any) []func(TableView, int) {
-	if value == nil {
-		return []func(TableView, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TableView, int):
-		return []func(TableView, int){value}
-
-	case func(int):
-		fn := func(_ TableView, index int) {
-			value(index)
-		}
-		return []func(TableView, int){fn}
-
-	case []func(TableView, int):
-		return value
-
-	case []func(int):
-		listeners := make([]func(TableView, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ TableView, index int) {
-				val(index)
-			}
-		}
-		return listeners
-
-	case []any:
-		listeners := make([]func(TableView, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TableView, int):
-				listeners[i] = val
-
-			case func(int):
-				listeners[i] = func(_ TableView, index int) {
-					val(index)
 				}
 
 			default:

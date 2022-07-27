@@ -151,57 +151,14 @@ func (picker *filePickerData) set(tag string, value any) bool {
 
 	switch tag {
 	case FileSelectedEvent:
-		switch value := value.(type) {
-		case func(FilePicker, []FileInfo):
-			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){value}
-
-		case func([]FileInfo):
-			fn := func(_ FilePicker, files []FileInfo) {
-				value(files)
-			}
-			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){fn}
-
-		case []func(FilePicker, []FileInfo):
-			picker.fileSelectedListeners = value
-
-		case []func([]FileInfo):
-			listeners := make([]func(FilePicker, []FileInfo), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				listeners[i] = func(_ FilePicker, files []FileInfo) {
-					val(files)
-				}
-			}
-			picker.fileSelectedListeners = listeners
-
-		case []any:
-			listeners := make([]func(FilePicker, []FileInfo), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				switch val := val.(type) {
-				case func(FilePicker, []FileInfo):
-					listeners[i] = val
-
-				case func([]FileInfo):
-					listeners[i] = func(_ FilePicker, files []FileInfo) {
-						val(files)
-					}
-
-				default:
-					notCompatibleType(tag, val)
-					return false
-				}
-			}
-			picker.fileSelectedListeners = listeners
+		listeners, ok := valueToEventListeners[FilePicker, []FileInfo](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(FilePicker, []FileInfo){}
 		}
+		picker.fileSelectedListeners = listeners
 		picker.propertyChangedEvent(tag)
 		return true
 
@@ -436,15 +393,5 @@ func GetFilePickerAccept(view View, subviewID string) []string {
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(FileSelectedEvent); value != nil {
-			if result, ok := value.([]func(FilePicker, []FileInfo)); ok {
-				return result
-			}
-		}
-	}
-	return []func(FilePicker, []FileInfo){}
+	return getEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }

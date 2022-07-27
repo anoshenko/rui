@@ -3,7 +3,7 @@ package rui
 import "fmt"
 
 // ScrollEvent is the constant for "scroll-event" property tag.
-// The "resize-event" is fired when the content of the view is scrolled.
+// The "scroll-event" is fired when the content of the view is scrolled.
 // The main listener format:
 //   func(View, Frame).
 // The additional listener formats:
@@ -46,17 +46,7 @@ func GetViewScroll(view View, subviewID string) Frame {
 // GetScrollListeners returns the list of "scroll-event" listeners. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then the listeners list of the first argument (view) is returned
 func GetScrollListeners(view View, subviewID string) []func(View, Frame) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(ScrollEvent); value != nil {
-			if result, ok := value.([]func(View, Frame)); ok {
-				return result
-			}
-		}
-	}
-	return []func(View, Frame){}
+	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }
 
 // ScrollTo scrolls the view's content to the given position.

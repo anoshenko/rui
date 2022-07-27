@@ -205,29 +205,38 @@ func (listView *listViewData) set(tag string, value any) bool {
 
 	switch tag {
 	case ListItemClickedEvent:
-		listeners := listView.valueToItemListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[ListView, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(ListView, int){}
 		}
 		listView.clickedListeners = listeners
 		listView.propertyChangedEvent(tag)
 		return true
 
 	case ListItemSelectedEvent:
-		listeners := listView.valueToItemListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[ListView, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(ListView, int){}
 		}
 		listView.selectedListeners = listeners
 		listView.propertyChangedEvent(tag)
 		return true
 
 	case ListItemCheckedEvent:
-		if !listView.setItemCheckedEvent(value) {
+		listeners, ok := valueToEventListeners[ListView, []int](value)
+		if !ok {
+			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(ListView, []int){}
 		}
+		listView.checkedListeners = listeners
 		listView.propertyChangedEvent(tag)
 		return true
 
@@ -285,61 +294,6 @@ func (listView *listViewData) set(tag string, value any) bool {
 		updateInnerHTML(listView.htmlID(), listView.session)
 	}
 	listView.propertyChangedEvent(tag)
-	return true
-}
-
-func (listView *listViewData) setItemCheckedEvent(value any) bool {
-	switch value := value.(type) {
-	case func(ListView, []int):
-		listView.checkedListeners = []func(ListView, []int){value}
-
-	case func([]int):
-		fn := func(_ ListView, date []int) {
-			value(date)
-		}
-		listView.checkedListeners = []func(ListView, []int){fn}
-
-	case []func(ListView, []int):
-		listView.checkedListeners = value
-
-	case []func([]int):
-		listeners := make([]func(ListView, []int), len(value))
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(ListItemCheckedEvent, val)
-				return false
-			}
-
-			listeners[i] = func(_ ListView, date []int) {
-				val(date)
-			}
-		}
-		listView.checkedListeners = listeners
-
-	case []any:
-		listeners := make([]func(ListView, []int), len(value))
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(ListItemCheckedEvent, val)
-				return false
-			}
-
-			switch val := val.(type) {
-			case func(ListView, []int):
-				listeners[i] = val
-
-			case func([]int):
-				listeners[i] = func(_ ListView, checked []int) {
-					val(checked)
-				}
-
-			default:
-				notCompatibleType(ListItemCheckedEvent, val)
-				return false
-			}
-		}
-		listView.checkedListeners = listeners
-	}
 	return true
 }
 
@@ -458,61 +412,6 @@ func (listView *listViewData) setItems(value any) bool {
 	listView.itemFrame = make([]Frame, size)
 
 	return true
-}
-
-func (listView *listViewData) valueToItemListeners(value any) []func(ListView, int) {
-	if value == nil {
-		return []func(ListView, int){}
-	}
-
-	switch value := value.(type) {
-	case func(ListView, int):
-		return []func(ListView, int){value}
-
-	case func(int):
-		fn := func(_ ListView, index int) {
-			value(index)
-		}
-		return []func(ListView, int){fn}
-
-	case []func(ListView, int):
-		return value
-
-	case []func(int):
-		listeners := make([]func(ListView, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ ListView, index int) {
-				val(index)
-			}
-		}
-		return listeners
-
-	case []any:
-		listeners := make([]func(ListView, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(ListView, int):
-				listeners[i] = val
-
-			case func(int):
-				listeners[i] = func(_ ListView, index int) {
-					val(index)
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
 }
 
 func (listView *listViewData) setChecked(value any) bool {

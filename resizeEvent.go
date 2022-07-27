@@ -22,146 +22,18 @@ func (view *viewData) onItemResize(self View, index string, x, y, width, height 
 }
 
 func (view *viewData) setFrameListener(tag string, value any) bool {
-	if value == nil {
-		delete(view.properties, tag)
-		return true
-	}
-
-	switch value := value.(type) {
-	case func(View, Frame):
-		view.properties[tag] = []func(View, Frame){value}
-
-	case []func(View, Frame):
-		if len(value) > 0 {
-			view.properties[tag] = value
-		} else {
-			delete(view.properties, tag)
-			return true
-		}
-
-	case func(Frame):
-		fn := func(_ View, frame Frame) {
-			value(frame)
-		}
-		view.properties[tag] = []func(View, Frame){fn}
-
-	case []func(Frame):
-		count := len(value)
-		if count == 0 {
-			delete(view.properties, tag)
-			return true
-		}
-
-		listeners := make([]func(View, Frame), count)
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(tag, val)
-				return false
-			}
-
-			listeners[i] = func(_ View, frame Frame) {
-				val(frame)
-			}
-		}
-		view.properties[tag] = listeners
-
-	case func(View):
-		fn := func(view View, _ Frame) {
-			value(view)
-		}
-		view.properties[tag] = []func(View, Frame){fn}
-
-	case []func(View):
-		count := len(value)
-		if count == 0 {
-			delete(view.properties, tag)
-			return true
-		}
-
-		listeners := make([]func(View, Frame), count)
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(tag, val)
-				return false
-			}
-
-			listeners[i] = func(view View, _ Frame) {
-				val(view)
-			}
-		}
-		view.properties[tag] = listeners
-
-	case func():
-		fn := func(View, Frame) {
-			value()
-		}
-		view.properties[tag] = []func(View, Frame){fn}
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			delete(view.properties, tag)
-			return true
-		}
-
-		listeners := make([]func(View, Frame), count)
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(tag, val)
-				return false
-			}
-
-			listeners[i] = func(View, Frame) {
-				val()
-			}
-		}
-		view.properties[tag] = listeners
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			delete(view.properties, tag)
-			return true
-		}
-
-		listeners := make([]func(View, Frame), count)
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(tag, val)
-				return false
-			}
-
-			switch val := val.(type) {
-			case func(View, Frame):
-				listeners[i] = val
-
-			case func(Frame):
-				listeners[i] = func(_ View, frame Frame) {
-					val(frame)
-				}
-
-			case func(View):
-				listeners[i] = func(view View, _ Frame) {
-					val(view)
-				}
-
-			case func():
-				listeners[i] = func(View, Frame) {
-					val()
-				}
-
-			default:
-				notCompatibleType(tag, val)
-				return false
-			}
-		}
-		view.properties[tag] = listeners
-
-	default:
+	listeners, ok := valueToEventListeners[FilePicker, []FileInfo](value)
+	if !ok {
 		notCompatibleType(tag, value)
 		return false
 	}
 
+	if listeners == nil {
+		delete(view.properties, tag)
+	} else {
+		view.properties[tag] = listeners
+	}
+	view.propertyChangedEvent(tag)
 	return true
 }
 
@@ -204,15 +76,5 @@ func GetViewFrame(view View, subviewID string) Frame {
 // GetResizeListeners returns the list of "resize-event" listeners. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then the listeners list of the first argument (view) is returned
 func GetResizeListeners(view View, subviewID string) []func(View, Frame) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(ResizeEvent); value != nil {
-			if result, ok := value.([]func(View, Frame)); ok {
-				return result
-			}
-		}
-	}
-	return []func(View, Frame){}
+	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }

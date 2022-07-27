@@ -50,34 +50,52 @@ type KeyEvent struct {
 	MetaKey bool
 }
 
-func valueToKeyListeners(value any) ([]func(View, KeyEvent), bool) {
+func (event *KeyEvent) init(data DataObject) {
+	getBool := func(tag string) bool {
+		if value, ok := data.PropertyValue(tag); ok && value == "1" {
+			return true
+		}
+		return false
+	}
+
+	event.Key, _ = data.PropertyValue("key")
+	event.Code, _ = data.PropertyValue("code")
+	event.TimeStamp = getTimeStamp(data)
+	event.Repeat = getBool("repeat")
+	event.CtrlKey = getBool("ctrlKey")
+	event.ShiftKey = getBool("shiftKey")
+	event.AltKey = getBool("altKey")
+	event.MetaKey = getBool("metaKey")
+}
+
+func valueToEventListeners[V View, E any](value any) ([]func(V, E), bool) {
 	if value == nil {
 		return nil, true
 	}
 
 	switch value := value.(type) {
-	case func(View, KeyEvent):
-		return []func(View, KeyEvent){value}, true
+	case func(V, E):
+		return []func(V, E){value}, true
 
-	case func(KeyEvent):
-		fn := func(_ View, event KeyEvent) {
+	case func(E):
+		fn := func(_ V, event E) {
 			value(event)
 		}
-		return []func(View, KeyEvent){fn}, true
+		return []func(V, E){fn}, true
 
-	case func(View):
-		fn := func(view View, _ KeyEvent) {
+	case func(V):
+		fn := func(view V, _ E) {
 			value(view)
 		}
-		return []func(View, KeyEvent){fn}, true
+		return []func(V, E){fn}, true
 
 	case func():
-		fn := func(View, KeyEvent) {
+		fn := func(V, E) {
 			value()
 		}
-		return []func(View, KeyEvent){fn}, true
+		return []func(V, E){fn}, true
 
-	case []func(View, KeyEvent):
+	case []func(V, E):
 		if len(value) == 0 {
 			return nil, true
 		}
@@ -88,33 +106,33 @@ func valueToKeyListeners(value any) ([]func(View, KeyEvent), bool) {
 		}
 		return value, true
 
-	case []func(KeyEvent):
+	case []func(E):
 		count := len(value)
 		if count == 0 {
 			return nil, true
 		}
-		listeners := make([]func(View, KeyEvent), count)
+		listeners := make([]func(V, E), count)
 		for i, v := range value {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(_ View, event KeyEvent) {
+			listeners[i] = func(_ V, event E) {
 				v(event)
 			}
 		}
 		return listeners, true
 
-	case []func(View):
+	case []func(V):
 		count := len(value)
 		if count == 0 {
 			return nil, true
 		}
-		listeners := make([]func(View, KeyEvent), count)
+		listeners := make([]func(V, E), count)
 		for i, v := range value {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(view View, _ KeyEvent) {
+			listeners[i] = func(view V, _ E) {
 				v(view)
 			}
 		}
@@ -125,12 +143,12 @@ func valueToKeyListeners(value any) ([]func(View, KeyEvent), bool) {
 		if count == 0 {
 			return nil, true
 		}
-		listeners := make([]func(View, KeyEvent), count)
+		listeners := make([]func(V, E), count)
 		for i, v := range value {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(View, KeyEvent) {
+			listeners[i] = func(V, E) {
 				v()
 			}
 		}
@@ -141,27 +159,27 @@ func valueToKeyListeners(value any) ([]func(View, KeyEvent), bool) {
 		if count == 0 {
 			return nil, true
 		}
-		listeners := make([]func(View, KeyEvent), count)
+		listeners := make([]func(V, E), count)
 		for i, v := range value {
 			if v == nil {
 				return nil, false
 			}
 			switch v := v.(type) {
-			case func(View, KeyEvent):
+			case func(V, E):
 				listeners[i] = v
 
-			case func(KeyEvent):
-				listeners[i] = func(_ View, event KeyEvent) {
+			case func(E):
+				listeners[i] = func(_ V, event E) {
 					v(event)
 				}
 
-			case func(View):
-				listeners[i] = func(view View, _ KeyEvent) {
+			case func(V):
+				listeners[i] = func(view V, _ E) {
 					v(view)
 				}
 
 			case func():
-				listeners[i] = func(View, KeyEvent) {
+				listeners[i] = func(V, E) {
 					v()
 				}
 
@@ -181,7 +199,7 @@ var keyEvents = map[string]struct{ jsEvent, jsFunc string }{
 }
 
 func (view *viewData) setKeyListener(tag string, value any) bool {
-	listeners, ok := valueToKeyListeners(value)
+	listeners, ok := valueToEventListeners[View, KeyEvent](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return false
@@ -209,67 +227,48 @@ func (view *viewData) removeKeyListener(tag string) {
 	}
 }
 
-func getKeyListeners(view View, subviewID string, tag string) []func(View, KeyEvent) {
+func getEventListeners[V View, E any](view View, subviewID string, tag string) []func(V, E) {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
 		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(View, KeyEvent)); ok {
+			if result, ok := value.([]func(V, E)); ok {
 				return result
 			}
 		}
 	}
-	return []func(View, KeyEvent){}
+	return []func(V, E){}
 }
 
 func keyEventsHtml(view View, buffer *strings.Builder) {
 	for tag, js := range keyEvents {
-		if listeners := getKeyListeners(view, "", tag); len(listeners) > 0 {
+		if listeners := getEventListeners[View, KeyEvent](view, "", tag); len(listeners) > 0 {
 			buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
 		}
 	}
 }
 
 func handleKeyEvents(view View, tag string, data DataObject) {
-	listeners := getKeyListeners(view, "", tag)
-	if len(listeners) == 0 {
-		return
-	}
+	listeners := getEventListeners[View, KeyEvent](view, "", tag)
+	if len(listeners) > 0 {
+		var event KeyEvent
+		event.init(data)
 
-	getBool := func(tag string) bool {
-		if value, ok := data.PropertyValue(tag); ok && value == "1" {
-			return true
+		for _, listener := range listeners {
+			listener(view, event)
 		}
-		return false
-	}
-
-	key, _ := data.PropertyValue("key")
-	code, _ := data.PropertyValue("code")
-	event := KeyEvent{
-		TimeStamp: getTimeStamp(data),
-		Key:       key,
-		Code:      code,
-		Repeat:    getBool("repeat"),
-		CtrlKey:   getBool("ctrlKey"),
-		ShiftKey:  getBool("shiftKey"),
-		AltKey:    getBool("altKey"),
-		MetaKey:   getBool("metaKey"),
-	}
-
-	for _, listener := range listeners {
-		listener(view, event)
 	}
 }
 
 // GetKeyDownListeners returns the "key-down-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetKeyDownListeners(view View, subviewID string) []func(View, KeyEvent) {
-	return getKeyListeners(view, subviewID, KeyDownEvent)
+	return getEventListeners[View, KeyEvent](view, subviewID, KeyDownEvent)
 }
 
 // GetKeyUpListeners returns the "key-up-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetKeyUpListeners(view View, subviewID string) []func(View, KeyEvent) {
-	return getKeyListeners(view, subviewID, KeyUpEvent)
+	return getEventListeners[View, KeyEvent](view, subviewID, KeyUpEvent)
 }

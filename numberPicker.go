@@ -99,52 +99,14 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 
 	switch tag {
 	case NumberChangedEvent:
-		switch value := value.(type) {
-		case func(NumberPicker, float64):
-			picker.numberChangedListeners = []func(NumberPicker, float64){value}
-
-		case func(float64):
-			fn := func(_ NumberPicker, newValue float64) {
-				value(newValue)
-			}
-			picker.numberChangedListeners = []func(NumberPicker, float64){fn}
-
-		case []func(NumberPicker, float64):
-			picker.numberChangedListeners = value
-
-		case []func(float64):
-			listeners := make([]func(NumberPicker, float64), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				listeners[i] = func(_ NumberPicker, newValue float64) {
-					val(newValue)
-				}
-			}
-			picker.numberChangedListeners = listeners
-
-		case []any:
-			listeners := make([]func(NumberPicker, float64), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				switch val := val.(type) {
-				case func(NumberPicker, float64):
-					listeners[i] = val
-
-				default:
-					notCompatibleType(tag, val)
-					return false
-				}
-			}
-			picker.numberChangedListeners = listeners
+		listeners, ok := valueToEventListeners[NumberPicker, float64](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(NumberPicker, float64){}
 		}
+		picker.numberChangedListeners = listeners
 		picker.propertyChangedEvent(tag)
 		return true
 
@@ -386,15 +348,5 @@ func GetNumberPickerValue(view View, subviewID string) float64 {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetNumberChangedListeners(view View, subviewID string) []func(NumberPicker, float64) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(NumberChangedEvent); value != nil {
-			if listeners, ok := value.([]func(NumberPicker, float64)); ok {
-				return listeners
-			}
-		}
-	}
-	return []func(NumberPicker, float64){}
+	return getEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
 }

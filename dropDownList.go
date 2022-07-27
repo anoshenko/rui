@@ -113,7 +113,16 @@ func (list *dropDownListData) set(tag string, value any) bool {
 		return list.setDisabledItems(value)
 
 	case DropDownEvent:
-		return list.setDropDownListener(value)
+		listeners, ok := valueToEventListeners[DropDownList, int](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(DropDownList, int){}
+		}
+		list.dropDownListener = listeners
+		list.propertyChangedEvent(tag)
+		return true
 
 	case Current:
 		oldCurrent := GetCurrent(list, "")
@@ -289,64 +298,6 @@ func (list *dropDownListData) setDisabledItems(value any) bool {
 	list.propertyChangedEvent(Items)
 	return true
 
-}
-
-func (list *dropDownListData) setDropDownListener(value any) bool {
-	switch value := value.(type) {
-	case func(DropDownList, int):
-		list.dropDownListener = []func(DropDownList, int){value}
-
-	case func(int):
-		list.dropDownListener = []func(DropDownList, int){func(_ DropDownList, index int) {
-			value(index)
-		}}
-
-	case []func(DropDownList, int):
-		list.dropDownListener = value
-
-	case []func(int):
-		listeners := make([]func(DropDownList, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(DropDownEvent, value)
-				return false
-			}
-			listeners[i] = func(_ DropDownList, index int) {
-				val(index)
-			}
-		}
-		list.dropDownListener = listeners
-
-	case []any:
-		listeners := make([]func(DropDownList, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				notCompatibleType(DropDownEvent, value)
-				return false
-			}
-			switch val := val.(type) {
-			case func(DropDownList, int):
-				listeners[i] = val
-
-			case func(int):
-				listeners[i] = func(_ DropDownList, index int) {
-					val(index)
-				}
-
-			default:
-				notCompatibleType(DropDownEvent, value)
-				return false
-			}
-		}
-		list.dropDownListener = listeners
-
-	default:
-		notCompatibleType(DropDownEvent, value)
-		return false
-	}
-
-	list.propertyChangedEvent(DropDownEvent)
-	return true
 }
 
 func (list *dropDownListData) Get(tag string) any {

@@ -36,6 +36,10 @@ const (
 	// It occurs after the Popup disappears from the screen.
 	// The main listener for this event has the following format: func(Popup)
 	DismissEvent = "dismiss-event"
+
+	// PopupArrow is the constant for the "popup-arrow" property tag.
+	// Using the "popup-arrow" property you can add ...
+	PopupArrow = "popup-arrow"
 )
 
 // PopupButton describes a button that will be placed at the bottom of the window.
@@ -181,11 +185,10 @@ func (popup *popupData) init(view View, params Params) {
 	viewRow := 0
 	if title != nil || closeButton {
 		viewRow = 1
-		titleHeight, _ := sizeConstant(popup.Session(), "ruiPopupTitleHeight")
 		titleView := NewGridLayout(session, Params{
 			Row:               0,
 			Style:             titleStyle,
-			CellWidth:         []SizeUnit{Fr(1), titleHeight},
+			CellWidth:         []any{Fr(1), "@ruiPopupTitleHeight"},
 			CellVerticalAlign: CenterAlign,
 			PaddingLeft:       Px(12),
 		})
@@ -195,8 +198,8 @@ func (popup *popupData) init(view View, params Params) {
 		if closeButton {
 			titleView.Append(NewGridLayout(session, Params{
 				Column:              1,
-				Height:              titleHeight,
-				Width:               titleHeight,
+				Height:              "@ruiPopupTitleHeight",
+				Width:               "@ruiPopupTitleHeight",
 				CellHorizontalAlign: CenterAlign,
 				CellVerticalAlign:   CenterAlign,
 				TextSize:            Px(20),

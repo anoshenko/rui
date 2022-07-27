@@ -90,131 +90,6 @@ type TouchEvent struct {
 	MetaKey bool
 }
 
-func valueToTouchListeners(value any) ([]func(View, TouchEvent), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(View, TouchEvent):
-		return []func(View, TouchEvent){value}, true
-
-	case func(TouchEvent):
-		fn := func(_ View, event TouchEvent) {
-			value(event)
-		}
-		return []func(View, TouchEvent){fn}, true
-
-	case func(View):
-		fn := func(view View, _ TouchEvent) {
-			value(view)
-		}
-		return []func(View, TouchEvent){fn}, true
-
-	case func():
-		fn := func(View, TouchEvent) {
-			value()
-		}
-		return []func(View, TouchEvent){fn}, true
-
-	case []func(View, TouchEvent):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(TouchEvent):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, TouchEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ View, event TouchEvent) {
-				v(event)
-			}
-		}
-		return listeners, true
-
-	case []func(View):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, TouchEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(view View, _ TouchEvent) {
-				v(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, TouchEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(View, TouchEvent) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, TouchEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(View, TouchEvent):
-				listeners[i] = v
-
-			case func(TouchEvent):
-				listeners[i] = func(_ View, event TouchEvent) {
-					v(event)
-				}
-
-			case func(View):
-				listeners[i] = func(view View, _ TouchEvent) {
-					v(view)
-				}
-
-			case func():
-				listeners[i] = func(View, TouchEvent) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
 var touchEvents = map[string]struct{ jsEvent, jsFunc string }{
 	TouchStart:  {jsEvent: "ontouchstart", jsFunc: "touchStartEvent"},
 	TouchEnd:    {jsEvent: "ontouchend", jsFunc: "touchEndEvent"},
@@ -223,7 +98,7 @@ var touchEvents = map[string]struct{ jsEvent, jsFunc string }{
 }
 
 func (view *viewData) setTouchListener(tag string, value any) bool {
-	listeners, ok := valueToTouchListeners(value)
+	listeners, ok := valueToEventListeners[View, TouchEvent](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return false
@@ -249,20 +124,6 @@ func (view *viewData) removeTouchListener(tag string) {
 			removeProperty(view.htmlID(), js.jsEvent, view.Session())
 		}
 	}
-}
-
-func getTouchListeners(view View, subviewID string, tag string) []func(View, TouchEvent) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(View, TouchEvent)); ok {
-				return result
-			}
-		}
-	}
-	return []func(View, TouchEvent){}
 }
 
 func touchEventsHtml(view View, buffer *strings.Builder) {
@@ -309,7 +170,7 @@ func (event *TouchEvent) init(data DataObject) {
 }
 
 func handleTouchEvents(view View, tag string, data DataObject) {
-	listeners := getTouchListeners(view, "", tag)
+	listeners := getEventListeners[View, TouchEvent](view, "", tag)
 	if len(listeners) == 0 {
 		return
 	}
@@ -325,23 +186,23 @@ func handleTouchEvents(view View, tag string, data DataObject) {
 // GetTouchStartListeners returns the "touch-start" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTouchStartListeners(view View, subviewID string) []func(View, TouchEvent) {
-	return getTouchListeners(view, subviewID, TouchStart)
+	return getEventListeners[View, TouchEvent](view, subviewID, TouchStart)
 }
 
 // GetTouchEndListeners returns the "touch-end" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTouchEndListeners(view View, subviewID string) []func(View, TouchEvent) {
-	return getTouchListeners(view, subviewID, TouchEnd)
+	return getEventListeners[View, TouchEvent](view, subviewID, TouchEnd)
 }
 
 // GetTouchMoveListeners returns the "touch-move" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTouchMoveListeners(view View, subviewID string) []func(View, TouchEvent) {
-	return getTouchListeners(view, subviewID, TouchMove)
+	return getEventListeners[View, TouchEvent](view, subviewID, TouchMove)
 }
 
 // GetTouchCancelListeners returns the "touch-cancel" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTouchCancelListeners(view View, subviewID string) []func(View, TouchEvent) {
-	return getTouchListeners(view, subviewID, TouchCancel)
+	return getEventListeners[View, TouchEvent](view, subviewID, TouchCancel)
 }

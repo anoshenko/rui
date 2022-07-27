@@ -20,22 +20,22 @@ const (
 	LostFocusEvent = "lost-focus-event"
 )
 
-func valueToFocusListeners(value any) ([]func(View), bool) {
+func valueToNoParamListeners[V View](value any) ([]func(V), bool) {
 	if value == nil {
 		return nil, true
 	}
 
 	switch value := value.(type) {
-	case func(View):
-		return []func(View){value}, true
+	case func(V):
+		return []func(V){value}, true
 
 	case func():
-		fn := func(View) {
+		fn := func(V) {
 			value()
 		}
-		return []func(View){fn}, true
+		return []func(V){fn}, true
 
-	case []func(View):
+	case []func(V):
 		if len(value) == 0 {
 			return nil, true
 		}
@@ -51,12 +51,12 @@ func valueToFocusListeners(value any) ([]func(View), bool) {
 		if count == 0 {
 			return nil, true
 		}
-		listeners := make([]func(View), count)
+		listeners := make([]func(V), count)
 		for i, v := range value {
 			if v == nil {
 				return nil, false
 			}
-			listeners[i] = func(View) {
+			listeners[i] = func(V) {
 				v()
 			}
 		}
@@ -67,17 +67,17 @@ func valueToFocusListeners(value any) ([]func(View), bool) {
 		if count == 0 {
 			return nil, true
 		}
-		listeners := make([]func(View), count)
+		listeners := make([]func(V), count)
 		for i, v := range value {
 			if v == nil {
 				return nil, false
 			}
 			switch v := v.(type) {
-			case func(View):
+			case func(V):
 				listeners[i] = v
 
 			case func():
-				listeners[i] = func(View) {
+				listeners[i] = func(V) {
 					v()
 				}
 
@@ -97,7 +97,7 @@ var focusEvents = map[string]struct{ jsEvent, jsFunc string }{
 }
 
 func (view *viewData) setFocusListener(tag string, value any) bool {
-	listeners, ok := valueToFocusListeners(value)
+	listeners, ok := valueToNoParamListeners[View](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return false

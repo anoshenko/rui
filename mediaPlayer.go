@@ -205,7 +205,7 @@ func (player *mediaPlayerData) set(tag string, value any) bool {
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent, LoadStartEvent,
 		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent,
 		ProgressEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
-		if listeners, ok := valueToPlayerListeners(value); ok {
+		if listeners, ok := valueToNoParamListeners[MediaPlayer](value); ok {
 			if listeners == nil {
 				delete(player.properties, tag)
 			} else {
@@ -218,7 +218,7 @@ func (player *mediaPlayerData) set(tag string, value any) bool {
 		notCompatibleType(tag, value)
 
 	case DurationChangedEvent, RateChangedEvent, TimeUpdateEvent, VolumeChangedEvent:
-		if listeners, ok := valueToPlayerTimeListeners(value); ok {
+		if listeners, ok := valueToEventListeners[MediaPlayer, float64](value); ok {
 			if listeners == nil {
 				delete(player.properties, tag)
 			} else {
@@ -309,202 +309,6 @@ func (player *mediaPlayerData) setSource(value any) bool {
 	}
 
 	return true
-}
-
-func valueToPlayerListeners(value any) ([]func(MediaPlayer), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(MediaPlayer):
-		return []func(MediaPlayer){value}, true
-
-	case func():
-		fn := func(MediaPlayer) {
-			value()
-		}
-		return []func(MediaPlayer){fn}, true
-
-	case []func(MediaPlayer):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(MediaPlayer) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(MediaPlayer):
-				listeners[i] = v
-
-			case func():
-				listeners[i] = func(MediaPlayer) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
-func valueToPlayerTimeListeners(value any) ([]func(MediaPlayer, float64), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(MediaPlayer, float64):
-		return []func(MediaPlayer, float64){value}, true
-
-	case func(float64):
-		fn := func(_ MediaPlayer, time float64) {
-			value(time)
-		}
-		return []func(MediaPlayer, float64){fn}, true
-
-	case func(MediaPlayer):
-		fn := func(player MediaPlayer, _ float64) {
-			value(player)
-		}
-		return []func(MediaPlayer, float64){fn}, true
-
-	case func():
-		fn := func(MediaPlayer, float64) {
-			value()
-		}
-		return []func(MediaPlayer, float64){fn}, true
-
-	case []func(MediaPlayer, float64):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(float64):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, float64), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ MediaPlayer, time float64) {
-				v(time)
-			}
-		}
-		return listeners, true
-
-	case []func(MediaPlayer):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, float64), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(player MediaPlayer, _ float64) {
-				v(player)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, float64), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(MediaPlayer, float64) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, float64), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(MediaPlayer, float64):
-				listeners[i] = v
-
-			case func(float64):
-				listeners[i] = func(_ MediaPlayer, time float64) {
-					v(time)
-				}
-
-			case func(MediaPlayer):
-				listeners[i] = func(player MediaPlayer, _ float64) {
-					v(player)
-				}
-
-			case func():
-				listeners[i] = func(MediaPlayer, float64) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
 }
 
 func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), bool) {

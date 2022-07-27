@@ -210,10 +210,12 @@ func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
 		tabsLayout.tabListener = listeners
 
 	case TabCloseEvent:
-		listeners := tabsLayout.valueToCloseListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[TabsLayout, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(TabsLayout, int){}
 		}
 		tabsLayout.tabCloseListener = listeners
 
@@ -421,61 +423,6 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value any) []func(TabsLayo
 			case func():
 				listeners[i] = func(TabsLayout, int, int) {
 					val()
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
-}
-
-func (tabsLayout *tabsLayoutData) valueToCloseListeners(value any) []func(TabsLayout, int) {
-	if value == nil {
-		return []func(TabsLayout, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TabsLayout, int):
-		return []func(TabsLayout, int){value}
-
-	case func(int):
-		fn := func(_ TabsLayout, index int) {
-			value(index)
-		}
-		return []func(TabsLayout, int){fn}
-
-	case []func(TabsLayout, int):
-		return value
-
-	case []func(int):
-		listeners := make([]func(TabsLayout, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ TabsLayout, index int) {
-				val(index)
-			}
-		}
-		return listeners
-
-	case []any:
-		listeners := make([]func(TabsLayout, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TabsLayout, int):
-				listeners[i] = val
-
-			case func(int):
-				listeners[i] = func(_ TabsLayout, index int) {
-					val(index)
 				}
 
 			default:

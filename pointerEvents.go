@@ -87,131 +87,6 @@ type PointerEvent struct {
 	IsPrimary bool
 }
 
-func valueToPointerListeners(value any) ([]func(View, PointerEvent), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(View, PointerEvent):
-		return []func(View, PointerEvent){value}, true
-
-	case func(PointerEvent):
-		fn := func(_ View, event PointerEvent) {
-			value(event)
-		}
-		return []func(View, PointerEvent){fn}, true
-
-	case func(View):
-		fn := func(view View, _ PointerEvent) {
-			value(view)
-		}
-		return []func(View, PointerEvent){fn}, true
-
-	case func():
-		fn := func(View, PointerEvent) {
-			value()
-		}
-		return []func(View, PointerEvent){fn}, true
-
-	case []func(View, PointerEvent):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(PointerEvent):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, PointerEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ View, event PointerEvent) {
-				v(event)
-			}
-		}
-		return listeners, true
-
-	case []func(View):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, PointerEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(view View, _ PointerEvent) {
-				v(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, PointerEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(View, PointerEvent) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, PointerEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(View, PointerEvent):
-				listeners[i] = v
-
-			case func(PointerEvent):
-				listeners[i] = func(_ View, event PointerEvent) {
-					v(event)
-				}
-
-			case func(View):
-				listeners[i] = func(view View, _ PointerEvent) {
-					v(view)
-				}
-
-			case func():
-				listeners[i] = func(View, PointerEvent) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
 var pointerEvents = map[string]struct{ jsEvent, jsFunc string }{
 	PointerDown:   {jsEvent: "onpointerdown", jsFunc: "pointerDownEvent"},
 	PointerUp:     {jsEvent: "onpointerup", jsFunc: "pointerUpEvent"},
@@ -222,7 +97,7 @@ var pointerEvents = map[string]struct{ jsEvent, jsFunc string }{
 }
 
 func (view *viewData) setPointerListener(tag string, value any) bool {
-	listeners, ok := valueToPointerListeners(value)
+	listeners, ok := valueToEventListeners[View, PointerEvent](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return false
@@ -248,20 +123,6 @@ func (view *viewData) removePointerListener(tag string) {
 			removeProperty(view.htmlID(), js.jsEvent, view.Session())
 		}
 	}
-}
-
-func getPointerListeners(view View, subviewID string, tag string) []func(View, PointerEvent) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(View, PointerEvent)); ok {
-				return result
-			}
-		}
-	}
-	return []func(View, PointerEvent){}
 }
 
 func pointerEventsHtml(view View, buffer *strings.Builder) {
@@ -291,7 +152,7 @@ func (event *PointerEvent) init(data DataObject) {
 }
 
 func handlePointerEvents(view View, tag string, data DataObject) {
-	listeners := getPointerListeners(view, "", tag)
+	listeners := getEventListeners[View, PointerEvent](view, "", tag)
 	if len(listeners) == 0 {
 		return
 	}
@@ -307,35 +168,35 @@ func handlePointerEvents(view View, tag string, data DataObject) {
 // GetPointerDownListeners returns the "pointer-down" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPointerDownListeners(view View, subviewID string) []func(View, PointerEvent) {
-	return getPointerListeners(view, subviewID, PointerDown)
+	return getEventListeners[View, PointerEvent](view, subviewID, PointerDown)
 }
 
 // GetPointerUpListeners returns the "pointer-up" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPointerUpListeners(view View, subviewID string) []func(View, PointerEvent) {
-	return getPointerListeners(view, subviewID, PointerUp)
+	return getEventListeners[View, PointerEvent](view, subviewID, PointerUp)
 }
 
 // GetPointerMoveListeners returns the "pointer-move" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPointerMoveListeners(view View, subviewID string) []func(View, PointerEvent) {
-	return getPointerListeners(view, subviewID, PointerMove)
+	return getEventListeners[View, PointerEvent](view, subviewID, PointerMove)
 }
 
 // GetPointerCancelListeners returns the "pointer-cancel" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPointerCancelListeners(view View, subviewID string) []func(View, PointerEvent) {
-	return getPointerListeners(view, subviewID, PointerCancel)
+	return getEventListeners[View, PointerEvent](view, subviewID, PointerCancel)
 }
 
 // GetPointerOverListeners returns the "pointer-over" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPointerOverListeners(view View, subviewID string) []func(View, PointerEvent) {
-	return getPointerListeners(view, subviewID, PointerOver)
+	return getEventListeners[View, PointerEvent](view, subviewID, PointerOver)
 }
 
 // GetPointerOutListeners returns the "pointer-out" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPointerOutListeners(view View, subviewID string) []func(View, PointerEvent) {
-	return getPointerListeners(view, subviewID, PointerOut)
+	return getEventListeners[View, PointerEvent](view, subviewID, PointerOut)
 }

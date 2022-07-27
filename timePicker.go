@@ -223,57 +223,14 @@ func (picker *timePickerData) set(tag string, value any) bool {
 		}
 
 	case TimeChangedEvent:
-		switch value := value.(type) {
-		case func(TimePicker, time.Time):
-			picker.timeChangedListeners = []func(TimePicker, time.Time){value}
-
-		case func(time.Time):
-			fn := func(_ TimePicker, time time.Time) {
-				value(time)
-			}
-			picker.timeChangedListeners = []func(TimePicker, time.Time){fn}
-
-		case []func(TimePicker, time.Time):
-			picker.timeChangedListeners = value
-
-		case []func(time.Time):
-			listeners := make([]func(TimePicker, time.Time), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				listeners[i] = func(_ TimePicker, time time.Time) {
-					val(time)
-				}
-			}
-			picker.timeChangedListeners = listeners
-
-		case []any:
-			listeners := make([]func(TimePicker, time.Time), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				switch val := val.(type) {
-				case func(TimePicker, time.Time):
-					listeners[i] = val
-
-				case func(time.Time):
-					listeners[i] = func(_ TimePicker, time time.Time) {
-						val(time)
-					}
-
-				default:
-					notCompatibleType(tag, val)
-					return false
-				}
-			}
-			picker.timeChangedListeners = listeners
+		listeners, ok := valueToEventListeners[TimePicker, time.Time](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(TimePicker, time.Time){}
 		}
+		picker.timeChangedListeners = listeners
 		picker.propertyChangedEvent(tag)
 		return true
 
@@ -458,15 +415,5 @@ func GetTimePickerValue(view View, subviewID string) time.Time {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTimeChangedListeners(view View, subviewID string) []func(TimePicker, time.Time) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(TimeChangedEvent); value != nil {
-			if listeners, ok := value.([]func(TimePicker, time.Time)); ok {
-				return listeners
-			}
-		}
-	}
-	return []func(TimePicker, time.Time){}
+	return getEventListeners[TimePicker, time.Time](view, subviewID, TimeChangedEvent)
 }
