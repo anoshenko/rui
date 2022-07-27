@@ -45,6 +45,12 @@ const (
 	// Opacity is the degree to which content behind an element is hidden, and is the opposite of transparency.
 	Opacity = "opacity"
 
+	// Overflow is the constant for the "overflow" property tag.
+	// The "overflow" int property sets the desired behavior for an element's overflow — i.e.
+	// when an element's content is too big to fit in its block formatting context — in both directions.
+	// Valid values: OverflowHidden (0), OverflowVisible (1), OverflowScroll (2), OverflowAuto (3)
+	Overflow = "overflow"
+
 	// Row is the constant for the "row" property tag.
 	Row = "row"
 

@@ -1,5 +1,12 @@
 # v0.8.0
 
+* Requared go 1.18
+* The "interface{}" type replaced by "any"
+* Added the "overflow" property 
+* Added the GetOverflow function
+
+# v0.8.0
+
 * Added "loaded-event" and "error-event" events to ImageView
 * Added NaturalSize and CurrentSource methods to ImageView
 * Added "user-select" property and IsUserSelect function

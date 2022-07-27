@@ -235,7 +235,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	writingMode := 0
 	for _, tag := range []string{
-		TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
+		Overflow, TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
 		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
 		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize} {
 

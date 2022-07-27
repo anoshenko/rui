@@ -179,6 +179,11 @@ var enumProperties = map[string]struct {
 		"",
 		[]string{"visible", "invisible", "gone"},
 	},
+	Overflow: {
+		[]string{"hidden", "visible", "scroll", "auto"},
+		Overflow,
+		[]string{"hidden", "visible", "scroll", "auto"},
+	},
 	TextAlign: {
 		[]string{"left", "right", "center", "justify"},
 		TextAlign,

@@ -156,6 +156,30 @@ func GetVisibility(view View, subviewID string) int {
 	return result
 }
 
+// GetOverflow returns a value of the subview "overflow" property. Returns one of next values:
+// OverflowHidden (0), OverflowVisible (1), OverflowScroll (2), OverflowAuto (3)
+// If the second argument (subviewID) is "" then a value of the first argument (view) is returned
+func GetOverflow(view View, subviewID string) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+	if view == nil {
+		return OverflowHidden
+	}
+
+	defaultOverflow := OverflowHidden
+	switch view.(type) {
+	case EditView:
+		defaultOverflow = OverflowAuto
+
+	case ListView:
+		defaultOverflow = OverflowAuto
+	}
+
+	result, _ := enumStyledProperty(view, Overflow, defaultOverflow)
+	return result
+}
+
 // GetZIndex returns the subview z-order.
 // If the second argument (subviewID) is "" then a z-order of the first argument (view) is returned
 func GetZIndex(view View, subviewID string) int {
@@ -478,7 +502,6 @@ func GetTextSize(view View, subviewID string) SizeUnit {
 
 // GetTextWeight returns a text weight of the subview. Returns one of next values:
 // 1, 2, 3, 4 (normal text), 5, 6, 7 (bold text), 8 and 9
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextWeight(view View, subviewID string) int {
 	if subviewID != "" {
