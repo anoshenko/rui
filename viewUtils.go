@@ -162,79 +162,37 @@ func GetZIndex(view View, subviewID string) int {
 // GetWidth returns the subview width.
 // If the second argument (subviewID) is "" then a width of the first argument (view) is returned
 func GetWidth(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Width)
-	return result
+	return sizeStyledProperty(view, subviewID, Width, false)
 }
 
 // GetHeight returns the subview height.
 // If the second argument (subviewID) is "" then a height of the first argument (view) is returned
 func GetHeight(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Height)
-	return result
+	return sizeStyledProperty(view, subviewID, Height, false)
 }
 
 // GetMinWidth returns a minimal subview width.
 // If the second argument (subviewID) is "" then a minimal width of the first argument (view) is returned
 func GetMinWidth(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, MinWidth)
-	return result
+	return sizeStyledProperty(view, subviewID, MinWidth, false)
 }
 
 // GetMinHeight returns a minimal subview height.
 // If the second argument (subviewID) is "" then a minimal height of the first argument (view) is returned
 func GetMinHeight(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, MinHeight)
-	return result
+	return sizeStyledProperty(view, subviewID, MinHeight, false)
 }
 
 // GetMaxWidth returns a maximal subview width.
 // If the second argument (subviewID) is "" then a maximal width of the first argument (view) is returned
 func GetMaxWidth(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, MaxWidth)
-	return result
+	return sizeStyledProperty(view, subviewID, MaxWidth, false)
 }
 
 // GetMaxHeight returns a maximal subview height.
 // If the second argument (subviewID) is "" then a maximal height of the first argument (view) is returned
 func GetMaxHeight(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, MaxHeight)
-	return result
+	return sizeStyledProperty(view, subviewID, MaxHeight, false)
 }
 
 // GetResize returns the "resize" property value if the subview. One of the following values is returned:
@@ -248,56 +206,28 @@ func GetResize(view View, subviewID string) int {
 // If a parent view is not an AbsoluteLayout container then this value is ignored.
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
 func GetLeft(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Left)
-	return result
+	return sizeStyledProperty(view, subviewID, Left, false)
 }
 
 // GetRight returns a right position of the subview in an AbsoluteLayout container.
 // If a parent view is not an AbsoluteLayout container then this value is ignored.
 // If the second argument (subviewID) is "" then a right position of the first argument (view) is returned
 func GetRight(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Right)
-	return result
+	return sizeStyledProperty(view, subviewID, Right, false)
 }
 
 // GetTop returns a top position of the subview in an AbsoluteLayout container.
 // If a parent view is not an AbsoluteLayout container then this value is ignored.
 // If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
 func GetTop(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Top)
-	return result
+	return sizeStyledProperty(view, subviewID, Top, false)
 }
 
 // GetBottom returns a top position of the subview in an AbsoluteLayout container.
 // If a parent view is not an AbsoluteLayout container then this value is ignored.
 // If the second argument (subviewID) is "" then a bottom position of the first argument (view) is returned
 func GetBottom(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Bottom)
-	return result
+	return sizeStyledProperty(view, subviewID, Bottom, false)
 }
 
 // Margin returns the subview margin.
@@ -427,18 +357,7 @@ func GetTextColor(view View, subviewID string) Color {
 // GetTextSize returns a text size of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextSize(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, TextSize); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextSize(parent, "")
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, TextSize, true)
 }
 
 // GetTextWeight returns a text weight of the subview. Returns one of next values:
@@ -458,69 +377,25 @@ func GetTextAlign(view View, subviewID string) int {
 // GetTextIndent returns a text indent of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextIndent(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, TextIndent); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextIndent(parent, "")
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, TextIndent, true)
 }
 
 // GetLetterSpacing returns a letter spacing of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetLetterSpacing(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, LetterSpacing); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetLetterSpacing(parent, "")
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, LetterSpacing, true)
 }
 
 // GetWordSpacing returns a word spacing of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetWordSpacing(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, WordSpacing); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetWordSpacing(parent, "")
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, WordSpacing, true)
 }
 
 // GetLineHeight returns a height of a text line of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetLineHeight(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, LineHeight); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetLineHeight(parent, "")
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, LineHeight, true)
 }
 
 // IsItalic returns "true" if a text font of the subview is displayed in italics, "false" otherwise.
@@ -557,18 +432,7 @@ func IsUnderline(view View, subviewID string) bool {
 // is used on text in an element, such as a line-through, underline, or overline.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextLineThickness(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, TextLineThickness); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextLineThickness(parent, "")
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, TextLineThickness, true)
 }
 
 // GetTextLineStyle returns the stroke style of the decoration line that
@@ -664,14 +528,7 @@ func GetColumn(view View, subviewID string) Range {
 // The default value is 0 (no 3D effects).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetPerspective(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, Perspective)
-	return result
+	return sizeStyledProperty(view, subviewID, Perspective, false)
 }
 
 // GetPerspectiveOrigin returns a x- and y-coordinate of the position at which the viewer is looking.
@@ -793,14 +650,27 @@ func valueFromStyle(view View, tag string) any {
 	return getValue(Style)
 }
 
-func sizeStyledProperty(view View, tag string) (SizeUnit, bool) {
-	if value, ok := sizeProperty(view, tag, view.Session()); ok {
-		return value, true
+func sizeStyledProperty(view View, subviewID string, tag string, inherit bool) SizeUnit {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
-	if value := valueFromStyle(view, tag); value != nil {
-		return valueToSizeUnit(value, view.Session())
+	if view != nil {
+		if value, ok := sizeProperty(view, tag, view.Session()); ok {
+			return value
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			if result, ok := valueToSizeUnit(value, view.Session()); ok {
+				return result
+			}
+		}
+
+		if inherit {
+			if parent := view.Parent(); parent != nil {
+				return sizeStyledProperty(parent, "", tag, true)
+			}
+		}
 	}
-	return AutoSize(), false
+	return AutoSize()
 }
 
 func enumStyledProperty(view View, subviewID string, tag string, defaultValue int, inherit bool) int {

@@ -369,27 +369,11 @@ func GetCellHeight(view View, subviewID string) []SizeUnit {
 // GetGridRowGap returns the gap between GridLayout rows.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetGridRowGap(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, GridRowGap); ok {
-			return result
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, GridRowGap, false)
 }
 
 // GetGridColumnGap returns the gap between GridLayout columns.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetGridColumnGap(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, GridColumnGap); ok {
-			return result
-		}
-	}
-	return AutoSize()
+	return sizeStyledProperty(view, subviewID, GridColumnGap, false)
 }

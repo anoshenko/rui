@@ -145,27 +145,13 @@ func GetColumnCount(view View, subviewID string) int {
 // GetColumnWidth returns SizeUnit value which specifies the width of each column of ColumnLayout.
 // If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
 func GetColumnWidth(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, ColumnWidth)
-	return result
+	return sizeStyledProperty(view, subviewID, ColumnWidth, false)
 }
 
 // GetColumnGap returns SizeUnit property which specifies the size of the gap (gutter) between columns of ColumnLayout.
 // If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
 func GetColumnGap(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, ColumnGap)
-	return result
+	return sizeStyledProperty(view, subviewID, ColumnGap, false)
 }
 
 // GetColumnSeparator returns ViewBorder struct which specifies the line drawn between
