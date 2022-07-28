@@ -917,29 +917,27 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	value := ""
-	if align, ok := enumStyledProperty(listView, HorizontalAlign, LeftAlign); ok {
-		switch align {
-		case LeftAlign:
-			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
-				value = `flex-end`
-			} else {
-				value = `flex-start`
-			}
-		case RightAlign:
-			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
-				value = `flex-start`
-			} else {
-				value = `flex-end`
-			}
-		case CenterAlign:
-			value = `center`
+	switch enumStyledProperty(listView, "", HorizontalAlign, LeftAlign, false) {
+	case LeftAlign:
+		if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
+			value = `flex-end`
+		} else {
+			value = `flex-start`
+		}
+	case RightAlign:
+		if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
+			value = `flex-start`
+		} else {
+			value = `flex-end`
+		}
+	case CenterAlign:
+		value = `center`
 
-		case StretchAlign:
-			if rows {
-				value = `space-between`
-			} else {
-				value = `stretch`
-			}
+	case StretchAlign:
+		if rows {
+			value = `space-between`
+		} else {
+			value = `stretch`
 		}
 	}
 
@@ -952,29 +950,27 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	value = ""
-	if align, ok := enumStyledProperty(listView, VerticalAlign, TopAlign); ok {
-		switch align {
-		case TopAlign:
-			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
-				value = `flex-end`
-			} else {
-				value = `flex-start`
-			}
-		case BottomAlign:
-			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
-				value = `flex-start`
-			} else {
-				value = `flex-end`
-			}
-		case CenterAlign:
-			value = `center`
+	switch enumStyledProperty(listView, "", VerticalAlign, TopAlign, false) {
+	case TopAlign:
+		if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
+			value = `flex-end`
+		} else {
+			value = `flex-start`
+		}
+	case BottomAlign:
+		if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
+			value = `flex-start`
+		} else {
+			value = `flex-end`
+		}
+	case CenterAlign:
+		value = `center`
 
-		case StretchAlign:
-			if rows {
-				value = `stretch`
-			} else {
-				value = `space-between`
-			}
+	case StretchAlign:
+		if rows {
+			value = `stretch`
+		} else {
+			value = `space-between`
 		}
 	}
 

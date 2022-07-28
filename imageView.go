@@ -360,38 +360,17 @@ func GetImageViewAltText(view View, subviewID string) string {
 // NoneFit (0), ContainFit (1), CoverFit (2), FillFit (3), or ScaleDownFit (4).
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
 func GetImageViewFit(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if value, ok := enumStyledProperty(view, Fit, NoneFit); ok {
-		return value
-	}
-	return 0
+	return enumStyledProperty(view, subviewID, Fit, NoneFit, false)
 }
 
 // GetImageViewVerticalAlign return the vertical align of an ImageView subview: TopAlign (0), BottomAlign (1), CenterAlign (2)
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
 func GetImageViewVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if align, ok := enumStyledProperty(view, ImageVerticalAlign, LeftAlign); ok {
-		return align
-	}
-	return CenterAlign
+	return enumStyledProperty(view, subviewID, ImageVerticalAlign, LeftAlign, false)
 }
 
 // GetImageViewHorizontalAlign return the vertical align of an ImageView subview: LeftAlign (0), RightAlign (1), CenterAlign (2)
 // If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
 func GetImageViewHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if align, ok := enumStyledProperty(view, ImageHorizontalAlign, LeftAlign); ok {
-		return align
-	}
-	return CenterAlign
+	return enumStyledProperty(view, subviewID, ImageHorizontalAlign, LeftAlign, false)
 }

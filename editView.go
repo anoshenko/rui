@@ -571,14 +571,7 @@ func GetTextChangedListeners(view View, subviewID string) []func(EditView, strin
 // GetEditViewType returns a value of the Type property of EditView.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetEditViewType(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return SingleLineText
-	}
-	t, _ := enumStyledProperty(view, EditViewType, SingleLineText)
-	return t
+	return enumStyledProperty(view, subviewID, EditViewType, SingleLineText, false)
 }
 
 // GetEditViewPattern returns a value of the Pattern property of EditView.

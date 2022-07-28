@@ -266,8 +266,8 @@ func (button *checkboxData) setChangedListener(value any) bool {
 
 func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 	session := button.Session()
-	vAlign, _ := enumStyledProperty(button, CheckboxVerticalAlign, LeftAlign)
-	hAlign, _ := enumStyledProperty(button, CheckboxHorizontalAlign, TopAlign)
+	vAlign := GetCheckboxVerticalAlign(button, "")
+	hAlign := GetCheckboxHorizontalAlign(button, "")
 	switch hAlign {
 	case CenterAlign:
 		if vAlign == BottomAlign {
@@ -294,8 +294,8 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 }
 
 func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) (int, int) {
-	vAlign, _ := enumStyledProperty(button, CheckboxVerticalAlign, LeftAlign)
-	hAlign, _ := enumStyledProperty(button, CheckboxHorizontalAlign, TopAlign)
+	vAlign := GetCheckboxVerticalAlign(button, "")
+	hAlign := GetCheckboxHorizontalAlign(button, "")
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(button.htmlID())
@@ -370,7 +370,7 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 }
 
 func (button *checkboxData) cssHorizontalAlign() string {
-	align, _ := enumStyledProperty(button, HorizontalAlign, TopAlign)
+	align := GetCheckboxHorizontalAlign(button, "")
 	values := enumProperties[CellHorizontalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
@@ -379,7 +379,7 @@ func (button *checkboxData) cssHorizontalAlign() string {
 }
 
 func (button *checkboxData) cssVerticalAlign() string {
-	align, _ := enumStyledProperty(button, VerticalAlign, TopAlign)
+	align := GetCheckboxVerticalAlign(button, "")
 	values := enumProperties[CellVerticalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
@@ -401,4 +401,16 @@ func IsCheckboxChecked(view View, subviewID string) bool {
 		}
 	}
 	return false
+}
+
+// GetCheckboxVerticalAlign return the vertical align of a Checkbox subview: TopAlign (0), BottomAlign (1), CenterAlign (2)
+// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
+func GetCheckboxVerticalAlign(view View, subviewID string) int {
+	return enumStyledProperty(view, subviewID, VerticalAlign, LeftAlign, false)
+}
+
+// GetCheckboxHorizontalAlign return the vertical align of a Checkbox subview: LeftAlign (0), RightAlign (1), CenterAlign (2)
+// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
+func GetCheckboxHorizontalAlign(view View, subviewID string) int {
+	return enumStyledProperty(view, subviewID, VerticalAlign, TopAlign, false)
 }

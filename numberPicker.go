@@ -258,15 +258,7 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 // NumberSlider (1) - NumberPicker is presented by slider.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetNumberPickerType(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-
-	t, _ := enumStyledProperty(view, NumberPickerType, NumberEditor)
-	return t
+	return enumStyledProperty(view, subviewID, NumberPickerType, NumberEditor, false)
 }
 
 // GetNumberPickerMinMax returns the min and max value of NumberPicker subview.

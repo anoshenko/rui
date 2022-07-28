@@ -325,43 +325,19 @@ func (gridLayout *gridLayoutData) cssStyle(self View, builder cssBuilder) {
 // GetCellVerticalAlign returns the vertical align of a GridLayout cell content: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetCellVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumStyledProperty(view, CellVerticalAlign, StretchAlign); ok {
-			return align
-		}
-	}
-	return StretchAlign
+	return enumStyledProperty(view, subviewID, CellVerticalAlign, StretchAlign, false)
 }
 
 // GetCellHorizontalAlign returns the vertical align of a GridLayout cell content: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetCellHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumStyledProperty(view, CellHorizontalAlign, StretchAlign); ok {
-			return align
-		}
-	}
-	return StretchAlign
+	return enumStyledProperty(view, subviewID, CellHorizontalAlign, StretchAlign, false)
 }
 
 // GetGridAutoFlow returns the value of the  "grid-auto-flow" property
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetGridAutoFlow(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumStyledProperty(view, GridAutoFlow, 0); ok {
-			return align
-		}
-	}
-	return 0
+	return enumStyledProperty(view, subviewID, GridAutoFlow, 0, false)
 }
 
 // GetCellWidth returns the width of a GridLayout cell. If the result is an empty array, then the width is not set.

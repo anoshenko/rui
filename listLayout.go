@@ -163,16 +163,8 @@ func GetListOrientation(view View, subviewID string) int {
 }
 
 // GetListWrap returns the wrap type of a ListLayout or ListView subview:
-// WrapOff (0), WrapOn (1), or WrapReverse (2)
+// ListWrapOff (0), ListWrapOn (1), or ListWrapReverse (2)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetListWrap(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, ListWrap, 0); ok {
-			return result
-		}
-	}
-	return ListWrapOff
+	return enumStyledProperty(view, subviewID, ListWrap, ListWrapOff, false)
 }

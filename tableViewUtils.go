@@ -91,30 +91,14 @@ func GetTableCellStyle(view View, subviewID string) TableCellStyle {
 // Valid values are NoneSelection (0), CellSelection (1), and RowSelection (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTableSelectionMode(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, SelectionMode, NoneSelection); ok {
-			return result
-		}
-	}
-	return NoneSelection
+	return enumStyledProperty(view, subviewID, SelectionMode, NoneSelection, false)
 }
 
 // GetTableVerticalAlign returns a vertical align in a TavleView cell. Returns one of next values:
 // TopAlign (0), BottomAlign (1), CenterAlign (2), and BaselineAlign (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTableVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, TableVerticalAlign, TopAlign); ok {
-			return result
-		}
-	}
-	return TopAlign
+	return enumStyledProperty(view, subviewID, TableVerticalAlign, TopAlign, false)
 }
 
 // GetTableHeadHeight returns the number of rows in the table header.

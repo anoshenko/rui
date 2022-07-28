@@ -88,16 +88,7 @@ func IsDisabled(view View, subviewID string) bool {
 // H1Semantics (12) - H6Semantics (17), BlockquoteSemantics (18), and CodeSemantics (19).
 // If the second argument (subviewID) is "" then a semantics of the first argument (view) is returned
 func GetSemantics(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if semantics, ok := enumStyledProperty(view, Semantics, DefaultSemantics); ok {
-			return semantics
-		}
-	}
-
-	return DefaultSemantics
+	return enumStyledProperty(view, subviewID, Semantics, DefaultSemantics, false)
 }
 
 // GetOpacity returns the subview opacity.
@@ -138,38 +129,28 @@ func GetDisabledStyle(view View, subviewID string) string {
 // Visible (0), Invisible (1), or Gone (2)
 // If the second argument (subviewID) is "" then a visibility of the first argument (view) is returned
 func GetVisibility(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return Visible
-	}
-	result, _ := enumStyledProperty(view, Visibility, Visible)
-	return result
+	return enumStyledProperty(view, subviewID, Visibility, Visible, false)
 }
 
 // GetOverflow returns a value of the subview "overflow" property. Returns one of next values:
 // OverflowHidden (0), OverflowVisible (1), OverflowScroll (2), OverflowAuto (3)
 // If the second argument (subviewID) is "" then a value of the first argument (view) is returned
 func GetOverflow(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return OverflowHidden
-	}
-
 	defaultOverflow := OverflowHidden
-	switch view.(type) {
-	case EditView:
-		defaultOverflow = OverflowAuto
-
-	case ListView:
-		defaultOverflow = OverflowAuto
+	view2 := view
+	if subviewID != "" {
+		view2 = ViewByID(view, subviewID)
 	}
+	if view2 != nil {
+		switch view.(type) {
+		case EditView:
+			defaultOverflow = OverflowAuto
 
-	result, _ := enumStyledProperty(view, Overflow, defaultOverflow)
-	return result
+		case ListView:
+			defaultOverflow = OverflowAuto
+		}
+	}
+	return enumStyledProperty(view, subviewID, Overflow, defaultOverflow, false)
 }
 
 // GetZIndex returns the subview z-order.
@@ -260,14 +241,7 @@ func GetMaxHeight(view View, subviewID string) SizeUnit {
 // NoneResize (0), BothResize (1), HorizontalResize (2), or VerticalResize (3)
 // If the second argument (subviewID) is "" then a value of the first argument (view) is returned
 func GetResize(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-	result, _ := enumStyledProperty(view, Resize, 0)
-	return result
+	return enumStyledProperty(view, subviewID, Resize, NoneResize, false)
 }
 
 // GetLeft returns a left position of the subview in an AbsoluteLayout container.
@@ -471,36 +445,14 @@ func GetTextSize(view View, subviewID string) SizeUnit {
 // 1, 2, 3, 4 (normal text), 5, 6, 7 (bold text), 8 and 9
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextWeight(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if weight, ok := enumStyledProperty(view, TextWeight, NormalFont); ok {
-			return weight
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextWeight(parent, "")
-		}
-	}
-	return NormalFont
+	return enumStyledProperty(view, subviewID, TextWeight, NormalFont, true)
 }
 
 // GetTextAlign returns a text align of the subview. Returns one of next values:
 // 	 LeftAlign = 0, RightAlign = 1, CenterAlign = 2, JustifyAlign = 3
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, TextAlign, LeftAlign); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextAlign(parent, "")
-		}
-	}
-	return LeftAlign
+	return enumStyledProperty(view, subviewID, TextAlign, LeftAlign, true)
 }
 
 // GetTextIndent returns a text indent of the subview.
@@ -623,18 +575,7 @@ func GetTextLineThickness(view View, subviewID string) SizeUnit {
 // is used on text in an element, such as a line-through, underline, or overline.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextLineStyle(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, TextLineStyle, SolidLine); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextLineStyle(parent, "")
-		}
-	}
-	return SolidLine
+	return enumStyledProperty(view, subviewID, TextLineStyle, SolidLine, true)
 }
 
 // GetTextLineColor returns the stroke color of the decoration line that
@@ -648,18 +589,7 @@ func GetTextLineColor(view View, subviewID string) Color {
 // NoneTextTransform (0), CapitalizeTextTransform (1), LowerCaseTextTransform (2) or UpperCaseTextTransform (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextTransform(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, TextTransform, NoneTextTransform); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextTransform(parent, "")
-		}
-	}
-	return NoneTextTransform
+	return enumStyledProperty(view, subviewID, TextTransform, NoneTextTransform, true)
 }
 
 // GetWritingMode returns whether lines of text are laid out horizontally or vertically, as well as
@@ -667,37 +597,18 @@ func GetTextTransform(view View, subviewID string) int {
 // HorizontalBottomToTop (1), VerticalRightToLeft (2) and VerticalLeftToRight (3)
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetWritingMode(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, WritingMode, HorizontalTopToBottom); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetWritingMode(parent, "")
-		}
-	}
-	return HorizontalTopToBottom
+	return enumStyledProperty(view, subviewID, WritingMode, HorizontalTopToBottom, true)
 }
 
 // GetTextDirection - returns a direction of text, table columns, and horizontal overflow.
-// Valid values are Inherit (0), LeftToRightDirection (1), and RightToLeftDirection (2).
+// Valid values are SystemTextDirection (0), LeftToRightDirection (1), and RightToLeftDirection (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextDirection(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+	if view == nil {
+		return SystemTextDirection
 	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, TextDirection, SystemTextDirection); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextDirection(parent, "")
-		}
-	}
-	return SystemTextDirection
-	// TODO return system text direction
+	defaultDirection := view.Session().TextDirection()
+	return enumStyledProperty(view, subviewID, TextDirection, defaultDirection, true)
 }
 
 // GetVerticalTextOrientation returns a orientation of the text characters in a line. It only affects text
@@ -705,18 +616,7 @@ func GetTextDirection(view View, subviewID string) int {
 // Valid values are MixedTextOrientation (0), UprightTextOrientation (1), and SidewaysTextOrientation (2).
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetVerticalTextOrientation(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, VerticalTextOrientation, MixedTextOrientation); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetVerticalTextOrientation(parent, "")
-		}
-	}
-	return MixedTextOrientation
+	return enumStyledProperty(view, subviewID, VerticalTextOrientation, MixedTextOrientation, true)
 }
 
 // GetRow returns the range of row numbers of a GridLayout in which the subview is placed.
@@ -903,14 +803,27 @@ func sizeStyledProperty(view View, tag string) (SizeUnit, bool) {
 	return AutoSize(), false
 }
 
-func enumStyledProperty(view View, tag string, defaultValue int) (int, bool) {
-	if value, ok := enumProperty(view, tag, view.Session(), defaultValue); ok {
-		return value, true
+func enumStyledProperty(view View, subviewID string, tag string, defaultValue int, inherit bool) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
-	if value := valueFromStyle(view, tag); value != nil {
-		return valueToEnum(value, tag, view.Session(), defaultValue)
+	if view != nil {
+		if value, ok := enumProperty(view, tag, view.Session(), defaultValue); ok {
+			return value
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			if result, ok := valueToEnum(value, tag, view.Session(), defaultValue); ok {
+				return result
+			}
+		}
+
+		if inherit {
+			if parent := view.Parent(); parent != nil {
+				return enumStyledProperty(parent, "", tag, defaultValue, true)
+			}
+		}
 	}
-	return defaultValue, false
+	return defaultValue
 }
 
 func boolStyledProperty(view View, subviewID string, tag string, inherit bool) bool {
