@@ -392,15 +392,7 @@ func GetDatePickerMax(view View, subviewID string) (time.Time, bool) {
 // GetDatePickerStep returns the date changing step in days of DatePicker subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetDatePickerStep(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, _ := intStyledProperty(view, DatePickerStep, 0); result >= 0 {
-			return result
-		}
-	}
-	return 0
+	return intStyledProperty(view, subviewID, DatePickerStep, 0)
 }
 
 // GetDatePickerValue returns the date of DatePicker subview.

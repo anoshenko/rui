@@ -694,15 +694,7 @@ func SetAnimated(rootView View, viewID, tag string, value any, animation Animati
 // IsAnimationPaused returns "true" if an animation of the subview is paused, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsAnimationPaused(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, AnimationPaused); ok {
-			return result
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, AnimationPaused, false)
 }
 
 // GetTransition returns the subview transitions. The result is always non-nil.

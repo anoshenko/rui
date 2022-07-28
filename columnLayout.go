@@ -139,14 +139,7 @@ func (columnLayout *columnLayoutData) set(tag string, value any) bool {
 // based on the "column-width" property.
 // If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
 func GetColumnCount(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-	result, _ := intStyledProperty(view, ColumnCount, 0)
-	return result
+	return intStyledProperty(view, subviewID, ColumnCount, 0)
 }
 
 // GetColumnWidth returns SizeUnit value which specifies the width of each column of ColumnLayout.

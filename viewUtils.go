@@ -103,15 +103,7 @@ func GetSemantics(view View, subviewID string) int {
 // GetOpacity returns the subview opacity.
 // If the second argument (subviewID) is "" then an opacity of the first argument (view) is returned
 func GetOpacity(view View, subviewID string) float64 {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if style, ok := floatStyledProperty(view, Opacity, 1); ok {
-			return style
-		}
-	}
-	return 1
+	return floatStyledProperty(view, subviewID, Opacity, 1)
 }
 
 // GetStyle returns the subview style id.
@@ -183,14 +175,7 @@ func GetOverflow(view View, subviewID string) int {
 // GetZIndex returns the subview z-order.
 // If the second argument (subviewID) is "" then a z-order of the first argument (view) is returned
 func GetZIndex(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-	result, _ := intStyledProperty(view, Visibility, 0)
-	return result
+	return intStyledProperty(view, subviewID, Visibility, 0)
 }
 
 // GetWidth returns the subview width.
@@ -434,14 +419,7 @@ func GetTextShadows(view View, subviewID string) []ViewShadow {
 // GetBackgroundColor returns a background color of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetBackgroundColor(view View, subviewID string) Color {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-	color, _ := colorStyledProperty(view, BackgroundColor)
-	return color
+	return colorStyledProperty(view, subviewID, BackgroundColor, false)
 }
 
 // GetFontName returns the subview font.
@@ -469,18 +447,7 @@ func GetFontName(view View, subviewID string) string {
 // GetTextColor returns a text color of the subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextColor(view View, subviewID string) Color {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if color, ok := colorStyledProperty(view, TextColor); ok {
-			return color
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextColor(parent, "")
-		}
-	}
-	return 0
+	return colorStyledProperty(view, subviewID, TextColor, true)
 }
 
 // GetTextSize returns a text size of the subview.
@@ -607,86 +574,31 @@ func GetLineHeight(view View, subviewID string) SizeUnit {
 // IsItalic returns "true" if a text font of the subview is displayed in italics, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsItalic(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Italic); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return IsItalic(parent, "")
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Italic, true)
 }
 
 // IsSmallCaps returns "true" if a text font of the subview is displayed in small caps, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsSmallCaps(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, SmallCaps); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return IsSmallCaps(parent, "")
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, SmallCaps, true)
 }
 
 // IsStrikethrough returns "true" if a text font of the subview is displayed strikethrough, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsStrikethrough(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Strikethrough); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return IsStrikethrough(parent, "")
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Strikethrough, true)
 }
 
 // IsOverline returns "true" if a text font of the subview is displayed overlined, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsOverline(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Overline); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return IsOverline(parent, "")
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Overline, true)
 }
 
 // IsUnderline returns "true" if a text font of the subview is displayed underlined, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsUnderline(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Underline); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return IsUnderline(parent, "")
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Underline, true)
 }
 
 // GetTextLineThickness returns the stroke thickness of the decoration line that
@@ -729,18 +641,7 @@ func GetTextLineStyle(view View, subviewID string) int {
 // is used on text in an element, such as a line-through, underline, or overline.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextLineColor(view View, subviewID string) Color {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if color, ok := colorStyledProperty(view, TextLineColor); ok {
-			return color
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetTextLineColor(parent, "")
-		}
-	}
-	return 0
+	return colorStyledProperty(view, subviewID, TextLineColor, true)
 }
 
 // GetTextTransform returns a text transform of the subview. Return one of next values:
@@ -892,15 +793,7 @@ func GetPerspectiveOrigin(view View, subviewID string) (SizeUnit, SizeUnit) {
 // false - the back face is hidden, effectively making the element invisible when turned away from the user.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetBackfaceVisible(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, BackfaceVisible); ok {
-			return result
-		}
-	}
-	return true
+	return boolStyledProperty(view, subviewID, BackfaceVisible, false)
 }
 
 // GetOrigin returns a x-, y-, and z-coordinate of the point around which a view transformation is applied.
@@ -974,29 +867,11 @@ func GetRotate(view View, subviewID string) (float64, float64, float64, AngleUni
 // and "false" if allows, but does not force, any break to be inserted within the principal box.
 // If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
 func GetAvoidBreak(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return false
-	}
-	result, _ := boolStyledProperty(view, AvoidBreak)
-	return result
+	return boolStyledProperty(view, subviewID, AvoidBreak, true)
 }
 
 func GetNotTranslate(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, NotTranslate); ok {
-			return result
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetNotTranslate(parent, "")
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, NotTranslate, true)
 }
 
 func valueFromStyle(view View, tag string) any {
@@ -1038,45 +913,83 @@ func enumStyledProperty(view View, tag string, defaultValue int) (int, bool) {
 	return defaultValue, false
 }
 
-func boolStyledProperty(view View, tag string) (bool, bool) {
-	if value, ok := boolProperty(view, tag, view.Session()); ok {
-		return value, true
+func boolStyledProperty(view View, subviewID string, tag string, inherit bool) bool {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
-	if value := valueFromStyle(view, tag); value != nil {
-		return valueToBool(value, view.Session())
+
+	if view != nil {
+		if value, ok := boolProperty(view, tag, view.Session()); ok {
+			return value
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			if b, ok := valueToBool(value, view.Session()); ok {
+				return b
+			}
+		}
+
+		if inherit {
+			if parent := view.Parent(); parent != nil {
+				return boolStyledProperty(parent, "", tag, inherit)
+			}
+		}
 	}
-	return false, false
+
+	return false
 }
 
-func intStyledProperty(view View, tag string, defaultValue int) (int, bool) {
-	if value, ok := intProperty(view, tag, view.Session(), defaultValue); ok {
-		return value, true
+func intStyledProperty(view View, subviewID string, tag string, defaultValue int) int {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
-	if value := valueFromStyle(view, tag); value != nil {
-		return valueToInt(value, view.Session(), defaultValue)
+	if view != nil {
+		if value, ok := intProperty(view, tag, view.Session(), defaultValue); ok {
+			return value
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			n, _ := valueToInt(value, view.Session(), defaultValue)
+			return n
+		}
 	}
-	return defaultValue, false
+	return defaultValue
 }
 
-func floatStyledProperty(view View, tag string, defaultValue float64) (float64, bool) {
-	if value, ok := floatProperty(view, tag, view.Session(), defaultValue); ok {
-		return value, true
+func floatStyledProperty(view View, subviewID string, tag string, defaultValue float64) float64 {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
-	if value := valueFromStyle(view, tag); value != nil {
-		return valueToFloat(value, view.Session(), defaultValue)
+	if view != nil {
+		if value, ok := floatProperty(view, tag, view.Session(), defaultValue); ok {
+			return value
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			f, _ := valueToFloat(value, view.Session(), defaultValue)
+			return f
+		}
 	}
-
-	return defaultValue, false
+	return defaultValue
 }
 
-func colorStyledProperty(view View, tag string) (Color, bool) {
-	if value, ok := colorProperty(view, tag, view.Session()); ok {
-		return value, true
+func colorStyledProperty(view View, subviewID, tag string, inherit bool) Color {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
 	}
-	if value := valueFromStyle(view, tag); value != nil {
-		return valueToColor(value, view.Session())
+	if view != nil {
+		if value, ok := colorProperty(view, tag, view.Session()); ok {
+			return value
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			if color, ok := valueToColor(value, view.Session()); ok {
+				return color
+			}
+		}
+		if inherit {
+			if parent := view.Parent(); parent != nil {
+				return colorStyledProperty(parent, "", tag, true)
+			}
+		}
 	}
-	return Color(0), false
+	return Color(0)
 }
 
 // FocusView sets focus on the specified View, if it can be focused.
@@ -1143,29 +1056,30 @@ func IsUserSelect(view View, subviewID string) bool {
 }
 
 func isUserSelect(view View) (bool, bool) {
-	result, ok := boolStyledProperty(view, UserSelect)
-	if ok {
-		return result, true
+	if value, ok := boolProperty(view, UserSelect, view.Session()); ok {
+		return value, true
+	}
+	if value := valueFromStyle(view, UserSelect); value != nil {
+		if b, ok := valueToBool(value, view.Session()); ok {
+			return b, true
+		}
 	}
 
 	if parent := view.Parent(); parent != nil {
-		result, ok = isUserSelect(parent)
-		if ok {
+		if result, ok := isUserSelect(parent); ok {
 			return result, true
 		}
 	}
 
-	if !result {
-		switch GetSemantics(view, "") {
-		case ParagraphSemantics, H1Semantics, H2Semantics, H3Semantics, H4Semantics, H5Semantics,
-			H6Semantics, BlockquoteSemantics, CodeSemantics:
-			return true, false
-		}
-
-		if _, ok := view.(TableView); ok {
-			return true, false
-		}
+	switch GetSemantics(view, "") {
+	case ParagraphSemantics, H1Semantics, H2Semantics, H3Semantics, H4Semantics, H5Semantics,
+		H6Semantics, BlockquoteSemantics, CodeSemantics:
+		return true, false
 	}
 
-	return result, false
+	if _, ok := view.(TableView); ok {
+		return true, false
+	}
+
+	return false, false
 }

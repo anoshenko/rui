@@ -188,10 +188,10 @@ func GetColorPickerValue(view View, subviewID string) Color {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		if result, ok := colorStyledProperty(view, ColorPickerValue); ok {
-			return result
+		if value, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
+			return value
 		}
-		for _, tag := range []string{Value, ColorTag} {
+		for _, tag := range []string{ColorPickerValue, Value, ColorTag} {
 			if value := valueFromStyle(view, tag); value != nil {
 				if result, ok := valueToColor(value, view.Session()); ok {
 					return result

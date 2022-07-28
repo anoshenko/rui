@@ -546,43 +546,19 @@ func GetHint(view View, subviewID string) string {
 // GetMaxLength returns a maximal lenght of EditView. If a maximal lenght is not limited  then 0 is returned
 // If the second argument (subviewID) is "" then a value of the first argument (view) is returned.
 func GetMaxLength(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := intStyledProperty(view, MaxLength, 0); ok {
-			return result
-		}
-	}
-	return 0
+	return intStyledProperty(view, subviewID, MaxLength, 0)
 }
 
 // IsReadOnly returns the true if a EditView works in read only mode.
 // If the second argument (subviewID) is "" then a value of the first argument (view) is returned.
 func IsReadOnly(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, ReadOnly); ok {
-			return result
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, ReadOnly, false)
 }
 
 // IsSpellcheck returns a value of the Spellcheck property of EditView.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsSpellcheck(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if spellcheck, ok := boolStyledProperty(view, Spellcheck); ok {
-			return spellcheck
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Spellcheck, false)
 }
 
 // GetTextChangedListeners returns the TextChangedListener list of an EditView or MultiLineEditView subview.
@@ -629,16 +605,7 @@ func GetEditViewPattern(view View, subviewID string) string {
 // IsEditViewWrap returns a value of the EditWrap property of MultiLineEditView.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsEditViewWrap(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if wrap, ok := boolStyledProperty(view, EditWrap); ok {
-			return wrap
-		}
-	}
-	return false
-
+	return boolStyledProperty(view, subviewID, EditWrap, false)
 }
 
 // AppendEditText appends the text to the EditView content.
@@ -659,12 +626,5 @@ func AppendEditText(view View, subviewID string, text string) {
 // GetCaretColor returns the color of the text input carret.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetCaretColor(view View, subviewID string) Color {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-	t, _ := colorStyledProperty(view, CaretColor)
-	return t
+	return colorStyledProperty(view, subviewID, CaretColor, false)
 }

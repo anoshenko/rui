@@ -251,7 +251,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 
 	buffer.WriteString(` type="file"`)
-	if multiple, ok := boolStyledProperty(picker, Multiple); ok && multiple {
+	if IsMultipleFilePicker(picker, "") {
 		buffer.WriteString(` multiple`)
 	}
 
@@ -354,15 +354,7 @@ func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(
 // IsMultipleFilePicker returns "true" if multiple files can be selected in the FilePicker, "false" otherwise.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsMultipleFilePicker(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Multiple); ok {
-			return result
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Multiple, false)
 }
 
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.

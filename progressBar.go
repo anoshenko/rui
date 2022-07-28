@@ -108,33 +108,11 @@ func (progress *progressBarData) htmlProperties(self View, buffer *strings.Build
 // GetProgressBarMax returns the max value of ProgressBar subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetProgressBarMax(view View, subviewID string) float64 {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-
-	result, ok := floatStyledProperty(view, ProgressBarMax, 1)
-	if !ok {
-		result, _ = floatStyledProperty(view, Max, 1)
-	}
-	return result
+	return floatStyledProperty(view, subviewID, ProgressBarMax, 1)
 }
 
 // GetProgressBarValue returns the value of ProgressBar subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetProgressBarValue(view View, subviewID string) float64 {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-
-	result, ok := floatStyledProperty(view, ProgressBarValue, 0)
-	if !ok {
-		result, _ = floatStyledProperty(view, Value, 0)
-	}
-	return result
+	return floatStyledProperty(view, subviewID, ProgressBarValue, 0)
 }

@@ -208,13 +208,5 @@ func GetDetailsSummary(view View, subviewID string) View {
 // IsDetailsExpanded returns a value of the Expanded property of DetailsView.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func IsDetailsExpanded(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Expanded); ok {
-			return result
-		}
-	}
-	return false
+	return boolStyledProperty(view, subviewID, Expanded, false)
 }

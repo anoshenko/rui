@@ -380,22 +380,7 @@ func GetTimePickerMax(view View, subviewID string) (time.Time, bool) {
 // GetTimePickerStep returns the time changing step in seconds of TimePicker subview.
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTimePickerStep(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 60
-	}
-
-	result, ok := intStyledProperty(view, TimePickerStep, 60)
-	if !ok {
-		result, _ = intStyledProperty(view, Step, 60)
-	}
-
-	if result < 0 {
-		return 60
-	}
-	return result
+	return intStyledProperty(view, subviewID, TimePickerStep, 60)
 }
 
 // GetTimePickerValue returns the time of TimePicker subview.
