@@ -309,6 +309,11 @@ var enumProperties = map[string]struct {
 		"",
 		[]string{"left", "right", "center", "stretch"},
 	},
+	ArrowAlign: {
+		[]string{"left", "right", "center"},
+		"",
+		[]string{"left", "right", "center"},
+	},
 	CellVerticalAlign: {
 		[]string{"top", "bottom", "center", "stretch"},
 		"align-items",
@@ -433,6 +438,11 @@ var enumProperties = map[string]struct {
 		[]string{"none", "both", "horizontal", "vertical"},
 		"resize",
 		[]string{"none", "both", "horizontal", "vertical"},
+	},
+	Arrow: {
+		[]string{"none", "top", "right", "bottom", "left"},
+		"",
+		[]string{"none", "top", "right", "bottom", "left"},
 	},
 }
 

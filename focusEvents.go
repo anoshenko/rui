@@ -20,7 +20,7 @@ const (
 	LostFocusEvent = "lost-focus-event"
 )
 
-func valueToNoParamListeners[V View](value any) ([]func(V), bool) {
+func valueToNoParamListeners[V any](value any) ([]func(V), bool) {
 	if value == nil {
 		return nil, true
 	}

@@ -2,7 +2,7 @@
 
 * Requared go 1.18
 * The "interface{}" type replaced by "any"
-* Added the "overflow" property 
+* Added "overflow", "arrow", "arrow-align", "arrow-size", and "arrow-offset" properties 
 * Added the GetOverflow function
 
 # v0.8.0

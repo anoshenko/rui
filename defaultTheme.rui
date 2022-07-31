@@ -61,6 +61,7 @@ theme {
 		ruiTabHeight = 32px,
 		ruiTabBarPadding = 2px,
 		ruiTabRadius = 2px,
+		ruiArrowSize = 16px,
 	},
 	constants:touch = _{
 		ruiButtonHorizontalPadding = 20px,
@@ -216,7 +217,6 @@ theme {
 			background-color = @ruiPopupBackgroundColor,
 			text-color = @ruiPopupTextColor,
 			radius = 4px,
-			shadow = _{spread-radius=4px, blur=16px, color=@ruiPopupShadow },
 		},
 		ruiPopupTitle {
 			background-color = @ruiPopupTitleColor,

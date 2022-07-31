@@ -1793,6 +1793,7 @@ function imageLoaded(element, event) {
 		",natural-height=" + element.naturalHeight +
 		",current-src=\"" + element.currentSrc +  "\"}";
 	sendMessage(message);
+	scanElementsSize()
 }
 
 function imageError(element, event) {
