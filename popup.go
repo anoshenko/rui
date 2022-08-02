@@ -334,45 +334,48 @@ func (popup popupData) createArrow(arrow int, align int, size SizeUnit, off Size
 	popupParams := Params{
 		MaxWidth:  Percent(100),
 		MaxHeight: Percent(100),
+		Row:       1,
+		Column:    1,
 		Content:   popupView,
 	}
+
 	arrowParams := Params{
 		Width:  size,
 		Height: size,
 	}
 	containerParams := Params{
-		MaxWidth:  Percent(100),
-		MaxHeight: Percent(100),
+		MaxWidth:   Percent(100),
+		MaxHeight:  Percent(100),
+		CellWidth:  []SizeUnit{AutoSize(), Fr(1), AutoSize()},
+		CellHeight: []SizeUnit{AutoSize(), Fr(1), AutoSize()},
 	}
 
 	switch arrow {
 	case TopArrow:
+		arrowParams[Column] = 1
 		arrowParams[BorderBottom] = border
 		arrowParams[BorderLeft] = border2
 		arrowParams[BorderRight] = border2
-		popupParams[Row] = 1
-		containerParams[CellHeight] = []SizeUnit{AutoSize(), Fr(1)}
 
 	case RightArrow:
-		arrowParams[Column] = 1
+		arrowParams[Column] = 2
+		arrowParams[Row] = 1
 		arrowParams[BorderLeft] = border
 		arrowParams[BorderTop] = border2
 		arrowParams[BorderBottom] = border2
-		containerParams[CellWidth] = []SizeUnit{Fr(1), AutoSize()}
 
 	case BottomArrow:
-		arrowParams[Row] = 1
+		arrowParams[Column] = 1
+		arrowParams[Row] = 2
 		arrowParams[BorderTop] = border
 		arrowParams[BorderLeft] = border2
 		arrowParams[BorderRight] = border2
-		containerParams[CellHeight] = []SizeUnit{Fr(1), AutoSize()}
 
 	case LeftArrow:
+		arrowParams[Row] = 1
 		arrowParams[BorderRight] = border
 		arrowParams[BorderTop] = border2
 		arrowParams[BorderBottom] = border2
-		popupParams[Column] = 1
-		containerParams[CellWidth] = []SizeUnit{AutoSize(), Fr(1)}
 
 	default:
 		return popupView
