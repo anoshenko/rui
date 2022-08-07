@@ -351,6 +351,8 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 	buffer.WriteString(htmlID)
 	buffer.WriteString(`pop" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent(\'`)
 	buffer.WriteString(htmlID)
+	buffer.WriteString(`\', \'ruiPop\', event)" ontransitioncancel="stackTransitionEndEvent(\'`)
+	buffer.WriteString(htmlID)
 	buffer.WriteString(`\', \'ruiPop\', event)" style="transition: transform 1s ease;">`)
 	viewHTML(layout.popView, buffer)
 	buffer.WriteString(`</div>`)

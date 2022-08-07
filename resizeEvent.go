@@ -22,7 +22,7 @@ func (view *viewData) onItemResize(self View, index string, x, y, width, height 
 }
 
 func (view *viewData) setFrameListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[FilePicker, []FileInfo](value)
+	listeners, ok := valueToEventListeners[View, Frame](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return false

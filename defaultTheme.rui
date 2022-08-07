@@ -62,6 +62,7 @@ theme {
 		ruiTabBarPadding = 2px,
 		ruiTabRadius = 2px,
 		ruiArrowSize = 16px,
+		ruiArrowWidth = 16px,
 	},
 	constants:touch = _{
 		ruiButtonHorizontalPadding = 20px,

@@ -3,7 +3,6 @@ package rui
 import (
 	"embed"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -171,7 +170,7 @@ func registerImage(fs *embed.FS, path, filename string) {
 }
 
 func scanImagesDirectory(path, filePrefix string) {
-	if files, err := ioutil.ReadDir(path); err == nil {
+	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			filename := file.Name()
 			if filename[0] != '.' {
@@ -189,7 +188,7 @@ func scanImagesDirectory(path, filePrefix string) {
 }
 
 func scanThemesDir(path string) {
-	if files, err := ioutil.ReadDir(path); err == nil {
+	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			filename := file.Name()
 			if filename[0] != '.' {
@@ -197,7 +196,7 @@ func scanThemesDir(path string) {
 				if file.IsDir() {
 					scanThemesDir(newPath)
 				} else if strings.ToLower(filepath.Ext(newPath)) == ".rui" {
-					if data, err := ioutil.ReadFile(newPath); err == nil {
+					if data, err := os.ReadFile(newPath); err == nil {
 						registerThemeText(string(data))
 					} else {
 						ErrorLog(err.Error())
@@ -380,7 +379,7 @@ func AllRawResources() []string {
 	}
 
 	if resources.path != "" {
-		if files, err := ioutil.ReadDir(resources.path + rawDir); err == nil {
+		if files, err := os.ReadDir(resources.path + rawDir); err == nil {
 			for _, file := range files {
 				result = append(result, file.Name())
 			}
@@ -388,7 +387,7 @@ func AllRawResources() []string {
 	}
 
 	if exe, err := os.Executable(); err == nil {
-		if files, err := ioutil.ReadDir(filepath.Dir(exe) + "/resources/" + rawDir); err == nil {
+		if files, err := os.ReadDir(filepath.Dir(exe) + "/resources/" + rawDir); err == nil {
 			for _, file := range files {
 				result = append(result, file.Name())
 			}

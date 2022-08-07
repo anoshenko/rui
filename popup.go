@@ -44,23 +44,40 @@ const (
 	Arrow = "arrow"
 
 	// ArrowAlign is the constant for the "arrow-align" property tag.
-	// The "arrow-align" int property is used for set the horizontal alignment of Popup arrow.
+	// The "arrow-align" int property is used for set the horizontal alignment of the Popup arrow.
 	// Valid values: LeftAlign (0), RightAlign (1), TopAlign (0), BottomAlign (1), CenterAlign (2)
 	ArrowAlign = "arrow-align"
 
 	// ArrowSize is the constant for the "arrow-size" property tag.
-	// The "arrow-size" SizeUnit property is used for set the size of Popup arrow.
+	// The "arrow-size" SizeUnit property is used for set the size (length) of the Popup arrow.
 	ArrowSize = "arrow-size"
 
+	// ArrowWidth is the constant for the "arrow-width" property tag.
+	// The "arrow-width" SizeUnit property is used for set the width of the Popup arrow.
+	ArrowWidth = "arrow-width"
+
 	// ArrowOffset is the constant for the "arrow-offset" property tag.
-	// The "arrow-offset" SizeUnit property is used for set the offset of Popup arrow.
+	// The "arrow-offset" SizeUnit property is used for set the offset of the Popup arrow.
 	ArrowOffset = "arrow-offset"
 
-	NoneArrow   = 0
-	TopArrow    = 1
-	RightArrow  = 2
+	// NoneArrow is value of the popup "arrow" property: no arrow
+	NoneArrow = 0
+
+	// TopArrow is value of the popup "arrow" property:
+	// Arrow at the top side of the pop-up window
+	TopArrow = 1
+
+	// RightArrow is value of the popup "arrow" property:
+	// Arrow on the right side of the pop-up window
+	RightArrow = 2
+
+	// BottomArrow is value of the popup "arrow" property:
+	// Arrow at the bottom of the pop-up window
 	BottomArrow = 3
-	LeftArrow   = 4
+
+	// LeftArrow is value of the popup "arrow" property:
+	// Arrow on the left side of the pop-up window
+	LeftArrow = 4
 )
 
 // PopupButton describes a button that will be placed at the bottom of the window.
@@ -90,27 +107,259 @@ type popupManager struct {
 	popups []Popup
 }
 
+type popupArrow struct {
+	column, row      int
+	location, align  int
+	size, width, off SizeUnit
+}
+
+func (arrow *popupArrow) fixOff(popupView View) {
+	if arrow.align == CenterAlign && arrow.off.Type == Auto {
+		r := GetRadius(popupView, "")
+		switch arrow.location {
+		case TopArrow:
+			switch arrow.align {
+			case LeftAlign:
+				arrow.off = r.TopLeftX
+
+			case RightAlign:
+				arrow.off = r.TopRightX
+			}
+
+		case BottomArrow:
+			switch arrow.align {
+			case LeftAlign:
+				arrow.off = r.BottomLeftX
+
+			case RightAlign:
+				arrow.off = r.BottomRightX
+			}
+
+		case RightArrow:
+			switch arrow.align {
+			case TopAlign:
+				arrow.off = r.TopRightY
+
+			case BottomAlign:
+				arrow.off = r.BottomRightY
+			}
+
+		case LeftArrow:
+			switch arrow.align {
+			case TopAlign:
+				arrow.off = r.TopLeftY
+
+			case BottomAlign:
+				arrow.off = r.BottomLeftY
+			}
+		}
+	}
+}
+
+func (arrow *popupArrow) createView(popupView View) View {
+	session := popupView.Session()
+
+	defaultSize := func(constTag string, defValue SizeUnit) SizeUnit {
+		if value, ok := session.Constant(constTag); ok {
+			if size, ok := StringToSizeUnit(value); ok && size.Type != Auto && size.Value != 0 {
+				return size
+			}
+		}
+		return defValue
+	}
+
+	if arrow.size.Type == Auto || arrow.size.Value == 0 {
+		arrow.size = defaultSize("ruiArrowSize", Px(16))
+	}
+
+	if arrow.width.Type == Auto || arrow.width.Value == 0 {
+		arrow.width = defaultSize("ruiArrowWidth", Px(16))
+	}
+
+	color := GetBackgroundColor(popupView, "")
+	border := NewBorder(Params{
+		Style:    SolidLine,
+		ColorTag: color,
+		Width:    arrow.size,
+	})
+	border2 := NewBorder(Params{
+		Style: SolidLine,
+		Width: SizeUnit{Type: arrow.width.Type, Value: arrow.width.Value / 2},
+	})
+
+	params := Params{}
+
+	switch arrow.location {
+	case TopArrow:
+		params[Row] = 0
+		params[Column] = 1
+		params[BorderBottom] = border
+		params[BorderLeft] = border2
+		params[BorderRight] = border2
+
+	case RightArrow:
+		params[Row] = 1
+		params[Column] = 0
+		params[BorderLeft] = border
+		params[BorderTop] = border2
+		params[BorderBottom] = border2
+
+	case BottomArrow:
+		params[Row] = 0
+		params[Column] = 1
+		params[BorderTop] = border
+		params[BorderLeft] = border2
+		params[BorderRight] = border2
+
+	case LeftArrow:
+		params[Row] = 1
+		params[Column] = 0
+		params[BorderRight] = border
+		params[BorderTop] = border2
+		params[BorderBottom] = border2
+	}
+
+	arrowView := NewView(session, params)
+
+	params = Params{
+		Row:     arrow.row,
+		Column:  arrow.column,
+		Content: arrowView,
+	}
+
+	arrow.fixOff(popupView)
+
+	switch arrow.location {
+	case TopArrow, BottomArrow:
+		cellWidth := make([]SizeUnit, 3)
+		switch arrow.align {
+		case LeftAlign:
+			cellWidth[0] = arrow.off
+			cellWidth[2] = Fr(1)
+
+		case RightAlign:
+			cellWidth[0] = Fr(1)
+			cellWidth[2] = arrow.off
+
+		default:
+			cellWidth[0] = Fr(1)
+			cellWidth[2] = Fr(1)
+			if arrow.off.Type != Auto && arrow.off.Value != 0 {
+				arrowView.Set(MarginLeft, arrow.off)
+			}
+		}
+		params[CellWidth] = cellWidth
+
+	case RightArrow, LeftArrow:
+		cellHeight := make([]SizeUnit, 3)
+		switch arrow.align {
+		case TopAlign:
+			cellHeight[0] = arrow.off
+			cellHeight[2] = Fr(1)
+
+		case BottomAlign:
+			cellHeight[0] = Fr(1)
+			cellHeight[2] = arrow.off
+
+		default:
+			cellHeight[0] = Fr(1)
+			cellHeight[2] = Fr(1)
+			if arrow.off.Type != Auto && arrow.off.Value != 0 {
+				arrowView.Set(MarginTop, arrow.off)
+			}
+		}
+		params[CellHeight] = cellHeight
+	}
+
+	return NewGridLayout(session, params)
+}
+
 func (popup *popupData) init(view View, popupParams Params) {
 	popup.view = view
 	session := view.Session()
 
+	columnCount := 3
+	rowCount := 3
+	popupRow := 1
+	popupColumn := 1
+	arrow := popupArrow{
+		row:    1,
+		column: 1,
+		align:  CenterAlign,
+	}
+
+	switch arrow.location, _ = enumProperty(popupParams, Arrow, session, NoneArrow); arrow.location {
+	case TopArrow:
+		rowCount = 4
+		popupRow = 2
+
+	case BottomArrow:
+		rowCount = 4
+		arrow.row = 2
+
+	case LeftArrow:
+		columnCount = 4
+		popupColumn = 2
+
+	case RightArrow:
+		columnCount = 4
+		arrow.column = 2
+
+	default:
+	}
+
+	cellWidth := make([]SizeUnit, columnCount)
+	switch hAlign, _ := enumProperty(popupParams, HorizontalAlign, session, CenterAlign); hAlign {
+	case LeftAlign:
+		cellWidth[columnCount-1] = Fr(1)
+
+	case RightAlign:
+		cellWidth[0] = Fr(1)
+
+	default:
+		cellWidth[0] = Fr(1)
+		cellWidth[columnCount-1] = Fr(1)
+	}
+
+	cellHeight := make([]SizeUnit, rowCount)
+	switch vAlign, _ := enumProperty(popupParams, VerticalAlign, session, CenterAlign); vAlign {
+	case LeftAlign:
+		cellHeight[rowCount-1] = Fr(1)
+
+	case RightAlign:
+		cellHeight[0] = Fr(1)
+
+	default:
+		cellHeight[0] = Fr(1)
+		cellHeight[rowCount-1] = Fr(1)
+	}
+
+	layerParams := Params{
+		Style:      "ruiPopupLayer",
+		MaxWidth:   Percent(100),
+		MaxHeight:  Percent(100),
+		CellWidth:  cellWidth,
+		CellHeight: cellHeight,
+	}
+
 	params := Params{
 		Style:               "ruiPopup",
+		Row:                 popupRow,
+		Column:              popupColumn,
 		MaxWidth:            Percent(100),
 		MaxHeight:           Percent(100),
 		CellVerticalAlign:   StretchAlign,
 		CellHorizontalAlign: StretchAlign,
 		ClickEvent:          func(View) {},
+		Shadow: NewShadowWithParams(Params{
+			SpreadRadius: Px(4),
+			Blur:         Px(16),
+			ColorTag:     "@ruiPopupShadow",
+		}),
 	}
 
-	closeButton := false
+	var closeButton View = nil
 	outsideClose := false
-	vAlign := CenterAlign
-	hAlign := CenterAlign
-	arrow := 0
-	arrowAlign := CenterAlign
-	arrowSize := AutoSize()
-	arrowOff := AutoSize()
 	buttons := []PopupButton{}
 	titleStyle := "ruiPopupTitle"
 	var title View = nil
@@ -118,17 +367,41 @@ func (popup *popupData) init(view View, popupParams Params) {
 	for tag, value := range popupParams {
 		if value != nil {
 			switch tag {
+			case VerticalAlign, HorizontalAlign, Arrow, Row, Column:
+				// Do nothing
+
+			case Margin:
+				layerParams[Padding] = value
+
+			case MarginLeft:
+				layerParams[PaddingLeft] = value
+
+			case MarginRight:
+				layerParams[PaddingRight] = value
+
+			case MarginTop:
+				layerParams[PaddingTop] = value
+
+			case MarginBottom:
+				layerParams[PaddingBottom] = value
+
 			case CloseButton:
-				closeButton, _ = boolProperty(popupParams, CloseButton, session)
+				closeButton = NewGridLayout(session, Params{
+					Column:              1,
+					Height:              "@ruiPopupTitleHeight",
+					Width:               "@ruiPopupTitleHeight",
+					CellHorizontalAlign: CenterAlign,
+					CellVerticalAlign:   CenterAlign,
+					TextSize:            Px(20),
+					Content:             "✕",
+					NotTranslate:        true,
+					ClickEvent: func(View) {
+						popup.Dismiss()
+					},
+				})
 
 			case OutsideClose:
 				outsideClose, _ = boolProperty(popupParams, OutsideClose, session)
-
-			case VerticalAlign:
-				vAlign, _ = enumProperty(popupParams, VerticalAlign, session, CenterAlign)
-
-			case HorizontalAlign:
-				hAlign, _ = enumProperty(popupParams, HorizontalAlign, session, CenterAlign)
 
 			case Buttons:
 				switch value := value.(type) {
@@ -169,9 +442,6 @@ func (popup *popupData) init(view View, popupParams Params) {
 					notCompatibleType(tag, value)
 				}
 
-			case Arrow:
-				arrow, _ = enumProperty(popupParams, Arrow, session, NoneArrow)
-
 			case ArrowAlign:
 				switch text := value.(type) {
 				case string:
@@ -183,13 +453,13 @@ func (popup *popupData) init(view View, popupParams Params) {
 						value = "right"
 					}
 				}
-				arrowAlign, _ = enumProperty(popupParams, ArrowAlign, session, CenterAlign)
+				arrow.align, _ = enumProperty(popupParams, ArrowAlign, session, CenterAlign)
 
 			case ArrowSize:
-				arrowSize, _ = sizeProperty(popupParams, ArrowSize, session)
+				arrow.size, _ = sizeProperty(popupParams, ArrowSize, session)
 
 			case ArrowOffset:
-				arrowOff, _ = sizeProperty(popupParams, ArrowOffset, session)
+				arrow.off, _ = sizeProperty(popupParams, ArrowOffset, session)
 
 			default:
 				params[tag] = value
@@ -199,40 +469,29 @@ func (popup *popupData) init(view View, popupParams Params) {
 
 	popupView := NewGridLayout(view.Session(), params)
 
-	var cellHeight []SizeUnit
+	var popupCellHeight []SizeUnit
 	viewRow := 0
-	if title != nil || closeButton {
-		viewRow = 1
-		titleView := NewGridLayout(session, Params{
+	if title != nil || closeButton != nil {
+		titleContent := []View{}
+		if title != nil {
+			titleContent = append(titleContent, title)
+		}
+		if closeButton != nil {
+			titleContent = append(titleContent, closeButton)
+		}
+		popupView.Append(NewGridLayout(session, Params{
 			Row:               0,
 			Style:             titleStyle,
-			CellWidth:         []any{Fr(1), "@ruiPopupTitleHeight"},
+			CellWidth:         []any{Fr(1), AutoSize()},
 			CellVerticalAlign: CenterAlign,
 			PaddingLeft:       Px(12),
-		})
-		if title != nil {
-			titleView.Append(title)
-		}
-		if closeButton {
-			titleView.Append(NewGridLayout(session, Params{
-				Column:              1,
-				Height:              "@ruiPopupTitleHeight",
-				Width:               "@ruiPopupTitleHeight",
-				CellHorizontalAlign: CenterAlign,
-				CellVerticalAlign:   CenterAlign,
-				TextSize:            Px(20),
-				Content:             "✕",
-				NotTranslate:        true,
-				ClickEvent: func(View) {
-					popup.Dismiss()
-				},
-			}))
-		}
+			Content:           titleContent,
+		}))
 
-		popupView.Append(titleView)
-		cellHeight = []SizeUnit{AutoSize(), Fr(1)}
+		viewRow = 1
+		popupCellHeight = []SizeUnit{AutoSize(), Fr(1)}
 	} else {
-		cellHeight = []SizeUnit{Fr(1)}
+		popupCellHeight = []SizeUnit{Fr(1)}
 	}
 
 	view.Set(Row, viewRow)
@@ -240,7 +499,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 
 	if buttonCount := len(buttons); buttonCount > 0 {
 		buttonsAlign, _ := enumProperty(params, ButtonsAlign, session, RightAlign)
-		cellHeight = append(cellHeight, AutoSize())
+		popupCellHeight = append(popupCellHeight, AutoSize())
 		gap, _ := sizeConstant(session, "ruiPopupButtonGap")
 		cellWidth := []SizeUnit{}
 		for i := 0; i < buttonCount; i++ {
@@ -278,225 +537,22 @@ func (popup *popupData) init(view View, popupParams Params) {
 			Content:             buttonsPanel,
 		}))
 	}
-	popupView.Set(CellHeight, cellHeight)
 
-	popup.layerView = NewGridLayout(session, Params{
-		Style:               "ruiPopupLayer",
-		CellVerticalAlign:   vAlign,
-		CellHorizontalAlign: hAlign,
-		MaxWidth:            Percent(100),
-		MaxHeight:           Percent(100),
-		Filter: NewViewFilter(Params{
-			DropShadow: NewShadowWithParams(Params{
-				SpreadRadius: Px(4),
-				Blur:         Px(16),
-				ColorTag:     "@ruiPopupShadow",
-			}),
-		}),
-		Content: NewColumnLayout(session, Params{
-			Content: popup.createArrow(arrow, arrowAlign, arrowSize, arrowOff, popupView),
-		}),
-	})
+	popupView.Set(CellHeight, popupCellHeight)
+
+	if arrow.location != NoneArrow {
+		layerParams[Content] = []View{popupView, arrow.createView(popupView)}
+	} else {
+		layerParams[Content] = []View{popupView}
+	}
+
+	popup.layerView = NewGridLayout(session, layerParams)
 
 	if outsideClose {
 		popup.layerView.Set(ClickEvent, func(View) {
 			popup.Dismiss()
 		})
 	}
-}
-
-func (popup popupData) createArrow(arrow int, align int, size SizeUnit, off SizeUnit, popupView View) View {
-	if arrow == NoneArrow {
-		return popupView
-	}
-
-	session := popupView.Session()
-
-	if size.Type == Auto {
-		size = Px(16)
-		if value, ok := session.Constant("ruiArrowSize"); ok {
-			size, _ = StringToSizeUnit(value)
-		}
-	}
-
-	color := GetBackgroundColor(popupView, "")
-	border := NewBorder(Params{
-		Style:    SolidLine,
-		ColorTag: color,
-		Width:    size,
-	})
-	border2 := NewBorder(Params{
-		Style:    SolidLine,
-		ColorTag: 1,
-		Width:    SizeUnit{Type: size.Type, Value: size.Value / 2},
-	})
-
-	popupParams := Params{
-		MaxWidth:  Percent(100),
-		MaxHeight: Percent(100),
-		Row:       1,
-		Column:    1,
-		Content:   popupView,
-	}
-
-	arrowParams := Params{
-		Width:  size,
-		Height: size,
-	}
-	containerParams := Params{
-		MaxWidth:   Percent(100),
-		MaxHeight:  Percent(100),
-		CellWidth:  []SizeUnit{AutoSize(), Fr(1), AutoSize()},
-		CellHeight: []SizeUnit{AutoSize(), Fr(1), AutoSize()},
-	}
-
-	switch arrow {
-	case TopArrow:
-		arrowParams[Column] = 1
-		arrowParams[BorderBottom] = border
-		arrowParams[BorderLeft] = border2
-		arrowParams[BorderRight] = border2
-
-	case RightArrow:
-		arrowParams[Column] = 2
-		arrowParams[Row] = 1
-		arrowParams[BorderLeft] = border
-		arrowParams[BorderTop] = border2
-		arrowParams[BorderBottom] = border2
-
-	case BottomArrow:
-		arrowParams[Column] = 1
-		arrowParams[Row] = 2
-		arrowParams[BorderTop] = border
-		arrowParams[BorderLeft] = border2
-		arrowParams[BorderRight] = border2
-
-	case LeftArrow:
-		arrowParams[Row] = 1
-		arrowParams[BorderRight] = border
-		arrowParams[BorderTop] = border2
-		arrowParams[BorderBottom] = border2
-
-	default:
-		return popupView
-	}
-
-	switch align {
-	case LeftAlign:
-		switch arrow {
-		case TopArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").TopLeftX
-			}
-			if off.Type != Auto {
-				arrowParams[MarginLeft] = off
-			}
-
-		case RightArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").TopRightY
-			}
-			if off.Type != Auto {
-				arrowParams[MarginTop] = off
-			}
-
-		case BottomArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").BottomLeftX
-			}
-			if off.Type != Auto {
-				arrowParams[MarginLeft] = off
-			}
-
-		case LeftArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").TopLeftY
-			}
-			if off.Type != Auto {
-				arrowParams[MarginTop] = off
-			}
-		}
-
-	case RightAlign:
-		switch arrow {
-		case TopArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").TopRightX
-			}
-			if off.Type != Auto {
-				arrowParams[MarginRight] = off
-			}
-
-		case RightArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").BottomRightY
-			}
-			if off.Type != Auto {
-				arrowParams[MarginBottom] = off
-			}
-
-		case BottomArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").BottomRightX
-			}
-			if off.Type != Auto {
-				arrowParams[MarginRight] = off
-			}
-
-		case LeftArrow:
-			if off.Type == Auto {
-				off = GetRadius(popupView, "").BottomLeftY
-			}
-			if off.Type != Auto {
-				arrowParams[MarginBottom] = off
-			}
-		}
-
-	default:
-		align = CenterAlign
-		if off.Type != Auto {
-			switch arrow {
-			case TopArrow, BottomArrow:
-				if off.Value < 0 {
-					off.Value = -off.Value
-					arrowParams[MarginRight] = off
-				} else {
-					arrowParams[MarginLeft] = off
-				}
-
-			case RightArrow, LeftArrow:
-				if off.Value < 0 {
-					off.Value = -off.Value
-					arrowParams[MarginBottom] = off
-				} else {
-					arrowParams[MarginTop] = off
-				}
-			}
-		}
-	}
-
-	if margin := popupView.Get(Margin); margin != nil {
-		popupView.Remove(Margin)
-		containerParams[Padding] = margin
-	}
-
-	/*
-		for key, value := range popupParams {
-			if key != Content {
-				popupView.Set(key, value)
-			}
-		}
-	*/
-
-	containerParams[CellVerticalAlign] = align
-	containerParams[CellHorizontalAlign] = align
-	containerParams[Content] = []View{
-		NewView(session, arrowParams),
-		//popupView,
-		NewColumnLayout(session, popupParams),
-	}
-
-	return NewGridLayout(session, containerParams)
 }
 
 func (popup popupData) View() View {

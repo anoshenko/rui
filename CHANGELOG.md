@@ -1,8 +1,9 @@
-# v0.8.0
+# v0.9.0
 
 * Requared go 1.18
 * The "interface{}" type replaced by "any"
-* Added "overflow", "arrow", "arrow-align", "arrow-size", and "arrow-offset" properties 
+* Added "overflow", "arrow", "arrow-align", "arrow-size", "arrow-width", and "arrow-offset" properties 
+* Added "@ruiArrowSize" and "@ruiArrowWidth" constants to the default theme
 * Added the GetOverflow function
 
 # v0.8.0

@@ -4312,6 +4312,43 @@ not to use the "title-style" property, but to override the "ruiPopupTitle" style
 The header can also have a window close button. To add it to the header, use the "close-button" bool property.
 Setting this property to "true" adds a window close button to the title bar (the default value is "false").
 
+### Arrow Popup
+
+A pop-up window can have an arrow on one side. An arrow is specified using the "arrow" int property (Arrow constant).
+The "arrow" property can take the following values
+
+| Value | Constant    | Arrow location                               |
+|:-----:|-------------|----------------------------------------------|
+| 0     | NoneArrow   | No arrow (default value)                     |
+| 1     | Top Arrow   | Arrow at the top side of the pop-up window   |
+| 2     | RightArrow  | Arrow on the right side of the pop-up window |
+| 3     | bottomarrow | Arrow at the bottom of the pop-up window     |
+| 4     | LeftArrow   | Arrow on the left side of the pop-up window  |
+
+The size of the arrow is specified using the "arrow-size" (ArrowSize constant) and "arrow-width" (ArrowWidth constant) SizeUnit properties.
+They specify the length ("arrow-size") and width ("arrow-width") of the arrow. 
+If these properties are not set, then the constants "@ruiArrowSize" (the default value is 16px) 
+and "@ruiArrowWidth" (the default value is 16px) are used.
+
+The alignment of the arrow relative to the popup is set using the "arrow-align" int property (ArrowAlign constant).
+The "arrow-align" property can take the following values
+
+| Value | Constants                | Alignment                        |
+|:-----:|--------------------------|----------------------------------|
+| 0     | TopAlign / LeftAlign     | Top/left alignment               |
+| 1     | BottomAlign / RightAlign | Bottom/Right Alignment           |
+| 2     | CenterAlign              | Center alignment (default value) |
+
+You can also set an additional offset for the arrow. For this, the "arrow-offset" SizeUnit property (ArrowOffset constant) is used.
+
+If the value of the "arrow-align" property is TopAlign/LeftAlign, then the offset is relative to the top/left side.
+If the value of the "arrow-align" property is BottomAlign/RightAlign, then the offset is relative to the bottom/right side.
+If the value of the "arrow-align" property is CenterAlign, then an offset (can be either positive or negative) is added as an arrow padding.
+That is, the arrow is aligned in the center with an offset
+
+If "arrow-offset" is not set, then the default value for "arrow-align" equal to CenterAlign is 0.
+For other "arrow-align" values, the default value is the appropriate corner radius of the popup.
+
 ### Close Popup
 
 As it was said above, the Dismiss() method of the Popup interface is used to close the popup window.

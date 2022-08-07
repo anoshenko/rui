@@ -2,7 +2,7 @@ package rui
 
 import (
 	"embed"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -28,7 +28,7 @@ func scanEmbedStringsDir(fs *embed.FS, dir string) {
 }
 
 func scanStringsDir(path string) {
-	if files, err := ioutil.ReadDir(path); err == nil {
+	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			filename := file.Name()
 			if filename[0] != '.' {
@@ -36,7 +36,7 @@ func scanStringsDir(path string) {
 				if file.IsDir() {
 					scanStringsDir(newPath)
 				} else if strings.ToLower(filepath.Ext(newPath)) == ".rui" {
-					if data, err := ioutil.ReadFile(newPath); err == nil {
+					if data, err := os.ReadFile(newPath); err == nil {
 						loadStringResources(string(data))
 					} else {
 						ErrorLog(err.Error())
