@@ -176,47 +176,44 @@ func (arrow *popupArrow) createView(popupView View) View {
 		arrow.width = defaultSize("ruiArrowWidth", Px(16))
 	}
 
-	color := GetBackgroundColor(popupView, "")
-	border := NewBorder(Params{
-		Style:    SolidLine,
-		ColorTag: color,
-		Width:    arrow.size,
-	})
-	border2 := NewBorder(Params{
-		Style: SolidLine,
-		Width: SizeUnit{Type: arrow.width.Type, Value: arrow.width.Value / 2},
-	})
+	params := Params{BackgroundColor: GetBackgroundColor(popupView, "")}
 
-	params := Params{}
+	if shadow := GetViewShadows(popupView, ""); shadow != nil {
+		params[Shadow] = shadow
+	}
+
+	if filter := GetBackdropFilter(popupView, ""); filter != nil {
+		params[BackdropFilter] = filter
+	}
 
 	switch arrow.location {
 	case TopArrow:
 		params[Row] = 0
 		params[Column] = 1
-		params[BorderBottom] = border
-		params[BorderLeft] = border2
-		params[BorderRight] = border2
+		params[Clip] = PolygonClip([]any{"0%", "100%", "50%", "0%", "100%", "100%"})
+		params[Width] = arrow.width
+		params[Height] = arrow.size
 
 	case RightArrow:
 		params[Row] = 1
 		params[Column] = 0
-		params[BorderLeft] = border
-		params[BorderTop] = border2
-		params[BorderBottom] = border2
+		params[Clip] = PolygonClip([]any{"0%", "0%", "100%", "50%", "0%", "100%"})
+		params[Width] = arrow.size
+		params[Height] = arrow.width
 
 	case BottomArrow:
 		params[Row] = 0
 		params[Column] = 1
-		params[BorderTop] = border
-		params[BorderLeft] = border2
-		params[BorderRight] = border2
+		params[Clip] = PolygonClip([]any{"0%", "0%", "50%", "100%", "100%", "0%"})
+		params[Width] = arrow.width
+		params[Height] = arrow.size
 
 	case LeftArrow:
 		params[Row] = 1
 		params[Column] = 0
-		params[BorderRight] = border
-		params[BorderTop] = border2
-		params[BorderBottom] = border2
+		params[Clip] = PolygonClip([]any{"100%", "0%", "0%", "50%", "100%", "100%"})
+		params[Width] = arrow.size
+		params[Height] = arrow.width
 	}
 
 	arrowView := NewView(session, params)

@@ -152,6 +152,10 @@ func stringToSizeUnit(value string) (SizeUnit, error) {
 		}
 	}
 
+	if val, err := strconv.ParseFloat(value, 64); err != nil {
+		return SizeUnit{Type: SizeInPixel, Value: val}, nil
+	}
+
 	return SizeUnit{Type: Auto, Value: 0}, errors.New(`Invalid SizeUnit value: "` + value + `"`)
 }
 
