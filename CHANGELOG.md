@@ -4,7 +4,9 @@
 * The "interface{}" type replaced by "any"
 * Added "overflow", "arrow", "arrow-align", "arrow-size", "arrow-width", and "arrow-offset" properties 
 * Added "@ruiArrowSize" and "@ruiArrowWidth" constants to the default theme
-* Added the GetOverflow function
+* Added Transition, Transitions, and SetTransition functions to the ViewStyle interface
+* Added GetOverflow, and GetTransitions functions
+* Changed GetTransition functions
 
 # v0.8.0
 

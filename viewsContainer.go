@@ -47,8 +47,7 @@ func (container *viewsContainerData) setParentID(parentID string) {
 func (container *viewsContainerData) Views() []View {
 	if container.views == nil {
 		container.views = []View{}
-	}
-	if count := len(container.views); count > 0 {
+	} else if count := len(container.views); count > 0 {
 		views := make([]View, count)
 		copy(views, container.views)
 		return views

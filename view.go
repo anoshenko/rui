@@ -71,8 +71,6 @@ type View interface {
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
 
-	getTransitions() Params
-
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index string, x, y, width, height float64)
 	setNoResizeEvent()

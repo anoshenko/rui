@@ -55,16 +55,19 @@ const (
 	// The animation plays forwards each cycle. In other words, each time the animation cycles,
 	// the animation will reset to the beginning state and start over again. This is the default value.
 	NormalAnimation = 0
+
 	// ReverseAnimation is value of the "animation-direction" property.
 	// The animation plays backwards each cycle. In other words, each time the animation cycles,
 	// the animation will reset to the end state and start over again. Animation steps are performed
 	// backwards, and timing functions are also reversed.
 	// For example, an "ease-in" timing function becomes "ease-out".
 	ReverseAnimation = 1
+
 	// AlternateAnimation is value of the "animation-direction" property.
 	// The animation reverses direction each cycle, with the first iteration being played forwards.
 	// The count to determine if a cycle is even or odd starts at one.
 	AlternateAnimation = 2
+
 	// AlternateReverseAnimation is value of the "animation-direction" property.
 	// The animation reverses direction each cycle, with the first iteration being played backwards.
 	// The count to determine if a cycle is even or odd starts at one.
@@ -673,12 +676,36 @@ func (view *viewData) updateTransitionCSS() {
 	updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.Session()), view.Session())
 }
 
-func (view *viewData) getTransitions() Params {
-	result := Params{}
-	for tag, animation := range view.transitions {
+func (style *viewStyle) Transition(tag string) Animation {
+	if style.transitions != nil {
+		if anim, ok := style.transitions[tag]; ok {
+			return anim
+		}
+	}
+	return nil
+}
+
+func (style *viewStyle) Transitions() map[string]Animation {
+	result := map[string]Animation{}
+	for tag, animation := range style.transitions {
 		result[tag] = animation
 	}
 	return result
+}
+
+func (style *viewStyle) SetTransition(tag string, animation Animation) {
+	if animation == nil {
+		delete(style.transitions, tag)
+	} else {
+		style.transitions[tag] = animation
+	}
+}
+
+func (view *viewData) SetTransition(tag string, animation Animation) {
+	view.viewStyle.SetTransition(tag, animation)
+	if view.created {
+		updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.Session()), view.Session())
+	}
 }
 
 // SetAnimated sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
@@ -697,38 +724,48 @@ func IsAnimationPaused(view View, subviewID string) bool {
 	return boolStyledProperty(view, subviewID, AnimationPaused, false)
 }
 
-// GetTransition returns the subview transitions. The result is always non-nil.
+// GetTransitions returns the subview transitions. The result is always non-nil.
 // If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
-func GetTransition(view View, subviewID string) Params {
+func GetTransitions(view View, subviewID string) map[string]Animation {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
 
 	if view != nil {
-		return view.getTransitions()
+		return view.Transitions()
 	}
 
-	return Params{}
+	return map[string]Animation{}
+}
+
+// GetTransition returns the subview property transition. If there is no transition for the given property then nil is returned.
+// If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
+func GetTransition(view View, subviewID, tag string) Animation {
+	if subviewID != "" {
+		view = ViewByID(view, subviewID)
+	}
+
+	if view != nil {
+		return view.Transition(tag)
+	}
+
+	return nil
 }
 
 // AddTransition adds the transition for the subview property.
 // If the second argument (subviewID) is "" then the transition is added to the first argument (view)
 func AddTransition(view View, subviewID, tag string, animation Animation) bool {
-	if tag == "" {
-		return false
-	}
+	if tag != "" {
+		if subviewID != "" {
+			view = ViewByID(view, subviewID)
+		}
 
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+		if view != nil {
+			view.SetTransition(tag, animation)
+			return true
+		}
 	}
-
-	if view == nil {
-		return false
-	}
-
-	transitions := view.getTransitions()
-	transitions[tag] = animation
-	return view.Set(Transition, transitions)
+	return false
 }
 
 // GetAnimation returns the subview animations. The result is always non-nil.

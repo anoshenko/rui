@@ -264,9 +264,22 @@ func (customView *CustomViewData) setScroll(x, y, width, height float64) {
 	}
 }
 
-func (customView *CustomViewData) getTransitions() Params {
+func (customView *CustomViewData) Transition(tag string) Animation {
 	if customView.superView != nil {
-		return customView.superView.getTransitions()
+		return customView.superView.Transition(tag)
 	}
-	return Params{}
+	return nil
+}
+
+func (customView *CustomViewData) Transitions() map[string]Animation {
+	if customView.superView != nil {
+		return customView.superView.Transitions()
+	}
+	return map[string]Animation{}
+}
+
+func (customView *CustomViewData) SetTransition(tag string, animation Animation) {
+	if customView.superView != nil {
+		customView.superView.SetTransition(tag, animation)
+	}
 }

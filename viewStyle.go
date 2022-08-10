@@ -10,6 +10,16 @@ import (
 // ViewStyle interface of the style of view
 type ViewStyle interface {
 	Properties
+
+	// Transition returns the transition animation of the property. Returns nil is there is no transition animation.
+	Transition(tag string) Animation
+	// Transitions returns the map of transition animations. The result is always non-nil.
+	Transitions() map[string]Animation
+	// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
+	// removes the transition animation of the property if "animation" argument  is nil.
+	// The "tag" argument is the property name.
+	SetTransition(tag string, animation Animation)
+
 	cssViewStyle(buffer cssBuilder, session Session)
 }
 
@@ -741,7 +751,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 				if animation := value[tag]; animation != nil {
 					buffer.WriteString(indent2)
 					animation.writeTransitionString(tag, buffer)
-					buffer.WriteString("\n")
+					buffer.WriteString(",\n")
 				}
 			}
 			buffer.WriteString(indent)
@@ -820,6 +830,10 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		if value := view.Get(tag); value != nil {
 			writeProperty(tag, value)
 		}
+	}
+
+	if transitions := view.Transitions(); len(transitions) > 0 {
+		writeProperty(Transition, transitions)
 	}
 
 	indent = indent[:len(indent)-1]
