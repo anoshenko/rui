@@ -493,46 +493,50 @@ func (animation *animationData) writeTransitionString(tag string, buffer *string
 
 func (animation *animationData) timingFunctionCSS(session Session) string {
 	if timingFunction, ok := stringProperty(animation, TimingFunction, session); ok {
-		if timingFunction, ok = session.resolveConstants(timingFunction); ok && IsTimingFunctionValid(timingFunction, session) {
+		if timingFunction, ok = session.resolveConstants(timingFunction); ok && isTimingFunctionValid(timingFunction) {
 			return timingFunction
 		}
 	}
 	return ("ease")
 }
 
-// IsTimingFunctionValid returns "true" if the "timingFunction" argument is the valid timing function.
-func IsTimingFunctionValid(timingFunction string, session Session) bool {
+func isTimingFunctionValid(timingFunction string) bool {
 	switch timingFunction {
 	case "", EaseTiming, EaseInTiming, EaseOutTiming, EaseInOutTiming, LinearTiming:
 		return true
 	}
 
-	if timingFunc, ok := session.resolveConstants(timingFunction); ok {
-		timingFunction = timingFunc
-		size := len(timingFunction)
-		if size > 0 && timingFunction[size-1] == ')' {
-			if index := strings.IndexRune(timingFunction, '('); index > 0 {
-				args := timingFunction[index+1 : size-1]
-				switch timingFunction[:index] {
-				case "steps":
-					if _, err := strconv.Atoi(strings.Trim(args, " \t\n")); err == nil {
-						return true
-					}
+	size := len(timingFunction)
+	if size > 0 && timingFunction[size-1] == ')' {
+		if index := strings.IndexRune(timingFunction, '('); index > 0 {
+			args := timingFunction[index+1 : size-1]
+			switch timingFunction[:index] {
+			case "steps":
+				if _, err := strconv.Atoi(strings.Trim(args, " \t\n")); err == nil {
+					return true
+				}
 
-				case "cubic-bezier":
-					if params := strings.Split(args, ","); len(params) == 4 {
-						for _, param := range params {
-							if _, err := strconv.ParseFloat(strings.Trim(param, " \t\n"), 64); err != nil {
-								return false
-							}
+			case "cubic-bezier":
+				if params := strings.Split(args, ","); len(params) == 4 {
+					for _, param := range params {
+						if _, err := strconv.ParseFloat(strings.Trim(param, " \t\n"), 64); err != nil {
+							return false
 						}
-						return true
 					}
+					return true
 				}
 			}
 		}
 	}
 
+	return false
+}
+
+// IsTimingFunctionValid returns "true" if the "timingFunction" argument is the valid timing function.
+func IsTimingFunctionValid(timingFunction string, session Session) bool {
+	if timingFunc, ok := session.resolveConstants(strings.Trim(timingFunction, " \t\n")); ok {
+		return isTimingFunctionValid(timingFunc)
+	}
 	return false
 }
 
