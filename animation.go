@@ -493,37 +493,41 @@ func (animation *animationData) writeTransitionString(tag string, buffer *string
 
 func (animation *animationData) timingFunctionCSS(session Session) string {
 	if timingFunction, ok := stringProperty(animation, TimingFunction, session); ok {
-		if timingFunction, ok = session.resolveConstants(timingFunction); ok && validateTimingFunction(timingFunction) {
+		if timingFunction, ok = session.resolveConstants(timingFunction); ok && IsTimingFunctionValid(timingFunction, session) {
 			return timingFunction
 		}
 	}
 	return ("ease")
 }
 
-func validateTimingFunction(timingFunction string) bool {
+// IsTimingFunctionValid returns "true" if the "timingFunction" argument is the valid timing function.
+func IsTimingFunctionValid(timingFunction string, session Session) bool {
 	switch timingFunction {
 	case "", EaseTiming, EaseInTiming, EaseOutTiming, EaseInOutTiming, LinearTiming:
 		return true
 	}
 
-	size := len(timingFunction)
-	if size > 0 && timingFunction[size-1] == ')' {
-		if index := strings.IndexRune(timingFunction, '('); index > 0 {
-			args := timingFunction[index+1 : size-1]
-			switch timingFunction[:index] {
-			case "steps":
-				if _, err := strconv.Atoi(strings.Trim(args, " \t\n")); err == nil {
-					return true
-				}
-
-			case "cubic-bezier":
-				if params := strings.Split(args, ","); len(params) == 4 {
-					for _, param := range params {
-						if _, err := strconv.ParseFloat(strings.Trim(param, " \t\n"), 64); err != nil {
-							return false
-						}
+	if timingFunc, ok := session.resolveConstants(timingFunction); ok {
+		timingFunction = timingFunc
+		size := len(timingFunction)
+		if size > 0 && timingFunction[size-1] == ')' {
+			if index := strings.IndexRune(timingFunction, '('); index > 0 {
+				args := timingFunction[index+1 : size-1]
+				switch timingFunction[:index] {
+				case "steps":
+					if _, err := strconv.Atoi(strings.Trim(args, " \t\n")); err == nil {
+						return true
 					}
-					return true
+
+				case "cubic-bezier":
+					if params := strings.Split(args, ","); len(params) == 4 {
+						for _, param := range params {
+							if _, err := strconv.ParseFloat(strings.Trim(param, " \t\n"), 64); err != nil {
+								return false
+							}
+						}
+						return true
+					}
 				}
 			}
 		}
