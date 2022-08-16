@@ -645,7 +645,16 @@ func (properties *propertyList) setRadius(value any) bool {
 		properties.properties[Radius] = radius
 		return true
 
+	case float32:
+		return properties.setRadius(Px(float64(value)))
+
+	case float64:
+		return properties.setRadius(Px(value))
+
 	default:
+		if n, ok := isInt(value); ok {
+			return properties.setRadius(Px(float64(n)))
+		}
 		notCompatibleType(Radius, value)
 	}
 

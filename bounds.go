@@ -260,6 +260,12 @@ func (properties *propertyList) setBounds(tag string, value any) bool {
 		case SizeUnit:
 			properties.properties[tag] = value
 
+		case float32:
+			properties.properties[tag] = Px(float64(value))
+
+		case float64:
+			properties.properties[tag] = Px(value)
+
 		case Bounds:
 			bounds := NewBoundsProperty(nil)
 			if value.Top.Type != Auto {
@@ -292,8 +298,12 @@ func (properties *propertyList) setBounds(tag string, value any) bool {
 			properties.properties[tag] = bounds
 
 		default:
-			notCompatibleType(tag, value)
-			return false
+			if n, ok := isInt(value); ok {
+				properties.properties[tag] = Px(float64(n))
+			} else {
+				notCompatibleType(tag, value)
+				return false
+			}
 		}
 	}
 
