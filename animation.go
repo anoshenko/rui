@@ -484,6 +484,8 @@ func (animation *animationData) writeTransitionString(tag string, buffer *string
 				buffer.WriteRune('"')
 				buffer.WriteString(timingFunction)
 				buffer.WriteRune('"')
+			} else {
+				buffer.WriteString(timingFunction)
 			}
 		}
 	}

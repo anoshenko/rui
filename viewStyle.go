@@ -832,10 +832,6 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		}
 	}
 
-	if transitions := view.Transitions(); len(transitions) > 0 {
-		writeProperty(Transition, transitions)
-	}
-
 	indent = indent[:len(indent)-1]
 	buffer.WriteString(indent)
 	buffer.WriteString("}")

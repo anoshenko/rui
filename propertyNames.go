@@ -320,20 +320,20 @@ const (
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	Underline = "underline"
 
-	// TextLineThickness is the constant for the "text-decoration-thickness" property tag.
-	// The "text-decoration-thickness" SizeUnit property sets the stroke thickness of the decoration line that
+	// TextLineThickness is the constant for the "text-line-thickness" property tag.
+	// The "text-line-thickness" SizeUnit property sets the stroke thickness of the decoration line that
 	// is used on text in an element, such as a line-through, underline, or overline.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	TextLineThickness = "text-line-thickness"
 
-	// TextLineStyle is the constant for the "text-decoration-style" property tag.
-	// The "text-decoration-style" int property sets the style of the lines specified by "text-decoration" property.
+	// TextLineStyle is the constant for the "text-line-style" property tag.
+	// The "text-line-style" int property sets the style of the lines specified by "text-decoration" property.
 	// The style applies to all lines that are set with "text-decoration" property.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	TextLineStyle = "text-line-style"
 
-	// TextLineColor is the constant for the "text-decoration-color" property tag.
-	// The "text-decoration-color" Color property sets the color of the lines specified by "text-decoration" property.
+	// TextLineColor is the constant for the "text-line-color" property tag.
+	// The "text-line-color" Color property sets the color of the lines specified by "text-decoration" property.
 	// The color applies to all lines that are set with "text-decoration" property.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	TextLineColor = "text-line-color"
