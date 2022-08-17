@@ -672,11 +672,29 @@ func (style *viewStyle) transitionCSS(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
+	convert := map[string]string{
+		CellHeight:        "grid-template-rows",
+		CellWidth:         "grid-template-columns",
+		Row:               "grid-row",
+		Column:            "grid-column",
+		Clip:              "clip-path",
+		Shadow:            "box-shadow",
+		ColumnSeparator:   "column-rule",
+		FontName:          "font",
+		TextSize:          "font-size",
+		TextLineThickness: "text-decoration-thickness",
+	}
+
 	for tag, animation := range style.transitions {
 		if buffer.Len() > 0 {
 			buffer.WriteString(", ")
 		}
-		buffer.WriteString(tag)
+
+		if cssTag, ok := convert[tag]; ok {
+			buffer.WriteString(cssTag)
+		} else {
+			buffer.WriteString(tag)
+		}
 		animation.transitionCSS(buffer, session)
 	}
 	return buffer.String()

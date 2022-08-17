@@ -394,12 +394,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	if r, ok := rangeProperty(style, Row, session); ok {
-		builder.add("grid-row-start", strconv.Itoa(r.First+1))
-		builder.add("grid-row-end", strconv.Itoa(r.Last+2))
+		builder.add("grid-row", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))
 	}
 	if r, ok := rangeProperty(style, Column, session); ok {
-		builder.add("grid-column-start", strconv.Itoa(r.First+1))
-		builder.add("grid-column-end", strconv.Itoa(r.Last+2))
+		builder.add("grid-column", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))
 	}
 	if text := style.gridCellSizesCSS(CellWidth, session); text != "" {
 		builder.add(`grid-template-columns`, text)
