@@ -368,7 +368,9 @@ func GetTextWeight(view View, subviewID string) int {
 }
 
 // GetTextAlign returns a text align of the subview. Returns one of next values:
-// 	 LeftAlign = 0, RightAlign = 1, CenterAlign = 2, JustifyAlign = 3
+//
+//	LeftAlign = 0, RightAlign = 1, CenterAlign = 2, JustifyAlign = 3
+//
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextAlign(view View, subviewID string) int {
 	return enumStyledProperty(view, subviewID, TextAlign, LeftAlign, true)
@@ -601,7 +603,11 @@ func GetScale(view View, subviewID string) (float64, float64, float64) {
 	if view == nil {
 		return 1, 1, 1
 	}
-	x, y, z, _ := getScale(view, view.Session())
+
+	session := view.Session()
+	x, _ := floatProperty(view, ScaleX, session, 1)
+	y, _ := floatProperty(view, ScaleY, session, 1)
+	z, _ := floatProperty(view, ScaleZ, session, 1)
 	return x, y, z
 }
 
@@ -615,8 +621,11 @@ func GetRotate(view View, subviewID string) (float64, float64, float64, AngleUni
 		return 0, 0, 0, AngleUnit{Value: 0, Type: Radian}
 	}
 
+	session := view.Session()
 	angle, _ := angleProperty(view, Rotate, view.Session())
-	rotateX, rotateY, rotateZ := getRotateVector(view, view.Session())
+	rotateX, _ := floatProperty(view, RotateX, session, 1)
+	rotateY, _ := floatProperty(view, RotateY, session, 1)
+	rotateZ, _ := floatProperty(view, RotateZ, session, 1)
 	return rotateX, rotateY, rotateZ, angle
 }
 

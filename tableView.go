@@ -622,7 +622,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 				updateProperty(htmlID, "tabindex", "0", session)
 				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
 				updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)", session)
-				updateProperty(htmlID, "data-selection", "cell", session)
+				updateProperty(htmlID, "data-selection", "row", session)
 				updateProperty(htmlID, "data-focusitemstyle", table.currentStyle(), session)
 				updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle(), session)
 

@@ -400,7 +400,7 @@ func (animation *animationData) animationCSS(session Session) string {
 
 	buffer.WriteString(animation.keyFramesName)
 
-	if duration, _ := floatProperty(animation, Duration, session, 1); duration > 0 {
+	if duration, ok := floatProperty(animation, Duration, session, 1); ok && duration > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs ", duration))
 	} else {
 		buffer.WriteString(" 1s ")
@@ -408,7 +408,7 @@ func (animation *animationData) animationCSS(session Session) string {
 
 	buffer.WriteString(animation.timingFunctionCSS(session))
 
-	if delay, _ := floatProperty(animation, Delay, session, 0); delay > 0 {
+	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
 	} else {
 		buffer.WriteString(" 0s")
@@ -438,7 +438,7 @@ func (animation *animationData) animationCSS(session Session) string {
 
 func (animation *animationData) transitionCSS(buffer *strings.Builder, session Session) {
 
-	if duration, _ := floatProperty(animation, Duration, session, 1); duration > 0 {
+	if duration, ok := floatProperty(animation, Duration, session, 1); ok && duration > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs ", duration))
 	} else {
 		buffer.WriteString(" 1s ")
@@ -446,7 +446,7 @@ func (animation *animationData) transitionCSS(buffer *strings.Builder, session S
 
 	buffer.WriteString(animation.timingFunctionCSS(session))
 
-	if delay, _ := floatProperty(animation, Delay, session, 0); delay > 0 {
+	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
 	}
 }

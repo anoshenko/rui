@@ -1,9 +1,5 @@
 package rui
 
-import (
-	"strconv"
-)
-
 const (
 	// Perspective is the name of the SizeUnit property that determines the distance between the z = 0 plane
 	// and the user in order to give a 3D-positioned element some perspective. Each 3D element
@@ -104,20 +100,6 @@ func getTranslate(style Properties, session Session) (SizeUnit, SizeUnit, SizeUn
 	return x, y, z
 }
 
-func getScale(style Properties, session Session) (float64, float64, float64, bool) {
-	scaleX, okX := floatProperty(style, ScaleX, session, 1)
-	scaleY, okY := floatProperty(style, ScaleY, session, 1)
-	scaleZ, okZ := floatProperty(style, ScaleZ, session, 1)
-	return scaleX, scaleY, scaleZ, okX || okY || okZ
-}
-
-func getRotateVector(style Properties, session Session) (float64, float64, float64) {
-	rotateX, _ := floatProperty(style, RotateX, session, 1)
-	rotateY, _ := floatProperty(style, RotateY, session, 1)
-	rotateZ, _ := floatProperty(style, RotateZ, session, 1)
-	return rotateX, rotateY, rotateZ
-}
-
 func (style *viewStyle) transform(session Session) string {
 
 	buffer := allocStringBuilder()
@@ -133,7 +115,10 @@ func (style *viewStyle) transform(session Session) string {
 	}
 
 	x, y, z := getTranslate(style, session)
-	scaleX, scaleY, scaleZ, scaleOK := getScale(style, session)
+
+	scaleX, okScaleX := floatTextProperty(style, ScaleX, session, 1)
+	scaleY, okScaleY := floatTextProperty(style, ScaleY, session, 1)
+
 	if getTransform3D(style, session) {
 		if x.Type != Auto || y.Type != Auto || z.Type != Auto {
 			if buffer.Len() > 0 {
@@ -148,30 +133,34 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteRune(')')
 		}
 
-		if scaleOK {
+		scaleZ, okScaleZ := floatTextProperty(style, ScaleZ, session, 1)
+		if okScaleX || okScaleY || okScaleZ {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
 			buffer.WriteString(`scale3d(`)
-			buffer.WriteString(strconv.FormatFloat(scaleX, 'g', -1, 64))
+			buffer.WriteString(scaleX)
 			buffer.WriteRune(',')
-			buffer.WriteString(strconv.FormatFloat(scaleY, 'g', -1, 64))
+			buffer.WriteString(scaleY)
 			buffer.WriteRune(',')
-			buffer.WriteString(strconv.FormatFloat(scaleZ, 'g', -1, 64))
+			buffer.WriteString(scaleZ)
 			buffer.WriteRune(')')
 		}
 
 		if angle, ok := angleProperty(style, Rotate, session); ok {
-			rotateX, rotateY, rotateZ := getRotateVector(style, session)
+			rotateX, _ := floatTextProperty(style, RotateX, session, 1)
+			rotateY, _ := floatTextProperty(style, RotateY, session, 1)
+			rotateZ, _ := floatTextProperty(style, RotateZ, session, 1)
+
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
 			buffer.WriteString(`rotate3d(`)
-			buffer.WriteString(strconv.FormatFloat(rotateX, 'g', -1, 64))
+			buffer.WriteString(rotateX)
 			buffer.WriteRune(',')
-			buffer.WriteString(strconv.FormatFloat(rotateY, 'g', -1, 64))
+			buffer.WriteString(rotateY)
 			buffer.WriteRune(',')
-			buffer.WriteString(strconv.FormatFloat(rotateZ, 'g', -1, 64))
+			buffer.WriteString(rotateZ)
 			buffer.WriteRune(',')
 			buffer.WriteString(angle.cssString())
 			buffer.WriteRune(')')
@@ -189,14 +178,14 @@ func (style *viewStyle) transform(session Session) string {
 			buffer.WriteRune(')')
 		}
 
-		if scaleOK {
+		if okScaleX || okScaleY {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
 			buffer.WriteString(`scale(`)
-			buffer.WriteString(strconv.FormatFloat(scaleX, 'g', -1, 64))
+			buffer.WriteString(scaleX)
 			buffer.WriteRune(',')
-			buffer.WriteString(strconv.FormatFloat(scaleY, 'g', -1, 64))
+			buffer.WriteString(scaleY)
 			buffer.WriteRune(')')
 		}
 

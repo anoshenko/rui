@@ -730,6 +730,12 @@ func (properties *propertyList) setFloatProperty(tag string, value any, min, max
 				ErrorLog(err.Error())
 				return false
 			}
+			if f < min || f > max {
+				ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
+				return false
+			}
+			properties.properties[tag] = value
+			return true
 
 		case float32:
 			f = float64(value)

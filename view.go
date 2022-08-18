@@ -655,8 +655,8 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	for _, floatTag := range []string{Opacity, ScaleX, ScaleY, ScaleZ, RotateX, RotateY, RotateZ} {
 		if tag == floatTag {
-			if f, ok := floatProperty(view, floatTag, session, 0); ok {
-				updateCSSProperty(htmlID, floatTag, strconv.FormatFloat(f, 'g', -1, 64), session)
+			if f, ok := floatTextProperty(view, floatTag, session, 0); ok {
+				updateCSSProperty(htmlID, floatTag, f, session)
 			}
 			return
 		}

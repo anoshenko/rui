@@ -114,12 +114,13 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 		oldValue := GetNumberPickerValue(picker, "")
 		min, max := GetNumberPickerMinMax(picker, "")
 		if picker.setFloatProperty(NumberPickerValue, value, min, max) {
-			if newValue := GetNumberPickerValue(picker, ""); oldValue != newValue {
+			if f, ok := floatProperty(picker, NumberPickerValue, picker.Session(), min); ok && f != oldValue {
+				newValue, _ := floatTextProperty(picker, NumberPickerValue, picker.Session(), min)
 				if picker.created {
-					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), newValue))
+					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), newValue))
 				}
 				for _, listener := range picker.numberChangedListeners {
-					listener(picker, newValue)
+					listener(picker, f)
 				}
 				picker.propertyChangedEvent(tag)
 			}
@@ -239,7 +240,7 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, err := strconv.ParseFloat(text, 32); err == nil {
 				oldValue := GetNumberPickerValue(picker, "")
-				picker.properties[NumberPickerValue] = value
+				picker.properties[NumberPickerValue] = text
 				if value != oldValue {
 					for _, listener := range picker.numberChangedListeners {
 						listener(picker, value)

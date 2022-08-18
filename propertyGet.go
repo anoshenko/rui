@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -236,6 +237,30 @@ func valueToFloat(value any, session Session, defaultValue float64) (float64, bo
 
 func floatProperty(properties Properties, tag string, session Session, defaultValue float64) (float64, bool) {
 	return valueToFloat(properties.getRaw(tag), session, defaultValue)
+}
+
+func valueToFloatText(value any, session Session, defaultValue float64) (string, bool) {
+	if value != nil {
+		switch value := value.(type) {
+		case float64:
+			return fmt.Sprintf("%g", value), true
+
+		case string:
+			if text, ok := session.resolveConstants(value); ok {
+				if _, err := strconv.ParseFloat(text, 64); err != nil {
+					ErrorLog(err.Error())
+					return fmt.Sprintf("%g", defaultValue), false
+				}
+				return text, true
+			}
+		}
+	}
+
+	return fmt.Sprintf("%g", defaultValue), false
+}
+
+func floatTextProperty(properties Properties, tag string, session Session, defaultValue float64) (string, bool) {
+	return valueToFloatText(properties.getRaw(tag), session, defaultValue)
 }
 
 func valueToRange(value any, session Session) (Range, bool) {
