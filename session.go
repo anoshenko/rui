@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -69,6 +70,8 @@ type Session interface {
 	DownloadFile(path string)
 	//DownloadFileData downloads (saves) on the client side a file with a specified name and specified content.
 	DownloadFileData(filename string, data []byte)
+	// OpenURL opens the url in the new browser tab
+	OpenURL(url string)
 
 	registerAnimation(props []AnimatedProperty) string
 
@@ -447,4 +450,12 @@ func (session *sessionData) SetTitleColor(color Color) {
 
 func (session *sessionData) RemoteAddr() string {
 	return session.brige.remoteAddr()
+}
+
+func (session *sessionData) OpenURL(urlStr string) {
+	if _, err := url.ParseRequestURI(urlStr); err != nil {
+		ErrorLog(err.Error())
+		return
+	}
+	session.runScript(`window.open("` + urlStr + `", "_blank");`)
 }
