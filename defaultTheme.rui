@@ -74,6 +74,7 @@ theme {
 			text-size = 10pt,
 			text-color = @ruiTextColor,
 			background-color = @ruiBackgroundColor,
+			accent-color = @ruiHighlightColor,
 		},
 		ruiButton {
 			align = center,

@@ -637,6 +637,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		TextColor:       "color",
 		TextLineColor:   "text-decoration-color",
 		CaretColor:      CaretColor,
+		AccentColor:     AccentColor,
 	}
 	if cssTag, ok := colorTags[tag]; ok {
 		if color, ok := colorProperty(view, tag, session); ok {

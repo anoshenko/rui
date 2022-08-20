@@ -224,6 +224,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		{TextColor, "color"},
 		{TextLineColor, "text-decoration-color"},
 		{CaretColor, CaretColor},
+		{AccentColor, AccentColor},
 	}
 	for _, p := range colorProperties {
 		if color, ok := colorProperty(style, p.property, session); ok && color != 0 {
