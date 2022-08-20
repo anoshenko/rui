@@ -42,6 +42,16 @@ func valueToSizeUnit(value any, session Session) (SizeUnit, bool) {
 			if text, ok := session.resolveConstants(value); ok {
 				return StringToSizeUnit(text)
 			}
+
+		case float64:
+			return Px(value), true
+
+		case float32:
+			return Px(float64(value)), true
+		}
+
+		if n, ok := isInt(value); ok {
+			return Px(float64(n)), true
 		}
 	}
 

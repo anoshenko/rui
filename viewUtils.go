@@ -156,7 +156,7 @@ func GetOverflow(view View, subviewID string) int {
 // GetZIndex returns the subview z-order.
 // If the second argument (subviewID) is "" then a z-order of the first argument (view) is returned
 func GetZIndex(view View, subviewID string) int {
-	return intStyledProperty(view, subviewID, Visibility, 0)
+	return intStyledProperty(view, subviewID, ZIndex, 0)
 }
 
 // GetWidth returns the subview width.
@@ -364,6 +364,12 @@ func GetTextColor(view View, subviewID string) Color {
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetTextSize(view View, subviewID string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, TextSize, true)
+}
+
+// GetTabSize returns the subview width of tab characters (U+0009) in spaces.
+// If the second argument (subviewID) is "" then a width of the first argument (view) is returned
+func GetTabSize(view View, subviewID string) int {
+	return intStyledProperty(view, subviewID, TabSize, 8)
 }
 
 // GetTextWeight returns a text weight of the subview. Returns one of next values:

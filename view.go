@@ -591,9 +591,9 @@ func viewPropertyChanged(view *viewData, tag string) {
 		}
 		return
 
-	case ZIndex:
-		if i, ok := intProperty(view, ZIndex, session, 0); ok {
-			updateCSSProperty(htmlID, ZIndex, strconv.Itoa(i), session)
+	case ZIndex, TabSize:
+		if i, ok := intProperty(view, tag, session, 0); ok {
+			updateCSSProperty(htmlID, tag, strconv.Itoa(i), session)
 		}
 		return
 

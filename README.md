@@ -1391,20 +1391,25 @@ The table below shows the behavior of various values of the "white-space" proper
 | WhiteSpacePreLine     | Preserve  | Collapse        | Wrap          | Remove             | Hang                               |
 | WhiteSpaceBreakSpaces | Preserve  | Preserve        | Wrap          | Wrap               | Wrap                               |
 
+#### "tab-size" property
+
+The "tab-size" int property (TabSize constant) specifies the size of the tab character (U+0009) in spaces.
+The value of the "tab-size" property must be greater than 0. The default value is 8
+
 #### "word-break" property
 
 The "word-break" int property (WordBreak constant) determines where the newline will be set if the text exceeds the block boundaries.
 The "white-space" property can take the following values:
 
-0 (constant WordBreak, name "normal) - default behavior for linefeed placement.
+0 (WordBreak constant, "normal" name) - default behavior for linefeed placement.
 
-1 (constant WordBreakAll, name "break-all) - if the block boundaries are exceeded, 
+1 (WordBreakAll constant, "break-all" name) - if the block boundaries are exceeded, 
 a line break will be inserted between any two characters (except for Chinese/Japanese/Korean text).
 
-2 (constant WordBreakKeepAll, name "keep-all) - Line break will not be used in Chinese/Japanese/ Korean text. 
+2 (WordBreakKeepAll constant, "keep-all" name) - Line break will not be used in Chinese/Japanese/ Korean text. 
 For text in other languages, the default behavior (normal) will be applied.
 
-3 (constant WordBreakWord, name "break-word) - when the block boundaries are exceeded, 
+3 (WordBreakWord constant, "break-word" name) - when the block boundaries are exceeded, 
 the remaining whole words can be broken in an arbitrary place, if a more suitable place for line break is not found.
 
 #### "strikethrough", "overline", "underline" properties

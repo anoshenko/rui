@@ -67,6 +67,7 @@ var boolProperties = []string{
 
 var intProperties = []string{
 	ZIndex,
+	TabSize,
 	HeadHeight,
 	FootHeight,
 	RowSpan,

@@ -359,6 +359,11 @@ const (
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	TextShadow = "text-shadow"
 
+	// TabSize is the constant for the "tab-size" property tag.
+	// The "tab-size" int property sets the width of tab characters (U+0009) in spaces.
+	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
+	TabSize = "tab-size"
+
 	// LetterSpacing is the constant for the "letter-spacing" property tag.
 	// The "letter-spacing" SizeUnit property sets the horizontal spacing behavior between text characters.
 	// This value is added to the natural spacing between characters while rendering the text.

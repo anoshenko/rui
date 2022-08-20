@@ -279,6 +279,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
+	if tabSize, ok := intProperty(style, TabSize, session, 8); ok && tabSize > 0 {
+		builder.add(TabSize, strconv.Itoa(tabSize))
+	}
+
 	if text := style.cssTextDecoration(session); text != "" {
 		builder.add("text-decoration", text)
 	}
