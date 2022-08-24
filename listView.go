@@ -1086,19 +1086,15 @@ func (listView *listViewData) onItemResize(self View, index string, x, y, width,
 }
 
 // GetVerticalAlign return the vertical align of a list: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
-func GetVerticalAlign(view View) int {
-	if align, ok := enumProperty(view, VerticalAlign, view.Session(), TopAlign); ok {
-		return align
-	}
-	return TopAlign
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetVerticalAlign(view View, subviewID string) int {
+	return enumStyledProperty(view, subviewID, VerticalAlign, TopAlign, false)
 }
 
-// GetHorizontalAlign return the vertical align of a list: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-func GetHorizontalAlign(view View) int {
-	if align, ok := enumProperty(view, HorizontalAlign, view.Session(), LeftAlign); ok {
-		return align
-	}
-	return LeftAlign
+// GetHorizontalAlign return the vertical align of a list/checkbox: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetHorizontalAlign(view View, subviewID string) int {
+	return enumStyledProperty(view, subviewID, HorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemClickedListeners returns a ListItemClickedListener of the ListView.

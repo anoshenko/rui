@@ -206,61 +206,13 @@ func checkboxKeyListener(view View, event KeyEvent) {
 }
 
 func (button *checkboxData) setChangedListener(value any) bool {
-	if value == nil {
-		if len(button.checkedListeners) > 0 {
-			button.checkedListeners = []func(Checkbox, bool){}
-		}
-		return true
+	listeners, ok := valueToEventListeners[Checkbox, bool](value)
+	if !ok {
+		return false
+	} else if listeners == nil {
+		listeners = []func(Checkbox, bool){}
 	}
-
-	switch value := value.(type) {
-	case func(Checkbox, bool):
-		button.checkedListeners = []func(Checkbox, bool){value}
-
-	case func(bool):
-		fn := func(_ Checkbox, checked bool) {
-			value(checked)
-		}
-		button.checkedListeners = []func(Checkbox, bool){fn}
-
-	case []func(Checkbox, bool):
-		button.checkedListeners = value
-
-	case []func(bool):
-		listeners := make([]func(Checkbox, bool), len(value))
-		for i, val := range value {
-			if val == nil {
-				return false
-			}
-
-			listeners[i] = func(_ Checkbox, checked bool) {
-				val(checked)
-			}
-		}
-		button.checkedListeners = listeners
-
-	case []any:
-		listeners := make([]func(Checkbox, bool), len(value))
-		for i, val := range value {
-			if val == nil {
-				return false
-			}
-
-			switch val := val.(type) {
-			case func(Checkbox, bool):
-				listeners[i] = val
-
-			case func(bool):
-				listeners[i] = func(_ Checkbox, date bool) {
-					val(date)
-				}
-
-			default:
-				return false
-			}
-		}
-		button.checkedListeners = listeners
-	}
+	button.checkedListeners = listeners
 	return true
 }
 
@@ -370,7 +322,7 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 }
 
 func (button *checkboxData) cssHorizontalAlign() string {
-	align := GetCheckboxHorizontalAlign(button, "")
+	align := GetHorizontalAlign(button, "")
 	values := enumProperties[CellHorizontalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
@@ -379,7 +331,7 @@ func (button *checkboxData) cssHorizontalAlign() string {
 }
 
 func (button *checkboxData) cssVerticalAlign() string {
-	align := GetCheckboxVerticalAlign(button, "")
+	align := GetVerticalAlign(button, "")
 	values := enumProperties[CellVerticalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
