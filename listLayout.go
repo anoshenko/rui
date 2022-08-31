@@ -58,6 +58,12 @@ func (listLayout *listLayoutData) normalizeTag(tag string) string {
 	switch tag {
 	case "wrap":
 		tag = ListWrap
+
+	case "row-gap":
+		return ListRowGap
+
+	case ColumnGap:
+		return ListColumnGap
 	}
 	return tag
 }
@@ -66,11 +72,27 @@ func (listLayout *listLayoutData) Get(tag string) any {
 	return listLayout.get(listLayout.normalizeTag(tag))
 }
 
+func (listLayout *listLayoutData) get(tag string) any {
+	if tag == Gap {
+		if rowGap := GetListRowGap(listLayout, ""); rowGap.Equal(GetListColumnGap(listLayout, "")) {
+			return rowGap
+		}
+		return AutoSize()
+	}
+
+	return listLayout.viewsContainerData.get(tag)
+}
+
 func (listLayout *listLayoutData) Remove(tag string) {
 	listLayout.remove(listLayout.normalizeTag(tag))
 }
 
 func (listLayout *listLayoutData) remove(tag string) {
+	if tag == Gap {
+		listLayout.remove(ListRowGap)
+		listLayout.remove(ListColumnGap)
+		return
+	}
 	listLayout.viewsContainerData.remove(tag)
 	if listLayout.created {
 		switch tag {
@@ -88,6 +110,10 @@ func (listLayout *listLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		listLayout.remove(tag)
 		return true
+	}
+
+	if tag == Gap {
+		return listLayout.set(ListRowGap, value) && listLayout.set(ListColumnGap, value)
 	}
 
 	if listLayout.viewsContainerData.set(tag, value) {
@@ -167,4 +193,16 @@ func GetListOrientation(view View, subviewID string) int {
 // If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
 func GetListWrap(view View, subviewID string) int {
 	return enumStyledProperty(view, subviewID, ListWrap, ListWrapOff, false)
+}
+
+// GetListRowGap returns the gap between ListLayout or ListView rows.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetListRowGap(view View, subviewID string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ListRowGap, false)
+}
+
+// GetListColumnGap returns the gap between ListLayout or ListView columns.
+// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+func GetListColumnGap(view View, subviewID string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ListColumnGap, false)
 }

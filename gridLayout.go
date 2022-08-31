@@ -250,11 +250,7 @@ func (gridLayout *gridLayoutData) set(tag string, value any) bool {
 	}
 
 	if tag == Gap {
-		if gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value) {
-			gridLayout.propertyChangedEvent(Gap)
-			return true
-		}
-		return false
+		return gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value)
 	}
 
 	if gridLayout.viewsContainerData.set(tag, value) {

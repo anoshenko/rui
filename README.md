@@ -1,3 +1,5 @@
+[Russian](https://github.com/anoshenko/rui/blob/main/README-ru.md)
+
 # RUI library
 
 The RUI (Remote User Interface) library is designed to create web applications in the go language.
@@ -2183,6 +2185,11 @@ alignment of items in the list. Valid values:
 | 2     | CenterAlign  | "center"  | Center alignment |
 | 3     | StretchAlign | "stretch" | Width alignment  |
 
+### "list-row-gap" and "list-column-gap" properties
+
+The "list-row-gap" and "list-column-gap" SizeUnit properties (ListRowGap and ListColumnGap constants) 
+allow you to set the distance between the rows and columns of the container, respectively. The default is 0px.
+
 ## GridLayout
 
 GridLayout is a container that implements the ViewsContainer interface. To create it, use the function
@@ -3192,6 +3199,11 @@ The ListView element implements a list.
 The ListView is created using the function:
 
 	func NewListView(session Session, params Params) ListView
+
+ListView is implemented on top of ListLayout and therefore supports all ListLayout properties:
+"orientation", "list-wrap", "vertical-align", "horizontal-align", "list-row-gap", and "list-column-gap".
+
+In addition to these properties ListView has the following:
 
 ### The "items" property
 

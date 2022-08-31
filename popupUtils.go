@@ -103,19 +103,22 @@ func ShowCancellableQuestion(title, text string, session Session, onYes func(), 
 }
 
 type popupMenuData struct {
-	items   []string
-	session Session
-	popup   Popup
-	result  func(int)
+	items    []string
+	disabled []int
+	session  Session
+	popup    Popup
+	result   func(int)
 }
 
 func (popup *popupMenuData) itemClick(list ListView, n int) {
-	if popup.popup != nil {
-		popup.popup.Dismiss()
-		popup.popup = nil
-	}
-	if popup.result != nil {
-		popup.result(n)
+	if popup.IsListItemEnabled(n) {
+		if popup.popup != nil {
+			popup.popup.Dismiss()
+			popup.popup = nil
+		}
+		if popup.result != nil {
+			popup.result(n)
+		}
 	}
 }
 
@@ -131,6 +134,13 @@ func (popup *popupMenuData) ListItem(index int, session Session) View {
 }
 
 func (popup *popupMenuData) IsListItemEnabled(index int) bool {
+	if popup.disabled != nil {
+		for _, n := range popup.disabled {
+			if index == n {
+				return false
+			}
+		}
+	}
 	return true
 }
 
@@ -165,10 +175,15 @@ func ShowMenu(session Session, params Params) Popup {
 		return nil
 	}
 
-	value, ok = params[PopupMenuResult]
-	if ok && value != nil {
+	if value, ok := params[PopupMenuResult]; ok && value != nil {
 		if result, ok := value.(func(int)); ok {
 			data.result = result
+		}
+	}
+
+	if value, ok := params[DisabledItems]; ok && value != nil {
+		if value, ok := value.([]int); ok {
+			data.disabled = value
 		}
 	}
 
@@ -181,7 +196,7 @@ func ShowMenu(session Session, params Params) Popup {
 	popupParams := Params{}
 	for tag, value := range params {
 		switch tag {
-		case Items, PopupMenuResult:
+		case Items, PopupMenuResult, DisabledItems:
 			// do nothing
 
 		default:

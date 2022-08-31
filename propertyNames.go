@@ -568,8 +568,18 @@ const (
 	// Orientation is the constant for the "orientation" property tag.
 	Orientation = "orientation"
 
-	// Gap is the constant for the "gap" property tag.
+	// Gap is t he constant for the "gap" property tag.
 	Gap = "gap"
+
+	// ListRowGap is the constant for the "list-row-gap" property tag.
+	// The "list-row-gap" SizeUnit properties allow to set the distance between the rows of the ListLayout or ListView.
+	// The default is 0px.
+	ListRowGap = "list-row-gap"
+
+	// ListColumnGap is the constant for the "list-column-gap" property tag.
+	// The "list-column-gap" SizeUnit properties allow to set the distance between the columns of the GridLayout or ListView.
+	// The default is 0px.
+	ListColumnGap = "list-column-gap"
 
 	// Text is the constant for the "text" property tag.
 	Text = "text"

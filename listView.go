@@ -110,6 +110,12 @@ func (listView *listViewData) normalizeTag(tag string) string {
 
 	case "wrap":
 		tag = ListWrap
+
+	case "row-gap":
+		return ListRowGap
+
+	case ColumnGap:
+		return ListColumnGap
 	}
 	return tag
 }
@@ -120,6 +126,10 @@ func (listView *listViewData) Remove(tag string) {
 
 func (listView *listViewData) remove(tag string) {
 	switch tag {
+	case Gap:
+		listView.remove(ListRowGap)
+		listView.remove(ListColumnGap)
+
 	case Checked:
 		if len(listView.checkedItem) > 0 {
 			listView.checkedItem = []int{}
@@ -204,6 +214,9 @@ func (listView *listViewData) set(tag string, value any) bool {
 	}
 
 	switch tag {
+	case Gap:
+		return listView.set(ListRowGap, value) && listView.set(ListColumnGap, value)
+
 	case ListItemClickedEvent:
 		listeners, ok := valueToEventListeners[ListView, int](value)
 		if !ok {
@@ -264,7 +277,7 @@ func (listView *listViewData) set(tag string, value any) bool {
 			listener(listView, current)
 		}
 
-	case Orientation, ListWrap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight:
+	case Orientation, ListWrap, ListRowGap, ListColumnGap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight:
 		result := listView.viewData.set(tag, value)
 		if result && listView.created {
 			updateInnerHTML(listView.htmlID(), listView.session)
@@ -303,6 +316,12 @@ func (listView *listViewData) Get(tag string) any {
 
 func (listView *listViewData) get(tag string) any {
 	switch tag {
+	case Gap:
+		if rowGap := GetListRowGap(listView, ""); rowGap.Equal(GetListColumnGap(listView, "")) {
+			return rowGap
+		}
+		return AutoSize()
+
 	case ListItemClickedEvent:
 		return listView.clickedListeners
 
@@ -874,6 +893,18 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	buffer.WriteString(`<div style="display: flex; align-content: stretch;`)
+
+	if gap := GetListRowGap(listView, ""); gap.Type != Auto {
+		buffer.WriteString(` row-gap: `)
+		buffer.WriteString(gap.cssString("0"))
+		buffer.WriteRune(';')
+	}
+
+	if gap := GetListColumnGap(listView, ""); gap.Type != Auto {
+		buffer.WriteString(` column-gap: `)
+		buffer.WriteString(gap.cssString("0"))
+		buffer.WriteRune(';')
+	}
 
 	wrap := GetListWrap(listView, "")
 	orientation := GetListOrientation(listView, "")

@@ -208,7 +208,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	for _, tag := range []string{
 		Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight, Left, Right, Top, Bottom,
 		TextSize, TextIndent, LetterSpacing, WordSpacing, LineHeight, TextLineThickness,
-		GridRowGap, GridColumnGap, ColumnGap, ColumnWidth} {
+		ListRowGap, ListColumnGap, GridRowGap, GridColumnGap, ColumnGap, ColumnWidth} {
 
 		if size, ok := sizeProperty(style, tag, session); ok && size.Type != Auto {
 			cssTag, ok := sizeProperties[tag]
@@ -799,7 +799,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		Opacity, ZIndex, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
 		Margin, Padding, BackgroundClip, BackgroundColor, Background, Border, Radius, Outline, Shadow,
 		Orientation, ListWrap, VerticalAlign, HorizontalAlign, CellWidth, CellHeight,
-		CellVerticalAlign, CellHorizontalAlign, GridRowGap, GridColumnGap,
+		CellVerticalAlign, CellHorizontalAlign, ListRowGap, ListColumnGap, GridRowGap, GridColumnGap,
 		ColumnCount, ColumnWidth, ColumnSeparator, ColumnGap, AvoidBreak,
 		Current, Expanded, Side, ResizeBorderWidth, EditViewType, MaxLength, Hint, Text, EditWrap,
 		TextOverflow, FontName, TextSize, TextColor, TextWeight, Italic, SmallCaps,

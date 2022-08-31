@@ -110,6 +110,8 @@ var sizeProperties = map[string]string{
 	WordSpacing:        WordSpacing,
 	LineHeight:         LineHeight,
 	TextLineThickness:  "text-decoration-thickness",
+	ListRowGap:         "row-gap",
+	ListColumnGap:      "column-gap",
 	GridRowGap:         GridRowGap,
 	GridColumnGap:      GridColumnGap,
 	ColumnWidth:        ColumnWidth,
