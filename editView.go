@@ -137,7 +137,7 @@ func (edit *editViewData) remove(tag string) {
 			if oldText != "" {
 				edit.textChanged("")
 				if edit.created {
-					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID()))
+					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), ""))
 				}
 			}
 		}

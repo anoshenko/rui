@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// DropDownEvent is the constant for "drop-down-event" property tag.
+// The "drop-down-event" event occurs when a list item becomes selected.
+// The main listener format: func(DropDownList, int), where the second argument is the item index.
 const DropDownEvent = "drop-down-event"
 
 // DropDownList - the interface of a drop-down list view
