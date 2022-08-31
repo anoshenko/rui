@@ -540,17 +540,17 @@ After getting the value with the Get function, you must typecast:
 
 This is quite cumbersome, therefore for each property there is a global function of the same name with the Get prefix,
 which performs the given cast, gets the value of the constant, if necessary, and returns it.
-All functions of this type have two arguments: View and subviewID string.
+All functions of this type have two arguments: View and subviewID ...string.
 The first argument is the root View, the second is the ID of the child View.
-If the ID of the child View is passed as "", then the value of the root View is returned.
+If the ID of the child View is not specified or is passed as "", then the value of the root View is returned.
 For the properties "width", "height", "min-width", "min-height", "max-width", "max-height" these are functions:
 
-	func GetWidth(view View, subviewID string) SizeUnit
-	func GetHeight(view View, subviewID string) SizeUnit
-	func GetMinWidth(view View, subviewID string) SizeUnit
-	func GetMinHeight(view View, subviewID string) SizeUnit
-	func GetMaxWidth(view View, subviewID string) SizeUnit
-	func GetMaxHeight(view View, subviewID string) SizeUnit
+	func GetWidth(view View, subviewID ...string) SizeUnit
+	func GetHeight(view View, subviewID ...string) SizeUnit
+	func GetMinWidth(view View, subviewID ...string) SizeUnit
+	func GetMinHeight(view View, subviewID ...string) SizeUnit
+	func GetMaxWidth(view View, subviewID ...string) SizeUnit
+	func GetMaxHeight(view View, subviewID ...string) SizeUnit
 
 ### "resize" property
 
@@ -569,7 +569,7 @@ The default value for a multiline text editor is BothResize(1).
 
 You can get the value of this property using the function
 
-	func GetResize(view View, subviewID string) int
+	func GetResize(view View, subviewID ...string) int
 
 ### "margin" and "padding" properties
 
@@ -609,8 +609,8 @@ can be converted to a more convenient Bounds structure:
 
 Global functions can also be used for this:
 
-	func GetMargin(view View, subviewID string) Bounds
-	func GetPadding(view View, subviewID string) Bounds
+	func GetMargin(view View, subviewID ...string) Bounds
+	func GetPadding(view View, subviewID ...string) Bounds
 
 The textual representation of the BoundsProperty is as follows:
 
@@ -744,7 +744,7 @@ This converts the ViewBorders to BorderProperty. Therefore, when the property is
 the Get function will return the BorderProperty interface, not the ViewBorders structure.
 You can get the ViewBorders structure without additional transformations using the global function
 
-	func GetBorder(view View, subviewID string) ViewBorders
+	func GetBorder(view View, subviewID ...string) ViewBorders
 
 Besides the auxiliary properties "style", "width" and "color" there are 4 more: "left", "right", "top" and "bottom".
 As a value, these properties can only take the ViewBorder structure and allow you to set all the attributes of the line of the side of the same name.
@@ -880,7 +880,7 @@ This converts BoxRadius to RadiusProperty. Therefore, when the property is read,
 the Get function will return the RadiusProperty interface, not the BoxRadius structure. 
 You can get the BoxRadius structure without additional transformations using the global function
 
-	func GetRadius(view View, subviewID string) BoxRadius
+	func GetRadius(view View, subviewID ...string) BoxRadius
 
 You can also set individual radii using the Set function of the View interface.
 For this, the following properties are used
@@ -955,7 +955,7 @@ The ViewShadow text representation has the following format:
 
 You can get the value of "shadow" property using the function
 
-	func GetViewShadows(view View, subviewID string) []ViewShadow
+	func GetViewShadows(view View, subviewID ...string) []ViewShadow
 
 If no shadow is specified, then this function will return an empty array
 
@@ -1214,7 +1214,7 @@ Where 1 - View is fully opaque, 0 - fully transparent.
 
 You can get the value of this property using the function
 
-	func GetOpacity(view View, subviewID string) float64
+	func GetOpacity(view View, subviewID ...string) float64
 
 ### "z-index" property
 
@@ -1224,7 +1224,7 @@ higher z-indexes overlap elements with lower.
 
 You can get the value of this property using the function
 
-	func GetZIndex(view View, subviewID string) int
+	func GetZIndex(view View, subviewID ...string) int
 
 ### "visibility" property
 
@@ -1238,7 +1238,7 @@ The "visibility" int property (constant Visibility) specifies the visibility of 
 
 You can get the value of this property using the function
 
-	func GetVisibility(view View, subviewID string) int
+	func GetVisibility(view View, subviewID ...string) int
 
 ### "filter" and "backdrop-filter" properties
 
@@ -1274,8 +1274,8 @@ Example
 
 You can get the value of the current filter using functions
 
-	func GetFilter(view View, subviewID string) ViewFilter
-	func GetBackdropFilter(view View, subviewID string) ViewFilter
+	func GetFilter(view View, subviewID ...string) ViewFilter
+	func GetBackdropFilter(view View, subviewID ...string) ViewFilter
 
 ### "semantics" property
 
@@ -1322,7 +1322,7 @@ if it is not available, then the second, third, etc.
 
 You can get the value of this property using the function
 
-	func GetFontName(view View, subviewID string) string
+	func GetFontName(view View, subviewID ...string) string
 
 #### "text-color" property
 
@@ -1330,7 +1330,7 @@ Property "text-color" (constant TextColor) - the Color property determines the c
 
 You can get the value of this property using the function
 
-	func GetTextColor(view View, subviewID string) Color
+	func GetTextColor(view View, subviewID ...string) Color
 
 #### "text-size" property
 
@@ -1338,7 +1338,7 @@ Property "text-size" (constant TextSize) - the SizeUnit property determines the 
 
 You can get the value of this property using the function
 
-	func GetTextSize(view View, subviewID string) SizeUnit
+	func GetTextSize(view View, subviewID ...string) SizeUnit
 
 #### "italic" property
 
@@ -1346,7 +1346,7 @@ The "italic" property (constant Italic) is the bool property. If the value is tr
 
 You can get the value of this property using the function
 
-	func IsItalic(view View, subviewID string) bool
+	func IsItalic(view View, subviewID ...string) bool
 	
 #### "small-caps" property
 
@@ -1354,7 +1354,7 @@ The "small-caps" property (SmallCaps constant) is the bool property. If the valu
 
 You can get the value of this property using the function
 
-	func IsSmallCaps(view View, subviewID string) bool
+	func IsSmallCaps(view View, subviewID ...string) bool
 
 #### "white-space" property
 
@@ -1426,9 +1426,9 @@ These bool properties set decorative lines on the text:
 
 You can get the value of these properties using the functions
 
-	func IsStrikethrough(view View, subviewID string) bool
-	func IsOverline(view View, subviewID string) bool
-	func IsUnderline(view View, subviewID string) bool
+	func IsStrikethrough(view View, subviewID ...string) bool
+	func IsOverline(view View, subviewID ...string) bool
+	func IsUnderline(view View, subviewID ...string) bool
 
 #### "text-line-thickness" property
 
@@ -1437,7 +1437,7 @@ of decorative lines on the text set using the "strikethrough", "overline" and "u
 
 You can get the value of this property using the function
 
-	GetTextLineThickness(view View, subviewID string) SizeUnit
+	GetTextLineThickness(view View, subviewID ...string) SizeUnit
 
 #### "text-line-style" property
 
@@ -1456,7 +1456,7 @@ Possible values are:
 
 You can get the value of this property using the function
 
-	func GetTextLineStyle(view View, subviewID string) int
+	func GetTextLineStyle(view View, subviewID ...string) int
 
 #### "text-line-color" property
 
@@ -1466,7 +1466,7 @@ If the property is not defined, then the text color specified by the "text-color
 
 You can get the value of this property using the function
 
-	func GetTextLineColor(view View, subviewID string) Color
+	func GetTextLineColor(view View, subviewID ...string) Color
 
 #### "text-weight" property
 
@@ -1488,7 +1488,7 @@ Some fonts are only available in normal or bold style. In this case, the value o
 
 You can get the value of this property using the function
 
-	func GetTextWeight(view View, subviewID string) int
+	func GetTextWeight(view View, subviewID ...string) int
 
 #### "text-shadow" property
 
@@ -1513,7 +1513,7 @@ ViewShadow, ViewShadow array, ViewShadow textual representation can be assigned 
 
 You can get the value of this property using the function
 
-	func GetTextShadows(view View, subviewID string) []ViewShadow
+	func GetTextShadows(view View, subviewID ...string) []ViewShadow
 
 If no shadow is specified, then this function will return an empty array
 
@@ -1530,7 +1530,7 @@ The "text-align" int property (constant TextAlign) sets the alignment of the tex
 
 You can get the value of this property using the function
 
-	func GetTextAlign(view View, subviewID string) int
+	func GetTextAlign(view View, subviewID ...string) int
 
 #### "text-indent" property
 
@@ -1539,7 +1539,7 @@ before the first line of text.
 
 You can get the value of this property using the function
 
-	func GetTextIndent(view View, subviewID string) SizeUnit
+	func GetTextIndent(view View, subviewID ...string) SizeUnit
 	
 #### "letter-spacing" property
 
@@ -1549,7 +1549,7 @@ The user agent can choose not to increase or decrease the letter spacing to alig
 
 You can get the value of this property using the function
 
-	func GetLetterSpacing(view View, subviewID string) SizeUnit
+	func GetLetterSpacing(view View, subviewID ...string) SizeUnit
 
 #### "word-spacing" property
 
@@ -1559,7 +1559,7 @@ Otherwise, it specifies additional spacing in addition to the inner word spacing
 
 You can get the value of this property using the function
 
-	func GetWordSpacing(view View, subviewID string) SizeUnit
+	func GetWordSpacing(view View, subviewID ...string) SizeUnit
 
 #### "line-height" property
 
@@ -1567,7 +1567,7 @@ The "line-height" (LineHeight constant) SizeUnit property sets the amount of spa
 
 You can get the value of this property using the function
 
-	func GetLineHeight(view View, subviewID string) SizeUnit
+	func GetLineHeight(view View, subviewID ...string) SizeUnit
 
 #### "text-transform" property
 
@@ -1582,7 +1582,7 @@ The "text-transform" (TextTransform constant) int property defines the case of c
 
 You can get the value of this property using the function
 
-	func GetTextTransform(view View, subviewID string) int
+	func GetTextTransform(view View, subviewID ...string) int
 
 #### "text-direction" property
 
@@ -1596,7 +1596,7 @@ The "text-direction" (TextDirection constant) int property determines the direct
 
 You can get the value of this property using the function
 
-	func GetTextDirection(view View, subviewID string) int
+	func GetTextDirection(view View, subviewID ...string) int
 
 #### "writing-mode" property
 The "writing-mode" (WritingMode constant) int property defines how the lines of text are arranged 
@@ -1612,7 +1612,7 @@ Possible values are:
 
 You can get the value of this property using the function
 
-	func GetWritingMode(view View, subviewID string) int
+	func GetWritingMode(view View, subviewID ...string) int
 
 #### "vertical-text-orientation" property
 
@@ -1627,7 +1627,7 @@ Possible values are:
 
 You can get the value of this property using the function
 
-	func GetVerticalTextOrientation(view View, subviewID string) int
+	func GetVerticalTextOrientation(view View, subviewID ...string) int
 
 #### "user-select" property
 
@@ -1643,7 +1643,7 @@ it will also apply to all child elements
 
 You can get the value of this property using the function
 
-	func IsUserSelect(view View, subviewID string) bool
+	func IsUserSelect(view View, subviewID ...string) bool
 
 ### Transformation properties
 
@@ -1661,7 +1661,7 @@ The vanishing point is by default located in the center of the element, but it c
 
 You can get the value of this property using the function
 
-	func GetPerspective(view View, subviewID string) SizeUnit
+	func GetPerspective(view View, subviewID ...string) SizeUnit
 
 #### "perspective-origin-x" and "perspective-origin-y" properties
 
@@ -1672,7 +1672,7 @@ By default, the "perspective-origin-x" and "perspective-origin-y" properties are
 
 You can get the value of these properties using the function
 
-	func GetPerspectiveOrigin(view View, subviewID string) (SizeUnit, SizeUnit)
+	func GetPerspectiveOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit)
 
 #### "backface-visibility" property
 
@@ -1685,7 +1685,7 @@ the back face can be visible when the transformation causes the element to rotat
 
 You can get the value of this property using the function
 
-	func GetBackfaceVisible(view View, subviewID string) bool
+	func GetBackfaceVisible(view View, subviewID ...string) bool
 
 #### "origin-x", "origin-y", and "origin-z" properties
 
@@ -1697,7 +1697,7 @@ The "origin-z" property is ignored if the perspective property is not set.
 
 You can get the value of these properties using the function
 
-	func GetOrigin(view View, subviewID string) (SizeUnit, SizeUnit, SizeUnit)
+	func GetOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit)
 
 #### "translate-x", "translate-y", and "translate-z" properties
 
@@ -1708,7 +1708,7 @@ The translate-z property is ignored if the perspective property is not set.
 
 You can get the value of these properties using the function
 
-	func GetTranslate(view View, subviewID string) (SizeUnit, SizeUnit, SizeUnit)
+	func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit)
 
 #### "scale-x", "scale-y" and "scale-z" properties
 
@@ -1721,7 +1721,7 @@ The "scale-z" property is ignored if the "perspective" property is not set.
 
 You can get the value of these properties using the function
 
-	func GetScale(view View, subviewID string) (float64, float64, float64)
+	func GetScale(view View, subviewID ...string) (float64, float64, float64)
 
 #### "rotate" property
 
@@ -1738,7 +1738,7 @@ The "rotate-z" property is ignored if the "perspective" property is not set.
 
 You can get the value of these properties, as well as the "rotate" property, using the function
 
-	func GetRotate(view View, subviewID string) (float64, float64, float64, AngleUnit)
+	func GetRotate(view View, subviewID ...string) (float64, float64, float64, AngleUnit)
 
 #### "skew-x" and "skew-y" properties
 
@@ -1748,7 +1748,7 @@ specified by the transform-origin-x and transform-origin-y properties.
 
 You can get the value of these properties using the function
 
-	func GetSkew(view View, subviewID string) (AngleUnit, AngleUnit)
+	func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit)
 
 ### User data
 
@@ -1788,8 +1788,8 @@ You can also use listeners in the following formats:
 
 You can get lists of listeners for keyboard events using the functions:
 
-	func GetKeyDownListeners(view View, subviewID string) []func(View, KeyEvent)
-	func GetKeyUpListeners(view View, subviewID string) []func(View, KeyEvent)
+	func GetKeyDownListeners(view View, subviewID ...string) []func(View, KeyEvent)
+	func GetKeyUpListeners(view View, subviewID ...string) []func(View, KeyEvent)
 
 ### Focus events
 
@@ -1810,8 +1810,8 @@ You can also use a listener in the following format:
 
 You can get lists of listeners for focus events using the functions:
 
-	func GetFocusListeners(view View, subviewID string) []func(View)
-	func GetLostFocusListeners(view View, subviewID string) []func(View)
+	func GetFocusListeners(view View, subviewID ...string) []func(View)
+	func GetLostFocusListeners(view View, subviewID ...string) []func(View)
 
 ### Mouse events
 
@@ -1879,14 +1879,14 @@ You can also use listeners in the following formats:
 
 You can get lists of listeners for mouse events using the functions:
 
-	func GetMouseDownListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseUpListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseMoveListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseOverListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseOutListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetClickListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetDoubleClickListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetContextMenuListeners(view View, subviewID string) []func(View, MouseEvent)
+	func GetMouseDownListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseUpListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseMoveListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseOverListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseOutListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetClickListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetDoubleClickListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetContextMenuListeners(view View, subviewID ...string) []func(View, MouseEvent)
 
 ### Pointer Events
 
@@ -1933,12 +1933,12 @@ You can also use listeners in the following formats:
 
 You can get lists of pointer event listeners using the functions:
 
-	func GetPointerDownListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerUpListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerMoveListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerCancelListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerOverListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerOutListeners(view View, subviewID string) []func(View, PointerEvent)
+	func GetPointerDownListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerUpListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerMoveListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerCancelListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerOverListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerOutListeners(view View, subviewID ...string) []func(View, PointerEvent)
 
 ### Touch events
 
@@ -1991,10 +1991,10 @@ You can also use listeners in the following formats:
 
 You can get lists of listeners for touch events using the functions:
 
-	func GetTouchStartListeners(view View, subviewID string) []func(View, TouchEvent)
-	func GetTouchEndListeners(view View, subviewID string) []func(View, TouchEvent)
-	func GetTouchMoveListeners(view View, subviewID string) []func(View, TouchEvent)
-	func GetTouchCancelListeners(view View, subviewID string) []func(View, TouchEvent)
+	func GetTouchStartListeners(view View, subviewID ...string) []func(View, TouchEvent)
+	func GetTouchEndListeners(view View, subviewID ...string) []func(View, TouchEvent)
+	func GetTouchMoveListeners(view View, subviewID ...string) []func(View, TouchEvent)
+	func GetTouchCancelListeners(view View, subviewID ...string) []func(View, TouchEvent)
 
 ### Resize-event
 
@@ -2023,7 +2023,7 @@ You can also use listeners in the following formats:
 
 You can get a list of listeners for this event using the function:
 
-	func GetResizeListeners(view View, subviewID string) []func(View, Frame)
+	func GetResizeListeners(view View, subviewID ...string) []func(View, Frame)
 
 The current position and dimensions of the visible part of the View can be obtained using the View interface function:
 
@@ -2031,7 +2031,7 @@ The current position and dimensions of the visible part of the View can be obtai
 
 or global function
 
-	func GetViewFrame(view View, subviewID string) Frame
+	func GetViewFrame(view View, subviewID ...string) Frame
 
 ### Scroll event
 
@@ -2062,13 +2062,13 @@ The current position of the viewable area and the overall dimensions of the View
 
 or global function
 
-	func GetViewScroll(view View, subviewID string) Frame
+	func GetViewScroll(view View, subviewID ...string) Frame
 
 The following global functions can be used for manual scrolling
 
 	func ScrollViewTo(view View, subviewID string, x, y float64)
-	func ScrollViewToStart(view View, subviewID string)
-	func ScrollViewToEnd(view View, subviewID string)
+	func ScrollViewToStart(view View, subviewID ...string)
+	func ScrollViewToEnd(view View, subviewID ...string)
 
 which scroll the view, respectively, to the given position, start and end
 
@@ -2342,7 +2342,7 @@ on the "text-direction" property to the right or left of the previous one, and t
 
 You can get the value of this property using the function
 
-	func GetColumnCount(view View, subviewID string) int
+	func GetColumnCount(view View, subviewID ...string) int
 
 ### "column-width" property
 
@@ -2353,7 +2353,7 @@ IMPORTANT! Percentages cannot be used as the "column-width" value (i.e. if you s
 
 You can get the value of this property using the function
 
-	func GetColumnWidth(view View, subviewID string) SizeUnit
+	func GetColumnWidth(view View, subviewID ...string) SizeUnit
 
 ### "column-gap" property
 
@@ -2361,7 +2361,7 @@ The "column-gap" SizeUnit property (ColumnGap constant) sets the width of the ga
 
 You can get the value of this property using the function
 
-	func GetColumnGap(view View, subviewID string) SizeUnit
+	func GetColumnGap(view View, subviewID ...string) SizeUnit
 
 ### "column-separator" property
 
@@ -2409,7 +2409,7 @@ not the ViewBorder structure.
 
 You can get the ViewBorders structure without additional transformations using the global function
 
-	func GetColumnSeparator(view View, subviewID string) ViewBorder
+	func GetColumnSeparator(view View, subviewID ...string) ViewBorder
 
 You can also set individual line attributes using the Set function of the View interface.
 For this, the following properties are used
@@ -2447,7 +2447,7 @@ The default is "false".
 
 You can get the value of this property using the function
 
-	func GetAvoidBreak(view View, subviewID string) bool
+	func GetAvoidBreak(view View, subviewID ...string) bool
 
 ## StackLayout
 
@@ -2493,7 +2493,7 @@ Example
 
 	func peek(layout rui.StackLayout) {
 		views := layout.Views()
-		if index := rui.GetCurrent(layout, ""); index >= 0 && index < len(views) {
+		if index := rui.GetCurrent(layout); index >= 0 && index < len(views) {
 			return views[index]
 		} 
 		return nil
@@ -2561,7 +2561,7 @@ You can control the current View using the "current" integer property (constant 
 To programmatically switch tabs, set this property to the index of the new current View.
 You can read the value of the "current" property using the function
 
-	func GetCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID ...string) int
 
 Also, the "current" property can be used to track changes to the current View:
 
@@ -2634,11 +2634,11 @@ Accordingly, the value "true" shows child Views, "false" - hides.
 
 You can get the value of the "expanded" property using the function
 
-	func IsDetailsExpanded(view View, subviewID string) bool
+	func IsDetailsExpanded(view View, subviewID ...string) bool
 
 and the value of the "summary" property can be obtained using the function
 
-	func GetDetailsSummary(view View, subviewID string) View
+	func GetDetailsSummary(view View, subviewID ...string) View
 
 ## Resizable
 
@@ -2683,7 +2683,7 @@ To create a TextView, the function is used:
 The displayed text is set by the string property "text" (Text constant).
 In addition to the Get method, the value of the "text" property can be obtained using the function
 
-    func GetText (view View, subviewID string) string
+    func GetText (view View, subviewID ...string) string
 
 TextView inherits from View all properties of text parameters ("font-name", "text-size", "text-color", etc.).
 In addition to them, the "text-overflow" int property (TextOverflow constant) is added. 
@@ -2764,11 +2764,11 @@ relative to the bounds of the ImageView. Valid values:
 
 The following functions can be used to retrieve ImageView property values:
 
-	func GetImageViewSource(view View, subviewID string) string
-	func GetImageViewAltText(view View, subviewID string) string
-	func GetImageViewFit(view View, subviewID string) int
-	func GetImageViewVerticalAlign(view View, subviewID string) int
-	func GetImageViewHorizontalAlign(view View, subviewID string) int
+	func GetImageViewSource(view View, subviewID ...string) string
+	func GetImageViewAltText(view View, subviewID ...string) string
+	func GetImageViewFit(view View, subviewID ...string) int
+	func GetImageViewVerticalAlign(view View, subviewID ...string) int
+	func GetImageViewHorizontalAlign(view View, subviewID ...string) int
 
 ## EditView
 
@@ -2821,15 +2821,15 @@ In this case, the color of the caret changes for all child EditViews placed in t
 
 The following functions can be used to get the values of the properties of an EditView:
 
-	func GetText(view View, subviewID string) string
-	func GetHint(view View, subviewID string) string
-	func GetMaxLength(view View, subviewID string) int
-	func GetEditViewType(view View, subviewID string) int
-	func GetEditViewPattern(view View, subviewID string) string
-	func IsReadOnly(view View, subviewID string) bool
-	func IsEditViewWrap(view View, subviewID string) bool
-	func IsSpellcheck(view View, subviewID string) bool
-	func GetCaretColor(view View, subviewID string) Color
+	func GetText(view View, subviewID ...string) string
+	func GetHint(view View, subviewID ...string) string
+	func GetMaxLength(view View, subviewID ...string) int
+	func GetEditViewType(view View, subviewID ...string) int
+	func GetEditViewPattern(view View, subviewID ...string) string
+	func IsReadOnly(view View, subviewID ...string) bool
+	func IsEditViewWrap(view View, subviewID ...string) bool
+	func IsSpellcheck(view View, subviewID ...string) bool
+	func GetCaretColor(view View, subviewID ...string) Color
 
 The "edit-text-changed" event (EditTextChangedEvent constant) is used to track changes to the text. 
 The main event listener has the following format:
@@ -2840,7 +2840,7 @@ where the second argument is the new text value
 
 You can get the current list of text change listeners using the function
 
-	func GetTextChangedListeners(view View, subviewID string) []func(EditView, string)
+	func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string)
 
 ## NumberPicker
 
@@ -2873,7 +2873,7 @@ The following can be passed as a value to the "number-picker-value" property:
 All of these types are cast to float64. Accordingly, the Get function always returns a float64 value.
 The value of the "number-picker-value" property can also be read using the function:
 
-	func GetNumberPickerValue(view View, subviewID string) float64
+	func GetNumberPickerValue(view View, subviewID ...string) float64
 
 The entered values may be subject to restrictions. For this, the following properties are used:
 
@@ -2890,8 +2890,8 @@ If "number-picker-type" is equal to NumberEditor, then the entered numbers, by d
 
 You can read the values of these properties using the functions:
 
-	func GetNumberPickerMinMax(view View, subviewID string) (float64, float64)
-	func GetNumberPickerStep(view View, subviewID string) float64
+	func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64)
+	func GetNumberPickerStep(view View, subviewID ...string) float64
 
 The "number-changed" event (NumberChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
@@ -2902,7 +2902,7 @@ where the second argument is the new value
 
 You can get the current list of value change listeners using the function
 
-	func GetNumberChangedListeners(view View, subviewID string) []func(NumberPicker, float64)
+	func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64)
 
 ## DatePicker
 
@@ -2924,7 +2924,7 @@ The following can be passed as a value to the "date-picker-value" property:
 The text is converted to time.Time. Accordingly, the Get function always returns a time.Time value.
 The value of the "date-picker-value" property can also be read using the function:
 
-	func GetDatePickerValue(view View, subviewID string) time.Time
+	func GetDatePickerValue(view View, subviewID ...string) time.Time
 
 The dates you enter may be subject to restrictions. For this, the following properties are used:
 
@@ -2936,9 +2936,9 @@ The dates you enter may be subject to restrictions. For this, the following prop
 
 You can read the values of these properties using the functions:
 
-	func GetDatePickerMin(view View, subviewID string) (time.Time, bool)
-	func GetDatePickerMax(view View, subviewID string) (time.Time, bool)
-	func GetDatePickerStep(view View, subviewID string) int
+	func GetDatePickerMin(view View, subviewID ...string) (time.Time, bool)
+	func GetDatePickerMax(view View, subviewID ...string) (time.Time, bool)
+	func GetDatePickerStep(view View, subviewID ...string) int
 
 The "date-changed" event (DateChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
@@ -2949,7 +2949,7 @@ where the second argument is the new date value
 
 You can get the current list of date change listeners using the function
 
-	func GetDateChangedListeners(view View, subviewID string) []func(DatePicker, time.Time)
+	func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time)
 
 ## TimePicker
 
@@ -2971,7 +2971,7 @@ The following can be passed as a value to the "time-picker-value" property:
 The text is converted to time.Time. Accordingly, the Get function always returns a time.Time value.
 The value of the "time-picker-value" property can also be read using the function:
 
-	func GetTimePickerValue(view View, subviewID string) time.Time
+	func GetTimePickerValue(view View, subviewID ...string) time.Time
 
 The time entered may be subject to restrictions. For this, the following properties are used:
 
@@ -2983,9 +2983,9 @@ The time entered may be subject to restrictions. For this, the following propert
 
 You can read the values of these properties using the functions:
 
-	func GetTimePickerMin(view View, subviewID string) (time.Time, bool)
-	func GetTimePickerMax(view View, subviewID string) (time.Time, bool)
-	func GetTimePickerStep(view View, subviewID string) int
+	func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool)
+	func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool)
+	func GetTimePickerStep(view View, subviewID ...string) int
 
 The "time-changed" event (TimeChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
@@ -2996,7 +2996,7 @@ where the second argument is the new time value
 
 You can get the current list of date change listeners using the function
 
-	func GetTimeChangedListeners(view View, subviewID string) []func(TimePicker, time.Time)
+	func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time)
 
 ## ColorPicker
 
@@ -3015,7 +3015,7 @@ The following can be passed as a value to the "color-picker-value" property:
 
 The value of the property "color-picker-value" can also be read using the function:
 
-	func GetColorPickerValue(view View, subviewID string) Color
+	func GetColorPickerValue(view View, subviewID ...string) Color
 
 The "color-changed" event (ColorChangedEvent constant) is used to track the change in the selected color. 
 The main event listener has the following format:
@@ -3026,7 +3026,7 @@ where the second argument is the new color value
 
 You can get the current list of date change listeners using the function
 
-	func GetColorChangedListeners(view View, subviewID string) []func(ColorPicker, Color)
+	func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color)
 
 ## FilePicker
 
@@ -3055,7 +3055,7 @@ Two functions of the FilePicker interface are used to access the selected files:
 
 as well as the corresponding global functions
 
-	func GetFilePickerFiles(view View, subviewID string) []FileInfo
+	func GetFilePickerFiles(view View, subviewID ...string) []FileInfo
 	func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(FileInfo, []byte))
 
 The Files/GetFilePickerFiles functions return a list of the selected files as a slice of FileInfo structures. 
@@ -3109,7 +3109,7 @@ where the second argument is the new value of the list of selected files.
 
 You can get the current list of listeners of the list of files changing using the function
 
-	func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo)
+	func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo)
 
 ## DropDownList
 
@@ -3130,7 +3130,7 @@ float32, float64, int, int8 … int64, uint, uint8 … uint64.
 All of these data types are converted to []string and assigned to the "items" property.
 You can read the value of the "items" property using the function
 
-	func GetDropDownItems(view View, subviewID string) []string
+	func GetDropDownItems(view View, subviewID ...string) []string
 
 You can disable the selection of individual items. For this, the "disabled-items" property (constant DisabledItems) is used.
 This property is assigned an array of disabled item indices. The index can be specified either as a number, as text, or as a constant. Therefore, the following data types can be assigned to the "disabled-items" property:
@@ -3144,12 +3144,12 @@ This property is assigned an array of disabled item indices. The index can be sp
 All of these data types are converted to []any and assigned to the "disabled-items" property.
 You can read the value of the "disabled-items" property using the function
 
-	func GetDropDownDisabledItems(view View, subviewID string) []int
+	func GetDropDownDisabledItems(view View, subviewID ...string) []int
 
 The selected value is determined by the int property "current" (Current constant). The default is 0.
 You can read the value of this property using the function
 
-	func GetCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID ...string) int
 
 To track the change of the "current" property, the "drop-down-event" event (DropDownEvent constant) is used. 
 The main event listener has the following format:
@@ -3160,7 +3160,7 @@ where the second argument is the index of the selected item
 
 You can get the current list of date change listeners using the function
 
-	func GetDropDownListeners(view View, subviewID string) []func(DropDownList, int)
+	func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int)
 
 ## ProgressBar
 
@@ -3179,8 +3179,8 @@ In addition to float64, float32, int, int8 … int64, uint, uint8 … uint64
 
 You can read the value of these properties using the functions
 
-	func GetProgressBarMax(view View, subviewID string) float64
-	func GetProgressBarValue(view View, subviewID string) float64
+	func GetProgressBarMax(view View, subviewID ...string) float64
+	func GetProgressBarValue(view View, subviewID ...string) float64
 
 ## Button
 
@@ -3239,7 +3239,7 @@ When assigning, all types except View and string are converted to string, then a
 and from the resulting View array using the NewViewListAdapter function, a ListAdapter is obtained.
 
 If the list items change during operation, then after the change, either the ReloadListViewData() 
-function of the ListView interface or the global ReloadListViewData(view View, subviewID string) function must be called.
+function of the ListView interface or the global ReloadListViewData(view View, subviewID ...string) function must be called.
 These functions update the displayed list items.
 
 ### "Orientation" property
@@ -3261,7 +3261,7 @@ on the value of the "text-direction" property. For languages written from right 
 
 You can get the value of this property using the function
 
-	func GetListOrientation(view View, subviewID string) int
+	func GetListOrientation(view View, subviewID ...string) int
 
 ### "wrap" property
 
@@ -3278,7 +3278,7 @@ the beginning (for the position of the beginning and end, see above), the new li
 
 You can get the value of this property using the function
 
-	func GetListWrap(view View, subviewID string) int
+	func GetListWrap(view View, subviewID ...string) int
 
 ### "item-width" and "item-height" properties
 
@@ -3291,8 +3291,8 @@ properties "item-width" and "item-height"
 
 You can get the values of these properties using the functions
 
-	func GetListItemWidth(view View, subviewID string) SizeUnit
-	func GetListItemHeight(view View, subviewID string) SizeUnit
+	func GetListItemWidth(view View, subviewID ...string) SizeUnit
+	func GetListItemHeight(view View, subviewID ...string) SizeUnit
 
 ### "item-vertical-align" property
 
@@ -3308,7 +3308,7 @@ of the contents of the list items. Valid values:
 
 You can get the value of this property using the function
 
-	func GetListItemVerticalAlign(view View, subviewID string) int
+	func GetListItemVerticalAlign(view View, subviewID ...string) int
 
 ### "item-horizontal-align" property
 
@@ -3324,7 +3324,7 @@ horizontal alignment of the contents of the list items. Valid values:
 
 You can get the value of this property using the function
 
-	GetListItemHorizontalAlign(view View, subviewID string) int
+	GetListItemHorizontalAlign(view View, subviewID ...string) int
 
 ### "current" property
 
@@ -3335,7 +3335,7 @@ The value "current" is less than 0 means that no item is selected
 
 You can get the value of this property using the function
 
-	func GetCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID ...string) int
 
 ### "list-item-style", "current-style", and "current-inactive-style" properties
 
@@ -3363,13 +3363,13 @@ can take the following values
 
 You can get the value of this property using the function
 
-	func GetListViewCheckbox(view View, subviewID string) int
+	func GetListViewCheckbox(view View, subviewID ...string) int
 
 You can get/set the list of checked items using the "checked" property (Checked constant).
 This property is of type []int and stores the indexes of the marked elements.
 You can get the value of this property using the function
 
-	func GetListViewCheckedItems(view View, subviewID string) []int
+	func GetListViewCheckedItems(view View, subviewID ...string) []int
 
 You can check if a specific element is marked using the function
 
@@ -3400,8 +3400,8 @@ In this case, the checkbox is centered horizontally, the content is below
 
 You can get property values for "checkbox-horizontal-align" and "checkbox-vertical-align" using the functions
 
-	func GetListViewCheckboxHorizontalAlign(view View, subviewID string) int
-	func GetListViewCheckboxVerticalAlign(view View, subviewID string) int
+	func GetListViewCheckboxHorizontalAlign(view View, subviewID ...string) int
+	func GetListViewCheckboxVerticalAlign(view View, subviewID ...string) int
 
 ### ListView events
 
@@ -3421,9 +3421,9 @@ Where the second argument is an array of indexes of the tagged items.
 
 You can get lists of listeners for these events using the functions:
 
-	func GetListItemClickedListeners(view View, subviewID string) []func(ListView, int)
-	func GetListItemSelectedListeners(view View, subviewID string) []func(ListView, int)
-	func GetListItemCheckedListeners(view View, subviewID string) []func(ListView, []int)
+	func GetListItemClickedListeners(view View, subviewID ...string) []func(ListView, int)
+	func GetListItemSelectedListeners(view View, subviewID ...string) []func(ListView, int)
+	func GetListItemCheckedListeners(view View, subviewID ...string) []func(ListView, []int)
 
 ## TableView
 
@@ -3617,7 +3617,7 @@ For horizontal alignment, use the "text-align" property
 
 You can get the value of this property using the function
 
-	func GetTableVerticalAlign(view View, subviewID string) int
+	func GetTableVerticalAlign(view View, subviewID ...string) int
 
 ### "selection-mode" property
 
@@ -3636,7 +3636,7 @@ In this mode, the table generates two types of events: "table-row-selected" and 
 
 You can get the value of this property using the function
 
-	func GetSelectionMode(view View, subviewID string) int
+	func GetSelectionMode(view View, subviewID ...string) int
 
 ### "current" property
 
@@ -3653,7 +3653,7 @@ the "current" property can be assigned a value of type int (row index).
 
 You can get the value of this property using the function
 
-	func GetTableCurrent(view View, subviewID string) CellIndex
+	func GetTableCurrent(view View, subviewID ...string) CellIndex
 
 ### "allow-selection" property
 
@@ -4603,7 +4603,7 @@ Calling the SetAnimated function does not change the value of the "transition" p
 
 To get the current list of permanent transition animations, use the function
 
-	func GetTransition(view View, subviewID string) Params
+	func GetTransition(view View, subviewID ...string) Params
 
 It is recommended to add new transition animations using the function 
 
@@ -4640,10 +4640,10 @@ You can also use a listener in the following format:
 
 Get lists of listeners for transition animation events using functions:
 
-	func GetTransitionRunListeners(view View, subviewID string) []func(View, string)
-	func GetTransitionStartListeners(view View, subviewID string) []func(View, string)
-	func GetTransitionEndListeners(view View, subviewID string) []func(View, string)
-	func GetTransitionCancelListeners(view View, subviewID string) []func(View, string)
+	func GetTransitionRunListeners(view View, subviewID ...string) []func(View, string)
+	func GetTransitionStartListeners(view View, subviewID ...string) []func(View, string)
+	func GetTransitionEndListeners(view View, subviewID ...string) []func(View, string)
+	func GetTransitionCancelListeners(view View, subviewID ...string) []func(View, string)
 
 ### Animation script
 
@@ -4772,10 +4772,10 @@ You can also use a listener in the following format:
 
 Get lists of animation event listeners using functions:
 
-	func GetAnimationStartListeners(view View, subviewID string) []func(View, string)
-	func GetAnimationEndListeners(view View, subviewID string) []func(View, string)
-	func GetAnimationCancelListeners(view View, subviewID string) []func(View, string)
-	func GetAnimationIterationListeners(view View, subviewID string) []func(View, string)
+	func GetAnimationStartListeners(view View, subviewID ...string) []func(View, string)
+	func GetAnimationEndListeners(view View, subviewID ...string) []func(View, string)
+	func GetAnimationCancelListeners(view View, subviewID ...string) []func(View, string)
+	func GetAnimationIterationListeners(view View, subviewID ...string) []func(View, string)
 
 ## Session
 

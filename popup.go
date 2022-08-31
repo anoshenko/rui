@@ -115,7 +115,7 @@ type popupArrow struct {
 
 func (arrow *popupArrow) fixOff(popupView View) {
 	if arrow.align == CenterAlign && arrow.off.Type == Auto {
-		r := GetRadius(popupView, "")
+		r := GetRadius(popupView)
 		switch arrow.location {
 		case TopArrow:
 			switch arrow.align {
@@ -176,13 +176,13 @@ func (arrow *popupArrow) createView(popupView View) View {
 		arrow.width = defaultSize("ruiArrowWidth", Px(16))
 	}
 
-	params := Params{BackgroundColor: GetBackgroundColor(popupView, "")}
+	params := Params{BackgroundColor: GetBackgroundColor(popupView)}
 
-	if shadow := GetViewShadows(popupView, ""); shadow != nil {
+	if shadow := GetViewShadows(popupView); shadow != nil {
 		params[Shadow] = shadow
 	}
 
-	if filter := GetBackdropFilter(popupView, ""); filter != nil {
+	if filter := GetBackdropFilter(popupView); filter != nil {
 		params[BackdropFilter] = filter
 	}
 

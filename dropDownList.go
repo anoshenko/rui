@@ -80,7 +80,7 @@ func (list *dropDownListData) remove(tag string) {
 		}
 
 	case Current:
-		oldCurrent := GetCurrent(list, "")
+		oldCurrent := GetCurrent(list)
 		delete(list.properties, Current)
 		if oldCurrent != 0 {
 			if list.created {
@@ -125,12 +125,12 @@ func (list *dropDownListData) set(tag string, value any) bool {
 		return true
 
 	case Current:
-		oldCurrent := GetCurrent(list, "")
+		oldCurrent := GetCurrent(list)
 		if !list.setIntProperty(Current, value) {
 			return false
 		}
 
-		if current := GetCurrent(list, ""); oldCurrent != current {
+		if current := GetCurrent(list); oldCurrent != current {
 			if list.created {
 				list.session.runScript(fmt.Sprintf(`selectDropDownListItem('%s', %d)`, list.htmlID(), current))
 			}
@@ -333,9 +333,9 @@ func (list *dropDownListData) htmlTag() string {
 
 func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 	if list.items != nil {
-		current := GetCurrent(list, "")
-		notTranslate := GetNotTranslate(list, "")
-		disabledItems := GetDropDownDisabledItems(list, "")
+		current := GetCurrent(list)
+		notTranslate := GetNotTranslate(list)
+		disabledItems := GetDropDownDisabledItems(list)
 		for i, item := range list.items {
 			disabled := false
 			for _, index := range disabledItems {
@@ -369,7 +369,7 @@ func (list *dropDownListData) htmlProperties(self View, buffer *strings.Builder)
 
 func (list *dropDownListData) htmlDisabledProperties(self View, buffer *strings.Builder) {
 	list.viewData.htmlDisabledProperties(self, buffer)
-	if IsDisabled(list, "") {
+	if IsDisabled(list) {
 		buffer.WriteString(`disabled`)
 	}
 }
@@ -386,7 +386,7 @@ func (list *dropDownListData) handleCommand(self View, command string, data Data
 	case "itemSelected":
 		if text, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(text); err == nil {
-				if GetCurrent(list, "") != number && number >= 0 && number < len(list.items) {
+				if GetCurrent(list) != number && number >= 0 && number < len(list.items) {
 					list.properties[Current] = number
 					list.onSelectedItemChanged(number)
 				}
@@ -401,19 +401,17 @@ func (list *dropDownListData) handleCommand(self View, command string, data Data
 	return true
 }
 
-func GetDropDownListeners(view View) []func(DropDownList, int) {
-	if value := view.Get(DropDownEvent); value != nil {
-		if listeners, ok := value.([]func(DropDownList, int)); ok {
-			return listeners
-		}
-	}
-	return []func(DropDownList, int){}
+// GetDropDownListeners returns the "drop-down-event" listener list. If there are no listeners then the empty list is returned.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int) {
+	return getEventListeners[DropDownList, int](view, subviewID, DropDownEvent)
 }
 
-// func GetDropDownItems return the view items list
-func GetDropDownItems(view View, subviewID string) []string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// GetDropDownItems return the DropDownList items list.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDropDownItems(view View, subviewID ...string) []string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if list, ok := view.(DropDownList); ok {
@@ -423,11 +421,13 @@ func GetDropDownItems(view View, subviewID string) []string {
 	return []string{}
 }
 
-// func GetDropDownDisabledItems return the list of disabled item indexes
-func GetDropDownDisabledItems(view View, subviewID string) []int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// GetDropDownDisabledItems return the list of DropDownList disabled item indexes.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDropDownDisabledItems(view View, subviewID ...string) []int {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
+
 	if view != nil {
 		if value := view.Get(DisabledItems); value != nil {
 			if values, ok := value.([]any); ok {

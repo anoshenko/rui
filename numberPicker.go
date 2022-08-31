@@ -111,8 +111,8 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 		return true
 
 	case NumberPickerValue:
-		oldValue := GetNumberPickerValue(picker, "")
-		min, max := GetNumberPickerMinMax(picker, "")
+		oldValue := GetNumberPickerValue(picker)
+		min, max := GetNumberPickerMinMax(picker)
 		if picker.setFloatProperty(NumberPickerValue, value, min, max) {
 			if f, ok := floatProperty(picker, NumberPickerValue, picker.Session(), min); ok && f != oldValue {
 				newValue, _ := floatTextProperty(picker, NumberPickerValue, picker.Session(), min)
@@ -140,29 +140,29 @@ func (picker *numberPickerData) propertyChanged(tag string) {
 	if picker.created {
 		switch tag {
 		case NumberPickerType:
-			if GetNumberPickerType(picker, "") == NumberSlider {
+			if GetNumberPickerType(picker) == NumberSlider {
 				updateProperty(picker.htmlID(), "type", "range", picker.session)
 			} else {
 				updateProperty(picker.htmlID(), "type", "number", picker.session)
 			}
 
 		case NumberPickerMin:
-			min, _ := GetNumberPickerMinMax(picker, "")
+			min, _ := GetNumberPickerMinMax(picker)
 			updateProperty(picker.htmlID(), Min, strconv.FormatFloat(min, 'f', -1, 32), picker.session)
 
 		case NumberPickerMax:
-			_, max := GetNumberPickerMinMax(picker, "")
+			_, max := GetNumberPickerMinMax(picker)
 			updateProperty(picker.htmlID(), Max, strconv.FormatFloat(max, 'f', -1, 32), picker.session)
 
 		case NumberPickerStep:
-			if step := GetNumberPickerStep(picker, ""); step > 0 {
+			if step := GetNumberPickerStep(picker); step > 0 {
 				updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32), picker.session)
 			} else {
 				updateProperty(picker.htmlID(), Step, "any", picker.session)
 			}
 
 		case NumberPickerValue:
-			value := GetNumberPickerValue(picker, "")
+			value := GetNumberPickerValue(picker)
 			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), value))
 			for _, listener := range picker.numberChangedListeners {
 				listener(picker, value)
@@ -192,13 +192,13 @@ func (picker *numberPickerData) htmlTag() string {
 func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builder) {
 	picker.viewData.htmlProperties(self, buffer)
 
-	if GetNumberPickerType(picker, "") == NumberSlider {
+	if GetNumberPickerType(picker) == NumberSlider {
 		buffer.WriteString(` type="range"`)
 	} else {
 		buffer.WriteString(` type="number"`)
 	}
 
-	min, max := GetNumberPickerMinMax(picker, "")
+	min, max := GetNumberPickerMinMax(picker)
 	if min != math.Inf(-1) {
 		buffer.WriteString(` min="`)
 		buffer.WriteString(strconv.FormatFloat(min, 'f', -1, 64))
@@ -211,7 +211,7 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 		buffer.WriteByte('"')
 	}
 
-	step := GetNumberPickerStep(picker, "")
+	step := GetNumberPickerStep(picker)
 	if step != 0 {
 		buffer.WriteString(` step="`)
 		buffer.WriteString(strconv.FormatFloat(step, 'f', -1, 64))
@@ -221,14 +221,14 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 	}
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(strconv.FormatFloat(GetNumberPickerValue(picker, ""), 'f', -1, 64))
+	buffer.WriteString(strconv.FormatFloat(GetNumberPickerValue(picker), 'f', -1, 64))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 }
 
 func (picker *numberPickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)
@@ -239,7 +239,7 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, err := strconv.ParseFloat(text, 32); err == nil {
-				oldValue := GetNumberPickerValue(picker, "")
+				oldValue := GetNumberPickerValue(picker)
 				picker.properties[NumberPickerValue] = text
 				if value != oldValue {
 					for _, listener := range picker.numberChangedListeners {
@@ -257,16 +257,23 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 // GetNumberPickerType returns the type of NumberPicker subview. Valid values:
 // NumberEditor (0) - NumberPicker is presented by editor (default type);
 // NumberSlider (1) - NumberPicker is presented by slider.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetNumberPickerType(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetNumberPickerType(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, NumberPickerType, NumberEditor, false)
 }
 
 // GetNumberPickerMinMax returns the min and max value of NumberPicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetNumberPickerMinMax(view View, subviewID string) (float64, float64) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
+	var pickerType int
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		pickerType = GetNumberPickerType(view, subviewID[0])
+	} else {
+		pickerType = GetNumberPickerType(view)
+	}
+
 	var defMin, defMax float64
-	if GetNumberPickerType(view, subviewID) == NumberSlider {
+	if pickerType == NumberSlider {
 		defMin = 0
 		defMax = 1
 	} else {
@@ -284,9 +291,15 @@ func GetNumberPickerMinMax(view View, subviewID string) (float64, float64) {
 }
 
 // GetNumberPickerStep returns the value changing step of NumberPicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetNumberPickerStep(view View, subviewID string) float64 {
-	_, max := GetNumberPickerMinMax(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetNumberPickerStep(view View, subviewID ...string) float64 {
+	var max float64
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		_, max = GetNumberPickerMinMax(view, subviewID[0])
+	} else {
+		_, max = GetNumberPickerMinMax(view)
+	}
+
 	result := floatStyledProperty(view, subviewID, NumberPickerStep, 0)
 	if result > max {
 		return max
@@ -295,16 +308,22 @@ func GetNumberPickerStep(view View, subviewID string) float64 {
 }
 
 // GetNumberPickerValue returns the value of NumberPicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetNumberPickerValue(view View, subviewID string) float64 {
-	min, _ := GetNumberPickerMinMax(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetNumberPickerValue(view View, subviewID ...string) float64 {
+	var min float64
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		min, _ = GetNumberPickerMinMax(view, subviewID[0])
+	} else {
+		min, _ = GetNumberPickerMinMax(view)
+	}
+
 	result := floatStyledProperty(view, subviewID, NumberPickerValue, min)
 	return result
 }
 
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetNumberChangedListeners(view View, subviewID string) []func(NumberPicker, float64) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64) {
 	return getEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
 }

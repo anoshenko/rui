@@ -158,7 +158,7 @@ func (listView *listViewData) remove(tag string) {
 		}
 
 	case Current:
-		current := GetCurrent(listView, "")
+		current := GetCurrent(listView)
 		delete(listView.properties, tag)
 		if listView.created {
 			updateInnerHTML(listView.htmlID(), listView.session)
@@ -264,11 +264,11 @@ func (listView *listViewData) set(tag string, value any) bool {
 		}
 
 	case Current:
-		oldCurrent := GetCurrent(listView, "")
+		oldCurrent := GetCurrent(listView)
 		if !listView.setIntProperty(Current, value) {
 			return false
 		}
-		current := GetCurrent(listView, "")
+		current := GetCurrent(listView)
 		if oldCurrent == current {
 			return true
 		}
@@ -317,7 +317,7 @@ func (listView *listViewData) Get(tag string) any {
 func (listView *listViewData) get(tag string) any {
 	switch tag {
 	case Gap:
-		if rowGap := GetListRowGap(listView, ""); rowGap.Equal(GetListColumnGap(listView, "")) {
+		if rowGap := GetListRowGap(listView); rowGap.Equal(GetListColumnGap(listView)) {
 			return rowGap
 		}
 		return AutoSize()
@@ -462,7 +462,7 @@ func (listView *listViewData) setChecked(value any) bool {
 		}
 	}
 
-	switch GetListViewCheckbox(listView, "") {
+	switch GetListViewCheckbox(listView) {
 	case SingleCheckbox:
 		count := len(checked)
 		if count > 1 {
@@ -546,14 +546,14 @@ func (listView *listViewData) getItemFrames() []Frame {
 
 func (listView *listViewData) itemAlign(self View, buffer *strings.Builder) {
 	values := enumProperties[ItemHorizontalAlign].cssValues
-	if hAlign := GetListItemHorizontalAlign(listView, ""); hAlign >= 0 && hAlign < len(values) {
+	if hAlign := GetListItemHorizontalAlign(listView); hAlign >= 0 && hAlign < len(values) {
 		buffer.WriteString(" justify-items: ")
 		buffer.WriteString(values[hAlign])
 		buffer.WriteRune(';')
 	}
 
 	values = enumProperties[ItemVerticalAlign].cssValues
-	if vAlign := GetListItemVerticalAlign(listView, ""); vAlign >= 0 && vAlign < len(values) {
+	if vAlign := GetListItemVerticalAlign(listView); vAlign >= 0 && vAlign < len(values) {
 		buffer.WriteString(" align-items: ")
 		buffer.WriteString(values[vAlign])
 		buffer.WriteRune(';')
@@ -561,13 +561,13 @@ func (listView *listViewData) itemAlign(self View, buffer *strings.Builder) {
 }
 
 func (listView *listViewData) itemSize(self View, buffer *strings.Builder) {
-	if itemWidth := GetListItemWidth(listView, ""); itemWidth.Type != Auto {
+	if itemWidth := GetListItemWidth(listView); itemWidth.Type != Auto {
 		buffer.WriteString(` min-width: `)
 		buffer.WriteString(itemWidth.cssString(""))
 		buffer.WriteRune(';')
 	}
 
-	if itemHeight := GetListItemHeight(listView, ""); itemHeight.Type != Auto {
+	if itemHeight := GetListItemHeight(listView); itemHeight.Type != Auto {
 		buffer.WriteString(` min-height: `)
 		buffer.WriteString(itemHeight.cssString(""))
 		buffer.WriteRune(';')
@@ -719,14 +719,14 @@ func (listView *listViewData) checkboxSubviews(self View, buffer *strings.Builde
 	count := listView.adapter.ListSize()
 	listViewID := listView.htmlID()
 
-	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView, "")
-	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView, "")
+	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
+	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView)
 
 	itemDiv := listView.checkboxItemDiv(self, checkbox, hCheckboxAlign, vCheckboxAlign)
 	onDiv, offDiv, contentDiv := listView.getDivs(self, checkbox, hCheckboxAlign, vCheckboxAlign)
 
-	current := GetCurrent(listView, "")
-	checkedItems := GetListViewCheckedItems(listView, "")
+	current := GetCurrent(listView)
+	checkedItems := GetListViewCheckedItems(listView)
 	for i := 0; i < count; i++ {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
@@ -782,7 +782,7 @@ func (listView *listViewData) noneCheckboxSubviews(self View, buffer *strings.Bu
 	itemStyleBuilder.WriteString(`" onclick="listItemClickEvent(this, event)"`)
 	itemStyle := itemStyleBuilder.String()
 
-	current := GetCurrent(listView, "")
+	current := GetCurrent(listView)
 	for i := 0; i < count; i++ {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
@@ -811,9 +811,9 @@ func (listView *listViewData) noneCheckboxSubviews(self View, buffer *strings.Bu
 
 func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 
-	checkbox := GetListViewCheckbox(listView, "")
-	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView, "")
-	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView, "")
+	checkbox := GetListViewCheckbox(listView)
+	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
+	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView)
 	onDiv, offDiv, contentDiv := listView.getDivs(listView, checkbox, hCheckboxAlign, vCheckboxAlign)
 
 	buffer := allocStringBuilder()
@@ -855,7 +855,7 @@ func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder)
 	buffer.WriteString(`" data-bluritemstyle="`)
 	buffer.WriteString(listView.currentInactiveStyle())
 	buffer.WriteString(`"`)
-	current := GetCurrent(listView, "")
+	current := GetCurrent(listView)
 	if listView.adapter != nil && current >= 0 && current < listView.adapter.ListSize() {
 		buffer.WriteString(` data-current="`)
 		buffer.WriteString(listView.htmlID())
@@ -871,8 +871,8 @@ func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder)
 func (listView *listViewData) cssStyle(self View, builder cssBuilder) {
 	listView.viewData.cssStyle(self, builder)
 
-	if GetListWrap(listView, "") != WrapOff {
-		switch GetListOrientation(listView, "") {
+	if GetListWrap(listView) != WrapOff {
+		switch GetListOrientation(listView) {
 		case TopDownOrientation, BottomUpOrientation:
 			builder.add(`max-height`, `100%`)
 		default:
@@ -894,20 +894,20 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	buffer.WriteString(`<div style="display: flex; align-content: stretch;`)
 
-	if gap := GetListRowGap(listView, ""); gap.Type != Auto {
+	if gap := GetListRowGap(listView); gap.Type != Auto {
 		buffer.WriteString(` row-gap: `)
 		buffer.WriteString(gap.cssString("0"))
 		buffer.WriteRune(';')
 	}
 
-	if gap := GetListColumnGap(listView, ""); gap.Type != Auto {
+	if gap := GetListColumnGap(listView); gap.Type != Auto {
 		buffer.WriteString(` column-gap: `)
 		buffer.WriteString(gap.cssString("0"))
 		buffer.WriteRune(';')
 	}
 
-	wrap := GetListWrap(listView, "")
-	orientation := GetListOrientation(listView, "")
+	wrap := GetListWrap(listView)
+	orientation := GetListOrientation(listView)
 	rows := (orientation == StartToEndOrientation || orientation == EndToStartOrientation)
 
 	if rows {
@@ -948,7 +948,7 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	value := ""
-	switch enumStyledProperty(listView, "", HorizontalAlign, LeftAlign, false) {
+	switch GetListHorizontalAlign(listView) {
 	case LeftAlign:
 		if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
 			value = `flex-end`
@@ -981,7 +981,7 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	value = ""
-	switch enumStyledProperty(listView, "", VerticalAlign, TopAlign, false) {
+	switch GetListVerticalAlign(listView) {
 	case TopAlign:
 		if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
 			value = `flex-end`
@@ -1015,7 +1015,7 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	buffer.WriteString(`">`)
 
-	checkbox := GetListViewCheckbox(listView, "")
+	checkbox := GetListViewCheckbox(listView)
 	if checkbox == NoneCheckbox {
 		listView.noneCheckboxSubviews(self, buffer)
 	} else {
@@ -1056,9 +1056,9 @@ func (listView *listViewData) handleCommand(self View, command string, data Data
 }
 
 func (listView *listViewData) onItemClick() {
-	current := GetCurrent(listView, "")
-	if current >= 0 && !IsDisabled(listView, "") {
-		checkbox := GetListViewCheckbox(listView, "")
+	current := GetCurrent(listView)
+	if current >= 0 && !IsDisabled(listView) {
+		checkbox := GetListViewCheckbox(listView)
 	m:
 		switch checkbox {
 		case SingleCheckbox:
@@ -1117,117 +1117,67 @@ func (listView *listViewData) onItemResize(self View, index string, x, y, width,
 }
 
 // GetVerticalAlign return the vertical align of a list: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetVerticalAlign(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, VerticalAlign, TopAlign, false)
 }
 
 // GetHorizontalAlign return the vertical align of a list/checkbox: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetHorizontalAlign(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, HorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemClickedListeners returns a ListItemClickedListener of the ListView.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemClickedListeners(view View, subviewID string) []func(ListView, int) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(ListItemClickedEvent); value != nil {
-			if result, ok := value.([]func(ListView, int)); ok {
-				return result
-			}
-		}
-	}
-	return []func(ListView, int){}
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemClickedListeners(view View, subviewID ...string) []func(ListView, int) {
+	return getEventListeners[ListView, int](view, subviewID, ListItemClickedEvent)
 }
 
 // GetListItemSelectedListeners returns a ListItemSelectedListener of the ListView.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemSelectedListeners(view View, subviewID string) []func(ListView, int) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(ListItemSelectedEvent); value != nil {
-			if result, ok := value.([]func(ListView, int)); ok {
-				return result
-			}
-		}
-	}
-	return []func(ListView, int){}
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemSelectedListeners(view View, subviewID ...string) []func(ListView, int) {
+	return getEventListeners[ListView, int](view, subviewID, ListItemSelectedEvent)
 }
 
 // GetListItemCheckedListeners returns a ListItemCheckedListener of the ListView.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemCheckedListeners(view View, subviewID string) []func(ListView, []int) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(ListItemCheckedEvent); value != nil {
-			if result, ok := value.([]func(ListView, []int)); ok {
-				return result
-			}
-		}
-	}
-	return []func(ListView, []int){}
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemCheckedListeners(view View, subviewID ...string) []func(ListView, []int) {
+	return getEventListeners[ListView, []int](view, subviewID, ListItemCheckedEvent)
 }
 
 // GetListItemWidth returns the width of a ListView item.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemWidth(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		result, _ := sizeProperty(view, ItemWidth, view.Session())
-		return result
-	}
-	return AutoSize()
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemWidth(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ItemWidth, false)
 }
 
 // GetListItemHeight returns the height of a ListView item.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemHeight(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		result, _ := sizeProperty(view, ItemHeight, view.Session())
-		return result
-	}
-	return AutoSize()
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemHeight(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ItemHeight, false)
 }
 
 // GetListViewCheckbox returns the ListView checkbox type: NoneCheckbox (0), SingleCheckbox (1), or MultipleCheckbox (2).
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListViewCheckbox(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		result, _ := enumProperty(view, ItemCheckbox, view.Session(), 0)
-		return result
-	}
-	return 0
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListViewCheckbox(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ItemCheckbox, 0, false)
 }
 
 // GetListViewCheckedItems returns the array of ListView checked items.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListViewCheckedItems(view View, subviewID string) []int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListViewCheckedItems(view View, subviewID ...string) []int {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
+
 	if view != nil {
 		if listView, ok := view.(ListView); ok {
 			checkedItems := listView.getCheckedItems()
-			switch GetListViewCheckbox(view, "") {
+			switch GetListViewCheckbox(view) {
 			case NoneCheckbox:
 				return []int{}
 
@@ -1256,66 +1206,34 @@ func IsListViewCheckedItem(view View, subviewID string, index int) bool {
 
 // GetListViewCheckboxVerticalAlign returns the vertical align of the ListView checkbox:
 // TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListViewCheckboxVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumProperty(view, CheckboxVerticalAlign, view.Session(), TopAlign); ok {
-			return align
-		}
-	}
-	return TopAlign
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListViewCheckboxVerticalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, CheckboxVerticalAlign, TopAlign, false)
 }
 
 // GetListViewCheckboxHorizontalAlign returns the horizontal align of the ListView checkbox:
 // LeftAlign (0), RightAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListViewCheckboxHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumProperty(view, CheckboxHorizontalAlign, view.Session(), LeftAlign); ok {
-			return align
-		}
-	}
-	return LeftAlign
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListViewCheckboxHorizontalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, CheckboxHorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemVerticalAlign returns the vertical align of the ListView item content:
 // TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumProperty(view, ItemVerticalAlign, view.Session(), TopAlign); ok {
-			return align
-		}
-	}
-	return TopAlign
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemVerticalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ItemVerticalAlign, TopAlign, false)
 }
 
 // ItemHorizontalAlign returns the horizontal align of the ListView item content:
 // LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListItemHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumProperty(view, ItemHorizontalAlign, view.Session(), LeftAlign); ok {
-			return align
-		}
-	}
-	return LeftAlign
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListItemHorizontalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ItemHorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemFrame - returns the location and size of the ListView item in pixels.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListItemFrame(view View, subviewID string, index int) Frame {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
@@ -1332,10 +1250,10 @@ func GetListItemFrame(view View, subviewID string, index int) Frame {
 }
 
 // GetListViewAdapter - returns the ListView adapter.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListViewAdapter(view View, subviewID string) ListAdapter {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if value := view.Get(Items); value != nil {
@@ -1348,11 +1266,12 @@ func GetListViewAdapter(view View, subviewID string) ListAdapter {
 }
 
 // ReloadListViewData updates ListView content
-// If the second argument (subviewID) is "" then content the first argument (view) is updated.
-func ReloadListViewData(view View, subviewID string) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then content the first argument (view) is updated.
+func ReloadListViewData(view View, subviewID ...string) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
+
 	if view != nil {
 		if listView, ok := view.(ListView); ok {
 			listView.ReloadListViewData()

@@ -290,7 +290,7 @@ func (table *tableViewData) normalizeTag(tag string) string {
 }
 
 func (table *tableViewData) Focusable() bool {
-	return GetTableSelectionMode(table, "") != NoneSelection
+	return GetTableSelectionMode(table) != NoneSelection
 }
 
 func (table *tableViewData) Get(tag string) any {
@@ -602,7 +602,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 			htmlID := table.htmlID()
 			session := table.Session()
 
-			switch GetTableSelectionMode(table, "") {
+			switch GetTableSelectionMode(table) {
 			case CellSelection:
 				updateProperty(htmlID, "tabindex", "0", session)
 				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
@@ -757,7 +757,7 @@ func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteRune('"')
 	}
 
-	if selectionMode := GetTableSelectionMode(table, ""); selectionMode != NoneSelection {
+	if selectionMode := GetTableSelectionMode(table); selectionMode != NoneSelection {
 		buffer.WriteString(` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`)
 		buffer.WriteString(table.currentStyle())
 		buffer.WriteString(`" data-bluritemstyle="`)
@@ -831,7 +831,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	view.Init(session)
 
 	ignorCells := []struct{ row, column int }{}
-	selectionMode := GetTableSelectionMode(table, "")
+	selectionMode := GetTableSelectionMode(table)
 
 	var allowCellSelection TableAllowCellSelection = nil
 	if allow, ok := adapter.(TableAllowCellSelection); ok {
@@ -854,7 +854,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	vAlignCss := enumProperties[TableVerticalAlign].cssValues
-	vAlignValue := GetTableVerticalAlign(table, "")
+	vAlignValue := GetTableVerticalAlign(table)
 	if vAlignValue < 0 || vAlignValue >= len(vAlignCss) {
 		vAlignValue = 0
 	}
@@ -1109,8 +1109,8 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		buffer.WriteString("</colgroup>")
 	}
 
-	headHeight := GetTableHeadHeight(table, "")
-	footHeight := GetTableFootHeight(table, "")
+	headHeight := GetTableHeadHeight(table)
+	footHeight := GetTableFootHeight(table)
 	cellBorder := table.getCellBorder()
 	cellPadding := table.boundsProperty(CellPadding)
 	if cellPadding == nil {

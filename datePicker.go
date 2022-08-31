@@ -96,7 +96,7 @@ func (picker *datePickerData) remove(tag string) {
 	case DatePickerValue:
 		if _, ok := picker.properties[DatePickerValue]; ok {
 			delete(picker.properties, DatePickerValue)
-			date := GetDatePickerValue(picker, "")
+			date := GetDatePickerValue(picker)
 			if picker.created {
 				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
 			}
@@ -204,9 +204,9 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		}
 
 	case DatePickerStep:
-		oldStep := GetDatePickerStep(picker, "")
+		oldStep := GetDatePickerStep(picker)
 		if picker.setIntProperty(DatePickerStep, value) {
-			if step := GetDatePickerStep(picker, ""); oldStep != step {
+			if step := GetDatePickerStep(picker); oldStep != step {
 				if picker.created {
 					if step > 0 {
 						updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
@@ -220,7 +220,7 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		}
 
 	case DatePickerValue:
-		oldDate := GetDatePickerValue(picker, "")
+		oldDate := GetDatePickerValue(picker)
 		if date, ok := setTimeValue(DatePickerValue); ok {
 			if date != oldDate {
 				if picker.created {
@@ -294,7 +294,7 @@ func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(GetDatePickerValue(picker, "").Format(dateFormat))
+	buffer.WriteString(GetDatePickerValue(picker).Format(dateFormat))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
@@ -304,7 +304,7 @@ func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *datePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)
@@ -315,7 +315,7 @@ func (picker *datePickerData) handleCommand(self View, command string, data Data
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, err := time.Parse(dateFormat, text); err == nil {
-				oldValue := GetDatePickerValue(picker, "")
+				oldValue := GetDatePickerValue(picker)
 				picker.properties[DatePickerValue] = value
 				if value != oldValue {
 					for _, listener := range picker.dateChangedListeners {
@@ -365,10 +365,10 @@ func getDateProperty(view View, mainTag, shortTag string) (time.Time, bool) {
 
 // GetDatePickerMin returns the min date of DatePicker subview and "true" as the second value if the min date is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDatePickerMin(view View, subviewID string) (time.Time, bool) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDatePickerMin(view View, subviewID ...string) (time.Time, bool) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return getDateProperty(view, DatePickerMin, Min)
@@ -378,10 +378,10 @@ func GetDatePickerMin(view View, subviewID string) (time.Time, bool) {
 
 // GetDatePickerMax returns the max date of DatePicker subview and "true" as the second value if the min date is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDatePickerMax(view View, subviewID string) (time.Time, bool) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDatePickerMax(view View, subviewID ...string) (time.Time, bool) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return getDateProperty(view, DatePickerMax, Max)
@@ -390,16 +390,16 @@ func GetDatePickerMax(view View, subviewID string) (time.Time, bool) {
 }
 
 // GetDatePickerStep returns the date changing step in days of DatePicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDatePickerStep(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDatePickerStep(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, DatePickerStep, 0)
 }
 
 // GetDatePickerValue returns the date of DatePicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDatePickerValue(view View, subviewID string) time.Time {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDatePickerValue(view View, subviewID ...string) time.Time {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view == nil {
 		return time.Now()
@@ -410,7 +410,7 @@ func GetDatePickerValue(view View, subviewID string) time.Time {
 
 // GetDateChangedListeners returns the DateChangedListener list of an DatePicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDateChangedListeners(view View, subviewID string) []func(DatePicker, time.Time) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time) {
 	return getEventListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
 }

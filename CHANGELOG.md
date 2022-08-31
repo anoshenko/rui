@@ -9,6 +9,7 @@
 * Added GetListRowGap, GetListColumnGap, GetAccentColor, GetTabSize, GetOverflow, IsTimingFunctionValid, and GetTransitions functions
 * Changed GetTransition functions
 * Added the OpenURL function to the Session interface
+* Changed the type of the second argument of all Get functions to "subviewID ...string" (previously "subviewID string")
 
 # v0.8.0
 

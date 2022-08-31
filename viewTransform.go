@@ -245,7 +245,7 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 
 	case PerspectiveOriginX, PerspectiveOriginY:
 		if getTransform3D(view, session) {
-			x, y := GetPerspectiveOrigin(view, "")
+			x, y := GetPerspectiveOrigin(view)
 			value := ""
 			if x.Type != Auto || y.Type != Auto {
 				value = x.cssString("50%") + " " + y.cssString("50%")
@@ -255,7 +255,7 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 
 	case BackfaceVisible:
 		if getTransform3D(view, session) {
-			if GetBackfaceVisible(view, "") {
+			if GetBackfaceVisible(view) {
 				updateCSSProperty(htmlID, BackfaceVisible, "visible", session)
 			} else {
 				updateCSSProperty(htmlID, BackfaceVisible, "hidden", session)

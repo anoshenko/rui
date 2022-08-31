@@ -66,7 +66,7 @@ func (picker *colorPickerData) remove(tag string) {
 		}
 
 	case ColorPickerValue:
-		oldColor := GetColorPickerValue(picker, "")
+		oldColor := GetColorPickerValue(picker)
 		delete(picker.properties, ColorPickerValue)
 		picker.colorChanged(oldColor)
 
@@ -99,7 +99,7 @@ func (picker *colorPickerData) set(tag string, value any) bool {
 		return true
 
 	case ColorPickerValue:
-		oldColor := GetColorPickerValue(picker, "")
+		oldColor := GetColorPickerValue(picker)
 		if picker.setColorProperty(ColorPickerValue, value) {
 			picker.colorChanged(oldColor)
 			return true
@@ -112,7 +112,7 @@ func (picker *colorPickerData) set(tag string, value any) bool {
 }
 
 func (picker *colorPickerData) colorChanged(oldColor Color) {
-	if newColor := GetColorPickerValue(picker, ""); oldColor != newColor {
+	if newColor := GetColorPickerValue(picker); oldColor != newColor {
 		if picker.created {
 			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), newColor.rgbString()))
 		}
@@ -145,7 +145,7 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 	picker.viewData.htmlProperties(self, buffer)
 
 	buffer.WriteString(` type="color" value="`)
-	buffer.WriteString(GetColorPickerValue(picker, "").rgbString())
+	buffer.WriteString(GetColorPickerValue(picker).rgbString())
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
@@ -155,7 +155,7 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 }
 
 func (picker *colorPickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)
@@ -165,7 +165,7 @@ func (picker *colorPickerData) handleCommand(self View, command string, data Dat
 	switch command {
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
-			oldColor := GetColorPickerValue(picker, "")
+			oldColor := GetColorPickerValue(picker)
 			if color, ok := StringToColor(text); ok {
 				picker.properties[ColorPickerValue] = color
 				if color != oldColor {
@@ -182,10 +182,10 @@ func (picker *colorPickerData) handleCommand(self View, command string, data Dat
 }
 
 // GetColorPickerValue returns the value of ColorPicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetColorPickerValue(view View, subviewID string) Color {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetColorPickerValue(view View, subviewID ...string) Color {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if value, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
@@ -204,7 +204,7 @@ func GetColorPickerValue(view View, subviewID string) Color {
 
 // GetColorChangedListeners returns the ColorChangedListener list of an ColorPicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetColorChangedListeners(view View, subviewID string) []func(ColorPicker, Color) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color) {
 	return getEventListeners[ColorPicker, Color](view, subviewID, ColorChangedEvent)
 }

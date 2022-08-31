@@ -96,7 +96,7 @@ func (picker *timePickerData) remove(tag string) {
 	case TimePickerValue:
 		if _, ok := picker.properties[TimePickerValue]; ok {
 			delete(picker.properties, TimePickerValue)
-			time := GetTimePickerValue(picker, "")
+			time := GetTimePickerValue(picker)
 			if picker.created {
 				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))
 			}
@@ -192,9 +192,9 @@ func (picker *timePickerData) set(tag string, value any) bool {
 		}
 
 	case TimePickerStep:
-		oldStep := GetTimePickerStep(picker, "")
+		oldStep := GetTimePickerStep(picker)
 		if picker.setIntProperty(TimePickerStep, value) {
-			if step := GetTimePickerStep(picker, ""); oldStep != step {
+			if step := GetTimePickerStep(picker); oldStep != step {
 				if picker.created {
 					if step > 0 {
 						updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
@@ -208,7 +208,7 @@ func (picker *timePickerData) set(tag string, value any) bool {
 		}
 
 	case TimePickerValue:
-		oldTime := GetTimePickerValue(picker, "")
+		oldTime := GetTimePickerValue(picker)
 		if time, ok := setTimeValue(TimePickerValue); ok {
 			if time != oldTime {
 				if picker.created {
@@ -282,7 +282,7 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(GetTimePickerValue(picker, "").Format(timeFormat))
+	buffer.WriteString(GetTimePickerValue(picker).Format(timeFormat))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
@@ -292,7 +292,7 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *timePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)
@@ -303,7 +303,7 @@ func (picker *timePickerData) handleCommand(self View, command string, data Data
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, err := time.Parse(timeFormat, text); err == nil {
-				oldValue := GetTimePickerValue(picker, "")
+				oldValue := GetTimePickerValue(picker)
 				picker.properties[TimePickerValue] = value
 				if value != oldValue {
 					for _, listener := range picker.timeChangedListeners {
@@ -353,10 +353,10 @@ func getTimeProperty(view View, mainTag, shortTag string) (time.Time, bool) {
 
 // GetTimePickerMin returns the min time of TimePicker subview and "true" as the second value if the min time is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTimePickerMin(view View, subviewID string) (time.Time, bool) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return getTimeProperty(view, TimePickerMin, Min)
@@ -366,10 +366,10 @@ func GetTimePickerMin(view View, subviewID string) (time.Time, bool) {
 
 // GetTimePickerMax returns the max time of TimePicker subview and "true" as the second value if the min time is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTimePickerMax(view View, subviewID string) (time.Time, bool) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return getTimeProperty(view, TimePickerMax, Max)
@@ -378,16 +378,16 @@ func GetTimePickerMax(view View, subviewID string) (time.Time, bool) {
 }
 
 // GetTimePickerStep returns the time changing step in seconds of TimePicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTimePickerStep(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTimePickerStep(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, TimePickerStep, 60)
 }
 
 // GetTimePickerValue returns the time of TimePicker subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTimePickerValue(view View, subviewID string) time.Time {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTimePickerValue(view View, subviewID ...string) time.Time {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view == nil {
 		return time.Now()
@@ -398,7 +398,7 @@ func GetTimePickerValue(view View, subviewID string) time.Time {
 
 // GetTimeChangedListeners returns the TimeChangedListener list of an TimePicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTimeChangedListeners(view View, subviewID string) []func(TimePicker, time.Time) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time) {
 	return getEventListeners[TimePicker, time.Time](view, subviewID, TimeChangedEvent)
 }

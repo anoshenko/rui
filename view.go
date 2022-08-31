@@ -195,7 +195,7 @@ func (view *viewData) remove(tag string) {
 	case Style, StyleDisabled:
 		if _, ok := view.properties[tag]; ok {
 			delete(view.properties, tag)
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view, "")), view.session)
+			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -325,7 +325,7 @@ func (view *viewData) set(tag string, value any) bool {
 		}
 		view.properties[tag] = text
 		if view.created {
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view, "")), view.session)
+			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -379,7 +379,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case Visibility:
-		switch GetVisibility(view, "") {
+		switch GetVisibility(view) {
 		case Invisible:
 			updateCSSProperty(htmlID, Visibility, "hidden", session)
 			updateCSSProperty(htmlID, "display", "", session)
@@ -448,7 +448,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case Outline, OutlineColor, OutlineStyle, OutlineWidth:
-		updateCSSProperty(htmlID, Outline, GetOutline(view, "").cssString(), session)
+		updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(), session)
 		return
 
 	case Shadow:
@@ -463,19 +463,19 @@ func viewPropertyChanged(view *viewData, tag string) {
 		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
 		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
-		radius := GetRadius(view, "")
+		radius := GetRadius(view)
 		updateCSSProperty(htmlID, "border-radius", radius.cssString(), session)
 		return
 
 	case Margin, MarginTop, MarginRight, MarginBottom, MarginLeft,
 		"top-margin", "right-margin", "bottom-margin", "left-margin":
-		margin := GetMargin(view, "")
+		margin := GetMargin(view)
 		updateCSSProperty(htmlID, Margin, margin.cssString(), session)
 		return
 
 	case Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
 		"top-padding", "right-padding", "bottom-padding", "left-padding":
-		padding := GetPadding(view, "")
+		padding := GetPadding(view)
 		updateCSSProperty(htmlID, Padding, padding.cssString(), session)
 		return
 
@@ -680,7 +680,7 @@ func (view *viewData) get(tag string) any {
 }
 
 func (view *viewData) htmlTag() string {
-	if semantics := GetSemantics(view, ""); semantics > DefaultSemantics {
+	if semantics := GetSemantics(view); semantics > DefaultSemantics {
 		values := enumProperties[Semantics].cssValues
 		if semantics < len(values) {
 			return values[semantics]
@@ -709,7 +709,7 @@ func (view *viewData) addToCSSStyle(addCSS map[string]string) {
 
 func (view *viewData) cssStyle(self View, builder cssBuilder) {
 	view.viewStyle.cssViewStyle(builder, view.session)
-	switch GetVisibility(view, "") {
+	switch GetVisibility(view) {
 	case Invisible:
 		builder.add(`visibility`, `hidden`)
 
@@ -733,7 +733,7 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 }
 
 func (view *viewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` data-disabled="1"`)
 	} else {
 		buffer.WriteString(` data-disabled="0"`)
@@ -748,7 +748,7 @@ func viewHTML(view View, buffer *strings.Builder) {
 	buffer.WriteString(view.htmlID())
 	buffer.WriteRune('"')
 
-	disabled := IsDisabled(view, "")
+	disabled := IsDisabled(view)
 
 	if cls := view.htmlClass(disabled); cls != "" {
 		buffer.WriteString(` class="`)
@@ -825,7 +825,7 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 	switch command {
 
 	case KeyDownEvent, KeyUpEvent:
-		if !IsDisabled(self, "") {
+		if !IsDisabled(self) {
 			handleKeyEvents(self, command, data)
 		}
 
@@ -840,13 +840,13 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 
 	case FocusEvent:
 		view.hasFocus = true
-		for _, listener := range getFocusListeners(view, "", command) {
+		for _, listener := range getFocusListeners(view, nil, command) {
 			listener(self)
 		}
 
 	case LostFocusEvent:
 		view.hasFocus = false
-		for _, listener := range getFocusListeners(view, "", command) {
+		for _, listener := range getFocusListeners(view, nil, command) {
 			listener(self)
 		}
 

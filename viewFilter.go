@@ -259,13 +259,19 @@ func (style *viewStyle) setFilter(tag string, value any) bool {
 }
 
 // GetFilter returns a View graphical effects like blur or color shift.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetFilter(view View, subviewID string) ViewFilter {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetFilter(view View, subviewID ...string) ViewFilter {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
+
 	if view != nil {
 		if value := view.getRaw(Filter); value != nil {
+			if filter, ok := value.(ViewFilter); ok {
+				return filter
+			}
+		}
+		if value := valueFromStyle(view, Filter); value != nil {
 			if filter, ok := value.(ViewFilter); ok {
 				return filter
 			}
@@ -276,13 +282,19 @@ func GetFilter(view View, subviewID string) ViewFilter {
 }
 
 // GetBackdropFilter returns the area behind a View graphical effects like blur or color shift.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetBackdropFilter(view View, subviewID string) ViewFilter {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetBackdropFilter(view View, subviewID ...string) ViewFilter {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
+
 	if view != nil {
 		if value := view.getRaw(BackdropFilter); value != nil {
+			if filter, ok := value.(ViewFilter); ok {
+				return filter
+			}
+		}
+		if value := valueFromStyle(view, BackdropFilter); value != nil {
 			if filter, ok := value.(ViewFilter); ok {
 				return filter
 			}

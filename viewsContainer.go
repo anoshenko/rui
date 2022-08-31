@@ -186,9 +186,9 @@ func (container *viewsContainerData) set(tag string, value any) bool {
 		// do nothing
 
 	case Disabled:
-		oldDisabled := IsDisabled(container, "")
+		oldDisabled := IsDisabled(container)
 		if container.viewData.Set(Disabled, value) {
-			disabled := IsDisabled(container, "")
+			disabled := IsDisabled(container)
 			if oldDisabled != disabled {
 				if container.views != nil {
 					for _, view := range container.views {

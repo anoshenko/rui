@@ -251,7 +251,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 
 	buffer.WriteString(` type="file"`)
-	if IsMultipleFilePicker(picker, "") {
+	if IsMultipleFilePicker(picker) {
 		buffer.WriteString(` multiple`)
 	}
 
@@ -262,7 +262,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *filePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)
@@ -334,9 +334,14 @@ func (picker *filePickerData) handleCommand(self View, command string, data Data
 
 // GetFilePickerFiles returns the list of FilePicker selected files
 // If there are no files selected then an empty slice is returned (the result is always not nil)
-// If the second argument (subviewID) is "" then selected files of the first argument (view) is returned
-func GetFilePickerFiles(view View, subviewID string) []FileInfo {
-	if picker := FilePickerByID(view, subviewID); picker != nil {
+// If the second argument (subviewID) is not specified or it is "" then selected files of the first argument (view) is returned
+func GetFilePickerFiles(view View, subviewID ...string) []FileInfo {
+	subview := ""
+	if len(subviewID) > 0 {
+		subview = subviewID[0]
+	}
+
+	if picker := FilePickerByID(view, subview); picker != nil {
 		return picker.Files()
 	}
 	return []FileInfo{}
@@ -352,16 +357,16 @@ func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(
 }
 
 // IsMultipleFilePicker returns "true" if multiple files can be selected in the FilePicker, "false" otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsMultipleFilePicker(view View, subviewID string) bool {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsMultipleFilePicker(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Multiple, false)
 }
 
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetFilePickerAccept(view View, subviewID string) []string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetFilePickerAccept(view View, subviewID ...string) []string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
@@ -383,7 +388,7 @@ func GetFilePickerAccept(view View, subviewID string) []string {
 
 // GetFileSelectedListeners returns the "file-selected-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo) {
 	return getEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }

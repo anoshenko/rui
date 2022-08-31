@@ -152,7 +152,7 @@ func (event *PointerEvent) init(data DataObject) {
 }
 
 func handlePointerEvents(view View, tag string, data DataObject) {
-	listeners := getEventListeners[View, PointerEvent](view, "", tag)
+	listeners := getEventListeners[View, PointerEvent](view, nil, tag)
 	if len(listeners) == 0 {
 		return
 	}
@@ -166,37 +166,37 @@ func handlePointerEvents(view View, tag string, data DataObject) {
 }
 
 // GetPointerDownListeners returns the "pointer-down" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetPointerDownListeners(view View, subviewID string) []func(View, PointerEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPointerDownListeners(view View, subviewID ...string) []func(View, PointerEvent) {
 	return getEventListeners[View, PointerEvent](view, subviewID, PointerDown)
 }
 
 // GetPointerUpListeners returns the "pointer-up" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetPointerUpListeners(view View, subviewID string) []func(View, PointerEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPointerUpListeners(view View, subviewID ...string) []func(View, PointerEvent) {
 	return getEventListeners[View, PointerEvent](view, subviewID, PointerUp)
 }
 
 // GetPointerMoveListeners returns the "pointer-move" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetPointerMoveListeners(view View, subviewID string) []func(View, PointerEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPointerMoveListeners(view View, subviewID ...string) []func(View, PointerEvent) {
 	return getEventListeners[View, PointerEvent](view, subviewID, PointerMove)
 }
 
 // GetPointerCancelListeners returns the "pointer-cancel" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetPointerCancelListeners(view View, subviewID string) []func(View, PointerEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPointerCancelListeners(view View, subviewID ...string) []func(View, PointerEvent) {
 	return getEventListeners[View, PointerEvent](view, subviewID, PointerCancel)
 }
 
 // GetPointerOverListeners returns the "pointer-over" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetPointerOverListeners(view View, subviewID string) []func(View, PointerEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPointerOverListeners(view View, subviewID ...string) []func(View, PointerEvent) {
 	return getEventListeners[View, PointerEvent](view, subviewID, PointerOver)
 }
 
 // GetPointerOutListeners returns the "pointer-out" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetPointerOutListeners(view View, subviewID string) []func(View, PointerEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPointerOutListeners(view View, subviewID ...string) []func(View, PointerEvent) {
 	return getEventListeners[View, PointerEvent](view, subviewID, PointerOut)
 }

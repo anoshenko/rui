@@ -65,10 +65,10 @@ func (progress *progressBarData) propertyChanged(tag string) {
 	if progress.created {
 		switch tag {
 		case ProgressBarMax:
-			updateProperty(progress.htmlID(), Max, strconv.FormatFloat(GetProgressBarMax(progress, ""), 'f', -1, 32), progress.session)
+			updateProperty(progress.htmlID(), Max, strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 32), progress.session)
 
 		case ProgressBarValue:
-			updateProperty(progress.htmlID(), Value, strconv.FormatFloat(GetProgressBarValue(progress, ""), 'f', -1, 32), progress.session)
+			updateProperty(progress.htmlID(), Value, strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 32), progress.session)
 		}
 	}
 }
@@ -97,22 +97,22 @@ func (progress *progressBarData) htmlProperties(self View, buffer *strings.Build
 	progress.viewData.htmlProperties(self, buffer)
 
 	buffer.WriteString(` max="`)
-	buffer.WriteString(strconv.FormatFloat(GetProgressBarMax(progress, ""), 'f', -1, 64))
+	buffer.WriteString(strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 64))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(strconv.FormatFloat(GetProgressBarValue(progress, ""), 'f', -1, 64))
+	buffer.WriteString(strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 64))
 	buffer.WriteByte('"')
 }
 
 // GetProgressBarMax returns the max value of ProgressBar subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetProgressBarMax(view View, subviewID string) float64 {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetProgressBarMax(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, ProgressBarMax, 1)
 }
 
 // GetProgressBarValue returns the value of ProgressBar subview.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetProgressBarValue(view View, subviewID string) float64 {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetProgressBarValue(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, ProgressBarValue, 0)
 }

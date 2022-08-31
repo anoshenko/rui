@@ -244,7 +244,7 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 		}
 	}
 
-	if text := GetImageViewAltText(imageView, ""); text != "" {
+	if text := GetImageViewAltText(imageView); text != "" {
 		buffer.WriteString(` alt="`)
 		buffer.WriteString(textToJS(text))
 		buffer.WriteString(`"`)
@@ -266,8 +266,8 @@ func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
 		builder.add("object-fit", "none")
 	}
 
-	vAlign := GetImageViewVerticalAlign(imageView, "")
-	hAlign := GetImageViewHorizontalAlign(imageView, "")
+	vAlign := GetImageViewVerticalAlign(imageView)
+	hAlign := GetImageViewHorizontalAlign(imageView)
 	if vAlign != CenterAlign || hAlign != CenterAlign {
 		var position string
 		switch hAlign {
@@ -323,10 +323,10 @@ func (imageView *imageViewData) CurrentSource() string {
 }
 
 // GetImageViewSource returns the image URL of an ImageView subview.
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewSource(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewSource(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -339,10 +339,10 @@ func GetImageViewSource(view View, subviewID string) string {
 }
 
 // GetImageViewAltText returns an alternative text description of an ImageView subview.
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewAltText(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewAltText(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -358,19 +358,19 @@ func GetImageViewAltText(view View, subviewID string) string {
 
 // GetImageViewFit returns how the content of a replaced ImageView subview:
 // NoneFit (0), ContainFit (1), CoverFit (2), FillFit (3), or ScaleDownFit (4).
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewFit(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewFit(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, Fit, NoneFit, false)
 }
 
 // GetImageViewVerticalAlign return the vertical align of an ImageView subview: TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewVerticalAlign(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ImageVerticalAlign, LeftAlign, false)
 }
 
 // GetImageViewHorizontalAlign return the vertical align of an ImageView subview: LeftAlign (0), RightAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewHorizontalAlign(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ImageHorizontalAlign, LeftAlign, false)
 }

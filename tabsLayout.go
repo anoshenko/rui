@@ -523,7 +523,7 @@ func (tabsLayout *tabsLayoutData) ListItem(index int, session Session) View {
 	if !ok || title == "" {
 		title = "No title"
 	}
-	if !GetNotTranslate(tabsLayout, "") {
+	if !GetNotTranslate(tabsLayout) {
 		title, _ = tabsLayout.Session().GetString(title)
 	}
 
@@ -723,7 +723,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		inactiveStyle := tabsLayout.inactiveTabStyle()
 		activeStyle := tabsLayout.activeTabStyle()
 
-		notTranslate := GetNotTranslate(tabsLayout, "")
+		notTranslate := GetNotTranslate(tabsLayout)
 		closeButton, _ := boolProperty(tabsLayout, TabCloseButton, tabsLayout.session)
 
 		var tabStyle, titleDiv string

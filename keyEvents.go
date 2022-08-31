@@ -227,9 +227,9 @@ func (view *viewData) removeKeyListener(tag string) {
 	}
 }
 
-func getEventListeners[V View, E any](view View, subviewID string, tag string) []func(V, E) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+func getEventListeners[V View, E any](view View, subviewID []string, tag string) []func(V, E) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if value := view.Get(tag); value != nil {
@@ -243,14 +243,14 @@ func getEventListeners[V View, E any](view View, subviewID string, tag string) [
 
 func keyEventsHtml(view View, buffer *strings.Builder) {
 	for tag, js := range keyEvents {
-		if listeners := getEventListeners[View, KeyEvent](view, "", tag); len(listeners) > 0 {
+		if listeners := getEventListeners[View, KeyEvent](view, nil, tag); len(listeners) > 0 {
 			buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
 		}
 	}
 }
 
 func handleKeyEvents(view View, tag string, data DataObject) {
-	listeners := getEventListeners[View, KeyEvent](view, "", tag)
+	listeners := getEventListeners[View, KeyEvent](view, nil, tag)
 	if len(listeners) > 0 {
 		var event KeyEvent
 		event.init(data)
@@ -262,13 +262,13 @@ func handleKeyEvents(view View, tag string, data DataObject) {
 }
 
 // GetKeyDownListeners returns the "key-down-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetKeyDownListeners(view View, subviewID string) []func(View, KeyEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetKeyDownListeners(view View, subviewID ...string) []func(View, KeyEvent) {
 	return getEventListeners[View, KeyEvent](view, subviewID, KeyDownEvent)
 }
 
 // GetKeyUpListeners returns the "key-up-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetKeyUpListeners(view View, subviewID string) []func(View, KeyEvent) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetKeyUpListeners(view View, subviewID ...string) []func(View, KeyEvent) {
 	return getEventListeners[View, KeyEvent](view, subviewID, KeyUpEvent)
 }

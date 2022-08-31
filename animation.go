@@ -747,16 +747,16 @@ func SetAnimated(rootView View, viewID, tag string, value any, animation Animati
 }
 
 // IsAnimationPaused returns "true" if an animation of the subview is paused, "false" otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsAnimationPaused(view View, subviewID string) bool {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsAnimationPaused(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, AnimationPaused, false)
 }
 
 // GetTransitions returns the subview transitions. The result is always non-nil.
-// If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
-func GetTransitions(view View, subviewID string) map[string]Animation {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
+func GetTransitions(view View, subviewID ...string) map[string]Animation {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -767,7 +767,7 @@ func GetTransitions(view View, subviewID string) map[string]Animation {
 }
 
 // GetTransition returns the subview property transition. If there is no transition for the given property then nil is returned.
-// If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
+// If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
 func GetTransition(view View, subviewID, tag string) Animation {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
@@ -781,7 +781,7 @@ func GetTransition(view View, subviewID, tag string) Animation {
 }
 
 // AddTransition adds the transition for the subview property.
-// If the second argument (subviewID) is "" then the transition is added to the first argument (view)
+// If the second argument (subviewID) is not specified or it is "" then the transition is added to the first argument (view)
 func AddTransition(view View, subviewID, tag string, animation Animation) bool {
 	if tag != "" {
 		if subviewID != "" {
@@ -797,10 +797,10 @@ func AddTransition(view View, subviewID, tag string, animation Animation) bool {
 }
 
 // GetAnimation returns the subview animations. The result is always non-nil.
-// If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
-func GetAnimation(view View, subviewID string) []Animation {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
+func GetAnimation(view View, subviewID ...string) []Animation {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {

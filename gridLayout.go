@@ -201,8 +201,8 @@ func (gridLayout *gridLayoutData) Get(tag string) any {
 
 func (gridLayout *gridLayoutData) get(tag string) any {
 	if tag == Gap {
-		rowGap := GetGridRowGap(gridLayout, "")
-		columnGap := GetGridColumnGap(gridLayout, "")
+		rowGap := GetGridRowGap(gridLayout)
+		columnGap := GetGridColumnGap(gridLayout)
 		if rowGap.Equal(columnGap) {
 			return rowGap
 		}
@@ -319,29 +319,29 @@ func (gridLayout *gridLayoutData) cssStyle(self View, builder cssBuilder) {
 */
 
 // GetCellVerticalAlign returns the vertical align of a GridLayout cell content: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellVerticalAlign(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CellVerticalAlign, StretchAlign, false)
 }
 
 // GetCellHorizontalAlign returns the vertical align of a GridLayout cell content: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellHorizontalAlign(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CellHorizontalAlign, StretchAlign, false)
 }
 
 // GetGridAutoFlow returns the value of the  "grid-auto-flow" property
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetGridAutoFlow(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetGridAutoFlow(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, GridAutoFlow, 0, false)
 }
 
 // GetCellWidth returns the width of a GridLayout cell. If the result is an empty array, then the width is not set.
 // If the result is a single value array, then the width of all cell is equal.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellWidth(view View, subviewID string) []SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellWidth(view View, subviewID ...string) []SizeUnit {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return gridCellSizes(view, CellWidth, view.Session())
@@ -351,10 +351,10 @@ func GetCellWidth(view View, subviewID string) []SizeUnit {
 
 // GetCellHeight returns the height of a GridLayout cell. If the result is an empty array, then the height is not set.
 // If the result is a single value array, then the height of all cell is equal.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellHeight(view View, subviewID string) []SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellHeight(view View, subviewID ...string) []SizeUnit {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return gridCellSizes(view, CellHeight, view.Session())
@@ -363,13 +363,13 @@ func GetCellHeight(view View, subviewID string) []SizeUnit {
 }
 
 // GetGridRowGap returns the gap between GridLayout rows.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetGridRowGap(view View, subviewID string) SizeUnit {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetGridRowGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, GridRowGap, false)
 }
 
 // GetGridColumnGap returns the gap between GridLayout columns.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetGridColumnGap(view View, subviewID string) SizeUnit {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetGridColumnGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, GridColumnGap, false)
 }

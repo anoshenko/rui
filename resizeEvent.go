@@ -3,9 +3,12 @@ package rui
 // ResizeEvent is the constant for "resize-event" property tag.
 // The "resize-event" is fired when the view changes its size.
 // The main listener format:
-//   func(View, Frame).
+//
+//	func(View, Frame).
+//
 // The additional listener formats:
-//   func(Frame), func(View), and func().
+//
+//	func(Frame), func(View), and func().
 const ResizeEvent = "resize-event"
 
 func (view *viewData) onResize(self View, x, y, width, height float64) {
@@ -13,7 +16,7 @@ func (view *viewData) onResize(self View, x, y, width, height float64) {
 	view.frame.Top = y
 	view.frame.Width = width
 	view.frame.Height = height
-	for _, listener := range GetResizeListeners(view, "") {
+	for _, listener := range GetResizeListeners(view) {
 		listener(self, view.frame)
 	}
 }
@@ -62,10 +65,10 @@ func (view *viewData) Frame() Frame {
 }
 
 // GetViewFrame returns the size and location of view's viewport.
-// If the second argument (subviewID) is "" then the value of the first argument (view) is returned
-func GetViewFrame(view View, subviewID string) Frame {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then the value of the first argument (view) is returned
+func GetViewFrame(view View, subviewID ...string) Frame {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view == nil {
 		return Frame{}
@@ -74,7 +77,7 @@ func GetViewFrame(view View, subviewID string) Frame {
 }
 
 // GetResizeListeners returns the list of "resize-event" listeners. If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then the listeners list of the first argument (view) is returned
-func GetResizeListeners(view View, subviewID string) []func(View, Frame) {
+// If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
+func GetResizeListeners(view View, subviewID ...string) []func(View, Frame) {
 	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }

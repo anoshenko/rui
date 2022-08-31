@@ -125,10 +125,11 @@ func (view *viewData) removeFocusListener(tag string) {
 	}
 }
 
-func getFocusListeners(view View, subviewID string, tag string) []func(View) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+func getFocusListeners(view View, subviewID []string, tag string) []func(View) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
+
 	if view != nil {
 		if value := view.Get(tag); value != nil {
 			if result, ok := value.([]func(View)); ok {
@@ -148,13 +149,13 @@ func focusEventsHtml(view View, buffer *strings.Builder) {
 }
 
 // GetFocusListeners returns a FocusListener list. If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetFocusListeners(view View, subviewID string) []func(View) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetFocusListeners(view View, subviewID ...string) []func(View) {
 	return getFocusListeners(view, subviewID, FocusEvent)
 }
 
 // GetLostFocusListeners returns a LostFocusListener list. If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetLostFocusListeners(view View, subviewID string) []func(View) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetLostFocusListeners(view View, subviewID ...string) []func(View) {
 	return getFocusListeners(view, subviewID, LostFocusEvent)
 }

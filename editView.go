@@ -132,19 +132,19 @@ func (edit *editViewData) remove(tag string) {
 
 	case Text:
 		if exists {
-			oldText := GetText(edit, "")
+			oldText := GetText(edit)
 			delete(edit.properties, tag)
 			if oldText != "" {
 				edit.textChanged("")
 				if edit.created {
-					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), ""))
+					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID()))
 				}
 			}
 		}
 
 	case EditViewPattern:
 		if exists {
-			oldText := GetEditViewPattern(edit, "")
+			oldText := GetEditViewPattern(edit)
 			delete(edit.properties, tag)
 			if oldText != "" {
 				if edit.created {
@@ -156,7 +156,7 @@ func (edit *editViewData) remove(tag string) {
 
 	case EditViewType:
 		if exists {
-			oldType := GetEditViewType(edit, "")
+			oldType := GetEditViewType(edit)
 			delete(edit.properties, tag)
 			if oldType != 0 {
 				if edit.created {
@@ -168,10 +168,10 @@ func (edit *editViewData) remove(tag string) {
 
 	case EditWrap:
 		if exists {
-			oldWrap := IsEditViewWrap(edit, "")
+			oldWrap := IsEditViewWrap(edit)
 			delete(edit.properties, tag)
-			if GetEditViewType(edit, "") == MultiLineText {
-				if wrap := IsEditViewWrap(edit, ""); wrap != oldWrap {
+			if GetEditViewType(edit) == MultiLineText {
+				if wrap := IsEditViewWrap(edit); wrap != oldWrap {
 					if edit.created {
 						if wrap {
 							updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
@@ -202,13 +202,13 @@ func (edit *editViewData) set(tag string, value any) bool {
 
 	switch tag {
 	case Text:
-		oldText := GetText(edit, "")
+		oldText := GetText(edit)
 		if text, ok := value.(string); ok {
 			edit.properties[Text] = text
-			if text = GetText(edit, ""); oldText != text {
+			if text = GetText(edit); oldText != text {
 				edit.textChanged(text)
 				if edit.created {
-					if GetEditViewType(edit, "") == MultiLineText {
+					if GetEditViewType(edit) == MultiLineText {
 						updateInnerHTML(edit.htmlID(), edit.Session())
 					} else {
 						text = strings.ReplaceAll(text, `"`, `\"`)
@@ -224,10 +224,10 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case Hint:
-		oldText := GetHint(edit, "")
+		oldText := GetHint(edit)
 		if text, ok := value.(string); ok {
 			edit.properties[Hint] = text
-			if text = GetHint(edit, ""); oldText != text {
+			if text = GetHint(edit); oldText != text {
 				if edit.created {
 					if text != "" {
 						updateProperty(edit.htmlID(), "placeholder", text, edit.session)
@@ -242,9 +242,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case MaxLength:
-		oldMaxLength := GetMaxLength(edit, "")
+		oldMaxLength := GetMaxLength(edit)
 		if edit.setIntProperty(MaxLength, value) {
-			if maxLength := GetMaxLength(edit, ""); maxLength != oldMaxLength {
+			if maxLength := GetMaxLength(edit); maxLength != oldMaxLength {
 				if edit.created {
 					if maxLength > 0 {
 						updateProperty(edit.htmlID(), "maxlength", strconv.Itoa(maxLength), edit.session)
@@ -261,7 +261,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 	case ReadOnly:
 		if edit.setBoolProperty(ReadOnly, value) {
 			if edit.created {
-				if IsReadOnly(edit, "") {
+				if IsReadOnly(edit) {
 					updateProperty(edit.htmlID(), ReadOnly, "", edit.session)
 				} else {
 					removeProperty(edit.htmlID(), ReadOnly, edit.session)
@@ -275,7 +275,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 	case Spellcheck:
 		if edit.setBoolProperty(Spellcheck, value) {
 			if edit.created {
-				updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit, ""), edit.session)
+				updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit), edit.session)
 			}
 			edit.propertyChangedEvent(tag)
 			return true
@@ -283,10 +283,10 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case EditViewPattern:
-		oldText := GetEditViewPattern(edit, "")
+		oldText := GetEditViewPattern(edit)
 		if text, ok := value.(string); ok {
 			edit.properties[EditViewPattern] = text
-			if text = GetEditViewPattern(edit, ""); oldText != text {
+			if text = GetEditViewPattern(edit); oldText != text {
 				if edit.created {
 					if text != "" {
 						updateProperty(edit.htmlID(), Pattern, text, edit.session)
@@ -301,9 +301,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case EditViewType:
-		oldType := GetEditViewType(edit, "")
+		oldType := GetEditViewType(edit)
 		if edit.setEnumProperty(EditViewType, value, enumProperties[EditViewType].values) {
-			if GetEditViewType(edit, "") != oldType {
+			if GetEditViewType(edit) != oldType {
 				if edit.created {
 					updateInnerHTML(edit.parentHTMLID(), edit.session)
 				}
@@ -314,10 +314,10 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case EditWrap:
-		oldWrap := IsEditViewWrap(edit, "")
+		oldWrap := IsEditViewWrap(edit)
 		if edit.setBoolProperty(EditWrap, value) {
-			if GetEditViewType(edit, "") == MultiLineText {
-				if wrap := IsEditViewWrap(edit, ""); wrap != oldWrap {
+			if GetEditViewType(edit) == MultiLineText {
+				if wrap := IsEditViewWrap(edit); wrap != oldWrap {
 					if edit.created {
 						if wrap {
 							updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
@@ -360,7 +360,7 @@ func (edit *editViewData) get(tag string) any {
 }
 
 func (edit *editViewData) AppendText(text string) {
-	if GetEditViewType(edit, "") == MultiLineText {
+	if GetEditViewType(edit) == MultiLineText {
 		if value := edit.getRaw(Text); value != nil {
 			if textValue, ok := value.(string); ok {
 				textValue += text
@@ -379,7 +379,7 @@ func (edit *editViewData) AppendText(text string) {
 		}
 		edit.set(Text, text)
 	} else {
-		edit.set(Text, GetText(edit, "")+text)
+		edit.set(Text, GetText(edit)+text)
 	}
 }
 
@@ -391,7 +391,7 @@ func (edit *editViewData) textChanged(newText string) {
 }
 
 func (edit *editViewData) htmlTag() string {
-	if GetEditViewType(edit, "") == MultiLineText {
+	if GetEditViewType(edit) == MultiLineText {
 		return "textarea"
 	}
 	return "input"
@@ -401,14 +401,14 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 	edit.viewData.htmlProperties(self, buffer)
 
 	writeSpellcheck := func() {
-		if spellcheck := IsSpellcheck(edit, ""); spellcheck {
+		if spellcheck := IsSpellcheck(edit); spellcheck {
 			buffer.WriteString(` spellcheck="true"`)
 		} else {
 			buffer.WriteString(` spellcheck="false"`)
 		}
 	}
 
-	editType := GetEditViewType(edit, "")
+	editType := GetEditViewType(edit)
 	switch editType {
 	case SingleLineText:
 		buffer.WriteString(` type="text" inputmode="text"`)
@@ -430,7 +430,7 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteString(` type="tel" inputmode="tel"`)
 
 	case MultiLineText:
-		if IsEditViewWrap(edit, "") {
+		if IsEditViewWrap(edit) {
 			buffer.WriteString(` wrap="soft"`)
 		} else {
 			buffer.WriteString(` wrap="off"`)
@@ -438,11 +438,11 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		writeSpellcheck()
 	}
 
-	if IsReadOnly(edit, "") {
+	if IsReadOnly(edit) {
 		buffer.WriteString(` readonly`)
 	}
 
-	if maxLength := GetMaxLength(edit, ""); maxLength > 0 {
+	if maxLength := GetMaxLength(edit); maxLength > 0 {
 		buffer.WriteString(` maxlength="`)
 		buffer.WriteString(strconv.Itoa(maxLength))
 		buffer.WriteByte('"')
@@ -455,21 +455,21 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		return textToJS(text)
 	}
 
-	if hint := GetHint(edit, ""); hint != "" {
+	if hint := GetHint(edit); hint != "" {
 		buffer.WriteString(` placeholder="`)
 		buffer.WriteString(convertText(hint))
 		buffer.WriteByte('"')
 	}
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
-	if pattern := GetEditViewPattern(edit, ""); pattern != "" {
+	if pattern := GetEditViewPattern(edit); pattern != "" {
 		buffer.WriteString(` pattern="`)
 		buffer.WriteString(convertText(pattern))
 		buffer.WriteByte('"')
 	}
 
 	if editType != MultiLineText {
-		if text := GetText(edit, ""); text != "" {
+		if text := GetText(edit); text != "" {
 			buffer.WriteString(` value="`)
 			buffer.WriteString(convertText(text))
 			buffer.WriteByte('"')
@@ -478,25 +478,25 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 }
 
 func (edit *editViewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	edit.viewData.htmlDisabledProperties(self, buffer)
 }
 
 func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	if GetEditViewType(edit, "") == MultiLineText {
-		buffer.WriteString(textToJS(GetText(edit, "")))
+	if GetEditViewType(edit) == MultiLineText {
+		buffer.WriteString(textToJS(GetText(edit)))
 	}
 }
 
 func (edit *editViewData) handleCommand(self View, command string, data DataObject) bool {
 	switch command {
 	case "textChanged":
-		oldText := GetText(edit, "")
+		oldText := GetText(edit)
 		if text, ok := data.PropertyValue("text"); ok {
 			edit.properties[Text] = text
-			if text := GetText(edit, ""); text != oldText {
+			if text := GetText(edit); text != oldText {
 				edit.textChanged(text)
 			}
 		}
@@ -507,10 +507,10 @@ func (edit *editViewData) handleCommand(self View, command string, data DataObje
 }
 
 // GetText returns a text of the EditView subview.
-// If the second argument (subviewID) is "" then a text of the first argument (view) is returned.
-func GetText(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a text of the first argument (view) is returned.
+func GetText(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if value := view.getRaw(Text); value != nil {
@@ -523,10 +523,10 @@ func GetText(view View, subviewID string) string {
 }
 
 // GetHint returns a hint text of the subview.
-// If the second argument (subviewID) is "" then a text of the first argument (view) is returned.
-func GetHint(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a text of the first argument (view) is returned.
+func GetHint(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if text, ok := stringProperty(view, Hint, view.Session()); ok {
@@ -544,41 +544,41 @@ func GetHint(view View, subviewID string) string {
 }
 
 // GetMaxLength returns a maximal lenght of EditView. If a maximal lenght is not limited  then 0 is returned
-// If the second argument (subviewID) is "" then a value of the first argument (view) is returned.
-func GetMaxLength(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned.
+func GetMaxLength(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, MaxLength, 0)
 }
 
 // IsReadOnly returns the true if a EditView works in read only mode.
-// If the second argument (subviewID) is "" then a value of the first argument (view) is returned.
-func IsReadOnly(view View, subviewID string) bool {
+// If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned.
+func IsReadOnly(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, ReadOnly, false)
 }
 
 // IsSpellcheck returns a value of the Spellcheck property of EditView.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsSpellcheck(view View, subviewID string) bool {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsSpellcheck(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Spellcheck, false)
 }
 
 // GetTextChangedListeners returns the TextChangedListener list of an EditView or MultiLineEditView subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTextChangedListeners(view View, subviewID string) []func(EditView, string) {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string) {
 	return getEventListeners[EditView, string](view, subviewID, EditTextChangedEvent)
 }
 
 // GetEditViewType returns a value of the Type property of EditView.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetEditViewType(view View, subviewID string) int {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetEditViewType(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, EditViewType, SingleLineText, false)
 }
 
 // GetEditViewPattern returns a value of the Pattern property of EditView.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetEditViewPattern(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetEditViewPattern(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if pattern, ok := stringProperty(view, EditViewPattern, view.Session()); ok {
@@ -596,13 +596,13 @@ func GetEditViewPattern(view View, subviewID string) string {
 }
 
 // IsEditViewWrap returns a value of the EditWrap property of MultiLineEditView.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsEditViewWrap(view View, subviewID string) bool {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsEditViewWrap(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, EditWrap, false)
 }
 
 // AppendEditText appends the text to the EditView content.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func AppendEditText(view View, subviewID string, text string) {
 	if subviewID != "" {
 		if edit := EditViewByID(view, subviewID); edit != nil {
@@ -617,7 +617,7 @@ func AppendEditText(view View, subviewID string, text string) {
 }
 
 // GetCaretColor returns the color of the text input carret.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCaretColor(view View, subviewID string) Color {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCaretColor(view View, subviewID ...string) Color {
 	return colorStyledProperty(view, subviewID, CaretColor, false)
 }
