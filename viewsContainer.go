@@ -25,8 +25,8 @@ type viewsContainerData struct {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (container *viewsContainerData) Init(session Session) {
-	container.viewData.Init(session)
+func (container *viewsContainerData) init(session Session) {
+	container.viewData.init(session)
 	container.tag = "ViewsContainer"
 	container.views = []View{}
 }

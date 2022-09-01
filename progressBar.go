@@ -22,7 +22,7 @@ type progressBarData struct {
 // NewProgressBar create new ProgressBar object and return it
 func NewProgressBar(session Session, params Params) ProgressBar {
 	view := new(progressBarData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -31,8 +31,8 @@ func newProgressBar(session Session) View {
 	return NewProgressBar(session, nil)
 }
 
-func (progress *progressBarData) Init(session Session) {
-	progress.viewData.Init(session)
+func (progress *progressBarData) init(session Session) {
+	progress.viewData.init(session)
 	progress.tag = "ProgressBar"
 }
 

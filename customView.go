@@ -87,10 +87,6 @@ func (customView *CustomViewData) Clear() {
 	customView.superView.Clear()
 }
 
-// Init initializes fields of View by default values
-func (customView *CustomViewData) Init(session Session) {
-}
-
 func (customView *CustomViewData) cssViewStyle(buffer cssBuilder, session Session) {
 	customView.superView.cssViewStyle(buffer, session)
 }

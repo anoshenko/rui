@@ -72,7 +72,7 @@ func (file *FileInfo) initBy(node DataValue) {
 // NewFilePicker create new FilePicker object and return it
 func NewFilePicker(session Session, params Params) FilePicker {
 	view := new(filePickerData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -81,8 +81,8 @@ func newFilePicker(session Session) View {
 	return NewFilePicker(session, nil)
 }
 
-func (picker *filePickerData) Init(session Session) {
-	picker.viewData.Init(session)
+func (picker *filePickerData) init(session Session) {
+	picker.viewData.init(session)
 	picker.tag = "FilePicker"
 	picker.files = []FileInfo{}
 	picker.loader = map[int]func(FileInfo, []byte){}

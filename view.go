@@ -33,14 +33,10 @@ type View interface {
 	ViewStyle
 	fmt.Stringer
 
-	// Init initializes fields of View by default values
-	Init(session Session)
 	// Session returns the current Session interface
 	Session() Session
 	// Parent returns the parent view
 	Parent() View
-	parentHTMLID() string
-	setParentID(parentID string)
 	// Tag returns the tag of View interface
 	Tag() string
 	// ID returns the id of the view
@@ -65,6 +61,8 @@ type View interface {
 	htmlTag() string
 	closeHTMLTag() bool
 	htmlID() string
+	parentHTMLID() string
+	setParentID(parentID string)
 	htmlSubviews(self View, buffer *strings.Builder)
 	htmlProperties(self View, buffer *strings.Builder)
 	htmlDisabledProperties(self View, buffer *strings.Builder)
@@ -100,7 +98,7 @@ type viewData struct {
 
 func newView(session Session) View {
 	view := new(viewData)
-	view.Init(session)
+	view.init(session)
 	return view
 }
 
@@ -122,12 +120,12 @@ func setInitParams(view View, params Params) {
 // NewView create new View object and return it
 func NewView(session Session, params Params) View {
 	view := new(viewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
 
-func (view *viewData) Init(session Session) {
+func (view *viewData) init(session Session) {
 	view.viewStyle.init()
 	view.tag = "View"
 	view.session = session

@@ -17,7 +17,7 @@ type gridLayoutData struct {
 // NewGridLayout create new GridLayout object and return it
 func NewGridLayout(session Session, params Params) GridLayout {
 	view := new(gridLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -27,8 +27,8 @@ func newGridLayout(session Session) View {
 }
 
 // Init initialize fields of GridLayout by default values
-func (gridLayout *gridLayoutData) Init(session Session) {
-	gridLayout.viewsContainerData.Init(session)
+func (gridLayout *gridLayoutData) init(session Session) {
+	gridLayout.viewsContainerData.init(session)
 	gridLayout.tag = "GridLayout"
 	gridLayout.systemClass = "ruiGridLayout"
 }

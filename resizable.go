@@ -45,7 +45,7 @@ type resizableData struct {
 // NewResizable create new Resizable object and return it
 func NewResizable(session Session, params Params) Resizable {
 	view := new(resizableData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -54,8 +54,8 @@ func newResizable(session Session) View {
 	return NewResizable(session, nil)
 }
 
-func (resizable *resizableData) Init(session Session) {
-	resizable.viewData.Init(session)
+func (resizable *resizableData) init(session Session) {
+	resizable.viewData.init(session)
 	resizable.tag = "Resizable"
 	resizable.systemClass = "ruiGridLayout"
 	resizable.content = []View{}

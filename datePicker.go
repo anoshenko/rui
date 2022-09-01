@@ -29,7 +29,7 @@ type datePickerData struct {
 // NewDatePicker create new DatePicker object and return it
 func NewDatePicker(session Session, params Params) DatePicker {
 	view := new(datePickerData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -38,8 +38,8 @@ func newDatePicker(session Session) View {
 	return NewDatePicker(session, nil)
 }
 
-func (picker *datePickerData) Init(session Session) {
-	picker.viewData.Init(session)
+func (picker *datePickerData) init(session Session) {
+	picker.viewData.init(session)
 	picker.tag = "DatePicker"
 	picker.dateChangedListeners = []func(DatePicker, time.Time){}
 }

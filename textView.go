@@ -17,7 +17,7 @@ type textViewData struct {
 // NewTextView create new TextView object and return it
 func NewTextView(session Session, params Params) TextView {
 	view := new(textViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -27,8 +27,8 @@ func newTextView(session Session) View {
 }
 
 // Init initialize fields of TextView by default values
-func (textView *textViewData) Init(session Session) {
-	textView.viewData.Init(session)
+func (textView *textViewData) init(session Session) {
+	textView.viewData.init(session)
 	textView.tag = "TextView"
 }
 

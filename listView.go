@@ -69,7 +69,7 @@ type listViewData struct {
 // NewListView creates the new list view
 func NewListView(session Session, params Params) ListView {
 	view := new(listViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -79,8 +79,8 @@ func newListView(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (listView *listViewData) Init(session Session) {
-	listView.viewData.Init(session)
+func (listView *listViewData) init(session Session) {
+	listView.viewData.init(session)
 	listView.tag = "ListView"
 	listView.systemClass = "ruiListView"
 	listView.items = []View{}

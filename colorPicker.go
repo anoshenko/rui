@@ -23,7 +23,7 @@ type colorPickerData struct {
 // NewColorPicker create new ColorPicker object and return it
 func NewColorPicker(session Session, params Params) ColorPicker {
 	view := new(colorPickerData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -32,8 +32,8 @@ func newColorPicker(session Session) View {
 	return NewColorPicker(session, nil)
 }
 
-func (picker *colorPickerData) Init(session Session) {
-	picker.viewData.Init(session)
+func (picker *colorPickerData) init(session Session) {
+	picker.viewData.init(session)
 	picker.tag = "ColorPicker"
 	picker.colorChangedListeners = []func(ColorPicker, Color){}
 	picker.properties[Padding] = Px(0)

@@ -48,7 +48,7 @@ type editViewData struct {
 // NewEditView create new EditView object and return it
 func NewEditView(session Session, params Params) EditView {
 	view := new(editViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -57,8 +57,8 @@ func newEditView(session Session) View {
 	return NewEditView(session, nil)
 }
 
-func (edit *editViewData) Init(session Session) {
-	edit.viewData.Init(session)
+func (edit *editViewData) init(session Session) {
+	edit.viewData.init(session)
 	edit.textChangeListeners = []func(EditView, string){}
 	edit.tag = "EditView"
 }

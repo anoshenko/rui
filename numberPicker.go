@@ -36,7 +36,7 @@ type numberPickerData struct {
 // NewNumberPicker create new NumberPicker object and return it
 func NewNumberPicker(session Session, params Params) NumberPicker {
 	view := new(numberPickerData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -45,8 +45,8 @@ func newNumberPicker(session Session) View {
 	return NewNumberPicker(session, nil)
 }
 
-func (picker *numberPickerData) Init(session Session) {
-	picker.viewData.Init(session)
+func (picker *numberPickerData) init(session Session) {
+	picker.viewData.init(session)
 	picker.tag = "NumberPicker"
 	picker.numberChangedListeners = []func(NumberPicker, float64){}
 }

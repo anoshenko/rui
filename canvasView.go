@@ -21,7 +21,7 @@ type canvasViewData struct {
 // NewCanvasView creates the new custom draw view
 func NewCanvasView(session Session, params Params) CanvasView {
 	view := new(canvasViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -31,8 +31,8 @@ func newCanvasView(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (canvasView *canvasViewData) Init(session Session) {
-	canvasView.viewData.Init(session)
+func (canvasView *canvasViewData) init(session Session) {
+	canvasView.viewData.init(session)
 	canvasView.tag = "CanvasView"
 }
 

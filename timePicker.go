@@ -29,7 +29,7 @@ type timePickerData struct {
 // NewTimePicker create new TimePicker object and return it
 func NewTimePicker(session Session, params Params) TimePicker {
 	view := new(timePickerData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -38,8 +38,8 @@ func newTimePicker(session Session) View {
 	return NewTimePicker(session, nil)
 }
 
-func (picker *timePickerData) Init(session Session) {
-	picker.viewData.Init(session)
+func (picker *timePickerData) init(session Session) {
+	picker.viewData.init(session)
 	picker.tag = "TimePicker"
 	picker.timeChangedListeners = []func(TimePicker, time.Time){}
 }

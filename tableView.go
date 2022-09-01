@@ -245,7 +245,7 @@ type tableCellView struct {
 // NewTableView create new TableView object and return it
 func NewTableView(session Session, params Params) TableView {
 	view := new(tableViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -255,8 +255,8 @@ func newTableView(session Session) View {
 }
 
 // Init initialize fields of TableView by default values
-func (table *tableViewData) Init(session Session) {
-	table.viewData.Init(session)
+func (table *tableViewData) init(session Session) {
+	table.viewData.init(session)
 	table.tag = "TableView"
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
@@ -828,7 +828,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	defer freeStringBuilder(cssBuilder.buffer)
 
 	var view tableCellView
-	view.Init(session)
+	view.init(session)
 
 	ignorCells := []struct{ row, column int }{}
 	selectionMode := GetTableSelectionMode(table)

@@ -23,7 +23,7 @@ type checkboxData struct {
 // NewCheckbox create new Checkbox object and return it
 func NewCheckbox(session Session, params Params) Checkbox {
 	view := new(checkboxData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, Params{
 		ClickEvent:   checkboxClickListener,
 		KeyDownEvent: checkboxKeyListener,
@@ -36,8 +36,8 @@ func newCheckbox(session Session) View {
 	return NewCheckbox(session, nil)
 }
 
-func (button *checkboxData) Init(session Session) {
-	button.viewsContainerData.Init(session)
+func (button *checkboxData) init(session Session) {
+	button.viewsContainerData.init(session)
 	button.tag = "Checkbox"
 	button.systemClass = "ruiGridLayout ruiCheckbox"
 	button.checkedListeners = []func(Checkbox, bool){}

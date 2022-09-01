@@ -41,7 +41,7 @@ type stackLayoutData struct {
 // NewStackLayout create new StackLayout object and return it
 func NewStackLayout(session Session, params Params) StackLayout {
 	view := new(stackLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -51,8 +51,8 @@ func newStackLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (layout *stackLayoutData) Init(session Session) {
-	layout.viewsContainerData.Init(session)
+func (layout *stackLayoutData) init(session Session) {
+	layout.viewsContainerData.init(session)
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
 	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}

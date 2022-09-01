@@ -27,7 +27,7 @@ type dropDownListData struct {
 // NewDropDownList create new DropDownList object and return it
 func NewDropDownList(session Session, params Params) DropDownList {
 	view := new(dropDownListData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -36,8 +36,8 @@ func newDropDownList(session Session) View {
 	return NewDropDownList(session, nil)
 }
 
-func (list *dropDownListData) Init(session Session) {
-	list.viewData.Init(session)
+func (list *dropDownListData) init(session Session) {
+	list.viewData.init(session)
 	list.tag = "DropDownList"
 	list.items = []string{}
 	list.disabledItems = []any{}

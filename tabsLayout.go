@@ -81,7 +81,7 @@ type tabsLayoutData struct {
 // NewTabsLayout create new TabsLayout object and return it
 func NewTabsLayout(session Session, params Params) TabsLayout {
 	view := new(tabsLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -91,8 +91,8 @@ func newTabsLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (tabsLayout *tabsLayoutData) Init(session Session) {
-	tabsLayout.viewsContainerData.Init(session)
+func (tabsLayout *tabsLayoutData) init(session Session) {
+	tabsLayout.viewsContainerData.init(session)
 	tabsLayout.tag = "TabsLayout"
 	tabsLayout.systemClass = "ruiTabsLayout"
 	tabsLayout.tabListener = []func(TabsLayout, int, int){}

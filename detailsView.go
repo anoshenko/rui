@@ -24,7 +24,7 @@ type detailsViewData struct {
 // NewDetailsView create new DetailsView object and return it
 func NewDetailsView(session Session, params Params) DetailsView {
 	view := new(detailsViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -34,8 +34,8 @@ func newDetailsView(session Session) View {
 }
 
 // Init initialize fields of DetailsView by default values
-func (detailsView *detailsViewData) Init(session Session) {
-	detailsView.viewsContainerData.Init(session)
+func (detailsView *detailsViewData) init(session Session) {
+	detailsView.viewsContainerData.init(session)
 	detailsView.tag = "DetailsView"
 	//detailsView.systemClass = "ruiDetailsView"
 }

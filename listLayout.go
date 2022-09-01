@@ -33,7 +33,7 @@ type listLayoutData struct {
 // NewListLayout create new ListLayout object and return it
 func NewListLayout(session Session, params Params) ListLayout {
 	view := new(listLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -43,8 +43,8 @@ func newListLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsAlignContainer by default values
-func (listLayout *listLayoutData) Init(session Session) {
-	listLayout.viewsContainerData.Init(session)
+func (listLayout *listLayoutData) init(session Session) {
+	listLayout.viewsContainerData.init(session)
 	listLayout.tag = "ListLayout"
 	listLayout.systemClass = "ruiListLayout"
 }

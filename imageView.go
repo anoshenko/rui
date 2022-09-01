@@ -54,7 +54,7 @@ type imageViewData struct {
 // NewImageView create new ImageView object and return it
 func NewImageView(session Session, params Params) ImageView {
 	view := new(imageViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -64,8 +64,8 @@ func newImageView(session Session) View {
 }
 
 // Init initialize fields of imageView by default values
-func (imageView *imageViewData) Init(session Session) {
-	imageView.viewData.Init(session)
+func (imageView *imageViewData) init(session Session) {
+	imageView.viewData.init(session)
 	imageView.tag = "ImageView"
 	//imageView.systemClass = "ruiImageView"
 

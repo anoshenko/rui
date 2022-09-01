@@ -163,8 +163,8 @@ type MediaSource struct {
 	MimeType string
 }
 
-func (player *mediaPlayerData) Init(session Session) {
-	player.viewData.Init(session)
+func (player *mediaPlayerData) init(session Session) {
+	player.viewData.init(session)
 	player.tag = "MediaPlayer"
 }
 

@@ -47,7 +47,7 @@ type columnLayoutData struct {
 // NewColumnLayout create new ColumnLayout object and return it
 func NewColumnLayout(session Session, params Params) ColumnLayout {
 	view := new(columnLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -57,8 +57,8 @@ func newColumnLayout(session Session) View {
 }
 
 // Init initialize fields of ColumnLayout by default values
-func (ColumnLayout *columnLayoutData) Init(session Session) {
-	ColumnLayout.viewsContainerData.Init(session)
+func (ColumnLayout *columnLayoutData) init(session Session) {
+	ColumnLayout.viewsContainerData.init(session)
 	ColumnLayout.tag = "ColumnLayout"
 	//ColumnLayout.systemClass = "ruiColumnLayout"
 }
