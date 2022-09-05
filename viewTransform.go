@@ -125,11 +125,11 @@ func (style *viewStyle) transform(session Session) string {
 				buffer.WriteRune(' ')
 			}
 			buffer.WriteString(`translate3d(`)
-			buffer.WriteString(x.cssString("0"))
+			buffer.WriteString(x.cssString("0", session))
 			buffer.WriteRune(',')
-			buffer.WriteString(y.cssString("0"))
+			buffer.WriteString(y.cssString("0", session))
 			buffer.WriteRune(',')
-			buffer.WriteString(z.cssString("0"))
+			buffer.WriteString(z.cssString("0", session))
 			buffer.WriteRune(')')
 		}
 
@@ -172,9 +172,9 @@ func (style *viewStyle) transform(session Session) string {
 				buffer.WriteRune(' ')
 			}
 			buffer.WriteString(`translate(`)
-			buffer.WriteString(x.cssString("0"))
+			buffer.WriteString(x.cssString("0", session))
 			buffer.WriteRune(',')
-			buffer.WriteString(y.cssString("0"))
+			buffer.WriteString(y.cssString("0", session))
 			buffer.WriteRune(')')
 		}
 
@@ -205,12 +205,12 @@ func (style *viewStyle) transform(session Session) string {
 func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Session) {
 	if getTransform3D(style, session) {
 		if perspective, ok := sizeProperty(style, Perspective, session); ok && perspective.Type != Auto && perspective.Value != 0 {
-			builder.add(`perspective`, perspective.cssString("0"))
+			builder.add(`perspective`, perspective.cssString("0", session))
 		}
 
 		x, y := getPerspectiveOrigin(style, session)
 		if x.Type != Auto || y.Type != Auto {
-			builder.addValues(`perspective-origin`, ` `, x.cssString("50%"), y.cssString("50%"))
+			builder.addValues(`perspective-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
 		}
 
 		if backfaceVisible, ok := boolProperty(style, BackfaceVisible, session); ok {
@@ -223,12 +223,12 @@ func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Sessio
 
 		x, y, z := getOrigin(style, session)
 		if x.Type != Auto || y.Type != Auto || z.Type != Auto {
-			builder.addValues(`transform-origin`, ` `, x.cssString("50%"), y.cssString("50%"), z.cssString("0"))
+			builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session), z.cssString("0", session))
 		}
 	} else {
 		x, y, _ := getOrigin(style, session)
 		if x.Type != Auto || y.Type != Auto {
-			builder.addValues(`transform-origin`, ` `, x.cssString("50%"), y.cssString("50%"))
+			builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
 		}
 	}
 
@@ -248,7 +248,7 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 			x, y := GetPerspectiveOrigin(view)
 			value := ""
 			if x.Type != Auto || y.Type != Auto {
-				value = x.cssString("50%") + " " + y.cssString("50%")
+				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
 			}
 			updateCSSProperty(htmlID, "perspective-origin", value, session)
 		}
@@ -267,11 +267,11 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 		value := ""
 		if getTransform3D(view, session) {
 			if x.Type != Auto || y.Type != Auto || z.Type != Auto {
-				value = x.cssString("50%") + " " + y.cssString("50%") + " " + z.cssString("50%")
+				value = x.cssString("50%", session) + " " + y.cssString("50%", session) + " " + z.cssString("50%", session)
 			}
 		} else {
 			if x.Type != Auto || y.Type != Auto {
-				value = x.cssString("50%") + " " + y.cssString("50%")
+				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
 			}
 		}
 		updateCSSProperty(htmlID, "transform-origin", value, session)

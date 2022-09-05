@@ -62,9 +62,10 @@ SizeUnit is declared as
 	type SizeUnit struct {
 		Type  SizeUnitType
 		Value float64
+		Function SizeFunc
 	}
 
-where Type is the type of size; Value is the size.
+where Type is the type of size; Value is the size; Function is function (used only if Type == SizeFunction, ignored otherwise)
 
 The Type can take the following values:
 
@@ -81,12 +82,13 @@ The Type can take the following values:
 | 8        | SizeInMM       | the Value field specifies the size in millimeters.                             |
 | 9        | SizeInCM       | the Value field defines the size in centimeters.                               |
 | 10       | SizeInFraction | the Value field specifies the size in parts. Used only for sizing cells of the GridLayout. |
+| 11       | SizeFunction   | the Function field specifies a function for calculating the size. The Value field is ignored |
 
 For a more visual and simple setting of variables of the SizeUnit type, the functions below can be used.
 
 | Function       | Equivalent definition                              |
 |----------------|----------------------------------------------------|
-| rui.AutoSize() | rui.SizeUnit{ Type: rui.Auto, Value: 0 }           |
+| rui.AutoSize() | rui.SizeUnit{ Type: rui.Auto }                     |
 | rui.Px(n)      | rui.SizeUnit{ Type: rui.SizeInPixel, Value: n }    |
 | rui.Em(n)      | rui.SizeUnit{ Type: rui.SizeInEM, Value: n }       |
 | rui.Ex(n)      | rui.SizeUnit{ Type: rui.SizeInEX, Value: n }       |
@@ -100,8 +102,8 @@ For a more visual and simple setting of variables of the SizeUnit type, the func
 
 Variables of the SizeUnit type have a textual representation (why you need it will be described below).
 The textual representation consists of a number (equal to the value of the Value field) followed by
-a suffix defining the type. An exception is a value of type Auto, which has the representation “auto”.
-The suffixes are listed in the following table:
+a suffix defining the type. 
+The exceptions are a value of type Auto, which has the representation "auto", and a value of type SizeFunction, which has a special representation. The suffixes are listed in the following table:
 
 | Suffix | Type           |
 |:------:|----------------|
@@ -123,6 +125,52 @@ To convert the textual representation to the SizeUnit structure, is used the fun
 	func StringToSizeUnit(value string) (SizeUnit, bool)
 
 You can get a textual representation of the structure using the String() function of SizeUnit structure
+
+#### SizeFunc
+
+The SizeFunc interface is used to define a function that calculates SizeUnit. Let's consider functions using the min function as an example.
+
+The min function finds the minimum value among the given arguments. This function is specified using the MinSize function, declared as:
+
+	func MinSize(arg0, arg1 any, args ...any) SizeFunc
+
+The function has 2 or more arguments, each of which can be either SizeUnit or SizeFunc or string which is a constant or
+text representation of SizeUnit or SizeFunc.
+
+Examples
+
+	rui.MizSize(rui.Percent(50), rui.Px(250))
+	rui.MizSize("50%", rui.Px(250), "40em")
+	rui.MizSize(rui.Percent(50), "@a1")
+
+The min function has the following text representation
+
+	"min(<arg1>, <arg2>, ...)"
+
+where arg1, arg2, ... must be a text representation of SizeUnit, or SizeFunc, or a constant. For example
+
+	"min(50%, 250px)"
+	"min(75%, @a1)"
+
+The SizeFunc interface implements the fmt.Stringer interface.
+The String() function of this interface returns the textual representation of SizeFunc.
+
+In addition to "min", there are the following functions
+
+| Text representation          | Function to create                   | Description                                              |
+|------------------------------|--------------------------------------|----------------------------------------------------------|
+| "min(<arg1>, <arg2>, ...)"   | MaxSize(arg0, arg1 any, args ...any) | finds the minimum value among the arguments              |
+| "sum(<arg1>, <arg2>, ...)"   | SumSize(arg0, arg1 any, args ...any) | calculates the sum of the argument values                |
+| "sub(<arg1>, <arg2>)"        | SubSize(arg0, arg1 any)              | calculates the subtraction of argument values            |
+| "mul(<arg1>, <arg2>)"        | MulSize(arg0, arg1 any)              | calculates the result of multiplying the argument values |
+| "div(<arg1>, <arg2>)"        | DivSize(arg0, arg1 any)              | calculates the result of dividing the argument values    |
+| "clamp(<min>, <val>, <max>)" | ClampSize(min, val, max any)         | limits value to specified range                          |
+
+Additional explanations for the function "clamp(<min>, <val>, <max>)": the result is calculated as follows:
+
+* if min ≤ val ≤ max then val;
+* if val < min then min;
+* if max < val then max;
 
 ### Color
 

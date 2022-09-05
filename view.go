@@ -446,7 +446,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case Outline, OutlineColor, OutlineStyle, OutlineWidth:
-		updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(), session)
+		updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(session), session)
 		return
 
 	case Shadow:
@@ -462,19 +462,19 @@ func viewPropertyChanged(view *viewData, tag string) {
 		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
 		radius := GetRadius(view)
-		updateCSSProperty(htmlID, "border-radius", radius.cssString(), session)
+		updateCSSProperty(htmlID, "border-radius", radius.cssString(session), session)
 		return
 
 	case Margin, MarginTop, MarginRight, MarginBottom, MarginLeft,
 		"top-margin", "right-margin", "bottom-margin", "left-margin":
 		margin := GetMargin(view)
-		updateCSSProperty(htmlID, Margin, margin.cssString(), session)
+		updateCSSProperty(htmlID, Margin, margin.cssString(session), session)
 		return
 
 	case Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
 		"top-padding", "right-padding", "bottom-padding", "left-padding":
 		padding := GetPadding(view)
-		updateCSSProperty(htmlID, Padding, padding.cssString(), session)
+		updateCSSProperty(htmlID, Padding, padding.cssString(session), session)
 		return
 
 	case AvoidBreak:
@@ -626,7 +626,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	if cssTag, ok := sizeProperties[tag]; ok {
 		size, _ := sizeProperty(view, tag, session)
-		updateCSSProperty(htmlID, cssTag, size.cssString(""), session)
+		updateCSSProperty(htmlID, cssTag, size.cssString("", session), session)
 		return
 	}
 

@@ -455,7 +455,7 @@ func (radius BoxRadius) String() string {
 	return buffer.String()
 }
 
-func (radius BoxRadius) cssValue(builder cssBuilder) {
+func (radius BoxRadius) cssValue(builder cssBuilder, session Session) {
 
 	if (radius.TopLeftX.Type == Auto || radius.TopLeftX.Value == 0) &&
 		(radius.TopLeftY.Type == Auto || radius.TopLeftY.Value == 0) &&
@@ -471,23 +471,23 @@ func (radius BoxRadius) cssValue(builder cssBuilder) {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(radius.TopLeftX.cssString("0"))
+	buffer.WriteString(radius.TopLeftX.cssString("0", session))
 
 	if radius.AllAnglesIsEqual() {
 
 		if !radius.TopLeftX.Equal(radius.TopLeftY) {
 			buffer.WriteString(" / ")
-			buffer.WriteString(radius.TopLeftY.cssString("0"))
+			buffer.WriteString(radius.TopLeftY.cssString("0", session))
 		}
 
 	} else {
 
 		buffer.WriteRune(' ')
-		buffer.WriteString(radius.TopRightX.cssString("0"))
+		buffer.WriteString(radius.TopRightX.cssString("0", session))
 		buffer.WriteRune(' ')
-		buffer.WriteString(radius.BottomRightX.cssString("0"))
+		buffer.WriteString(radius.BottomRightX.cssString("0", session))
 		buffer.WriteRune(' ')
-		buffer.WriteString(radius.BottomLeftX.cssString("0"))
+		buffer.WriteString(radius.BottomLeftX.cssString("0", session))
 
 		if !radius.TopLeftX.Equal(radius.TopLeftY) ||
 			!radius.TopRightX.Equal(radius.TopRightY) ||
@@ -495,22 +495,22 @@ func (radius BoxRadius) cssValue(builder cssBuilder) {
 			!radius.BottomRightX.Equal(radius.BottomRightY) {
 
 			buffer.WriteString(" / ")
-			buffer.WriteString(radius.TopLeftY.cssString("0"))
+			buffer.WriteString(radius.TopLeftY.cssString("0", session))
 			buffer.WriteRune(' ')
-			buffer.WriteString(radius.TopRightY.cssString("0"))
+			buffer.WriteString(radius.TopRightY.cssString("0", session))
 			buffer.WriteRune(' ')
-			buffer.WriteString(radius.BottomRightY.cssString("0"))
+			buffer.WriteString(radius.BottomRightY.cssString("0", session))
 			buffer.WriteRune(' ')
-			buffer.WriteString(radius.BottomLeftY.cssString("0"))
+			buffer.WriteString(radius.BottomLeftY.cssString("0", session))
 		}
 	}
 
 	builder.add("border-radius", buffer.String())
 }
 
-func (radius BoxRadius) cssString() string {
+func (radius BoxRadius) cssString(session Session) string {
 	var builder cssValueBuilder
-	radius.cssValue(&builder)
+	radius.cssValue(&builder, session)
 	return builder.finish()
 }
 

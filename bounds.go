@@ -213,18 +213,21 @@ func (bounds *Bounds) String() string {
 		bounds.Bottom.String() + "," + bounds.Left.String()
 }
 
-func (bounds *Bounds) cssValue(tag string, builder cssBuilder) {
+func (bounds *Bounds) cssValue(tag string, builder cssBuilder, session Session) {
 	if bounds.allFieldsEqual() {
-		builder.add(tag, bounds.Top.cssString("0"))
+		builder.add(tag, bounds.Top.cssString("0", session))
 	} else {
-		builder.addValues(tag, " ", bounds.Top.cssString("0"), bounds.Right.cssString("0"),
-			bounds.Bottom.cssString("0"), bounds.Left.cssString("0"))
+		builder.addValues(tag, " ",
+			bounds.Top.cssString("0", session),
+			bounds.Right.cssString("0", session),
+			bounds.Bottom.cssString("0", session),
+			bounds.Left.cssString("0", session))
 	}
 }
 
-func (bounds *Bounds) cssString() string {
+func (bounds *Bounds) cssString(session Session) string {
 	var builder cssValueBuilder
-	bounds.cssValue("", &builder)
+	bounds.cssValue("", &builder, session)
 	return builder.finish()
 }
 

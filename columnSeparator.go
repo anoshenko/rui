@@ -167,8 +167,9 @@ func (separator *columnSeparatorProperty) cssValue(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	if value.Width.Type != Auto && value.Width.Type != SizeInFraction && value.Width.Value > 0 {
-		buffer.WriteString(value.Width.cssString(""))
+	if value.Width.Type != Auto && value.Width.Type != SizeInFraction &&
+		(value.Width.Value > 0 || value.Width.Type == SizeFunction) {
+		buffer.WriteString(value.Width.cssString("", session))
 	}
 
 	styles := enumProperties[BorderStyle].cssValues

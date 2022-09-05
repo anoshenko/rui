@@ -146,13 +146,13 @@ func (clip *insetClip) cssStyle(session Session) string {
 	for _, tag := range []string{Top, Right, Bottom, Left} {
 		value, _ := sizeProperty(clip, tag, session)
 		buffer.WriteString(leadText)
-		buffer.WriteString(value.cssString("0px"))
+		buffer.WriteString(value.cssString("0px", session))
 		leadText = " "
 	}
 
 	if radius := getRadiusProperty(clip); radius != nil {
 		buffer.WriteString(" round ")
-		buffer.WriteString(radius.BoxRadius(session).cssString())
+		buffer.WriteString(radius.BoxRadius(session).cssString(session))
 	}
 
 	buffer.WriteRune(')')
@@ -211,15 +211,15 @@ func (clip *circleClip) cssStyle(session Session) string {
 
 	buffer.WriteString("circle(")
 	r, _ := sizeProperty(clip, Radius, session)
-	buffer.WriteString(r.cssString("50%"))
+	buffer.WriteString(r.cssString("50%", session))
 
 	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("50%"))
+	buffer.WriteString(x.cssString("50%", session))
 	buffer.WriteRune(' ')
 
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("50%"))
+	buffer.WriteString(y.cssString("50%", session))
 	buffer.WriteRune(')')
 
 	return buffer.String()
@@ -280,17 +280,17 @@ func (clip *ellipseClip) cssStyle(session Session) string {
 	rx, _ := sizeProperty(clip, RadiusX, session)
 	ry, _ := sizeProperty(clip, RadiusX, session)
 	buffer.WriteString("ellipse(")
-	buffer.WriteString(rx.cssString("50%"))
+	buffer.WriteString(rx.cssString("50%", session))
 	buffer.WriteRune(' ')
-	buffer.WriteString(ry.cssString("50%"))
+	buffer.WriteString(ry.cssString("50%", session))
 
 	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("50%"))
+	buffer.WriteString(x.cssString("50%", session))
 	buffer.WriteRune(' ')
 
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("50%"))
+	buffer.WriteString(y.cssString("50%", session))
 	buffer.WriteRune(')')
 
 	return buffer.String()
@@ -427,13 +427,13 @@ func (clip *polygonClip) cssStyle(session Session) string {
 		case string:
 			if val, ok := session.resolveConstants(value); ok {
 				if size, ok := StringToSizeUnit(val); ok {
-					buffer.WriteString(size.cssString("0px"))
+					buffer.WriteString(size.cssString("0px", session))
 					return
 				}
 			}
 
 		case SizeUnit:
-			buffer.WriteString(value.cssString("0px"))
+			buffer.WriteString(value.cssString("0px", session))
 			return
 		}
 

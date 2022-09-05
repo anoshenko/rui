@@ -2,6 +2,8 @@
 
 * Requires go 1.18 or higher
 * The "interface{}" type replaced by "any"
+* Added SizeFunc interface and Function field to SizeUnit struct
+* Added MaxSize, MinSize, SumSize, SubSize, MulSize, DivSize, ClampSize functions
 * Added "list-row-gap", "list-column-gap", "accent-color", "tab-size", "overflow", 
 "arrow", "arrow-align", "arrow-size", "arrow-width", and "arrow-offset" properties 
 * Added "@ruiArrowSize" and "@ruiArrowWidth" constants to the default theme

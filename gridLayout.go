@@ -145,7 +145,7 @@ func (style *viewStyle) gridCellSizesCSS(tag string, session Session) string {
 
 	case 1:
 		if cellSize[0].Type != Auto {
-			return `repeat(auto-fill, ` + cellSize[0].cssString(`auto`) + `)`
+			return `repeat(auto-fill, ` + cellSize[0].cssString(`auto`, session) + `)`
 		}
 
 	default:
@@ -161,14 +161,14 @@ func (style *viewStyle) gridCellSizesCSS(tag string, session Session) string {
 		}
 		if !allAuto {
 			if allEqual {
-				return fmt.Sprintf(`repeat(%d, %s)`, len(cellSize), cellSize[0].cssString(`auto`))
+				return fmt.Sprintf(`repeat(%d, %s)`, len(cellSize), cellSize[0].cssString(`auto`, session))
 			}
 
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 			for _, size := range cellSize {
 				buffer.WriteRune(' ')
-				buffer.WriteString(size.cssString(`auto`))
+				buffer.WriteString(size.cssString(`auto`, session))
 			}
 			return buffer.String()
 		}

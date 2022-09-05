@@ -539,12 +539,19 @@ func (properties *propertyList) setSizeProperty(tag string, value any) bool {
 		switch value := value.(type) {
 		case string:
 			var ok bool
-			if size, ok = StringToSizeUnit(value); !ok {
+			if fn := parseSizeFunc(value); fn != nil {
+				size.Type = SizeFunction
+				size.Function = fn
+			} else if size, ok = StringToSizeUnit(value); !ok {
 				invalidPropertyValue(tag, value)
 				return false
 			}
 		case SizeUnit:
 			size = value
+
+		case SizeFunc:
+			size.Type = SizeFunction
+			size.Function = value
 
 		case float32:
 			size.Type = SizeInPixel

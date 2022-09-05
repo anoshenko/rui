@@ -219,9 +219,9 @@ func (image *backgroundImage) cssStyle(session Session) string {
 
 			if width.Type != Auto || height.Type != Auto {
 				buffer.WriteString(` / `)
-				buffer.WriteString(width.cssString("auto"))
+				buffer.WriteString(width.cssString("auto", session))
 				buffer.WriteRune(' ')
-				buffer.WriteString(height.cssString("auto"))
+				buffer.WriteString(height.cssString("auto", session))
 			}
 		}
 

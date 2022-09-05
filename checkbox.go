@@ -236,7 +236,7 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 	}
 
 	if gap, ok := sizeConstant(session, "ruiCheckboxGap"); ok && gap.Type != Auto && gap.Value > 0 {
-		builder.add("gap", gap.cssString("0"))
+		builder.add("gap", gap.cssString("0", session))
 	}
 
 	builder.add("align-items", "stretch")

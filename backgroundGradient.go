@@ -261,19 +261,18 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 				switch value := point.Pos.(type) {
 				case string:
 					if value != "" {
-						if value[0] == '@' {
-							value, _ = session.Constant(value[1:])
-						}
-						if pos, ok := StringToSizeUnit(value); ok && pos.Type != Auto {
-							buffer.WriteRune(' ')
-							buffer.WriteString(pos.cssString(""))
+						if value, ok := session.resolveConstants(value); ok {
+							if pos, ok := StringToSizeUnit(value); ok && pos.Type != Auto {
+								buffer.WriteRune(' ')
+								buffer.WriteString(pos.cssString("", session))
+							}
 						}
 					}
 
 				case SizeUnit:
 					if value.Type != Auto {
 						buffer.WriteRune(' ')
-						buffer.WriteString(value.cssString(""))
+						buffer.WriteString(value.cssString("", session))
 					}
 				}
 			}
@@ -512,9 +511,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 					if r, ok := StringToSizeUnit(text); ok && r.Type != Auto {
 						buffer.WriteString("ellipse ")
 						shapeText = ""
-						buffer.WriteString(r.cssString(""))
+						buffer.WriteString(r.cssString("", session))
 						buffer.WriteString(" ")
-						buffer.WriteString(r.cssString(""))
+						buffer.WriteString(r.cssString("", session))
 						buffer.WriteString(" ")
 					} else {
 						ErrorLog(`Invalid radial gradient radius: ` + text)
@@ -539,9 +538,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			if value.Type != Auto {
 				buffer.WriteString("ellipse ")
 				shapeText = ""
-				buffer.WriteString(value.cssString(""))
+				buffer.WriteString(value.cssString("", session))
 				buffer.WriteString(" ")
-				buffer.WriteString(value.cssString(""))
+				buffer.WriteString(value.cssString("", session))
 				buffer.WriteString(" ")
 			}
 
@@ -553,7 +552,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			buffer.WriteString("ellipse ")
 			shapeText = ""
 			for i := 0; i < count; i++ {
-				buffer.WriteString(value[i].cssString("50%"))
+				buffer.WriteString(value[i].cssString("50%", session))
 				buffer.WriteString(" ")
 			}
 
@@ -568,13 +567,13 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 				if value[i] != nil {
 					switch value := value[i].(type) {
 					case SizeUnit:
-						buffer.WriteString(value.cssString("50%"))
+						buffer.WriteString(value.cssString("50%", session))
 						buffer.WriteString(" ")
 
 					case string:
 						if text, ok := session.resolveConstants(value); ok {
 							if size, err := stringToSizeUnit(text); err == nil {
-								buffer.WriteString(size.cssString("50%"))
+								buffer.WriteString(size.cssString("50%", session))
 								buffer.WriteString(" ")
 							} else {
 								buffer.WriteString("50% ")
@@ -597,9 +596,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			buffer.WriteString(shapeText)
 		}
 		buffer.WriteString("at ")
-		buffer.WriteString(x.cssString("50%"))
+		buffer.WriteString(x.cssString("50%", session))
 		buffer.WriteString(" ")
-		buffer.WriteString(y.cssString("50%"))
+		buffer.WriteString(y.cssString("50%", session))
 	}
 
 	buffer.WriteString(", ")

@@ -563,13 +563,13 @@ func (listView *listViewData) itemAlign(self View, buffer *strings.Builder) {
 func (listView *listViewData) itemSize(self View, buffer *strings.Builder) {
 	if itemWidth := GetListItemWidth(listView); itemWidth.Type != Auto {
 		buffer.WriteString(` min-width: `)
-		buffer.WriteString(itemWidth.cssString(""))
+		buffer.WriteString(itemWidth.cssString("", listView.Session()))
 		buffer.WriteRune(';')
 	}
 
 	if itemHeight := GetListItemHeight(listView); itemHeight.Type != Auto {
 		buffer.WriteString(` min-height: `)
-		buffer.WriteString(itemHeight.cssString(""))
+		buffer.WriteString(itemHeight.cssString("", listView.Session()))
 		buffer.WriteRune(';')
 	}
 }
@@ -659,7 +659,7 @@ func (listView *listViewData) checkboxItemDiv(self View, checkbox, hCheckboxAlig
 
 	if gap, ok := sizeConstant(listView.session, "ruiCheckboxGap"); ok && gap.Type != Auto {
 		itemStyleBuilder.WriteString(` grid-gap: `)
-		itemStyleBuilder.WriteString(gap.cssString("auto"))
+		itemStyleBuilder.WriteString(gap.cssString("auto", listView.Session()))
 		itemStyleBuilder.WriteRune(';')
 	}
 
@@ -896,13 +896,13 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	if gap := GetListRowGap(listView); gap.Type != Auto {
 		buffer.WriteString(` row-gap: `)
-		buffer.WriteString(gap.cssString("0"))
+		buffer.WriteString(gap.cssString("0", listView.Session()))
 		buffer.WriteRune(';')
 	}
 
 	if gap := GetListColumnGap(listView); gap.Type != Auto {
 		buffer.WriteString(` column-gap: `)
-		buffer.WriteString(gap.cssString("0"))
+		buffer.WriteString(gap.cssString("0", listView.Session()))
 		buffer.WriteRune(';')
 	}
 

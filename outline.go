@@ -103,18 +103,18 @@ type ViewOutline struct {
 	Width SizeUnit
 }
 
-func (outline ViewOutline) cssValue(builder cssBuilder) {
+func (outline ViewOutline) cssValue(builder cssBuilder, session Session) {
 	values := enumProperties[BorderStyle].cssValues
 	if outline.Style > 0 && outline.Style < len(values) && outline.Color.Alpha() > 0 &&
 		outline.Width.Type != Auto && outline.Width.Type != SizeInFraction &&
 		outline.Width.Type != SizeInPercent && outline.Width.Value > 0 {
-		builder.addValues("outline", " ", outline.Width.cssString("0"), values[outline.Style], outline.Color.cssString())
+		builder.addValues("outline", " ", outline.Width.cssString("0", session), values[outline.Style], outline.Color.cssString())
 	}
 }
 
-func (outline ViewOutline) cssString() string {
+func (outline ViewOutline) cssString(session Session) string {
 	var builder cssValueBuilder
-	outline.cssValue(&builder)
+	outline.cssValue(&builder, session)
 	return builder.finish()
 }
 

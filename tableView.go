@@ -594,7 +594,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 				updateCSSProperty(htmlID, "border-spacing", "0", session)
 				updateCSSProperty(htmlID, "border-collapse", "collapse", session)
 			} else {
-				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0"), session)
+				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0", session), session)
 				updateCSSProperty(htmlID, "border-collapse", "separate", session)
 			}
 
@@ -1319,24 +1319,26 @@ func (table *tableViewData) getCurrent() CellIndex {
 }
 
 func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
-	table.viewData.cssViewStyle(builder, table.Session())
+	session := table.Session()
+	table.viewData.cssViewStyle(builder, session)
 
-	gap, ok := sizeProperty(table, Gap, table.Session())
+	gap, ok := sizeProperty(table, Gap, session)
 	if !ok || gap.Type == Auto || gap.Value <= 0 {
 		builder.add("border-spacing", "0")
 		builder.add("border-collapse", "collapse")
 	} else {
-		builder.add("border-spacing", gap.cssString("0"))
+		builder.add("border-spacing", gap.cssString("0", session))
 		builder.add("border-collapse", "separate")
 	}
 }
 
 func (table *tableViewData) ReloadTableData() {
+	session := table.Session()
 	if content := table.content(); content != nil {
-		updateProperty(table.htmlID(), "data-rows", strconv.Itoa(content.RowCount()), table.Session())
-		updateProperty(table.htmlID(), "data-columns", strconv.Itoa(content.ColumnCount()), table.Session())
+		updateProperty(table.htmlID(), "data-rows", strconv.Itoa(content.RowCount()), session)
+		updateProperty(table.htmlID(), "data-columns", strconv.Itoa(content.ColumnCount()), session)
 	}
-	updateInnerHTML(table.htmlID(), table.Session())
+	updateInnerHTML(table.htmlID(), session)
 }
 
 func (table *tableViewData) onItemResize(self View, index string, x, y, width, height float64) {

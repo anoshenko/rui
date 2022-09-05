@@ -14,89 +14,94 @@ import (
 type SizeUnitType uint8
 
 const (
-	// Auto - default value.
+	// Auto is the SizeUnit type: default value.
 	Auto SizeUnitType = 0
-	// SizeInPixel - size in pixels.
+	// SizeInPixel is the SizeUnit type: the Value field specifies the size in pixels.
 	SizeInPixel SizeUnitType = 1
-	// SizeInEM - size in em.
+	// SizeInEM is the SizeUnit type: the Value field specifies the size in em.
 	SizeInEM SizeUnitType = 2
-	// SizeInEX - size in em.
+	// SizeInEX is the SizeUnit type: the Value field specifies the size in em.
 	SizeInEX SizeUnitType = 3
-	// SizeInPercent - size in percents of a parant size.
+	// SizeInPercent is the SizeUnit type: the Value field specifies the size in percents of the parent size.
 	SizeInPercent SizeUnitType = 4
-	// SizeInPt - size in pt (1/72 inch).
+	// SizeInPt is the SizeUnit type: the Value field specifies the size in pt (1/72 inch).
 	SizeInPt SizeUnitType = 5
-	// SizeInPc - size in pc (1pc = 12pt).
+	// SizeInPc is the SizeUnit type: the Value field specifies the size in pc (1pc = 12pt).
 	SizeInPc SizeUnitType = 6
-	// SizeInInch - size in inches.
+	// SizeInInch is the SizeUnit type: the Value field specifies the size in inches.
 	SizeInInch SizeUnitType = 7
-	// SizeInMM - size in millimeters.
+	// SizeInMM is the SizeUnit type: the Value field specifies the size in millimeters.
 	SizeInMM SizeUnitType = 8
-	// SizeInCM - size in centimeters.
+	// SizeInCM is the SizeUnit type: the Value field specifies the size in centimeters.
 	SizeInCM SizeUnitType = 9
-	// SizeInFraction - size in fraction. Used only for "cell-width" and "cell-height" property
+	// SizeInFraction is the SizeUnit type: the Value field specifies the size in fraction.
+	// Used only for "cell-width" and "cell-height" property.
 	SizeInFraction SizeUnitType = 10
+	// SizeFunction is the SizeUnit type: the Function field specifies the size function.
+	// "min", "max", "clamp", "sum", "sub", "mul", and "div" functions are available.
+	SizeFunction = 11
 )
 
 // SizeUnit describe a size (Value field) and size unit (Type field).
 type SizeUnit struct {
-	Type  SizeUnitType
-	Value float64
+	Type     SizeUnitType
+	Value    float64
+	Function SizeFunc
 }
 
 // AutoSize creates SizeUnit with Auto type
 func AutoSize() SizeUnit {
-	return SizeUnit{Auto, 0}
+	return SizeUnit{Auto, 0, nil}
 }
 
 // Px creates SizeUnit with SizeInPixel type
 func Px(value float64) SizeUnit {
-	return SizeUnit{SizeInPixel, value}
+	return SizeUnit{SizeInPixel, value, nil}
 }
 
 // Em creates SizeUnit with SizeInEM type
 func Em(value float64) SizeUnit {
-	return SizeUnit{SizeInEM, value}
+	return SizeUnit{SizeInEM, value, nil}
 }
 
 // Ex creates SizeUnit with SizeInEX type
 func Ex(value float64) SizeUnit {
-	return SizeUnit{SizeInEX, value}
+	return SizeUnit{SizeInEX, value, nil}
 }
 
 // Percent creates SizeUnit with SizeInDIP type
 func Percent(value float64) SizeUnit {
-	return SizeUnit{SizeInPercent, value}
+	return SizeUnit{SizeInPercent, value, nil}
 }
 
 // Pt creates SizeUnit with SizeInPt type
 func Pt(value float64) SizeUnit {
-	return SizeUnit{SizeInPt, value}
+	return SizeUnit{SizeInPt, value, nil}
 }
 
 // Pc creates SizeUnit with SizeInPc type
 func Pc(value float64) SizeUnit {
-	return SizeUnit{SizeInPc, value}
+	return SizeUnit{SizeInPc, value, nil}
 }
 
 // Mm creates SizeUnit with SizeInMM type
 func Mm(value float64) SizeUnit {
-	return SizeUnit{SizeInMM, value}
+	return SizeUnit{SizeInMM, value, nil}
 }
 
 // Cm creates SizeUnit with SizeInCM type
 func Cm(value float64) SizeUnit {
-	return SizeUnit{SizeInCM, value}
+	return SizeUnit{SizeInCM, value, nil}
 }
 
 // Inch creates SizeUnit with SizeInInch type
 func Inch(value float64) SizeUnit {
-	return SizeUnit{SizeInInch, value}
+	return SizeUnit{SizeInInch, value, nil}
 }
 
 // Fr creates SizeUnit with SizeInFraction type
 func Fr(value float64) SizeUnit {
-	return SizeUnit{SizeInFraction, value}
+	return SizeUnit{SizeInFraction, value, nil}
 }
 
 // Equal compare two SizeUnit. Return true if SizeUnit are equal
@@ -152,7 +157,7 @@ func stringToSizeUnit(value string) (SizeUnit, error) {
 		}
 	}
 
-	if val, err := strconv.ParseFloat(value, 64); err != nil {
+	if val, err := strconv.ParseFloat(value, 64); err == nil {
 		return SizeUnit{Type: SizeInPixel, Value: val}, nil
 	}
 
@@ -161,8 +166,15 @@ func stringToSizeUnit(value string) (SizeUnit, error) {
 
 // String - convert SizeUnit to string
 func (size SizeUnit) String() string {
-	if size.Type == Auto {
+	switch size.Type {
+	case Auto:
 		return "auto"
+
+	case SizeFunction:
+		if size.Function == nil {
+			return "auto"
+		}
+		return size.Function.String()
 	}
 	if suffix, ok := sizeUnitSuffixes()[size.Type]; ok {
 		return fmt.Sprintf("%g%s", size.Value, suffix)
@@ -171,13 +183,19 @@ func (size SizeUnit) String() string {
 }
 
 // cssString - convert SizeUnit to string
-func (size SizeUnit) cssString(textForAuto string) string {
+func (size SizeUnit) cssString(textForAuto string, session Session) string {
 	switch size.Type {
 	case Auto:
 		return textForAuto
 
 	case SizeInEM:
 		return fmt.Sprintf("%grem", size.Value)
+
+	case SizeFunction:
+		if size.Function == nil {
+			return textForAuto
+		}
+		return size.Function.cssString(session)
 	}
 
 	if size.Value == 0 {

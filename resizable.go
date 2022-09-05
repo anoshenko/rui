@@ -340,7 +340,7 @@ func (resizable *resizableData) updateResizeBorderWidth() {
 }
 
 func (resizable *resizableData) cellSizeCSS() (string, string) {
-	w := resizable.resizeBorderWidth().cssString("4px")
+	w := resizable.resizeBorderWidth().cssString("4px", resizable.Session())
 	side := resizable.getSide()
 	column := "1fr"
 	row := "1fr"
@@ -384,7 +384,7 @@ func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder)
 	top := 1
 	leftSide := (side & LeftSide) != 0
 	rightSide := (side & RightSide) != 0
-	w := resizable.resizeBorderWidth().cssString("4px")
+	w := resizable.resizeBorderWidth().cssString("4px", resizable.Session())
 
 	if leftSide {
 		left = 2

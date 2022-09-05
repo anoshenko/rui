@@ -38,6 +38,9 @@ func valueToSizeUnit(value any, session Session) (SizeUnit, bool) {
 		case SizeUnit:
 			return value, true
 
+		case SizeFunc:
+			return SizeUnit{Type: SizeFunction, Function: value}, true
+
 		case string:
 			if text, ok := session.resolveConstants(value); ok {
 				return StringToSizeUnit(text)

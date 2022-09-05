@@ -658,11 +658,14 @@ func (border *borderProperty) cssWidth(builder cssBuilder, session Session) {
 		borders.Top.Width == borders.Left.Width &&
 		borders.Top.Width == borders.Bottom.Width {
 		if borders.Top.Width.Type != Auto {
-			builder.add("border-width", borders.Top.Width.cssString("0"))
+			builder.add("border-width", borders.Top.Width.cssString("0", session))
 		}
 	} else {
-		builder.addValues("border-width", " ", borders.Top.Width.cssString("0"),
-			borders.Right.Width.cssString("0"), borders.Bottom.Width.cssString("0"), borders.Left.Width.cssString("0"))
+		builder.addValues("border-width", " ",
+			borders.Top.Width.cssString("0", session),
+			borders.Right.Width.cssString("0", session),
+			borders.Bottom.Width.cssString("0", session),
+			borders.Left.Width.cssString("0", session))
 	}
 }
 

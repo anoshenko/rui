@@ -173,11 +173,11 @@ func (style *viewStyle) backgroundCSS(session Session) string {
 func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if margin, ok := boundsProperty(style, Margin, session); ok {
-		margin.cssValue(Margin, builder)
+		margin.cssValue(Margin, builder, session)
 	}
 
 	if padding, ok := boundsProperty(style, Padding, session); ok {
-		padding.cssValue(Padding, builder)
+		padding.cssValue(Padding, builder, session)
 	}
 
 	if border := getBorder(style, Border); border != nil {
@@ -187,10 +187,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	radius := getRadius(style, session)
-	radius.cssValue(builder)
+	radius.cssValue(builder, session)
 
 	if outline := getOutline(style); outline != nil {
-		outline.ViewOutline(session).cssValue(builder)
+		outline.ViewOutline(session).cssValue(builder, session)
 	}
 
 	if z, ok := intProperty(style, ZIndex, session, 0); ok {
@@ -215,7 +215,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 			if !ok {
 				cssTag = tag
 			}
-			builder.add(cssTag, size.cssString(""))
+			builder.add(cssTag, size.cssString("", session))
 		}
 	}
 
