@@ -46,6 +46,8 @@ func (style *viewStyle) setGridCellSize(tag string, value any) bool {
 				val = strings.Trim(val, " \t\n\r")
 				if isConstantName(val) {
 					sizes[i] = val
+				} else if fn := parseSizeFunc(val); fn != nil {
+					sizes[i] = SizeUnit{Type: SizeFunction, Function: fn}
 				} else if size, err := stringToSizeUnit(val); err == nil {
 					sizes[i] = size
 				} else {
