@@ -11,6 +11,10 @@ import (
 // "min", "max", "clamp", "sum", "sub", "mul", and "div" functions are available.
 type SizeFunc interface {
 	fmt.Stringer
+	// Name() returns the function name: "min", "max", "clamp", "sum", "sub", "mul", or "div"
+	Name() string
+	// Args() returns a list of function arguments
+	Args() []any
 	cssString(session Session) string
 	writeCSS(topFunc string, buffer *strings.Builder, session Session)
 	writeString(topFunc string, buffer *strings.Builder)
@@ -157,6 +161,16 @@ func (data *sizeFuncData) String() string {
 
 	data.writeString("", buffer)
 	return buffer.String()
+}
+
+func (data *sizeFuncData) Name() string {
+	return data.tag
+}
+
+func (data *sizeFuncData) Args() []any {
+	args := make([]any, len(data.args))
+	copy(args, data.args)
+	return args
 }
 
 func (data *sizeFuncData) writeString(topFunc string, buffer *strings.Builder) {
