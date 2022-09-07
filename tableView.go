@@ -454,21 +454,23 @@ func (table *tableViewData) set(tag string, value any) bool {
 				delete(table.properties, tag)
 			}
 
+		case DataObject:
+			params := Params{}
+			for k := 0; k < value.PropertyCount(); k++ {
+				if prop := value.Property(k); prop != nil && prop.Type() == TextNode {
+					params[prop.Tag()] = prop.Text()
+				}
+			}
+			if len(params) > 0 {
+				table.properties[tag] = params
+			} else {
+				delete(table.properties, tag)
+			}
+
 		case DataNode:
 			switch value.Type() {
 			case ObjectNode:
-				obj := value.Object()
-				params := Params{}
-				for k := 0; k < obj.PropertyCount(); k++ {
-					if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-						params[prop.Tag()] = prop.Text()
-					}
-				}
-				if len(params) > 0 {
-					table.properties[tag] = params
-				} else {
-					delete(table.properties, tag)
-				}
+				return table.set(tag, value.Object())
 
 			case TextNode:
 				table.properties[tag] = value.Text()
