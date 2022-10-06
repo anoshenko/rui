@@ -33,14 +33,10 @@ type View interface {
 	ViewStyle
 	fmt.Stringer
 
-	// Init initializes fields of View by default values
-	Init(session Session)
 	// Session returns the current Session interface
 	Session() Session
 	// Parent returns the parent view
 	Parent() View
-	parentHTMLID() string
-	setParentID(parentID string)
 	// Tag returns the tag of View interface
 	Tag() string
 	// ID returns the id of the view
@@ -54,7 +50,7 @@ type View interface {
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
-	SetAnimated(tag string, value interface{}, animation Animation) bool
+	SetAnimated(tag string, value any, animation Animation) bool
 	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag string, listener func(View, string))
 	// HasFocus returns 'true' if the view has focus
@@ -65,13 +61,13 @@ type View interface {
 	htmlTag() string
 	closeHTMLTag() bool
 	htmlID() string
+	parentHTMLID() string
+	setParentID(parentID string)
 	htmlSubviews(self View, buffer *strings.Builder)
 	htmlProperties(self View, buffer *strings.Builder)
 	htmlDisabledProperties(self View, buffer *strings.Builder)
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
-
-	getTransitions() Params
 
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index string, x, y, width, height float64)
@@ -102,7 +98,7 @@ type viewData struct {
 
 func newView(session Session) View {
 	view := new(viewData)
-	view.Init(session)
+	view.init(session)
 	return view
 }
 
@@ -124,12 +120,12 @@ func setInitParams(view View, params Params) {
 // NewView create new View object and return it
 func NewView(session Session, params Params) View {
 	view := new(viewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
 
-func (view *viewData) Init(session Session) {
+func (view *viewData) init(session Session) {
 	view.viewStyle.init()
 	view.tag = "View"
 	view.session = session
@@ -197,7 +193,7 @@ func (view *viewData) remove(tag string) {
 	case Style, StyleDisabled:
 		if _, ok := view.properties[tag]; ok {
 			delete(view.properties, tag)
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view, "")), view.session)
+			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -290,11 +286,11 @@ func (view *viewData) propertyChangedEvent(tag string) {
 
 }
 
-func (view *viewData) Set(tag string, value interface{}) bool {
+func (view *viewData) Set(tag string, value any) bool {
 	return view.set(strings.ToLower(tag), value)
 }
 
-func (view *viewData) set(tag string, value interface{}) bool {
+func (view *viewData) set(tag string, value any) bool {
 	if value == nil {
 		view.remove(tag)
 		return true
@@ -327,7 +323,7 @@ func (view *viewData) set(tag string, value interface{}) bool {
 		}
 		view.properties[tag] = text
 		if view.created {
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view, "")), view.session)
+			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -381,7 +377,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case Visibility:
-		switch GetVisibility(view, "") {
+		switch GetVisibility(view) {
 		case Invisible:
 			updateCSSProperty(htmlID, Visibility, "hidden", session)
 			updateCSSProperty(htmlID, "display", "", session)
@@ -450,7 +446,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case Outline, OutlineColor, OutlineStyle, OutlineWidth:
-		updateCSSProperty(htmlID, Outline, GetOutline(view, "").cssString(), session)
+		updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(session), session)
 		return
 
 	case Shadow:
@@ -465,20 +461,20 @@ func viewPropertyChanged(view *viewData, tag string) {
 		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
 		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
-		radius := GetRadius(view, "")
-		updateCSSProperty(htmlID, "border-radius", radius.cssString(), session)
+		radius := GetRadius(view)
+		updateCSSProperty(htmlID, "border-radius", radius.cssString(session), session)
 		return
 
 	case Margin, MarginTop, MarginRight, MarginBottom, MarginLeft,
 		"top-margin", "right-margin", "bottom-margin", "left-margin":
-		margin := GetMargin(view, "")
-		updateCSSProperty(htmlID, Margin, margin.cssString(), session)
+		margin := GetMargin(view)
+		updateCSSProperty(htmlID, Margin, margin.cssString(session), session)
 		return
 
 	case Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
 		"top-padding", "right-padding", "bottom-padding", "left-padding":
-		padding := GetPadding(view, "")
-		updateCSSProperty(htmlID, Padding, padding.cssString(), session)
+		padding := GetPadding(view)
+		updateCSSProperty(htmlID, Padding, padding.cssString(session), session)
 		return
 
 	case AvoidBreak:
@@ -593,9 +589,9 @@ func viewPropertyChanged(view *viewData, tag string) {
 		}
 		return
 
-	case ZIndex:
-		if i, ok := intProperty(view, ZIndex, session, 0); ok {
-			updateCSSProperty(htmlID, ZIndex, strconv.Itoa(i), session)
+	case ZIndex, TabSize:
+		if i, ok := intProperty(view, tag, session, 0); ok {
+			updateCSSProperty(htmlID, tag, strconv.Itoa(i), session)
 		}
 		return
 
@@ -630,7 +626,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	if cssTag, ok := sizeProperties[tag]; ok {
 		size, _ := sizeProperty(view, tag, session)
-		updateCSSProperty(htmlID, cssTag, size.cssString(""), session)
+		updateCSSProperty(htmlID, cssTag, size.cssString("", session), session)
 		return
 	}
 
@@ -639,6 +635,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		TextColor:       "color",
 		TextLineColor:   "text-decoration-color",
 		CaretColor:      CaretColor,
+		AccentColor:     AccentColor,
 	}
 	if cssTag, ok := colorTags[tag]; ok {
 		if color, ok := colorProperty(view, tag, session); ok {
@@ -657,19 +654,19 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	for _, floatTag := range []string{Opacity, ScaleX, ScaleY, ScaleZ, RotateX, RotateY, RotateZ} {
 		if tag == floatTag {
-			if f, ok := floatProperty(view, floatTag, session, 0); ok {
-				updateCSSProperty(htmlID, floatTag, strconv.FormatFloat(f, 'g', -1, 64), session)
+			if f, ok := floatTextProperty(view, floatTag, session, 0); ok {
+				updateCSSProperty(htmlID, floatTag, f, session)
 			}
 			return
 		}
 	}
 }
 
-func (view *viewData) Get(tag string) interface{} {
+func (view *viewData) Get(tag string) any {
 	return view.get(strings.ToLower(tag))
 }
 
-func (view *viewData) get(tag string) interface{} {
+func (view *viewData) get(tag string) any {
 	if tag == ID {
 		if view.viewID != "" {
 			return view.viewID
@@ -681,7 +678,7 @@ func (view *viewData) get(tag string) interface{} {
 }
 
 func (view *viewData) htmlTag() string {
-	if semantics := GetSemantics(view, ""); semantics > DefaultSemantics {
+	if semantics := GetSemantics(view); semantics > DefaultSemantics {
 		values := enumProperties[Semantics].cssValues
 		if semantics < len(values) {
 			return values[semantics]
@@ -710,7 +707,7 @@ func (view *viewData) addToCSSStyle(addCSS map[string]string) {
 
 func (view *viewData) cssStyle(self View, builder cssBuilder) {
 	view.viewStyle.cssViewStyle(builder, view.session)
-	switch GetVisibility(view, "") {
+	switch GetVisibility(view) {
 	case Invisible:
 		builder.add(`visibility`, `hidden`)
 
@@ -734,7 +731,7 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 }
 
 func (view *viewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` data-disabled="1"`)
 	} else {
 		buffer.WriteString(` data-disabled="0"`)
@@ -749,7 +746,7 @@ func viewHTML(view View, buffer *strings.Builder) {
 	buffer.WriteString(view.htmlID())
 	buffer.WriteRune('"')
 
-	disabled := IsDisabled(view, "")
+	disabled := IsDisabled(view)
 
 	if cls := view.htmlClass(disabled); cls != "" {
 		buffer.WriteString(` class="`)
@@ -826,7 +823,7 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 	switch command {
 
 	case KeyDownEvent, KeyUpEvent:
-		if !IsDisabled(self, "") {
+		if !IsDisabled(self) {
 			handleKeyEvents(self, command, data)
 		}
 
@@ -841,13 +838,13 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 
 	case FocusEvent:
 		view.hasFocus = true
-		for _, listener := range getFocusListeners(view, "", command) {
+		for _, listener := range getFocusListeners(view, nil, command) {
 			listener(self)
 		}
 
 	case LostFocusEvent:
 		view.hasFocus = false
-		for _, listener := range getFocusListeners(view, "", command) {
+		for _, listener := range getFocusListeners(view, nil, command) {
 			listener(self)
 		}
 

@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -31,16 +32,29 @@ func imageProperty(properties Properties, tag string, session Session) (string, 
 	return "", false
 }
 
-func valueToSizeUnit(value interface{}, session Session) (SizeUnit, bool) {
+func valueToSizeUnit(value any, session Session) (SizeUnit, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case SizeUnit:
 			return value, true
 
+		case SizeFunc:
+			return SizeUnit{Type: SizeFunction, Function: value}, true
+
 		case string:
 			if text, ok := session.resolveConstants(value); ok {
 				return StringToSizeUnit(text)
 			}
+
+		case float64:
+			return Px(value), true
+
+		case float32:
+			return Px(float64(value)), true
+		}
+
+		if n, ok := isInt(value); ok {
+			return Px(float64(n)), true
 		}
 	}
 
@@ -67,7 +81,7 @@ func angleProperty(properties Properties, tag string, session Session) (AngleUni
 	return AngleUnit{Type: 0, Value: 0}, false
 }
 
-func valueToColor(value interface{}, session Session) (Color, bool) {
+func valueToColor(value any, session Session) (Color, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case Color:
@@ -88,7 +102,7 @@ func colorProperty(properties Properties, tag string, session Session) (Color, b
 	return valueToColor(properties.getRaw(tag), session)
 }
 
-func valueToEnum(value interface{}, tag string, session Session, defaultValue int) (int, bool) {
+func valueToEnum(value any, tag string, session Session, defaultValue int) (int, bool) {
 	if value != nil {
 		values := enumProperties[tag].values
 		switch value := value.(type) {
@@ -155,7 +169,7 @@ func enumProperty(properties Properties, tag string, session Session, defaultVal
 	return valueToEnum(properties.getRaw(tag), tag, session, defaultValue)
 }
 
-func valueToBool(value interface{}, session Session) (bool, bool) {
+func valueToBool(value any, session Session) (bool, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case bool:
@@ -184,7 +198,7 @@ func boolProperty(properties Properties, tag string, session Session) (bool, boo
 	return valueToBool(properties.getRaw(tag), session)
 }
 
-func valueToInt(value interface{}, session Session, defaultValue int) (int, bool) {
+func valueToInt(value any, session Session, defaultValue int) (int, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case string:
@@ -214,7 +228,7 @@ func intProperty(properties Properties, tag string, session Session, defaultValu
 	return valueToInt(properties.getRaw(tag), session, defaultValue)
 }
 
-func valueToFloat(value interface{}, session Session, defaultValue float64) (float64, bool) {
+func valueToFloat(value any, session Session, defaultValue float64) (float64, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case float64:
@@ -238,7 +252,31 @@ func floatProperty(properties Properties, tag string, session Session, defaultVa
 	return valueToFloat(properties.getRaw(tag), session, defaultValue)
 }
 
-func valueToRange(value interface{}, session Session) (Range, bool) {
+func valueToFloatText(value any, session Session, defaultValue float64) (string, bool) {
+	if value != nil {
+		switch value := value.(type) {
+		case float64:
+			return fmt.Sprintf("%g", value), true
+
+		case string:
+			if text, ok := session.resolveConstants(value); ok {
+				if _, err := strconv.ParseFloat(text, 64); err != nil {
+					ErrorLog(err.Error())
+					return fmt.Sprintf("%g", defaultValue), false
+				}
+				return text, true
+			}
+		}
+	}
+
+	return fmt.Sprintf("%g", defaultValue), false
+}
+
+func floatTextProperty(properties Properties, tag string, session Session, defaultValue float64) (string, bool) {
+	return valueToFloatText(properties.getRaw(tag), session, defaultValue)
+}
+
+func valueToRange(value any, session Session) (Range, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case Range:

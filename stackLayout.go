@@ -41,7 +41,7 @@ type stackLayoutData struct {
 // NewStackLayout create new StackLayout object and return it
 func NewStackLayout(session Session, params Params) StackLayout {
 	view := new(stackLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -51,8 +51,8 @@ func newStackLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (layout *stackLayoutData) Init(session Session) {
-	layout.viewsContainerData.Init(session)
+func (layout *stackLayoutData) init(session Session) {
+	layout.viewsContainerData.init(session)
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
 	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
@@ -97,11 +97,11 @@ func (layout *stackLayoutData) popFinished(view View, tag string) {
 	}
 }
 
-func (layout *stackLayoutData) Set(tag string, value interface{}) bool {
+func (layout *stackLayoutData) Set(tag string, value any) bool {
 	return layout.set(strings.ToLower(tag), value)
 }
 
-func (layout *stackLayoutData) set(tag string, value interface{}) bool {
+func (layout *stackLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		layout.remove(tag)
 		return true
@@ -109,8 +109,8 @@ func (layout *stackLayoutData) set(tag string, value interface{}) bool {
 
 	switch tag {
 	case TransitionEndEvent:
-		listeners, ok := valueToAnimationListeners(value)
-		if ok {
+		listeners, ok := valueToEventListeners[View, string](value)
+		if ok && listeners != nil {
 			listeners = append(listeners, layout.pushFinished)
 			listeners = append(listeners, layout.popFinished)
 			layout.properties[TransitionEndEvent] = listeners
@@ -179,11 +179,11 @@ func (layout *stackLayoutData) remove(tag string) {
 	}
 }
 
-func (layout *stackLayoutData) Get(tag string) interface{} {
+func (layout *stackLayoutData) Get(tag string) any {
 	return layout.get(strings.ToLower(tag))
 }
 
-func (layout *stackLayoutData) get(tag string) interface{} {
+func (layout *stackLayoutData) get(tag string) any {
 	if tag == Current {
 		return layout.peek
 	}
@@ -350,6 +350,8 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(htmlID)
 	buffer.WriteString(`pop" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent(\'`)
+	buffer.WriteString(htmlID)
+	buffer.WriteString(`\', \'ruiPop\', event)" ontransitioncancel="stackTransitionEndEvent(\'`)
 	buffer.WriteString(htmlID)
 	buffer.WriteString(`\', \'ruiPop\', event)" style="transition: transform 1s ease;">`)
 	viewHTML(layout.popView, buffer)

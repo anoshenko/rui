@@ -17,7 +17,7 @@ type textViewData struct {
 // NewTextView create new TextView object and return it
 func NewTextView(session Session, params Params) TextView {
 	view := new(textViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -27,8 +27,8 @@ func newTextView(session Session) View {
 }
 
 // Init initialize fields of TextView by default values
-func (textView *textViewData) Init(session Session) {
-	textView.viewData.Init(session)
+func (textView *textViewData) init(session Session) {
+	textView.viewData.init(session)
 	textView.tag = "TextView"
 }
 
@@ -36,7 +36,7 @@ func (textView *textViewData) String() string {
 	return getViewString(textView)
 }
 
-func (textView *textViewData) Get(tag string) interface{} {
+func (textView *textViewData) Get(tag string) any {
 	return textView.get(strings.ToLower(tag))
 }
 
@@ -57,11 +57,11 @@ func (textView *textViewData) remove(tag string) {
 	}
 }
 
-func (textView *textViewData) Set(tag string, value interface{}) bool {
+func (textView *textViewData) Set(tag string, value any) bool {
 	return textView.set(strings.ToLower(tag), value)
 }
 
-func (textView *textViewData) set(tag string, value interface{}) bool {
+func (textView *textViewData) set(tag string, value any) bool {
 	switch tag {
 	case Text:
 		switch value := value.(type) {
@@ -155,7 +155,7 @@ func textToJS(text string) string {
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value := textView.getRaw(Text); value != nil {
 		if text, ok := value.(string); ok {
-			if !GetNotTranslate(textView, "") {
+			if !GetNotTranslate(textView) {
 				text, _ = textView.session.GetString(text)
 			}
 			buffer.WriteString(textToJS(text))
@@ -165,14 +165,7 @@ func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 // GetTextOverflow returns a value of the "text-overflow" property:
 // TextOverflowClip (0) or TextOverflowEllipsis (1).
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetTextOverflow(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return SingleLineText
-	}
-	t, _ := enumStyledProperty(view, TextOverflow, SingleLineText)
-	return t
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTextOverflow(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, TextOverflow, SingleLineText, false)
 }

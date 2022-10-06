@@ -64,9 +64,9 @@ type borderProperty struct {
 	propertyList
 }
 
-func newBorderProperty(value interface{}) BorderProperty {
+func newBorderProperty(value any) BorderProperty {
 	border := new(borderProperty)
-	border.properties = map[string]interface{}{}
+	border.properties = map[string]any{}
 
 	if value != nil {
 		switch value := value.(type) {
@@ -131,7 +131,7 @@ func newBorderProperty(value interface{}) BorderProperty {
 // NewBorder creates the new BorderProperty
 func NewBorder(params Params) BorderProperty {
 	border := new(borderProperty)
-	border.properties = map[string]interface{}{}
+	border.properties = map[string]any{}
 	if params != nil {
 		for _, tag := range []string{Style, Width, ColorTag, Left, Right, Top, Bottom,
 			LeftStyle, RightStyle, TopStyle, BottomStyle,
@@ -213,7 +213,7 @@ func (border *borderProperty) writeString(buffer *strings.Builder, indent string
 	buffer.WriteString("_{ ")
 	comma := false
 
-	write := func(tag string, value interface{}) {
+	write := func(tag string, value any) {
 		if comma {
 			buffer.WriteString(", ")
 		}
@@ -430,7 +430,7 @@ func (border *borderProperty) Remove(tag string) {
 	}
 }
 
-func (border *borderProperty) Set(tag string, value interface{}) bool {
+func (border *borderProperty) Set(tag string, value any) bool {
 	if value == nil {
 		border.Remove(tag)
 		return true
@@ -512,7 +512,7 @@ func (border *borderProperty) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (border *borderProperty) Get(tag string) interface{} {
+func (border *borderProperty) Get(tag string) any {
 	tag = border.normalizeTag(tag)
 
 	if result, ok := border.properties[tag]; ok {
@@ -658,11 +658,14 @@ func (border *borderProperty) cssWidth(builder cssBuilder, session Session) {
 		borders.Top.Width == borders.Left.Width &&
 		borders.Top.Width == borders.Bottom.Width {
 		if borders.Top.Width.Type != Auto {
-			builder.add("border-width", borders.Top.Width.cssString("0"))
+			builder.add("border-width", borders.Top.Width.cssString("0", session))
 		}
 	} else {
-		builder.addValues("border-width", " ", borders.Top.Width.cssString("0"),
-			borders.Right.Width.cssString("0"), borders.Bottom.Width.cssString("0"), borders.Left.Width.cssString("0"))
+		builder.addValues("border-width", " ",
+			borders.Top.Width.cssString("0", session),
+			borders.Right.Width.cssString("0", session),
+			borders.Bottom.Width.cssString("0", session),
+			borders.Left.Width.cssString("0", session))
 	}
 }
 

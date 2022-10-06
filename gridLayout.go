@@ -17,7 +17,7 @@ type gridLayoutData struct {
 // NewGridLayout create new GridLayout object and return it
 func NewGridLayout(session Session, params Params) GridLayout {
 	view := new(gridLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -27,8 +27,8 @@ func newGridLayout(session Session) View {
 }
 
 // Init initialize fields of GridLayout by default values
-func (gridLayout *gridLayoutData) Init(session Session) {
-	gridLayout.viewsContainerData.Init(session)
+func (gridLayout *gridLayoutData) init(session Session) {
+	gridLayout.viewsContainerData.init(session)
 	gridLayout.tag = "GridLayout"
 	gridLayout.systemClass = "ruiGridLayout"
 }
@@ -37,15 +37,17 @@ func (gridLayout *gridLayoutData) String() string {
 	return getViewString(gridLayout)
 }
 
-func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
+func (style *viewStyle) setGridCellSize(tag string, value any) bool {
 	setValues := func(values []string) bool {
 		count := len(values)
 		if count > 1 {
-			sizes := make([]interface{}, count)
+			sizes := make([]any, count)
 			for i, val := range values {
 				val = strings.Trim(val, " \t\n\r")
 				if isConstantName(val) {
 					sizes[i] = val
+				} else if fn := parseSizeFunc(val); fn != nil {
+					sizes[i] = SizeUnit{Type: SizeFunction, Function: fn}
 				} else if size, err := stringToSizeUnit(val); err == nil {
 					sizes[i] = size
 				} else {
@@ -99,13 +101,13 @@ func (style *viewStyle) setGridCellSize(tag string, value interface{}) bool {
 				return false
 			}
 
-		case []interface{}:
+		case []any:
 			count := len(value)
 			if count == 0 {
 				invalidPropertyValue(tag, value)
 				return false
 			}
-			sizes := make([]interface{}, count)
+			sizes := make([]any, count)
 			for i, val := range value {
 				switch val := val.(type) {
 				case SizeUnit:
@@ -145,7 +147,7 @@ func (style *viewStyle) gridCellSizesCSS(tag string, session Session) string {
 
 	case 1:
 		if cellSize[0].Type != Auto {
-			return `repeat(auto-fill, ` + cellSize[0].cssString(`auto`) + `)`
+			return `repeat(auto-fill, ` + cellSize[0].cssString(`auto`, session) + `)`
 		}
 
 	default:
@@ -161,14 +163,14 @@ func (style *viewStyle) gridCellSizesCSS(tag string, session Session) string {
 		}
 		if !allAuto {
 			if allEqual {
-				return fmt.Sprintf(`repeat(%d, %s)`, len(cellSize), cellSize[0].cssString(`auto`))
+				return fmt.Sprintf(`repeat(%d, %s)`, len(cellSize), cellSize[0].cssString(`auto`, session))
 			}
 
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 			for _, size := range cellSize {
 				buffer.WriteRune(' ')
-				buffer.WriteString(size.cssString(`auto`))
+				buffer.WriteString(size.cssString(`auto`, session))
 			}
 			return buffer.String()
 		}
@@ -195,14 +197,14 @@ func (gridLayout *gridLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gridLayout *gridLayoutData) Get(tag string) interface{} {
+func (gridLayout *gridLayoutData) Get(tag string) any {
 	return gridLayout.get(gridLayout.normalizeTag(tag))
 }
 
-func (gridLayout *gridLayoutData) get(tag string) interface{} {
+func (gridLayout *gridLayoutData) get(tag string) any {
 	if tag == Gap {
-		rowGap := GetGridRowGap(gridLayout, "")
-		columnGap := GetGridColumnGap(gridLayout, "")
+		rowGap := GetGridRowGap(gridLayout)
+		columnGap := GetGridColumnGap(gridLayout)
 		if rowGap.Equal(columnGap) {
 			return rowGap
 		}
@@ -239,22 +241,18 @@ func (gridLayout *gridLayoutData) remove(tag string) {
 	}
 }
 
-func (gridLayout *gridLayoutData) Set(tag string, value interface{}) bool {
+func (gridLayout *gridLayoutData) Set(tag string, value any) bool {
 	return gridLayout.set(gridLayout.normalizeTag(tag), value)
 }
 
-func (gridLayout *gridLayoutData) set(tag string, value interface{}) bool {
+func (gridLayout *gridLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		gridLayout.remove(tag)
 		return true
 	}
 
 	if tag == Gap {
-		if gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value) {
-			gridLayout.propertyChangedEvent(Gap)
-			return true
-		}
-		return false
+		return gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value)
 	}
 
 	if gridLayout.viewsContainerData.set(tag, value) {
@@ -285,7 +283,7 @@ func gridCellSizes(properties Properties, tag string, session Session) []SizeUni
 		case SizeUnit:
 			return []SizeUnit{value}
 
-		case []interface{}:
+		case []any:
 			result := make([]SizeUnit, len(value))
 			for i, val := range value {
 				result[i] = AutoSize()
@@ -323,53 +321,29 @@ func (gridLayout *gridLayoutData) cssStyle(self View, builder cssBuilder) {
 */
 
 // GetCellVerticalAlign returns the vertical align of a GridLayout cell content: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumStyledProperty(view, CellVerticalAlign, StretchAlign); ok {
-			return align
-		}
-	}
-	return StretchAlign
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellVerticalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, CellVerticalAlign, StretchAlign, false)
 }
 
 // GetCellHorizontalAlign returns the vertical align of a GridLayout cell content: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumStyledProperty(view, CellHorizontalAlign, StretchAlign); ok {
-			return align
-		}
-	}
-	return StretchAlign
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellHorizontalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, CellHorizontalAlign, StretchAlign, false)
 }
 
 // GetGridAutoFlow returns the value of the  "grid-auto-flow" property
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetGridAutoFlow(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if align, ok := enumStyledProperty(view, GridAutoFlow, 0); ok {
-			return align
-		}
-	}
-	return 0
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetGridAutoFlow(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, GridAutoFlow, 0, false)
 }
 
 // GetCellWidth returns the width of a GridLayout cell. If the result is an empty array, then the width is not set.
 // If the result is a single value array, then the width of all cell is equal.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellWidth(view View, subviewID string) []SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellWidth(view View, subviewID ...string) []SizeUnit {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return gridCellSizes(view, CellWidth, view.Session())
@@ -379,10 +353,10 @@ func GetCellWidth(view View, subviewID string) []SizeUnit {
 
 // GetCellHeight returns the height of a GridLayout cell. If the result is an empty array, then the height is not set.
 // If the result is a single value array, then the height of all cell is equal.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetCellHeight(view View, subviewID string) []SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCellHeight(view View, subviewID ...string) []SizeUnit {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return gridCellSizes(view, CellHeight, view.Session())
@@ -391,29 +365,13 @@ func GetCellHeight(view View, subviewID string) []SizeUnit {
 }
 
 // GetGridRowGap returns the gap between GridLayout rows.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetGridRowGap(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, GridRowGap); ok {
-			return result
-		}
-	}
-	return AutoSize()
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetGridRowGap(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, GridRowGap, false)
 }
 
 // GetGridColumnGap returns the gap between GridLayout columns.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetGridColumnGap(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := sizeStyledProperty(view, GridColumnGap); ok {
-			return result
-		}
-	}
-	return AutoSize()
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetGridColumnGap(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, GridColumnGap, false)
 }

@@ -45,7 +45,7 @@ type resizableData struct {
 // NewResizable create new Resizable object and return it
 func NewResizable(session Session, params Params) Resizable {
 	view := new(resizableData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -54,8 +54,8 @@ func newResizable(session Session) View {
 	return NewResizable(session, nil)
 }
 
-func (resizable *resizableData) Init(session Session) {
-	resizable.viewData.Init(session)
+func (resizable *resizableData) init(session Session) {
+	resizable.viewData.init(session)
 	resizable.tag = "Resizable"
 	resizable.systemClass = "ruiGridLayout"
 	resizable.content = []View{}
@@ -108,11 +108,11 @@ func (resizable *resizableData) remove(tag string) {
 	}
 }
 
-func (resizable *resizableData) Set(tag string, value interface{}) bool {
+func (resizable *resizableData) Set(tag string, value any) bool {
 	return resizable.set(strings.ToLower(tag), value)
 }
 
-func (resizable *resizableData) set(tag string, value interface{}) bool {
+func (resizable *resizableData) set(tag string, value any) bool {
 	if value == nil {
 		resizable.remove(tag)
 		return true
@@ -183,7 +183,7 @@ func (resizable *resizableData) set(tag string, value interface{}) bool {
 	return resizable.viewData.set(tag, value)
 }
 
-func (resizable *resizableData) Get(tag string) interface{} {
+func (resizable *resizableData) Get(tag string) any {
 	return resizable.get(strings.ToLower(tag))
 }
 
@@ -235,7 +235,7 @@ func (resizable *resizableData) getSide() int {
 	return AllSides
 }
 
-func (resizable *resizableData) setSide(value interface{}) bool {
+func (resizable *resizableData) setSide(value any) bool {
 	switch value := value.(type) {
 	case string:
 		if n, err := strconv.Atoi(value); err == nil {
@@ -340,7 +340,7 @@ func (resizable *resizableData) updateResizeBorderWidth() {
 }
 
 func (resizable *resizableData) cellSizeCSS() (string, string) {
-	w := resizable.resizeBorderWidth().cssString("4px")
+	w := resizable.resizeBorderWidth().cssString("4px", resizable.Session())
 	side := resizable.getSide()
 	column := "1fr"
 	row := "1fr"
@@ -384,7 +384,7 @@ func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder)
 	top := 1
 	leftSide := (side & LeftSide) != 0
 	rightSide := (side & RightSide) != 0
-	w := resizable.resizeBorderWidth().cssString("4px")
+	w := resizable.resizeBorderWidth().cssString("4px", resizable.Session())
 
 	if leftSide {
 		left = 2

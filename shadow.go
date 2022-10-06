@@ -111,7 +111,7 @@ func (shadow *viewShadowData) Remove(tag string) {
 	delete(shadow.properties, strings.ToLower(tag))
 }
 
-func (shadow *viewShadowData) Set(tag string, value interface{}) bool {
+func (shadow *viewShadowData) Set(tag string, value any) bool {
 	if value == nil {
 		shadow.Remove(tag)
 		return true
@@ -127,7 +127,7 @@ func (shadow *viewShadowData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (shadow *viewShadowData) Get(tag string) interface{} {
+func (shadow *viewShadowData) Get(tag string) any {
 	return shadow.propertyList.Get(strings.ToLower(tag))
 }
 
@@ -151,13 +151,13 @@ func (shadow *viewShadowData) cssStyle(buffer *strings.Builder, session Session,
 		buffer.WriteString("inset ")
 	}
 
-	buffer.WriteString(offsetX.cssString("0"))
+	buffer.WriteString(offsetX.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(offsetY.cssString("0"))
+	buffer.WriteString(offsetY.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(blurRadius.cssString("0"))
+	buffer.WriteString(blurRadius.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(spreadRadius.cssString("0"))
+	buffer.WriteString(spreadRadius.cssString("0", session))
 	buffer.WriteByte(' ')
 	buffer.WriteString(color.cssString())
 	return true
@@ -177,11 +177,11 @@ func (shadow *viewShadowData) cssTextStyle(buffer *strings.Builder, session Sess
 	}
 
 	buffer.WriteString(lead)
-	buffer.WriteString(offsetX.cssString("0"))
+	buffer.WriteString(offsetX.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(offsetY.cssString("0"))
+	buffer.WriteString(offsetY.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(blurRadius.cssString("0"))
+	buffer.WriteString(blurRadius.cssString("0", session))
 	buffer.WriteByte(' ')
 	buffer.WriteString(color.cssString())
 	return true
@@ -225,7 +225,7 @@ func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string
 	buffer.WriteString(" }")
 }
 
-func (properties *propertyList) setShadow(tag string, value interface{}) bool {
+func (properties *propertyList) setShadow(tag string, value any) bool {
 
 	if value == nil {
 		delete(properties.properties, tag)

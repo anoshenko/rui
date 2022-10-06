@@ -72,7 +72,7 @@ func (file *FileInfo) initBy(node DataValue) {
 // NewFilePicker create new FilePicker object and return it
 func NewFilePicker(session Session, params Params) FilePicker {
 	view := new(filePickerData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -81,8 +81,8 @@ func newFilePicker(session Session) View {
 	return NewFilePicker(session, nil)
 }
 
-func (picker *filePickerData) Init(session Session) {
-	picker.viewData.Init(session)
+func (picker *filePickerData) init(session Session) {
+	picker.viewData.init(session)
 	picker.tag = "FilePicker"
 	picker.files = []FileInfo{}
 	picker.loader = map[int]func(FileInfo, []byte){}
@@ -139,11 +139,11 @@ func (picker *filePickerData) remove(tag string) {
 	}
 }
 
-func (picker *filePickerData) Set(tag string, value interface{}) bool {
+func (picker *filePickerData) Set(tag string, value any) bool {
 	return picker.set(strings.ToLower(tag), value)
 }
 
-func (picker *filePickerData) set(tag string, value interface{}) bool {
+func (picker *filePickerData) set(tag string, value any) bool {
 	if value == nil {
 		picker.remove(tag)
 		return true
@@ -151,57 +151,14 @@ func (picker *filePickerData) set(tag string, value interface{}) bool {
 
 	switch tag {
 	case FileSelectedEvent:
-		switch value := value.(type) {
-		case func(FilePicker, []FileInfo):
-			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){value}
-
-		case func([]FileInfo):
-			fn := func(_ FilePicker, files []FileInfo) {
-				value(files)
-			}
-			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){fn}
-
-		case []func(FilePicker, []FileInfo):
-			picker.fileSelectedListeners = value
-
-		case []func([]FileInfo):
-			listeners := make([]func(FilePicker, []FileInfo), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				listeners[i] = func(_ FilePicker, files []FileInfo) {
-					val(files)
-				}
-			}
-			picker.fileSelectedListeners = listeners
-
-		case []interface{}:
-			listeners := make([]func(FilePicker, []FileInfo), len(value))
-			for i, val := range value {
-				if val == nil {
-					notCompatibleType(tag, val)
-					return false
-				}
-
-				switch val := val.(type) {
-				case func(FilePicker, []FileInfo):
-					listeners[i] = val
-
-				case func([]FileInfo):
-					listeners[i] = func(_ FilePicker, files []FileInfo) {
-						val(files)
-					}
-
-				default:
-					notCompatibleType(tag, val)
-					return false
-				}
-			}
-			picker.fileSelectedListeners = listeners
+		listeners, ok := valueToEventListeners[FilePicker, []FileInfo](value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		} else if listeners == nil {
+			listeners = []func(FilePicker, []FileInfo){}
 		}
+		picker.fileSelectedListeners = listeners
 		picker.propertyChangedEvent(tag)
 		return true
 
@@ -294,7 +251,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 
 	buffer.WriteString(` type="file"`)
-	if multiple, ok := boolStyledProperty(picker, Multiple); ok && multiple {
+	if IsMultipleFilePicker(picker) {
 		buffer.WriteString(` multiple`)
 	}
 
@@ -305,7 +262,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func (picker *filePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self, "") {
+	if IsDisabled(self) {
 		buffer.WriteString(` disabled`)
 	}
 	picker.viewData.htmlDisabledProperties(self, buffer)
@@ -377,9 +334,14 @@ func (picker *filePickerData) handleCommand(self View, command string, data Data
 
 // GetFilePickerFiles returns the list of FilePicker selected files
 // If there are no files selected then an empty slice is returned (the result is always not nil)
-// If the second argument (subviewID) is "" then selected files of the first argument (view) is returned
-func GetFilePickerFiles(view View, subviewID string) []FileInfo {
-	if picker := FilePickerByID(view, subviewID); picker != nil {
+// If the second argument (subviewID) is not specified or it is "" then selected files of the first argument (view) is returned
+func GetFilePickerFiles(view View, subviewID ...string) []FileInfo {
+	subview := ""
+	if len(subviewID) > 0 {
+		subview = subviewID[0]
+	}
+
+	if picker := FilePickerByID(view, subview); picker != nil {
 		return picker.Files()
 	}
 	return []FileInfo{}
@@ -395,24 +357,16 @@ func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(
 }
 
 // IsMultipleFilePicker returns "true" if multiple files can be selected in the FilePicker, "false" otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsMultipleFilePicker(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Multiple); ok {
-			return result
-		}
-	}
-	return false
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsMultipleFilePicker(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, Multiple, false)
 }
 
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetFilePickerAccept(view View, subviewID string) []string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetFilePickerAccept(view View, subviewID ...string) []string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
@@ -434,17 +388,7 @@ func GetFilePickerAccept(view View, subviewID string) []string {
 
 // GetFileSelectedListeners returns the "file-selected-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(FileSelectedEvent); value != nil {
-			if result, ok := value.([]func(FilePicker, []FileInfo)); ok {
-				return result
-			}
-		}
-	}
-	return []func(FilePicker, []FileInfo){}
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo) {
+	return getEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }

@@ -23,7 +23,7 @@ type checkboxData struct {
 // NewCheckbox create new Checkbox object and return it
 func NewCheckbox(session Session, params Params) Checkbox {
 	view := new(checkboxData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, Params{
 		ClickEvent:   checkboxClickListener,
 		KeyDownEvent: checkboxKeyListener,
@@ -36,8 +36,8 @@ func newCheckbox(session Session) View {
 	return NewCheckbox(session, nil)
 }
 
-func (button *checkboxData) Init(session Session) {
-	button.viewsContainerData.Init(session)
+func (button *checkboxData) init(session Session) {
+	button.viewsContainerData.init(session)
 	button.tag = "Checkbox"
 	button.systemClass = "ruiGridLayout ruiCheckbox"
 	button.checkedListeners = []func(Checkbox, bool){}
@@ -51,7 +51,7 @@ func (button *checkboxData) Focusable() bool {
 	return true
 }
 
-func (button *checkboxData) Get(tag string) interface{} {
+func (button *checkboxData) Get(tag string) any {
 	switch strings.ToLower(tag) {
 	case CheckboxChangedEvent:
 		return button.checkedListeners
@@ -60,11 +60,11 @@ func (button *checkboxData) Get(tag string) interface{} {
 	return button.viewsContainerData.Get(tag)
 }
 
-func (button *checkboxData) Set(tag string, value interface{}) bool {
+func (button *checkboxData) Set(tag string, value any) bool {
 	return button.set(tag, value)
 }
 
-func (button *checkboxData) set(tag string, value interface{}) bool {
+func (button *checkboxData) set(tag string, value any) bool {
 	switch tag {
 	case CheckboxChangedEvent:
 		if !button.setChangedListener(value) {
@@ -194,80 +194,32 @@ func (button *checkboxData) changedCheckboxState(state bool) {
 }
 
 func checkboxClickListener(view View) {
-	view.Set(Checked, !IsCheckboxChecked(view, ""))
+	view.Set(Checked, !IsCheckboxChecked(view))
 	BlurView(view)
 }
 
 func checkboxKeyListener(view View, event KeyEvent) {
 	switch event.Code {
 	case "Enter", "Space":
-		view.Set(Checked, !IsCheckboxChecked(view, ""))
+		view.Set(Checked, !IsCheckboxChecked(view))
 	}
 }
 
-func (button *checkboxData) setChangedListener(value interface{}) bool {
-	if value == nil {
-		if len(button.checkedListeners) > 0 {
-			button.checkedListeners = []func(Checkbox, bool){}
-		}
-		return true
+func (button *checkboxData) setChangedListener(value any) bool {
+	listeners, ok := valueToEventListeners[Checkbox, bool](value)
+	if !ok {
+		return false
+	} else if listeners == nil {
+		listeners = []func(Checkbox, bool){}
 	}
-
-	switch value := value.(type) {
-	case func(Checkbox, bool):
-		button.checkedListeners = []func(Checkbox, bool){value}
-
-	case func(bool):
-		fn := func(_ Checkbox, checked bool) {
-			value(checked)
-		}
-		button.checkedListeners = []func(Checkbox, bool){fn}
-
-	case []func(Checkbox, bool):
-		button.checkedListeners = value
-
-	case []func(bool):
-		listeners := make([]func(Checkbox, bool), len(value))
-		for i, val := range value {
-			if val == nil {
-				return false
-			}
-
-			listeners[i] = func(_ Checkbox, checked bool) {
-				val(checked)
-			}
-		}
-		button.checkedListeners = listeners
-
-	case []interface{}:
-		listeners := make([]func(Checkbox, bool), len(value))
-		for i, val := range value {
-			if val == nil {
-				return false
-			}
-
-			switch val := val.(type) {
-			case func(Checkbox, bool):
-				listeners[i] = val
-
-			case func(bool):
-				listeners[i] = func(_ Checkbox, date bool) {
-					val(date)
-				}
-
-			default:
-				return false
-			}
-		}
-		button.checkedListeners = listeners
-	}
+	button.checkedListeners = listeners
 	return true
 }
 
 func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 	session := button.Session()
-	vAlign, _ := enumStyledProperty(button, CheckboxVerticalAlign, LeftAlign)
-	hAlign, _ := enumStyledProperty(button, CheckboxHorizontalAlign, TopAlign)
+	vAlign := GetCheckboxVerticalAlign(button)
+	hAlign := GetCheckboxHorizontalAlign(button)
 	switch hAlign {
 	case CenterAlign:
 		if vAlign == BottomAlign {
@@ -284,7 +236,7 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 	}
 
 	if gap, ok := sizeConstant(session, "ruiCheckboxGap"); ok && gap.Type != Auto && gap.Value > 0 {
-		builder.add("gap", gap.cssString("0"))
+		builder.add("gap", gap.cssString("0", session))
 	}
 
 	builder.add("align-items", "stretch")
@@ -294,8 +246,8 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 }
 
 func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) (int, int) {
-	vAlign, _ := enumStyledProperty(button, CheckboxVerticalAlign, LeftAlign)
-	hAlign, _ := enumStyledProperty(button, CheckboxHorizontalAlign, TopAlign)
+	vAlign := GetCheckboxVerticalAlign(button)
+	hAlign := GetCheckboxHorizontalAlign(button)
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(button.htmlID())
@@ -339,7 +291,7 @@ func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) 
 
 func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 
-	vCheckboxAlign, hCheckboxAlign := button.htmlCheckbox(buffer, IsCheckboxChecked(button, ""))
+	vCheckboxAlign, hCheckboxAlign := button.htmlCheckbox(buffer, IsCheckboxChecked(button))
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(button.htmlID())
@@ -370,7 +322,7 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 }
 
 func (button *checkboxData) cssHorizontalAlign() string {
-	align, _ := enumStyledProperty(button, HorizontalAlign, TopAlign)
+	align := GetHorizontalAlign(button)
 	values := enumProperties[CellHorizontalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
@@ -379,7 +331,7 @@ func (button *checkboxData) cssHorizontalAlign() string {
 }
 
 func (button *checkboxData) cssVerticalAlign() string {
-	align, _ := enumStyledProperty(button, VerticalAlign, TopAlign)
+	align := GetVerticalAlign(button)
 	values := enumProperties[CellVerticalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
@@ -388,17 +340,19 @@ func (button *checkboxData) cssVerticalAlign() string {
 }
 
 // IsCheckboxChecked returns true if the Checkbox is checked, false otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsCheckboxChecked(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if checked := view.Get(Checked); checked != nil {
-			if b, ok := checked.(bool); ok {
-				return b
-			}
-		}
-	}
-	return false
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsCheckboxChecked(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, Checked, false)
+}
+
+// GetCheckboxVerticalAlign return the vertical align of a Checkbox subview: TopAlign (0), BottomAlign (1), CenterAlign (2)
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetCheckboxVerticalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, CheckboxVerticalAlign, LeftAlign, false)
+}
+
+// GetCheckboxHorizontalAlign return the vertical align of a Checkbox subview: LeftAlign (0), RightAlign (1), CenterAlign (2)
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetCheckboxHorizontalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, CheckboxHorizontalAlign, TopAlign, false)
 }

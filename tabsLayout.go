@@ -81,7 +81,7 @@ type tabsLayoutData struct {
 // NewTabsLayout create new TabsLayout object and return it
 func NewTabsLayout(session Session, params Params) TabsLayout {
 	view := new(tabsLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -91,8 +91,8 @@ func newTabsLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (tabsLayout *tabsLayoutData) Init(session Session) {
-	tabsLayout.viewsContainerData.Init(session)
+func (tabsLayout *tabsLayoutData) init(session Session) {
+	tabsLayout.viewsContainerData.init(session)
 	tabsLayout.tag = "TabsLayout"
 	tabsLayout.systemClass = "ruiTabsLayout"
 	tabsLayout.tabListener = []func(TabsLayout, int, int){}
@@ -108,11 +108,11 @@ func (tabsLayout *tabsLayoutData) currentItem(defaultValue int) int {
 	return result
 }
 
-func (tabsLayout *tabsLayoutData) Get(tag string) interface{} {
+func (tabsLayout *tabsLayoutData) Get(tag string) any {
 	return tabsLayout.get(strings.ToLower(tag))
 }
 
-func (tabsLayout *tabsLayoutData) get(tag string) interface{} {
+func (tabsLayout *tabsLayoutData) get(tag string) any {
 	switch tag {
 	case CurrentTabChangedEvent:
 		return tabsLayout.tabListener
@@ -190,11 +190,11 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 	tabsLayout.propertyChangedEvent(tag)
 }
 
-func (tabsLayout *tabsLayoutData) Set(tag string, value interface{}) bool {
+func (tabsLayout *tabsLayoutData) Set(tag string, value any) bool {
 	return tabsLayout.set(strings.ToLower(tag), value)
 }
 
-func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
+func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		tabsLayout.remove(tag)
 		return true
@@ -210,10 +210,12 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 		tabsLayout.tabListener = listeners
 
 	case TabCloseEvent:
-		listeners := tabsLayout.valueToCloseListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[TabsLayout, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(TabsLayout, int){}
 		}
 		tabsLayout.tabCloseListener = listeners
 
@@ -286,7 +288,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(TabsLayout, int, int) {
+func (tabsLayout *tabsLayoutData) valueToTabListeners(value any) []func(TabsLayout, int, int) {
 	if value == nil {
 		return []func(TabsLayout, int, int){}
 	}
@@ -388,7 +390,7 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(TabsLayout, int, int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -421,61 +423,6 @@ func (tabsLayout *tabsLayoutData) valueToTabListeners(value interface{}) []func(
 			case func():
 				listeners[i] = func(TabsLayout, int, int) {
 					val()
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
-}
-
-func (tabsLayout *tabsLayoutData) valueToCloseListeners(value interface{}) []func(TabsLayout, int) {
-	if value == nil {
-		return []func(TabsLayout, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TabsLayout, int):
-		return []func(TabsLayout, int){value}
-
-	case func(int):
-		fn := func(_ TabsLayout, index int) {
-			value(index)
-		}
-		return []func(TabsLayout, int){fn}
-
-	case []func(TabsLayout, int):
-		return value
-
-	case []func(int):
-		listeners := make([]func(TabsLayout, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ TabsLayout, index int) {
-				val(index)
-			}
-		}
-		return listeners
-
-	case []interface{}:
-		listeners := make([]func(TabsLayout, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TabsLayout, int):
-				listeners[i] = val
-
-			case func(int):
-				listeners[i] = func(_ TabsLayout, index int) {
-					val(index)
 				}
 
 			default:
@@ -576,7 +523,7 @@ func (tabsLayout *tabsLayoutData) ListItem(index int, session Session) View {
 	if !ok || title == "" {
 		title = "No title"
 	}
-	if !GetNotTranslate(tabsLayout, "") {
+	if !GetNotTranslate(tabsLayout) {
 		title, _ = tabsLayout.Session().GetString(title)
 	}
 
@@ -776,7 +723,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		inactiveStyle := tabsLayout.inactiveTabStyle()
 		activeStyle := tabsLayout.activeTabStyle()
 
-		notTranslate := GetNotTranslate(tabsLayout, "")
+		notTranslate := GetNotTranslate(tabsLayout)
 		closeButton, _ := boolProperty(tabsLayout, TabCloseButton, tabsLayout.session)
 
 		var tabStyle, titleDiv string

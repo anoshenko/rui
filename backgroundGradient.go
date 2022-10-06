@@ -50,10 +50,10 @@ const (
 type BackgroundGradientPoint struct {
 	// Color - the color of the point. Must not be nil.
 	// Can take a value of Color type or string (color constant or textual description of the color)
-	Color interface{}
+	Color any
 	// Pos - the distance from the start of the gradient straight line. Optional (may be nil).
 	// Can take a value of SizeUnit type or string (angle constant or textual description of the SizeUnit)
-	Pos interface{}
+	Pos any
 }
 
 type backgroundGradient struct {
@@ -71,7 +71,7 @@ type backgroundRadialGradient struct {
 // NewBackgroundLinearGradient creates the new background linear gradient
 func NewBackgroundLinearGradient(params Params) BackgroundElement {
 	result := new(backgroundLinearGradient)
-	result.properties = map[string]interface{}{}
+	result.properties = map[string]any{}
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
@@ -81,7 +81,7 @@ func NewBackgroundLinearGradient(params Params) BackgroundElement {
 // NewBackgroundRadialGradient creates the new background radial gradient
 func NewBackgroundRadialGradient(params Params) BackgroundElement {
 	result := new(backgroundRadialGradient)
-	result.properties = map[string]interface{}{}
+	result.properties = map[string]any{}
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
@@ -106,7 +106,7 @@ func (gradient *backgroundGradient) parseGradientText(value string) []Background
 	return points
 }
 
-func (gradient *backgroundGradient) Set(tag string, value interface{}) bool {
+func (gradient *backgroundGradient) Set(tag string, value any) bool {
 
 	switch tag = strings.ToLower(tag); tag {
 	case Repeating:
@@ -261,19 +261,18 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 				switch value := point.Pos.(type) {
 				case string:
 					if value != "" {
-						if value[0] == '@' {
-							value, _ = session.Constant(value[1:])
-						}
-						if pos, ok := StringToSizeUnit(value); ok && pos.Type != Auto {
-							buffer.WriteRune(' ')
-							buffer.WriteString(pos.cssString(""))
+						if value, ok := session.resolveConstants(value); ok {
+							if pos, ok := StringToSizeUnit(value); ok && pos.Type != Auto {
+								buffer.WriteRune(' ')
+								buffer.WriteString(pos.cssString("", session))
+							}
 						}
 					}
 
 				case SizeUnit:
 					if value.Type != Auto {
 						buffer.WriteRune(' ')
-						buffer.WriteString(value.cssString(""))
+						buffer.WriteString(value.cssString("", session))
 					}
 				}
 			}
@@ -296,7 +295,7 @@ func (image *backgroundLinearGradient) Clone() BackgroundElement {
 	return result
 }
 
-func (gradient *backgroundLinearGradient) Set(tag string, value interface{}) bool {
+func (gradient *backgroundLinearGradient) Set(tag string, value any) bool {
 	if strings.ToLower(tag) == Direction {
 		switch value := value.(type) {
 		case AngleUnit:
@@ -402,7 +401,7 @@ func (gradient *backgroundRadialGradient) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gradient *backgroundRadialGradient) Set(tag string, value interface{}) bool {
+func (gradient *backgroundRadialGradient) Set(tag string, value any) bool {
 	tag = gradient.normalizeTag(tag)
 	switch tag {
 	case RadialGradientRadius:
@@ -426,7 +425,7 @@ func (gradient *backgroundRadialGradient) Set(tag string, value interface{}) boo
 				return true
 			}
 
-		case []interface{}:
+		case []any:
 			switch len(value) {
 			case 0:
 				delete(gradient.properties, RadialGradientRadius)
@@ -477,7 +476,7 @@ func (gradient *backgroundRadialGradient) Set(tag string, value interface{}) boo
 	return gradient.backgroundGradient.Set(tag, value)
 }
 
-func (gradient *backgroundRadialGradient) Get(tag string) interface{} {
+func (gradient *backgroundRadialGradient) Get(tag string) any {
 	return gradient.backgroundGradient.Get(gradient.normalizeTag(tag))
 }
 
@@ -512,9 +511,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 					if r, ok := StringToSizeUnit(text); ok && r.Type != Auto {
 						buffer.WriteString("ellipse ")
 						shapeText = ""
-						buffer.WriteString(r.cssString(""))
+						buffer.WriteString(r.cssString("", session))
 						buffer.WriteString(" ")
-						buffer.WriteString(r.cssString(""))
+						buffer.WriteString(r.cssString("", session))
 						buffer.WriteString(" ")
 					} else {
 						ErrorLog(`Invalid radial gradient radius: ` + text)
@@ -539,9 +538,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			if value.Type != Auto {
 				buffer.WriteString("ellipse ")
 				shapeText = ""
-				buffer.WriteString(value.cssString(""))
+				buffer.WriteString(value.cssString("", session))
 				buffer.WriteString(" ")
-				buffer.WriteString(value.cssString(""))
+				buffer.WriteString(value.cssString("", session))
 				buffer.WriteString(" ")
 			}
 
@@ -553,11 +552,11 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			buffer.WriteString("ellipse ")
 			shapeText = ""
 			for i := 0; i < count; i++ {
-				buffer.WriteString(value[i].cssString("50%"))
+				buffer.WriteString(value[i].cssString("50%", session))
 				buffer.WriteString(" ")
 			}
 
-		case []interface{}:
+		case []any:
 			count := len(value)
 			if count > 2 {
 				count = 2
@@ -568,13 +567,13 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 				if value[i] != nil {
 					switch value := value[i].(type) {
 					case SizeUnit:
-						buffer.WriteString(value.cssString("50%"))
+						buffer.WriteString(value.cssString("50%", session))
 						buffer.WriteString(" ")
 
 					case string:
 						if text, ok := session.resolveConstants(value); ok {
 							if size, err := stringToSizeUnit(text); err == nil {
-								buffer.WriteString(size.cssString("50%"))
+								buffer.WriteString(size.cssString("50%", session))
 								buffer.WriteString(" ")
 							} else {
 								buffer.WriteString("50% ")
@@ -597,9 +596,9 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			buffer.WriteString(shapeText)
 		}
 		buffer.WriteString("at ")
-		buffer.WriteString(x.cssString("50%"))
+		buffer.WriteString(x.cssString("50%", session))
 		buffer.WriteString(" ")
-		buffer.WriteString(y.cssString("50%"))
+		buffer.WriteString(y.cssString("50%", session))
 	}
 
 	buffer.WriteString(", ")

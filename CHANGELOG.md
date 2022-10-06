@@ -1,3 +1,18 @@
+# v0.9.0
+
+* Requires go 1.18 or higher
+* The "interface{}" type replaced by "any"
+* Added SizeFunc interface and Function field to SizeUnit struct
+* Added MaxSize, MinSize, SumSize, SubSize, MulSize, DivSize, ClampSize functions
+* Added "list-row-gap", "list-column-gap", "accent-color", "tab-size", "overflow", 
+"arrow", "arrow-align", "arrow-size", "arrow-width", and "arrow-offset" properties 
+* Added "@ruiArrowSize" and "@ruiArrowWidth" constants to the default theme
+* Added Transition, Transitions, and SetTransition functions to the ViewStyle interface
+* Added GetListRowGap, GetListColumnGap, GetAccentColor, GetTabSize, GetOverflow, IsTimingFunctionValid, and GetTransitions functions
+* Changed GetTransition functions
+* Added the OpenURL function to the Session interface
+* Changed the type of the second argument of all Get functions to "subviewID ...string" (previously "subviewID string")
+
 # v0.8.0
 
 * Added "loaded-event" and "error-event" events to ImageView

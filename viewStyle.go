@@ -10,6 +10,16 @@ import (
 // ViewStyle interface of the style of view
 type ViewStyle interface {
 	Properties
+
+	// Transition returns the transition animation of the property. Returns nil is there is no transition animation.
+	Transition(tag string) Animation
+	// Transitions returns the map of transition animations. The result is always non-nil.
+	Transitions() map[string]Animation
+	// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
+	// removes the transition animation of the property if "animation" argument  is nil.
+	// The "tag" argument is the property name.
+	SetTransition(tag string, animation Animation)
+
 	cssViewStyle(buffer cssBuilder, session Session)
 }
 
@@ -163,11 +173,11 @@ func (style *viewStyle) backgroundCSS(session Session) string {
 func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if margin, ok := boundsProperty(style, Margin, session); ok {
-		margin.cssValue(Margin, builder)
+		margin.cssValue(Margin, builder, session)
 	}
 
 	if padding, ok := boundsProperty(style, Padding, session); ok {
-		padding.cssValue(Padding, builder)
+		padding.cssValue(Padding, builder, session)
 	}
 
 	if border := getBorder(style, Border); border != nil {
@@ -177,10 +187,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	radius := getRadius(style, session)
-	radius.cssValue(builder)
+	radius.cssValue(builder, session)
 
 	if outline := getOutline(style); outline != nil {
-		outline.ViewOutline(session).cssValue(builder)
+		outline.ViewOutline(session).cssValue(builder, session)
 	}
 
 	if z, ok := intProperty(style, ZIndex, session, 0); ok {
@@ -198,14 +208,14 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	for _, tag := range []string{
 		Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight, Left, Right, Top, Bottom,
 		TextSize, TextIndent, LetterSpacing, WordSpacing, LineHeight, TextLineThickness,
-		GridRowGap, GridColumnGap, ColumnGap, ColumnWidth} {
+		ListRowGap, ListColumnGap, GridRowGap, GridColumnGap, ColumnGap, ColumnWidth} {
 
 		if size, ok := sizeProperty(style, tag, session); ok && size.Type != Auto {
 			cssTag, ok := sizeProperties[tag]
 			if !ok {
 				cssTag = tag
 			}
-			builder.add(cssTag, size.cssString(""))
+			builder.add(cssTag, size.cssString("", session))
 		}
 	}
 
@@ -214,6 +224,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		{TextColor, "color"},
 		{TextLineColor, "text-decoration-color"},
 		{CaretColor, CaretColor},
+		{AccentColor, AccentColor},
 	}
 	for _, p := range colorProperties {
 		if color, ok := colorProperty(style, p.property, session); ok && color != 0 {
@@ -235,7 +246,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	writingMode := 0
 	for _, tag := range []string{
-		TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
+		Overflow, TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
 		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
 		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize} {
 
@@ -266,6 +277,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 				builder.add(prop.cssTag, prop.off)
 			}
 		}
+	}
+
+	if tabSize, ok := intProperty(style, TabSize, session, 8); ok && tabSize > 0 {
+		builder.add(TabSize, strconv.Itoa(tabSize))
 	}
 
 	if text := style.cssTextDecoration(session); text != "" {
@@ -384,12 +399,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	if r, ok := rangeProperty(style, Row, session); ok {
-		builder.add("grid-row-start", strconv.Itoa(r.First+1))
-		builder.add("grid-row-end", strconv.Itoa(r.Last+2))
+		builder.add("grid-row", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))
 	}
 	if r, ok := rangeProperty(style, Column, session); ok {
-		builder.add("grid-column-start", strconv.Itoa(r.First+1))
-		builder.add("grid-column-end", strconv.Itoa(r.Last+2))
+		builder.add("grid-column", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))
 	}
 	if text := style.gridCellSizesCSS(CellWidth, session); text != "" {
 		builder.add(`grid-template-columns`, text)
@@ -442,7 +455,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 }
 
-func valueToOrientation(value interface{}, session Session) (int, bool) {
+func valueToOrientation(value any, session Session) (int, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case int:
@@ -471,11 +484,11 @@ func valueToOrientation(value interface{}, session Session) (int, bool) {
 	return 0, false
 }
 
-func (style *viewStyle) Get(tag string) interface{} {
+func (style *viewStyle) Get(tag string) any {
 	return style.get(strings.ToLower(tag))
 }
 
-func (style *viewStyle) get(tag string) interface{} {
+func (style *viewStyle) get(tag string) any {
 	switch tag {
 	case Border, CellBorder:
 		return getBorder(&style.propertyList, tag)
@@ -539,7 +552,7 @@ func (style *viewStyle) AllTags() []string {
 	return result
 }
 
-func supportedPropertyValue(value interface{}) bool {
+func supportedPropertyValue(value any) bool {
 	switch value.(type) {
 	case string:
 	case []string:
@@ -551,7 +564,7 @@ func supportedPropertyValue(value interface{}) bool {
 	case fmt.Stringer:
 	case []ViewShadow:
 	case []View:
-	case []interface{}:
+	case []any:
 	case map[string]Animation:
 	default:
 		return false
@@ -559,7 +572,7 @@ func supportedPropertyValue(value interface{}) bool {
 	return true
 }
 
-func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, indent string) {
+func writePropertyValue(buffer *strings.Builder, tag string, value any, indent string) {
 
 	writeString := func(text string) {
 		simple := (tag != Text && tag != Title && tag != Summary)
@@ -569,7 +582,8 @@ func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, 
 			} else {
 				for _, ch := range text {
 					if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-						ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == ':' {
+						ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == ':' ||
+						ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
 					} else {
 						simple = false
 						break
@@ -654,7 +668,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, 
 		value.writeString(buffer, indent+"\t")
 
 	case fmt.Stringer:
-		buffer.WriteString(value.String())
+		writeString(value.String())
 
 	case []ViewShadow:
 		switch len(value) {
@@ -697,7 +711,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, 
 			buffer.WriteRune(']')
 		}
 
-	case []interface{}:
+	case []any:
 		switch count := len(value); count {
 		case 0:
 			buffer.WriteString("[]")
@@ -741,7 +755,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value interface{}, 
 				if animation := value[tag]; animation != nil {
 					buffer.WriteString(indent2)
 					animation.writeTransitionString(tag, buffer)
-					buffer.WriteString("\n")
+					buffer.WriteString(",\n")
 				}
 			}
 			buffer.WriteString(indent)
@@ -755,7 +769,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 	buffer.WriteString(" {\n")
 	indent += "\t"
 
-	writeProperty := func(tag string, value interface{}) {
+	writeProperty := func(tag string, value any) {
 		if supportedPropertyValue(value) {
 			buffer.WriteString(indent)
 			buffer.WriteString(tag)
@@ -786,7 +800,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		Opacity, ZIndex, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
 		Margin, Padding, BackgroundClip, BackgroundColor, Background, Border, Radius, Outline, Shadow,
 		Orientation, ListWrap, VerticalAlign, HorizontalAlign, CellWidth, CellHeight,
-		CellVerticalAlign, CellHorizontalAlign, GridRowGap, GridColumnGap,
+		CellVerticalAlign, CellHorizontalAlign, ListRowGap, ListColumnGap, GridRowGap, GridColumnGap,
 		ColumnCount, ColumnWidth, ColumnSeparator, ColumnGap, AvoidBreak,
 		Current, Expanded, Side, ResizeBorderWidth, EditViewType, MaxLength, Hint, Text, EditWrap,
 		TextOverflow, FontName, TextSize, TextColor, TextWeight, Italic, SmallCaps,

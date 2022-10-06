@@ -592,7 +592,7 @@ func (canvas *canvasData) writeFont(name string, script *strings.Builder) {
 
 func (canvas *canvasData) SetFont(name string, size SizeUnit) {
 	canvas.script.WriteString("\nctx.font = '")
-	canvas.script.WriteString(size.cssString("1em"))
+	canvas.script.WriteString(size.cssString("1rem", canvas.View().Session()))
 	canvas.writeFont(name, &canvas.script)
 }
 
@@ -616,7 +616,7 @@ func (canvas *canvasData) setFontWithParams(name string, size SizeUnit, params F
 		}
 	}
 
-	script.WriteString(size.cssString("1em"))
+	script.WriteString(size.cssString("1rem", canvas.View().Session()))
 	switch params.LineHeight.Type {
 	case Auto:
 
@@ -634,7 +634,7 @@ func (canvas *canvasData) setFontWithParams(name string, size SizeUnit, params F
 
 	default:
 		script.WriteString("/")
-		script.WriteString(params.LineHeight.cssString(""))
+		script.WriteString(params.LineHeight.cssString("", canvas.View().Session()))
 	}
 
 	canvas.writeFont(name, script)

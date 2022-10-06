@@ -54,7 +54,7 @@ type imageViewData struct {
 // NewImageView create new ImageView object and return it
 func NewImageView(session Session, params Params) ImageView {
 	view := new(imageViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -64,8 +64,8 @@ func newImageView(session Session) View {
 }
 
 // Init initialize fields of imageView by default values
-func (imageView *imageViewData) Init(session Session) {
-	imageView.viewData.Init(session)
+func (imageView *imageViewData) init(session Session) {
+	imageView.viewData.init(session)
 	imageView.tag = "ImageView"
 	//imageView.systemClass = "ruiImageView"
 
@@ -114,82 +114,11 @@ func (imageView *imageViewData) remove(tag string) {
 	}
 }
 
-func (imageView *imageViewData) Set(tag string, value interface{}) bool {
+func (imageView *imageViewData) Set(tag string, value any) bool {
 	return imageView.set(imageView.normalizeTag(tag), value)
 }
 
-func valueToImageListeners(value interface{}) ([]func(ImageView), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(ImageView):
-		return []func(ImageView){value}, true
-
-	case func():
-		fn := func(ImageView) {
-			value()
-		}
-		return []func(ImageView){fn}, true
-
-	case []func(ImageView):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(ImageView), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(ImageView) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []interface{}:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(ImageView), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(ImageView):
-				listeners[i] = v
-
-			case func():
-				listeners[i] = func(ImageView) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
-func (imageView *imageViewData) set(tag string, value interface{}) bool {
+func (imageView *imageViewData) set(tag string, value any) bool {
 	if value == nil {
 		imageView.remove(tag)
 		return true
@@ -228,8 +157,12 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 		notCompatibleType(tag, value)
 
 	case LoadedEvent, ErrorEvent:
-		if listeners, ok := valueToImageListeners(value); ok {
-			imageView.properties[tag] = listeners
+		if listeners, ok := valueToNoParamListeners[ImageView](value); ok {
+			if listeners == nil {
+				delete(imageView.properties, tag)
+			} else {
+				imageView.properties[tag] = listeners
+			}
 			return true
 		}
 
@@ -248,7 +181,7 @@ func (imageView *imageViewData) set(tag string, value interface{}) bool {
 	return false
 }
 
-func (imageView *imageViewData) Get(tag string) interface{} {
+func (imageView *imageViewData) Get(tag string) any {
 	return imageView.viewData.get(imageView.normalizeTag(tag))
 }
 
@@ -311,7 +244,7 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 		}
 	}
 
-	if text := GetImageViewAltText(imageView, ""); text != "" {
+	if text := GetImageViewAltText(imageView); text != "" {
 		buffer.WriteString(` alt="`)
 		buffer.WriteString(textToJS(text))
 		buffer.WriteString(`"`)
@@ -333,8 +266,8 @@ func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
 		builder.add("object-fit", "none")
 	}
 
-	vAlign := GetImageViewVerticalAlign(imageView, "")
-	hAlign := GetImageViewHorizontalAlign(imageView, "")
+	vAlign := GetImageViewVerticalAlign(imageView)
+	hAlign := GetImageViewHorizontalAlign(imageView)
 	if vAlign != CenterAlign || hAlign != CenterAlign {
 		var position string
 		switch hAlign {
@@ -390,10 +323,10 @@ func (imageView *imageViewData) CurrentSource() string {
 }
 
 // GetImageViewSource returns the image URL of an ImageView subview.
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewSource(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewSource(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -406,10 +339,10 @@ func GetImageViewSource(view View, subviewID string) string {
 }
 
 // GetImageViewAltText returns an alternative text description of an ImageView subview.
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewAltText(view View, subviewID string) string {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewAltText(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -425,40 +358,19 @@ func GetImageViewAltText(view View, subviewID string) string {
 
 // GetImageViewFit returns how the content of a replaced ImageView subview:
 // NoneFit (0), ContainFit (1), CoverFit (2), FillFit (3), or ScaleDownFit (4).
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewFit(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if value, ok := enumStyledProperty(view, Fit, NoneFit); ok {
-		return value
-	}
-	return 0
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewFit(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, Fit, NoneFit, false)
 }
 
 // GetImageViewVerticalAlign return the vertical align of an ImageView subview: TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if align, ok := enumStyledProperty(view, ImageVerticalAlign, LeftAlign); ok {
-		return align
-	}
-	return CenterAlign
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewVerticalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ImageVerticalAlign, LeftAlign, false)
 }
 
 // GetImageViewHorizontalAlign return the vertical align of an ImageView subview: LeftAlign (0), RightAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is "" then a left position of the first argument (view) is returned
-func GetImageViewHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if align, ok := enumStyledProperty(view, ImageHorizontalAlign, LeftAlign); ok {
-		return align
-	}
-	return CenterAlign
+// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+func GetImageViewHorizontalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ImageHorizontalAlign, LeftAlign, false)
 }

@@ -109,7 +109,7 @@ type radiusPropertyData struct {
 // NewRadiusProperty creates the new RadiusProperty
 func NewRadiusProperty(params Params) RadiusProperty {
 	result := new(radiusPropertyData)
-	result.properties = map[string]interface{}{}
+	result.properties = map[string]any{}
 	if params != nil {
 		for _, tag := range []string{X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
 			TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY} {
@@ -172,7 +172,7 @@ func (radius *radiusPropertyData) deleteUnusedTags() {
 		}
 	}
 
-	equalValue := func(value1, value2 interface{}) bool {
+	equalValue := func(value1, value2 any) bool {
 		switch value1 := value1.(type) {
 		case string:
 			switch value2 := value2.(type) {
@@ -243,7 +243,7 @@ func (radius *radiusPropertyData) Remove(tag string) {
 
 }
 
-func (radius *radiusPropertyData) Set(tag string, value interface{}) bool {
+func (radius *radiusPropertyData) Set(tag string, value any) bool {
 	if value == nil {
 		radius.Remove(tag)
 		return true
@@ -318,7 +318,7 @@ func (radius *radiusPropertyData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (radius *radiusPropertyData) Get(tag string) interface{} {
+func (radius *radiusPropertyData) Get(tag string) any {
 	tag = radius.normalizeTag(tag)
 	if value, ok := radius.properties[tag]; ok {
 		return value
@@ -455,7 +455,7 @@ func (radius BoxRadius) String() string {
 	return buffer.String()
 }
 
-func (radius BoxRadius) cssValue(builder cssBuilder) {
+func (radius BoxRadius) cssValue(builder cssBuilder, session Session) {
 
 	if (radius.TopLeftX.Type == Auto || radius.TopLeftX.Value == 0) &&
 		(radius.TopLeftY.Type == Auto || radius.TopLeftY.Value == 0) &&
@@ -471,23 +471,23 @@ func (radius BoxRadius) cssValue(builder cssBuilder) {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(radius.TopLeftX.cssString("0"))
+	buffer.WriteString(radius.TopLeftX.cssString("0", session))
 
 	if radius.AllAnglesIsEqual() {
 
 		if !radius.TopLeftX.Equal(radius.TopLeftY) {
 			buffer.WriteString(" / ")
-			buffer.WriteString(radius.TopLeftY.cssString("0"))
+			buffer.WriteString(radius.TopLeftY.cssString("0", session))
 		}
 
 	} else {
 
 		buffer.WriteRune(' ')
-		buffer.WriteString(radius.TopRightX.cssString("0"))
+		buffer.WriteString(radius.TopRightX.cssString("0", session))
 		buffer.WriteRune(' ')
-		buffer.WriteString(radius.BottomRightX.cssString("0"))
+		buffer.WriteString(radius.BottomRightX.cssString("0", session))
 		buffer.WriteRune(' ')
-		buffer.WriteString(radius.BottomLeftX.cssString("0"))
+		buffer.WriteString(radius.BottomLeftX.cssString("0", session))
 
 		if !radius.TopLeftX.Equal(radius.TopLeftY) ||
 			!radius.TopRightX.Equal(radius.TopRightY) ||
@@ -495,22 +495,22 @@ func (radius BoxRadius) cssValue(builder cssBuilder) {
 			!radius.BottomRightX.Equal(radius.BottomRightY) {
 
 			buffer.WriteString(" / ")
-			buffer.WriteString(radius.TopLeftY.cssString("0"))
+			buffer.WriteString(radius.TopLeftY.cssString("0", session))
 			buffer.WriteRune(' ')
-			buffer.WriteString(radius.TopRightY.cssString("0"))
+			buffer.WriteString(radius.TopRightY.cssString("0", session))
 			buffer.WriteRune(' ')
-			buffer.WriteString(radius.BottomRightY.cssString("0"))
+			buffer.WriteString(radius.BottomRightY.cssString("0", session))
 			buffer.WriteRune(' ')
-			buffer.WriteString(radius.BottomLeftY.cssString("0"))
+			buffer.WriteString(radius.BottomLeftY.cssString("0", session))
 		}
 	}
 
 	builder.add("border-radius", buffer.String())
 }
 
-func (radius BoxRadius) cssString() string {
+func (radius BoxRadius) cssString(session Session) string {
 	var builder cssValueBuilder
-	radius.cssValue(&builder)
+	radius.cssValue(&builder, session)
 	return builder.finish()
 }
 
@@ -570,7 +570,7 @@ func getRadiusProperty(style Properties) RadiusProperty {
 	return NewRadiusProperty(nil)
 }
 
-func (properties *propertyList) setRadius(value interface{}) bool {
+func (properties *propertyList) setRadius(value any) bool {
 
 	if value == nil {
 		delete(properties.properties, Radius)
@@ -645,7 +645,16 @@ func (properties *propertyList) setRadius(value interface{}) bool {
 		properties.properties[Radius] = radius
 		return true
 
+	case float32:
+		return properties.setRadius(Px(float64(value)))
+
+	case float64:
+		return properties.setRadius(Px(value))
+
 	default:
+		if n, ok := isInt(value); ok {
+			return properties.setRadius(Px(float64(n)))
+		}
 		notCompatibleType(Radius, value)
 	}
 
@@ -664,7 +673,7 @@ func (properties *propertyList) removeRadiusElement(tag string) {
 	}
 }
 
-func (properties *propertyList) setRadiusElement(tag string, value interface{}) bool {
+func (properties *propertyList) setRadiusElement(tag string, value any) bool {
 	if value == nil {
 		properties.removeRadiusElement(tag)
 		return true
@@ -679,7 +688,7 @@ func (properties *propertyList) setRadiusElement(tag string, value interface{}) 
 	return false
 }
 
-func getRadiusElement(style Properties, tag string) interface{} {
+func getRadiusElement(style Properties, tag string) any {
 	value := style.Get(Radius)
 	if value != nil {
 		switch value := value.(type) {

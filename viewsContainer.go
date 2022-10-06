@@ -25,8 +25,8 @@ type viewsContainerData struct {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (container *viewsContainerData) Init(session Session) {
-	container.viewData.Init(session)
+func (container *viewsContainerData) init(session Session) {
+	container.viewData.init(session)
 	container.tag = "ViewsContainer"
 	container.views = []View{}
 }
@@ -47,8 +47,7 @@ func (container *viewsContainerData) setParentID(parentID string) {
 func (container *viewsContainerData) Views() []View {
 	if container.views == nil {
 		container.views = []View{}
-	}
-	if count := len(container.views); count > 0 {
+	} else if count := len(container.views); count > 0 {
 		views := make([]View, count)
 		copy(views, container.views)
 		return views
@@ -172,11 +171,11 @@ func (container *viewsContainerData) remove(tag string) {
 	}
 }
 
-func (container *viewsContainerData) Set(tag string, value interface{}) bool {
+func (container *viewsContainerData) Set(tag string, value any) bool {
 	return container.set(strings.ToLower(tag), value)
 }
 
-func (container *viewsContainerData) set(tag string, value interface{}) bool {
+func (container *viewsContainerData) set(tag string, value any) bool {
 	if value == nil {
 		container.remove(tag)
 		return true
@@ -187,9 +186,9 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 		// do nothing
 
 	case Disabled:
-		oldDisabled := IsDisabled(container, "")
+		oldDisabled := IsDisabled(container)
 		if container.viewData.Set(Disabled, value) {
-			disabled := IsDisabled(container, "")
+			disabled := IsDisabled(container)
 			if oldDisabled != disabled {
 				if container.views != nil {
 					for _, view := range container.views {
@@ -224,7 +223,7 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 		}
 		container.views = views
 
-	case []interface{}:
+	case []any:
 		views := []View{}
 		for _, v := range value {
 			switch v := v.(type) {
@@ -279,11 +278,11 @@ func (container *viewsContainerData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (container *viewsContainerData) Get(tag string) interface{} {
+func (container *viewsContainerData) Get(tag string) any {
 	return container.get(strings.ToLower(tag))
 }
 
-func (container *viewsContainerData) get(tag string) interface{} {
+func (container *viewsContainerData) get(tag string) any {
 	switch tag {
 	case Content:
 		return container.views

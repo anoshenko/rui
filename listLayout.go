@@ -33,7 +33,7 @@ type listLayoutData struct {
 // NewListLayout create new ListLayout object and return it
 func NewListLayout(session Session, params Params) ListLayout {
 	view := new(listLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -43,8 +43,8 @@ func newListLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsAlignContainer by default values
-func (listLayout *listLayoutData) Init(session Session) {
-	listLayout.viewsContainerData.Init(session)
+func (listLayout *listLayoutData) init(session Session) {
+	listLayout.viewsContainerData.init(session)
 	listLayout.tag = "ListLayout"
 	listLayout.systemClass = "ruiListLayout"
 }
@@ -58,12 +58,29 @@ func (listLayout *listLayoutData) normalizeTag(tag string) string {
 	switch tag {
 	case "wrap":
 		tag = ListWrap
+
+	case "row-gap":
+		return ListRowGap
+
+	case ColumnGap:
+		return ListColumnGap
 	}
 	return tag
 }
 
-func (listLayout *listLayoutData) Get(tag string) interface{} {
+func (listLayout *listLayoutData) Get(tag string) any {
 	return listLayout.get(listLayout.normalizeTag(tag))
+}
+
+func (listLayout *listLayoutData) get(tag string) any {
+	if tag == Gap {
+		if rowGap := GetListRowGap(listLayout); rowGap.Equal(GetListColumnGap(listLayout)) {
+			return rowGap
+		}
+		return AutoSize()
+	}
+
+	return listLayout.viewsContainerData.get(tag)
 }
 
 func (listLayout *listLayoutData) Remove(tag string) {
@@ -71,6 +88,11 @@ func (listLayout *listLayoutData) Remove(tag string) {
 }
 
 func (listLayout *listLayoutData) remove(tag string) {
+	if tag == Gap {
+		listLayout.remove(ListRowGap)
+		listLayout.remove(ListColumnGap)
+		return
+	}
 	listLayout.viewsContainerData.remove(tag)
 	if listLayout.created {
 		switch tag {
@@ -80,14 +102,18 @@ func (listLayout *listLayoutData) remove(tag string) {
 	}
 }
 
-func (listLayout *listLayoutData) Set(tag string, value interface{}) bool {
+func (listLayout *listLayoutData) Set(tag string, value any) bool {
 	return listLayout.set(listLayout.normalizeTag(tag), value)
 }
 
-func (listLayout *listLayoutData) set(tag string, value interface{}) bool {
+func (listLayout *listLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		listLayout.remove(tag)
 		return true
+	}
+
+	if tag == Gap {
+		return listLayout.set(ListRowGap, value) && listLayout.set(ListColumnGap, value)
 	}
 
 	if listLayout.viewsContainerData.set(tag, value) {
@@ -113,38 +139,24 @@ func (listLayout *listLayoutData) htmlSubviews(self View, buffer *strings.Builde
 
 // GetListVerticalAlign returns the vertical align of a ListLayout or ListView sibview:
 // TopAlign (0), BottomAlign (1), CenterAlign (2), or StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListVerticalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return LeftAlign
-	}
-	result, _ := enumProperty(view, VerticalAlign, view.Session(), 0)
-	return result
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListVerticalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, VerticalAlign, TopAlign, false)
 }
 
 // GetListHorizontalAlign returns the vertical align of a ListLayout or ListView subview:
 // LeftAlign (0), RightAlign (1), CenterAlign (2), or StretchAlign (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListHorizontalAlign(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return TopAlign
-	}
-	result, _ := enumProperty(view, HorizontalAlign, view.Session(), 0)
-	return result
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListHorizontalAlign(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, HorizontalAlign, LeftAlign, false)
 }
 
 // GetListOrientation returns the orientation of a ListLayout or ListView subview:
 // TopDownOrientation (0), StartToEndOrientation (1), BottomUpOrientation (2), or EndToStartOrientation (3)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListOrientation(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListOrientation(view View, subviewID ...string) int {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -163,16 +175,20 @@ func GetListOrientation(view View, subviewID string) int {
 }
 
 // GetListWrap returns the wrap type of a ListLayout or ListView subview:
-// WrapOff (0), WrapOn (1), or WrapReverse (2)
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetListWrap(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := enumStyledProperty(view, ListWrap, 0); ok {
-			return result
-		}
-	}
-	return ListWrapOff
+// ListWrapOff (0), ListWrapOn (1), or ListWrapReverse (2)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListWrap(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ListWrap, ListWrapOff, false)
+}
+
+// GetListRowGap returns the gap between ListLayout or ListView rows.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListRowGap(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ListRowGap, false)
+}
+
+// GetListColumnGap returns the gap between ListLayout or ListView columns.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetListColumnGap(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ListColumnGap, false)
 }

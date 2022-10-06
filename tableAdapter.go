@@ -18,7 +18,7 @@ type TableAdapter interface {
 	// * rui.View
 	// * fmt.Stringer
 	// * rui.VerticalTableJoin, rui.HorizontalTableJoin
-	Cell(row, column int) interface{}
+	Cell(row, column int) any
 }
 
 // TableColumnStyle describes the style of TableView columns.
@@ -59,15 +59,15 @@ type TableAllowRowSelection interface {
 }
 
 // SimpleTableAdapter is implementation of TableAdapter where the content
-// defines as [][]interface{}.
-// When you assign [][]interface{} value to the "content" property, it is converted to SimpleTableAdapter
+// defines as [][]any.
+// When you assign [][]any value to the "content" property, it is converted to SimpleTableAdapter
 type SimpleTableAdapter interface {
 	TableAdapter
 	TableCellStyle
 }
 
 type simpleTableAdapter struct {
-	content     [][]interface{}
+	content     [][]any
 	columnCount int
 }
 
@@ -94,7 +94,7 @@ type HorizontalTableJoin struct {
 }
 
 // NewSimpleTableAdapter creates the new SimpleTableAdapter
-func NewSimpleTableAdapter(content [][]interface{}) SimpleTableAdapter {
+func NewSimpleTableAdapter(content [][]any) SimpleTableAdapter {
 	if content == nil {
 		return nil
 	}
@@ -125,7 +125,7 @@ func (adapter *simpleTableAdapter) ColumnCount() int {
 	return adapter.columnCount
 }
 
-func (adapter *simpleTableAdapter) Cell(row, column int) interface{} {
+func (adapter *simpleTableAdapter) Cell(row, column int) any {
 	if adapter.content != nil && row >= 0 && row < len(adapter.content) &&
 		adapter.content[row] != nil && column >= 0 && column < len(adapter.content[row]) {
 		return adapter.content[row][column]
@@ -220,7 +220,7 @@ func (adapter *textTableAdapter) ColumnCount() int {
 	return adapter.columnCount
 }
 
-func (adapter *textTableAdapter) Cell(row, column int) interface{} {
+func (adapter *textTableAdapter) Cell(row, column int) any {
 	if adapter.content != nil && row >= 0 && row < len(adapter.content) &&
 		adapter.content[row] != nil && column >= 0 && column < len(adapter.content[row]) {
 		return adapter.content[row][column]
@@ -242,7 +242,7 @@ func (style *simpleTableRowStyle) RowStyle(row int) Params {
 	return nil
 }
 
-func (table *tableViewData) setRowStyle(value interface{}) bool {
+func (table *tableViewData) setRowStyle(value any) bool {
 	newSimpleTableRowStyle := func(params []Params) TableRowStyle {
 		if len(params) == 0 {
 			return nil
@@ -319,7 +319,7 @@ func (style *simpleTableColumnStyle) ColumnStyle(row int) Params {
 	return nil
 }
 
-func (table *tableViewData) setColumnStyle(value interface{}) bool {
+func (table *tableViewData) setColumnStyle(value any) bool {
 	newSimpleTableColumnStyle := func(params []Params) TableColumnStyle {
 		if len(params) == 0 {
 			return nil

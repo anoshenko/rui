@@ -144,131 +144,6 @@ type MouseEvent struct {
 	MetaKey bool
 }
 
-func valueToMouseListeners(value interface{}) ([]func(View, MouseEvent), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(View, MouseEvent):
-		return []func(View, MouseEvent){value}, true
-
-	case func(MouseEvent):
-		fn := func(_ View, event MouseEvent) {
-			value(event)
-		}
-		return []func(View, MouseEvent){fn}, true
-
-	case func(View):
-		fn := func(view View, _ MouseEvent) {
-			value(view)
-		}
-		return []func(View, MouseEvent){fn}, true
-
-	case func():
-		fn := func(View, MouseEvent) {
-			value()
-		}
-		return []func(View, MouseEvent){fn}, true
-
-	case []func(View, MouseEvent):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(MouseEvent):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, MouseEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ View, event MouseEvent) {
-				v(event)
-			}
-		}
-		return listeners, true
-
-	case []func(View):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, MouseEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(view View, _ MouseEvent) {
-				v(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, MouseEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(View, MouseEvent) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []interface{}:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(View, MouseEvent), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(View, MouseEvent):
-				listeners[i] = v
-
-			case func(MouseEvent):
-				listeners[i] = func(_ View, event MouseEvent) {
-					v(event)
-				}
-
-			case func(View):
-				listeners[i] = func(view View, _ MouseEvent) {
-					v(view)
-				}
-
-			case func():
-				listeners[i] = func(View, MouseEvent) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
 var mouseEvents = map[string]struct{ jsEvent, jsFunc string }{
 	ClickEvent:       {jsEvent: "onclick", jsFunc: "clickEvent"},
 	DoubleClickEvent: {jsEvent: "ondblclick", jsFunc: "doubleClickEvent"},
@@ -280,8 +155,8 @@ var mouseEvents = map[string]struct{ jsEvent, jsFunc string }{
 	ContextMenuEvent: {jsEvent: "oncontextmenu", jsFunc: "contextMenuEvent"},
 }
 
-func (view *viewData) setMouseListener(tag string, value interface{}) bool {
-	listeners, ok := valueToMouseListeners(value)
+func (view *viewData) setMouseListener(tag string, value any) bool {
+	listeners, ok := valueToEventListeners[View, MouseEvent](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return false
@@ -307,20 +182,6 @@ func (view *viewData) removeMouseListener(tag string) {
 			removeProperty(view.htmlID(), js.jsEvent, view.Session())
 		}
 	}
-}
-
-func getMouseListeners(view View, subviewID string, tag string) []func(View, MouseEvent) {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(View, MouseEvent)); ok {
-				return result
-			}
-		}
-	}
-	return []func(View, MouseEvent){}
 }
 
 func mouseEventsHtml(view View, buffer *strings.Builder) {
@@ -363,64 +224,62 @@ func (event *MouseEvent) init(data DataObject) {
 }
 
 func handleMouseEvents(view View, tag string, data DataObject) {
-	listeners := getMouseListeners(view, "", tag)
-	if len(listeners) == 0 {
-		return
-	}
+	listeners := getEventListeners[View, MouseEvent](view, nil, tag)
+	if len(listeners) > 0 {
+		var event MouseEvent
+		event.init(data)
 
-	var event MouseEvent
-	event.init(data)
-
-	for _, listener := range listeners {
-		listener(view, event)
+		for _, listener := range listeners {
+			listener(view, event)
+		}
 	}
 }
 
 // GetClickListeners returns the "click-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetClickListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, ClickEvent)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetClickListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, ClickEvent)
 }
 
 // GetDoubleClickListeners returns the "double-click-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDoubleClickListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, DoubleClickEvent)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDoubleClickListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, DoubleClickEvent)
 }
 
 // GetContextMenuListeners returns the "context-menu" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetContextMenuListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, ContextMenuEvent)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetContextMenuListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, ContextMenuEvent)
 }
 
 // GetMouseDownListeners returns the "mouse-down" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetMouseDownListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, MouseDown)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMouseDownListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, MouseDown)
 }
 
 // GetMouseUpListeners returns the "mouse-up" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetMouseUpListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, MouseUp)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMouseUpListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, MouseUp)
 }
 
 // GetMouseMoveListeners returns the "mouse-move" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetMouseMoveListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, MouseMove)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMouseMoveListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, MouseMove)
 }
 
 // GetMouseOverListeners returns the "mouse-over" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetMouseOverListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, MouseOver)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMouseOverListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, MouseOver)
 }
 
 // GetMouseOutListeners returns the "mouse-out" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetMouseOutListeners(view View, subviewID string) []func(View, MouseEvent) {
-	return getMouseListeners(view, subviewID, MouseOut)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMouseOutListeners(view View, subviewID ...string) []func(View, MouseEvent) {
+	return getEventListeners[View, MouseEvent](view, subviewID, MouseOut)
 }

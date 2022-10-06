@@ -20,7 +20,7 @@ type boundsPropertyData struct {
 // NewBoundsProperty creates the new BoundsProperty object
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
-	bounds.properties = map[string]interface{}{}
+	bounds.properties = map[string]any{}
 	if params != nil {
 		for _, tag := range []string{Top, Right, Bottom, Left} {
 			if value, ok := params[tag]; ok {
@@ -79,7 +79,7 @@ func (bounds *boundsPropertyData) Remove(tag string) {
 	bounds.propertyList.Remove(bounds.normalizeTag(tag))
 }
 
-func (bounds *boundsPropertyData) Set(tag string, value interface{}) bool {
+func (bounds *boundsPropertyData) Set(tag string, value any) bool {
 	if value == nil {
 		bounds.Remove(tag)
 		return true
@@ -98,7 +98,7 @@ func (bounds *boundsPropertyData) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (bounds *boundsPropertyData) Get(tag string) interface{} {
+func (bounds *boundsPropertyData) Get(tag string) any {
 	tag = bounds.normalizeTag(tag)
 	if value, ok := bounds.properties[tag]; ok {
 		return value
@@ -213,22 +213,25 @@ func (bounds *Bounds) String() string {
 		bounds.Bottom.String() + "," + bounds.Left.String()
 }
 
-func (bounds *Bounds) cssValue(tag string, builder cssBuilder) {
+func (bounds *Bounds) cssValue(tag string, builder cssBuilder, session Session) {
 	if bounds.allFieldsEqual() {
-		builder.add(tag, bounds.Top.cssString("0"))
+		builder.add(tag, bounds.Top.cssString("0", session))
 	} else {
-		builder.addValues(tag, " ", bounds.Top.cssString("0"), bounds.Right.cssString("0"),
-			bounds.Bottom.cssString("0"), bounds.Left.cssString("0"))
+		builder.addValues(tag, " ",
+			bounds.Top.cssString("0", session),
+			bounds.Right.cssString("0", session),
+			bounds.Bottom.cssString("0", session),
+			bounds.Left.cssString("0", session))
 	}
 }
 
-func (bounds *Bounds) cssString() string {
+func (bounds *Bounds) cssString(session Session) string {
 	var builder cssValueBuilder
-	bounds.cssValue("", &builder)
+	bounds.cssValue("", &builder, session)
 	return builder.finish()
 }
 
-func (properties *propertyList) setBounds(tag string, value interface{}) bool {
+func (properties *propertyList) setBounds(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		switch value := value.(type) {
 		case string:
@@ -259,6 +262,12 @@ func (properties *propertyList) setBounds(tag string, value interface{}) bool {
 
 		case SizeUnit:
 			properties.properties[tag] = value
+
+		case float32:
+			properties.properties[tag] = Px(float64(value))
+
+		case float64:
+			properties.properties[tag] = Px(value)
 
 		case Bounds:
 			bounds := NewBoundsProperty(nil)
@@ -292,8 +301,12 @@ func (properties *propertyList) setBounds(tag string, value interface{}) bool {
 			properties.properties[tag] = bounds
 
 		default:
-			notCompatibleType(tag, value)
-			return false
+			if n, ok := isInt(value); ok {
+				properties.properties[tag] = Px(float64(n))
+			} else {
+				notCompatibleType(tag, value)
+				return false
+			}
 		}
 	}
 
@@ -340,7 +353,7 @@ func (properties *propertyList) removeBoundsSide(mainTag, sideTag string) {
 	}
 }
 
-func (properties *propertyList) setBoundsSide(mainTag, sideTag string, value interface{}) bool {
+func (properties *propertyList) setBoundsSide(mainTag, sideTag string, value any) bool {
 	bounds := properties.boundsProperty(mainTag)
 	if bounds.Set(sideTag, value) {
 		properties.properties[mainTag] = bounds

@@ -13,7 +13,7 @@ type ruiWriter interface {
 	endObject()
 	startArrayProperty(tag string)
 	endObArray()
-	writeProperty(tag string, value interface{})
+	writeProperty(tag string, value any)
 	finish() string
 }
 
@@ -112,7 +112,7 @@ func (writer *ruiWriterData) endObArray() {
 	writer.buffer.WriteString("],\n")
 }
 
-func (writer *ruiWriterData) writeValue(value interface{}) {
+func (writer *ruiWriterData) writeValue(value any) {
 
 	switch value := value.(type) {
 	case string:
@@ -175,7 +175,7 @@ func (writer *ruiWriterData) writeValue(value interface{}) {
 			writer.buffer.WriteRune(']')
 		}
 
-	case []interface{}:
+	case []any:
 		switch len(value) {
 		case 0:
 			writer.buffer.WriteString("[]\n")
@@ -205,7 +205,7 @@ func (writer *ruiWriterData) writeValue(value interface{}) {
 	writer.buffer.WriteString(",\n")
 }
 
-func (writer *ruiWriterData) writeProperty(tag string, value interface{}) {
+func (writer *ruiWriterData) writeProperty(tag string, value any) {
 	writer.writeIndent()
 	writer.writeString(tag)
 	writer.buffer.WriteString(" = ")

@@ -245,7 +245,7 @@ type tableCellView struct {
 // NewTableView create new TableView object and return it
 func NewTableView(session Session, params Params) TableView {
 	view := new(tableViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -255,8 +255,8 @@ func newTableView(session Session) View {
 }
 
 // Init initialize fields of TableView by default values
-func (table *tableViewData) Init(session Session) {
-	table.viewData.Init(session)
+func (table *tableViewData) init(session Session) {
+	table.viewData.init(session)
 	table.tag = "TableView"
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
@@ -290,10 +290,10 @@ func (table *tableViewData) normalizeTag(tag string) string {
 }
 
 func (table *tableViewData) Focusable() bool {
-	return GetTableSelectionMode(table, "") != NoneSelection
+	return GetTableSelectionMode(table) != NoneSelection
 }
 
-func (table *tableViewData) Get(tag string) interface{} {
+func (table *tableViewData) Get(tag string) any {
 	return table.get(table.normalizeTag(tag))
 }
 
@@ -340,11 +340,11 @@ func (table *tableViewData) remove(tag string) {
 	}
 }
 
-func (table *tableViewData) Set(tag string, value interface{}) bool {
+func (table *tableViewData) Set(tag string, value any) bool {
 	return table.set(table.normalizeTag(tag), value)
 }
 
-func (table *tableViewData) set(tag string, value interface{}) bool {
+func (table *tableViewData) set(tag string, value any) bool {
 	if value == nil {
 		table.remove(tag)
 		return true
@@ -356,7 +356,7 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 		case TableAdapter:
 			table.properties[Content] = value
 
-		case [][]interface{}:
+		case [][]any:
 			table.properties[Content] = NewSimpleTableAdapter(val)
 
 		case [][]string:
@@ -384,20 +384,24 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 		table.cellSelectedListener = listeners
 
 	case TableRowClickedEvent:
-		listeners := table.valueToRowListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[TableView, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(TableView, int){}
 		}
 		table.rowClickedListener = listeners
 
 	case TableRowSelectedEvent:
-		listeners := table.valueToRowListeners(value)
-		if listeners == nil {
+		listeners, ok := valueToEventListeners[TableView, int](value)
+		if !ok {
 			notCompatibleType(tag, value)
 			return false
+		} else if listeners == nil {
+			listeners = []func(TableView, int){}
 		}
-		table.rowSelectedListener = []func(TableView, int){}
+		table.rowSelectedListener = listeners
 
 	case CellStyle:
 		if style, ok := value.(TableCellStyle); ok {
@@ -450,21 +454,23 @@ func (table *tableViewData) set(tag string, value interface{}) bool {
 				delete(table.properties, tag)
 			}
 
+		case DataObject:
+			params := Params{}
+			for k := 0; k < value.PropertyCount(); k++ {
+				if prop := value.Property(k); prop != nil && prop.Type() == TextNode {
+					params[prop.Tag()] = prop.Text()
+				}
+			}
+			if len(params) > 0 {
+				table.properties[tag] = params
+			} else {
+				delete(table.properties, tag)
+			}
+
 		case DataNode:
 			switch value.Type() {
 			case ObjectNode:
-				obj := value.Object()
-				params := Params{}
-				for k := 0; k < obj.PropertyCount(); k++ {
-					if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-						params[prop.Tag()] = prop.Text()
-					}
-				}
-				if len(params) > 0 {
-					table.properties[tag] = params
-				} else {
-					delete(table.properties, tag)
-				}
+				return table.set(tag, value.Object())
 
 			case TextNode:
 				table.properties[tag] = value.Text()
@@ -590,7 +596,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 				updateCSSProperty(htmlID, "border-spacing", "0", session)
 				updateCSSProperty(htmlID, "border-collapse", "collapse", session)
 			} else {
-				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0"), session)
+				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0", session), session)
 				updateCSSProperty(htmlID, "border-collapse", "separate", session)
 			}
 
@@ -598,7 +604,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 			htmlID := table.htmlID()
 			session := table.Session()
 
-			switch GetTableSelectionMode(table, "") {
+			switch GetTableSelectionMode(table) {
 			case CellSelection:
 				updateProperty(htmlID, "tabindex", "0", session)
 				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
@@ -676,7 +682,7 @@ func (table *tableViewData) currentInactiveStyle() string {
 	return "ruiCurrentTableCell"
 }
 
-func (table *tableViewData) valueToCellListeners(value interface{}) []func(TableView, int, int) {
+func (table *tableViewData) valueToCellListeners(value any) []func(TableView, int, int) {
 	if value == nil {
 		return []func(TableView, int, int){}
 	}
@@ -706,7 +712,7 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 		}
 		return listeners
 
-	case []interface{}:
+	case []any:
 		listeners := make([]func(TableView, int, int), len(value))
 		for i, val := range value {
 			if val == nil {
@@ -719,61 +725,6 @@ func (table *tableViewData) valueToCellListeners(value interface{}) []func(Table
 			case func(int, int):
 				listeners[i] = func(_ TableView, row, column int) {
 					val(row, column)
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
-}
-
-func (table *tableViewData) valueToRowListeners(value interface{}) []func(TableView, int) {
-	if value == nil {
-		return []func(TableView, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TableView, int):
-		return []func(TableView, int){value}
-
-	case func(int):
-		fn := func(_ TableView, index int) {
-			value(index)
-		}
-		return []func(TableView, int){fn}
-
-	case []func(TableView, int):
-		return value
-
-	case []func(int):
-		listeners := make([]func(TableView, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ TableView, index int) {
-				val(index)
-			}
-		}
-		return listeners
-
-	case []interface{}:
-		listeners := make([]func(TableView, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TableView, int):
-				listeners[i] = val
-
-			case func(int):
-				listeners[i] = func(_ TableView, index int) {
-					val(index)
 				}
 
 			default:
@@ -808,7 +759,7 @@ func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteRune('"')
 	}
 
-	if selectionMode := GetTableSelectionMode(table, ""); selectionMode != NoneSelection {
+	if selectionMode := GetTableSelectionMode(table); selectionMode != NoneSelection {
 		buffer.WriteString(` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`)
 		buffer.WriteString(table.currentStyle())
 		buffer.WriteString(`" data-bluritemstyle="`)
@@ -879,10 +830,10 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	defer freeStringBuilder(cssBuilder.buffer)
 
 	var view tableCellView
-	view.Init(session)
+	view.init(session)
 
 	ignorCells := []struct{ row, column int }{}
-	selectionMode := GetTableSelectionMode(table, "")
+	selectionMode := GetTableSelectionMode(table)
 
 	var allowCellSelection TableAllowCellSelection = nil
 	if allow, ok := adapter.(TableAllowCellSelection); ok {
@@ -905,7 +856,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	vAlignCss := enumProperties[TableVerticalAlign].cssValues
-	vAlignValue := GetTableVerticalAlign(table, "")
+	vAlignValue := GetTableVerticalAlign(table)
 	if vAlignValue < 0 || vAlignValue >= len(vAlignCss) {
 		vAlignValue = 0
 	}
@@ -1160,8 +1111,8 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		buffer.WriteString("</colgroup>")
 	}
 
-	headHeight := GetTableHeadHeight(table, "")
-	footHeight := GetTableFootHeight(table, "")
+	headHeight := GetTableHeadHeight(table)
+	footHeight := GetTableFootHeight(table)
 	cellBorder := table.getCellBorder()
 	cellPadding := table.boundsProperty(CellPadding)
 	if cellPadding == nil {
@@ -1370,24 +1321,26 @@ func (table *tableViewData) getCurrent() CellIndex {
 }
 
 func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
-	table.viewData.cssViewStyle(builder, table.Session())
+	session := table.Session()
+	table.viewData.cssViewStyle(builder, session)
 
-	gap, ok := sizeProperty(table, Gap, table.Session())
+	gap, ok := sizeProperty(table, Gap, session)
 	if !ok || gap.Type == Auto || gap.Value <= 0 {
 		builder.add("border-spacing", "0")
 		builder.add("border-collapse", "collapse")
 	} else {
-		builder.add("border-spacing", gap.cssString("0"))
+		builder.add("border-spacing", gap.cssString("0", session))
 		builder.add("border-collapse", "separate")
 	}
 }
 
 func (table *tableViewData) ReloadTableData() {
+	session := table.Session()
 	if content := table.content(); content != nil {
-		updateProperty(table.htmlID(), "data-rows", strconv.Itoa(content.RowCount()), table.Session())
-		updateProperty(table.htmlID(), "data-columns", strconv.Itoa(content.ColumnCount()), table.Session())
+		updateProperty(table.htmlID(), "data-rows", strconv.Itoa(content.RowCount()), session)
+		updateProperty(table.htmlID(), "data-columns", strconv.Itoa(content.ColumnCount()), session)
 	}
-	updateInnerHTML(table.htmlID(), table.Session())
+	updateInnerHTML(table.htmlID(), session)
 }
 
 func (table *tableViewData) onItemResize(self View, index string, x, y, width, height float64) {

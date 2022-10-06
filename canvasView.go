@@ -21,7 +21,7 @@ type canvasViewData struct {
 // NewCanvasView creates the new custom draw view
 func NewCanvasView(session Session, params Params) CanvasView {
 	view := new(canvasViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -31,8 +31,8 @@ func newCanvasView(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (canvasView *canvasViewData) Init(session Session) {
-	canvasView.viewData.Init(session)
+func (canvasView *canvasViewData) init(session Session) {
+	canvasView.viewData.init(session)
 	canvasView.tag = "CanvasView"
 }
 
@@ -63,11 +63,11 @@ func (canvasView *canvasViewData) remove(tag string) {
 	}
 }
 
-func (canvasView *canvasViewData) Set(tag string, value interface{}) bool {
+func (canvasView *canvasViewData) Set(tag string, value any) bool {
 	return canvasView.set(canvasView.normalizeTag(tag), value)
 }
 
-func (canvasView *canvasViewData) set(tag string, value interface{}) bool {
+func (canvasView *canvasViewData) set(tag string, value any) bool {
 	if tag == DrawFunction {
 		if value == nil {
 			canvasView.drawer = nil
@@ -85,11 +85,11 @@ func (canvasView *canvasViewData) set(tag string, value interface{}) bool {
 	return canvasView.viewData.set(tag, value)
 }
 
-func (canvasView *canvasViewData) Get(tag string) interface{} {
+func (canvasView *canvasViewData) Get(tag string) any {
 	return canvasView.get(canvasView.normalizeTag(tag))
 }
 
-func (canvasView *canvasViewData) get(tag string) interface{} {
+func (canvasView *canvasViewData) get(tag string) any {
 	if tag == DrawFunction {
 		return canvasView.drawer
 	}

@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -30,7 +29,7 @@ type videoPlayerData struct {
 // NewVideoPlayer create new MediaPlayer object and return it
 func NewVideoPlayer(session Session, params Params) VideoPlayer {
 	view := new(videoPlayerData)
-	view.Init(session)
+	view.init(session)
 	view.tag = "VideoPlayer"
 	setInitParams(view, params)
 	return view
@@ -40,8 +39,8 @@ func newVideoPlayer(session Session) View {
 	return NewVideoPlayer(session, nil)
 }
 
-func (player *videoPlayerData) Init(session Session) {
-	player.mediaPlayerData.Init(session)
+func (player *videoPlayerData) init(session Session) {
+	player.mediaPlayerData.init(session)
 	player.tag = "VideoPlayer"
 }
 
@@ -77,11 +76,11 @@ func (player *videoPlayerData) remove(tag string) {
 	}
 }
 
-func (player *videoPlayerData) Set(tag string, value interface{}) bool {
+func (player *videoPlayerData) Set(tag string, value any) bool {
 	return player.set(strings.ToLower(tag), value)
 }
 
-func (player *videoPlayerData) set(tag string, value interface{}) bool {
+func (player *videoPlayerData) set(tag string, value any) bool {
 	if value == nil {
 		player.remove(tag)
 		return true
@@ -90,9 +89,9 @@ func (player *videoPlayerData) set(tag string, value interface{}) bool {
 	if player.mediaPlayerData.set(tag, value) {
 		session := player.Session()
 		updateSize := func(cssTag string) {
-			if size, ok := floatProperty(player, tag, session, 0); ok {
-				if size > 0 {
-					updateProperty(player.htmlID(), cssTag, fmt.Sprintf("%g", size), session)
+			if size, ok := floatTextProperty(player, tag, session, 0); ok {
+				if size != "0" {
+					updateProperty(player.htmlID(), cssTag, size, session)
 				} else {
 					removeProperty(player.htmlID(), cssTag, session)
 				}
@@ -122,12 +121,16 @@ func (player *videoPlayerData) htmlProperties(self View, buffer *strings.Builder
 
 	session := player.Session()
 
-	if size, ok := floatProperty(player, VideoWidth, session, 0); ok && size > 0 {
-		buffer.WriteString(fmt.Sprintf(` width="%g"`, size))
+	if size, ok := floatTextProperty(player, VideoWidth, session, 0); ok && size != "0" {
+		buffer.WriteString(` width="`)
+		buffer.WriteString(size)
+		buffer.WriteString(`"`)
 	}
 
-	if size, ok := floatProperty(player, VideoHeight, session, 0); ok && size > 0 {
-		buffer.WriteString(fmt.Sprintf(` height="%g"`, size))
+	if size, ok := floatTextProperty(player, VideoHeight, session, 0); ok && size != "0" {
+		buffer.WriteString(` height="`)
+		buffer.WriteString(size)
+		buffer.WriteString(`"`)
 	}
 
 	if url, ok := stringProperty(player, Poster, session); ok && url != "" {

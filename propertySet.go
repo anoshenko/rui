@@ -67,6 +67,7 @@ var boolProperties = []string{
 
 var intProperties = []string{
 	ZIndex,
+	TabSize,
 	HeadHeight,
 	FootHeight,
 	RowSpan,
@@ -109,6 +110,8 @@ var sizeProperties = map[string]string{
 	WordSpacing:        WordSpacing,
 	LineHeight:         LineHeight,
 	TextLineThickness:  "text-decoration-thickness",
+	ListRowGap:         "row-gap",
+	ListColumnGap:      "column-gap",
 	GridRowGap:         GridRowGap,
 	GridColumnGap:      GridColumnGap,
 	ColumnWidth:        ColumnWidth,
@@ -178,6 +181,11 @@ var enumProperties = map[string]struct {
 		[]string{"visible", "invisible", "gone"},
 		"",
 		[]string{"visible", "invisible", "gone"},
+	},
+	Overflow: {
+		[]string{"hidden", "visible", "scroll", "auto"},
+		Overflow,
+		[]string{"hidden", "visible", "scroll", "auto"},
 	},
 	TextAlign: {
 		[]string{"left", "right", "center", "justify"},
@@ -304,6 +312,11 @@ var enumProperties = map[string]struct {
 		"",
 		[]string{"left", "right", "center", "stretch"},
 	},
+	ArrowAlign: {
+		[]string{"left", "right", "center"},
+		"",
+		[]string{"left", "right", "center"},
+	},
 	CellVerticalAlign: {
 		[]string{"top", "bottom", "center", "stretch"},
 		"align-items",
@@ -429,13 +442,18 @@ var enumProperties = map[string]struct {
 		"resize",
 		[]string{"none", "both", "horizontal", "vertical"},
 	},
+	Arrow: {
+		[]string{"none", "top", "right", "bottom", "left"},
+		"",
+		[]string{"none", "top", "right", "bottom", "left"},
+	},
 }
 
-func notCompatibleType(tag string, value interface{}) {
+func notCompatibleType(tag string, value any) {
 	ErrorLogF(`"%T" type not compatible with "%s" property`, value, tag)
 }
 
-func invalidPropertyValue(tag string, value interface{}) {
+func invalidPropertyValue(tag string, value any) {
 	ErrorLogF(`Invalid value "%v" of "%s" property`, value, tag)
 }
 
@@ -457,7 +475,7 @@ func isConstantName(text string) bool {
 	return !strings.ContainsAny(text, ",;|\"'`+(){}[]<>/\\*&%! \t\n\r")
 }
 
-func isInt(value interface{}) (int, bool) {
+func isInt(value any) (int, bool) {
 	var n int
 	switch value := value.(type) {
 	case int:
@@ -497,7 +515,7 @@ func isInt(value interface{}) (int, bool) {
 	return n, true
 }
 
-func (properties *propertyList) setSimpleProperty(tag string, value interface{}) bool {
+func (properties *propertyList) setSimpleProperty(tag string, value any) bool {
 	if value == nil {
 		delete(properties.properties, tag)
 		return true
@@ -515,18 +533,25 @@ func (properties *propertyList) setSimpleProperty(tag string, value interface{})
 	return false
 }
 
-func (properties *propertyList) setSizeProperty(tag string, value interface{}) bool {
+func (properties *propertyList) setSizeProperty(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		var size SizeUnit
 		switch value := value.(type) {
 		case string:
 			var ok bool
-			if size, ok = StringToSizeUnit(value); !ok {
+			if fn := parseSizeFunc(value); fn != nil {
+				size.Type = SizeFunction
+				size.Function = fn
+			} else if size, ok = StringToSizeUnit(value); !ok {
 				invalidPropertyValue(tag, value)
 				return false
 			}
 		case SizeUnit:
 			size = value
+
+		case SizeFunc:
+			size.Type = SizeFunction
+			size.Function = value
 
 		case float32:
 			size.Type = SizeInPixel
@@ -556,7 +581,7 @@ func (properties *propertyList) setSizeProperty(tag string, value interface{}) b
 	return true
 }
 
-func (properties *propertyList) setAngleProperty(tag string, value interface{}) bool {
+func (properties *propertyList) setAngleProperty(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		var angle AngleUnit
 		switch value := value.(type) {
@@ -589,7 +614,7 @@ func (properties *propertyList) setAngleProperty(tag string, value interface{}) 
 	return true
 }
 
-func (properties *propertyList) setColorProperty(tag string, value interface{}) bool {
+func (properties *propertyList) setColorProperty(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		var result Color
 		switch value := value.(type) {
@@ -621,7 +646,7 @@ func (properties *propertyList) setColorProperty(tag string, value interface{}) 
 	return true
 }
 
-func (properties *propertyList) setEnumProperty(tag string, value interface{}, values []string) bool {
+func (properties *propertyList) setEnumProperty(tag string, value any, values []string) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		var n int
 		if text, ok := value.(string); ok {
@@ -646,7 +671,7 @@ func (properties *propertyList) setEnumProperty(tag string, value interface{}, v
 	return true
 }
 
-func (properties *propertyList) setBoolProperty(tag string, value interface{}) bool {
+func (properties *propertyList) setBoolProperty(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		if text, ok := value.(string); ok {
 			switch strings.ToLower(strings.Trim(text, " \t")) {
@@ -683,7 +708,7 @@ func (properties *propertyList) setBoolProperty(tag string, value interface{}) b
 	return true
 }
 
-func (properties *propertyList) setIntProperty(tag string, value interface{}) bool {
+func (properties *propertyList) setIntProperty(tag string, value any) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		if text, ok := value.(string); ok {
 			n, err := strconv.Atoi(strings.Trim(text, " \t"))
@@ -704,7 +729,7 @@ func (properties *propertyList) setIntProperty(tag string, value interface{}) bo
 	return true
 }
 
-func (properties *propertyList) setFloatProperty(tag string, value interface{}, min, max float64) bool {
+func (properties *propertyList) setFloatProperty(tag string, value any, min, max float64) bool {
 	if !properties.setSimpleProperty(tag, value) {
 		f := float64(0)
 		switch value := value.(type) {
@@ -715,6 +740,12 @@ func (properties *propertyList) setFloatProperty(tag string, value interface{}, 
 				ErrorLog(err.Error())
 				return false
 			}
+			if f < min || f > max {
+				ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
+				return false
+			}
+			properties.properties[tag] = value
+			return true
 
 		case float32:
 			f = float64(value)
@@ -742,11 +773,11 @@ func (properties *propertyList) setFloatProperty(tag string, value interface{}, 
 	return true
 }
 
-func (properties *propertyList) Set(tag string, value interface{}) bool {
+func (properties *propertyList) Set(tag string, value any) bool {
 	return properties.set(strings.ToLower(tag), value)
 }
 
-func (properties *propertyList) set(tag string, value interface{}) bool {
+func (properties *propertyList) set(tag string, value any) bool {
 	if value == nil {
 		delete(properties.properties, tag)
 		return true

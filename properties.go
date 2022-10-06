@@ -9,13 +9,13 @@ import (
 type Properties interface {
 	// Get returns a value of the property with name defined by the argument.
 	// The type of return value depends on the property. If the property is not set then nil is returned.
-	Get(tag string) interface{}
-	getRaw(tag string) interface{}
+	Get(tag string) any
+	getRaw(tag string) any
 	// Set sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
-	Set(tag string, value interface{}) bool
-	setRaw(tag string, value interface{})
+	Set(tag string, value any) bool
+	setRaw(tag string, value any)
 	// Remove removes the property with name defined by the argument
 	Remove(tag string)
 	// Clear removes all properties
@@ -25,25 +25,25 @@ type Properties interface {
 }
 
 type propertyList struct {
-	properties map[string]interface{}
+	properties map[string]any
 }
 
 func (properties *propertyList) init() {
-	properties.properties = map[string]interface{}{}
+	properties.properties = map[string]any{}
 }
 
-func (properties *propertyList) Get(tag string) interface{} {
+func (properties *propertyList) Get(tag string) any {
 	return properties.getRaw(strings.ToLower(tag))
 }
 
-func (properties *propertyList) getRaw(tag string) interface{} {
+func (properties *propertyList) getRaw(tag string) any {
 	if value, ok := properties.properties[tag]; ok {
 		return value
 	}
 	return nil
 }
 
-func (properties *propertyList) setRaw(tag string, value interface{}) {
+func (properties *propertyList) setRaw(tag string, value any) {
 	properties.properties[tag] = value
 }
 
@@ -56,7 +56,7 @@ func (properties *propertyList) remove(tag string) {
 }
 
 func (properties *propertyList) Clear() {
-	properties.properties = map[string]interface{}{}
+	properties.properties = map[string]any{}
 }
 
 func (properties *propertyList) AllTags() []string {

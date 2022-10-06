@@ -27,7 +27,7 @@ type circleClip struct {
 }
 
 type polygonClip struct {
-	points []interface{}
+	points []any
 }
 
 // InsetClip creates a rectangle View clipping area.
@@ -73,9 +73,9 @@ func EllipseClip(x, y, rx, ry SizeUnit) ClipShape {
 // PolygonClip creates a polygon View clipping area.
 // The elements of the function argument can be or text constants,
 // or the text representation of SizeUnit, or elements of SizeUnit type.
-func PolygonClip(points []interface{}) ClipShape {
+func PolygonClip(points []any) ClipShape {
 	clip := new(polygonClip)
-	clip.points = []interface{}{}
+	clip.points = []any{}
 	if clip.Set(Points, points) {
 		return clip
 	}
@@ -85,14 +85,14 @@ func PolygonClip(points []interface{}) ClipShape {
 // PolygonPointsClip creates a polygon View clipping area.
 func PolygonPointsClip(points []SizeUnit) ClipShape {
 	clip := new(polygonClip)
-	clip.points = []interface{}{}
+	clip.points = []any{}
 	if clip.Set(Points, points) {
 		return clip
 	}
 	return nil
 }
 
-func (clip *insetClip) Set(tag string, value interface{}) bool {
+func (clip *insetClip) Set(tag string, value any) bool {
 	switch strings.ToLower(tag) {
 	case Top, Right, Bottom, Left:
 		if value == nil {
@@ -146,13 +146,13 @@ func (clip *insetClip) cssStyle(session Session) string {
 	for _, tag := range []string{Top, Right, Bottom, Left} {
 		value, _ := sizeProperty(clip, tag, session)
 		buffer.WriteString(leadText)
-		buffer.WriteString(value.cssString("0px"))
+		buffer.WriteString(value.cssString("0px", session))
 		leadText = " "
 	}
 
 	if radius := getRadiusProperty(clip); radius != nil {
 		buffer.WriteString(" round ")
-		buffer.WriteString(radius.BoxRadius(session).cssString())
+		buffer.WriteString(radius.BoxRadius(session).cssString(session))
 	}
 
 	buffer.WriteRune(')')
@@ -168,7 +168,7 @@ func (clip *insetClip) valid(session Session) bool {
 	return false
 }
 
-func (clip *circleClip) Set(tag string, value interface{}) bool {
+func (clip *circleClip) Set(tag string, value any) bool {
 	if value == nil {
 		clip.Remove(tag)
 	}
@@ -211,15 +211,15 @@ func (clip *circleClip) cssStyle(session Session) string {
 
 	buffer.WriteString("circle(")
 	r, _ := sizeProperty(clip, Radius, session)
-	buffer.WriteString(r.cssString("50%"))
+	buffer.WriteString(r.cssString("50%", session))
 
 	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("50%"))
+	buffer.WriteString(x.cssString("50%", session))
 	buffer.WriteRune(' ')
 
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("50%"))
+	buffer.WriteString(y.cssString("50%", session))
 	buffer.WriteRune(')')
 
 	return buffer.String()
@@ -232,7 +232,7 @@ func (clip *circleClip) valid(session Session) bool {
 	return true
 }
 
-func (clip *ellipseClip) Set(tag string, value interface{}) bool {
+func (clip *ellipseClip) Set(tag string, value any) bool {
 	if value == nil {
 		clip.Remove(tag)
 	}
@@ -280,17 +280,17 @@ func (clip *ellipseClip) cssStyle(session Session) string {
 	rx, _ := sizeProperty(clip, RadiusX, session)
 	ry, _ := sizeProperty(clip, RadiusX, session)
 	buffer.WriteString("ellipse(")
-	buffer.WriteString(rx.cssString("50%"))
+	buffer.WriteString(rx.cssString("50%", session))
 	buffer.WriteRune(' ')
-	buffer.WriteString(ry.cssString("50%"))
+	buffer.WriteString(ry.cssString("50%", session))
 
 	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("50%"))
+	buffer.WriteString(x.cssString("50%", session))
 	buffer.WriteRune(' ')
 
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("50%"))
+	buffer.WriteString(y.cssString("50%", session))
 	buffer.WriteRune(')')
 
 	return buffer.String()
@@ -302,23 +302,23 @@ func (clip *ellipseClip) valid(session Session) bool {
 	return rx.Value != 0 && ry.Value != 0
 }
 
-func (clip *polygonClip) Get(tag string) interface{} {
+func (clip *polygonClip) Get(tag string) any {
 	if Points == strings.ToLower(tag) {
 		return clip.points
 	}
 	return nil
 }
 
-func (clip *polygonClip) getRaw(tag string) interface{} {
+func (clip *polygonClip) getRaw(tag string) any {
 	return clip.Get(tag)
 }
 
-func (clip *polygonClip) Set(tag string, value interface{}) bool {
+func (clip *polygonClip) Set(tag string, value any) bool {
 	if Points == strings.ToLower(tag) {
 		switch value := value.(type) {
-		case []interface{}:
+		case []any:
 			result := true
-			clip.points = make([]interface{}, len(value))
+			clip.points = make([]any, len(value))
 			for i, val := range value {
 				switch val := val.(type) {
 				case string:
@@ -343,7 +343,7 @@ func (clip *polygonClip) Set(tag string, value interface{}) bool {
 			return result
 
 		case []SizeUnit:
-			clip.points = make([]interface{}, len(value))
+			clip.points = make([]any, len(value))
 			for i, point := range value {
 				clip.points[i] = point
 			}
@@ -352,7 +352,7 @@ func (clip *polygonClip) Set(tag string, value interface{}) bool {
 		case string:
 			result := true
 			values := strings.Split(value, ",")
-			clip.points = make([]interface{}, len(values))
+			clip.points = make([]any, len(values))
 			for i, val := range values {
 				val = strings.Trim(val, " \t\n\r")
 				if isConstantName(val) {
@@ -370,18 +370,18 @@ func (clip *polygonClip) Set(tag string, value interface{}) bool {
 	return false
 }
 
-func (clip *polygonClip) setRaw(tag string, value interface{}) {
+func (clip *polygonClip) setRaw(tag string, value any) {
 	clip.Set(tag, value)
 }
 
 func (clip *polygonClip) Remove(tag string) {
 	if Points == strings.ToLower(tag) {
-		clip.points = []interface{}{}
+		clip.points = []any{}
 	}
 }
 
 func (clip *polygonClip) Clear() {
-	clip.points = []interface{}{}
+	clip.points = []any{}
 }
 
 func (clip *polygonClip) AllTags() []string {
@@ -422,18 +422,18 @@ func (clip *polygonClip) cssStyle(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	writePoint := func(value interface{}) {
+	writePoint := func(value any) {
 		switch value := value.(type) {
 		case string:
 			if val, ok := session.resolveConstants(value); ok {
 				if size, ok := StringToSizeUnit(val); ok {
-					buffer.WriteString(size.cssString("0px"))
+					buffer.WriteString(size.cssString("0px", session))
 					return
 				}
 			}
 
 		case SizeUnit:
-			buffer.WriteString(value.cssString("0px"))
+			buffer.WriteString(value.cssString("0px", session))
 			return
 		}
 
@@ -501,7 +501,7 @@ func parseClipShape(obj DataObject) ClipShape {
 	return nil
 }
 
-func (style *viewStyle) setClipShape(tag string, value interface{}) bool {
+func (style *viewStyle) setClipShape(tag string, value any) bool {
 	switch value := value.(type) {
 	case ClipShape:
 		style.properties[tag] = value
@@ -558,10 +558,10 @@ func getClipShape(prop Properties, tag string, session Session) ClipShape {
 }
 
 // GetClip returns a View clipping area.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetClip(view View, subviewID string) ClipShape {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetClip(view View, subviewID ...string) ClipShape {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return getClipShape(view, Clip, view.Session())
@@ -571,10 +571,10 @@ func GetClip(view View, subviewID string) ClipShape {
 }
 
 // GetShapeOutside returns a shape around which adjacent inline content.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetShapeOutside(view View, subviewID string) ClipShape {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetShapeOutside(view View, subviewID ...string) ClipShape {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		return getClipShape(view, ShapeOutside, view.Session())

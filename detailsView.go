@@ -24,7 +24,7 @@ type detailsViewData struct {
 // NewDetailsView create new DetailsView object and return it
 func NewDetailsView(session Session, params Params) DetailsView {
 	view := new(detailsViewData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -34,8 +34,8 @@ func newDetailsView(session Session) View {
 }
 
 // Init initialize fields of DetailsView by default values
-func (detailsView *detailsViewData) Init(session Session) {
-	detailsView.viewsContainerData.Init(session)
+func (detailsView *detailsViewData) init(session Session) {
+	detailsView.viewsContainerData.init(session)
 	detailsView.tag = "DetailsView"
 	//detailsView.systemClass = "ruiDetailsView"
 }
@@ -68,11 +68,11 @@ func (detailsView *detailsViewData) remove(tag string) {
 	}
 }
 
-func (detailsView *detailsViewData) Set(tag string, value interface{}) bool {
+func (detailsView *detailsViewData) Set(tag string, value any) bool {
 	return detailsView.set(strings.ToLower(tag), value)
 }
 
-func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
+func (detailsView *detailsViewData) set(tag string, value any) bool {
 	if value == nil {
 		detailsView.remove(tag)
 		return true
@@ -110,7 +110,7 @@ func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
 			return false
 		}
 		if detailsView.created {
-			if IsDetailsExpanded(detailsView, "") {
+			if IsDetailsExpanded(detailsView) {
 				updateProperty(detailsView.htmlID(), "open", "", detailsView.Session())
 			} else {
 				removeProperty(detailsView.htmlID(), "open", detailsView.Session())
@@ -133,11 +133,11 @@ func (detailsView *detailsViewData) set(tag string, value interface{}) bool {
 	return true
 }
 
-func (detailsView *detailsViewData) Get(tag string) interface{} {
+func (detailsView *detailsViewData) Get(tag string) any {
 	return detailsView.get(strings.ToLower(tag))
 }
 
-func (detailsView *detailsViewData) get(tag string) interface{} {
+func (detailsView *detailsViewData) get(tag string) any {
 	return detailsView.viewsContainerData.get(tag)
 }
 
@@ -148,7 +148,7 @@ func (detailsView *detailsViewData) htmlTag() string {
 func (detailsView *detailsViewData) htmlProperties(self View, buffer *strings.Builder) {
 	detailsView.viewsContainerData.htmlProperties(self, buffer)
 	buffer.WriteString(` ontoggle="detailsEvent(this)"`)
-	if IsDetailsExpanded(detailsView, "") {
+	if IsDetailsExpanded(detailsView) {
 		buffer.WriteString(` open`)
 	}
 }
@@ -157,7 +157,7 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 	if value, ok := detailsView.properties[Summary]; ok {
 		switch value := value.(type) {
 		case string:
-			if !GetNotTranslate(detailsView, "") {
+			if !GetNotTranslate(detailsView) {
 				value, _ = detailsView.session.GetString(value)
 			}
 			buffer.WriteString("<summary>")
@@ -186,10 +186,10 @@ func (detailsView *detailsViewData) handleCommand(self View, command string, dat
 }
 
 // GetDetailsSummary returns a value of the Summary property of DetailsView.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func GetDetailsSummary(view View, subviewID string) View {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDetailsSummary(view View, subviewID ...string) View {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
 		if value := view.Get(Summary); value != nil {
@@ -206,15 +206,7 @@ func GetDetailsSummary(view View, subviewID string) View {
 }
 
 // IsDetailsExpanded returns a value of the Expanded property of DetailsView.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsDetailsExpanded(view View, subviewID string) bool {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view != nil {
-		if result, ok := boolStyledProperty(view, Expanded); ok {
-			return result
-		}
-	}
-	return false
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsDetailsExpanded(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, Expanded, false)
 }

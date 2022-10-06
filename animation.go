@@ -55,16 +55,19 @@ const (
 	// The animation plays forwards each cycle. In other words, each time the animation cycles,
 	// the animation will reset to the beginning state and start over again. This is the default value.
 	NormalAnimation = 0
+
 	// ReverseAnimation is value of the "animation-direction" property.
 	// The animation plays backwards each cycle. In other words, each time the animation cycles,
 	// the animation will reset to the end state and start over again. Animation steps are performed
 	// backwards, and timing functions are also reversed.
 	// For example, an "ease-in" timing function becomes "ease-out".
 	ReverseAnimation = 1
+
 	// AlternateAnimation is value of the "animation-direction" property.
 	// The animation reverses direction each cycle, with the first iteration being played forwards.
 	// The count to determine if a cycle is even or odd starts at one.
 	AlternateAnimation = 2
+
 	// AlternateReverseAnimation is value of the "animation-direction" property.
 	// The animation reverses direction each cycle, with the first iteration being played backwards.
 	// The count to determine if a cycle is even or odd starts at one.
@@ -107,11 +110,11 @@ type AnimatedProperty struct {
 	// Tag is the name of the property
 	Tag string
 	// From is the initial value of the property
-	From interface{}
+	From any
 	// To is the final value of the property
-	To interface{}
+	To any
 	// KeyFrames is intermediate property values
-	KeyFrames map[int]interface{}
+	KeyFrames map[int]any
 }
 
 type animationData struct {
@@ -184,7 +187,7 @@ func (animation *animationData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (animation *animationData) Set(tag string, value interface{}) bool {
+func (animation *animationData) Set(tag string, value any) bool {
 	if value == nil {
 		animation.Remove(tag)
 		return true
@@ -285,7 +288,7 @@ func (animation *animationData) Set(tag string, value interface{}) bool {
 								ErrorLogF(`key-frame "%d" is out of range`, n)
 							} else {
 								if result.KeyFrames == nil {
-									result.KeyFrames = map[int]interface{}{n: node.Text()}
+									result.KeyFrames = map[int]any{n: node.Text()}
 								} else {
 									result.KeyFrames[n] = node.Text()
 								}
@@ -359,7 +362,7 @@ func (animation *animationData) Remove(tag string) {
 	delete(animation.properties, animation.normalizeTag(tag))
 }
 
-func (animation *animationData) Get(tag string) interface{} {
+func (animation *animationData) Get(tag string) any {
 	return animation.getRaw(animation.normalizeTag(tag))
 }
 
@@ -397,7 +400,7 @@ func (animation *animationData) animationCSS(session Session) string {
 
 	buffer.WriteString(animation.keyFramesName)
 
-	if duration, _ := floatProperty(animation, Duration, session, 1); duration > 0 {
+	if duration, ok := floatProperty(animation, Duration, session, 1); ok && duration > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs ", duration))
 	} else {
 		buffer.WriteString(" 1s ")
@@ -405,7 +408,7 @@ func (animation *animationData) animationCSS(session Session) string {
 
 	buffer.WriteString(animation.timingFunctionCSS(session))
 
-	if delay, _ := floatProperty(animation, Delay, session, 0); delay > 0 {
+	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
 	} else {
 		buffer.WriteString(" 0s")
@@ -435,7 +438,7 @@ func (animation *animationData) animationCSS(session Session) string {
 
 func (animation *animationData) transitionCSS(buffer *strings.Builder, session Session) {
 
-	if duration, _ := floatProperty(animation, Duration, session, 1); duration > 0 {
+	if duration, ok := floatProperty(animation, Duration, session, 1); ok && duration > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs ", duration))
 	} else {
 		buffer.WriteString(" 1s ")
@@ -443,7 +446,7 @@ func (animation *animationData) transitionCSS(buffer *strings.Builder, session S
 
 	buffer.WriteString(animation.timingFunctionCSS(session))
 
-	if delay, _ := floatProperty(animation, Delay, session, 0); delay > 0 {
+	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
 	}
 }
@@ -481,6 +484,8 @@ func (animation *animationData) writeTransitionString(tag string, buffer *string
 				buffer.WriteRune('"')
 				buffer.WriteString(timingFunction)
 				buffer.WriteRune('"')
+			} else {
+				buffer.WriteString(timingFunction)
 			}
 		}
 	}
@@ -490,14 +495,14 @@ func (animation *animationData) writeTransitionString(tag string, buffer *string
 
 func (animation *animationData) timingFunctionCSS(session Session) string {
 	if timingFunction, ok := stringProperty(animation, TimingFunction, session); ok {
-		if timingFunction, ok = session.resolveConstants(timingFunction); ok && validateTimingFunction(timingFunction) {
+		if timingFunction, ok = session.resolveConstants(timingFunction); ok && isTimingFunctionValid(timingFunction) {
 			return timingFunction
 		}
 	}
 	return ("ease")
 }
 
-func validateTimingFunction(timingFunction string) bool {
+func isTimingFunctionValid(timingFunction string) bool {
 	switch timingFunction {
 	case "", EaseTiming, EaseInTiming, EaseOutTiming, EaseInOutTiming, LinearTiming:
 		return true
@@ -526,6 +531,14 @@ func validateTimingFunction(timingFunction string) bool {
 		}
 	}
 
+	return false
+}
+
+// IsTimingFunctionValid returns "true" if the "timingFunction" argument is the valid timing function.
+func IsTimingFunctionValid(timingFunction string, session Session) bool {
+	if timingFunc, ok := session.resolveConstants(strings.Trim(timingFunction, " \t\n")); ok {
+		return isTimingFunctionValid(timingFunc)
+	}
 	return false
 }
 
@@ -602,7 +615,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 	return name
 }
 
-func (view *viewData) SetAnimated(tag string, value interface{}, animation Animation) bool {
+func (view *viewData) SetAnimated(tag string, value any, animation Animation) bool {
 	if animation == nil {
 		return view.Set(tag, value)
 	}
@@ -659,11 +672,29 @@ func (style *viewStyle) transitionCSS(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
+	convert := map[string]string{
+		CellHeight:        "grid-template-rows",
+		CellWidth:         "grid-template-columns",
+		Row:               "grid-row",
+		Column:            "grid-column",
+		Clip:              "clip-path",
+		Shadow:            "box-shadow",
+		ColumnSeparator:   "column-rule",
+		FontName:          "font",
+		TextSize:          "font-size",
+		TextLineThickness: "text-decoration-thickness",
+	}
+
 	for tag, animation := range style.transitions {
 		if buffer.Len() > 0 {
 			buffer.WriteString(", ")
 		}
-		buffer.WriteString(tag)
+
+		if cssTag, ok := convert[tag]; ok {
+			buffer.WriteString(cssTag)
+		} else {
+			buffer.WriteString(tag)
+		}
 		animation.transitionCSS(buffer, session)
 	}
 	return buffer.String()
@@ -673,18 +704,42 @@ func (view *viewData) updateTransitionCSS() {
 	updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.Session()), view.Session())
 }
 
-func (view *viewData) getTransitions() Params {
-	result := Params{}
-	for tag, animation := range view.transitions {
+func (style *viewStyle) Transition(tag string) Animation {
+	if style.transitions != nil {
+		if anim, ok := style.transitions[tag]; ok {
+			return anim
+		}
+	}
+	return nil
+}
+
+func (style *viewStyle) Transitions() map[string]Animation {
+	result := map[string]Animation{}
+	for tag, animation := range style.transitions {
 		result[tag] = animation
 	}
 	return result
 }
 
+func (style *viewStyle) SetTransition(tag string, animation Animation) {
+	if animation == nil {
+		delete(style.transitions, tag)
+	} else {
+		style.transitions[tag] = animation
+	}
+}
+
+func (view *viewData) SetTransition(tag string, animation Animation) {
+	view.viewStyle.SetTransition(tag, animation)
+	if view.created {
+		updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.Session()), view.Session())
+	}
+}
+
 // SetAnimated sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
 // true - success,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
-func SetAnimated(rootView View, viewID, tag string, value interface{}, animation Animation) bool {
+func SetAnimated(rootView View, viewID, tag string, value any, animation Animation) bool {
 	if view := ViewByID(rootView, viewID); view != nil {
 		return view.SetAnimated(tag, value, animation)
 	}
@@ -692,58 +747,60 @@ func SetAnimated(rootView View, viewID, tag string, value interface{}, animation
 }
 
 // IsAnimationPaused returns "true" if an animation of the subview is paused, "false" otherwise.
-// If the second argument (subviewID) is "" then a value from the first argument (view) is returned.
-func IsAnimationPaused(view View, subviewID string) bool {
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsAnimationPaused(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, AnimationPaused, false)
+}
+
+// GetTransitions returns the subview transitions. The result is always non-nil.
+// If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
+func GetTransitions(view View, subviewID ...string) map[string]Animation {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	if view != nil {
+		return view.Transitions()
+	}
+
+	return map[string]Animation{}
+}
+
+// GetTransition returns the subview property transition. If there is no transition for the given property then nil is returned.
+// If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
+func GetTransition(view View, subviewID, tag string) Animation {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
+
 	if view != nil {
-		if result, ok := boolStyledProperty(view, AnimationPaused); ok {
-			return result
+		return view.Transition(tag)
+	}
+
+	return nil
+}
+
+// AddTransition adds the transition for the subview property.
+// If the second argument (subviewID) is not specified or it is "" then the transition is added to the first argument (view)
+func AddTransition(view View, subviewID, tag string, animation Animation) bool {
+	if tag != "" {
+		if subviewID != "" {
+			view = ViewByID(view, subviewID)
+		}
+
+		if view != nil {
+			view.SetTransition(tag, animation)
+			return true
 		}
 	}
 	return false
 }
 
-// GetTransition returns the subview transitions. The result is always non-nil.
-// If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
-func GetTransition(view View, subviewID string) Params {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if view != nil {
-		return view.getTransitions()
-	}
-
-	return Params{}
-}
-
-// AddTransition adds the transition for the subview property.
-// If the second argument (subviewID) is "" then the transition is added to the first argument (view)
-func AddTransition(view View, subviewID, tag string, animation Animation) bool {
-	if tag == "" {
-		return false
-	}
-
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-
-	if view == nil {
-		return false
-	}
-
-	transitions := view.getTransitions()
-	transitions[tag] = animation
-	return view.Set(Transition, transitions)
-}
-
 // GetAnimation returns the subview animations. The result is always non-nil.
-// If the second argument (subviewID) is "" then transitions of the first argument (view) is returned
-func GetAnimation(view View, subviewID string) []Animation {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
+func GetAnimation(view View, subviewID ...string) []Animation {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {

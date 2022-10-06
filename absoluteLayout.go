@@ -14,7 +14,7 @@ type absoluteLayoutData struct {
 // NewAbsoluteLayout create new AbsoluteLayout object and return it
 func NewAbsoluteLayout(session Session, params Params) AbsoluteLayout {
 	view := new(absoluteLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -24,8 +24,8 @@ func newAbsoluteLayout(session Session) View {
 }
 
 // Init initialize fields of ViewsContainer by default values
-func (layout *absoluteLayoutData) Init(session Session) {
-	layout.viewsContainerData.Init(session)
+func (layout *absoluteLayoutData) init(session Session) {
+	layout.viewsContainerData.init(session)
 	layout.tag = "AbsoluteLayout"
 	layout.systemClass = "ruiAbsoluteLayout"
 }

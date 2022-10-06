@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-var stopTestLogFlag = false
-var testLogDone chan int
+// var stopTestLogFlag = false
+// var testLogDone chan int
 var ignoreTestLog = false
 
 func createTestLog(t *testing.T, ignore bool) {

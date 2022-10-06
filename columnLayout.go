@@ -47,7 +47,7 @@ type columnLayoutData struct {
 // NewColumnLayout create new ColumnLayout object and return it
 func NewColumnLayout(session Session, params Params) ColumnLayout {
 	view := new(columnLayoutData)
-	view.Init(session)
+	view.init(session)
 	setInitParams(view, params)
 	return view
 }
@@ -57,8 +57,8 @@ func newColumnLayout(session Session) View {
 }
 
 // Init initialize fields of ColumnLayout by default values
-func (ColumnLayout *columnLayoutData) Init(session Session) {
-	ColumnLayout.viewsContainerData.Init(session)
+func (ColumnLayout *columnLayoutData) init(session Session) {
+	ColumnLayout.viewsContainerData.init(session)
 	ColumnLayout.tag = "ColumnLayout"
 	//ColumnLayout.systemClass = "ruiColumnLayout"
 }
@@ -76,7 +76,7 @@ func (columnLayout *columnLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (columnLayout *columnLayoutData) Get(tag string) interface{} {
+func (columnLayout *columnLayoutData) Get(tag string) any {
 	return columnLayout.get(columnLayout.normalizeTag(tag))
 }
 
@@ -97,11 +97,11 @@ func (columnLayout *columnLayoutData) remove(tag string) {
 	}
 }
 
-func (columnLayout *columnLayoutData) Set(tag string, value interface{}) bool {
+func (columnLayout *columnLayoutData) Set(tag string, value any) bool {
 	return columnLayout.set(columnLayout.normalizeTag(tag), value)
 }
 
-func (columnLayout *columnLayoutData) set(tag string, value interface{}) bool {
+func (columnLayout *columnLayoutData) set(tag string, value any) bool {
 	if value == nil {
 		columnLayout.remove(tag)
 		return true
@@ -137,50 +137,26 @@ func (columnLayout *columnLayoutData) set(tag string, value interface{}) bool {
 // GetColumnCount returns int value which specifies number of columns into which the content of
 // ColumnLayout is break. If the return value is 0 then the number of columns is calculated
 // based on the "column-width" property.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnCount(view View, subviewID string) int {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return 0
-	}
-	result, _ := intStyledProperty(view, ColumnCount, 0)
-	return result
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnCount(view View, subviewID ...string) int {
+	return intStyledProperty(view, subviewID, ColumnCount, 0)
 }
 
 // GetColumnWidth returns SizeUnit value which specifies the width of each column of ColumnLayout.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnWidth(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, ColumnWidth)
-	return result
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnWidth(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ColumnWidth, false)
 }
 
 // GetColumnGap returns SizeUnit property which specifies the size of the gap (gutter) between columns of ColumnLayout.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnGap(view View, subviewID string) SizeUnit {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
-	}
-	if view == nil {
-		return AutoSize()
-	}
-	result, _ := sizeStyledProperty(view, ColumnGap)
-	return result
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnGap(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, ColumnGap, false)
 }
 
-// GetColumnSeparator returns ViewBorder struct which specifies the line drawn between
-// columns in a multi-column ColumnLayout.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnSeparator(view View, subviewID string) ViewBorder {
-	if subviewID != "" {
-		view = ViewByID(view, subviewID)
+func getColumnSeparator(view View, subviewID []string) ViewBorder {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
 	}
 
 	if view != nil {
@@ -199,27 +175,34 @@ func GetColumnSeparator(view View, subviewID string) ViewBorder {
 	return ViewBorder{}
 }
 
+// GetColumnSeparator returns ViewBorder struct which specifies the line drawn between
+// columns in a multi-column ColumnLayout.
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnSeparator(view View, subviewID ...string) ViewBorder {
+	return getColumnSeparator(view, subviewID)
+}
+
 // ColumnSeparatorStyle returns int value which specifies the style of the line drawn between
 // columns in a multi-column layout.
 // Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnSeparatorStyle(view View, subviewID string) int {
-	border := GetColumnSeparator(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnSeparatorStyle(view View, subviewID ...string) int {
+	border := getColumnSeparator(view, subviewID)
 	return border.Style
 }
 
 // ColumnSeparatorWidth returns SizeUnit value which specifies the width of the line drawn between
 // columns in a multi-column layout.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnSeparatorWidth(view View, subviewID string) SizeUnit {
-	border := GetColumnSeparator(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnSeparatorWidth(view View, subviewID ...string) SizeUnit {
+	border := getColumnSeparator(view, subviewID)
 	return border.Width
 }
 
 // ColumnSeparatorColor returns Color value which specifies the color of the line drawn between
 // columns in a multi-column layout.
-// If the second argument (subviewID) is "" then a top position of the first argument (view) is returned
-func GetColumnSeparatorColor(view View, subviewID string) Color {
-	border := GetColumnSeparator(view, subviewID)
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnSeparatorColor(view View, subviewID ...string) Color {
+	border := getColumnSeparator(view, subviewID)
 	return border.Color
 }

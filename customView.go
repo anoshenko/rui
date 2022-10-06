@@ -45,26 +45,26 @@ func (customView *CustomViewData) setTag(tag string) {
 
 // Get returns a value of the property with name defined by the argument.
 // The type of return value depends on the property. If the property is not set then nil is returned.
-func (customView *CustomViewData) Get(tag string) interface{} {
+func (customView *CustomViewData) Get(tag string) any {
 	return customView.superView.Get(tag)
 }
 
-func (customView *CustomViewData) getRaw(tag string) interface{} {
+func (customView *CustomViewData) getRaw(tag string) any {
 	return customView.superView.getRaw(tag)
 }
 
-func (customView *CustomViewData) setRaw(tag string, value interface{}) {
+func (customView *CustomViewData) setRaw(tag string, value any) {
 	customView.superView.setRaw(tag, value)
 }
 
 // Set sets the value (second argument) of the property with name defined by the first argument.
 // Return "true" if the value has been set, in the opposite case "false" are returned and
 // a description of the error is written to the log
-func (customView *CustomViewData) Set(tag string, value interface{}) bool {
+func (customView *CustomViewData) Set(tag string, value any) bool {
 	return customView.superView.Set(tag, value)
 }
 
-func (customView *CustomViewData) SetAnimated(tag string, value interface{}, animation Animation) bool {
+func (customView *CustomViewData) SetAnimated(tag string, value any, animation Animation) bool {
 	return customView.superView.SetAnimated(tag, value, animation)
 }
 
@@ -85,10 +85,6 @@ func (customView *CustomViewData) AllTags() []string {
 // Clear removes all properties
 func (customView *CustomViewData) Clear() {
 	customView.superView.Clear()
-}
-
-// Init initializes fields of View by default values
-func (customView *CustomViewData) Init(session Session) {
 }
 
 func (customView *CustomViewData) cssViewStyle(buffer cssBuilder, session Session) {
@@ -264,9 +260,22 @@ func (customView *CustomViewData) setScroll(x, y, width, height float64) {
 	}
 }
 
-func (customView *CustomViewData) getTransitions() Params {
+func (customView *CustomViewData) Transition(tag string) Animation {
 	if customView.superView != nil {
-		return customView.superView.getTransitions()
+		return customView.superView.Transition(tag)
 	}
-	return Params{}
+	return nil
+}
+
+func (customView *CustomViewData) Transitions() map[string]Animation {
+	if customView.superView != nil {
+		return customView.superView.Transitions()
+	}
+	return map[string]Animation{}
+}
+
+func (customView *CustomViewData) SetTransition(tag string, animation Animation) {
+	if customView.superView != nil {
+		customView.superView.SetTransition(tag, animation)
+	}
 }

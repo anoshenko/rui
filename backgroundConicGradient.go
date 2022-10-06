@@ -12,16 +12,16 @@ type backgroundConicGradient struct {
 type BackgroundGradientAngle struct {
 	// Color - the color of the key angle. Must not be nil.
 	// Can take a value of Color type or string (color constant or textual description of the color)
-	Color interface{}
+	Color any
 	// Angle - the key angle. Optional (may be nil).
 	// Can take a value of AngleUnit type or string (angle constant or textual description of the angle)
-	Angle interface{}
+	Angle any
 }
 
 // NewBackgroundConicGradient creates the new background conic gradient
 func NewBackgroundConicGradient(params Params) BackgroundElement {
 	result := new(backgroundConicGradient)
-	result.properties = map[string]interface{}{}
+	result.properties = map[string]any{}
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
@@ -139,7 +139,7 @@ func (gradient *backgroundConicGradient) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gradient *backgroundConicGradient) Set(tag string, value interface{}) bool {
+func (gradient *backgroundConicGradient) Set(tag string, value any) bool {
 	tag = gradient.normalizeTag(tag)
 	switch tag {
 	case CenterX, CenterY, Repeating, From:
@@ -153,7 +153,7 @@ func (gradient *backgroundConicGradient) Set(tag string, value interface{}) bool
 	return false
 }
 
-func (gradient *backgroundConicGradient) stringToAngle(text string) (interface{}, bool) {
+func (gradient *backgroundConicGradient) stringToAngle(text string) (any, bool) {
 	if text == "" {
 		return nil, false
 	} else if text[0] == '@' {
@@ -216,7 +216,7 @@ func (gradient *backgroundConicGradient) parseGradientText(value string) []Backg
 	return vector
 }
 
-func (gradient *backgroundConicGradient) setGradient(value interface{}) bool {
+func (gradient *backgroundConicGradient) setGradient(value any) bool {
 	if value == nil {
 		delete(gradient.properties, Gradient)
 		return true
@@ -262,7 +262,7 @@ func (gradient *backgroundConicGradient) setGradient(value interface{}) bool {
 	return false
 }
 
-func (gradient *backgroundConicGradient) Get(tag string) interface{} {
+func (gradient *backgroundConicGradient) Get(tag string) any {
 	return gradient.backgroundElement.Get(gradient.normalizeTag(tag))
 }
 
@@ -316,9 +316,9 @@ func (gradient *backgroundConicGradient) cssStyle(session Session) string {
 			buffer.WriteRune(' ')
 		}
 		buffer.WriteString("at ")
-		buffer.WriteString(x.cssString("50%"))
+		buffer.WriteString(x.cssString("50%", session))
 		buffer.WriteString(" ")
-		buffer.WriteString(y.cssString("50%"))
+		buffer.WriteString(y.cssString("50%", session))
 		comma = true
 	}
 

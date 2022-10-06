@@ -30,7 +30,7 @@
 В функции main вызывается функция StartApp. Она создает rui приложение и запускает его основной цикл.
 Функция StartApp имеет 3 параметра:
 1) IP адрес по которому будет доступно приложение (в нашем примере это "localhost:8000")
-2) Фуекция создает структуру реализующую интерфейс SessionContent
+2) Функция создает структуру реализующую интерфейс SessionContent
 3) Дополнительные опциональные параметры (в нашем примере это заголовок и имя файла иконки)
 
 Интерфейс SessionContent объявлен как:
@@ -57,12 +57,12 @@
 SizeUnit объявлена как
 
 	type SizeUnit struct {
-		Type  SizeUnitType
-		Value float64
+		Type     SizeUnitType
+		Value    float64
+		Function SizeFunc
 	}
 
-где Type - тип размера;
-Value - размер
+где Type - тип размера; Value - размер; Function - функция (используется только если Type == SizeFunction, в остальных случаях игнорируется).
 
 Тип может принимать следующие значения:
 
@@ -79,12 +79,13 @@ Value - размер
 | 8        | SizeInMM       | поле Value определяет размер в миллиметрах.                                 |
 | 9        | SizeInCM       | поле Value определяет размер в сантиметрах.                                 |
 | 10       | SizeInFraction | поле Value определяет размер в частях. Используется только для задания размеров ячеек в GridLayout. |
+| 11       | SizeFunction   | поле Function задает функцию для вычисления размера. Значение поля Value игнорируется |
 
 Для более наглядного и простого задания переменных типа SizeUnit могут использоваться функции приведенные ниже
 
 | Функция        | Эквивалентное определение                          |
 |----------------|----------------------------------------------------|
-| rui.AutoSize() | rui.SizeUnit{ Type: rui.Auto, Value: 0 }           |
+| rui.AutoSize() | rui.SizeUnit{ Type: rui.Auto }                     |
 | rui.Px(n)      | rui.SizeUnit{ Type: rui.SizeInPixel, Value: n }    |
 | rui.Em(n)      | rui.SizeUnit{ Type: rui.SizeInEM, Value: n }       |
 | rui.Ex(n)      | rui.SizeUnit{ Type: rui.SizeInEX, Value: n }       |
@@ -96,7 +97,10 @@ Value - размер
 | rui.Cm(n)      | rui.SizeUnit{ Type: rui.SizeInCM, Value: n }       |
 | rui.Fr(n)      | rui.SizeUnit{ Type: rui.SizeInFraction, Value: n } |
 
-Переменные типа SizeUnit имеют текстовое представление (зачем оно нужно будет описано ниже). Текстовое представление состоит из числа (равному значению поля Value) и следующим за ним суффиксом определяющим тип. Исключением является значение типа Auto, которое имеет представление “auto”. Суффиксы перечислены в следующей таблице:
+Переменные типа SizeUnit имеют текстовое представление (зачем оно нужно будет описано ниже). 
+Текстовое представление состоит из числа (равному значению поля Value) и следующим за ним суффиксом определяющим тип. 
+Исключением является значение типа Auto, которое имеет представление “auto” и 
+значение типа SizeFunction, которое имеет особое представление. Суффиксы перечислены в следующей таблице:
 
 | Суффикс | Тип            |
 |:-------:|----------------|
@@ -118,6 +122,52 @@ Value - размер
 	func StringToSizeUnit(value string) (SizeUnit, bool)
 
 Получить текстовое представление структуры можно свойством String()
+
+#### SizeFunc
+
+Интерфейс SizeFunc используется для задания функции вычисляющей SizeUnit. Рассмотрим функции на примере функции min.
+
+Функция min находит минимальное значение среди заданных аргументов. Данная функция задается с помощью функции MinSize, объявленной как:
+
+	func MinSize(arg0, arg1 any, args ...any) SizeFunc
+
+Функция имеет 2 и более аргументов, каждый из которых может быть или SizeUnit или SizeFunc или string являющееся константой или
+текстовым представлением SizeUnit или SizeFunc.
+
+Примеры
+
+	rui.MizSize(rui.Percent(50), rui.Px(250))
+	rui.MizSize("50%", rui.Px(250), "40em")
+	rui.MizSize(rui.Percent(50), "@a1")
+
+Функция min имеет следующее текстовое представление
+
+	"min(<arg1>, <arg2>, ...)"
+
+где arg1, arg2, ... должны быть текстовым представлением SizeUnit или SizeFunc или константой. Например
+
+	"min(50%, 250px)"
+	"min(75%, @a1)"
+
+Интерфейс SizeFunc реализует интерфейс fmt.Stringer. 
+Функция String() этого интерфейса возвращает текстовое представление SizeFunc.
+
+Помимо min имеются следующие функции
+
+| Текстовое представление      | Функция для создания                 | Описание
+|------------------------------|--------------------------------------|-------------------------------------------------|
+| "min(<arg1>, <arg2>, ...)"   | MaxSize(arg0, arg1 any, args ...any) | находит минимальное значение среди аргументов   |
+| "sum(<arg1>, <arg2>, ...)"   | SumSize(arg0, arg1 any, args ...any) | находит сумму значений аргументов               |
+| "sub(<arg1>, <arg2>)"        | SubSize(arg0, arg1 any)              | находит разность значений аргументов            |
+| "mul(<arg1>, <arg2>)"        | MulSize(arg0, arg1 any)              | находит результат умножения значений аргументов |
+| "div(<arg1>, <arg2>)"        | DivSize(arg0, arg1 any)              | находит результат деления значений аргументов   |
+| "clamp(<min>, <val>, <max>)" | ClampSize(min, val, max any)         | ограничивает значение заданным диапазоном       |
+
+Дополнительные пояснения к функции "clamp(<min>, <val>, <max>)": результат вычисляется следующим образом:
+
+* if min ≤ val ≤ max then val;
+* if val < min then min;
+* if max < val then max;
 
 ### Color
 
@@ -358,8 +408,8 @@ View имеет ряд свойств, таких как высота, шири�
 (View реализует данный интерфейс):
 
 	type Properties interface {
-		Get(tag string) interface{}
-		Set(tag string, value interface{}) bool
+		Get(tag string) any
+		Set(tag string, value any) bool
 		Remove(tag string)
 		Clear()
 		AllTags() []string
@@ -374,8 +424,8 @@ View имеет ряд свойств, таких как высота, шири�
 
 Для упрощения установки/чтения свойств имеются также две глобальные функции Get и Set:
 
-	func Get(rootView View, viewID, tag string) interface{}
-	func Set(rootView View, viewID, tag string, value interface{}) bool
+	func Get(rootView View, viewID, tag string) any
+	func Set(rootView View, viewID, tag string, value any) bool
 
 Данные функции возвращают/устанавливают значение дочернего View
 
@@ -439,7 +489,7 @@ View имеет ряд свойств, таких как высота, шири�
 * функция func([<параметры>])
 * массив функций []func(< View >[, <параметры>])
 * массив функций []func([<параметры>])
-* []interface{} содержащий только func(< View >[, <параметры>]) и func([<параметры>])
+* []any содержащий только func(< View >[, <параметры>]) и func([<параметры>])
 
 После присваивания свойству все эти типы преобразуются в массив функций []func(<View>, [<параметры>]).
 Соответственно функция Get всегда возвращает массив функций []func(<View>, [<параметры>]).
@@ -451,7 +501,7 @@ View имеет ряд свойств, таких как высота, шири�
 * func(newText string)
 * []func(editor EditView, newText string)
 * []func(newText string)
-* []interface{} содержащий только func(editor EditView, newText string) и func(newText string)
+* []any содержащий только func(editor EditView, newText string) и func(newText string)
 
 А свойство "edit-text-changed" всегда хранит и возвращает []func(EditView, string).
 
@@ -538,17 +588,17 @@ SizeUnit или имя константы (о константах ниже):
 
 Это довольно громоздко поэтому для каждого свойства существует одноимённая глобальная функция с префиксом Get,
 которая выполняет данное приведение типа, получает значение константы, если необходимо, и
-возвращает его. Все функции данного типа имеют два аргумента: View и subviewID string.
-Первый аргумент это корневой View, второй - ID дочернего View. Если ID дочернего View передать как "",
+возвращает его. Все функции данного типа имеют два аргумента: View и subviewID ...string.
+Первый аргумент это корневой View, второй - ID дочернего View. Если ID дочернего View не задать или передать как "",
 то возвращается значение корневого View.
 Для свойств "width", "height", "min-width", "min-height", "max-width", "max-height" это функции:
 
-	func GetWidth(view View, subviewID string) SizeUnit
-	func GetHeight(view View, subviewID string) SizeUnit
-	func GetMinWidth(view View, subviewID string) SizeUnit
-	func GetMinHeight(view View, subviewID string) SizeUnit
-	func GetMaxWidth(view View, subviewID string) SizeUnit
-	func GetMaxHeight(view View, subviewID string) SizeUnit
+	func GetWidth(view View, subviewID ...string) SizeUnit
+	func GetHeight(view View, subviewID ...string) SizeUnit
+	func GetMinWidth(view View, subviewID ...string) SizeUnit
+	func GetMinHeight(view View, subviewID ...string) SizeUnit
+	func GetMaxWidth(view View, subviewID ...string) SizeUnit
+	func GetMaxHeight(view View, subviewID ...string) SizeUnit
 
 ### Свойство "resize"
 
@@ -567,7 +617,7 @@ SizeUnit или имя константы (о константах ниже):
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetResize(view View, subviewID string) int
+	func GetResize(view View, subviewID ...string) int
 
 ### Свойства "margin" и "padding"
 
@@ -608,8 +658,8 @@ BoundsProperty с помощью функции "Bounds(session Session) Bounds"
 
 Для этого используется также могут использоваться глобальные функции:
 
-	func GetMargin(view View, subviewID string) Bounds
-	func GetPadding(view View, subviewID string) Bounds
+	func GetMargin(view View, subviewID ...string) Bounds
+	func GetPadding(view View, subviewID ...string) Bounds
 
 Текстовое представление BoundsProperty имеет следующий вид:
 
@@ -743,7 +793,7 @@ BoundsProperty с помощью функции "Bounds(session Session) Bounds"
 BorderProperty, а не структура ViewBorders. Получить структуру ViewBorders без дополнительных преобразований можно
 с помощью глобальной функции
 
-	func GetBorder(view View, subviewID string) ViewBorders
+	func GetBorder(view View, subviewID ...string) ViewBorders
 
 Кроме вспомогательных свойств "style", "width" и "color" есть еще 4: "left", "right", "top" и "bottom".
 В качестве значения эти свойства могут принимать только структуру ViewBorder и позволяю установить все
@@ -897,7 +947,7 @@ RadiusProperty имеет текстовое представление след
 RadiusProperty, а не структура BoxRadius. Получить структуру BoxRadius без дополнительных преобразований можно
 с помощью глобальной функции
 
-	func GetRadius(view View, subviewID string) BoxRadius
+	func GetRadius(view View, subviewID ...string) BoxRadius
 
 Вы также можете устанавливать отдельные радиусы использую функцию Set интерфейса View.
 Для этого используются следующие свойства
@@ -973,7 +1023,7 @@ RadiusProperty, а не структура BoxRadius. Получить стру�
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetViewShadows(view View, subviewID string) []ViewShadow
+	func GetViewShadows(view View, subviewID ...string) []ViewShadow
 
 Если тень не задана, то данная функция вернет пустой массив
 
@@ -1037,7 +1087,7 @@ RadiusProperty, а не структура BoxRadius. Получить стру�
 Pos определяет положение точки относительно начала линии градиента. Массив должен иметь не менее 2 точек.
 В качестве значения градиента можно также передать массив Color. В этом случае точки равномерно
 распределяются вдоль линии градиента.
-Также  в качестве массива ключевых точек можно использовать массив типа []interface{}.
+Также  в качестве массива ключевых точек можно использовать массив типа []any.
 Элементами этого массива могут быть BackgroundGradientPoint, Color, текстовое представление BackgroundGradientPoint
 или Color и имя константы
 
@@ -1105,8 +1155,8 @@ Pos определяет положение точки относительно 
 описывается структурой BackgroundGradientAngle:
 
 	type BackgroundGradientAngle struct {
-		Color interface{}
-		Angle interface{}
+		Color any
+		Angle any
 	}
 
 где Color задает цвет ключевого угла и может принимать значение типа Color или string (цветовая константа 
@@ -1216,7 +1266,7 @@ radius необходимо передать nil
 
 Многоугольная область обрезки. Создается с помощью функций:
 
-	func PolygonClip(points []interface{}) ClipShape
+	func PolygonClip(points []any) ClipShape
 	func PolygonPointsClip(points []SizeUnit) ClipShape
 
 в качестве аргумента передается массив угловых точек многоугольника в следующем порядке: x1, y1, x2, y2, …
@@ -1234,7 +1284,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetOpacity(view View, subviewID string) float64
+	func GetOpacity(view View, subviewID ...string) float64
 
 ### Свойство "z-index"
 
@@ -1244,7 +1294,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetZIndex(view View, subviewID string) int
+	func GetZIndex(view View, subviewID ...string) int
 
 ### Свойство "visibility"
 
@@ -1258,7 +1308,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetVisibility(view View, subviewID string) int
+	func GetVisibility(view View, subviewID ...string) int
 
 ### Свойства "filter" и "backdrop-filter"
 
@@ -1287,8 +1337,8 @@ radius необходимо передать nil
 
 Получить значение текущего фильтра можно с помощью функций
 
-	func GetFilter(view View, subviewID string) ViewFilter
-	func GetBackdropFilter(view View, subviewID string) ViewFilter
+	func GetFilter(view View, subviewID ...string) ViewFilter
+	func GetBackdropFilter(view View, subviewID ...string) ViewFilter
 
 ### Свойство "semantics"
 
@@ -1335,7 +1385,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetFontName(view View, subviewID string) string
+	func GetFontName(view View, subviewID ...string) string
 
 #### Свойство "text-color"
 
@@ -1343,7 +1393,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextColor(view View, subviewID string) Color
+	func GetTextColor(view View, subviewID ...string) Color
 
 #### Свойство "text-size"
 
@@ -1351,7 +1401,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextSize(view View, subviewID string) SizeUnit
+	func GetTextSize(view View, subviewID ...string) SizeUnit
 
 #### Свойство "italic"
 
@@ -1359,7 +1409,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func IsItalic(view View, subviewID string) bool
+	func IsItalic(view View, subviewID ...string) bool
 	
 #### Свойство "small-caps"
 
@@ -1367,7 +1417,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func IsSmallCaps(view View, subviewID string) bool
+	func IsSmallCaps(view View, subviewID ...string) bool
 
 #### Свойство "white-space"
 
@@ -1408,6 +1458,11 @@ radius необходимо передать nil
 | WhiteSpacePreLine     | Сохраняются как в источнике | Объединяются в один пробел  | Переносится       | Удаляются                   |
 | WhiteSpaceBreakSpaces | Сохраняются как в источнике | Сохраняются как в источнике | Переносится       | Переносятся                 |
 
+#### Свойство "tab-size"
+
+Свойство "tab-size" (константа TabSize) типа int задает размер символа табуляции (U+0009) в пробелах.
+Значение свойства "tab-size" должно быть больше 0.
+
 #### Свойство "word-break"
 
 Свойство "word-break" (константа WordBreak) типа int определяет, где будет установлен перевод
@@ -1437,9 +1492,9 @@ radius необходимо передать nil
 
 Получить значение данных свойств можно с помощью функций
 
-	func IsStrikethrough(view View, subviewID string) bool
-	func IsOverline(view View, subviewID string) bool
-	func IsUnderline(view View, subviewID string) bool
+	func IsStrikethrough(view View, subviewID ...string) bool
+	func IsOverline(view View, subviewID ...string) bool
+	func IsUnderline(view View, subviewID ...string) bool
 
 #### Свойство "text-line-thickness"
 
@@ -1448,7 +1503,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	GetTextLineThickness(view View, subviewID string) SizeUnit
+	GetTextLineThickness(view View, subviewID ...string) SizeUnit
 
 #### Свойство "text-line-style"
 
@@ -1468,7 +1523,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextLineStyle(view View, subviewID string) int
+	func GetTextLineStyle(view View, subviewID ...string) int
 
 #### Свойство "text-line-color"
 
@@ -1478,7 +1533,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextLineColor(view View, subviewID string) Color
+	func GetTextLineColor(view View, subviewID ...string) Color
 
 #### Свойство "text-weight"
 
@@ -1500,7 +1555,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextWeight(view View, subviewID string) int
+	func GetTextWeight(view View, subviewID ...string) int
 
 #### Свойство "text-shadow"
 
@@ -1527,7 +1582,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextShadows(view View, subviewID string) []ViewShadow
+	func GetTextShadows(view View, subviewID ...string) []ViewShadow
 
 Если тень не задана, то данная функция вернет пустой массив
 
@@ -1544,7 +1599,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextAlign(view View, subviewID string) int
+	func GetTextAlign(view View, subviewID ...string) int
 
 #### Свойство "text-indent"
 
@@ -1552,7 +1607,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextIndent(view View, subviewID string) SizeUnit
+	func GetTextIndent(view View, subviewID ...string) SizeUnit
 	
 #### Свойство "letter-spacing"
 
@@ -1562,7 +1617,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetLetterSpacing(view View, subviewID string) SizeUnit
+	func GetLetterSpacing(view View, subviewID ...string) SizeUnit
 
 #### Свойство "word-spacing"
 
@@ -1572,7 +1627,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetWordSpacing(view View, subviewID string) SizeUnit
+	func GetWordSpacing(view View, subviewID ...string) SizeUnit
 
 #### Свойство "line-height"
 
@@ -1580,7 +1635,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetLineHeight(view View, subviewID string) SizeUnit
+	func GetLineHeight(view View, subviewID ...string) SizeUnit
 
 #### Свойство "text-transform"
 
@@ -1595,7 +1650,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextTransform(view View, subviewID string) int
+	func GetTextTransform(view View, subviewID ...string) int
 
 #### Свойство "text-direction"
 
@@ -1609,7 +1664,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTextDirection(view View, subviewID string) int
+	func GetTextDirection(view View, subviewID ...string) int
 
 #### Свойство "writing-mode"
 
@@ -1626,7 +1681,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetWritingMode(view View, subviewID string) int
+	func GetWritingMode(view View, subviewID ...string) int
 
 #### Свойство "vertical-text-orientation"
 
@@ -1641,7 +1696,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetVerticalTextOrientation(view View, subviewID string) int
+	func GetVerticalTextOrientation(view View, subviewID ...string) int
 
 #### Свойство "user-select"
 
@@ -1657,7 +1712,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func IsUserSelect(view View, subviewID string) bool
+	func IsUserSelect(view View, subviewID ...string) bool
 
 ### Свойства трансформации
 
@@ -1676,7 +1731,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetPerspective(view View, subviewID string) SizeUnit
+	func GetPerspective(view View, subviewID ...string) SizeUnit
 
 #### Свойства "perspective-origin-x" и "perspective-origin-y"
 
@@ -1687,7 +1742,7 @@ radius необходимо передать nil
 
 Получить значение данных свойств можно с помощью функции
 
-	func GetPerspectiveOrigin(view View, subviewID string) (SizeUnit, SizeUnit)
+	func GetPerspectiveOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit)
 
 #### Свойство "backface-visibility"
 
@@ -1700,7 +1755,7 @@ radius необходимо передать nil
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetBackfaceVisible(view View, subviewID string) bool
+	func GetBackfaceVisible(view View, subviewID ...string) bool
 
 #### Свойства "origin-x", "origin-y" и "origin-z"
 
@@ -1713,7 +1768,7 @@ radius необходимо передать nil
 
 Получить значение данных свойств можно с помощью функции
 
-	func GetOrigin(view View, subviewID string) (SizeUnit, SizeUnit, SizeUnit)
+	func GetOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit)
 
 #### Свойства "translate-x", "translate-y" и "translate-z"
 
@@ -1724,7 +1779,7 @@ radius необходимо передать nil
 
 Получить значение данных свойств можно с помощью функции
 
-	func GetTranslate(view View, subviewID string) (SizeUnit, SizeUnit, SizeUnit)
+	func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit)
 
 #### Свойства "scale-x", "scale-y" и "scale-z"
 
@@ -1737,7 +1792,7 @@ radius необходимо передать nil
 
 Получить значение данных свойств можно с помощью функции
 
-	func GetScale(view View, subviewID string) (float64, float64, float64)
+	func GetScale(view View, subviewID ...string) (float64, float64, float64)
 
 #### Свойства "rotate"
 
@@ -1754,7 +1809,7 @@ radius необходимо передать nil
 
 Получить значение данных свойств, а также свойства "rotate" можно с помощью функции
 
-	func GetRotate(view View, subviewID string) (float64, float64, float64, AngleUnit)
+	func GetRotate(view View, subviewID ...string) (float64, float64, float64, AngleUnit)
 
 #### Свойства "skew-x" и "skew-y"
 
@@ -1764,7 +1819,7 @@ radius необходимо передать nil
 
 Получить значение данных свойств можно с помощью функции
 
-	func GetSkew(view View, subviewID string) (AngleUnit, AngleUnit)
+	func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit)
 
 ### Пользовательские данные
 
@@ -1804,8 +1859,8 @@ radius необходимо передать nil
 
 Получить списки слушателей событий клавиатуры можно с помощью функций:
 
-	func GetKeyDownListeners(view View, subviewID string) []func(View, KeyEvent)
-	func GetKeyUpListeners(view View, subviewID string) []func(View, KeyEvent)
+	func GetKeyDownListeners(view View, subviewID ...string) []func(View, KeyEvent)
+	func GetKeyUpListeners(view View, subviewID ...string) []func(View, KeyEvent)
 
 ### События фокуса
 
@@ -1826,8 +1881,8 @@ radius необходимо передать nil
 
 Получить списки слушателей событий фокуса можно с помощью функций:
 
-	func GetFocusListeners(view View, subviewID string) []func(View)
-	func GetLostFocusListeners(view View, subviewID string) []func(View)
+	func GetFocusListeners(view View, subviewID ...string) []func(View)
+	func GetLostFocusListeners(view View, subviewID ...string) []func(View)
 
 ### События мыши
 
@@ -1895,14 +1950,14 @@ radius необходимо передать nil
 
 Получить списки слушателей событий мыши можно с помощью функций:
 
-	func GetMouseDownListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseUpListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseMoveListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseOverListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetMouseOutListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetClickListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetDoubleClickListeners(view View, subviewID string) []func(View, MouseEvent)
-	func GetContextMenuListeners(view View, subviewID string) []func(View, MouseEvent)
+	func GetMouseDownListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseUpListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseMoveListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseOverListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetMouseOutListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetClickListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetDoubleClickListeners(view View, subviewID ...string) []func(View, MouseEvent)
+	func GetContextMenuListeners(view View, subviewID ...string) []func(View, MouseEvent)
 
 ### События указателя
 
@@ -1949,12 +2004,12 @@ radius необходимо передать nil
 
 Получить списки слушателей событий указателя можно с помощью функций:
 
-	func GetPointerDownListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerUpListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerMoveListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerCancelListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerOverListeners(view View, subviewID string) []func(View, PointerEvent)
-	func GetPointerOutListeners(view View, subviewID string) []func(View, PointerEvent)
+	func GetPointerDownListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerUpListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerMoveListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerCancelListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerOverListeners(view View, subviewID ...string) []func(View, PointerEvent)
+	func GetPointerOutListeners(view View, subviewID ...string) []func(View, PointerEvent)
 
 ### Touch события
 
@@ -2007,10 +2062,10 @@ radius необходимо передать nil
 
 Получить списки слушателей событий касания можно с помощью функций:
 
-	func GetTouchStartListeners(view View, subviewID string) []func(View, TouchEvent)
-	func GetTouchEndListeners(view View, subviewID string) []func(View, TouchEvent)
-	func GetTouchMoveListeners(view View, subviewID string) []func(View, TouchEvent)
-	func GetTouchCancelListeners(view View, subviewID string) []func(View, TouchEvent)
+	func GetTouchStartListeners(view View, subviewID ...string) []func(View, TouchEvent)
+	func GetTouchEndListeners(view View, subviewID ...string) []func(View, TouchEvent)
+	func GetTouchMoveListeners(view View, subviewID ...string) []func(View, TouchEvent)
+	func GetTouchCancelListeners(view View, subviewID ...string) []func(View, TouchEvent)
 
 ### Событие "resize-event"
 
@@ -2039,7 +2094,7 @@ radius необходимо передать nil
 
 Получить список слушателей данного события можно с помощью функции:
 
-	func GetResizeListeners(view View, subviewID string) []func(View, Frame)
+	func GetResizeListeners(view View, subviewID ...string) []func(View, Frame)
 
 Текущие положение и размеры видимой части View можно получить с помощью функции интерфейса View:
 
@@ -2047,7 +2102,7 @@ radius необходимо передать nil
 
 или глобальной функции
 
-	func GetViewFrame(view View, subviewID string) Frame
+	func GetViewFrame(view View, subviewID ...string) Frame
 
 ### Событие прокрутки
 
@@ -2078,13 +2133,13 @@ radius необходимо передать nil
 
 или глобальной функции
 
-	func GetViewScroll(view View, subviewID string) Frame
+	func GetViewScroll(view View, subviewID ...string) Frame
 
 Для программной прокрутки могут использоваться следующие глобальные функции
 
 	func ScrollViewTo(view View, subviewID string, x, y float64)
-	func ScrollViewToStart(view View, subviewID string)
-	func ScrollViewToEnd(view View, subviewID string)
+	func ScrollViewToStart(view View, subviewID ...string)
+	func ScrollViewToEnd(view View, subviewID ...string)
 
 которые прокручивают view, соответственно, в заданную позицию, начало и конец
 
@@ -2114,7 +2169,7 @@ radius необходимо передать nil
 
 * []string - каждый элемент массива преобразуется во View как описано в предыдущем пункте;
 
-* []interface{} - данный массив должен содержать только View и string. Каждый string-элемент
+* []any - данный массив должен содержать только View и string. Каждый string-элемент
 преобразуется во View, как описано выше. Если массив будет содержать недопустимае значения,
 то свойство "content" не будет установлено, а функция Set вернет false  и в лог запишется сообщение об ошибке.
 
@@ -2199,6 +2254,11 @@ ListLayout является контейнером, реализующим ин�
 | 1        | RightAlign   | "right"   | Выравнивание по правому краю |
 | 2        | CenterAlign  | "center"  | Выравнивание по центру       |
 | 3        | StretchAlign | "stretch" | Выравнивание по ширине       |
+
+### "list-row-gap" и "list-column-gap"
+
+Свойства "list-row-gap" и "list-column-gap" (константы ListRowGap и ListColumnGap) типа SizeUnit позволяют
+установить соответственно расстояния между строками и столбцами контейнера. Значение по умолчанию 0.
 
 ## GridLayout
 
@@ -2285,7 +2345,7 @@ Cвойство "grid-auto-flow" может принимать следующи�
 
 * []string. Каждый элемент должен быть текстовым представлением SizeUnit (или SizeUnit константой)
 
-* []interface{}. Каждый элемент должен или иметь тип SizeUnit или быть текстовым
+* []any. Каждый элемент должен или иметь тип SizeUnit или быть текстовым
 представлением SizeUnit (или SizeUnit константой)
 
 Если количество элементов в свойствах "cell-width" и "cell-height" меньше, чем используемое число
@@ -2353,7 +2413,7 @@ ColumnLayout является контейнером, реализующим и�
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetColumnCount(view View, subviewID string) int
+	func GetColumnCount(view View, subviewID ...string) int
 
 ### Свойство "column-width"
 
@@ -2365,7 +2425,7 @@ ColumnLayout является контейнером, реализующим и�
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetColumnWidth(view View, subviewID string) SizeUnit
+	func GetColumnWidth(view View, subviewID ...string) SizeUnit
 
 ### Свойство "column-gap"
 
@@ -2373,7 +2433,7 @@ ColumnLayout является контейнером, реализующим и�
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetColumnGap(view View, subviewID string) SizeUnit
+	func GetColumnGap(view View, subviewID ...string) SizeUnit
 
 ### Свойство "column-separator"
 
@@ -2421,7 +2481,7 @@ ViewBorder описана как
 а не структура ViewBorder. Получить структуру ViewBorders без дополнительных преобразований можно
 с помощью глобальной функции
 
-	func GetColumnSeparator(view View, subviewID string) ViewBorder
+	func GetColumnSeparator(view View, subviewID ...string) ViewBorder
 
 Вы также можете устанавливать отдельные атрибуты линии использую функцию Set интерфейса View.
 Для этого используются следующие свойства
@@ -2459,7 +2519,7 @@ ViewBorder описана как
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetAvoidBreak(view View, subviewID string) bool
+	func GetAvoidBreak(view View, subviewID ...string) bool
 
 ## StackLayout
 
@@ -2505,7 +2565,7 @@ StackLayout является контейнером, реализующим ин
 
 	func peek(layout rui.StackLayout) {
 		views := layout.Views()
-		if index := rui.GetCurrent(layout, ""); index >= 0 && index < len(views) {
+		if index := rui.GetCurrent(layout); index >= 0 && index < len(views) {
 			return views[index]
 		} 
 		return nil
@@ -2574,7 +2634,7 @@ Cвойства "tab-close-button" может быть задано как дл�
 Для программного переключания вкладок присвойте данному свойству значение индекса новой текущего View.
 Прочитать значение свойства "current" можно с помощью функции
 
-	func GetCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID ...string) int
 
 Также свойство "current" может быть использовано для отслеживания изменения текущего View:
 
@@ -2650,11 +2710,11 @@ View, "false" - скрывает.
 
 Получить значение свойства "expanded" можно с помощью функции
 
-	func IsDetailsExpanded(view View, subviewID string) bool
+	func IsDetailsExpanded(view View, subviewID ...string) bool
 
 а значение свойства "summary" можно получить с помощью функции
 
-	func GetDetailsSummary(view View, subviewID string) View
+	func GetDetailsSummary(view View, subviewID ...string) View
 
 ## Resizable
 
@@ -2698,7 +2758,7 @@ AllSides определено как
 Выводимый текст задается string свойством "text" (константа Text).
 Помимо метода Get значение свойства "text" может быть получено с помощью функции
 
-	func GetText(view View, subviewID string) string
+	func GetText(view View, subviewID ...string) string
 
 TextView наследует от View все свойства параметров текста ("font-name", "text-size", "text-color" и т.д.).
 Кроме них добавляется еще один "text-overflow" (константа TextOverflow). Он определяет как обрезается
@@ -2781,11 +2841,11 @@ NaturalSize() возвращает исходную ширину и высоту
 
 Для получения значений свойств ImageView могут использоваться следующие функции:
 
-	func GetImageViewSource(view View, subviewID string) string
-	func GetImageViewAltText(view View, subviewID string) string
-	func GetImageViewFit(view View, subviewID string) int
-	func GetImageViewVerticalAlign(view View, subviewID string) int
-	func GetImageViewHorizontalAlign(view View, subviewID string) int
+	func GetImageViewSource(view View, subviewID ...string) string
+	func GetImageViewAltText(view View, subviewID ...string) string
+	func GetImageViewFit(view View, subviewID ...string) int
+	func GetImageViewVerticalAlign(view View, subviewID ...string) int
+	func GetImageViewHorizontalAlign(view View, subviewID ...string) int
 
 ## EditView
 
@@ -2841,15 +2901,15 @@ Cвойство "caret-color" может быть задано не только
 
 Для получения значений свойств EditView могут использоваться следующие функции:
 
-	func GetText(view View, subviewID string) string
-	func GetHint(view View, subviewID string) string
-	func GetMaxLength(view View, subviewID string) int
-	func GetEditViewType(view View, subviewID string) int
-	func GetEditViewPattern(view View, subviewID string) string
-	func IsReadOnly(view View, subviewID string) bool
-	func IsEditViewWrap(view View, subviewID string) bool
-	func IsSpellcheck(view View, subviewID string) bool
-	func GetCaretColor(view View, subviewID string) Color
+	func GetText(view View, subviewID ...string) string
+	func GetHint(view View, subviewID ...string) string
+	func GetMaxLength(view View, subviewID ...string) int
+	func GetEditViewType(view View, subviewID ...string) int
+	func GetEditViewPattern(view View, subviewID ...string) string
+	func IsReadOnly(view View, subviewID ...string) bool
+	func IsEditViewWrap(view View, subviewID ...string) bool
+	func IsSpellcheck(view View, subviewID ...string) bool
+	func GetCaretColor(view View, subviewID ...string) Color
 
 Для отслеживания изменения текста используется событие "edit-text-changed" (константа
 EditTextChangedEvent). Основной слушатель события имеет следующий формат:
@@ -2860,7 +2920,7 @@ EditTextChangedEvent). Основной слушатель события име
 
 Получить текущий список слушателей изменения текста можно с помощью функции
 
-	func GetTextChangedListeners(view View, subviewID string) []func(EditView, string)
+	func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string)
 
 ## NumberPicker
 
@@ -2893,7 +2953,7 @@ NumberPicker может работать в двух режимах: редак�
 Все эти типы приводятся к float64. Соответственно функция Get всегда возвращает float64 значение.
 Прочитано значение свойства "number-picker-value" может быть также с помощью функции:
 
-	func GetNumberPickerValue(view View, subviewID string) float64
+	func GetNumberPickerValue(view View, subviewID ...string) float64
 
 На вводимые значения могут быть наложены ограничения. Для этого используются следующие свойства:
 
@@ -2911,8 +2971,8 @@ NumberPicker может работать в двух режимах: редак�
 
 Прочитать значения данных свойств можно с помощью функций:
 
-	func GetNumberPickerMinMax(view View, subviewID string) (float64, float64)
-	func GetNumberPickerStep(view View, subviewID string) float64
+	func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64)
+	func GetNumberPickerStep(view View, subviewID ...string) float64
 
 Для отслеживания изменения вводимого значения используется событие "number-changed" (константа
 NumberChangedEvent).  Основной слушатель события имеет следующий формат:
@@ -2923,7 +2983,7 @@ NumberChangedEvent).  Основной слушатель события име�
 
 Получить текущий список слушателей изменения значения можно с помощью функции
 
-	func GetNumberChangedListeners(view View, subviewID string) []func(NumberPicker, float64)
+	func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64)
 
 ## DatePicker
 
@@ -2944,7 +3004,7 @@ NumberChangedEvent).  Основной слушатель события име�
 Текст  преобразуется в time.Time. Соответственно функция Get всегда возвращает time.Time значение.
 Прочитано значение свойства "date-picker-value" может быть также с помощью функции:
 
-	func GetDatePickerValue(view View, subviewID string) time.Time
+	func GetDatePickerValue(view View, subviewID ...string) time.Time
 
 На вводимые даты могут быть наложены ограничения. Для этого используются следующие свойства:
 
@@ -2956,9 +3016,9 @@ NumberChangedEvent).  Основной слушатель события име�
 
 Прочитать значения данных свойств можно с помощью функций:
 
-	func GetDatePickerMin(view View, subviewID string) (time.Time, bool)
-	func GetDatePickerMax(view View, subviewID string) (time.Time, bool)
-	func GetDatePickerStep(view View, subviewID string) int
+	func GetDatePickerMin(view View, subviewID ...string) (time.Time, bool)
+	func GetDatePickerMax(view View, subviewID ...string) (time.Time, bool)
+	func GetDatePickerStep(view View, subviewID ...string) int
 
 Для отслеживания изменения вводимого значения используется событие "date-changed" (константа
 DateChangedEvent).  Основной слушатель события имеет следующий формат:
@@ -2969,7 +3029,7 @@ DateChangedEvent).  Основной слушатель события имее�
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetDateChangedListeners(view View, subviewID string) []func(DatePicker, time.Time)
+	func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time)
 
 ## TimePicker
 
@@ -2990,7 +3050,7 @@ DateChangedEvent).  Основной слушатель события имее�
 Текст преобразуется в time.Time. Соответственно функция Get всегда возвращает time.Time значение.
 Прочитано значение свойства "time-picker-value" может быть также с помощью функции:
 
-	func GetTimePickerValue(view View, subviewID string) time.Time
+	func GetTimePickerValue(view View, subviewID ...string) time.Time
 
 На вводимое время могут быть наложены ограничения. Для этого используются следующие свойства:
 
@@ -3002,9 +3062,9 @@ DateChangedEvent).  Основной слушатель события имее�
 
 Прочитать значения данных свойств можно с помощью функций:
 
-	func GetTimePickerMin(view View, subviewID string) (time.Time, bool)
-	func GetTimePickerMax(view View, subviewID string) (time.Time, bool)
-	func GetTimePickerStep(view View, subviewID string) int
+	func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool)
+	func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool)
+	func GetTimePickerStep(view View, subviewID ...string) int
 
 Для отслеживания изменения вводимого значения используется событие "time-changed" (константа
 TimeChangedEvent).  Основной слушатель события имеет следующий формат:
@@ -3015,7 +3075,7 @@ TimeChangedEvent).  Основной слушатель события имее�
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetTimeChangedListeners(view View, subviewID string) []func(TimePicker, time.Time)
+	func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time)
 
 ## ColorPicker
 
@@ -3034,7 +3094,7 @@ TimeChangedEvent).  Основной слушатель события имее�
 
 Прочитано значение свойства "color-picker-value" может быть также с помощью функции:
 
-	func GetColorPickerValue(view View, subviewID string) Color
+	func GetColorPickerValue(view View, subviewID ...string) Color
 
 Для отслеживания изменения выбранного цвета используется событие "color-changed" (константа
 ColorChangedEvent).  Основной слушатель события имеет следующий формат:
@@ -3045,7 +3105,7 @@ ColorChangedEvent).  Основной слушатель события имее
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetColorChangedListeners(view View, subviewID string) []func(ColorPicker, Color)
+	func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color)
 
 ## FilePicker
 
@@ -3074,7 +3134,7 @@ ColorChangedEvent).  Основной слушатель события имее
 
 а также соответствующие им глобальные функции
 
-	func GetFilePickerFiles(view View, subviewID string) []FileInfo
+	func GetFilePickerFiles(view View, subviewID ...string) []FileInfo
 	func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(FileInfo, []byte))
 
 Функции Files/GetFilePickerFiles возвращают список выбранных файлов в виде среза структур FileInfo. Структура FileInfo объявлена как
@@ -3126,7 +3186,7 @@ FileInfo содержит только информацию о файле, но 
 
 Получить текущий список слушателей изменения списка файлов можно с помощью функции
 
-	func GetFileSelectedListeners(view View, subviewID string) []func(FilePicker, []FileInfo)
+	func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo)
 
 ## DropDownList
 
@@ -3141,13 +3201,13 @@ FileInfo содержит только информацию о файле, но 
 
 * []string
 * []fmt.Stringer
-* []interface{} содержащий в качестве элементов только: string, fmt.Stringer, bool, rune,
+* []any содержащий в качестве элементов только: string, fmt.Stringer, bool, rune,
 float32, float64, int, int8…int64, uint, uint8…uint64.
 
 Все эти типы данных преопразуются в []string и присваиваются свойству "items".
 Прочитать значение свойства "items" можно с помощью функции
 
-	func GetDropDownItems(view View, subviewID string) []string
+	func GetDropDownItems(view View, subviewID ...string) []string
 
 Можно запретить выбор отдельных пунктов. Для этого используется свойство "disabled-items" (константа DisabledItems).
 Данному свойству присваивается массив индексов запрещенных пунктов. Индекс может задаваться или числом или в виде текста
@@ -3157,17 +3217,17 @@ float32, float64, int, int8…int64, uint, uint8…uint64.
 * int
 * []string
 * string может содержать несколько индексов разделенных запятыми
-* []interface{} содержащий в качестве элементов только: string, int, int8…int64, uint, uint8…uint64.
+* []any содержащий в качестве элементов только: string, int, int8…int64, uint, uint8…uint64.
 
-Все эти типы данных преопразуются в []interface{} и присваиваются свойству "disabled-items".
+Все эти типы данных преопразуются в []any и присваиваются свойству "disabled-items".
 Прочитать значение свойства "disabled-items" можно с помощью функции
 
-	func GetDropDownDisabledItems(view View, subviewID string) []int
+	func GetDropDownDisabledItems(view View, subviewID ...string) []int
 
 Выбранное значение определяется int свойством "current" (константа Current). Значение по умолчанию 0.
 Прочитать значение данного свойства можно с помощью функции
 
-	func GetCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID ...string) int
 
 Для отслеживания изменения свойства "current" используется событие "drop-down-event" (константа
 DropDownEvent). Основной слушатель события имеет следующий формат:
@@ -3178,7 +3238,7 @@ DropDownEvent). Основной слушатель события имеет с
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetDropDownListeners(view View, subviewID string) []func(DropDownList, int)
+	func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int)
 
 ## ProgressBar
 
@@ -3199,8 +3259,8 @@ int8…int64, uint, uint8…uint64
 
 Прочитать значение данных свойств можно с помощью функций
 
-	func GetProgressBarMax(view View, subviewID string) float64
-	func GetProgressBarValue(view View, subviewID string) float64
+	func GetProgressBarMax(view View, subviewID ...string) float64
+	func GetProgressBarValue(view View, subviewID ...string) float64
 
 ## Button
 
@@ -3220,6 +3280,11 @@ int8…int64, uint, uint8…uint64
 Для создания ListView используется функция:
 
 	func NewListView(session Session, params Params) ListView
+
+ListView реализован на основе ListLayout и поэтому он поддерживает все свойства ListLayout:
+"orientation", "list-wrap", "vertical-align", "horizontal-align", "list-row-gap" и "list-column-gap".
+
+Помимо эти свойств ListView имеет ещё следующие:
 
 ### Свойство "items"
 
@@ -3248,13 +3313,13 @@ Cвойствy "items" могут быть присвоены следующие
 * ListAdapter;
 * []View при присваиваниии преобразуется в ListAdapter с помощью функции NewViewListAdapter;
 * []string при присваиваниии преобразуется в ListAdapter с помощью функции NewTextListAdapter;
-* []interface{} который может содержать элементы типа View, string, fmt.Stringer, bool, rune,
+* []any который может содержать элементы типа View, string, fmt.Stringer, bool, rune,
 float32, float64, int, int8…int64, uint, uint8…uint64. При присваиваниии все типы кроме
 View и string преобразуется в string, далее все string в TextView и из получившегося массива View
 с помощью функции NewViewListAdapter получается ListAdapter.
 
 Если элементы списка меняются в ходе работы, то после изменения необходимо вызывать или функцию
-ReloadListViewData() интерфейса ListView или глобальную функцию ReloadListViewData(view View, subviewID string).
+ReloadListViewData() интерфейса ListView или глобальную функцию ReloadListViewData(view View, subviewID ...string).
 Данные функции обновляют отображаемые элементы списка.
 
 ### Свойство "orientation"
@@ -3276,7 +3341,7 @@ ReloadListViewData() интерфейса ListView или глобальную �
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetListOrientation(view View, subviewID string) int
+	func GetListOrientation(view View, subviewID ...string) int
 
 ### Свойство "wrap"
 
@@ -3293,7 +3358,7 @@ ReloadListViewData() интерфейса ListView или глобальную �
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetListWrap(view View, subviewID string) int
+	func GetListWrap(view View, subviewID ...string) int
 
 ### Свойства "item-width" и "item-height"
 
@@ -3306,8 +3371,8 @@ ReloadListViewData() интерфейса ListView или глобальную �
 
 Получить значения данных свойств можно с помощью функций
 
-	func GetListItemWidth(view View, subviewID string) SizeUnit
-	func GetListItemHeight(view View, subviewID string) SizeUnit
+	func GetListItemWidth(view View, subviewID ...string) SizeUnit
+	func GetListItemHeight(view View, subviewID ...string) SizeUnit
 
 ### Свойство "item-vertical-align"
 
@@ -3323,7 +3388,7 @@ ReloadListViewData() интерфейса ListView или глобальную �
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetListItemVerticalAlign(view View, subviewID string) int
+	func GetListItemVerticalAlign(view View, subviewID ...string) int
 
 ### Свойство "item-horizontal-align"
 
@@ -3339,7 +3404,7 @@ ReloadListViewData() интерфейса ListView или глобальную �
 
 Получить значение данного свойства можно с помощью функции
 
-	GetListItemHorizontalAlign(view View, subviewID string) int
+	GetListItemHorizontalAlign(view View, subviewID ...string) int
 
 ### Свойство "current"
 
@@ -3350,7 +3415,7 @@ int свойство "current" (константа Current). Значение "c
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetCurrent(view View, subviewID string) int
+	func GetCurrent(view View, subviewID ...string) int
 
 ### Свойства "list-item-style", "current-style" и "current-inactive-style"
 
@@ -3378,13 +3443,13 @@ int свойство "current" (константа Current). Значение "c
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetListViewCheckbox(view View, subviewID string) int
+	func GetListViewCheckbox(view View, subviewID ...string) int
 
 Получить/установить список помеченных пунктов можно с помощью свойства "checked" (константа Checked).
 Данное свойство имеет тип []int и хранит индексы помеченных элементов.
 Получить значение данного свойства можно с помощью функции
 
-	func GetListViewCheckedItems(view View, subviewID string) []int
+	func GetListViewCheckedItems(view View, subviewID ...string) []int
 
 Проверить помечен ли конкретный элемент можно с помощью функции
 
@@ -3415,8 +3480,8 @@ CheckboxHorizontalAlign и CheckboxVerticalAlign)
 
 Получить значения свойств можно "checkbox-horizontal-align" и "checkbox-vertical-align" с помощью функций
 
-	func GetListViewCheckboxHorizontalAlign(view View, subviewID string) int
-	func GetListViewCheckboxVerticalAlign(view View, subviewID string) int
+	func GetListViewCheckboxHorizontalAlign(view View, subviewID ...string) int
+	func GetListViewCheckboxVerticalAlign(view View, subviewID ...string) int
 
 ### События ListView
 
@@ -3436,9 +3501,9 @@ CheckboxHorizontalAlign и CheckboxVerticalAlign)
 
 Получить списки слушателей данных событий можно с помощью функций:
 
-	func GetListItemClickedListeners(view View, subviewID string) []func(ListView, int)
-	func GetListItemSelectedListeners(view View, subviewID string) []func(ListView, int)
-	func GetListItemCheckedListeners(view View, subviewID string) []func(ListView, []int)
+	func GetListItemClickedListeners(view View, subviewID ...string) []func(ListView, int)
+	func GetListItemSelectedListeners(view View, subviewID ...string) []func(ListView, int)
+	func GetListItemCheckedListeners(view View, subviewID ...string) []func(ListView, []int)
 
 ## TableView
 
@@ -3454,7 +3519,7 @@ CheckboxHorizontalAlign и CheckboxVerticalAlign)
 	type TableAdapter interface {
 		RowCount() int
 		ColumnCount() int
-		Cell(row, column int) interface{}
+		Cell(row, column int) any
 	}
 
 где функции RowCount() и ColumnCount() должны возврацать количество строк и столбцов в таблице;
@@ -3474,10 +3539,10 @@ Cell(row, column int) возвращает содержимое ячейки т�
 Свойству "content" можно также присваивать следующие типы данных
 
 * TableAdapter
-* [][]interface{}
+* [][]any
 * [][]string
 
-[][]interface{} и [][]string при присвоении преобразуются к TableAdapter.
+[][]any и [][]string при присвоении преобразуются к TableAdapter.
 
 ### Свойство "cell-style"
 
@@ -3530,7 +3595,7 @@ Cell(row, column int) возвращает содержимое ячейки т�
 	|      |       |        |
 	|------|-------|--------|
 
-Если в качестве значения свойства "content" используется [][]interface{}, то для объединения
+Если в качестве значения свойства "content" используется [][]any, то для объединения
 ячеек используются пустые структуры
 
 	type VerticalTableJoin struct {
@@ -3541,7 +3606,7 @@ Cell(row, column int) возвращает содержимое ячейки т�
 Данные структуры присоединяют ячейку, соответсвенно, к верхней/левой. Описание приведенной выше таблицы будет
 иметь следующий вид
 
-	content := [][]interface{} {
+	content := [][]any {
 		{"", "", rui.HorizontalTableJoin{}},
 		{rui.VerticalTableJoin{}, "", ""},
 	}
@@ -3635,7 +3700,7 @@ TableColumnStyle объявлена как
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTableVerticalAlign(view View, subviewID string) int
+	func GetTableVerticalAlign(view View, subviewID ...string) int
 
 ### Свойство "selection-mode"
 
@@ -3657,7 +3722,7 @@ TableColumnStyle объявлена как
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetSelectionMode(view View, subviewID string) int
+	func GetSelectionMode(view View, subviewID ...string) int
 
 ### Свойство "current"
 
@@ -3675,7 +3740,7 @@ TableColumnStyle объявлена как
 
 Получить значение данного свойства можно с помощью функции
 
-	func GetTableCurrent(view View, subviewID string) CellIndex
+	func GetTableCurrent(view View, subviewID ...string) CellIndex
 
 ### Свойство "allow-selection"
 
@@ -4349,6 +4414,42 @@ params - параметры всплавающего окна (может быт
 Заголовок также может иметь кнопку закрытия окна. Для ее добавления к заголовку используется свойство "close-button" типа bool.
 Установка этого свойства в "true" добавляет к заголовку кнопку закрытия окна (значение по умолчанию равно "false").
 
+### Стрелка Popup
+
+Всплывающее окно может иметь у одной из сторон стрелку. Стрелка задается с помощью свойства "arrow" (константа Arrow). 
+Cвойства "arrow" может принимать следующие значения
+
+| Значение | Константа   | Расположение стрелки                        |
+|:--------:|-------------|---------------------------------------------|
+| 0	       | NoneArrow   | Нет стрелки (значение по умолчанию)         |
+| 1	       | TopArrow    | Стрелка у верхней стороны всплывающего окна |
+| 2	       | RightArrow  | Стрелка у правой стороны всплывающего окна  |
+| 3        | BottomArrow | Стрелка у нижней стороны всплывающего окна  |
+| 4        | LeftArrow   | Стрелка у левой стороны всплывающего окна   |
+
+Размеры стрелки задаются с помощью свойств "arrow-size" (константа ArrowSize) и "arrow-width" (константа ArrowWidth) типа SizeUnit.
+Они задают длину ("arrow-size") и ширину ("arrow-width") стрелки. Если данные свойтсва не заданы то используются константы
+"@ruiArrowSize" (значение по умолчанию 16px) и "@ruiArrowWidth" (значение по умолчанию 16px).
+
+Выравнивание стрелки относительно всплывающего окна задается с помощью свойства "arrow-align" (константа ArrowAlign). 
+Cвойства "arrow-align" может принимать следующие значения
+
+| Значение | Константы                | Выравнивание                                   |
+|:--------:|--------------------------|------------------------------------------------|
+| 0	       | TopAlign / LeftAlign     | Выравнивание по верхнему / левому краю строны  |
+| 1        | BottomAlign / RightAlign | Выравнивание по нижнему / правому краю строны  |
+| 2        | CenterAlign              | Выравнивание по центру (значение по умолчанию) |
+
+Также для стрелки можно задать дополнительное смещение. Для этого используется свойств "arrow-offset" (константа ArrowOffset) типа SizeUnit.
+
+Если значение свойства "arrow-align" равно TopAlign/LeftAlign, то смещение задается относительно верхней / левой стороны.
+Если значение свойства "arrow-align" равно BottomAlign/RightAlign, то смещение задается относительно нижней / правой стороны.
+Если значение свойства "arrow-align" равно CenterAlign, то смещение (может быть как положительным так и отрицательным) добавляется в виде отступа стрелки. 
+Т.е по центру выравнивается стрелка со смещением
+
+Если "arrow-offset" не задано, то значением по умолчанию для "arrow-align" равного CenterAlign является 0. 
+Для других значений "arrow-align" значением по умолчанию является соответствующий радиус скругления угла всплывающего окна.
+
 ### Закрытие Popup
 
 Как было сказано выше, для закрытия всплавающего окна используется метод Dismiss() интерфейса Popup.
@@ -4552,7 +4653,7 @@ x1 и x2 должны быть в диапазоне [0, 1]. Вы можете �
 Однократная анимация запускается с помощью функции SetAnimated интерфейса View. Данная функция имеет следующее
 описание:
 
-	SetAnimated(tag string, value interface{}, animation Animation) bool
+	SetAnimated(tag string, value any, animation Animation) bool
 
 Она присваивает свойству новое значение, при этом изменение происходит с использованием заданной анимации.
 Например,
@@ -4564,7 +4665,7 @@ x1 и x2 должны быть в диапазоне [0, 1]. Вы можете �
 
 Есть также глобальная функция для анимированного однократного изменения значения свойства дочернего View
 
-	func SetAnimated(rootView View, viewID, tag string, value interface{}, animation Animation) bool
+	func SetAnimated(rootView View, viewID, tag string, value any, animation Animation) bool
 
 Постоянная анимация запускается каждый раз когда изменяется значение свойства. Для задания постоянной 
 анимации перехода используется свойство "transition" (константа Transition). В качества значения данному 
@@ -4587,7 +4688,7 @@ x1 и x2 должны быть в диапазоне [0, 1]. Вы можете �
 
 Для получения текущего списка постоянных анимаций перехода используется функция
 
-	func GetTransition(view View, subviewID string) Params
+	func GetTransition(view View, subviewID ...string) Params
 
 Добавлять новые анимации перехода рекомендуется с помощью функции 
 
@@ -4624,10 +4725,10 @@ x1 и x2 должны быть в диапазоне [0, 1]. Вы можете �
 
 Получить списки слушателей событий анимации перехода с помощью функций:
 
-	func GetTransitionRunListeners(view View, subviewID string) []func(View, string)
-	func GetTransitionStartListeners(view View, subviewID string) []func(View, string)
-	func GetTransitionEndListeners(view View, subviewID string) []func(View, string)
-	func GetTransitionCancelListeners(view View, subviewID string) []func(View, string)
+	func GetTransitionRunListeners(view View, subviewID ...string) []func(View, string)
+	func GetTransitionStartListeners(view View, subviewID ...string) []func(View, string)
+	func GetTransitionEndListeners(view View, subviewID ...string) []func(View, string)
+	func GetTransitionCancelListeners(view View, subviewID ...string) []func(View, string)
 
 ### Cценарий анимации
 
@@ -4641,8 +4742,8 @@ Cценарий анимации описывает более сложную а
 
 	type AnimatedProperty struct {
 		Tag       string
-		From, To  interface{}
-		KeyFrames map[int]interface{}
+		From, To  any
+		KeyFrames map[int]any
 	}
 
 где Tag - имя свойства, From - начальное значение свойства, To - конечное значение свойства,
@@ -4756,10 +4857,10 @@ Safari и Firefox.
 
 Получить списки слушателей событий анимации с помощью функций:
 
-	func GetAnimationStartListeners(view View, subviewID string) []func(View, string)
-	func GetAnimationEndListeners(view View, subviewID string) []func(View, string)
-	func GetAnimationCancelListeners(view View, subviewID string) []func(View, string)
-	func GetAnimationIterationListeners(view View, subviewID string) []func(View, string)
+	func GetAnimationStartListeners(view View, subviewID ...string) []func(View, string)
+	func GetAnimationEndListeners(view View, subviewID ...string) []func(View, string)
+	func GetAnimationCancelListeners(view View, subviewID ...string) []func(View, string)
+	func GetAnimationIterationListeners(view View, subviewID ...string) []func(View, string)
 
 ## Сессия
 
@@ -4834,11 +4935,11 @@ Safari и Firefox.
 
 * SetTitleColor(color Color) устанавливает цвет панели навигации браузера. Поддерживается только в Safari и Chrome для Android.
 
-* Get(viewID, tag string) interface{} - возвращает значение свойства View с именем tag. Эквивалентно
+* Get(viewID, tag string) any - возвращает значение свойства View с именем tag. Эквивалентно
 
 	rui.Get(session.RootView(), viewID, tag)
 
-* Set(viewID, tag string, value interface{}) bool - устанавливает значение свойства View с именем tag.
+* Set(viewID, tag string, value any) bool - устанавливает значение свойства View с именем tag.
 
 	rui.Set(session.RootView(), viewID, tag, value)
 
