@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package rui
 
 import (
@@ -7,15 +9,6 @@ import (
 
 	"github.com/gorilla/websocket"
 )
-
-type WebBrige interface {
-	ReadMessage() (string, bool)
-	WriteMessage(text string) bool
-	RunGetterScript(script string) DataObject
-	AnswerReceived(answer DataObject)
-	Close()
-	remoteAddr() string
-}
 
 type wsBrige struct {
 	conn        *websocket.Conn
@@ -30,7 +23,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 8096,
 }
 
-func CreateSocketBrige(w http.ResponseWriter, req *http.Request) WebBrige {
+func CreateSocketBrige(w http.ResponseWriter, req *http.Request) webBrige {
 	conn, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		ErrorLog(err.Error())
@@ -45,13 +38,12 @@ func CreateSocketBrige(w http.ResponseWriter, req *http.Request) WebBrige {
 	return brige
 }
 
-func (brige *wsBrige) Close() {
+func (brige *wsBrige) close() {
 	brige.closed = true
 	brige.conn.Close()
 }
 
-func (brige *wsBrige) ReadMessage() (string, bool) {
-	//messageType, p, err := brige.conn.ReadMessage()
+func (brige *wsBrige) readMessage() (string, bool) {
 	_, p, err := brige.conn.ReadMessage()
 	if err != nil {
 		if !brige.closed {
@@ -63,7 +55,7 @@ func (brige *wsBrige) ReadMessage() (string, bool) {
 	return string(p), true
 }
 
-func (brige *wsBrige) WriteMessage(script string) bool {
+func (brige *wsBrige) writeMessage(script string) bool {
 	if ProtocolInDebugLog {
 		DebugLog("Run script:")
 		DebugLog(script)
@@ -75,7 +67,7 @@ func (brige *wsBrige) WriteMessage(script string) bool {
 	return true
 }
 
-func (brige *wsBrige) RunGetterScript(script string) DataObject {
+func (brige *wsBrige) runGetterScript(script string) DataObject {
 	brige.answerMutex.Lock()
 	answerID := brige.answerID
 	brige.answerID++
@@ -107,7 +99,7 @@ func (brige *wsBrige) RunGetterScript(script string) DataObject {
 	return result
 }
 
-func (brige *wsBrige) AnswerReceived(answer DataObject) {
+func (brige *wsBrige) answerReceived(answer DataObject) {
 	if text, ok := answer.PropertyValue("answerID"); ok {
 		if id, err := strconv.Atoi(text); err == nil {
 			if chanel, ok := brige.answer[id]; ok {

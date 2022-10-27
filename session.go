@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+type webBrige interface {
+	readMessage() (string, bool)
+	writeMessage(text string) bool
+	runGetterScript(script string) DataObject
+	answerReceived(answer DataObject)
+	close()
+	remoteAddr() string
+}
+
 // SessionContent is the interface of a session content
 type SessionContent interface {
 	CreateRootView(session Session) View
@@ -85,14 +94,14 @@ type Session interface {
 	nextViewID() string
 	styleProperty(styleTag, property string) any
 
-	setBrige(events chan DataObject, brige WebBrige)
+	setBrige(events chan DataObject, brige webBrige)
 	writeInitScript(writer *strings.Builder)
 	runScript(script string)
 	runGetterScript(script string) DataObject //, answer chan DataObject)
 	handleAnswer(data DataObject)
 	handleRootSize(data DataObject)
 	handleResize(data DataObject)
-	handleViewEvent(command string, data DataObject)
+	handleEvent(command string, data DataObject)
 	close()
 
 	onStart()
@@ -137,7 +146,7 @@ type sessionData struct {
 	ignoreUpdates    bool
 	popups           *popupManager
 	images           *imageManager
-	brige            WebBrige
+	brige            webBrige
 	events           chan DataObject
 	animationCounter int
 	animationCSS     string
@@ -166,38 +175,8 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 		}
 	}
 
-	if value, ok := params.PropertyValue("touch"); ok {
-		session.touchScreen = (value == "1" || value == "true")
-	}
-
-	if value, ok := params.PropertyValue("user-agent"); ok {
-		session.userAgent = value
-	}
-
-	if value, ok := params.PropertyValue("direction"); ok {
-		if value == "rtl" {
-			session.textDirection = RightToLeftDirection
-		}
-	}
-
-	if value, ok := params.PropertyValue("language"); ok {
-		session.language = value
-	}
-
-	if value, ok := params.PropertyValue("languages"); ok {
-		session.languages = strings.Split(value, ",")
-	}
-
-	if value, ok := params.PropertyValue("dark"); ok {
-		session.darkTheme = (value == "1" || value == "true")
-	}
-
-	if value, ok := params.PropertyValue("pixel-ratio"); ok {
-		if f, err := strconv.ParseFloat(value, 64); err != nil {
-			ErrorLog(err.Error())
-		} else {
-			session.pixelRatio = f
-		}
+	if params != nil {
+		session.handleSessionInfo(params)
 	}
 
 	return session
@@ -211,7 +190,7 @@ func (session *sessionData) ID() int {
 	return session.sessionID
 }
 
-func (session *sessionData) setBrige(events chan DataObject, brige WebBrige) {
+func (session *sessionData) setBrige(events chan DataObject, brige webBrige) {
 	session.events = events
 	session.brige = brige
 }
@@ -344,7 +323,7 @@ func (session *sessionData) imageManager() *imageManager {
 
 func (session *sessionData) runScript(script string) {
 	if session.brige != nil {
-		session.brige.WriteMessage(script)
+		session.brige.writeMessage(script)
 	} else {
 		ErrorLog("No connection")
 	}
@@ -352,7 +331,7 @@ func (session *sessionData) runScript(script string) {
 
 func (session *sessionData) runGetterScript(script string) DataObject { //}, answer chan DataObject) {
 	if session.brige != nil {
-		return session.brige.RunGetterScript(script)
+		return session.brige.runGetterScript(script)
 	}
 
 	ErrorLog("No connection")
@@ -362,7 +341,7 @@ func (session *sessionData) runGetterScript(script string) DataObject { //}, ans
 }
 
 func (session *sessionData) handleAnswer(data DataObject) {
-	session.brige.AnswerReceived(data)
+	session.brige.answerReceived(data)
 }
 
 func (session *sessionData) handleRootSize(data DataObject) {
@@ -429,13 +408,67 @@ func (session *sessionData) handleResize(data DataObject) {
 	}
 }
 
-func (session *sessionData) handleViewEvent(command string, data DataObject) {
-	if viewID, ok := data.PropertyValue("id"); ok {
-		if view := session.viewByHTMLID(viewID); view != nil {
-			view.handleCommand(view, command, data)
+func (session *sessionData) handleSessionInfo(params DataObject) {
+	if value, ok := params.PropertyValue("touch"); ok {
+		session.touchScreen = (value == "1" || value == "true")
+	}
+
+	if value, ok := params.PropertyValue("user-agent"); ok {
+		session.userAgent = value
+	}
+
+	if value, ok := params.PropertyValue("direction"); ok {
+		if value == "rtl" {
+			session.textDirection = RightToLeftDirection
 		}
-	} else if command != "clickOutsidePopup" {
-		ErrorLog(`"id" property not found. Event: ` + command)
+	}
+
+	if value, ok := params.PropertyValue("language"); ok {
+		session.language = value
+	}
+
+	if value, ok := params.PropertyValue("languages"); ok {
+		session.languages = strings.Split(value, ",")
+	}
+
+	if value, ok := params.PropertyValue("dark"); ok {
+		session.darkTheme = (value == "1" || value == "true")
+	}
+
+	if value, ok := params.PropertyValue("pixel-ratio"); ok {
+		if f, err := strconv.ParseFloat(value, 64); err != nil {
+			ErrorLog(err.Error())
+		} else {
+			session.pixelRatio = f
+		}
+	}
+}
+
+func (session *sessionData) handleEvent(command string, data DataObject) {
+	switch command {
+	case "session-pause":
+		session.onPause()
+
+	case "session-resume":
+		session.onResume()
+
+	case "root-size":
+		session.handleRootSize(data)
+
+	case "resize":
+		session.handleResize(data)
+
+	case "sessionInfo":
+		session.handleSessionInfo(data)
+
+	default:
+		if viewID, ok := data.PropertyValue("id"); ok {
+			if view := session.viewByHTMLID(viewID); view != nil {
+				view.handleCommand(view, command, data)
+			}
+		} else if command != "clickOutsidePopup" {
+			ErrorLog(`"id" property not found. Event: ` + command)
+		}
 	}
 }
 
