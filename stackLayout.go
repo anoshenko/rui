@@ -296,9 +296,9 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`push" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent(\'`)
+	buffer.WriteString(`push" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent('`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`\', \'ruiPush\', event)" style="`)
+	buffer.WriteString(`', 'ruiPush', event)" style="`)
 
 	switch layout.animationType {
 	case StartToEndAnimation:
@@ -349,11 +349,11 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`pop" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent(\'`)
+	buffer.WriteString(`pop" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent('`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`\', \'ruiPop\', event)" ontransitioncancel="stackTransitionEndEvent(\'`)
+	buffer.WriteString(`', 'ruiPop', event)" ontransitioncancel="stackTransitionEndEvent('`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`\', \'ruiPop\', event)" style="transition: transform 1s ease;">`)
+	buffer.WriteString(`', 'ruiPop', event)" style="transition: transform 1s ease;">`)
 	viewHTML(layout.popView, buffer)
 	buffer.WriteString(`</div>`)
 

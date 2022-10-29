@@ -585,9 +585,9 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 				if len(value) > 0 {
 					buffer.WriteString(` `)
 					buffer.WriteString(event.cssTag)
-					buffer.WriteString(`="playerEvent(this, \'`)
+					buffer.WriteString(`="playerEvent(this, '`)
 					buffer.WriteString(event.tag)
-					buffer.WriteString(`\')"`)
+					buffer.WriteString(`')"`)
 				}
 			}
 		}

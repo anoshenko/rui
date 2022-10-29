@@ -123,7 +123,11 @@ func (brige *wsBrige) runFunc(funcName string, args ...any) bool {
 	}
 	brige.buffer.WriteString(");")
 
-	if err := brige.conn.WriteMessage(websocket.TextMessage, []byte(brige.buffer.String())); err != nil {
+	funcText := brige.buffer.String()
+	if ProtocolInDebugLog {
+		DebugLog("Run func: " + funcText)
+	}
+	if err := brige.conn.WriteMessage(websocket.TextMessage, []byte(funcText)); err != nil {
 		ErrorLog(err.Error())
 		return false
 	}

@@ -766,13 +766,13 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			} else {
 				buffer.WriteString(inactiveStyle)
 			}
-			buffer.WriteString(`" tabindex="0" onclick="tabClickEvent(this, \'`)
+			buffer.WriteString(`" tabindex="0" onclick="tabClickEvent(this, '`)
 			buffer.WriteString(tabsLayoutID)
-			buffer.WriteString(`\', `)
+			buffer.WriteString(`', `)
 			buffer.WriteString(strconv.Itoa(n))
-			buffer.WriteString(`, event)" onkeydown="tabKeyClickEvent(\'`)
+			buffer.WriteString(`, event)" onkeydown="tabKeyClickEvent('`)
 			buffer.WriteString(tabsLayoutID)
-			buffer.WriteString(`\', `)
+			buffer.WriteString(`', `)
 			buffer.WriteString(strconv.Itoa(n))
 			buffer.WriteString(`, event)" style="`)
 			buffer.WriteString(tabStyle)
@@ -808,13 +808,13 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 				close = closeButton
 			}
 			if close {
-				buffer.WriteString(`<div class="ruiTabCloseButton" tabindex="0" onclick="tabCloseClickEvent(this, \'`)
+				buffer.WriteString(`<div class="ruiTabCloseButton" tabindex="0" onclick="tabCloseClickEvent(this, '`)
 				buffer.WriteString(tabsLayoutID)
-				buffer.WriteString(`\', `)
+				buffer.WriteString(`', `)
 				buffer.WriteString(strconv.Itoa(n))
-				buffer.WriteString(`, event)" onkeydown="tabCloseKeyClickEvent(\'`)
+				buffer.WriteString(`, event)" onkeydown="tabCloseKeyClickEvent('`)
 				buffer.WriteString(tabsLayoutID)
-				buffer.WriteString(`\', `)
+				buffer.WriteString(`', `)
 				buffer.WriteString(strconv.Itoa(n))
 				buffer.WriteString(`, event)"  style="display: grid; `)
 

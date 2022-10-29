@@ -40,11 +40,7 @@ func updateCSSStyle(htmlID string, session Session) {
 	if !session.ignoreViewUpdates() {
 		if view := session.viewByHTMLID(htmlID); view != nil {
 			builder := viewCSSBuilder{buffer: allocStringBuilder()}
-			//builder.buffer.WriteString(`updateCSSStyle('`)
-			//builder.buffer.WriteString(view.htmlID())
-			//builder.buffer.WriteString(`', '`)
 			view.cssStyle(view, &builder)
-			//builder.buffer.WriteString(`');`)
 			session.runFunc("updateCSSStyle", view.htmlID(), builder.finish())
 		}
 	}
