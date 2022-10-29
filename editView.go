@@ -440,7 +440,7 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		if strings.ContainsRune(text, '"') {
 			text = strings.ReplaceAll(text, `"`, `&#34;`)
 		}
-		return textToJS(text)
+		return text
 	}
 
 	if hint := GetHint(edit); hint != "" {
@@ -474,7 +474,7 @@ func (edit *editViewData) htmlDisabledProperties(self View, buffer *strings.Buil
 
 func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if GetEditViewType(edit) == MultiLineText {
-		buffer.WriteString(textToJS(GetText(edit)))
+		buffer.WriteString(GetText(edit))
 	}
 }
 

@@ -1027,7 +1027,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 					switch value := adapter.Cell(row, column).(type) {
 					case string:
-						buffer.WriteString(textToJS(value))
+						buffer.WriteString(value)
 
 					case View:
 						viewHTML(value, buffer)
@@ -1051,10 +1051,10 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						}
 
 					case fmt.Stringer:
-						buffer.WriteString(textToJS(value.String()))
+						buffer.WriteString(value.String())
 
 					case rune:
-						buffer.WriteString(textToJS(string(value)))
+						buffer.WriteString(string(value))
 
 					case float32:
 						buffer.WriteString(fmt.Sprintf("%g", float64(value)))

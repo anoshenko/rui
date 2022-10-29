@@ -246,7 +246,7 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 
 	if text := GetImageViewAltText(imageView); text != "" {
 		buffer.WriteString(` alt="`)
-		buffer.WriteString(textToJS(text))
+		buffer.WriteString(text)
 		buffer.WriteString(`"`)
 	}
 
