@@ -87,7 +87,7 @@ func (list *dropDownListData) remove(tag string) {
 		delete(list.properties, Current)
 		if oldCurrent != 0 {
 			if list.created {
-				list.session.runScript(fmt.Sprintf(`selectDropDownListItem('%s', %d)`, list.htmlID(), 0))
+				list.session.runFunc("selectDropDownListItem", list.htmlID(), 0)
 			}
 			list.onSelectedItemChanged(0)
 		}
@@ -135,7 +135,7 @@ func (list *dropDownListData) set(tag string, value any) bool {
 
 		if current := GetCurrent(list); oldCurrent != current {
 			if list.created {
-				list.session.runScript(fmt.Sprintf(`selectDropDownListItem('%s', %d)`, list.htmlID(), current))
+				list.session.runFunc("selectDropDownListItem", list.htmlID(), current)
 			}
 			list.onSelectedItemChanged(current)
 		}

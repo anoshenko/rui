@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -137,7 +136,7 @@ func (edit *editViewData) remove(tag string) {
 			if oldText != "" {
 				edit.textChanged("")
 				if edit.created {
-					edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), ""))
+					edit.session.runFunc("setInputValue", edit.htmlID(), "")
 				}
 			}
 		}
@@ -211,11 +210,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 					if GetEditViewType(edit) == MultiLineText {
 						updateInnerHTML(edit.htmlID(), edit.Session())
 					} else {
-						text = strings.ReplaceAll(text, `"`, `\"`)
-						text = strings.ReplaceAll(text, `'`, `\'`)
-						text = strings.ReplaceAll(text, "\n", `\n`)
-						text = strings.ReplaceAll(text, "\r", `\r`)
-						edit.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, edit.htmlID(), text))
+						edit.session.runFunc("setInputValue", edit.htmlID(), text)
 					}
 				}
 			}
@@ -365,14 +360,7 @@ func (edit *editViewData) AppendText(text string) {
 			if textValue, ok := value.(string); ok {
 				textValue += text
 				edit.properties[Text] = textValue
-
-				text := strings.ReplaceAll(text, `"`, `\"`)
-				text = strings.ReplaceAll(text, `'`, `\'`)
-				text = strings.ReplaceAll(text, "\n", `\n`)
-				text = strings.ReplaceAll(text, "\r", `\r`)
-
-				edit.session.runScript(`appendToInnerHTML("` + edit.htmlID() + `", "` + text + `")`)
-
+				edit.session.runFunc("appendToInnerHTML", edit.htmlID(), text)
 				edit.textChanged(textValue)
 				return
 			}

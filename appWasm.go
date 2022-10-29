@@ -4,7 +4,6 @@ package rui
 
 import (
 	_ "embed"
-	"strings"
 	"syscall/js"
 )
 
@@ -21,40 +20,6 @@ type wasmApp struct {
 func (app *wasmApp) Finish() {
 	app.session.close()
 }
-
-/*
-func (app *wasmApp) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-
-	if ProtocolInDebugLog {
-		DebugLogF("%s %s", req.Method, req.URL.Path)
-	}
-
-	switch req.Method {
-	case "GET":
-		switch req.URL.Path {
-		case "/":
-			w.WriteHeader(http.StatusOK)
-			io.WriteString(w, app.getStartPage())
-
-		case "/ws":
-			if brige := CreateSocketBrige(w, req); brige != nil {
-				go app.socketReader(brige)
-			}
-
-		default:
-			filename := req.URL.Path[1:]
-			if size := len(filename); size > 0 && filename[size-1] == '/' {
-				filename = filename[:size-1]
-			}
-
-			if !serveResourceFile(filename, w, req) &&
-				!serveDownloadFile(filename, w, req) {
-				w.WriteHeader(http.StatusNotFound)
-			}
-		}
-	}
-}
-*/
 
 func (app *wasmApp) startSession(this js.Value, args []js.Value) interface{} {
 	if app.createContentFunc == nil || len(args) == 1 {
@@ -99,16 +64,16 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 	app.brige = createWasmBrige()
 	js.Global().Set("startSession", js.FuncOf(app.startSession))
 
-	script := defaultScripts + wasmScripts
-	script = strings.ReplaceAll(script, "\\", `\\`)
-	script = strings.ReplaceAll(script, "\n", `\n`)
-	script = strings.ReplaceAll(script, "\t", `\t`)
-	script = strings.ReplaceAll(script, "\"", `\"`)
-	script = strings.ReplaceAll(script, "'", `\'`)
+	/*
+		script := defaultScripts + wasmScripts
+		script = strings.ReplaceAll(script, "\\", `\\`)
+		script = strings.ReplaceAll(script, "\n", `\n`)
+		script = strings.ReplaceAll(script, "\t", `\t`)
+		script = strings.ReplaceAll(script, "\"", `\"`)
+		script = strings.ReplaceAll(script, "'", `\'`)
 
-	//window := js.Global().Get("window")
-	//window.Call("execScript", `document.getElementById('ruiscript').text = "`+script+`"`)
-	js.Global().Call("execScript", `document.getElementById('ruiscript').text += "`+script+`"`)
+		js.Global().Call("execScript", `document.getElementById('ruiscript').text += "`+script+`"`)
+	*/
 
 	document := js.Global().Get("document")
 	body := document.Call("querySelector", "body")
@@ -116,7 +81,8 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 <div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden;" onclick="clickOutsidePopup(event)"></div>
 <a id="ruiDownloader" download style="display: none;"></a>`)
 
-	js.Global().Call("execScript", "initSession()")
+	//js.Global().Call("execScript", "initSession()")
+	js.Global().Call("initSession", "")
 	//window.Call("execScript", "initSession()")
 
 	for true {

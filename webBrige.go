@@ -3,8 +3,10 @@
 package rui
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -16,6 +18,7 @@ type wsBrige struct {
 	answerID    int
 	answerMutex sync.Mutex
 	closed      bool
+	buffer      strings.Builder
 }
 
 var upgrader = websocket.Upgrader{
@@ -41,6 +44,90 @@ func CreateSocketBrige(w http.ResponseWriter, req *http.Request) webBrige {
 func (brige *wsBrige) close() {
 	brige.closed = true
 	brige.conn.Close()
+}
+
+func (brige *wsBrige) argToString(arg any) (string, bool) {
+	switch arg := arg.(type) {
+	case string:
+		arg = strings.ReplaceAll(arg, "\\", `\\`)
+		arg = strings.ReplaceAll(arg, "'", `\'`)
+		arg = strings.ReplaceAll(arg, "\n", `\n`)
+		arg = strings.ReplaceAll(arg, "\r", `\r`)
+		arg = strings.ReplaceAll(arg, "\t", `\t`)
+		arg = strings.ReplaceAll(arg, "\b", `\b`)
+		arg = strings.ReplaceAll(arg, "\f", `\f`)
+		arg = strings.ReplaceAll(arg, "\v", `\v`)
+		return `'` + arg + `'`, true
+
+	case rune:
+		switch arg {
+		case '\t':
+			return `'\t'`, true
+		case '\r':
+			return `'\r'`, true
+		case '\n':
+			return `'\n'`, true
+		case '\b':
+			return `'\b'`, true
+		case '\f':
+			return `'\f'`, true
+		case '\v':
+			return `'\v'`, true
+		case '\'':
+			return `'\''`, true
+		case '\\':
+			return `'\\'`, true
+		}
+		if arg < ' ' {
+			return fmt.Sprintf(`'\x%02d'`, int(arg)), true
+		}
+		return `'` + string(arg) + `'`, true
+
+	case bool:
+		if arg {
+			return "true", true
+		} else {
+			return "false", true
+		}
+
+	case float32:
+		return fmt.Sprintf("%g", float64(arg)), true
+
+	case float64:
+		return fmt.Sprintf("%g", arg), true
+
+	default:
+		if n, ok := isInt(arg); ok {
+			return fmt.Sprintf("%d", n), true
+		}
+	}
+
+	ErrorLog("Unsupported agument type")
+	return "", false
+}
+
+func (brige *wsBrige) runFunc(funcName string, args ...any) bool {
+	brige.buffer.Reset()
+	brige.buffer.WriteString(funcName)
+	brige.buffer.WriteRune('(')
+	for i, arg := range args {
+		argText, ok := brige.argToString(arg)
+		if !ok {
+			return false
+		}
+
+		if i > 0 {
+			brige.buffer.WriteString(", ")
+		}
+		brige.buffer.WriteString(argText)
+	}
+	brige.buffer.WriteString(");")
+
+	if err := brige.conn.WriteMessage(websocket.TextMessage, []byte(brige.buffer.String())); err != nil {
+		ErrorLog(err.Error())
+		return false
+	}
+	return true
 }
 
 func (brige *wsBrige) readMessage() (string, bool) {

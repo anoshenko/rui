@@ -76,7 +76,7 @@ func (manager *imageManager) loadImage(url string, onLoaded func(Image), session
 	image.listener = onLoaded
 	image.loadingStatus = ImageLoading
 	manager.images[url] = image
-	session.runScript("loadImage('" + url + "');")
+	session.runFunc("loadImage", url)
 	return image
 }
 

@@ -825,8 +825,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		defer session.setIgnoreViewUpdates(false)
 	}
 
-	var cssBuilder viewCSSBuilder
-	cssBuilder.buffer = allocStringBuilder()
+	cssBuilder := viewCSSBuilder{buffer: allocStringBuilder()}
 	defer freeStringBuilder(cssBuilder.buffer)
 
 	var view tableCellView

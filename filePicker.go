@@ -2,7 +2,6 @@ package rui
 
 import (
 	"encoding/base64"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -109,7 +108,7 @@ func (picker *filePickerData) LoadFile(file FileInfo, result func(FileInfo, []by
 	for i, info := range picker.files {
 		if info.Name == file.Name && info.Size == file.Size && info.LastModified == file.LastModified {
 			picker.loader[i] = result
-			picker.Session().runScript(fmt.Sprintf(`loadSelectedFile("%s", %d)`, picker.htmlID(), i))
+			picker.Session().runFunc("loadSelectedFile", picker.htmlID(), i)
 			return
 		}
 	}

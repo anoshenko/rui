@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -117,7 +116,7 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 			if f, ok := floatProperty(picker, NumberPickerValue, picker.Session(), min); ok && f != oldValue {
 				newValue, _ := floatTextProperty(picker, NumberPickerValue, picker.Session(), min)
 				if picker.created {
-					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), newValue))
+					picker.session.runFunc("setInputValue", picker.htmlID(), newValue)
 				}
 				for _, listener := range picker.numberChangedListeners {
 					listener(picker, f)
@@ -163,7 +162,7 @@ func (picker *numberPickerData) propertyChanged(tag string) {
 
 		case NumberPickerValue:
 			value := GetNumberPickerValue(picker)
-			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%f')`, picker.htmlID(), value))
+			picker.session.runFunc("setInputValue", picker.htmlID(), value)
 			for _, listener := range picker.numberChangedListeners {
 				listener(picker, value)
 			}

@@ -1161,6 +1161,12 @@ function blur(elementId) {
 	}
 }
 
+function blurCurrent() {
+	if (document.activeElement != document.body) {
+		document.activeElement.blur();
+	}
+}
+
 function playerEvent(element, tag) {
 	//event.stopPropagation();
 	sendMessage(tag + "{session=" + sessionID + ",id=" + element.id + "}");

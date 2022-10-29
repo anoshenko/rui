@@ -803,7 +803,7 @@ func colorStyledProperty(view View, subviewID []string, tag string, inherit bool
 // The focused View is the View which will receive keyboard events by default.
 func FocusView(view View) {
 	if view != nil {
-		view.Session().runScript("focus('" + view.htmlID() + "')")
+		view.Session().runFunc("focus", view.htmlID())
 	}
 }
 
@@ -811,21 +811,21 @@ func FocusView(view View) {
 // The focused View is the View which will receive keyboard events by default.
 func FocusViewByID(viewID string, session Session) {
 	if viewID != "" {
-		session.runScript("focus('" + viewID + "')")
+		session.runFunc("focus", viewID)
 	}
 }
 
 // BlurView removes keyboard focus from the specified View.
 func BlurView(view View) {
 	if view != nil {
-		view.Session().runScript("blur('" + view.htmlID() + "')")
+		view.Session().runFunc("blur", view.htmlID())
 	}
 }
 
 // BlurViewByID removes keyboard focus from the View with the specified viewID.
 func BlurViewByID(viewID string, session Session) {
 	if viewID != "" {
-		session.runScript("blur('" + viewID + "')")
+		session.runFunc("blur", viewID)
 	}
 }
 

@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -114,7 +113,7 @@ func (picker *colorPickerData) set(tag string, value any) bool {
 func (picker *colorPickerData) colorChanged(oldColor Color) {
 	if newColor := GetColorPickerValue(picker); oldColor != newColor {
 		if picker.created {
-			picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), newColor.rgbString()))
+			picker.session.runFunc("setInputValue", picker.htmlID(), newColor.rgbString())
 		}
 		for _, listener := range picker.colorChangedListeners {
 			listener(picker, newColor)

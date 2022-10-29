@@ -754,7 +754,7 @@ func viewHTML(view View, buffer *strings.Builder) {
 		buffer.WriteRune('"')
 	}
 
-	var cssBuilder viewCSSBuilder
+	cssBuilder := viewCSSBuilder{buffer: allocStringBuilder()}
 	view.cssStyle(view, &cssBuilder)
 
 	if style := cssBuilder.finish(); style != "" {

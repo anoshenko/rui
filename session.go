@@ -8,6 +8,7 @@ import (
 )
 
 type webBrige interface {
+	runFunc(funcName string, args ...any) bool
 	readMessage() (string, bool)
 	writeMessage(text string) bool
 	runGetterScript(script string) DataObject
@@ -96,6 +97,7 @@ type Session interface {
 
 	setBrige(events chan DataObject, brige webBrige)
 	writeInitScript(writer *strings.Builder)
+	runFunc(funcName string, args ...any)
 	runScript(script string)
 	runGetterScript(script string) DataObject //, answer chan DataObject)
 	handleAnswer(data DataObject)
@@ -319,6 +321,14 @@ func (session *sessionData) imageManager() *imageManager {
 		session.images.images = make(map[string]*imageData)
 	}
 	return session.images
+}
+
+func (session *sessionData) runFunc(funcName string, args ...any) {
+	if session.brige != nil {
+		session.brige.runFunc(funcName, args...)
+	} else {
+		ErrorLog("No connection")
+	}
 }
 
 func (session *sessionData) runScript(script string) {

@@ -1,7 +1,5 @@
 package rui
 
-import "fmt"
-
 // ScrollEvent is the constant for "scroll-event" property tag.
 // The "scroll-event" is fired when the content of the view is scrolled.
 // The main listener format:
@@ -59,7 +57,7 @@ func ScrollViewTo(view View, subviewID string, x, y float64) {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		view.Session().runScript(fmt.Sprintf(`scrollTo("%s", %g, %g)`, view.htmlID(), x, y))
+		view.Session().runFunc("scrollTo", view.htmlID(), x, y)
 	}
 }
 
@@ -70,7 +68,7 @@ func ScrollViewToStart(view View, subviewID ...string) {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
-		view.Session().runScript(`scrollToStart("` + view.htmlID() + `")`)
+		view.Session().runFunc("scrollToStart", view.htmlID())
 	}
 }
 
@@ -81,6 +79,6 @@ func ScrollViewToEnd(view View, subviewID ...string) {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
-		view.Session().runScript(`scrollToEnd("` + view.htmlID() + `")`)
+		view.Session().runFunc("scrollToEnd", view.htmlID())
 	}
 }

@@ -39,15 +39,13 @@ func sizeConstant(session Session, tag string) (SizeUnit, bool) {
 func updateCSSStyle(htmlID string, session Session) {
 	if !session.ignoreViewUpdates() {
 		if view := session.viewByHTMLID(htmlID); view != nil {
-			var builder viewCSSBuilder
-
-			builder.buffer = allocStringBuilder()
-			builder.buffer.WriteString(`updateCSSStyle('`)
-			builder.buffer.WriteString(view.htmlID())
-			builder.buffer.WriteString(`', '`)
+			builder := viewCSSBuilder{buffer: allocStringBuilder()}
+			//builder.buffer.WriteString(`updateCSSStyle('`)
+			//builder.buffer.WriteString(view.htmlID())
+			//builder.buffer.WriteString(`', '`)
 			view.cssStyle(view, &builder)
-			builder.buffer.WriteString(`');`)
-			view.Session().runScript(builder.finish())
+			//builder.buffer.WriteString(`');`)
+			session.runFunc("updateCSSStyle", view.htmlID(), builder.finish())
 		}
 	}
 }
@@ -66,8 +64,7 @@ func updateInnerHTML(htmlID string, session Session) {
 
 			script.Grow(32 * 1024)
 			view.htmlSubviews(view, script)
-			view.Session().runScript(fmt.Sprintf(`updateInnerHTML('%v', '%v');`, view.htmlID(), script.String()))
-			//view.updateEventHandlers()
+			session.runFunc("updateInnerHTML", view.htmlID(), script.String())
 		}
 	}
 }
@@ -75,8 +72,7 @@ func updateInnerHTML(htmlID string, session Session) {
 func appendToInnerHTML(htmlID, content string, session Session) {
 	if !session.ignoreViewUpdates() {
 		if view := session.viewByHTMLID(htmlID); view != nil {
-			view.Session().runScript(fmt.Sprintf(`appendToInnerHTML('%v', '%v');`, view.htmlID(), content))
-			//view.updateEventHandlers()
+			session.runFunc("appendToInnerHTML", view.htmlID(), content)
 		}
 	}
 }
@@ -87,7 +83,7 @@ func updateProperty(htmlID, property, value string, session Session) {
 			buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', '%v');`, property, value))
 			buffer.WriteRune('\n')
 		} else {
-			session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', '%v');`, htmlID, property, value))
+			session.runFunc("updateProperty", htmlID, property, value)
 		}
 	}
 }
@@ -98,7 +94,7 @@ func updateCSSProperty(htmlID, property, value string, session Session) {
 			buffer.WriteString(fmt.Sprintf(`element.style['%v'] = '%v';`, property, value))
 			buffer.WriteRune('\n')
 		} else {
-			session.runScript(fmt.Sprintf(`updateCSSProperty('%v', '%v', '%v');`, htmlID, property, value))
+			session.runFunc("updateCSSProperty", htmlID, property, value)
 		}
 	}
 }
@@ -112,10 +108,8 @@ func updateBoolProperty(htmlID, property string, value bool, session Session) {
 				buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', false);`, property))
 			}
 			buffer.WriteRune('\n')
-		} else if value {
-			session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', true);`, htmlID, property))
 		} else {
-			session.runScript(fmt.Sprintf(`updateProperty('%v', '%v', false);`, htmlID, property))
+			session.runFunc("updateProperty", htmlID, property, value)
 		}
 	}
 }
@@ -126,7 +120,7 @@ func removeProperty(htmlID, property string, session Session) {
 			buffer.WriteString(fmt.Sprintf(`if (element.hasAttribute('%v')) { element.removeAttribute('%v');}`, property, property))
 			buffer.WriteRune('\n')
 		} else {
-			session.runScript(fmt.Sprintf(`removeProperty('%v', '%v');`, htmlID, property))
+			session.runFunc("removeProperty", htmlID, property)
 		}
 	}
 }

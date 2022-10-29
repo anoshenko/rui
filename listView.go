@@ -819,12 +819,6 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`updateInnerHTML('`)
-	buffer.WriteString(listView.htmlID())
-	buffer.WriteRune('-')
-	buffer.WriteString(strconv.Itoa(index))
-	buffer.WriteString(`', '`)
-
 	buffer.WriteString(listView.checkboxItemDiv(listView, checkbox, hCheckboxAlign, vCheckboxAlign))
 	if checked {
 		buffer.WriteString(onDiv)
@@ -842,9 +836,8 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 			buffer.WriteString("ERROR: invalid item view")
 		}
 	}
-	buffer.WriteString(`</div></div>');`)
-
-	session.runScript(buffer.String())
+	buffer.WriteString(`</div></div>`)
+	session.runFunc("updateInnerHTML", listView.htmlID()+"-"+strconv.Itoa(index), buffer.String())
 }
 
 func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder) {

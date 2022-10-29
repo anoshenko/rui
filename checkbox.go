@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -190,7 +189,7 @@ func (button *checkboxData) changedCheckboxState(state bool) {
 	defer freeStringBuilder(buffer)
 
 	button.htmlCheckbox(buffer, state)
-	button.Session().runScript(fmt.Sprintf(`updateInnerHTML('%v', '%v');`, button.htmlID()+"checkbox", buffer.String()))
+	button.Session().runFunc("updateInnerHTML", button.htmlID()+"checkbox", buffer.String())
 }
 
 func checkboxClickListener(view View) {

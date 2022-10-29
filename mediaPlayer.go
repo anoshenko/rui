@@ -472,11 +472,7 @@ func (player *mediaPlayerData) propertyChanged(tag string) {
 
 		case Muted:
 			value, _ := boolProperty(player, tag, player.Session())
-			if value {
-				player.Session().runScript("setMediaMuted('" + player.htmlID() + "', true)")
-			} else {
-				player.Session().runScript("setMediaMuted('" + player.htmlID() + "', false)")
-			}
+			player.Session().runFunc("setMediaMuted", player.htmlID(), value)
 
 		case Preload:
 			value, _ := enumProperty(player, tag, player.Session(), 0)
@@ -659,15 +655,15 @@ func (player *mediaPlayerData) handleCommand(self View, command string, data Dat
 }
 
 func (player *mediaPlayerData) Play() {
-	player.session.runScript(fmt.Sprintf(`mediaPlay('%v');`, player.htmlID()))
+	player.session.runFunc("mediaPlay", player.htmlID())
 }
 
 func (player *mediaPlayerData) Pause() {
-	player.session.runScript(fmt.Sprintf(`mediaPause('%v');`, player.htmlID()))
+	player.session.runFunc("mediaPause", player.htmlID())
 }
 
 func (player *mediaPlayerData) SetCurrentTime(seconds float64) {
-	player.session.runScript(fmt.Sprintf(`mediaSetSetCurrentTime('%v', %v);`, player.htmlID(), seconds))
+	player.session.runFunc("mediaSetSetCurrentTime", player.htmlID(), seconds)
 }
 
 func (player *mediaPlayerData) getFloatPlayerProperty(tag string) (float64, bool) {
@@ -731,7 +727,7 @@ func (player *mediaPlayerData) Duration() float64 {
 }
 
 func (player *mediaPlayerData) SetPlaybackRate(rate float64) {
-	player.session.runScript(fmt.Sprintf(`mediaSetPlaybackRate('%v', %v);`, player.htmlID(), rate))
+	player.session.runFunc("mediaSetPlaybackRate", player.htmlID(), rate)
 }
 
 func (player *mediaPlayerData) PlaybackRate() float64 {
@@ -743,7 +739,7 @@ func (player *mediaPlayerData) PlaybackRate() float64 {
 
 func (player *mediaPlayerData) SetVolume(volume float64) {
 	if volume >= 0 && volume <= 1 {
-		player.session.runScript(fmt.Sprintf(`mediaSetVolume('%v', %v);`, player.htmlID(), volume))
+		player.session.runFunc("mediaSetVolume", player.htmlID(), volume)
 	}
 }
 

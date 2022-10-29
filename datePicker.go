@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -98,7 +97,7 @@ func (picker *datePickerData) remove(tag string) {
 			delete(picker.properties, DatePickerValue)
 			date := GetDatePickerValue(picker)
 			if picker.created {
-				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
+				picker.session.runFunc("setInputValue", picker.htmlID(), date.Format(dateFormat))
 			}
 			for _, listener := range picker.dateChangedListeners {
 				listener(picker, date)
@@ -224,7 +223,7 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		if date, ok := setTimeValue(DatePickerValue); ok {
 			if date != oldDate {
 				if picker.created {
-					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), date.Format(dateFormat)))
+					picker.session.runFunc("setInputValue", picker.htmlID(), date.Format(dateFormat))
 				}
 				for _, listener := range picker.dateChangedListeners {
 					listener(picker, date)

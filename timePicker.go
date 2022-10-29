@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -98,7 +97,7 @@ func (picker *timePickerData) remove(tag string) {
 			delete(picker.properties, TimePickerValue)
 			time := GetTimePickerValue(picker)
 			if picker.created {
-				picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))
+				picker.session.runFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
 			}
 			for _, listener := range picker.timeChangedListeners {
 				listener(picker, time)
@@ -212,7 +211,7 @@ func (picker *timePickerData) set(tag string, value any) bool {
 		if time, ok := setTimeValue(TimePickerValue); ok {
 			if time != oldTime {
 				if picker.created {
-					picker.session.runScript(fmt.Sprintf(`setInputValue('%s', '%s')`, picker.htmlID(), time.Format(timeFormat)))
+					picker.session.runFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
 				}
 				for _, listener := range picker.timeChangedListeners {
 					listener(picker, time)
