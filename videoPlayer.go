@@ -61,15 +61,15 @@ func (player *videoPlayerData) remove(tag string) {
 
 	case VideoWidth:
 		delete(player.properties, tag)
-		removeProperty(player.htmlID(), "width", player.Session())
+		player.session.removeProperty(player.htmlID(), "width")
 
 	case VideoHeight:
 		delete(player.properties, tag)
-		removeProperty(player.htmlID(), "height", player.Session())
+		player.session.removeProperty(player.htmlID(), "height")
 
 	case Poster:
 		delete(player.properties, tag)
-		removeProperty(player.htmlID(), Poster, player.Session())
+		player.session.removeProperty(player.htmlID(), Poster)
 
 	default:
 		player.mediaPlayerData.remove(tag)
@@ -91,9 +91,9 @@ func (player *videoPlayerData) set(tag string, value any) bool {
 		updateSize := func(cssTag string) {
 			if size, ok := floatTextProperty(player, tag, session, 0); ok {
 				if size != "0" {
-					updateProperty(player.htmlID(), cssTag, size, session)
+					session.updateProperty(player.htmlID(), cssTag, size)
 				} else {
-					removeProperty(player.htmlID(), cssTag, session)
+					session.removeProperty(player.htmlID(), cssTag)
 				}
 			}
 		}
@@ -107,7 +107,7 @@ func (player *videoPlayerData) set(tag string, value any) bool {
 
 		case Poster:
 			if url, ok := stringProperty(player, Poster, session); ok {
-				updateProperty(player.htmlID(), Poster, url, session)
+				session.updateProperty(player.htmlID(), Poster, url)
 			}
 		}
 		return true

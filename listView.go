@@ -837,7 +837,7 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 		}
 	}
 	buffer.WriteString(`</div></div>`)
-	session.runFunc("updateInnerHTML", listView.htmlID()+"-"+strconv.Itoa(index), buffer.String())
+	session.updateInnerHTML(listView.htmlID()+"-"+strconv.Itoa(index), buffer.String())
 }
 
 func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder) {

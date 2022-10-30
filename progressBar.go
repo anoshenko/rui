@@ -65,10 +65,12 @@ func (progress *progressBarData) propertyChanged(tag string) {
 	if progress.created {
 		switch tag {
 		case ProgressBarMax:
-			updateProperty(progress.htmlID(), Max, strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 32), progress.session)
+			progress.session.updateProperty(progress.htmlID(), Max,
+				strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 32))
 
 		case ProgressBarValue:
-			updateProperty(progress.htmlID(), Value, strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 32), progress.session)
+			progress.session.updateProperty(progress.htmlID(), Value,
+				strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 32))
 		}
 	}
 }

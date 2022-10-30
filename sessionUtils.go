@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -60,19 +59,12 @@ func updateInnerHTML(htmlID string, session Session) {
 
 			script.Grow(32 * 1024)
 			view.htmlSubviews(view, script)
-			session.runFunc("updateInnerHTML", view.htmlID(), script.String())
+			session.updateInnerHTML(view.htmlID(), script.String())
 		}
 	}
 }
 
-func appendToInnerHTML(htmlID, content string, session Session) {
-	if !session.ignoreViewUpdates() {
-		if view := session.viewByHTMLID(htmlID); view != nil {
-			session.runFunc("appendToInnerHTML", view.htmlID(), content)
-		}
-	}
-}
-
+/*
 func updateProperty(htmlID, property, value string, session Session) {
 	if !session.ignoreViewUpdates() {
 		if buffer := session.updateScript(htmlID); buffer != nil {
@@ -120,7 +112,7 @@ func removeProperty(htmlID, property string, session Session) {
 		}
 	}
 }
-
+*/
 /*
 func setDisabled(htmlID string, disabled bool, session Session) {
 	if !session.ignoreViewUpdates() {

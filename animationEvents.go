@@ -70,7 +70,7 @@ func (view *viewData) setTransitionListener(tag string, value any) bool {
 	} else if js, ok := transitionEvents[tag]; ok {
 		view.properties[tag] = listeners
 		if view.created {
-			updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)", view.Session())
+			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
 		}
 	} else {
 		return false
@@ -82,7 +82,7 @@ func (view *viewData) removeTransitionListener(tag string) {
 	delete(view.properties, tag)
 	if view.created {
 		if js, ok := transitionEvents[tag]; ok {
-			removeProperty(view.htmlID(), js.jsEvent, view.Session())
+			view.session.removeProperty(view.htmlID(), js.jsEvent)
 		}
 	}
 }
@@ -136,7 +136,7 @@ func (view *viewData) setAnimationListener(tag string, value any) bool {
 	} else if js, ok := animationEvents[tag]; ok {
 		view.properties[tag] = listeners
 		if view.created {
-			updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)", view.Session())
+			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
 		}
 	} else {
 		return false
@@ -148,7 +148,7 @@ func (view *viewData) removeAnimationListener(tag string) {
 	delete(view.properties, tag)
 	if view.created {
 		if js, ok := animationEvents[tag]; ok {
-			removeProperty(view.htmlID(), js.jsEvent, view.Session())
+			view.session.removeProperty(view.htmlID(), js.jsEvent)
 		}
 	}
 }

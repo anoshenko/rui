@@ -624,8 +624,8 @@ func (view *viewData) SetAnimated(tag string, value any, animation Animation) bo
 	htmlID := view.htmlID()
 	session.startUpdateScript(htmlID)
 
-	updateProperty(htmlID, "ontransitionend", "transitionEndEvent(this, event)", view.session)
-	updateProperty(htmlID, "ontransitioncancel", "transitionCancelEvent(this, event)", view.session)
+	session.updateProperty(htmlID, "ontransitionend", "transitionEndEvent(this, event)")
+	session.updateProperty(htmlID, "ontransitioncancel", "transitionCancelEvent(this, event)")
 
 	if prevAnimation, ok := view.transitions[tag]; ok {
 		view.singleTransition[tag] = prevAnimation
@@ -701,7 +701,7 @@ func (style *viewStyle) transitionCSS(session Session) string {
 }
 
 func (view *viewData) updateTransitionCSS() {
-	updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.Session()), view.Session())
+	view.session.updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.session))
 }
 
 func (style *viewStyle) Transition(tag string) Animation {
@@ -732,7 +732,7 @@ func (style *viewStyle) SetTransition(tag string, animation Animation) {
 func (view *viewData) SetTransition(tag string, animation Animation) {
 	view.viewStyle.SetTransition(tag, animation)
 	if view.created {
-		updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.Session()), view.Session())
+		view.session.updateCSSProperty(view.htmlID(), "transition", view.transitionCSS(view.session))
 	}
 }
 

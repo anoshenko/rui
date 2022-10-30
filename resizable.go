@@ -334,8 +334,8 @@ func (resizable *resizableData) updateResizeBorderWidth() {
 		session := resizable.Session()
 		column, row := resizable.cellSizeCSS()
 
-		updateCSSProperty(htmlID, "grid-template-columns", column, session)
-		updateCSSProperty(htmlID, "grid-template-rows", row, session)
+		session.updateCSSProperty(htmlID, "grid-template-columns", column)
+		session.updateCSSProperty(htmlID, "grid-template-rows", row)
 	}
 }
 

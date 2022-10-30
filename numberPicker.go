@@ -140,24 +140,24 @@ func (picker *numberPickerData) propertyChanged(tag string) {
 		switch tag {
 		case NumberPickerType:
 			if GetNumberPickerType(picker) == NumberSlider {
-				updateProperty(picker.htmlID(), "type", "range", picker.session)
+				picker.session.updateProperty(picker.htmlID(), "type", "range")
 			} else {
-				updateProperty(picker.htmlID(), "type", "number", picker.session)
+				picker.session.updateProperty(picker.htmlID(), "type", "number")
 			}
 
 		case NumberPickerMin:
 			min, _ := GetNumberPickerMinMax(picker)
-			updateProperty(picker.htmlID(), Min, strconv.FormatFloat(min, 'f', -1, 32), picker.session)
+			picker.session.updateProperty(picker.htmlID(), Min, strconv.FormatFloat(min, 'f', -1, 32))
 
 		case NumberPickerMax:
 			_, max := GetNumberPickerMinMax(picker)
-			updateProperty(picker.htmlID(), Max, strconv.FormatFloat(max, 'f', -1, 32), picker.session)
+			picker.session.updateProperty(picker.htmlID(), Max, strconv.FormatFloat(max, 'f', -1, 32))
 
 		case NumberPickerStep:
 			if step := GetNumberPickerStep(picker); step > 0 {
-				updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32), picker.session)
+				picker.session.updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32))
 			} else {
-				updateProperty(picker.htmlID(), Step, "any", picker.session)
+				picker.session.updateProperty(picker.htmlID(), Step, "any")
 			}
 
 		case NumberPickerValue:

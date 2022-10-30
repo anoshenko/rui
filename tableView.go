@@ -593,11 +593,11 @@ func (table *tableViewData) propertyChanged(tag string) {
 			session := table.Session()
 			gap, ok := sizeProperty(table, Gap, session)
 			if !ok || gap.Type == Auto || gap.Value <= 0 {
-				updateCSSProperty(htmlID, "border-spacing", "0", session)
-				updateCSSProperty(htmlID, "border-collapse", "collapse", session)
+				session.updateCSSProperty(htmlID, "border-spacing", "0")
+				session.updateCSSProperty(htmlID, "border-collapse", "collapse")
 			} else {
-				updateCSSProperty(htmlID, "border-spacing", gap.cssString("0", session), session)
-				updateCSSProperty(htmlID, "border-collapse", "separate", session)
+				session.updateCSSProperty(htmlID, "border-spacing", gap.cssString("0", session))
+				session.updateCSSProperty(htmlID, "border-collapse", "separate")
 			}
 
 		case SelectionMode:
@@ -606,38 +606,38 @@ func (table *tableViewData) propertyChanged(tag string) {
 
 			switch GetTableSelectionMode(table) {
 			case CellSelection:
-				updateProperty(htmlID, "tabindex", "0", session)
-				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
-				updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)", session)
-				updateProperty(htmlID, "data-selection", "cell", session)
-				updateProperty(htmlID, "data-focusitemstyle", table.currentStyle(), session)
-				updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle(), session)
+				session.updateProperty(htmlID, "tabindex", "0")
+				session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
+				session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
+				session.updateProperty(htmlID, "data-selection", "cell")
+				session.updateProperty(htmlID, "data-focusitemstyle", table.currentStyle())
+				session.updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle())
 
 				if table.current.Row >= 0 && table.current.Column >= 0 {
-					updateProperty(htmlID, "data-current", table.cellID(table.current.Row, table.current.Column), session)
+					session.updateProperty(htmlID, "data-current", table.cellID(table.current.Row, table.current.Column))
 				} else {
-					removeProperty(htmlID, "data-current", session)
+					session.removeProperty(htmlID, "data-current")
 				}
-				updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)", session)
+				session.updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)")
 
 			case RowSelection:
-				updateProperty(htmlID, "tabindex", "0", session)
-				updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)", session)
-				updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)", session)
-				updateProperty(htmlID, "data-selection", "row", session)
-				updateProperty(htmlID, "data-focusitemstyle", table.currentStyle(), session)
-				updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle(), session)
+				session.updateProperty(htmlID, "tabindex", "0")
+				session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
+				session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
+				session.updateProperty(htmlID, "data-selection", "row")
+				session.updateProperty(htmlID, "data-focusitemstyle", table.currentStyle())
+				session.updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle())
 
 				if table.current.Row >= 0 {
-					updateProperty(htmlID, "data-current", table.rowID(table.current.Row), session)
+					session.updateProperty(htmlID, "data-current", table.rowID(table.current.Row))
 				} else {
-					removeProperty(htmlID, "data-current", session)
+					session.removeProperty(htmlID, "data-current")
 				}
-				updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)", session)
+				session.updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)")
 
 			default: // NoneSelection
 				for _, prop := range []string{"tabindex", "data-current", "onfocus", "onblur", "onkeydown", "data-selection"} {
-					removeProperty(htmlID, prop, session)
+					session.removeProperty(htmlID, prop)
 				}
 			}
 			updateInnerHTML(htmlID, session)
@@ -1335,11 +1335,12 @@ func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
 
 func (table *tableViewData) ReloadTableData() {
 	session := table.Session()
+	htmlID := table.htmlID()
 	if content := table.content(); content != nil {
-		updateProperty(table.htmlID(), "data-rows", strconv.Itoa(content.RowCount()), session)
-		updateProperty(table.htmlID(), "data-columns", strconv.Itoa(content.ColumnCount()), session)
+		session.updateProperty(htmlID, "data-rows", strconv.Itoa(content.RowCount()))
+		session.updateProperty(htmlID, "data-columns", strconv.Itoa(content.ColumnCount()))
 	}
-	updateInnerHTML(table.htmlID(), session)
+	updateInnerHTML(htmlID, session)
 }
 
 func (table *tableViewData) onItemResize(self View, index string, x, y, width, height float64) {

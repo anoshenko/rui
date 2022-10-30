@@ -100,7 +100,7 @@ func (edit *editViewData) remove(tag string) {
 		if exists {
 			delete(edit.properties, Hint)
 			if edit.created {
-				removeProperty(edit.htmlID(), "placeholder", edit.session)
+				edit.session.removeProperty(edit.htmlID(), "placeholder")
 			}
 			edit.propertyChangedEvent(tag)
 		}
@@ -109,7 +109,7 @@ func (edit *editViewData) remove(tag string) {
 		if exists {
 			delete(edit.properties, MaxLength)
 			if edit.created {
-				removeProperty(edit.htmlID(), "maxlength", edit.session)
+				edit.session.removeProperty(edit.htmlID(), "maxlength")
 			}
 			edit.propertyChangedEvent(tag)
 		}
@@ -118,7 +118,7 @@ func (edit *editViewData) remove(tag string) {
 		if exists {
 			delete(edit.properties, tag)
 			if edit.created {
-				updateBoolProperty(edit.htmlID(), tag, false, edit.session)
+				edit.session.updateBoolProperty(edit.htmlID(), tag, false)
 			}
 			edit.propertyChangedEvent(tag)
 		}
@@ -147,7 +147,7 @@ func (edit *editViewData) remove(tag string) {
 			delete(edit.properties, tag)
 			if oldText != "" {
 				if edit.created {
-					removeProperty(edit.htmlID(), Pattern, edit.session)
+					edit.session.removeProperty(edit.htmlID(), Pattern)
 				}
 				edit.propertyChangedEvent(tag)
 			}
@@ -173,9 +173,9 @@ func (edit *editViewData) remove(tag string) {
 				if wrap := IsEditViewWrap(edit); wrap != oldWrap {
 					if edit.created {
 						if wrap {
-							updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
+							edit.session.updateProperty(edit.htmlID(), "wrap", "soft")
 						} else {
-							updateProperty(edit.htmlID(), "wrap", "off", edit.session)
+							edit.session.updateProperty(edit.htmlID(), "wrap", "off")
 						}
 					}
 					edit.propertyChangedEvent(tag)
@@ -225,9 +225,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 			if text = GetHint(edit); oldText != text {
 				if edit.created {
 					if text != "" {
-						updateProperty(edit.htmlID(), "placeholder", text, edit.session)
+						edit.session.updateProperty(edit.htmlID(), "placeholder", text)
 					} else {
-						removeProperty(edit.htmlID(), "placeholder", edit.session)
+						edit.session.removeProperty(edit.htmlID(), "placeholder")
 					}
 				}
 				edit.propertyChangedEvent(tag)
@@ -242,9 +242,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 			if maxLength := GetMaxLength(edit); maxLength != oldMaxLength {
 				if edit.created {
 					if maxLength > 0 {
-						updateProperty(edit.htmlID(), "maxlength", strconv.Itoa(maxLength), edit.session)
+						edit.session.updateProperty(edit.htmlID(), "maxlength", strconv.Itoa(maxLength))
 					} else {
-						removeProperty(edit.htmlID(), "maxlength", edit.session)
+						edit.session.removeProperty(edit.htmlID(), "maxlength")
 					}
 				}
 				edit.propertyChangedEvent(tag)
@@ -257,9 +257,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 		if edit.setBoolProperty(ReadOnly, value) {
 			if edit.created {
 				if IsReadOnly(edit) {
-					updateProperty(edit.htmlID(), ReadOnly, "", edit.session)
+					edit.session.updateProperty(edit.htmlID(), ReadOnly, "")
 				} else {
-					removeProperty(edit.htmlID(), ReadOnly, edit.session)
+					edit.session.removeProperty(edit.htmlID(), ReadOnly)
 				}
 			}
 			edit.propertyChangedEvent(tag)
@@ -270,7 +270,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 	case Spellcheck:
 		if edit.setBoolProperty(Spellcheck, value) {
 			if edit.created {
-				updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit), edit.session)
+				edit.session.updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit))
 			}
 			edit.propertyChangedEvent(tag)
 			return true
@@ -284,9 +284,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 			if text = GetEditViewPattern(edit); oldText != text {
 				if edit.created {
 					if text != "" {
-						updateProperty(edit.htmlID(), Pattern, text, edit.session)
+						edit.session.updateProperty(edit.htmlID(), Pattern, text)
 					} else {
-						removeProperty(edit.htmlID(), Pattern, edit.session)
+						edit.session.removeProperty(edit.htmlID(), Pattern)
 					}
 				}
 				edit.propertyChangedEvent(tag)
@@ -315,9 +315,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 				if wrap := IsEditViewWrap(edit); wrap != oldWrap {
 					if edit.created {
 						if wrap {
-							updateProperty(edit.htmlID(), "wrap", "soft", edit.session)
+							edit.session.updateProperty(edit.htmlID(), "wrap", "soft")
 						} else {
-							updateProperty(edit.htmlID(), "wrap", "off", edit.session)
+							edit.session.updateProperty(edit.htmlID(), "wrap", "off")
 						}
 					}
 					edit.propertyChangedEvent(tag)

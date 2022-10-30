@@ -134,6 +134,26 @@ func (brige *wsBrige) runFunc(funcName string, args ...any) bool {
 	return true
 }
 
+func (brige *wsBrige) updateInnerHTML(htmlID, html string) {
+	brige.runFunc("updateInnerHTML", htmlID, html)
+}
+
+func (brige *wsBrige) appendToInnerHTML(htmlID, html string) {
+	brige.runFunc("appendToInnerHTML", htmlID, html)
+}
+
+func (brige *wsBrige) updateCSSProperty(htmlID, property, value string) {
+	brige.runFunc("updateCSSProperty", htmlID, property, value)
+}
+
+func (brige *wsBrige) updateProperty(htmlID, property, value any) {
+	brige.runFunc("updateProperty", htmlID, property, value)
+}
+
+func (brige *wsBrige) removeProperty(htmlID, property string) {
+	brige.runFunc("removeProperty", htmlID, property)
+}
+
 func (brige *wsBrige) readMessage() (string, bool) {
 	_, p, err := brige.conn.ReadMessage()
 	if err != nil {

@@ -161,8 +161,8 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 		delete(tabsLayout.properties, Tabs)
 		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
-			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
-			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
+			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
+			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
 			updateCSSStyle(htmlID, tabsLayout.session)
 			updateInnerHTML(htmlID, tabsLayout.session)
 		}
@@ -171,8 +171,8 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 		delete(tabsLayout.properties, tag)
 		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
-			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
-			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
+			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
+			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
 			updateInnerHTML(htmlID, tabsLayout.session)
 		}
 
@@ -247,8 +247,8 @@ func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
 		}
 		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
-			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
-			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
+			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
+			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
 			updateCSSStyle(htmlID, tabsLayout.session)
 			updateInnerHTML(htmlID, tabsLayout.session)
 		}
@@ -267,8 +267,8 @@ func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
 
 		if tabsLayout.created {
 			htmlID := tabsLayout.htmlID()
-			updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle(), tabsLayout.session)
-			updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle(), tabsLayout.session)
+			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
+			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
 			updateInnerHTML(htmlID, tabsLayout.session)
 		}
 

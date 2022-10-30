@@ -125,14 +125,14 @@ func (textView *textViewData) set(tag string, value any) bool {
 
 func (textView *textViewData) textOverflowUpdated() {
 	session := textView.Session()
-	if n, ok := enumProperty(textView, TextOverflow, textView.session, 0); ok {
+	if n, ok := enumProperty(textView, TextOverflow, session, 0); ok {
 		values := enumProperties[TextOverflow].cssValues
 		if n >= 0 && n < len(values) {
-			updateCSSProperty(textView.htmlID(), TextOverflow, values[n], session)
+			session.updateCSSProperty(textView.htmlID(), TextOverflow, values[n])
 			return
 		}
 	}
-	updateCSSProperty(textView.htmlID(), TextOverflow, "", session)
+	session.updateCSSProperty(textView.htmlID(), TextOverflow, "")
 }
 
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {

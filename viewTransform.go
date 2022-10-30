@@ -250,15 +250,15 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 			if x.Type != Auto || y.Type != Auto {
 				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
 			}
-			updateCSSProperty(htmlID, "perspective-origin", value, session)
+			session.updateCSSProperty(htmlID, "perspective-origin", value)
 		}
 
 	case BackfaceVisible:
 		if getTransform3D(view, session) {
 			if GetBackfaceVisible(view) {
-				updateCSSProperty(htmlID, BackfaceVisible, "visible", session)
+				session.updateCSSProperty(htmlID, BackfaceVisible, "visible")
 			} else {
-				updateCSSProperty(htmlID, BackfaceVisible, "hidden", session)
+				session.updateCSSProperty(htmlID, BackfaceVisible, "hidden")
 			}
 		}
 
@@ -274,10 +274,10 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
 			}
 		}
-		updateCSSProperty(htmlID, "transform-origin", value, session)
+		session.updateCSSProperty(htmlID, "transform-origin", value)
 
 	case SkewX, SkewY, TranslateX, TranslateY, TranslateZ, ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ:
-		updateCSSProperty(htmlID, "transform", view.transform(session), session)
+		session.updateCSSProperty(htmlID, "transform", view.transform(session))
 
 	default:
 		return false

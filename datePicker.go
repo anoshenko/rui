@@ -77,19 +77,19 @@ func (picker *datePickerData) remove(tag string) {
 	case DatePickerMin:
 		delete(picker.properties, DatePickerMin)
 		if picker.created {
-			removeProperty(picker.htmlID(), Min, picker.session)
+			picker.session.removeProperty(picker.htmlID(), Min)
 		}
 
 	case DatePickerMax:
 		delete(picker.properties, DatePickerMax)
 		if picker.created {
-			removeProperty(picker.htmlID(), Max, picker.session)
+			picker.session.removeProperty(picker.htmlID(), Max)
 		}
 
 	case DatePickerStep:
 		delete(picker.properties, DatePickerStep)
 		if picker.created {
-			removeProperty(picker.htmlID(), Step, picker.session)
+			picker.session.removeProperty(picker.htmlID(), Step)
 		}
 
 	case DatePickerValue:
@@ -183,7 +183,7 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		if date, ok := setTimeValue(DatePickerMin); ok {
 			if !oldOK || date != old {
 				if picker.created {
-					updateProperty(picker.htmlID(), Min, date.Format(dateFormat), picker.session)
+					picker.session.updateProperty(picker.htmlID(), Min, date.Format(dateFormat))
 				}
 				picker.propertyChangedEvent(tag)
 			}
@@ -195,7 +195,7 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		if date, ok := setTimeValue(DatePickerMax); ok {
 			if !oldOK || date != old {
 				if picker.created {
-					updateProperty(picker.htmlID(), Max, date.Format(dateFormat), picker.session)
+					picker.session.updateProperty(picker.htmlID(), Max, date.Format(dateFormat))
 				}
 				picker.propertyChangedEvent(tag)
 			}
@@ -208,9 +208,9 @@ func (picker *datePickerData) set(tag string, value any) bool {
 			if step := GetDatePickerStep(picker); oldStep != step {
 				if picker.created {
 					if step > 0 {
-						updateProperty(picker.htmlID(), Step, strconv.Itoa(step), picker.session)
+						picker.session.updateProperty(picker.htmlID(), Step, strconv.Itoa(step))
 					} else {
-						removeProperty(picker.htmlID(), Step, picker.session)
+						picker.session.removeProperty(picker.htmlID(), Step)
 					}
 				}
 				picker.propertyChangedEvent(tag)

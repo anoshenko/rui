@@ -610,7 +610,7 @@ func ShowPopup(view View, param Params) Popup {
 func (manager *popupManager) updatePopupLayerInnerHTML(session Session) {
 	if manager.popups == nil {
 		manager.popups = []Popup{}
-		session.runFunc("updateInnerHTML", "ruiPopupLayer", "")
+		session.updateInnerHTML("ruiPopupLayer", "")
 		return
 	}
 
@@ -620,7 +620,7 @@ func (manager *popupManager) updatePopupLayerInnerHTML(session Session) {
 	for _, popup := range manager.popups {
 		popup.html(buffer)
 	}
-	session.runFunc("updateInnerHTML", "ruiPopupLayer", buffer.String())
+	session.updateInnerHTML("ruiPopupLayer", buffer.String())
 }
 
 func (manager *popupManager) showPopup(popup Popup) {
@@ -637,8 +637,8 @@ func (manager *popupManager) showPopup(popup Popup) {
 
 	session.runFunc("blurCurrent")
 	manager.updatePopupLayerInnerHTML(session)
-	updateCSSProperty("ruiPopupLayer", "visibility", "visible", session)
-	updateCSSProperty("ruiRoot", "pointer-events", "none", session)
+	session.updateCSSProperty("ruiPopupLayer", "visibility", "visible")
+	session.updateCSSProperty("ruiRoot", "pointer-events", "none")
 }
 
 func (manager *popupManager) dismissPopup(popup Popup) {
@@ -656,9 +656,9 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 	if manager.popups[count-1] == popup {
 		if count == 1 {
 			manager.popups = []Popup{}
-			updateCSSProperty("ruiRoot", "pointer-events", "auto", session)
-			updateCSSProperty("ruiPopupLayer", "visibility", "hidden", session)
-			session.runFunc("updateInnerHTML", "ruiPopupLayer", "")
+			session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
+			session.updateCSSProperty("ruiPopupLayer", "visibility", "hidden")
+			session.updateInnerHTML("ruiPopupLayer", "")
 		} else {
 			manager.popups = manager.popups[:count-1]
 			manager.updatePopupLayerInnerHTML(session)

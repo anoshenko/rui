@@ -98,7 +98,7 @@ func (button *checkboxData) set(tag string, value any) bool {
 			return false
 		}
 		if button.created {
-			updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign(), button.session)
+			button.session.updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign())
 		}
 
 	case HorizontalAlign:
@@ -106,7 +106,7 @@ func (button *checkboxData) set(tag string, value any) bool {
 			return false
 		}
 		if button.created {
-			updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign(), button.session)
+			button.session.updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign())
 		}
 
 	case CellVerticalAlign, CellHorizontalAlign, CellWidth, CellHeight:
@@ -159,13 +159,13 @@ func (button *checkboxData) remove(tag string) {
 	case VerticalAlign:
 		delete(button.properties, tag)
 		if button.created {
-			updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign(), button.session)
+			button.session.updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign())
 		}
 
 	case HorizontalAlign:
 		delete(button.properties, tag)
 		if button.created {
-			updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign(), button.session)
+			button.session.updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign())
 		}
 
 	default:
@@ -189,7 +189,7 @@ func (button *checkboxData) changedCheckboxState(state bool) {
 	defer freeStringBuilder(buffer)
 
 	button.htmlCheckbox(buffer, state)
-	button.Session().runFunc("updateInnerHTML", button.htmlID()+"checkbox", buffer.String())
+	button.Session().updateInnerHTML(button.htmlID()+"checkbox", buffer.String())
 }
 
 func checkboxClickListener(view View) {

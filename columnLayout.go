@@ -89,10 +89,10 @@ func (columnLayout *columnLayoutData) remove(tag string) {
 	if columnLayout.created {
 		switch tag {
 		case ColumnCount, ColumnWidth, ColumnGap:
-			updateCSSProperty(columnLayout.htmlID(), tag, "", columnLayout.Session())
+			columnLayout.session.updateCSSProperty(columnLayout.htmlID(), tag, "")
 
 		case ColumnSeparator:
-			updateCSSProperty(columnLayout.htmlID(), "column-rule", "", columnLayout.Session())
+			columnLayout.session.updateCSSProperty(columnLayout.htmlID(), "column-rule", "")
 		}
 	}
 }
@@ -120,14 +120,14 @@ func (columnLayout *columnLayoutData) set(tag string, value any) bool {
 				separator := val.(ColumnSeparatorProperty)
 				css = separator.cssValue(columnLayout.Session())
 			}
-			updateCSSProperty(columnLayout.htmlID(), "column-rule", css, session)
+			session.updateCSSProperty(columnLayout.htmlID(), "column-rule", css)
 
 		case ColumnCount:
 			session := columnLayout.Session()
 			if count, ok := intProperty(columnLayout, tag, session, 0); ok && count > 0 {
-				updateCSSProperty(columnLayout.htmlID(), tag, strconv.Itoa(count), session)
+				session.updateCSSProperty(columnLayout.htmlID(), tag, strconv.Itoa(count))
 			} else {
-				updateCSSProperty(columnLayout.htmlID(), tag, "auto", session)
+				session.updateCSSProperty(columnLayout.htmlID(), tag, "auto")
 			}
 		}
 	}

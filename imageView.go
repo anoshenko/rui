@@ -102,8 +102,8 @@ func (imageView *imageViewData) remove(tag string) {
 	if imageView.created {
 		switch tag {
 		case Source:
-			updateProperty(imageView.htmlID(), "src", "", imageView.session)
-			removeProperty(imageView.htmlID(), "srcset", imageView.session)
+			imageView.session.updateProperty(imageView.htmlID(), "src", "")
+			imageView.session.removeProperty(imageView.htmlID(), "srcset")
 
 		case AltText:
 			updateInnerHTML(imageView.htmlID(), imageView.session)
@@ -133,11 +133,11 @@ func (imageView *imageViewData) set(tag string, value any) bool {
 				if src != "" && src[0] == '@' {
 					src, _ = imageProperty(imageView, Source, imageView.session)
 				}
-				updateProperty(imageView.htmlID(), "src", src, imageView.session)
+				imageView.session.updateProperty(imageView.htmlID(), "src", src)
 				if srcset := imageView.srcSet(src); srcset != "" {
-					updateProperty(imageView.htmlID(), "srcset", srcset, imageView.session)
+					imageView.session.updateProperty(imageView.htmlID(), "srcset", srcset)
 				} else {
-					removeProperty(imageView.htmlID(), "srcset", imageView.session)
+					imageView.session.removeProperty(imageView.htmlID(), "srcset")
 				}
 			}
 			imageView.propertyChangedEvent(Source)

@@ -230,12 +230,12 @@ func (gridLayout *gridLayoutData) remove(tag string) {
 	if gridLayout.created {
 		switch tag {
 		case CellWidth:
-			updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
-				gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session), gridLayout.session)
+			gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
+				gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session))
 
 		case CellHeight:
-			updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
-				gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session), gridLayout.session)
+			gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
+				gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session))
 
 		}
 	}
@@ -259,12 +259,12 @@ func (gridLayout *gridLayoutData) set(tag string, value any) bool {
 		if gridLayout.created {
 			switch tag {
 			case CellWidth:
-				updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
-					gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session), gridLayout.session)
+				gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
+					gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session))
 
 			case CellHeight:
-				updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
-					gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session), gridLayout.session)
+				gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
+					gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session))
 
 			}
 		}

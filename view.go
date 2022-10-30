@@ -193,7 +193,7 @@ func (view *viewData) remove(tag string) {
 	case Style, StyleDisabled:
 		if _, ok := view.properties[tag]; ok {
 			delete(view.properties, tag)
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
+			view.session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -323,7 +323,7 @@ func (view *viewData) set(tag string, value any) bool {
 		}
 		view.properties[tag] = text
 		if view.created {
-			updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)), view.session)
+			view.session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
 		}
 
 	case FocusEvent, LostFocusEvent:
@@ -379,21 +379,21 @@ func viewPropertyChanged(view *viewData, tag string) {
 	case Visibility:
 		switch GetVisibility(view) {
 		case Invisible:
-			updateCSSProperty(htmlID, Visibility, "hidden", session)
-			updateCSSProperty(htmlID, "display", "", session)
+			session.updateCSSProperty(htmlID, Visibility, "hidden")
+			session.updateCSSProperty(htmlID, "display", "")
 
 		case Gone:
-			updateCSSProperty(htmlID, Visibility, "hidden", session)
-			updateCSSProperty(htmlID, "display", "none", session)
+			session.updateCSSProperty(htmlID, Visibility, "hidden")
+			session.updateCSSProperty(htmlID, "display", "none")
 
 		default:
-			updateCSSProperty(htmlID, Visibility, "visible", session)
-			updateCSSProperty(htmlID, "display", "", session)
+			session.updateCSSProperty(htmlID, Visibility, "visible")
+			session.updateCSSProperty(htmlID, "display", "")
 		}
 		return
 
 	case Background:
-		updateCSSProperty(htmlID, Background, view.backgroundCSS(session), session)
+		session.updateCSSProperty(htmlID, Background, view.backgroundCSS(session))
 		return
 
 	case Border:
@@ -402,9 +402,9 @@ func viewPropertyChanged(view *viewData, tag string) {
 			if buffer == nil {
 				session.startUpdateScript(htmlID)
 			}
-			updateCSSProperty(htmlID, BorderWidth, "", session)
-			updateCSSProperty(htmlID, BorderColor, "", session)
-			updateCSSProperty(htmlID, BorderStyle, "none", session)
+			session.updateCSSProperty(htmlID, BorderWidth, "")
+			session.updateCSSProperty(htmlID, BorderColor, "")
+			session.updateCSSProperty(htmlID, BorderStyle, "none")
 			if buffer == nil {
 				session.finishUpdateScript(htmlID)
 			}
@@ -418,9 +418,9 @@ func viewPropertyChanged(view *viewData, tag string) {
 			if buffer == nil {
 				session.startUpdateScript(htmlID)
 			}
-			updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session), session)
-			updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session), session)
-			updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session), session)
+			session.updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session))
+			session.updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session))
+			session.updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session))
 			if buffer == nil {
 				session.finishUpdateScript(htmlID)
 			}
@@ -429,32 +429,32 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	case BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle:
 		if border := getBorder(view, Border); border != nil {
-			updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session), session)
+			session.updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session))
 		}
 		return
 
 	case BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor:
 		if border := getBorder(view, Border); border != nil {
-			updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session), session)
+			session.updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session))
 		}
 		return
 
 	case BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
 		if border := getBorder(view, Border); border != nil {
-			updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session), session)
+			session.updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session))
 		}
 		return
 
 	case Outline, OutlineColor, OutlineStyle, OutlineWidth:
-		updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(session), session)
+		session.updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(session))
 		return
 
 	case Shadow:
-		updateCSSProperty(htmlID, "box-shadow", shadowCSS(view, Shadow, session), session)
+		session.updateCSSProperty(htmlID, "box-shadow", shadowCSS(view, Shadow, session))
 		return
 
 	case TextShadow:
-		updateCSSProperty(htmlID, "text-shadow", shadowCSS(view, TextShadow, session), session)
+		session.updateCSSProperty(htmlID, "text-shadow", shadowCSS(view, TextShadow, session))
 		return
 
 	case Radius, RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
@@ -462,44 +462,44 @@ func viewPropertyChanged(view *viewData, tag string) {
 		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
 		radius := GetRadius(view)
-		updateCSSProperty(htmlID, "border-radius", radius.cssString(session), session)
+		session.updateCSSProperty(htmlID, "border-radius", radius.cssString(session))
 		return
 
 	case Margin, MarginTop, MarginRight, MarginBottom, MarginLeft,
 		"top-margin", "right-margin", "bottom-margin", "left-margin":
 		margin := GetMargin(view)
-		updateCSSProperty(htmlID, Margin, margin.cssString(session), session)
+		session.updateCSSProperty(htmlID, Margin, margin.cssString(session))
 		return
 
 	case Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
 		"top-padding", "right-padding", "bottom-padding", "left-padding":
 		padding := GetPadding(view)
-		updateCSSProperty(htmlID, Padding, padding.cssString(session), session)
+		session.updateCSSProperty(htmlID, Padding, padding.cssString(session))
 		return
 
 	case AvoidBreak:
 		if avoid, ok := boolProperty(view, AvoidBreak, session); ok {
 			if avoid {
-				updateCSSProperty(htmlID, "break-inside", "avoid", session)
+				session.updateCSSProperty(htmlID, "break-inside", "avoid")
 			} else {
-				updateCSSProperty(htmlID, "break-inside", "auto", session)
+				session.updateCSSProperty(htmlID, "break-inside", "auto")
 			}
 		}
 		return
 
 	case Clip:
 		if clip := getClipShape(view, Clip, session); clip != nil && clip.valid(session) {
-			updateCSSProperty(htmlID, `clip-path`, clip.cssStyle(session), session)
+			session.updateCSSProperty(htmlID, `clip-path`, clip.cssStyle(session))
 		} else {
-			updateCSSProperty(htmlID, `clip-path`, "none", session)
+			session.updateCSSProperty(htmlID, `clip-path`, "none")
 		}
 		return
 
 	case ShapeOutside:
 		if clip := getClipShape(view, ShapeOutside, session); clip != nil && clip.valid(session) {
-			updateCSSProperty(htmlID, ShapeOutside, clip.cssStyle(session), session)
+			session.updateCSSProperty(htmlID, ShapeOutside, clip.cssStyle(session))
 		} else {
-			updateCSSProperty(htmlID, ShapeOutside, "none", session)
+			session.updateCSSProperty(htmlID, ShapeOutside, "none")
 		}
 		return
 
@@ -510,7 +510,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 				text = filter.cssStyle(session)
 			}
 		}
-		updateCSSProperty(htmlID, tag, text, session)
+		session.updateCSSProperty(htmlID, tag, text)
 		return
 
 	case BackdropFilter:
@@ -524,8 +524,8 @@ func viewPropertyChanged(view *viewData, tag string) {
 		if buffer == nil {
 			session.startUpdateScript(htmlID)
 		}
-		updateCSSProperty(htmlID, "-webkit-backdrop-filter", text, session)
-		updateCSSProperty(htmlID, tag, text, session)
+		session.updateCSSProperty(htmlID, "-webkit-backdrop-filter", text)
+		session.updateCSSProperty(htmlID, tag, text)
 		if buffer == nil {
 			session.finishUpdateScript(htmlID)
 		}
@@ -533,38 +533,38 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	case FontName:
 		if font, ok := stringProperty(view, FontName, session); ok {
-			updateCSSProperty(htmlID, "font-family", font, session)
+			session.updateCSSProperty(htmlID, "font-family", font)
 		} else {
-			updateCSSProperty(htmlID, "font-family", "", session)
+			session.updateCSSProperty(htmlID, "font-family", "")
 		}
 		return
 
 	case Italic:
 		if state, ok := boolProperty(view, tag, session); ok {
 			if state {
-				updateCSSProperty(htmlID, "font-style", "italic", session)
+				session.updateCSSProperty(htmlID, "font-style", "italic")
 			} else {
-				updateCSSProperty(htmlID, "font-style", "normal", session)
+				session.updateCSSProperty(htmlID, "font-style", "normal")
 			}
 		} else {
-			updateCSSProperty(htmlID, "font-style", "", session)
+			session.updateCSSProperty(htmlID, "font-style", "")
 		}
 		return
 
 	case SmallCaps:
 		if state, ok := boolProperty(view, tag, session); ok {
 			if state {
-				updateCSSProperty(htmlID, "font-variant", "small-caps", session)
+				session.updateCSSProperty(htmlID, "font-variant", "small-caps")
 			} else {
-				updateCSSProperty(htmlID, "font-variant", "normal", session)
+				session.updateCSSProperty(htmlID, "font-variant", "normal")
 			}
 		} else {
-			updateCSSProperty(htmlID, "font-variant", "", session)
+			session.updateCSSProperty(htmlID, "font-variant", "")
 		}
 		return
 
 	case Strikethrough, Overline, Underline:
-		updateCSSProperty(htmlID, "text-decoration", view.cssTextDecoration(session), session)
+		session.updateCSSProperty(htmlID, "text-decoration", view.cssTextDecoration(session))
 		for _, tag2 := range []string{TextLineColor, TextLineStyle, TextLineThickness} {
 			viewPropertyChanged(view, tag2)
 		}
@@ -575,29 +575,29 @@ func viewPropertyChanged(view *viewData, tag string) {
 		return
 
 	case AnimationTag:
-		updateCSSProperty(htmlID, AnimationTag, view.animationCSS(session), session)
+		session.updateCSSProperty(htmlID, AnimationTag, view.animationCSS(session))
 		return
 
 	case AnimationPaused:
 		paused, ok := boolProperty(view, AnimationPaused, session)
 		if !ok {
-			updateCSSProperty(htmlID, `animation-play-state`, ``, session)
+			session.updateCSSProperty(htmlID, `animation-play-state`, ``)
 		} else if paused {
-			updateCSSProperty(htmlID, `animation-play-state`, `paused`, session)
+			session.updateCSSProperty(htmlID, `animation-play-state`, `paused`)
 		} else {
-			updateCSSProperty(htmlID, `animation-play-state`, `running`, session)
+			session.updateCSSProperty(htmlID, `animation-play-state`, `running`)
 		}
 		return
 
 	case ZIndex, TabSize:
 		if i, ok := intProperty(view, tag, session, 0); ok {
-			updateCSSProperty(htmlID, tag, strconv.Itoa(i), session)
+			session.updateCSSProperty(htmlID, tag, strconv.Itoa(i))
 		}
 		return
 
 	case Row, Column:
-		if parent := view.parentHTMLID(); parent != "" {
-			updateInnerHTML(parent, session)
+		if parentID := view.parentHTMLID(); parentID != "" {
+			updateInnerHTML(parentID, session)
 		}
 		return
 
@@ -608,15 +608,15 @@ func viewPropertyChanged(view *viewData, tag string) {
 		}
 		if userSelect, ok := boolProperty(view, UserSelect, session); ok {
 			if userSelect {
-				updateCSSProperty(htmlID, "-webkit-user-select", "auto", session)
-				updateCSSProperty(htmlID, "user-select", "auto", session)
+				session.updateCSSProperty(htmlID, "-webkit-user-select", "auto")
+				session.updateCSSProperty(htmlID, "user-select", "auto")
 			} else {
-				updateCSSProperty(htmlID, "-webkit-user-select", "none", session)
-				updateCSSProperty(htmlID, "user-select", "none", session)
+				session.updateCSSProperty(htmlID, "-webkit-user-select", "none")
+				session.updateCSSProperty(htmlID, "user-select", "none")
 			}
 		} else {
-			updateCSSProperty(htmlID, "-webkit-user-select", "", session)
-			updateCSSProperty(htmlID, "user-select", "", session)
+			session.updateCSSProperty(htmlID, "-webkit-user-select", "")
+			session.updateCSSProperty(htmlID, "user-select", "")
 		}
 		if buffer == nil {
 			session.finishUpdateScript(htmlID)
@@ -626,7 +626,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	if cssTag, ok := sizeProperties[tag]; ok {
 		size, _ := sizeProperty(view, tag, session)
-		updateCSSProperty(htmlID, cssTag, size.cssString("", session), session)
+		session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
 		return
 	}
 
@@ -639,23 +639,23 @@ func viewPropertyChanged(view *viewData, tag string) {
 	}
 	if cssTag, ok := colorTags[tag]; ok {
 		if color, ok := colorProperty(view, tag, session); ok {
-			updateCSSProperty(htmlID, cssTag, color.cssString(), session)
+			session.updateCSSProperty(htmlID, cssTag, color.cssString())
 		} else {
-			updateCSSProperty(htmlID, cssTag, "", session)
+			session.updateCSSProperty(htmlID, cssTag, "")
 		}
 		return
 	}
 
 	if valuesData, ok := enumProperties[tag]; ok && valuesData.cssTag != "" {
 		n, _ := enumProperty(view, tag, session, 0)
-		updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n], session)
+		session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
 		return
 	}
 
 	for _, floatTag := range []string{Opacity, ScaleX, ScaleY, ScaleZ, RotateX, RotateY, RotateZ} {
 		if tag == floatTag {
 			if f, ok := floatTextProperty(view, floatTag, session, 0); ok {
-				updateCSSProperty(htmlID, floatTag, f, session)
+				session.updateCSSProperty(htmlID, floatTag, f)
 			}
 			return
 		}

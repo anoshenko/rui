@@ -63,7 +63,7 @@ func (detailsView *detailsViewData) remove(tag string) {
 			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 		case Expanded:
-			removeProperty(detailsView.htmlID(), "open", detailsView.Session())
+			detailsView.session.removeProperty(detailsView.htmlID(), "open")
 		}
 	}
 }
@@ -111,9 +111,9 @@ func (detailsView *detailsViewData) set(tag string, value any) bool {
 		}
 		if detailsView.created {
 			if IsDetailsExpanded(detailsView) {
-				updateProperty(detailsView.htmlID(), "open", "", detailsView.Session())
+				detailsView.session.updateProperty(detailsView.htmlID(), "open", "")
 			} else {
-				removeProperty(detailsView.htmlID(), "open", detailsView.Session())
+				detailsView.session.removeProperty(detailsView.htmlID(), "open")
 			}
 		}
 

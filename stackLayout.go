@@ -122,11 +122,11 @@ func (layout *stackLayoutData) set(tag string, value any) bool {
 		setCurrent := func(index int) {
 			if index != layout.peek {
 				if layout.peek < len(layout.views) {
-					updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.peek), "visibility", "hidden", layout.Session())
+					layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.peek), "visibility", "hidden")
 				}
 
 				layout.peek = index
-				updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(index), "visibility", "visible", layout.Session())
+				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(index), "visibility", "visible")
 				layout.propertyChangedEvent(Current)
 			}
 		}
@@ -204,11 +204,11 @@ func (layout *stackLayoutData) MoveToFront(view View) bool {
 		if view2.htmlID() == htmlID {
 			if i != peek {
 				if peek < len(layout.views) {
-					updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(peek), "visibility", "hidden", layout.Session())
+					layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(peek), "visibility", "hidden")
 				}
 
 				layout.peek = i
-				updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible", layout.Session())
+				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible")
 				layout.propertyChangedEvent(Current)
 			}
 			return true
@@ -225,11 +225,11 @@ func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
 		if view.ID() == viewID {
 			if i != peek {
 				if peek < len(layout.views) {
-					updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(peek), "visibility", "hidden", layout.Session())
+					layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(peek), "visibility", "hidden")
 				}
 
 				layout.peek = i
-				updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible", layout.Session())
+				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible")
 				layout.propertyChangedEvent(Current)
 			}
 			return true
@@ -319,8 +319,8 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 	viewHTML(layout.pushView, buffer)
 	buffer.WriteString(`</div>`)
 
-	appendToInnerHTML(htmlID, buffer.String(), session)
-	updateCSSProperty(htmlID+"push", "transform", "translate(0px, 0px)", layout.session)
+	session.appendToInnerHTML(htmlID, buffer.String())
+	layout.session.updateCSSProperty(htmlID+"push", "transform", "translate(0px, 0px)")
 
 	layout.views = append(layout.views, view)
 	view.setParentID(htmlID)
@@ -357,7 +357,7 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 	viewHTML(layout.popView, buffer)
 	buffer.WriteString(`</div>`)
 
-	appendToInnerHTML(htmlID, buffer.String(), session)
+	session.appendToInnerHTML(htmlID, buffer.String())
 
 	var value string
 	switch layout.animationType {
@@ -374,7 +374,7 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 		value = fmt.Sprintf("translate(%gpx, 0px)", layout.frame.Width)
 	}
 
-	updateCSSProperty(htmlID+"pop", "transform", value, layout.session)
+	layout.session.updateCSSProperty(htmlID+"pop", "transform", value)
 	return true
 }
 

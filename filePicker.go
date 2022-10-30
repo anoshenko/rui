@@ -129,7 +129,7 @@ func (picker *filePickerData) remove(tag string) {
 	case Accept:
 		delete(picker.properties, tag)
 		if picker.created {
-			removeProperty(picker.htmlID(), "accept", picker.Session())
+			picker.session.removeProperty(picker.htmlID(), "accept")
 		}
 		picker.propertyChangedEvent(tag)
 
@@ -196,9 +196,9 @@ func (picker *filePickerData) set(tag string, value any) bool {
 
 		if picker.created {
 			if css := picker.acceptCSS(); css != "" {
-				updateProperty(picker.htmlID(), "accept", css, picker.Session())
+				picker.session.updateProperty(picker.htmlID(), "accept", css)
 			} else {
-				removeProperty(picker.htmlID(), "accept", picker.Session())
+				picker.session.removeProperty(picker.htmlID(), "accept")
 			}
 		}
 		picker.propertyChangedEvent(tag)

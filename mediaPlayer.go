@@ -463,21 +463,21 @@ func (player *mediaPlayerData) propertyChanged(tag string) {
 	if player.created {
 		switch tag {
 		case Controls, Loop:
-			value, _ := boolProperty(player, tag, player.Session())
+			value, _ := boolProperty(player, tag, player.session)
 			if value {
-				updateBoolProperty(player.htmlID(), tag, value, player.Session())
+				player.session.updateBoolProperty(player.htmlID(), tag, value)
 			} else {
-				removeProperty(player.htmlID(), tag, player.Session())
+				player.session.removeProperty(player.htmlID(), tag)
 			}
 
 		case Muted:
-			value, _ := boolProperty(player, tag, player.Session())
-			player.Session().runFunc("setMediaMuted", player.htmlID(), value)
+			value, _ := boolProperty(player, tag, player.session)
+			player.session.runFunc("setMediaMuted", player.htmlID(), value)
 
 		case Preload:
-			value, _ := enumProperty(player, tag, player.Session(), 0)
+			value, _ := enumProperty(player, tag, player.session, 0)
 			values := enumProperties[Preload].values
-			updateProperty(player.htmlID(), tag, values[value], player.Session())
+			player.session.updateProperty(player.htmlID(), tag, values[value])
 
 		case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
 			EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
@@ -490,53 +490,53 @@ func (player *mediaPlayerData) propertyChanged(tag string) {
 						case []func(MediaPlayer):
 							if len(value) > 0 {
 								fn := fmt.Sprintf(`playerEvent(this, "%s")`, event.tag)
-								updateProperty(player.htmlID(), event.cssTag, fn, player.Session())
+								player.session.updateProperty(player.htmlID(), event.cssTag, fn)
 								return
 							}
 						}
 					}
-					updateProperty(player.htmlID(), tag, "", player.Session())
+					player.session.updateProperty(player.htmlID(), tag, "")
 					break
 				}
 
 			}
 		case TimeUpdateEvent:
 			if value := player.getRaw(tag); value != nil {
-				updateProperty(player.htmlID(), "ontimeupdate", "playerTimeUpdatedEvent(this)", player.Session())
+				player.session.updateProperty(player.htmlID(), "ontimeupdate", "playerTimeUpdatedEvent(this)")
 			} else {
-				updateProperty(player.htmlID(), "ontimeupdate", "", player.Session())
+				player.session.updateProperty(player.htmlID(), "ontimeupdate", "")
 			}
 
 		case VolumeChangedEvent:
 			if value := player.getRaw(tag); value != nil {
-				updateProperty(player.htmlID(), "onvolumechange", "playerVolumeChangedEvent(this)", player.Session())
+				player.session.updateProperty(player.htmlID(), "onvolumechange", "playerVolumeChangedEvent(this)")
 			} else {
-				updateProperty(player.htmlID(), "onvolumechange", "", player.Session())
+				player.session.updateProperty(player.htmlID(), "onvolumechange", "")
 			}
 
 		case DurationChangedEvent:
 			if value := player.getRaw(tag); value != nil {
-				updateProperty(player.htmlID(), "ondurationchange", "playerDurationChangedEvent(this)", player.Session())
+				player.session.updateProperty(player.htmlID(), "ondurationchange", "playerDurationChangedEvent(this)")
 			} else {
-				updateProperty(player.htmlID(), "ondurationchange", "", player.Session())
+				player.session.updateProperty(player.htmlID(), "ondurationchange", "")
 			}
 
 		case RateChangedEvent:
 			if value := player.getRaw(tag); value != nil {
-				updateProperty(player.htmlID(), "onratechange", "playerRateChangedEvent(this)", player.Session())
+				player.session.updateProperty(player.htmlID(), "onratechange", "playerRateChangedEvent(this)")
 			} else {
-				updateProperty(player.htmlID(), "onratechange", "", player.Session())
+				player.session.updateProperty(player.htmlID(), "onratechange", "")
 			}
 
 		case PlayerErrorEvent:
 			if value := player.getRaw(tag); value != nil {
-				updateProperty(player.htmlID(), "onerror", "playerErrorEvent(this)", player.Session())
+				player.session.updateProperty(player.htmlID(), "onerror", "playerErrorEvent(this)")
 			} else {
-				updateProperty(player.htmlID(), "onerror", "", player.Session())
+				player.session.updateProperty(player.htmlID(), "onerror", "")
 			}
 
 		case Source:
-			updateInnerHTML(player.htmlID(), player.Session())
+			updateInnerHTML(player.htmlID(), player.session)
 		}
 	}
 }
@@ -544,7 +544,7 @@ func (player *mediaPlayerData) propertyChanged(tag string) {
 func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value := player.getRaw(Source); value != nil {
 		if sources, ok := value.([]MediaSource); ok && len(sources) > 0 {
-			session := player.Session()
+			session := player.session
 			for _, src := range sources {
 				if url, ok := session.resolveConstants(src.Url); ok && url != "" {
 					buffer.WriteString(`<source src="`)
@@ -565,13 +565,13 @@ func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) 
 func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder) {
 	player.viewData.htmlProperties(self, buffer)
 	for _, tag := range []string{Controls, Loop, Muted, Preload} {
-		if value, _ := boolProperty(player, tag, player.Session()); value {
+		if value, _ := boolProperty(player, tag, player.session); value {
 			buffer.WriteRune(' ')
 			buffer.WriteString(tag)
 		}
 	}
 
-	if value, ok := enumProperty(player, Preload, player.Session(), 0); ok {
+	if value, ok := enumProperty(player, Preload, player.session, 0); ok {
 		values := enumProperties[Preload].values
 		buffer.WriteString(` preload="`)
 		buffer.WriteString(values[value])
@@ -667,7 +667,7 @@ func (player *mediaPlayerData) SetCurrentTime(seconds float64) {
 }
 
 func (player *mediaPlayerData) getFloatPlayerProperty(tag string) (float64, bool) {
-	value := player.Session().htmlPropertyValue(player.htmlID(), tag)
+	value := player.session.htmlPropertyValue(player.htmlID(), tag)
 	if value != "" {
 		result, err := strconv.ParseFloat(value, 32)
 		if err == nil {
@@ -718,7 +718,7 @@ func (player *mediaPlayerData) Volume() float64 {
 }
 
 func (player *mediaPlayerData) getBoolPlayerProperty(tag string) (bool, bool) {
-	switch value := player.Session().htmlPropertyValue(player.htmlID(), tag); strings.ToLower(value) {
+	switch value := player.session.htmlPropertyValue(player.htmlID(), tag); strings.ToLower(value) {
 	case "0", "false", "off":
 		return false, true
 
