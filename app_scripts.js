@@ -1702,3 +1702,44 @@ function imageError(element, event) {
 	var message = "imageViewError{session=" + sessionID + ",id=" + element.id + "}";
 	sendMessage(message);
 }
+
+function canvasTextMetrics(answerID, elementId, font, text) {
+	var w = 0;
+	var ascent = 0;
+	var descent = 0;
+	var left = 0;
+	var right = 0;
+
+	const canvas = document.getElementById(elementId);
+	if (canvas) {
+		const ctx = canvas.getContext('2d');
+  		if (ctx) {
+			ctx.save()
+			const dpr = window.devicePixelRatio || 1;
+			ctx.scale(dpr, dpr);
+			ctx.font = font;
+			ctx.textBaseline = 'alphabetic';
+			ctx.textAlign = 'start';
+			var metrics = ctx.measureText(text)
+			w = metrics.width;
+			ascent = metrics.actualBoundingBoxAscent;
+			descent = metrics.actualBoundingBoxDescent;
+			left = metrics.actualBoundingBoxLeft;
+			right = metrics.actualBoundingBoxRight;
+			ctx.restore();
+		}
+	}
+
+	sendMessage('answer{answerID=' + answerID + ', width=' + w + ', ascent=' + ascent + 
+		', descent=' + descent + ', left=' + left + ', right=' + right + '}');
+}
+
+function getPropertyValue(answerID, elementId, name) {
+	const element = document.getElementById(elementId);
+	if (element && element[name]) {
+		sendMessage('answer{answerID=' + answerID + ', value="' + element[name] + '"}')
+		return
+	}
+
+	sendMessage('answer{answerID=' + answerID + ', value=""}')
+}

@@ -667,48 +667,15 @@ func (player *mediaPlayerData) SetCurrentTime(seconds float64) {
 }
 
 func (player *mediaPlayerData) getFloatPlayerProperty(tag string) (float64, bool) {
-
-	script := allocStringBuilder()
-	defer freeStringBuilder(script)
-
-	script.WriteString(`const element = document.getElementById('`)
-	script.WriteString(player.htmlID())
-	script.WriteString(`');
-if (element && element.`)
-	script.WriteString(tag)
-	script.WriteString(`) {
-	sendMessage('answer{answerID=' + answerID + ',`)
-	script.WriteString(tag)
-	script.WriteString(`=' + element.`)
-	script.WriteString(tag)
-	script.WriteString(` + '}');
-} else {
-	sendMessage('answer{answerID=' + answerID + ',`)
-	script.WriteString(tag)
-	script.WriteString(`=0}');
-}`)
-
-	result := player.Session().runGetterScript(script.String())
-	switch result.Tag() {
-	case "answer":
-		if value, ok := result.PropertyValue(tag); ok {
-			w, err := strconv.ParseFloat(value, 32)
-			if err == nil {
-				return w, true
-			}
-			ErrorLog(err.Error())
+	value := player.Session().htmlPropertyValue(player.htmlID(), tag)
+	if value != "" {
+		result, err := strconv.ParseFloat(value, 32)
+		if err == nil {
+			return result, true
 		}
-
-	case "error":
-		if text, ok := result.PropertyValue("errorText"); ok {
-			ErrorLog(text)
-		} else {
-			ErrorLog("error")
-		}
-
-	default:
-		ErrorLog("Unknown answer: " + result.Tag())
+		ErrorLog(err.Error())
 	}
+
 	return 0, false
 }
 
@@ -751,45 +718,14 @@ func (player *mediaPlayerData) Volume() float64 {
 }
 
 func (player *mediaPlayerData) getBoolPlayerProperty(tag string) (bool, bool) {
+	switch value := player.Session().htmlPropertyValue(player.htmlID(), tag); strings.ToLower(value) {
+	case "0", "false", "off":
+		return false, true
 
-	script := allocStringBuilder()
-	defer freeStringBuilder(script)
-
-	script.WriteString(`const element = document.getElementById('`)
-	script.WriteString(player.htmlID())
-	script.WriteString(`');
-if (element && element.`)
-	script.WriteString(tag)
-	script.WriteString(`) {
-	sendMessage('answer{answerID=' + answerID + ',`)
-	script.WriteString(tag)
-	script.WriteString(`=1}')
-} else {
-	sendMessage('answer{answerID=' + answerID + ',`)
-	script.WriteString(tag)
-	script.WriteString(`=0}')
-}`)
-
-	result := player.Session().runGetterScript(script.String())
-	switch result.Tag() {
-	case "answer":
-		if value, ok := result.PropertyValue(tag); ok {
-			if value == "1" {
-				return true, true
-			}
-			return false, true
-		}
-
-	case "error":
-		if text, ok := result.PropertyValue("errorText"); ok {
-			ErrorLog(text)
-		} else {
-			ErrorLog("error")
-		}
-
-	default:
-		ErrorLog("Unknown answer: " + result.Tag())
+	case "1", "true", "on":
+		return false, true
 	}
+
 	return false, false
 }
 

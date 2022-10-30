@@ -76,6 +76,21 @@ type FontParams struct {
 	LineHeight SizeUnit
 }
 
+// TextMetrics is the result of the Canvas.TextMetrics function
+type TextMetrics struct {
+	// Width is the calculated width of a segment of inline text in pixels
+	Width float64
+	// Ascent is the distance from the horizontal baseline to the top of the bounding rectangle used to render the text, in pixels.
+	Ascent float64
+	// Descent is the distance from the horizontal baseline to the bottom of the bounding rectangle used to render the text, in pixels.
+	Descent float64
+	// Left is the distance to the left side of the bounding rectangle of the given text, in  pixels;
+	// positive numbers indicating a distance going left from the given alignment point.
+	Left float64
+	// Right is the distance to the right side of the bounding rectangle of the given text, CSS pixels.
+	Right float64
+}
+
 // Canvas is a drawing interface
 type Canvas interface {
 	// View return the view for the drawing
@@ -195,8 +210,8 @@ type Canvas interface {
 	// SetFontWithParams sets the current text style to use when drawing text
 	SetFontWithParams(name string, size SizeUnit, params FontParams)
 
-	// TextWidth calculates the width of the text drawn by a given font
-	TextWidth(text string, fontName string, fontSize SizeUnit) float64
+	// TextWidth calculates metrics of the text drawn by a given font
+	TextMetrics(text string, fontName string, fontSize SizeUnit, fontParams FontParams) TextMetrics
 
 	// SetTextBaseline sets the current text baseline used when drawing text. Valid values:
 	// AlphabeticBaseline (0), TopBaseline (1), MiddleBaseline (2), BottomBaseline (3),
@@ -596,6 +611,67 @@ func (canvas *canvasData) SetFont(name string, size SizeUnit) {
 	canvas.writeFont(name, &canvas.script)
 }
 
+func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params FontParams) string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	if params.Italic {
+		buffer.WriteString("italic ")
+	}
+	if params.SmallCaps {
+		buffer.WriteString("small-caps ")
+	}
+	if params.Weight > 0 && params.Weight <= 9 {
+		switch params.Weight {
+		case 4:
+			buffer.WriteString("normal ")
+		case 7:
+			buffer.WriteString("bold ")
+		default:
+			buffer.WriteString(strconv.Itoa(params.Weight * 100))
+			buffer.WriteRune(' ')
+		}
+	}
+
+	buffer.WriteString(size.cssString("1rem", canvas.View().Session()))
+	switch params.LineHeight.Type {
+	case Auto:
+
+	case SizeInPercent:
+		if params.LineHeight.Value != 100 {
+			buffer.WriteString("/")
+			buffer.WriteString(strconv.FormatFloat(params.LineHeight.Value/100, 'g', -1, 64))
+		}
+
+	case SizeInFraction:
+		if params.LineHeight.Value != 1 {
+			buffer.WriteString("/")
+			buffer.WriteString(strconv.FormatFloat(params.LineHeight.Value, 'g', -1, 64))
+		}
+
+	default:
+		buffer.WriteString("/")
+		buffer.WriteString(params.LineHeight.cssString("", canvas.View().Session()))
+	}
+
+	names := strings.Split(name, ",")
+	lead := " "
+	for _, font := range names {
+		font = strings.Trim(font, " \n\"'")
+		buffer.WriteString(lead)
+		lead = ","
+		if strings.Contains(font, " ") {
+			buffer.WriteRune('"')
+			buffer.WriteString(font)
+			buffer.WriteRune('"')
+		} else {
+			buffer.WriteString(font)
+		}
+	}
+
+	return buffer.String()
+}
+
 func (canvas *canvasData) setFontWithParams(name string, size SizeUnit, params FontParams, script *strings.Builder) {
 	script.WriteString("\nctx.font = '")
 	if params.Italic {
@@ -644,57 +720,9 @@ func (canvas *canvasData) SetFontWithParams(name string, size SizeUnit, params F
 	canvas.setFontWithParams(name, size, params, &canvas.script)
 }
 
-func (canvas *canvasData) TextWidth(text string, fontName string, fontSize SizeUnit) float64 {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-
-	canvas.setFontWithParams(fontName, fontSize, FontParams{}, buffer)
-	fontParams := buffer.String()
-
-	buffer.Reset()
-	canvas.writeStringArgs(text, buffer)
-	str := buffer.String()
-
-	script := fmt.Sprintf(`
-var w = 0;	
-const canvas = document.getElementById('%s');
-if (canvas) {
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.save()
-    const dpr = window.devicePixelRatio || 1;
-    ctx.scale(dpr, dpr);
-    %s;
-    w = ctx.measureText('%s').width;
-	ctx.restore();
-  }
-}
-sendMessage('answer{width=' + w + ', answerID=' + answerID + '}');
-`, canvas.View().htmlID(), fontParams, str)
-
-	result := canvas.View().Session().runGetterScript(script)
-	switch result.Tag() {
-	case "answer":
-		if value, ok := result.PropertyValue("width"); ok {
-			w, err := strconv.ParseFloat(value, 32)
-			if err == nil {
-				return w
-			}
-			ErrorLog(err.Error())
-		}
-
-	case "error":
-		if text, ok := result.PropertyValue("errorText"); ok {
-			ErrorLog(text)
-		} else {
-			ErrorLog("error")
-		}
-
-	default:
-		ErrorLog("Unknown answer: " + result.Tag())
-	}
-
-	return 0
+func (canvas *canvasData) TextMetrics(text string, fontName string, fontSize SizeUnit, fontParams FontParams) TextMetrics {
+	view := canvas.View()
+	return view.Session().canvasTextMetrics(view.htmlID(), canvas.fontWithParams(fontName, fontSize, fontParams), text)
 }
 
 func (canvas *canvasData) SetTextBaseline(baseline int) {

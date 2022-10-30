@@ -151,6 +151,10 @@ func (brige *wsBrige) writeMessage(script string) bool {
 		DebugLog("Run script:")
 		DebugLog(script)
 	}
+	if brige.conn == nil {
+		ErrorLog("No connection")
+		return false
+	}
 	if err := brige.conn.WriteMessage(websocket.TextMessage, []byte(script)); err != nil {
 		ErrorLog(err.Error())
 		return false
@@ -158,7 +162,9 @@ func (brige *wsBrige) writeMessage(script string) bool {
 	return true
 }
 
-func (brige *wsBrige) runGetterScript(script string) DataObject {
+func (brige *wsBrige) canvasTextMetrics(htmlID, font, text string) TextMetrics {
+	result := TextMetrics{}
+
 	brige.answerMutex.Lock()
 	answerID := brige.answerID
 	brige.answerID++
@@ -166,28 +172,34 @@ func (brige *wsBrige) runGetterScript(script string) DataObject {
 
 	answer := make(chan DataObject)
 	brige.answer[answerID] = answer
-	errorText := ""
-	if brige.conn != nil {
-		script = "var answerID = " + strconv.Itoa(answerID) + ";\n" + script
-		if ProtocolInDebugLog {
-			DebugLog("\n" + script)
-		}
-		err := brige.conn.WriteMessage(websocket.TextMessage, []byte(script))
-		if err == nil {
-			return <-answer
-		}
-		errorText = err.Error()
-	} else {
-		if ProtocolInDebugLog {
-			DebugLog("\n" + script)
-		}
-		errorText = "No connection"
+
+	if brige.runFunc("canvasTextMetrics", answerID, htmlID, font, text) {
+		data := <-answer
+		result.Width = dataFloatProperty(data, "width")
 	}
 
-	result := NewDataObject("error")
-	result.SetPropertyValue("text", errorText)
 	delete(brige.answer, answerID)
 	return result
+}
+
+func (brige *wsBrige) htmlPropertyValue(htmlID, name string) string {
+	brige.answerMutex.Lock()
+	answerID := brige.answerID
+	brige.answerID++
+	brige.answerMutex.Unlock()
+
+	answer := make(chan DataObject)
+	brige.answer[answerID] = answer
+
+	if brige.runFunc("getPropertyValue", answerID, htmlID, name) {
+		data := <-answer
+		if value, ok := data.PropertyValue("value"); ok {
+			return value
+		}
+	}
+
+	delete(brige.answer, answerID)
+	return ""
 }
 
 func (brige *wsBrige) answerReceived(answer DataObject) {

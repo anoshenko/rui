@@ -1,3 +1,7 @@
+# v.10.0
+
+* The Canvas.TextWidth method replaced by Canvas.TextMetrics
+
 # v0.9.0
 
 * Requires go 1.18 or higher

@@ -11,7 +11,8 @@ type webBrige interface {
 	runFunc(funcName string, args ...any) bool
 	readMessage() (string, bool)
 	writeMessage(text string) bool
-	runGetterScript(script string) DataObject
+	canvasTextMetrics(htmlID, font, text string) TextMetrics
+	htmlPropertyValue(htmlID, name string) string
 	answerReceived(answer DataObject)
 	close()
 	remoteAddr() string
@@ -99,7 +100,8 @@ type Session interface {
 	writeInitScript(writer *strings.Builder)
 	runFunc(funcName string, args ...any)
 	runScript(script string)
-	runGetterScript(script string) DataObject //, answer chan DataObject)
+	canvasTextMetrics(htmlID, font, text string) TextMetrics
+	htmlPropertyValue(htmlID, name string) string
 	handleAnswer(data DataObject)
 	handleRootSize(data DataObject)
 	handleResize(data DataObject)
@@ -339,15 +341,22 @@ func (session *sessionData) runScript(script string) {
 	}
 }
 
-func (session *sessionData) runGetterScript(script string) DataObject { //}, answer chan DataObject) {
+func (session *sessionData) canvasTextMetrics(htmlID, font, text string) TextMetrics {
 	if session.brige != nil {
-		return session.brige.runGetterScript(script)
+		return session.brige.canvasTextMetrics(htmlID, font, text)
 	}
 
 	ErrorLog("No connection")
-	result := NewDataObject("error")
-	result.SetPropertyValue("text", "No connection")
-	return result
+	return TextMetrics{Width: 0}
+}
+
+func (session *sessionData) htmlPropertyValue(htmlID, name string) string {
+	if session.brige != nil {
+		return session.brige.htmlPropertyValue(htmlID, name)
+	}
+
+	ErrorLog("No connection")
+	return ""
 }
 
 func (session *sessionData) handleAnswer(data DataObject) {
