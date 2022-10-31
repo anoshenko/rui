@@ -465,7 +465,7 @@ func (player *mediaPlayerData) propertyChanged(tag string) {
 		case Controls, Loop:
 			value, _ := boolProperty(player, tag, player.session)
 			if value {
-				player.session.updateBoolProperty(player.htmlID(), tag, value)
+				player.session.updateProperty(player.htmlID(), tag, value)
 			} else {
 				player.session.removeProperty(player.htmlID(), tag)
 			}

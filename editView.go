@@ -118,7 +118,7 @@ func (edit *editViewData) remove(tag string) {
 		if exists {
 			delete(edit.properties, tag)
 			if edit.created {
-				edit.session.updateBoolProperty(edit.htmlID(), tag, false)
+				edit.session.updateProperty(edit.htmlID(), tag, false)
 			}
 			edit.propertyChangedEvent(tag)
 		}
@@ -270,7 +270,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 	case Spellcheck:
 		if edit.setBoolProperty(Spellcheck, value) {
 			if edit.created {
-				edit.session.updateBoolProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit))
+				edit.session.updateProperty(edit.htmlID(), Spellcheck, IsSpellcheck(edit))
 			}
 			edit.propertyChangedEvent(tag)
 			return true

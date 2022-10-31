@@ -13,12 +13,13 @@ import (
 )
 
 type wsBrige struct {
-	conn        *websocket.Conn
-	answer      map[int]chan DataObject
-	answerID    int
-	answerMutex sync.Mutex
-	closed      bool
-	buffer      strings.Builder
+	conn          *websocket.Conn
+	answer        map[int]chan DataObject
+	answerID      int
+	answerMutex   sync.Mutex
+	closed        bool
+	buffer        strings.Builder
+	updateScripts map[string]*strings.Builder
 }
 
 var upgrader = websocket.Upgrader{
@@ -38,12 +39,34 @@ func CreateSocketBrige(w http.ResponseWriter, req *http.Request) webBrige {
 	brige.answer = make(map[int]chan DataObject)
 	brige.conn = conn
 	brige.closed = false
+	brige.updateScripts = map[string]*strings.Builder{}
 	return brige
 }
 
 func (brige *wsBrige) close() {
 	brige.closed = true
 	brige.conn.Close()
+}
+
+func (brige *wsBrige) startUpdateScript(htmlID string) bool {
+	if _, ok := brige.updateScripts[htmlID]; ok {
+		return false
+	}
+	buffer := allocStringBuilder()
+	brige.updateScripts[htmlID] = buffer
+	buffer.WriteString("var element = document.getElementById('")
+	buffer.WriteString(htmlID)
+	buffer.WriteString("');\nif (element) {\n")
+	return true
+}
+
+func (brige *wsBrige) finishUpdateScript(htmlID string) {
+	if buffer, ok := brige.updateScripts[htmlID]; ok {
+		buffer.WriteString("scanElementsSize();\n}\n")
+		brige.writeMessage(buffer.String())
+		freeStringBuilder(buffer)
+		delete(brige.updateScripts, htmlID)
+	}
 }
 
 func (brige *wsBrige) argToString(arg any) (string, bool) {
@@ -143,15 +166,42 @@ func (brige *wsBrige) appendToInnerHTML(htmlID, html string) {
 }
 
 func (brige *wsBrige) updateCSSProperty(htmlID, property, value string) {
-	brige.runFunc("updateCSSProperty", htmlID, property, value)
+	if buffer, ok := brige.updateScripts[htmlID]; ok {
+		buffer.WriteString(`element.style['`)
+		buffer.WriteString(property)
+		buffer.WriteString(`'] = '`)
+		buffer.WriteString(value)
+		buffer.WriteString("';\n")
+	} else {
+		brige.runFunc("updateCSSProperty", htmlID, property, value)
+	}
+
 }
 
-func (brige *wsBrige) updateProperty(htmlID, property, value any) {
-	brige.runFunc("updateProperty", htmlID, property, value)
+func (brige *wsBrige) updateProperty(htmlID, property string, value any) {
+	if buffer, ok := brige.updateScripts[htmlID]; ok {
+		if val, ok := brige.argToString(value); ok {
+			buffer.WriteString(`element.setAttribute('`)
+			buffer.WriteString(property)
+			buffer.WriteString(`', `)
+			buffer.WriteString(val)
+			buffer.WriteString(");\n")
+		}
+	} else {
+		brige.runFunc("updateProperty", htmlID, property, value)
+	}
 }
 
 func (brige *wsBrige) removeProperty(htmlID, property string) {
-	brige.runFunc("removeProperty", htmlID, property)
+	if buffer, ok := brige.updateScripts[htmlID]; ok {
+		buffer.WriteString(`if (element.hasAttribute('`)
+		buffer.WriteString(property)
+		buffer.WriteString(`')) { element.removeAttribute('`)
+		buffer.WriteString(property)
+		buffer.WriteString("');}\n")
+	} else {
+		brige.runFunc("removeProperty", htmlID, property)
+	}
 }
 
 func (brige *wsBrige) readMessage() (string, bool) {

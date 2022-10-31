@@ -8,11 +8,13 @@ import (
 )
 
 type webBrige interface {
+	startUpdateScript(htmlID string) bool
+	finishUpdateScript(htmlID string)
 	runFunc(funcName string, args ...any) bool
 	updateInnerHTML(htmlID, html string)
 	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)
-	updateProperty(htmlID, property, value any)
+	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
 	readMessage() (string, bool)
 	writeMessage(text string) bool
@@ -107,10 +109,11 @@ type Session interface {
 	updateInnerHTML(htmlID, html string)
 	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)
-	updateProperty(htmlID, property, value string)
-	updateBoolProperty(htmlID, property string, value bool)
+	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
 	runScript(script string)
+	startUpdateScript(htmlID string) bool
+	finishUpdateScript(htmlID string)
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
 	htmlPropertyValue(htmlID, name string) string
 	handleAnswer(data DataObject)
@@ -131,10 +134,6 @@ type Session interface {
 
 	popupManager() *popupManager
 	imageManager() *imageManager
-
-	startUpdateScript(htmlID string)
-	updateScript(htmlID string) *strings.Builder
-	finishUpdateScript(htmlID string)
 }
 
 type sessionData struct {
@@ -365,50 +364,33 @@ func (session *sessionData) appendToInnerHTML(htmlID, html string) {
 }
 
 func (session *sessionData) updateCSSProperty(htmlID, property, value string) {
-	if !session.ignoreViewUpdates() {
-		if buffer := session.updateScript(htmlID); buffer != nil {
-			buffer.WriteString(fmt.Sprintf(`element.style['%v'] = '%v';`, property, value))
-			buffer.WriteRune('\n')
-		} else {
-			session.runFunc("updateCSSProperty", htmlID, property, value)
-		}
+	if !session.ignoreViewUpdates() && session.brige != nil {
+		session.brige.updateCSSProperty(htmlID, property, value)
 	}
 }
 
-func (session *sessionData) updateProperty(htmlID, property, value string) {
-	if !session.ignoreViewUpdates() {
-		if buffer := session.updateScript(htmlID); buffer != nil {
-			buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', '%v');`, property, value))
-			buffer.WriteRune('\n')
-		} else {
-			session.runFunc("updateProperty", htmlID, property, value)
-		}
-	}
-}
-
-func (session *sessionData) updateBoolProperty(htmlID, property string, value bool) {
-	if !session.ignoreViewUpdates() {
-		if buffer := session.updateScript(htmlID); buffer != nil {
-			if value {
-				buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', true);`, property))
-			} else {
-				buffer.WriteString(fmt.Sprintf(`element.setAttribute('%v', false);`, property))
-			}
-			buffer.WriteRune('\n')
-		} else {
-			session.runFunc("updateProperty", htmlID, property, value)
-		}
+func (session *sessionData) updateProperty(htmlID, property string, value any) {
+	if !session.ignoreViewUpdates() && session.brige != nil {
+		session.brige.updateProperty(htmlID, property, value)
 	}
 }
 
 func (session *sessionData) removeProperty(htmlID, property string) {
-	if !session.ignoreViewUpdates() {
-		if buffer := session.updateScript(htmlID); buffer != nil {
-			buffer.WriteString(fmt.Sprintf(`if (element.hasAttribute('%v')) { element.removeAttribute('%v');}`, property, property))
-			buffer.WriteRune('\n')
-		} else {
-			session.runFunc("removeProperty", htmlID, property)
-		}
+	if !session.ignoreViewUpdates() && session.brige != nil {
+		session.brige.removeProperty(htmlID, property)
+	}
+}
+
+func (session *sessionData) startUpdateScript(htmlID string) bool {
+	if session.brige != nil {
+		return session.brige.startUpdateScript(htmlID)
+	}
+	return false
+}
+
+func (session *sessionData) finishUpdateScript(htmlID string) {
+	if session.brige != nil {
+		session.brige.finishUpdateScript(htmlID)
 	}
 }
 
