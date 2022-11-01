@@ -4,6 +4,7 @@ package rui
 
 import (
 	_ "embed"
+	"strings"
 	"syscall/js"
 )
 
@@ -15,35 +16,88 @@ type wasmApp struct {
 	createContentFunc func(Session) SessionContent
 	session           Session
 	brige             webBrige
+	close             chan DataObject
 }
 
 func (app *wasmApp) Finish() {
 	app.session.close()
 }
 
-func (app *wasmApp) startSession(this js.Value, args []js.Value) interface{} {
-	if app.createContentFunc == nil || len(args) == 1 {
-		return nil
-	}
+func wasmLog(text string) {
+	js.Global().Call("log", text)
+}
 
-	params := ParseDataText(args[0].String())
-	session := newSession(app, 0, "", params)
-	session.setBrige(make(chan DataObject), app.brige)
-	if !session.setContent(app.createContentFunc(session), session) {
-		return nil
-	}
+func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
+	if len(args) > 0 {
+		if obj := ParseDataText(args[0].String()); obj != nil {
+			switch command := obj.Tag(); command {
+			/*
+						case "startSession":
+							answer := ""
+							if session, answer = app.startSession(obj, events, brige); session != nil {
+								if !brige.writeMessage(answer) {
+									return
+								}
+								session.onStart()
+								go sessionEventHandler(session, events, brige)
+							}
 
-	app.session = session
+						case "reconnect":
+							if sessionText, ok := obj.PropertyValue("session"); ok {
+								if sessionID, err := strconv.Atoi(sessionText); err == nil {
+									if session = app.sessions[sessionID]; session != nil {
+										session.setBrige(events, brige)
+										answer := allocStringBuilder()
+										defer freeStringBuilder(answer)
 
-	answer := allocStringBuilder()
-	defer freeStringBuilder(answer)
+										session.writeInitScript(answer)
+										if !brige.writeMessage(answer.String()) {
+											return
+										}
+										session.onReconnect()
+										go sessionEventHandler(session, events, brige)
+										return
+									}
+									DebugLogF("Session #%d not exists", sessionID)
+								} else {
+									ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
+								}
+							} else {
+								ErrorLog(`"session" key not found`)
+							}
 
-	session.writeInitScript(answer)
-	answerText := answer.String()
+							answer := ""
+							if session, answer = app.startSession(obj, events, brige); session != nil {
+								if !brige.writeMessage(answer) {
+									return
+								}
+								session.onStart()
+								go sessionEventHandler(session, events, brige)
+							}
 
-	if ProtocolInDebugLog {
-		DebugLog("Start session:")
-		DebugLog(answerText)
+									case "disconnect":
+					session.onDisconnect()
+					return
+
+				case "session-close":
+					session.onFinish()
+					session.App().removeSession(session.ID())
+					brige.close()
+
+			*/
+			case "answer":
+				app.session.handleAnswer(obj)
+
+			case "imageLoaded":
+				app.session.imageManager().imageLoaded(obj, app.session)
+
+			case "imageError":
+				app.session.imageManager().imageLoadError(obj, app.session)
+
+			default:
+				app.session.handleEvent(command, obj)
+			}
+		}
 	}
 	return nil
 }
@@ -51,117 +105,75 @@ func (app *wasmApp) startSession(this js.Value, args []js.Value) interface{} {
 func (app *wasmApp) removeSession(id int) {
 }
 
+func (app *wasmApp) createSession() Session {
+	session := newSession(app, 0, "", ParseDataText(js.Global().Call("sessionInfo", "").String()))
+	session.setBrige(app.close, app.brige)
+	session.setContent(app.createContentFunc(session))
+	return session
+}
+
+func (app *wasmApp) init() {
+
+	document := js.Global().Get("document")
+	body := document.Call("querySelector", "body")
+
+	script := document.Call("createElement", "script")
+	script.Set("type", "text/javascript")
+	script.Set("textContent", defaultScripts+wasmScripts)
+	body.Call("appendChild", script)
+
+	js.Global().Set("sendMessage", js.FuncOf(app.handleMessage))
+
+	app.close = make(chan DataObject)
+	app.session = app.createSession()
+
+	style := document.Call("createElement", "style")
+	css := appStyles + app.session.getCurrentTheme().cssText(app.session)
+	css = strings.ReplaceAll(css, `\n`, "\n")
+	css = strings.ReplaceAll(css, `\t`, "\t")
+	style.Set("textContent", css)
+	document.Call("querySelector", "head").Call("appendChild", style)
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	div := document.Call("createElement", "div")
+	div.Set("className", "ruiRoot")
+	div.Set("id", "ruiRootView")
+	viewHTML(app.session.RootView(), buffer)
+	div.Set("innerHTML", buffer.String())
+	body.Call("appendChild", div)
+
+	div = document.Call("createElement", "div")
+	div.Set("className", "ruiPopupLayer")
+	div.Set("id", "ruiPopupLayer")
+	div.Set("onclick", "clickOutsidePopup(event)")
+	div.Set("style", "visibility: hidden;")
+	body.Call("appendChild", div)
+
+	div = document.Call("createElement", "a")
+	div.Set("id", "ruiDownloader")
+	div.Set("download", "")
+	div.Set("style", "display: none;")
+	body.Call("appendChild", div)
+}
+
 // StartApp - create the new wasmApp and start it
 func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
-	app := new(wasmApp)
-	app.params = params
-	app.createContentFunc = createContentFunc
+	SetDebugLog(wasmLog)
+	SetErrorLog(wasmLog)
 
 	if createContentFunc == nil {
 		return
 	}
 
+	app := new(wasmApp)
+	app.params = params
+	app.createContentFunc = createContentFunc
 	app.brige = createWasmBrige()
-	js.Global().Set("startSession", js.FuncOf(app.startSession))
 
-	/*
-		script := defaultScripts + wasmScripts
-		script = strings.ReplaceAll(script, "\\", `\\`)
-		script = strings.ReplaceAll(script, "\n", `\n`)
-		script = strings.ReplaceAll(script, "\t", `\t`)
-		script = strings.ReplaceAll(script, "\"", `\"`)
-		script = strings.ReplaceAll(script, "'", `\'`)
-
-		js.Global().Call("execScript", `document.getElementById('ruiscript').text += "`+script+`"`)
-	*/
-
-	document := js.Global().Get("document")
-	body := document.Call("querySelector", "body")
-	body.Set("innerHTML", `<div class="ruiRoot" id="ruiRootView"></div>
-<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden;" onclick="clickOutsidePopup(event)"></div>
-<a id="ruiDownloader" download style="display: none;"></a>`)
-
-	//js.Global().Call("execScript", "initSession()")
-	js.Global().Call("initSession", "")
-	//window.Call("execScript", "initSession()")
-
-	for true {
-		if message, ok := app.brige.readMessage(); ok && app.session != nil {
-			if ProtocolInDebugLog {
-				DebugLog(message)
-			}
-
-			if obj := ParseDataText(message); obj != nil {
-				switch command := obj.Tag(); command {
-				/*
-							case "startSession":
-								answer := ""
-								if session, answer = app.startSession(obj, events, brige); session != nil {
-									if !brige.writeMessage(answer) {
-										return
-									}
-									session.onStart()
-									go sessionEventHandler(session, events, brige)
-								}
-
-							case "reconnect":
-								if sessionText, ok := obj.PropertyValue("session"); ok {
-									if sessionID, err := strconv.Atoi(sessionText); err == nil {
-										if session = app.sessions[sessionID]; session != nil {
-											session.setBrige(events, brige)
-											answer := allocStringBuilder()
-											defer freeStringBuilder(answer)
-
-											session.writeInitScript(answer)
-											if !brige.writeMessage(answer.String()) {
-												return
-											}
-											session.onReconnect()
-											go sessionEventHandler(session, events, brige)
-											return
-										}
-										DebugLogF("Session #%d not exists", sessionID)
-									} else {
-										ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
-									}
-								} else {
-									ErrorLog(`"session" key not found`)
-								}
-
-								answer := ""
-								if session, answer = app.startSession(obj, events, brige); session != nil {
-									if !brige.writeMessage(answer) {
-										return
-									}
-									session.onStart()
-									go sessionEventHandler(session, events, brige)
-								}
-
-										case "disconnect":
-						session.onDisconnect()
-						return
-
-					case "session-close":
-						session.onFinish()
-						session.App().removeSession(session.ID())
-						brige.close()
-
-				*/
-				case "answer":
-					app.session.handleAnswer(obj)
-
-				case "imageLoaded":
-					app.session.imageManager().imageLoaded(obj, app.session)
-
-				case "imageError":
-					app.session.imageManager().imageLoadError(obj, app.session)
-
-				default:
-					app.session.handleEvent(command, obj)
-				}
-			}
-		}
-	}
+	app.init()
+	<-app.close
 }
 
 func FinishApp() {
@@ -171,31 +183,3 @@ func FinishApp() {
 func OpenBrowser(url string) bool {
 	return false
 }
-
-/*
-func OpenBrowser(url string) bool {
-	var err error
-
-	switch runtime.GOOS {
-	case "linux":
-		for _, provider := range []string{"xdg-open", "x-www-browser", "www-browser"} {
-			if _, err = exec.LookPath(provider); err == nil {
-				if exec.Command(provider, url).Start(); err == nil {
-					return true
-				}
-			}
-		}
-
-	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-
-	case "darwin":
-		err = exec.Command("open", url).Start()
-
-	default:
-		err = fmt.Errorf("unsupported platform")
-	}
-
-	return err != nil
-}
-*/

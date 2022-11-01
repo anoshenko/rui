@@ -67,7 +67,7 @@ type Session interface {
 
 	// Content returns the SessionContent of session
 	Content() SessionContent
-	setContent(content SessionContent, self Session) bool
+	setContent(content SessionContent) bool
 
 	// SetTitle sets the text of the browser title/tab
 	SetTitle(title string)
@@ -91,6 +91,7 @@ type Session interface {
 	// OpenURL opens the url in the new browser tab
 	OpenURL(url string)
 
+	getCurrentTheme() Theme
 	registerAnimation(props []AnimatedProperty) string
 
 	resolveConstants(value string) (string, bool)
@@ -245,10 +246,10 @@ func (session *sessionData) Content() SessionContent {
 	return session.content
 }
 
-func (session *sessionData) setContent(content SessionContent, self Session) bool {
+func (session *sessionData) setContent(content SessionContent) bool {
 	if content != nil {
 		session.content = content
-		session.rootView = content.CreateRootView(self)
+		session.rootView = content.CreateRootView(session)
 		if session.rootView != nil {
 			session.rootView.setParentID("ruiRootView")
 			return true
@@ -554,11 +555,11 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 
 func (session *sessionData) SetTitle(title string) {
 	title, _ = session.GetString(title)
-	session.runScript(`document.title = "` + title + `";`)
+	session.runFunc("setTitle", title)
 }
 
 func (session *sessionData) SetTitleColor(color Color) {
-	session.runScript(`setTitleColor("` + color.cssString() + `");`)
+	session.runFunc("setTitleColor", color.cssString())
 }
 
 func (session *sessionData) RemoteAddr() string {
@@ -570,5 +571,5 @@ func (session *sessionData) OpenURL(urlStr string) {
 		ErrorLog(err.Error())
 		return
 	}
-	session.runScript(`window.open("` + urlStr + `", "_blank");`)
+	session.runFunc("openURL", urlStr)
 }

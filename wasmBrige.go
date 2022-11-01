@@ -3,11 +3,10 @@
 package rui
 
 import (
+	"fmt"
 	"strconv"
 	"sync"
 	"syscall/js"
-
-	"github.com/gorilla/websocket"
 )
 
 type wasmBrige struct {
@@ -18,11 +17,6 @@ type wasmBrige struct {
 	closed      bool
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 8096,
-}
-
 func createWasmBrige() webBrige {
 	brige := new(wasmBrige)
 	brige.queue = make(chan string, 1000)
@@ -30,23 +24,58 @@ func createWasmBrige() webBrige {
 	brige.answer = make(map[int]chan DataObject)
 	brige.closed = false
 
-	js.Global().Set("sendMessage", js.FuncOf(brige.sendMessage))
-
 	return brige
 }
 
-func (brige *wasmBrige) sendMessage(this js.Value, args []js.Value) interface{} {
-	if len(args) > 0 {
-		brige.queue <- args[0].String()
+func (brige *wasmBrige) startUpdateScript(htmlID string) bool {
+	return false
+}
+
+func (brige *wasmBrige) finishUpdateScript(htmlID string) {
+}
+
+func (brige *wasmBrige) runFunc(funcName string, args ...any) bool {
+	if ProtocolInDebugLog {
+		text := funcName + "("
+		for i, arg := range args {
+			if i > 0 {
+				text += fmt.Sprintf(", `%v`", arg)
+			} else {
+				text += fmt.Sprintf("`%v`", arg)
+			}
+		}
+		DebugLog(text + ")")
 	}
-	return nil
+
+	js.Global().Call(funcName, args...)
+	return true
+}
+
+func (brige *wasmBrige) updateInnerHTML(htmlID, html string) {
+	brige.runFunc("updateInnerHTML", htmlID, html)
+}
+
+func (brige *wasmBrige) appendToInnerHTML(htmlID, html string) {
+	brige.runFunc("appendToInnerHTML", htmlID, html)
+}
+
+func (brige *wasmBrige) updateCSSProperty(htmlID, property, value string) {
+	brige.runFunc("updateCSSProperty", htmlID, property, value)
+}
+
+func (brige *wasmBrige) updateProperty(htmlID, property string, value any) {
+	brige.runFunc("updateProperty", htmlID, property, value)
+}
+
+func (brige *wasmBrige) removeProperty(htmlID, property string) {
+	brige.runFunc("removeProperty", htmlID, property)
 }
 
 func (brige *wasmBrige) close() {
 }
 
 func (brige *wasmBrige) readMessage() (string, bool) {
-	return <-brige.queue, true
+	return "", false
 }
 
 func (brige *wasmBrige) writeMessage(script string) bool {
@@ -61,25 +90,36 @@ func (brige *wasmBrige) writeMessage(script string) bool {
 	return true
 }
 
-func (brige *wasmBrige) runGetterScript(script string) DataObject {
-	brige.answerMutex.Lock()
-	answerID := brige.answerID
-	brige.answerID++
-	brige.answerMutex.Unlock()
+/*
+	func (brige *wasmBrige) runGetterScript(script string) DataObject {
+		brige.answerMutex.Lock()
+		answerID := brige.answerID
+		brige.answerID++
+		brige.answerMutex.Unlock()
 
-	answer := make(chan DataObject)
-	brige.answer[answerID] = answer
-	errorText := ""
+		answer := make(chan DataObject)
+		brige.answer[answerID] = answer
+		errorText := ""
 
-	js.Global().Set("answerID", strconv.Itoa(answerID))
+		js.Global().Set("answerID", strconv.Itoa(answerID))
 
-	window := js.Global().Get("window")
-	window.Call("execScript", script)
+		window := js.Global().Get("window")
+		window.Call("execScript", script)
 
-	result := NewDataObject("error")
-	result.SetPropertyValue("text", errorText)
-	delete(brige.answer, answerID)
-	return result
+		result := NewDataObject("error")
+		result.SetPropertyValue("text", errorText)
+		delete(brige.answer, answerID)
+		return result
+	}
+*/
+
+func (brige *wasmBrige) canvasTextMetrics(htmlID, font, text string) TextMetrics {
+	// TODO
+	return TextMetrics{}
+}
+
+func (brige *wasmBrige) htmlPropertyValue(htmlID, name string) string {
+	return ""
 }
 
 func (brige *wasmBrige) answerReceived(answer DataObject) {

@@ -2,7 +2,6 @@ package rui
 
 import (
 	"bytes"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -24,7 +23,7 @@ func (session *sessionData) startDownload(file downloadFile) {
 	currentDownloadId++
 	id := strconv.Itoa(currentDownloadId)
 	downloadFiles[id] = file
-	session.runScript(fmt.Sprintf(`startDowndload("%s", "%s")`, id, file.filename))
+	session.runFunc("startDowndload", id, file.filename)
 }
 
 func serveDownloadFile(id string, w http.ResponseWriter, r *http.Request) bool {

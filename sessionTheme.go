@@ -325,15 +325,16 @@ func (session *sessionData) SetLanguage(lang string) {
 	if lang != session.language {
 		session.language = lang
 
-		if session.rootView != nil {
+		if session.rootView != nil && session.brige != nil {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
-			buffer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
+			//buffer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
 			viewHTML(session.rootView, buffer)
-			buffer.WriteString("';\nscanElementsSize();")
+			//buffer.WriteString("';\nscanElementsSize();")
 
-			session.runScript(buffer.String())
+			//session.runScript(buffer.String())
+			session.brige.updateInnerHTML("ruiRootView", buffer.String())
 		}
 	}
 }

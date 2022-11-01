@@ -14,6 +14,47 @@ window.onblur = function(event) {
 	sendMessage( "session-pause{session=" + sessionID +"}" );
 }
 
+function sessionInfo() {
+
+	const touch_screen = (('ontouchstart' in document.documentElement) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)) ? "1" : "0";
+	var message = "startSession{touch=" + touch_screen 
+	
+	const style = window.getComputedStyle(document.body);
+	if (style) {
+		var direction = style.getPropertyValue('direction');
+		if (direction) {
+			message += ",direction=" + direction
+		}
+	}
+
+	const lang = window.navigator.language;
+	if (lang) {
+		message += ",language=\"" + lang + "\"";
+	}
+
+	const langs = window.navigator.languages;
+	if (langs) {
+		message += ",languages=\"" + langs + "\"";
+	}
+
+	const userAgent = window.navigator.userAgent
+	if (userAgent) {
+		message += ",user-agent=\"" + userAgent + "\"";
+	}
+
+	const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+	if (darkThemeMq.matches) {
+		message += ",dark=1";
+	} 
+
+	const pixelRatio = window.devicePixelRatio;
+	if (pixelRatio) {
+		message += ",pixel-ratio=" + pixelRatio;
+	}
+
+	return message + "}";
+}
+
 function getIntAttribute(element, tag) {
 	let value = element.getAttribute(tag);
 	if (value) {
@@ -1276,6 +1317,10 @@ function startDowndload(url, filename) {
 	}
 }
 
+function setTitle(title) {
+	document.title = title;
+}
+
 function setTitleColor(color) {
 	var metas = document.getElementsByTagName('meta');
 	if (metas) {
@@ -1290,6 +1335,10 @@ function setTitleColor(color) {
 	meta.setAttribute('name', 'theme-color');
 	meta.setAttribute('content', color);
 	document.getElementsByTagName('head')[0].appendChild(meta);
+}
+
+function openURL(url) {
+	window.open(url, "_blank");
 }
 
 function detailsEvent(element) {
@@ -1742,4 +1791,8 @@ function getPropertyValue(answerID, elementId, name) {
 	}
 
 	sendMessage('answer{answerID=' + answerID + ', value=""}')
+}
+
+function appendStyles(styles) {
+	document.querySelector('style').textContent += styles
 }

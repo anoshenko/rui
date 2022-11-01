@@ -200,7 +200,7 @@ func (app *application) startSession(params DataObject, events chan DataObject, 
 
 	session := newSession(app, app.nextSessionID(), "", params)
 	session.setBrige(events, brige)
-	if !session.setContent(app.createContentFunc(session), session) {
+	if !session.setContent(app.createContentFunc(session)) {
 		return nil, ""
 	}
 

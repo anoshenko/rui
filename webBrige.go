@@ -175,7 +175,6 @@ func (brige *wsBrige) updateCSSProperty(htmlID, property, value string) {
 	} else {
 		brige.runFunc("updateCSSProperty", htmlID, property, value)
 	}
-
 }
 
 func (brige *wsBrige) updateProperty(htmlID, property string, value any) {
