@@ -325,7 +325,7 @@ func (session *sessionData) SetLanguage(lang string) {
 	if lang != session.language {
 		session.language = lang
 
-		if session.rootView != nil && session.brige != nil {
+		if session.rootView != nil && session.bridge != nil {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
@@ -334,7 +334,7 @@ func (session *sessionData) SetLanguage(lang string) {
 			//buffer.WriteString("';\nscanElementsSize();")
 
 			//session.runScript(buffer.String())
-			session.brige.updateInnerHTML("ruiRootView", buffer.String())
+			session.bridge.updateInnerHTML("ruiRootView", buffer.String())
 		}
 	}
 }

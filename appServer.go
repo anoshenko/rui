@@ -78,8 +78,8 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			io.WriteString(w, app.getStartPage())
 
 		case "/ws":
-			if brige := CreateSocketBrige(w, req); brige != nil {
-				go app.socketReader(brige)
+			if bridge := CreateSocketBridge(w, req); bridge != nil {
+				go app.socketReader(bridge)
 			}
 
 		default:
@@ -96,12 +96,12 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (app *application) socketReader(brige webBrige) {
+func (app *application) socketReader(bridge webBridge) {
 	var session Session
 	events := make(chan DataObject, 1024)
 
 	for {
-		message, ok := brige.readMessage()
+		message, ok := bridge.readMessage()
 		if !ok {
 			events <- NewDataObject("disconnect")
 			return
@@ -116,28 +116,28 @@ func (app *application) socketReader(brige webBrige) {
 			switch command {
 			case "startSession":
 				answer := ""
-				if session, answer = app.startSession(obj, events, brige); session != nil {
-					if !brige.writeMessage(answer) {
+				if session, answer = app.startSession(obj, events, bridge); session != nil {
+					if !bridge.writeMessage(answer) {
 						return
 					}
 					session.onStart()
-					go sessionEventHandler(session, events, brige)
+					go sessionEventHandler(session, events, bridge)
 				}
 
 			case "reconnect":
 				if sessionText, ok := obj.PropertyValue("session"); ok {
 					if sessionID, err := strconv.Atoi(sessionText); err == nil {
 						if session = app.sessions[sessionID]; session != nil {
-							session.setBrige(events, brige)
+							session.setBridge(events, bridge)
 							answer := allocStringBuilder()
 							defer freeStringBuilder(answer)
 
 							session.writeInitScript(answer)
-							if !brige.writeMessage(answer.String()) {
+							if !bridge.writeMessage(answer.String()) {
 								return
 							}
 							session.onReconnect()
-							go sessionEventHandler(session, events, brige)
+							go sessionEventHandler(session, events, bridge)
 							return
 						}
 						DebugLogF("Session #%d not exists", sessionID)
@@ -149,12 +149,12 @@ func (app *application) socketReader(brige webBrige) {
 				}
 
 				answer := ""
-				if session, answer = app.startSession(obj, events, brige); session != nil {
-					if !brige.writeMessage(answer) {
+				if session, answer = app.startSession(obj, events, bridge); session != nil {
+					if !bridge.writeMessage(answer) {
 						return
 					}
 					session.onStart()
-					go sessionEventHandler(session, events, brige)
+					go sessionEventHandler(session, events, bridge)
 				}
 
 			case "answer":
@@ -173,7 +173,7 @@ func (app *application) socketReader(brige webBrige) {
 	}
 }
 
-func sessionEventHandler(session Session, events chan DataObject, brige webBrige) {
+func sessionEventHandler(session Session, events chan DataObject, bridge webBridge) {
 	for {
 		data := <-events
 
@@ -185,7 +185,7 @@ func sessionEventHandler(session Session, events chan DataObject, brige webBrige
 		case "session-close":
 			session.onFinish()
 			session.App().removeSession(session.ID())
-			brige.close()
+			bridge.close()
 
 		default:
 			session.handleEvent(command, data)
@@ -193,13 +193,13 @@ func sessionEventHandler(session Session, events chan DataObject, brige webBrige
 	}
 }
 
-func (app *application) startSession(params DataObject, events chan DataObject, brige webBrige) (Session, string) {
+func (app *application) startSession(params DataObject, events chan DataObject, bridge webBridge) (Session, string) {
 	if app.createContentFunc == nil {
 		return nil, ""
 	}
 
 	session := newSession(app, app.nextSessionID(), "", params)
-	session.setBrige(events, brige)
+	session.setBridge(events, bridge)
 	if !session.setContent(app.createContentFunc(session)) {
 		return nil, ""
 	}

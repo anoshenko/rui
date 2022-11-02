@@ -486,6 +486,19 @@ func (canvas *canvasData) SetLineCap(cap int) {
 }
 
 func (canvas *canvasData) SetLineDash(dash []float64, offset float64) {
+	/*buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	lead := '['
+	for _, val := range dash {
+		buffer.WriteRune(lead)
+		lead = ','
+		buffer.WriteString(fmt.Sprintf("%g", val))
+	}
+	buffer.WriteRune(']')
+
+	canvas.session.callCanvasFunc("setLineDash", buffer.String())
+	*/
 	canvas.session.callCanvasFunc("setLineDash", dash)
 	if offset >= 0 {
 		canvas.session.updateCanvasProperty("lineDashOffset", offset)

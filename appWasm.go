@@ -17,7 +17,7 @@ type wasmApp struct {
 	params            AppParams
 	createContentFunc func(Session) SessionContent
 	session           Session
-	brige             webBrige
+	bridge            webBridge
 	close             chan DataObject
 }
 
@@ -36,28 +36,28 @@ func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 			/*
 						case "startSession":
 							answer := ""
-							if session, answer = app.startSession(obj, events, brige); session != nil {
-								if !brige.writeMessage(answer) {
+							if session, answer = app.startSession(obj, events, bridge); session != nil {
+								if !bridge.writeMessage(answer) {
 									return
 								}
 								session.onStart()
-								go sessionEventHandler(session, events, brige)
+								go sessionEventHandler(session, events, bridge)
 							}
 
 						case "reconnect":
 							if sessionText, ok := obj.PropertyValue("session"); ok {
 								if sessionID, err := strconv.Atoi(sessionText); err == nil {
 									if session = app.sessions[sessionID]; session != nil {
-										session.setBrige(events, brige)
+										session.setBridge(events, bridge)
 										answer := allocStringBuilder()
 										defer freeStringBuilder(answer)
 
 										session.writeInitScript(answer)
-										if !brige.writeMessage(answer.String()) {
+										if !bridge.writeMessage(answer.String()) {
 											return
 										}
 										session.onReconnect()
-										go sessionEventHandler(session, events, brige)
+										go sessionEventHandler(session, events, bridge)
 										return
 									}
 									DebugLogF("Session #%d not exists", sessionID)
@@ -69,12 +69,12 @@ func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 							}
 
 							answer := ""
-							if session, answer = app.startSession(obj, events, brige); session != nil {
-								if !brige.writeMessage(answer) {
+							if session, answer = app.startSession(obj, events, bridge); session != nil {
+								if !bridge.writeMessage(answer) {
 									return
 								}
 								session.onStart()
-								go sessionEventHandler(session, events, brige)
+								go sessionEventHandler(session, events, bridge)
 							}
 
 									case "disconnect":
@@ -84,7 +84,7 @@ func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 				case "session-close":
 					session.onFinish()
 					session.App().removeSession(session.ID())
-					brige.close()
+					bridge.close()
 
 			*/
 			case "answer":
@@ -109,7 +109,7 @@ func (app *wasmApp) removeSession(id int) {
 
 func (app *wasmApp) createSession() Session {
 	session := newSession(app, 0, "", ParseDataText(js.Global().Call("sessionInfo", "").String()))
-	session.setBrige(app.close, app.brige)
+	session.setBridge(app.close, app.bridge)
 	session.setContent(app.createContentFunc(session))
 	return session
 }
@@ -196,7 +196,7 @@ func (app *wasmApp) init(params AppParams) {
 	body.Call("appendChild", div)
 
 	if params.TitleColor != 0 {
-		app.brige.callFunc("setTitleColor", params.TitleColor.cssString())
+		app.bridge.callFunc("setTitleColor", params.TitleColor.cssString())
 	}
 
 }
@@ -212,7 +212,7 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 
 	app := new(wasmApp)
 	app.createContentFunc = createContentFunc
-	app.brige = createWasmBrige()
+	app.bridge = createWasmBridge()
 
 	app.init(params)
 	<-app.close

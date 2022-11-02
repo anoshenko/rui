@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type webBrige interface {
+type webBridge interface {
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
 	callFunc(funcName string, args ...any) bool
@@ -111,7 +111,7 @@ type Session interface {
 	nextViewID() string
 	styleProperty(styleTag, property string) any
 
-	setBrige(events chan DataObject, brige webBrige)
+	setBridge(events chan DataObject, bridge webBridge)
 	writeInitScript(writer *strings.Builder)
 	callFunc(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
@@ -175,7 +175,7 @@ type sessionData struct {
 	ignoreUpdates    bool
 	popups           *popupManager
 	images           *imageManager
-	brige            webBrige
+	bridge           webBridge
 	events           chan DataObject
 	animationCounter int
 	animationCSS     string
@@ -219,9 +219,9 @@ func (session *sessionData) ID() int {
 	return session.sessionID
 }
 
-func (session *sessionData) setBrige(events chan DataObject, brige webBrige) {
+func (session *sessionData) setBridge(events chan DataObject, bridge webBridge) {
 	session.events = events
-	session.brige = brige
+	session.bridge = bridge
 }
 
 func (session *sessionData) close() {
@@ -313,7 +313,7 @@ func (session *sessionData) reload() {
 }
 
 func (session *sessionData) ignoreViewUpdates() bool {
-	return session.brige == nil || session.ignoreUpdates
+	return session.bridge == nil || session.ignoreUpdates
 }
 
 func (session *sessionData) setIgnoreViewUpdates(ignore bool) {
@@ -351,8 +351,8 @@ func (session *sessionData) imageManager() *imageManager {
 }
 
 func (session *sessionData) callFunc(funcName string, args ...any) {
-	if session.brige != nil {
-		session.brige.callFunc(funcName, args...)
+	if session.bridge != nil {
+		session.bridge.callFunc(funcName, args...)
 	} else {
 		ErrorLog("No connection")
 	}
@@ -360,8 +360,8 @@ func (session *sessionData) callFunc(funcName string, args ...any) {
 
 func (session *sessionData) updateInnerHTML(htmlID, html string) {
 	if !session.ignoreViewUpdates() {
-		if session.brige != nil {
-			session.brige.updateInnerHTML(htmlID, html)
+		if session.bridge != nil {
+			session.bridge.updateInnerHTML(htmlID, html)
 		} else {
 			ErrorLog("No connection")
 		}
@@ -370,8 +370,8 @@ func (session *sessionData) updateInnerHTML(htmlID, html string) {
 
 func (session *sessionData) appendToInnerHTML(htmlID, html string) {
 	if !session.ignoreViewUpdates() {
-		if session.brige != nil {
-			session.brige.appendToInnerHTML(htmlID, html)
+		if session.bridge != nil {
+			session.bridge.appendToInnerHTML(htmlID, html)
 		} else {
 			ErrorLog("No connection")
 		}
@@ -379,90 +379,90 @@ func (session *sessionData) appendToInnerHTML(htmlID, html string) {
 }
 
 func (session *sessionData) updateCSSProperty(htmlID, property, value string) {
-	if !session.ignoreViewUpdates() && session.brige != nil {
-		session.brige.updateCSSProperty(htmlID, property, value)
+	if !session.ignoreViewUpdates() && session.bridge != nil {
+		session.bridge.updateCSSProperty(htmlID, property, value)
 	}
 }
 
 func (session *sessionData) updateProperty(htmlID, property string, value any) {
-	if !session.ignoreViewUpdates() && session.brige != nil {
-		session.brige.updateProperty(htmlID, property, value)
+	if !session.ignoreViewUpdates() && session.bridge != nil {
+		session.bridge.updateProperty(htmlID, property, value)
 	}
 }
 
 func (session *sessionData) removeProperty(htmlID, property string) {
-	if !session.ignoreViewUpdates() && session.brige != nil {
-		session.brige.removeProperty(htmlID, property)
+	if !session.ignoreViewUpdates() && session.bridge != nil {
+		session.bridge.removeProperty(htmlID, property)
 	}
 }
 
 func (session *sessionData) startUpdateScript(htmlID string) bool {
-	if session.brige != nil {
-		return session.brige.startUpdateScript(htmlID)
+	if session.bridge != nil {
+		return session.bridge.startUpdateScript(htmlID)
 	}
 	return false
 }
 
 func (session *sessionData) finishUpdateScript(htmlID string) {
-	if session.brige != nil {
-		session.brige.finishUpdateScript(htmlID)
+	if session.bridge != nil {
+		session.bridge.finishUpdateScript(htmlID)
 	}
 }
 
 func (session *sessionData) cavnasStart(htmlID string) {
-	if session.brige != nil {
-		session.brige.cavnasStart(htmlID)
+	if session.bridge != nil {
+		session.bridge.cavnasStart(htmlID)
 	}
 }
 
 func (session *sessionData) callCanvasFunc(funcName string, args ...any) {
-	if session.brige != nil {
-		session.brige.callCanvasFunc(funcName, args...)
+	if session.bridge != nil {
+		session.bridge.callCanvasFunc(funcName, args...)
 	}
 }
 
 func (session *sessionData) updateCanvasProperty(property string, value any) {
-	if session.brige != nil {
-		session.brige.updateCanvasProperty(property, value)
+	if session.bridge != nil {
+		session.bridge.updateCanvasProperty(property, value)
 	}
 }
 
 func (session *sessionData) createCanvasVar(funcName string, args ...any) any {
-	if session.brige != nil {
-		return session.brige.createCanvasVar(funcName, args...)
+	if session.bridge != nil {
+		return session.bridge.createCanvasVar(funcName, args...)
 	}
 	return nil
 }
 
 func (session *sessionData) callCanvasVarFunc(v any, funcName string, args ...any) {
-	if session.brige != nil && v != nil {
-		session.brige.callCanvasVarFunc(v, funcName, args...)
+	if session.bridge != nil && v != nil {
+		session.bridge.callCanvasVarFunc(v, funcName, args...)
 	}
 }
 
 func (session *sessionData) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
-	if session.brige != nil {
-		session.brige.callCanvasImageFunc(url, property, funcName, args...)
+	if session.bridge != nil {
+		session.bridge.callCanvasImageFunc(url, property, funcName, args...)
 	}
 }
 
 func (session *sessionData) cavnasFinish() {
-	if session.brige != nil {
-		session.brige.cavnasFinish()
+	if session.bridge != nil {
+		session.bridge.cavnasFinish()
 	}
 }
 
 func (session *sessionData) runScript(script string) {
-	if session.brige != nil {
-		session.brige.writeMessage(script)
+	if session.bridge != nil {
+		session.bridge.writeMessage(script)
 	} else {
 		ErrorLog("No connection")
 	}
 }
 
 func (session *sessionData) canvasTextMetrics(htmlID, font, text string) TextMetrics {
-	if session.brige != nil {
-		return session.brige.canvasTextMetrics(htmlID, font, text)
+	if session.bridge != nil {
+		return session.bridge.canvasTextMetrics(htmlID, font, text)
 	}
 
 	ErrorLog("No connection")
@@ -470,8 +470,8 @@ func (session *sessionData) canvasTextMetrics(htmlID, font, text string) TextMet
 }
 
 func (session *sessionData) htmlPropertyValue(htmlID, name string) string {
-	if session.brige != nil {
-		return session.brige.htmlPropertyValue(htmlID, name)
+	if session.bridge != nil {
+		return session.bridge.htmlPropertyValue(htmlID, name)
 	}
 
 	ErrorLog("No connection")
@@ -479,7 +479,7 @@ func (session *sessionData) htmlPropertyValue(htmlID, name string) string {
 }
 
 func (session *sessionData) handleAnswer(data DataObject) {
-	session.brige.answerReceived(data)
+	session.bridge.answerReceived(data)
 }
 
 func (session *sessionData) handleRootSize(data DataObject) {
@@ -620,7 +620,7 @@ func (session *sessionData) SetTitleColor(color Color) {
 }
 
 func (session *sessionData) RemoteAddr() string {
-	return session.brige.remoteAddr()
+	return session.bridge.remoteAddr()
 }
 
 func (session *sessionData) OpenURL(urlStr string) {

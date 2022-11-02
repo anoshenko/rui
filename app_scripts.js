@@ -1799,13 +1799,15 @@ function appendStyles(styles) {
 
 function getCanvasContext(elementId) {
 	const canvas = document.getElementById(elementId)
-	const ctx = canvas.getContext('2d');
-	const dpr = window.devicePixelRatio || 1;
-	//var gradient;
-	//var path;
-	//var img;
-	ctx.canvas.width = dpr * canvas.clientWidth;
-	ctx.canvas.height = dpr * canvas.clientHeight;
-	ctx.scale(dpr, dpr);
-	return ctx;
+	if (canvas) {
+		const ctx = canvas.getContext('2d');
+		if (ctx) {
+			const dpr = window.devicePixelRatio || 1;
+			ctx.canvas.width = dpr * canvas.clientWidth;
+			ctx.canvas.height = dpr * canvas.clientHeight;
+			ctx.scale(dpr, dpr);
+			return ctx;
+		}
+	}
+	return null;
 }
