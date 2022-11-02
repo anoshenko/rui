@@ -136,7 +136,7 @@ func (edit *editViewData) remove(tag string) {
 			if oldText != "" {
 				edit.textChanged("")
 				if edit.created {
-					edit.session.runFunc("setInputValue", edit.htmlID(), "")
+					edit.session.callFunc("setInputValue", edit.htmlID(), "")
 				}
 			}
 		}
@@ -210,7 +210,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 					if GetEditViewType(edit) == MultiLineText {
 						updateInnerHTML(edit.htmlID(), edit.Session())
 					} else {
-						edit.session.runFunc("setInputValue", edit.htmlID(), text)
+						edit.session.callFunc("setInputValue", edit.htmlID(), text)
 					}
 				}
 			}
@@ -360,7 +360,7 @@ func (edit *editViewData) AppendText(text string) {
 			if textValue, ok := value.(string); ok {
 				textValue += text
 				edit.properties[Text] = textValue
-				edit.session.runFunc("appendToInnerHTML", edit.htmlID(), text)
+				edit.session.callFunc("appendToInnerHTML", edit.htmlID(), text)
 				edit.textChanged(textValue)
 				return
 			}

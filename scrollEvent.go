@@ -57,7 +57,7 @@ func ScrollViewTo(view View, subviewID string, x, y float64) {
 		view = ViewByID(view, subviewID)
 	}
 	if view != nil {
-		view.Session().runFunc("scrollTo", view.htmlID(), x, y)
+		view.Session().callFunc("scrollTo", view.htmlID(), x, y)
 	}
 }
 
@@ -68,7 +68,7 @@ func ScrollViewToStart(view View, subviewID ...string) {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
-		view.Session().runFunc("scrollToStart", view.htmlID())
+		view.Session().callFunc("scrollToStart", view.htmlID())
 	}
 }
 
@@ -79,6 +79,6 @@ func ScrollViewToEnd(view View, subviewID ...string) {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
-		view.Session().runFunc("scrollToEnd", view.htmlID())
+		view.Session().callFunc("scrollToEnd", view.htmlID())
 	}
 }

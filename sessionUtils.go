@@ -12,7 +12,7 @@ func updateCSSStyle(htmlID string, session Session) {
 		if view := session.viewByHTMLID(htmlID); view != nil {
 			builder := viewCSSBuilder{buffer: allocStringBuilder()}
 			view.cssStyle(view, &builder)
-			//session.runFunc("updateCSSStyle", view.htmlID(), builder.finish())
+			//session.callFunc("updateCSSStyle", view.htmlID(), builder.finish())
 			session.updateProperty(view.htmlID(), "style", builder.finish())
 		}
 	}

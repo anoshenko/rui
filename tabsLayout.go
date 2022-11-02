@@ -151,7 +151,7 @@ func (tabsLayout *tabsLayoutData) remove(tag string) {
 			return
 		}
 		if tabsLayout.created {
-			tabsLayout.session.runFunc("activateTab", tabsLayout.htmlID(), 0)
+			tabsLayout.session.callFunc("activateTab", tabsLayout.htmlID(), 0)
 			for _, listener := range tabsLayout.tabListener {
 				listener(tabsLayout, 0, oldCurrent)
 			}
@@ -235,7 +235,7 @@ func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
 			return true
 		}
 		if tabsLayout.created {
-			tabsLayout.session.runFunc("activateTab", tabsLayout.htmlID(), current)
+			tabsLayout.session.callFunc("activateTab", tabsLayout.htmlID(), current)
 			for _, listener := range tabsLayout.tabListener {
 				listener(tabsLayout, current, oldCurrent)
 			}

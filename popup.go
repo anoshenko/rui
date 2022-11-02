@@ -635,7 +635,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 		manager.popups = append(manager.popups, popup)
 	}
 
-	session.runFunc("blurCurrent")
+	session.callFunc("blurCurrent")
 	manager.updatePopupLayerInnerHTML(session)
 	session.updateCSSProperty("ruiPopupLayer", "visibility", "visible")
 	session.updateCSSProperty("ruiRoot", "pointer-events", "none")

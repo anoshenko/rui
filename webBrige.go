@@ -150,7 +150,7 @@ func (brige *wsBrige) argToString(arg any) (string, bool) {
 	return "", false
 }
 
-func (brige *wsBrige) runFunc(funcName string, args ...any) bool {
+func (brige *wsBrige) callFunc(funcName string, args ...any) bool {
 	brige.buffer.Reset()
 	brige.buffer.WriteString(funcName)
 	brige.buffer.WriteRune('(')
@@ -179,11 +179,11 @@ func (brige *wsBrige) runFunc(funcName string, args ...any) bool {
 }
 
 func (brige *wsBrige) updateInnerHTML(htmlID, html string) {
-	brige.runFunc("updateInnerHTML", htmlID, html)
+	brige.callFunc("updateInnerHTML", htmlID, html)
 }
 
 func (brige *wsBrige) appendToInnerHTML(htmlID, html string) {
-	brige.runFunc("appendToInnerHTML", htmlID, html)
+	brige.callFunc("appendToInnerHTML", htmlID, html)
 }
 
 func (brige *wsBrige) updateCSSProperty(htmlID, property, value string) {
@@ -194,7 +194,7 @@ func (brige *wsBrige) updateCSSProperty(htmlID, property, value string) {
 		buffer.WriteString(value)
 		buffer.WriteString("';\n")
 	} else {
-		brige.runFunc("updateCSSProperty", htmlID, property, value)
+		brige.callFunc("updateCSSProperty", htmlID, property, value)
 	}
 }
 
@@ -208,7 +208,7 @@ func (brige *wsBrige) updateProperty(htmlID, property string, value any) {
 			buffer.WriteString(");\n")
 		}
 	} else {
-		brige.runFunc("updateProperty", htmlID, property, value)
+		brige.callFunc("updateProperty", htmlID, property, value)
 	}
 }
 
@@ -220,7 +220,7 @@ func (brige *wsBrige) removeProperty(htmlID, property string) {
 		buffer.WriteString(property)
 		buffer.WriteString("');}\n")
 	} else {
-		brige.runFunc("removeProperty", htmlID, property)
+		brige.callFunc("removeProperty", htmlID, property)
 	}
 }
 
@@ -367,7 +367,7 @@ func (brige *wsBrige) canvasTextMetrics(htmlID, font, text string) TextMetrics {
 	answer := make(chan DataObject)
 	brige.answer[answerID] = answer
 
-	if brige.runFunc("canvasTextMetrics", answerID, htmlID, font, text) {
+	if brige.callFunc("canvasTextMetrics", answerID, htmlID, font, text) {
 		data := <-answer
 		result.Width = dataFloatProperty(data, "width")
 	}
@@ -385,7 +385,7 @@ func (brige *wsBrige) htmlPropertyValue(htmlID, name string) string {
 	answer := make(chan DataObject)
 	brige.answer[answerID] = answer
 
-	if brige.runFunc("getPropertyValue", answerID, htmlID, name) {
+	if brige.callFunc("getPropertyValue", answerID, htmlID, name) {
 		data := <-answer
 		if value, ok := data.PropertyValue("value"); ok {
 			return value

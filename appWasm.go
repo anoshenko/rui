@@ -196,7 +196,7 @@ func (app *wasmApp) init(params AppParams) {
 	body.Call("appendChild", div)
 
 	if params.TitleColor != 0 {
-		app.brige.runFunc("setTitleColor", params.TitleColor.cssString())
+		app.brige.callFunc("setTitleColor", params.TitleColor.cssString())
 	}
 
 }

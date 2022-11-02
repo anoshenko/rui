@@ -10,7 +10,7 @@ import (
 type webBrige interface {
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
-	runFunc(funcName string, args ...any) bool
+	callFunc(funcName string, args ...any) bool
 	updateInnerHTML(htmlID, html string)
 	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)
@@ -113,7 +113,7 @@ type Session interface {
 
 	setBrige(events chan DataObject, brige webBrige)
 	writeInitScript(writer *strings.Builder)
-	runFunc(funcName string, args ...any)
+	callFunc(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
 	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)
@@ -350,9 +350,9 @@ func (session *sessionData) imageManager() *imageManager {
 	return session.images
 }
 
-func (session *sessionData) runFunc(funcName string, args ...any) {
+func (session *sessionData) callFunc(funcName string, args ...any) {
 	if session.brige != nil {
-		session.brige.runFunc(funcName, args...)
+		session.brige.callFunc(funcName, args...)
 	} else {
 		ErrorLog("No connection")
 	}
@@ -612,11 +612,11 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 
 func (session *sessionData) SetTitle(title string) {
 	title, _ = session.GetString(title)
-	session.runFunc("setTitle", title)
+	session.callFunc("setTitle", title)
 }
 
 func (session *sessionData) SetTitleColor(color Color) {
-	session.runFunc("setTitleColor", color.cssString())
+	session.callFunc("setTitleColor", color.cssString())
 }
 
 func (session *sessionData) RemoteAddr() string {
@@ -628,5 +628,5 @@ func (session *sessionData) OpenURL(urlStr string) {
 		ErrorLog(err.Error())
 		return
 	}
-	session.runFunc("openURL", urlStr)
+	session.callFunc("openURL", urlStr)
 }

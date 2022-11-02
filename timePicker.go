@@ -97,7 +97,7 @@ func (picker *timePickerData) remove(tag string) {
 			delete(picker.properties, TimePickerValue)
 			time := GetTimePickerValue(picker)
 			if picker.created {
-				picker.session.runFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
+				picker.session.callFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
 			}
 			for _, listener := range picker.timeChangedListeners {
 				listener(picker, time)
@@ -211,7 +211,7 @@ func (picker *timePickerData) set(tag string, value any) bool {
 		if time, ok := setTimeValue(TimePickerValue); ok {
 			if time != oldTime {
 				if picker.created {
-					picker.session.runFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
+					picker.session.callFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
 				}
 				for _, listener := range picker.timeChangedListeners {
 					listener(picker, time)

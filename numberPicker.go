@@ -116,7 +116,7 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 			if f, ok := floatProperty(picker, NumberPickerValue, picker.Session(), min); ok && f != oldValue {
 				newValue, _ := floatTextProperty(picker, NumberPickerValue, picker.Session(), min)
 				if picker.created {
-					picker.session.runFunc("setInputValue", picker.htmlID(), newValue)
+					picker.session.callFunc("setInputValue", picker.htmlID(), newValue)
 				}
 				for _, listener := range picker.numberChangedListeners {
 					listener(picker, f)
@@ -162,7 +162,7 @@ func (picker *numberPickerData) propertyChanged(tag string) {
 
 		case NumberPickerValue:
 			value := GetNumberPickerValue(picker)
-			picker.session.runFunc("setInputValue", picker.htmlID(), value)
+			picker.session.callFunc("setInputValue", picker.htmlID(), value)
 			for _, listener := range picker.numberChangedListeners {
 				listener(picker, value)
 			}

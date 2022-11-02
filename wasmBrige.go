@@ -34,7 +34,7 @@ func (brige *wasmBrige) startUpdateScript(htmlID string) bool {
 func (brige *wasmBrige) finishUpdateScript(htmlID string) {
 }
 
-func (brige *wasmBrige) runFunc(funcName string, args ...any) bool {
+func (brige *wasmBrige) callFunc(funcName string, args ...any) bool {
 	if ProtocolInDebugLog {
 		text := funcName + "("
 		for i, arg := range args {
@@ -52,23 +52,23 @@ func (brige *wasmBrige) runFunc(funcName string, args ...any) bool {
 }
 
 func (brige *wasmBrige) updateInnerHTML(htmlID, html string) {
-	brige.runFunc("updateInnerHTML", htmlID, html)
+	brige.callFunc("updateInnerHTML", htmlID, html)
 }
 
 func (brige *wasmBrige) appendToInnerHTML(htmlID, html string) {
-	brige.runFunc("appendToInnerHTML", htmlID, html)
+	brige.callFunc("appendToInnerHTML", htmlID, html)
 }
 
 func (brige *wasmBrige) updateCSSProperty(htmlID, property, value string) {
-	brige.runFunc("updateCSSProperty", htmlID, property, value)
+	brige.callFunc("updateCSSProperty", htmlID, property, value)
 }
 
 func (brige *wasmBrige) updateProperty(htmlID, property string, value any) {
-	brige.runFunc("updateProperty", htmlID, property, value)
+	brige.callFunc("updateProperty", htmlID, property, value)
 }
 
 func (brige *wasmBrige) removeProperty(htmlID, property string) {
-	brige.runFunc("removeProperty", htmlID, property)
+	brige.callFunc("removeProperty", htmlID, property)
 }
 
 func (brige *wasmBrige) close() {

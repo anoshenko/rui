@@ -23,7 +23,7 @@ func (session *sessionData) startDownload(file downloadFile) {
 	currentDownloadId++
 	id := strconv.Itoa(currentDownloadId)
 	downloadFiles[id] = file
-	session.runFunc("startDowndload", id, file.filename)
+	session.callFunc("startDowndload", id, file.filename)
 }
 
 func serveDownloadFile(id string, w http.ResponseWriter, r *http.Request) bool {

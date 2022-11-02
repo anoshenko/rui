@@ -113,7 +113,7 @@ func (picker *colorPickerData) set(tag string, value any) bool {
 func (picker *colorPickerData) colorChanged(oldColor Color) {
 	if newColor := GetColorPickerValue(picker); oldColor != newColor {
 		if picker.created {
-			picker.session.runFunc("setInputValue", picker.htmlID(), newColor.rgbString())
+			picker.session.callFunc("setInputValue", picker.htmlID(), newColor.rgbString())
 		}
 		for _, listener := range picker.colorChangedListeners {
 			listener(picker, newColor)
