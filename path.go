@@ -1,10 +1,5 @@
 package rui
 
-import (
-	"strconv"
-	"strings"
-)
-
 // Path is a path interface
 type Path interface {
 	// Reset erases the Path
@@ -63,134 +58,79 @@ type Path interface {
 	// If the shape has already been closed or has only one point, this function does nothing.
 	Close()
 
-	scriptText() string
+	create(session Session)
+}
+
+type pathElement struct {
+	funcName string
+	args     []any
 }
 
 type pathData struct {
-	script strings.Builder
+	elements []pathElement
 }
 
 // NewPath creates a new empty Path
 func NewPath() Path {
 	path := new(pathData)
-	path.script.Grow(4096)
-	path.script.WriteString("\nctx.beginPath();")
+	path.Reset()
 	return path
 }
 
 func (path *pathData) Reset() {
-	path.script.Reset()
-	path.script.WriteString("\nctx.beginPath();")
+	path.elements = []pathElement{
+		pathElement{funcName: "beginPath", args: []any{}},
+	}
 }
 
 func (path *pathData) MoveTo(x, y float64) {
-	path.script.WriteString("\nctx.moveTo(")
-	path.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	path.script.WriteString(");")
+	path.elements = append(path.elements, pathElement{funcName: "moveTo", args: []any{x, y}})
 }
 
 func (path *pathData) LineTo(x, y float64) {
-	path.script.WriteString("\nctx.lineTo(")
-	path.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	path.script.WriteString(");")
+	path.elements = append(path.elements, pathElement{funcName: "lineTo", args: []any{x, y}})
 }
 
 func (path *pathData) ArcTo(x0, y0, x1, y1, radius float64) {
 	if radius > 0 {
-		path.script.WriteString("\nctx.arcTo(")
-		path.script.WriteString(strconv.FormatFloat(x0, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(y0, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(x1, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(y1, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(radius, 'g', -1, 64))
-		path.script.WriteString(");")
+		path.elements = append(path.elements, pathElement{funcName: "arcTo", args: []any{x0, y0, x1, y1, radius}})
 	}
 }
 
 func (path *pathData) Arc(x, y, radius, startAngle, endAngle float64, clockwise bool) {
 	if radius > 0 {
-		path.script.WriteString("\nctx.arc(")
-		path.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(radius, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(startAngle, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(endAngle, 'g', -1, 64))
 		if !clockwise {
-			path.script.WriteString(",true);")
+			path.elements = append(path.elements, pathElement{funcName: "arc", args: []any{x, y, radius, startAngle, endAngle, true}})
 		} else {
-			path.script.WriteString(");")
+			path.elements = append(path.elements, pathElement{funcName: "arc", args: []any{x, y, radius, startAngle, endAngle}})
 		}
 	}
 }
 
 func (path *pathData) BezierCurveTo(cp0x, cp0y, cp1x, cp1y, x, y float64) {
-	path.script.WriteString("\nctx.bezierCurveTo(")
-	path.script.WriteString(strconv.FormatFloat(cp0x, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(cp0y, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(cp1x, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(cp1y, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	path.script.WriteString(");")
+	path.elements = append(path.elements, pathElement{funcName: "bezierCurveTo", args: []any{cp0x, cp0y, cp1x, cp1y, x, y}})
 }
 
 func (path *pathData) QuadraticCurveTo(cpx, cpy, x, y float64) {
-	path.script.WriteString("\nctx.quadraticCurveTo(")
-	path.script.WriteString(strconv.FormatFloat(cpx, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(cpy, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	path.script.WriteRune(',')
-	path.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	path.script.WriteString(");")
+	path.elements = append(path.elements, pathElement{funcName: "quadraticCurveTo", args: []any{cpx, cpy, x, y}})
 }
 
 func (path *pathData) Ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle float64, clockwise bool) {
 	if radiusX > 0 && radiusY > 0 {
-		path.script.WriteString("\nctx.ellipse(")
-		path.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(radiusX, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(radiusY, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(rotation, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(startAngle, 'g', -1, 64))
-		path.script.WriteRune(',')
-		path.script.WriteString(strconv.FormatFloat(endAngle, 'g', -1, 64))
 		if !clockwise {
-			path.script.WriteString(",true);")
+			path.elements = append(path.elements, pathElement{funcName: "ellipse", args: []any{x, y, radiusX, radiusY, rotation, startAngle, endAngle, true}})
 		} else {
-			path.script.WriteString(");")
+			path.elements = append(path.elements, pathElement{funcName: "ellipse", args: []any{x, y, radiusX, radiusY, rotation, startAngle, endAngle}})
 		}
 	}
 }
 
 func (path *pathData) Close() {
-	path.script.WriteString("\nctx.close();")
+	path.elements = append(path.elements, pathElement{funcName: "close", args: []any{}})
 }
 
-func (path *pathData) scriptText() string {
-	return path.script.String()
+func (path *pathData) create(session Session) {
+	for _, element := range path.elements {
+		session.callCanvasFunc(element.funcName, element.args...)
+	}
 }

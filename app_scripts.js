@@ -1796,3 +1796,16 @@ function getPropertyValue(answerID, elementId, name) {
 function appendStyles(styles) {
 	document.querySelector('style').textContent += styles
 }
+
+function getCanvasContext(elementId) {
+	const canvas = document.getElementById(elementId)
+	const ctx = canvas.getContext('2d');
+	const dpr = window.devicePixelRatio || 1;
+	//var gradient;
+	//var path;
+	//var img;
+	ctx.canvas.width = dpr * canvas.clientWidth;
+	ctx.canvas.height = dpr * canvas.clientHeight;
+	ctx.scale(dpr, dpr);
+	return ctx;
+}

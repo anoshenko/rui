@@ -1,7 +1,7 @@
 package rui
 
 import (
-	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -290,42 +290,24 @@ type Canvas interface {
 	// in the rectangle (dstX, dstY, dstWidth, dstHeight), scaling in height and width if necessary
 	DrawImageFragment(srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight float64, image Image)
 
-	finishDraw() string
+	finishDraw()
 }
 
 type canvasData struct {
-	view   CanvasView
-	script strings.Builder
+	view    CanvasView
+	session Session
 }
 
 func newCanvas(view CanvasView) Canvas {
 	canvas := new(canvasData)
 	canvas.view = view
-	canvas.script.Grow(4096)
-	canvas.script.WriteString(`const canvas = document.getElementById('`)
-	canvas.script.WriteString(view.htmlID())
-	canvas.script.WriteString(`');
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-var gradient;
-var path;
-var img;
-ctx.canvas.width = dpr * canvas.clientWidth;
-ctx.canvas.height = dpr * canvas.clientHeight;
-ctx.scale(dpr, dpr);`)
-	/*
-	   	canvas.script.WriteString(strconv.FormatFloat(view.canvasWidth(), 'g', -1, 64))
-	   	canvas.script.WriteString(`;
-	   ctx.canvas.height = dpr * `)
-	   	canvas.script.WriteString(strconv.FormatFloat(view.canvasHeight(), 'g', -1, 64))
-	   	canvas.script.WriteString(";\nctx.scale(dpr, dpr);")
-	*/
+	canvas.session = view.Session()
+	canvas.session.cavnasStart(view.htmlID())
 	return canvas
 }
 
-func (canvas *canvasData) finishDraw() string {
-	canvas.script.WriteString("\n")
-	return canvas.script.String()
+func (canvas *canvasData) finishDraw() {
+	canvas.session.cavnasFinish()
 }
 
 func (canvas *canvasData) View() CanvasView {
@@ -347,162 +329,102 @@ func (canvas *canvasData) Height() float64 {
 }
 
 func (canvas *canvasData) Save() {
-	canvas.script.WriteString("\nctx.save();")
+	canvas.session.callCanvasFunc("save")
 }
 
 func (canvas *canvasData) Restore() {
-	canvas.script.WriteString("\nctx.restore();")
+	canvas.session.callCanvasFunc("restore")
 }
 
 func (canvas *canvasData) ClipRect(x, y, width, height float64) {
-	canvas.script.WriteString("\nctx.beginPath();\nctx.rect(")
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(width, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(height, 'g', -1, 64))
-	canvas.script.WriteString(");\nctx.clip();")
+	canvas.session.callCanvasFunc("beginPath")
+	canvas.session.callCanvasFunc("rect", x, y, width, height)
+	canvas.session.callCanvasFunc("clip")
 }
 
 func (canvas *canvasData) ClipPath(path Path) {
-	canvas.script.WriteString(path.scriptText())
-	canvas.script.WriteString("\nctx.clip();")
+	path.create(canvas.session)
+	canvas.session.callCanvasFunc("clip")
 }
 
 func (canvas *canvasData) SetScale(x, y float64) {
-	canvas.script.WriteString("\nctx.scale(")
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("scale", x, y)
 }
 
 func (canvas *canvasData) SetTranslation(x, y float64) {
-	canvas.script.WriteString("\nctx.translate(")
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("translate", x, y)
 }
 
 func (canvas *canvasData) SetRotation(angle float64) {
-	canvas.script.WriteString("\nctx.rotate(")
-	canvas.script.WriteString(strconv.FormatFloat(angle, 'g', -1, 64))
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("rotate", angle)
 }
 
 func (canvas *canvasData) SetTransformation(xScale, yScale, xSkew, ySkew, dx, dy float64) {
-	canvas.script.WriteString("\nctx.transform(")
-	canvas.script.WriteString(strconv.FormatFloat(xScale, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(ySkew, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(xSkew, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(yScale, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(dx, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(dy, 'g', -1, 64))
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("transform", xScale, ySkew, xSkew, yScale, dx, dy)
 }
 
 func (canvas *canvasData) ResetTransformation() {
-	canvas.script.WriteString("\nctx.resetTransform();\nctx.scale(dpr, dpr);")
+	canvas.session.callCanvasFunc("resetTransform")
+	canvas.session.callCanvasFunc("scale", canvas.session.PixelRatio(), canvas.session.PixelRatio())
+	//canvas.session.callCanvasFunc("scale", angle)
+	// TODO canvas.script.WriteString("\nctx.resetTransform();\nctx.scale(dpr, dpr);")
 }
 
 func (canvas *canvasData) SetSolidColorFillStyle(color Color) {
-	canvas.script.WriteString("\nctx.fillStyle = \"")
-	canvas.script.WriteString(color.cssString())
-	canvas.script.WriteString(`";`)
+	canvas.session.updateCanvasProperty("fillStyle", color.cssString())
 }
 
 func (canvas *canvasData) SetSolidColorStrokeStyle(color Color) {
-	canvas.script.WriteString("\nctx.strokeStyle = \"")
-	canvas.script.WriteString(color.cssString())
-	canvas.script.WriteString(`";`)
+	canvas.session.updateCanvasProperty("strokeStyle", color.cssString())
 }
 
-func (canvas *canvasData) setLinearGradient(x0, y0 float64, color0 Color, x1, y1 float64, color1 Color, stopPoints []GradientPoint) {
-	canvas.script.WriteString("\ngradient = ctx.createLinearGradient(")
-	canvas.script.WriteString(strconv.FormatFloat(x0, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y0, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(x1, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y1, 'g', -1, 64))
-	canvas.script.WriteString(");\ngradient.addColorStop(0, '")
-	canvas.script.WriteString(color0.cssString())
-	canvas.script.WriteString("');")
+func (canvas *canvasData) createLinearGradient(x0, y0 float64, color0 Color, x1, y1 float64, color1 Color, stopPoints []GradientPoint) any {
+
+	gradient := canvas.session.createCanvasVar("createLinearGradient", x0, y0, x1, y1)
+	canvas.session.callCanvasVarFunc(gradient, "addColorStop", 0, color0.cssString())
 
 	for _, point := range stopPoints {
 		if point.Offset >= 0 && point.Offset <= 1 {
-			canvas.script.WriteString("\ngradient.addColorStop(")
-			canvas.script.WriteString(strconv.FormatFloat(point.Offset, 'g', -1, 64))
-			canvas.script.WriteString(", '")
-			canvas.script.WriteString(point.Color.cssString())
-			canvas.script.WriteString("');")
+			canvas.session.callCanvasVarFunc(gradient, "addColorStop", point.Offset, point.Color.cssString())
 		}
 	}
 
-	canvas.script.WriteString("\ngradient.addColorStop(1, '")
-	canvas.script.WriteString(color1.cssString())
-	canvas.script.WriteString("');")
+	canvas.session.callCanvasVarFunc(gradient, "addColorStop", 1, color1.cssString())
+	return gradient
 }
 
 func (canvas *canvasData) SetLinearGradientFillStyle(x0, y0 float64, color0 Color, x1, y1 float64, color1 Color, stopPoints []GradientPoint) {
-	canvas.setLinearGradient(x0, y0, color0, x1, y1, color1, stopPoints)
-	canvas.script.WriteString("\nctx.fillStyle = gradient;")
+	gradient := canvas.createLinearGradient(x0, y0, color0, x1, y1, color1, stopPoints)
+	canvas.session.updateCanvasProperty("fillStyle", gradient)
 }
 
 func (canvas *canvasData) SetLinearGradientStrokeStyle(x0, y0 float64, color0 Color, x1, y1 float64, color1 Color, stopPoints []GradientPoint) {
-	canvas.setLinearGradient(x0, y0, color0, x1, y1, color1, stopPoints)
-	canvas.script.WriteString("\nctx.strokeStyle = gradient;")
+	gradient := canvas.createLinearGradient(x0, y0, color0, x1, y1, color1, stopPoints)
+	canvas.session.updateCanvasProperty("strokeStyle", gradient)
 }
 
-func (canvas *canvasData) setRadialGradient(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint) {
-	canvas.script.WriteString("\ngradient = ctx.createRadialGradient(")
-	canvas.script.WriteString(strconv.FormatFloat(x0, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y0, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(r0, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(x1, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y1, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(r1, 'g', -1, 64))
-	canvas.script.WriteString(");\ngradient.addColorStop(0, '")
-	canvas.script.WriteString(color0.cssString())
-	canvas.script.WriteString("');")
+func (canvas *canvasData) createRadialGradient(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint) any {
+	gradient := canvas.session.createCanvasVar("createRadialGradient", x0, y0, r0, x1, y1, r1)
+	canvas.session.callCanvasVarFunc(gradient, "addColorStop", 0, color0.cssString())
 
 	for _, point := range stopPoints {
 		if point.Offset >= 0 && point.Offset <= 1 {
-			canvas.script.WriteString("\ngradient.addColorStop(")
-			canvas.script.WriteString(strconv.FormatFloat(point.Offset, 'g', -1, 64))
-			canvas.script.WriteString(", '")
-			canvas.script.WriteString(point.Color.cssString())
-			canvas.script.WriteString("');")
+			canvas.session.callCanvasVarFunc(gradient, "addColorStop", point.Offset, point.Color.cssString())
 		}
 	}
 
-	canvas.script.WriteString("\ngradient.addColorStop(1, '")
-	canvas.script.WriteString(color1.cssString())
-	canvas.script.WriteString("');")
+	canvas.session.callCanvasVarFunc(gradient, "addColorStop", 1, color1.cssString())
+	return gradient
 }
 
 func (canvas *canvasData) SetRadialGradientFillStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint) {
-	canvas.setRadialGradient(x0, y0, r0, color0, x1, y1, r1, color1, stopPoints)
-	canvas.script.WriteString("\nctx.fillStyle = gradient;")
+	gradient := canvas.createRadialGradient(x0, y0, r0, color0, x1, y1, r1, color1, stopPoints)
+	canvas.session.updateCanvasProperty("fillStyle", gradient)
 }
 
 func (canvas *canvasData) SetRadialGradientStrokeStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint) {
-	canvas.setRadialGradient(x0, y0, r0, color0, x1, y1, r1, color1, stopPoints)
-	canvas.script.WriteString("\nctx.strokeStyle = gradient;")
+	gradient := canvas.createRadialGradient(x0, y0, r0, color0, x1, y1, r1, color1, stopPoints)
+	canvas.session.updateCanvasProperty("strokeStyle", gradient)
 }
 
 func (canvas *canvasData) SetImageFillStyle(image Image, repeat int) {
@@ -528,89 +450,70 @@ func (canvas *canvasData) SetImageFillStyle(image Image, repeat int) {
 		return
 	}
 
-	canvas.script.WriteString("\nimg = images.get('")
-	canvas.script.WriteString(image.URL())
-	canvas.script.WriteString("');\nif (img) {\nctx.fillStyle = ctx.createPattern(img,'")
-	canvas.script.WriteString(repeatText)
-	canvas.script.WriteString("');\n}")
+	canvas.session.callCanvasImageFunc(image.URL(), "fillStyle", "createPattern", repeatText)
 }
 
 func (canvas *canvasData) SetLineWidth(width float64) {
 	if width > 0 {
-		canvas.script.WriteString("\nctx.lineWidth = '")
-		canvas.script.WriteString(strconv.FormatFloat(width, 'g', -1, 64))
-		canvas.script.WriteString("';")
+		canvas.session.updateCanvasProperty("lineWidth", width)
 	}
 }
 
 func (canvas *canvasData) SetLineJoin(join int) {
 	switch join {
 	case MiterJoin:
-		canvas.script.WriteString("\nctx.lineJoin = 'miter';")
+		canvas.session.updateCanvasProperty("lineJoin", "miter")
 
 	case RoundJoin:
-		canvas.script.WriteString("\nctx.lineJoin = 'round';")
+		canvas.session.updateCanvasProperty("lineJoin", "round")
 
 	case BevelJoin:
-		canvas.script.WriteString("\nctx.lineJoin = 'bevel';")
+		canvas.session.updateCanvasProperty("lineJoin", "bevel")
 	}
 }
 
 func (canvas *canvasData) SetLineCap(cap int) {
 	switch cap {
 	case ButtCap:
-		canvas.script.WriteString("\nctx.lineCap = 'butt';")
+		canvas.session.updateCanvasProperty("lineCap", "butt")
 
 	case RoundCap:
-		canvas.script.WriteString("\nctx.lineCap = 'round';")
+		canvas.session.updateCanvasProperty("lineCap", "round")
 
 	case SquareCap:
-		canvas.script.WriteString("\nctx.lineCap = 'square';")
+		canvas.session.updateCanvasProperty("lineCap", "square")
 	}
 }
 
 func (canvas *canvasData) SetLineDash(dash []float64, offset float64) {
-	canvas.script.WriteString("\nctx.setLineDash([")
-	for i, d := range dash {
-		if i > 0 {
-			canvas.script.WriteString(",")
-		}
-		canvas.script.WriteString(strconv.FormatFloat(d, 'g', -1, 64))
-	}
-
-	canvas.script.WriteString("]);")
+	canvas.session.callCanvasFunc("setLineDash", dash)
 	if offset >= 0 {
-		canvas.script.WriteString("\nctx.lineDashOffset = '")
-		canvas.script.WriteString(strconv.FormatFloat(offset, 'g', -1, 64))
-		canvas.script.WriteString("';")
+		canvas.session.updateCanvasProperty("lineDashOffset", offset)
 	}
 }
 
-func (canvas *canvasData) writeFont(name string, script *strings.Builder) {
-	names := strings.Split(name, ",")
-	lead := " "
-	for _, font := range names {
-		font = strings.Trim(font, " \n\"'")
-		script.WriteString(lead)
-		lead = ","
-		if strings.Contains(font, " ") {
-			script.WriteRune('"')
-			script.WriteString(font)
-			script.WriteRune('"')
-		} else {
-			script.WriteString(font)
+/*
+	func (canvas *canvasData) convertFont(name string) string {
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		for i, font := range strings.Split(name, ",") {
+			font = strings.Trim(font, " \n\"'")
+			if i > 0 {
+				buffer.WriteRune(',')
+			}
+			if strings.Contains(font, " ") {
+				buffer.WriteRune('"')
+				buffer.WriteString(font)
+				buffer.WriteRune('"')
+			} else {
+				buffer.WriteString(font)
+			}
 		}
 
+		return buffer.String()
 	}
-	script.WriteString("';")
-}
-
-func (canvas *canvasData) SetFont(name string, size SizeUnit) {
-	canvas.script.WriteString("\nctx.font = '")
-	canvas.script.WriteString(size.cssString("1rem", canvas.View().Session()))
-	canvas.writeFont(name, &canvas.script)
-}
-
+*/
 func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params FontParams) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
@@ -672,135 +575,76 @@ func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params Font
 	return buffer.String()
 }
 
-func (canvas *canvasData) setFontWithParams(name string, size SizeUnit, params FontParams, script *strings.Builder) {
-	script.WriteString("\nctx.font = '")
-	if params.Italic {
-		script.WriteString("italic ")
-	}
-	if params.SmallCaps {
-		script.WriteString("small-caps ")
-	}
-	if params.Weight > 0 && params.Weight <= 9 {
-		switch params.Weight {
-		case 4:
-			script.WriteString("normal ")
-		case 7:
-			script.WriteString("bold ")
-		default:
-			script.WriteString(strconv.Itoa(params.Weight * 100))
-			script.WriteRune(' ')
-		}
-	}
-
-	script.WriteString(size.cssString("1rem", canvas.View().Session()))
-	switch params.LineHeight.Type {
-	case Auto:
-
-	case SizeInPercent:
-		if params.LineHeight.Value != 100 {
-			script.WriteString("/")
-			script.WriteString(strconv.FormatFloat(params.LineHeight.Value/100, 'g', -1, 64))
-		}
-
-	case SizeInFraction:
-		if params.LineHeight.Value != 1 {
-			script.WriteString("/")
-			script.WriteString(strconv.FormatFloat(params.LineHeight.Value, 'g', -1, 64))
-		}
-
-	default:
-		script.WriteString("/")
-		script.WriteString(params.LineHeight.cssString("", canvas.View().Session()))
-	}
-
-	canvas.writeFont(name, script)
+func (canvas *canvasData) SetFont(name string, size SizeUnit) {
+	canvas.session.updateCanvasProperty("font", canvas.fontWithParams(name, size, FontParams{}))
 }
 
 func (canvas *canvasData) SetFontWithParams(name string, size SizeUnit, params FontParams) {
-	canvas.setFontWithParams(name, size, params, &canvas.script)
+	canvas.session.updateCanvasProperty("font", canvas.fontWithParams(name, size, params))
 }
 
 func (canvas *canvasData) TextMetrics(text string, fontName string, fontSize SizeUnit, fontParams FontParams) TextMetrics {
-	view := canvas.View()
-	return view.Session().canvasTextMetrics(view.htmlID(), canvas.fontWithParams(fontName, fontSize, fontParams), text)
+	return canvas.session.canvasTextMetrics(canvas.view.htmlID(), canvas.fontWithParams(fontName, fontSize, fontParams), text)
 }
 
 func (canvas *canvasData) SetTextBaseline(baseline int) {
 	switch baseline {
 	case AlphabeticBaseline:
-		canvas.script.WriteString("\nctx.textBaseline = 'alphabetic';")
+		canvas.session.updateCanvasProperty("textBaseline", "alphabetic")
 	case TopBaseline:
-		canvas.script.WriteString("\nctx.textBaseline = 'top';")
+		canvas.session.updateCanvasProperty("textBaseline", "top")
 	case MiddleBaseline:
-		canvas.script.WriteString("\nctx.textBaseline = 'middle';")
+		canvas.session.updateCanvasProperty("textBaseline", "middle")
 	case BottomBaseline:
-		canvas.script.WriteString("\nctx.textBaseline = 'bottom';")
+		canvas.session.updateCanvasProperty("textBaseline", "bottom")
 	case HangingBaseline:
-		canvas.script.WriteString("\nctx.textBaseline = 'hanging';")
+		canvas.session.updateCanvasProperty("textBaseline", "hanging")
 	case IdeographicBaseline:
-		canvas.script.WriteString("\nctx.textBaseline = 'ideographic';")
+		canvas.session.updateCanvasProperty("textBaseline", "ideographic")
 	}
 }
 
 func (canvas *canvasData) SetTextAlign(align int) {
 	switch align {
 	case LeftAlign:
-		canvas.script.WriteString("\nctx.textAlign = 'left';")
+		canvas.session.updateCanvasProperty("textAlign", "left")
 	case RightAlign:
-		canvas.script.WriteString("\nctx.textAlign = 'right';")
+		canvas.session.updateCanvasProperty("textAlign", "right")
 	case CenterAlign:
-		canvas.script.WriteString("\nctx.textAlign = 'center';")
+		canvas.session.updateCanvasProperty("textAlign", "center")
 	case StartAlign:
-		canvas.script.WriteString("\nctx.textAlign = 'start';")
+		canvas.session.updateCanvasProperty("textAlign", "start")
 	case EndAlign:
-		canvas.script.WriteString("\nctx.textAlign = 'end';")
+		canvas.session.updateCanvasProperty("textAlign", "end")
 	}
 }
 
 func (canvas *canvasData) SetShadow(offsetX, offsetY, blur float64, color Color) {
 	if color.Alpha() > 0 && blur >= 0 {
-		canvas.script.WriteString("\nctx.shadowColor = '")
-		canvas.script.WriteString(color.cssString())
-		canvas.script.WriteString("';\nctx.shadowOffsetX = ")
-		canvas.script.WriteString(strconv.FormatFloat(offsetX, 'g', -1, 64))
-		canvas.script.WriteString(";\nctx.shadowOffsetY = ")
-		canvas.script.WriteString(strconv.FormatFloat(offsetY, 'g', -1, 64))
-		canvas.script.WriteString(";\nctx.shadowBlur = ")
-		canvas.script.WriteString(strconv.FormatFloat(blur, 'g', -1, 64))
-		canvas.script.WriteString(";")
+		canvas.session.updateCanvasProperty("shadowColor", color.cssString())
+		canvas.session.updateCanvasProperty("shadowOffsetX", offsetX)
+		canvas.session.updateCanvasProperty("shadowOffsetY", offsetY)
+		canvas.session.updateCanvasProperty("shadowBlur", blur)
 	}
 }
 
 func (canvas *canvasData) ResetShadow() {
-	canvas.script.WriteString("\nctx.shadowColor = 'rgba(0,0,0,0)';\nctx.shadowOffsetX = 0;\nctx.shadowOffsetY = 0;\nctx.shadowBlur = 0;")
-}
-
-func (canvas *canvasData) writeRectArgs(x, y, width, height float64) {
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(width, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(height, 'g', -1, 64))
+	canvas.session.updateCanvasProperty("shadowColor", "rgba(0,0,0,0)")
+	canvas.session.updateCanvasProperty("shadowOffsetX", 0)
+	canvas.session.updateCanvasProperty("shadowOffsetY", 0)
+	canvas.session.updateCanvasProperty("shadowBlur", 0)
 }
 
 func (canvas *canvasData) ClearRect(x, y, width, height float64) {
-	canvas.script.WriteString("\nctx.clearRect(")
-	canvas.writeRectArgs(x, y, width, height)
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("clearRect", x, y, width, height)
 }
 
 func (canvas *canvasData) FillRect(x, y, width, height float64) {
-	canvas.script.WriteString("\nctx.fillRect(")
-	canvas.writeRectArgs(x, y, width, height)
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("fillRect", x, y, width, height)
 }
 
 func (canvas *canvasData) StrokeRect(x, y, width, height float64) {
-	canvas.script.WriteString("\nctx.strokeRect(")
-	canvas.writeRectArgs(x, y, width, height)
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("strokeRect", x, y, width, height)
 }
 
 func (canvas *canvasData) FillAndStrokeRect(x, y, width, height float64) {
@@ -808,7 +652,7 @@ func (canvas *canvasData) FillAndStrokeRect(x, y, width, height float64) {
 	canvas.StrokeRect(x, y, width, height)
 }
 
-func (canvas *canvasData) writeRoundedRect(x, y, width, height, r float64) {
+func (canvas *canvasData) createRoundedRect(x, y, width, height, r float64) {
 	left := strconv.FormatFloat(x, 'g', -1, 64)
 	top := strconv.FormatFloat(y, 'g', -1, 64)
 	right := strconv.FormatFloat(x+width, 'g', -1, 64)
@@ -818,104 +662,65 @@ func (canvas *canvasData) writeRoundedRect(x, y, width, height, r float64) {
 	rightR := strconv.FormatFloat(x+width-r, 'g', -1, 64)
 	bottomR := strconv.FormatFloat(y+height-r, 'g', -1, 64)
 	radius := strconv.FormatFloat(r, 'g', -1, 64)
-	canvas.script.WriteString("\nctx.beginPath();\nctx.moveTo(")
-	canvas.script.WriteString(left)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(topR)
-	canvas.script.WriteString(");\nctx.arc(")
-	canvas.script.WriteString(leftR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(topR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(radius)
-	canvas.script.WriteString(",Math.PI,Math.PI*3/2);\nctx.lineTo(")
-	canvas.script.WriteString(rightR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(top)
-	canvas.script.WriteString(");\nctx.arc(")
-	canvas.script.WriteString(rightR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(topR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(radius)
-	canvas.script.WriteString(",Math.PI*3/2,Math.PI*2);\nctx.lineTo(")
-	canvas.script.WriteString(right)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(bottomR)
-	canvas.script.WriteString(");\nctx.arc(")
-	canvas.script.WriteString(rightR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(bottomR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(radius)
-	canvas.script.WriteString(",0,Math.PI/2);\nctx.lineTo(")
-	canvas.script.WriteString(leftR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(bottom)
-	canvas.script.WriteString(");\nctx.arc(")
-	canvas.script.WriteString(leftR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(bottomR)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(radius)
-	canvas.script.WriteString(",Math.PI/2,Math.PI);\nctx.closePath();")
+
+	canvas.session.callCanvasFunc("beginPath")
+	canvas.session.callCanvasFunc("moveTo", left, topR)
+	canvas.session.callCanvasFunc("arc", leftR, topR, radius, math.Pi, math.Pi*3/2)
+	canvas.session.callCanvasFunc("lineTo", rightR, top)
+	canvas.session.callCanvasFunc("arc", rightR, topR, radius, math.Pi*3/2, math.Pi*2)
+	canvas.session.callCanvasFunc("lineTo", right, bottomR)
+	canvas.session.callCanvasFunc("arc", rightR, bottomR, radius, 0, math.Pi/2)
+	canvas.session.callCanvasFunc("lineTo", leftR, bottom)
+	canvas.session.callCanvasFunc("arc", leftR, bottomR, radius, math.Pi/2, math.Pi)
+	canvas.session.callCanvasFunc("closePath")
 }
 
 func (canvas *canvasData) FillRoundedRect(x, y, width, height, r float64) {
-	canvas.writeRoundedRect(x, y, width, height, r)
-	canvas.script.WriteString("\nctx.fill();")
+	canvas.createRoundedRect(x, y, width, height, r)
+	canvas.session.callCanvasFunc("fill")
 }
 
 func (canvas *canvasData) StrokeRoundedRect(x, y, width, height, r float64) {
-	canvas.writeRoundedRect(x, y, width, height, r)
-	canvas.script.WriteString("\nctx.stroke();")
+	canvas.createRoundedRect(x, y, width, height, r)
+	canvas.session.callCanvasFunc("stroke")
 }
 
 func (canvas *canvasData) FillAndStrokeRoundedRect(x, y, width, height, r float64) {
-	canvas.writeRoundedRect(x, y, width, height, r)
-	canvas.script.WriteString("\nctx.fill();\nctx.stroke();")
+	canvas.createRoundedRect(x, y, width, height, r)
+	canvas.session.callCanvasFunc("fill")
+	canvas.session.callCanvasFunc("stroke")
 }
 
-func (canvas *canvasData) writeEllipse(x, y, radiusX, radiusY, rotation float64) {
-	yText := strconv.FormatFloat(y, 'g', -1, 64)
-	canvas.script.WriteString("\nctx.beginPath();\nctx.moveTo(")
-	canvas.script.WriteString(strconv.FormatFloat(x+radiusX, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(yText)
-	canvas.script.WriteString(");\nctx.ellipse(")
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(yText)
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(radiusX, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(radiusY, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(rotation, 'g', -1, 64))
-	canvas.script.WriteString(",0,Math.PI*2);")
+func (canvas *canvasData) createEllipse(x, y, radiusX, radiusY, rotation float64) {
+	canvas.session.callCanvasFunc("beginPath")
+	canvas.session.callCanvasFunc("moveTo", x+radiusX, y)
+	canvas.session.callCanvasFunc("ellipse", x, y, radiusX, radiusY, rotation, 0, math.Pi*2)
+	//canvas.session.callCanvasFunc("closePath")
 }
 
 func (canvas *canvasData) FillEllipse(x, y, radiusX, radiusY, rotation float64) {
 	if radiusX >= 0 && radiusY >= 0 {
-		canvas.writeEllipse(x, y, radiusX, radiusY, rotation)
-		canvas.script.WriteString("\nctx.fill();")
+		canvas.createEllipse(x, y, radiusX, radiusY, rotation)
+		canvas.session.callCanvasFunc("fill")
 	}
 }
 
 func (canvas *canvasData) StrokeEllipse(x, y, radiusX, radiusY, rotation float64) {
 	if radiusX >= 0 && radiusY >= 0 {
-		canvas.writeEllipse(x, y, radiusX, radiusY, rotation)
-		canvas.script.WriteString("\nctx.stroke();")
+		canvas.createEllipse(x, y, radiusX, radiusY, rotation)
+		canvas.session.callCanvasFunc("stroke")
 	}
 }
 
 func (canvas *canvasData) FillAndStrokeEllipse(x, y, radiusX, radiusY, rotation float64) {
 	if radiusX >= 0 && radiusY >= 0 {
-		canvas.writeEllipse(x, y, radiusX, radiusY, rotation)
-		canvas.script.WriteString("\nctx.fill();\nctx.stroke();")
+		canvas.createEllipse(x, y, radiusX, radiusY, rotation)
+		canvas.session.callCanvasFunc("fill")
+		canvas.session.callCanvasFunc("stroke")
 	}
 }
 
+/*
 func (canvas *canvasData) writePointArgs(x, y float64) {
 	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
 	canvas.script.WriteRune(',')
@@ -947,101 +752,59 @@ func (canvas *canvasData) writeStringArgs(text string, script *strings.Builder) 
 		}
 	}
 }
+*/
 
 func (canvas *canvasData) FillText(x, y float64, text string) {
-	canvas.script.WriteString("\nctx.fillText('")
-	canvas.writeStringArgs(text, &canvas.script)
-	canvas.script.WriteString(`',`)
-	canvas.writePointArgs(x, y)
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("fillText", text, x, y)
 }
 
 func (canvas *canvasData) StrokeText(x, y float64, text string) {
-	canvas.script.WriteString("\nctx.strokeText('")
-	canvas.writeStringArgs(text, &canvas.script)
-	canvas.script.WriteString(`',`)
-	canvas.writePointArgs(x, y)
-	canvas.script.WriteString(");")
+	canvas.session.callCanvasFunc("strokeText", text, x, y)
 }
 
 func (canvas *canvasData) FillPath(path Path) {
-	canvas.script.WriteString(path.scriptText())
-	canvas.script.WriteString("\nctx.fill();")
+	path.create(canvas.session)
+	canvas.session.callCanvasFunc("fill")
 }
 
 func (canvas *canvasData) StrokePath(path Path) {
-	canvas.script.WriteString(path.scriptText())
-	canvas.script.WriteString("\nctx.stroke();")
+	path.create(canvas.session)
+	canvas.session.callCanvasFunc("stroke")
 }
 
 func (canvas *canvasData) FillAndStrokePath(path Path) {
-	canvas.script.WriteString(path.scriptText())
-	canvas.script.WriteString("\nctx.fill();\nctx.stroke();")
+	path.create(canvas.session)
+	canvas.session.callCanvasFunc("fill")
+	canvas.session.callCanvasFunc("stroke")
 }
 
 func (canvas *canvasData) DrawLine(x0, y0, x1, y1 float64) {
-	canvas.script.WriteString("\nctx.beginPath();\nctx.moveTo(")
-	canvas.script.WriteString(strconv.FormatFloat(x0, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y0, 'g', -1, 64))
-	canvas.script.WriteString(");\nctx.lineTo(")
-	canvas.script.WriteString(strconv.FormatFloat(x1, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y1, 'g', -1, 64))
-	canvas.script.WriteString(");\nctx.stroke();")
+	canvas.session.callCanvasFunc("beginPath")
+	canvas.session.callCanvasFunc("moveTo", x0, y0)
+	canvas.session.callCanvasFunc("lineTo", x1, y1)
+	canvas.session.callCanvasFunc("stroke")
 }
 
 func (canvas *canvasData) DrawImage(x, y float64, image Image) {
 	if image == nil || image.LoadingStatus() != ImageReady {
 		return
 	}
-	canvas.script.WriteString("\nimg = images.get('")
-	canvas.script.WriteString(image.URL())
-	canvas.script.WriteString("');\nif (img) {\nctx.drawImage(img,")
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	canvas.script.WriteString(");\n}")
+
+	canvas.session.callCanvasImageFunc(image.URL(), "", "drawImage", x, y)
 }
 
 func (canvas *canvasData) DrawImageInRect(x, y, width, height float64, image Image) {
 	if image == nil || image.LoadingStatus() != ImageReady {
 		return
 	}
-	canvas.script.WriteString("\nimg = images.get('")
-	canvas.script.WriteString(image.URL())
-	canvas.script.WriteString("');\nif (img) {\nctx.drawImage(img,")
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(width, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(height, 'g', -1, 64))
-	canvas.script.WriteString(");\n}")
+
+	canvas.session.callCanvasImageFunc(image.URL(), "", "drawImage", x, y, width, height)
 }
 
 func (canvas *canvasData) DrawImageFragment(srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight float64, image Image) {
 	if image == nil || image.LoadingStatus() != ImageReady {
 		return
 	}
-	canvas.script.WriteString("\nimg = images.get('")
-	canvas.script.WriteString(image.URL())
-	canvas.script.WriteString("');\nif (img) {\nctx.drawImage(img,")
-	canvas.script.WriteString(strconv.FormatFloat(srcX, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(srcY, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(srcWidth, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(srcHeight, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(dstX, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(dstY, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(dstWidth, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(dstHeight, 'g', -1, 64))
-	canvas.script.WriteString(");\n}")
+
+	canvas.session.callCanvasImageFunc(image.URL(), "", "drawImage", srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight)
 }

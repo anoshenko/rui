@@ -123,7 +123,7 @@ func scanEmbedImagesDir(fs *embed.FS, dir, prefix string) {
 			} else {
 				ext := strings.ToLower(filepath.Ext(name))
 				switch ext {
-				case ".png", ".jpg", ".jpeg", ".svg":
+				case ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp":
 					registerImage(fs, path, prefix+name)
 				}
 			}

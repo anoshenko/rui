@@ -13,13 +13,19 @@ import (
 )
 
 type wsBrige struct {
-	conn          *websocket.Conn
-	answer        map[int]chan DataObject
-	answerID      int
-	answerMutex   sync.Mutex
-	closed        bool
-	buffer        strings.Builder
-	updateScripts map[string]*strings.Builder
+	conn            *websocket.Conn
+	answer          map[int]chan DataObject
+	answerID        int
+	answerMutex     sync.Mutex
+	closed          bool
+	buffer          strings.Builder
+	canvasBuffer    strings.Builder
+	canvasVarNumber int
+	updateScripts   map[string]*strings.Builder
+}
+
+type canvasVar struct {
+	name string
 }
 
 var upgrader = websocket.Upgrader{
@@ -119,6 +125,21 @@ func (brige *wsBrige) argToString(arg any) (string, bool) {
 	case float64:
 		return fmt.Sprintf("%g", arg), true
 
+	case []float64:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+		lead := '['
+		for _, val := range arg {
+			buffer.WriteRune(lead)
+			lead = ','
+			buffer.WriteString(fmt.Sprintf("%g", val))
+		}
+		buffer.WriteRune(']')
+		return buffer.String(), true
+
+	case canvasVar:
+		return arg.name, true
+
 	default:
 		if n, ok := isInt(arg); ok {
 			return fmt.Sprintf("%d", n), true
@@ -200,6 +221,110 @@ func (brige *wsBrige) removeProperty(htmlID, property string) {
 		buffer.WriteString("');}\n")
 	} else {
 		brige.runFunc("removeProperty", htmlID, property)
+	}
+}
+
+func (brige *wsBrige) cavnasStart(htmlID string) {
+	brige.canvasBuffer.Reset()
+	brige.canvasBuffer.WriteString(`const ctx = getCanvasContext('`)
+	brige.canvasBuffer.WriteString(htmlID)
+	brige.canvasBuffer.WriteString(`');`)
+}
+
+func (brige *wsBrige) callCanvasFunc(funcName string, args ...any) {
+	brige.canvasBuffer.WriteString("\nctx.")
+	brige.canvasBuffer.WriteString(funcName)
+	brige.canvasBuffer.WriteRune('(')
+	for i, arg := range args {
+		if i > 0 {
+			brige.canvasBuffer.WriteString(", ")
+		}
+		argText, _ := brige.argToString(arg)
+		brige.canvasBuffer.WriteString(argText)
+	}
+	brige.canvasBuffer.WriteString(");")
+}
+
+func (brige *wsBrige) updateCanvasProperty(property string, value any) {
+	brige.canvasBuffer.WriteString("\nctx.")
+	brige.canvasBuffer.WriteString(property)
+	brige.canvasBuffer.WriteString(" = ")
+	argText, _ := brige.argToString(value)
+	brige.canvasBuffer.WriteString(argText)
+	brige.canvasBuffer.WriteString(";")
+}
+
+func (brige *wsBrige) createCanvasVar(funcName string, args ...any) any {
+	brige.canvasVarNumber++
+	result := canvasVar{name: fmt.Sprintf("v%d", brige.canvasVarNumber)}
+	brige.canvasBuffer.WriteString("\nvar ")
+	brige.canvasBuffer.WriteString(result.name)
+	brige.canvasBuffer.WriteString(" = ctx.")
+	brige.canvasBuffer.WriteString(funcName)
+	brige.canvasBuffer.WriteRune('(')
+	for i, arg := range args {
+		if i > 0 {
+			brige.canvasBuffer.WriteString(", ")
+		}
+		argText, _ := brige.argToString(arg)
+		brige.canvasBuffer.WriteString(argText)
+	}
+	brige.canvasBuffer.WriteString(");")
+	return result
+}
+
+func (brige *wsBrige) callCanvasVarFunc(v any, funcName string, args ...any) {
+	varName, ok := v.(canvasVar)
+	if !ok {
+		return
+	}
+	brige.canvasBuffer.WriteString("\n")
+	brige.canvasBuffer.WriteString(varName.name)
+	brige.canvasBuffer.WriteRune('.')
+	brige.canvasBuffer.WriteString(funcName)
+	brige.canvasBuffer.WriteRune('(')
+	for i, arg := range args {
+		if i > 0 {
+			brige.canvasBuffer.WriteString(", ")
+		}
+		argText, _ := brige.argToString(arg)
+		brige.canvasBuffer.WriteString(argText)
+	}
+	brige.canvasBuffer.WriteString(");")
+}
+
+func (brige *wsBrige) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
+
+	brige.canvasBuffer.WriteString("\nimg = images.get('")
+	brige.canvasBuffer.WriteString(url)
+	brige.canvasBuffer.WriteString("');\nif (img) {\n")
+	if property != "" {
+		brige.canvasBuffer.WriteString("ctx.")
+		brige.canvasBuffer.WriteString(property)
+		brige.canvasBuffer.WriteString(" = ")
+	}
+	brige.canvasBuffer.WriteString("ctx.")
+	brige.canvasBuffer.WriteString(funcName)
+	brige.canvasBuffer.WriteString("(img")
+	for _, arg := range args {
+		brige.canvasBuffer.WriteString(", ")
+		argText, _ := brige.argToString(arg)
+		brige.canvasBuffer.WriteString(argText)
+	}
+	brige.canvasBuffer.WriteString(");\n}")
+}
+
+func (brige *wsBrige) cavnasFinish() {
+	brige.canvasBuffer.WriteString("\n")
+	script := brige.canvasBuffer.String()
+	if ProtocolInDebugLog {
+		DebugLog("Run script:")
+		DebugLog(script)
+	}
+	if brige.conn == nil {
+		ErrorLog("No connection")
+	} else if err := brige.conn.WriteMessage(websocket.TextMessage, []byte(script)); err != nil {
+		ErrorLog(err.Error())
 	}
 }
 

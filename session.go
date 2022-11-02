@@ -18,6 +18,13 @@ type webBrige interface {
 	removeProperty(htmlID, property string)
 	readMessage() (string, bool)
 	writeMessage(text string) bool
+	cavnasStart(htmlID string)
+	callCanvasFunc(funcName string, args ...any)
+	callCanvasVarFunc(v any, funcName string, args ...any)
+	callCanvasImageFunc(url string, property string, funcName string, args ...any)
+	createCanvasVar(funcName string, args ...any) any
+	updateCanvasProperty(property string, value any)
+	cavnasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
 	htmlPropertyValue(htmlID, name string) string
 	answerReceived(answer DataObject)
@@ -115,6 +122,13 @@ type Session interface {
 	runScript(script string)
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
+	cavnasStart(htmlID string)
+	callCanvasFunc(funcName string, args ...any)
+	createCanvasVar(funcName string, args ...any) any
+	callCanvasVarFunc(v any, funcName string, args ...any)
+	callCanvasImageFunc(url string, property string, funcName string, args ...any)
+	updateCanvasProperty(property string, value any)
+	cavnasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
 	htmlPropertyValue(htmlID, name string) string
 	handleAnswer(data DataObject)
@@ -392,6 +406,49 @@ func (session *sessionData) startUpdateScript(htmlID string) bool {
 func (session *sessionData) finishUpdateScript(htmlID string) {
 	if session.brige != nil {
 		session.brige.finishUpdateScript(htmlID)
+	}
+}
+
+func (session *sessionData) cavnasStart(htmlID string) {
+	if session.brige != nil {
+		session.brige.cavnasStart(htmlID)
+	}
+}
+
+func (session *sessionData) callCanvasFunc(funcName string, args ...any) {
+	if session.brige != nil {
+		session.brige.callCanvasFunc(funcName, args...)
+	}
+}
+
+func (session *sessionData) updateCanvasProperty(property string, value any) {
+	if session.brige != nil {
+		session.brige.updateCanvasProperty(property, value)
+	}
+}
+
+func (session *sessionData) createCanvasVar(funcName string, args ...any) any {
+	if session.brige != nil {
+		return session.brige.createCanvasVar(funcName, args...)
+	}
+	return nil
+}
+
+func (session *sessionData) callCanvasVarFunc(v any, funcName string, args ...any) {
+	if session.brige != nil && v != nil {
+		session.brige.callCanvasVarFunc(v, funcName, args...)
+	}
+}
+
+func (session *sessionData) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
+	if session.brige != nil {
+		session.brige.callCanvasImageFunc(url, property, funcName, args...)
+	}
+}
+
+func (session *sessionData) cavnasFinish() {
+	if session.brige != nil {
+		session.brige.cavnasFinish()
 	}
 }
 

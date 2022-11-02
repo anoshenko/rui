@@ -4,6 +4,8 @@ package rui
 
 import (
 	_ "embed"
+	"encoding/base64"
+	"path/filepath"
 	"strings"
 	"syscall/js"
 )
@@ -112,10 +114,46 @@ func (app *wasmApp) createSession() Session {
 	return session
 }
 
-func (app *wasmApp) init() {
+func (app *wasmApp) init(params AppParams) {
+
+	app.params = params
 
 	document := js.Global().Get("document")
 	body := document.Call("querySelector", "body")
+	head := document.Call("querySelector", "head")
+
+	meta := document.Call("createElement", "meta")
+	meta.Set("name", "viewport")
+	meta.Set("content", "width=device-width")
+	head.Call("appendChild", meta)
+
+	meta = document.Call("createElement", "base")
+	meta.Set("target", "_blank")
+	meta.Set("rel", "noopener")
+	head.Call("appendChild", meta)
+
+	if params.Icon != "" {
+		if image, ok := resources.images[params.Icon]; ok && image.fs != nil {
+			dataType := map[string]string{
+				".svg":  "data:image/svg+xml",
+				".png":  "data:image/png",
+				".jpg":  "data:image/jpg",
+				".jpeg": "data:image/jpg",
+				".gif":  "data:image/gif",
+			}
+			ext := strings.ToLower(filepath.Ext(params.Icon))
+			if prefix, ok := dataType[ext]; ok {
+				if data, err := image.fs.ReadFile(image.path); err == nil {
+					meta = document.Call("createElement", "link")
+					meta.Set("rel", "icon")
+					meta.Set("href", prefix+";base64,"+base64.StdEncoding.EncodeToString(data))
+					head.Call("appendChild", meta)
+				} else {
+					DebugLog(err.Error())
+				}
+			}
+		}
+	}
 
 	script := document.Call("createElement", "script")
 	script.Set("type", "text/javascript")
@@ -156,6 +194,11 @@ func (app *wasmApp) init() {
 	div.Set("download", "")
 	div.Set("style", "display: none;")
 	body.Call("appendChild", div)
+
+	if params.TitleColor != 0 {
+		app.brige.runFunc("setTitleColor", params.TitleColor.cssString())
+	}
+
 }
 
 // StartApp - create the new wasmApp and start it
@@ -168,11 +211,10 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 	}
 
 	app := new(wasmApp)
-	app.params = params
 	app.createContentFunc = createContentFunc
 	app.brige = createWasmBrige()
 
-	app.init()
+	app.init(params)
 	<-app.close
 }
 

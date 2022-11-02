@@ -1,7 +1,10 @@
 package rui
 
 import (
+	"encoding/base64"
 	"fmt"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -129,12 +132,10 @@ func (imageView *imageViewData) set(tag string, value any) bool {
 		if text, ok := value.(string); ok {
 			imageView.properties[Source] = text
 			if imageView.created {
-				src := text
-				if src != "" && src[0] == '@' {
-					src, _ = imageProperty(imageView, Source, imageView.session)
-				}
+				src, srcset := imageView.src(text)
 				imageView.session.updateProperty(imageView.htmlID(), "src", src)
-				if srcset := imageView.srcSet(src); srcset != "" {
+
+				if srcset != "" {
 					imageView.session.updateProperty(imageView.htmlID(), "srcset", srcset)
 				} else {
 					imageView.session.removeProperty(imageView.htmlID(), "srcset")
@@ -214,29 +215,51 @@ func (imageView *imageViewData) htmlTag() string {
 	return "img"
 }
 
-/*
-func (imageView *imageViewData) closeHTMLTag() bool {
-	return false
+func (imageView *imageViewData) src(src string) (string, string) {
+	if src != "" && src[0] == '@' {
+		if image, ok := imageView.Session().ImageConstant(src[1:]); ok {
+			src = image
+		} else {
+			src = ""
+		}
+	}
+
+	if src != "" {
+		srcset := imageView.srcSet(src)
+		if runtime.GOOS == "js" {
+			if image, ok := resources.images[src]; ok && image.fs != nil {
+				dataType := map[string]string{
+					".svg":  "data:image/svg+xml",
+					".png":  "data:image/png",
+					".jpg":  "data:image/jpg",
+					".jpeg": "data:image/jpg",
+					".gif":  "data:image/gif",
+				}
+				ext := strings.ToLower(filepath.Ext(src))
+				if prefix, ok := dataType[ext]; ok {
+					if data, err := image.fs.ReadFile(image.path); err == nil {
+						return prefix + ";base64," + base64.StdEncoding.EncodeToString(data), ""
+					} else {
+						DebugLog(err.Error())
+					}
+				}
+			}
+		}
+		return src, srcset
+	}
+	return "", ""
 }
-*/
 
 func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builder) {
+
 	imageView.viewData.htmlProperties(self, buffer)
 
 	if imageResource, ok := imageProperty(imageView, Source, imageView.Session()); ok && imageResource != "" {
-		if imageResource[0] == '@' {
-			if image, ok := imageView.Session().ImageConstant(imageResource[1:]); ok {
-				imageResource = image
-			} else {
-				imageResource = ""
-			}
-		}
-
-		if imageResource != "" {
+		if src, srcset := imageView.src(imageResource); src != "" {
 			buffer.WriteString(` src="`)
-			buffer.WriteString(imageResource)
+			buffer.WriteString(src)
 			buffer.WriteString(`"`)
-			if srcset := imageView.srcSet(imageResource); srcset != "" {
+			if srcset != "" {
 				buffer.WriteString(` srcset="`)
 				buffer.WriteString(srcset)
 				buffer.WriteString(`"`)

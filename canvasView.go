@@ -107,7 +107,7 @@ func (canvasView *canvasViewData) Redraw() {
 		if canvasView.drawer != nil {
 			canvasView.drawer(canvas)
 		}
-		canvasView.session.runScript(canvas.finishDraw())
+		canvas.finishDraw()
 	}
 }
 
