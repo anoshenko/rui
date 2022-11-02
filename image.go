@@ -1,6 +1,12 @@
 package rui
 
-import "strconv"
+import (
+	"encoding/base64"
+	"path/filepath"
+	"runtime"
+	"strconv"
+	"strings"
+)
 
 const (
 	// ImageLoading is the image loading status: in the process of loading
@@ -76,6 +82,27 @@ func (manager *imageManager) loadImage(url string, onLoaded func(Image), session
 	image.listener = onLoaded
 	image.loadingStatus = ImageLoading
 	manager.images[url] = image
+
+	if runtime.GOOS == "js" {
+		if file, ok := resources.images[url]; ok && file.fs != nil {
+			dataType := map[string]string{
+				".svg":  "data:image/svg+xml",
+				".png":  "data:image/png",
+				".jpg":  "data:image/jpg",
+				".jpeg": "data:image/jpg",
+				".gif":  "data:image/gif",
+			}
+			ext := strings.ToLower(filepath.Ext(url))
+			if prefix, ok := dataType[ext]; ok {
+				if data, err := file.fs.ReadFile(file.path); err == nil {
+					session.callFunc("loadInlineImage", url, prefix+";base64,"+base64.StdEncoding.EncodeToString(data))
+					return image
+				} else {
+					DebugLog(err.Error())
+				}
+			}
+		}
+	}
 	session.callFunc("loadImage", url)
 	return image
 }

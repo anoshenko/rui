@@ -119,8 +119,9 @@ func (bridge *wasmBridge) callCanvasVarFunc(v any, funcName string, args ...any)
 
 func (bridge *wasmBridge) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
 	image := js.Global().Get("images").Call("get", url)
-	if !image.IsUndefined() && !image.IsNull() {
-		result := image.Call(funcName, args...)
+	if !image.IsUndefined() && !image.IsNull() && !bridge.canvas.IsNull() {
+
+		result := bridge.canvas.Call(funcName, append([]any{image}, args...)...)
 		if property != "" {
 			bridge.canvas.Set(property, result)
 		}

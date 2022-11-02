@@ -1156,6 +1156,37 @@ function loadImage(url) {
 	img.src = url;
 }
 
+function loadInlineImage(url, content) {
+	var img = images.get(url);
+	if (img != undefined) {
+		return
+	}
+	
+	img = new Image(); 
+	img.addEventListener("load", function() {
+		images.set(url, img)
+		var message = "imageLoaded{session=" + sessionID + ",url=\"" + url + "\""; 
+		if (img.naturalWidth) {
+			message += ",width=" + img.naturalWidth
+		}
+		if (img.naturalHeight) {
+			message += ",height=" + img.naturalHeight
+		}
+		sendMessage(message + "}")
+	}, false);
+
+	img.addEventListener("error", function(event) {
+		var message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
+		if (event && event.message) {
+			var text = event.message.replace(new RegExp("\"", 'g'), "\\\"")
+			message += ",message=\"" + text + "\""; 
+		}
+		sendMessage(message + "}")
+	}, false);
+
+	img.src = content;
+}
+
 function clickOutsidePopup(e) {
 	sendMessage("clickOutsidePopup{session=" + sessionID + "}")
 	e.stopPropagation();
