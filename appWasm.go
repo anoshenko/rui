@@ -31,7 +31,11 @@ func wasmLog(text string) {
 
 func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 	if len(args) > 0 {
-		if obj := ParseDataText(args[0].String()); obj != nil {
+		text := args[0].String()
+		if ProtocolInDebugLog {
+			DebugLog(text)
+		}
+		if obj := ParseDataText(text); obj != nil {
 			switch command := obj.Tag(); command {
 			/*
 						case "startSession":

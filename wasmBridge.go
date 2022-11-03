@@ -35,7 +35,7 @@ func (bridge *wasmBridge) startUpdateScript(htmlID string) bool {
 func (bridge *wasmBridge) finishUpdateScript(htmlID string) {
 }
 
-func (bridge *wasmBridge) callFunc(funcName string, args ...any) bool {
+func (bridge *wasmBridge) printFuncToLog(funcName string, args ...any) {
 	if ProtocolInDebugLog {
 		text := funcName + "("
 		for i, arg := range args {
@@ -47,25 +47,54 @@ func (bridge *wasmBridge) callFunc(funcName string, args ...any) bool {
 		}
 		DebugLog(text + ")")
 	}
+}
+
+func (bridge *wasmBridge) callFunc(funcName string, args ...any) bool {
+	bridge.printFuncToLog(funcName, args...)
 
 	js.Global().Call(funcName, args...)
 	return true
 }
 
 func (bridge *wasmBridge) updateInnerHTML(htmlID, html string) {
-	bridge.callFunc("updateInnerHTML", htmlID, html)
+	bridge.updateProperty(htmlID, "innerHTML", html)
 }
 
 func (bridge *wasmBridge) appendToInnerHTML(htmlID, html string) {
-	bridge.callFunc("appendToInnerHTML", htmlID, html)
+	if ProtocolInDebugLog {
+		DebugLog(fmt.Sprintf("%s.innerHTML += '%s'", htmlID, html))
+	}
+
+	element := js.Global().Get("document").Call("getElementById", htmlID)
+	if !element.IsUndefined() && !element.IsNull() {
+		oldHtml := element.Get("innerHTML").String()
+		element.Set("innerHTML", oldHtml+html)
+		js.Global().Call("scanElementsSize")
+	}
 }
 
 func (bridge *wasmBridge) updateCSSProperty(htmlID, property, value string) {
-	bridge.callFunc("updateCSSProperty", htmlID, property, value)
+	if ProtocolInDebugLog {
+		DebugLog(fmt.Sprintf("%s.style[%s] = '%s'", htmlID, property, value))
+	}
+
+	element := js.Global().Get("document").Call("getElementById", htmlID)
+	if !element.IsUndefined() && !element.IsNull() {
+		element.Get("style").Set(property, value)
+		js.Global().Call("scanElementsSize")
+	}
 }
 
 func (bridge *wasmBridge) updateProperty(htmlID, property string, value any) {
-	bridge.callFunc("updateProperty", htmlID, property, value)
+	if ProtocolInDebugLog {
+		DebugLog(fmt.Sprintf("%s.%s = '%v'", htmlID, property, value))
+	}
+
+	element := js.Global().Get("document").Call("getElementById", htmlID)
+	if !element.IsUndefined() && !element.IsNull() {
+		element.Set(property, value)
+		js.Global().Call("scanElementsSize")
+	}
 }
 
 func (bridge *wasmBridge) removeProperty(htmlID, property string) {
@@ -92,6 +121,10 @@ func (bridge *wasmBridge) writeMessage(script string) bool {
 }
 
 func (bridge *wasmBridge) cavnasStart(htmlID string) {
+	if ProtocolInDebugLog {
+		DebugLog("const ctx = document.getElementById('" + htmlID + "'elementId').getContext('2d');\nctx.save();")
+	}
+
 	bridge.canvas = js.Global().Call("getCanvasContext", htmlID)
 	if !bridge.canvas.IsNull() {
 		bridge.canvas.Call("save")
@@ -110,12 +143,14 @@ func (bridge *wasmBridge) callCanvasFunc(funcName string, args ...any) {
 			}
 		}
 
+		bridge.printFuncToLog("ctx."+funcName, args...)
 		bridge.canvas.Call(funcName, args...)
 	}
 }
 
 func (bridge *wasmBridge) callCanvasVarFunc(v any, funcName string, args ...any) {
 	if jsVar, ok := v.(js.Value); ok && !jsVar.IsNull() {
+		bridge.printFuncToLog(jsVar.String()+"."+funcName, args...)
 		jsVar.Call(funcName, args...)
 	}
 }
@@ -123,10 +158,13 @@ func (bridge *wasmBridge) callCanvasVarFunc(v any, funcName string, args ...any)
 func (bridge *wasmBridge) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
 	image := js.Global().Get("images").Call("get", url)
 	if !image.IsUndefined() && !image.IsNull() && !bridge.canvas.IsNull() {
-
-		result := bridge.canvas.Call(funcName, append([]any{image}, args...)...)
+		args = append([]any{image}, args...)
+		result := bridge.canvas.Call(funcName, args...)
 		if property != "" {
+			bridge.printFuncToLog("ctx."+property+" = ctx."+funcName, args...)
 			bridge.canvas.Set(property, result)
+		} else {
+			bridge.printFuncToLog("ctx."+funcName, args...)
 		}
 	}
 }
@@ -135,17 +173,25 @@ func (bridge *wasmBridge) createCanvasVar(funcName string, args ...any) any {
 	if bridge.canvas.IsNull() {
 		return bridge.canvas
 	}
-	return bridge.canvas.Call(funcName, args...)
+
+	result := bridge.canvas.Call(funcName, args...)
+	bridge.printFuncToLog("var "+result.String()+" = ctx."+funcName, args...)
+	return result
 }
 
 func (bridge *wasmBridge) updateCanvasProperty(property string, value any) {
 	if !bridge.canvas.IsNull() {
+		if ProtocolInDebugLog {
+			DebugLog(fmt.Sprintf("ctx.%s = '%v'", property, value))
+		}
+
 		bridge.canvas.Set(property, value)
 	}
 }
 
 func (bridge *wasmBridge) cavnasFinish() {
 	if !bridge.canvas.IsNull() {
+		DebugLog("ctx.restore()")
 		bridge.canvas.Call("restore")
 	}
 }
