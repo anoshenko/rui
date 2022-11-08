@@ -226,7 +226,7 @@ func (imageView *imageViewData) src(src string) (string, string) {
 
 	if src != "" {
 		srcset := imageView.srcSet(src)
-		if runtime.GOOS == "js" {
+		if runtime.GOOS == "js" && wasmMediaResources {
 			if image, ok := resources.images[src]; ok && image.fs != nil {
 				dataType := map[string]string{
 					".svg":  "data:image/svg+xml",

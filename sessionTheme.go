@@ -329,11 +329,7 @@ func (session *sessionData) SetLanguage(lang string) {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
-			//buffer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
 			viewHTML(session.rootView, buffer)
-			//buffer.WriteString("';\nscanElementsSize();")
-
-			//session.runScript(buffer.String())
 			session.bridge.updateInnerHTML("ruiRootView", buffer.String())
 		}
 	}

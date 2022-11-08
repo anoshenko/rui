@@ -26,7 +26,7 @@ func (app *wasmApp) Finish() {
 }
 
 func wasmLog(text string) {
-	js.Global().Call("log", text)
+	js.Global().Get("console").Call("log", text)
 }
 
 func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
@@ -37,60 +37,9 @@ func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 		}
 		if obj := ParseDataText(text); obj != nil {
 			switch command := obj.Tag(); command {
-			/*
-						case "startSession":
-							answer := ""
-							if session, answer = app.startSession(obj, events, bridge); session != nil {
-								if !bridge.writeMessage(answer) {
-									return
-								}
-								session.onStart()
-								go sessionEventHandler(session, events, bridge)
-							}
+			case "session-close":
+				app.close <- obj
 
-						case "reconnect":
-							if sessionText, ok := obj.PropertyValue("session"); ok {
-								if sessionID, err := strconv.Atoi(sessionText); err == nil {
-									if session = app.sessions[sessionID]; session != nil {
-										session.setBridge(events, bridge)
-										answer := allocStringBuilder()
-										defer freeStringBuilder(answer)
-
-										session.writeInitScript(answer)
-										if !bridge.writeMessage(answer.String()) {
-											return
-										}
-										session.onReconnect()
-										go sessionEventHandler(session, events, bridge)
-										return
-									}
-									DebugLogF("Session #%d not exists", sessionID)
-								} else {
-									ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
-								}
-							} else {
-								ErrorLog(`"session" key not found`)
-							}
-
-							answer := ""
-							if session, answer = app.startSession(obj, events, bridge); session != nil {
-								if !bridge.writeMessage(answer) {
-									return
-								}
-								session.onStart()
-								go sessionEventHandler(session, events, bridge)
-							}
-
-									case "disconnect":
-					session.onDisconnect()
-					return
-
-				case "session-close":
-					session.onFinish()
-					session.App().removeSession(session.ID())
-					bridge.close()
-
-			*/
 			case "answer":
 				app.session.handleAnswer(obj)
 
@@ -176,6 +125,10 @@ func (app *wasmApp) init(params AppParams) {
 	style.Set("textContent", css)
 	document.Call("querySelector", "head").Call("appendChild", style)
 
+	style = document.Call("createElement", "style")
+	style.Set("id", "ruiAnimations")
+	document.Call("querySelector", "head").Call("appendChild", style)
+
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
@@ -216,14 +169,14 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 
 	app := new(wasmApp)
 	app.createContentFunc = createContentFunc
-	app.bridge = createWasmBridge()
+	app.close = make(chan DataObject)
+	app.bridge = createWasmBridge(app.close)
 
 	app.init(params)
 	<-app.close
 }
 
 func FinishApp() {
-	//app.Finish()
 }
 
 func OpenBrowser(url string) bool {

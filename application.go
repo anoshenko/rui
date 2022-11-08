@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var wasmMediaResources = false
+
 //go:embed app_scripts.js
 var defaultScripts string
 
@@ -66,6 +68,7 @@ func getStartPage(buffer *strings.Builder, params AppParams, addScripts string) 
 		<style>`)
 	buffer.WriteString(appStyles)
 	buffer.WriteString(`</style>
+		<style id="ruiAnimations"></style>
 		<script>
 `)
 	buffer.WriteString(defaultScripts)

@@ -224,6 +224,20 @@ func (bridge *wsBridge) removeProperty(htmlID, property string) {
 	}
 }
 
+func (bridge *wsBridge) addAnimationCSS(css string) {
+	bridge.writeMessage(`var styles = document.getElementById('ruiAnimations');
+if (styles) {
+	styles.textContent += '` + css + `';
+}`)
+}
+
+func (bridge *wsBridge) clearAnimation() {
+	bridge.writeMessage(`var styles = document.getElementById('ruiAnimations');
+if (styles) {
+	styles.textContent = '';
+}`)
+}
+
 func (bridge *wsBridge) cavnasStart(htmlID string) {
 	bridge.canvasBuffer.Reset()
 	bridge.canvasBuffer.WriteString(`const ctx = getCanvasContext('`)

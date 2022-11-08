@@ -609,8 +609,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 
 	style := cssBuilder.finish()
 	session.animationCSS += style
-	style = strings.ReplaceAll(style, "\n", `\n`)
-	session.runScript(`document.querySelector('style').textContent += "` + style + `"`)
+	session.addAnimationCSS(style)
 
 	return name
 }

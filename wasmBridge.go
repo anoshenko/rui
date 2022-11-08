@@ -5,25 +5,22 @@ package rui
 import (
 	"fmt"
 	"strconv"
-	"sync"
+	"strings"
 	"syscall/js"
 )
 
 type wasmBridge struct {
-	queue       chan string
-	answer      map[int]chan DataObject
-	answerID    int
-	answerMutex sync.Mutex
-	closed      bool
-	canvas      js.Value
+	answer     map[int]chan DataObject
+	answerID   int
+	canvas     js.Value
+	closeEvent chan DataObject
 }
 
-func createWasmBridge() webBridge {
+func createWasmBridge(close chan DataObject) webBridge {
 	bridge := new(wasmBridge)
-	bridge.queue = make(chan string, 1000)
 	bridge.answerID = 1
 	bridge.answer = make(map[int]chan DataObject)
-	bridge.closed = false
+	bridge.closeEvent = close
 
 	return bridge
 }
@@ -57,7 +54,15 @@ func (bridge *wasmBridge) callFunc(funcName string, args ...any) bool {
 }
 
 func (bridge *wasmBridge) updateInnerHTML(htmlID, html string) {
-	bridge.updateProperty(htmlID, "innerHTML", html)
+	if ProtocolInDebugLog {
+		DebugLog(fmt.Sprintf("%s.innerHTML = '%s'", htmlID, html))
+	}
+
+	element := js.Global().Get("document").Call("getElementById", htmlID)
+	if !element.IsUndefined() && !element.IsNull() {
+		element.Set("innerHTML", html)
+		js.Global().Call("scanElementsSize")
+	}
 }
 
 func (bridge *wasmBridge) appendToInnerHTML(htmlID, html string) {
@@ -86,15 +91,7 @@ func (bridge *wasmBridge) updateCSSProperty(htmlID, property, value string) {
 }
 
 func (bridge *wasmBridge) updateProperty(htmlID, property string, value any) {
-	if ProtocolInDebugLog {
-		DebugLog(fmt.Sprintf("%s.%s = '%v'", htmlID, property, value))
-	}
-
-	element := js.Global().Get("document").Call("getElementById", htmlID)
-	if !element.IsUndefined() && !element.IsNull() {
-		element.Set(property, value)
-		js.Global().Call("scanElementsSize")
-	}
+	bridge.callFunc("updateProperty", htmlID, property, value)
 }
 
 func (bridge *wasmBridge) removeProperty(htmlID, property string) {
@@ -102,6 +99,7 @@ func (bridge *wasmBridge) removeProperty(htmlID, property string) {
 }
 
 func (bridge *wasmBridge) close() {
+	bridge.closeEvent <- NewDataObject("close")
 }
 
 func (bridge *wasmBridge) readMessage() (string, bool) {
@@ -118,6 +116,23 @@ func (bridge *wasmBridge) writeMessage(script string) bool {
 	window.Call("execScript", script)
 
 	return true
+}
+
+func (bridge *wasmBridge) addAnimationCSS(css string) {
+	css = strings.ReplaceAll(css, `\t`, "\t")
+	css = strings.ReplaceAll(css, `\n`, "\n")
+	css = strings.ReplaceAll(css, `\'`, "'")
+	css = strings.ReplaceAll(css, `\"`, "\"")
+	css = strings.ReplaceAll(css, `\\`, "\\")
+
+	styles := js.Global().Get("document").Call("getElementById", "ruiAnimations")
+	content := styles.Get("textContent").String()
+	styles.Set("textContent", content+"\n"+css)
+}
+
+func (bridge *wasmBridge) clearAnimation() {
+	styles := js.Global().Get("document").Call("getElementById", "ruiAnimations")
+	styles.Set("textContent", "")
 }
 
 func (bridge *wasmBridge) cavnasStart(htmlID string) {

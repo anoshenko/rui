@@ -79,7 +79,7 @@ func NewPath() Path {
 
 func (path *pathData) Reset() {
 	path.elements = []pathElement{
-		pathElement{funcName: "beginPath", args: []any{}},
+		{funcName: "beginPath", args: []any{}},
 	}
 }
 

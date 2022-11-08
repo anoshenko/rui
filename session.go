@@ -18,6 +18,8 @@ type webBridge interface {
 	removeProperty(htmlID, property string)
 	readMessage() (string, bool)
 	writeMessage(text string) bool
+	addAnimationCSS(css string)
+	clearAnimation()
 	cavnasStart(htmlID string)
 	callCanvasFunc(funcName string, args ...any)
 	callCanvasVarFunc(v any, funcName string, args ...any)
@@ -119,9 +121,10 @@ type Session interface {
 	updateCSSProperty(htmlID, property, value string)
 	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
-	runScript(script string)
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
+	addAnimationCSS(css string)
+	clearAnimation()
 	cavnasStart(htmlID string)
 	callCanvasFunc(funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
@@ -309,7 +312,7 @@ func (session *sessionData) reload() {
 		buffer.WriteString("';\nscanElementsSize();")
 	}
 
-	session.runScript(buffer.String())
+	session.bridge.writeMessage(buffer.String())
 }
 
 func (session *sessionData) ignoreViewUpdates() bool {
@@ -409,6 +412,18 @@ func (session *sessionData) finishUpdateScript(htmlID string) {
 	}
 }
 
+func (session *sessionData) addAnimationCSS(css string) {
+	if session.bridge != nil {
+		session.bridge.addAnimationCSS(css)
+	}
+}
+
+func (session *sessionData) clearAnimation() {
+	if session.bridge != nil {
+		session.bridge.clearAnimation()
+	}
+}
+
 func (session *sessionData) cavnasStart(htmlID string) {
 	if session.bridge != nil {
 		session.bridge.cavnasStart(htmlID)
@@ -449,14 +464,6 @@ func (session *sessionData) callCanvasImageFunc(url string, property string, fun
 func (session *sessionData) cavnasFinish() {
 	if session.bridge != nil {
 		session.bridge.cavnasFinish()
-	}
-}
-
-func (session *sessionData) runScript(script string) {
-	if session.bridge != nil {
-		session.bridge.writeMessage(script)
-	} else {
-		ErrorLog("No connection")
 	}
 }
 

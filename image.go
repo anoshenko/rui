@@ -83,8 +83,9 @@ func (manager *imageManager) loadImage(url string, onLoaded func(Image), session
 	image.loadingStatus = ImageLoading
 	manager.images[url] = image
 
-	if runtime.GOOS == "js" {
+	if runtime.GOOS == "js" && wasmMediaResources {
 		if file, ok := resources.images[url]; ok && file.fs != nil {
+
 			dataType := map[string]string{
 				".svg":  "data:image/svg+xml",
 				".png":  "data:image/png",
