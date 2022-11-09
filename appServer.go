@@ -20,6 +20,14 @@ import (
 //go:embed app_socket.js
 var socketScripts string
 
+func debugLog(text string) {
+	log.Println("\033[34m" + text)
+}
+
+func errorLog(text string) {
+	log.Println("\033[31m" + text)
+}
+
 type application struct {
 	server            *http.Server
 	params            AppParams

@@ -25,8 +25,12 @@ func (app *wasmApp) Finish() {
 	app.session.close()
 }
 
-func wasmLog(text string) {
+func debugLog(text string) {
 	js.Global().Get("console").Call("log", text)
+}
+
+func errorLog(text string) {
+	js.Global().Get("console").Call("log", "%c"+text, "color: #F00;")
 }
 
 func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
@@ -160,9 +164,6 @@ func (app *wasmApp) init(params AppParams) {
 
 // StartApp - create the new wasmApp and start it
 func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
-	SetDebugLog(wasmLog)
-	SetErrorLog(wasmLog)
-
 	if createContentFunc == nil {
 		return
 	}

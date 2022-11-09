@@ -2,7 +2,6 @@ package rui
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 )
 
@@ -10,14 +9,8 @@ import (
 // clients and the server is displayed in the debug log
 var ProtocolInDebugLog = false
 
-var debugLogFunc func(string) = func(text string) {
-	log.Println("\033[34m" + text)
-}
-
-var errorLogFunc = func(text string) {
-	log.Println("\033[31m" + text)
-	//println(text)
-}
+var debugLogFunc func(string) = debugLog
+var errorLogFunc func(string) = errorLog
 
 // SetDebugLog sets a function for outputting debug info.
 // The default value is nil (debug info is ignored)
