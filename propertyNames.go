@@ -483,7 +483,14 @@ const (
 	GridColumnGap = "grid-column-gap"
 
 	// Source is the constant for the "src" property tag.
+	// The "src" property specifies the image to display in the ImageView.
 	Source = "src"
+
+	// SrcSet is the constant for the "srcset" property tag.
+	// The "srcset" property is a string which identifies one or more image candidate strings, separated using commas (,)
+	// each specifying image resources to use under given screen density.
+	// This property is only used if you are building an application for js/wasm platform
+	SrcSet = "srcset"
 
 	// Fit is the constant for the "fit" property tag.
 	Fit           = "fit"

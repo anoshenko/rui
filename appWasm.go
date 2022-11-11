@@ -90,6 +90,7 @@ func (app *wasmApp) init(params AppParams) {
 	head.Call("appendChild", meta)
 
 	if params.Icon != "" {
+		url := params.Icon
 		if image, ok := resources.images[params.Icon]; ok && image.fs != nil {
 			dataType := map[string]string{
 				".svg":  "data:image/svg+xml",
@@ -101,15 +102,17 @@ func (app *wasmApp) init(params AppParams) {
 			ext := strings.ToLower(filepath.Ext(params.Icon))
 			if prefix, ok := dataType[ext]; ok {
 				if data, err := image.fs.ReadFile(image.path); err == nil {
-					meta = document.Call("createElement", "link")
-					meta.Set("rel", "icon")
-					meta.Set("href", prefix+";base64,"+base64.StdEncoding.EncodeToString(data))
-					head.Call("appendChild", meta)
+					url = prefix + ";base64," + base64.StdEncoding.EncodeToString(data)
 				} else {
 					DebugLog(err.Error())
 				}
 			}
 		}
+
+		meta = document.Call("createElement", "link")
+		meta.Set("rel", "icon")
+		meta.Set("href", url)
+		head.Call("appendChild", meta)
 	}
 
 	script := document.Call("createElement", "script")

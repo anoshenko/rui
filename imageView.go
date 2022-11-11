@@ -84,6 +84,9 @@ func (imageView *imageViewData) normalizeTag(tag string) string {
 	case "source":
 		tag = Source
 
+	case "src-set", "source-set":
+		tag = SrcSet
+
 	case VerticalAlign:
 		tag = ImageVerticalAlign
 
@@ -130,11 +133,31 @@ func (imageView *imageViewData) set(tag string, value any) bool {
 	switch tag {
 	case Source:
 		if text, ok := value.(string); ok {
-			imageView.properties[Source] = text
+			imageView.properties[tag] = text
 			if imageView.created {
 				src, srcset := imageView.src(text)
 				imageView.session.updateProperty(imageView.htmlID(), "src", src)
 
+				if srcset != "" {
+					imageView.session.updateProperty(imageView.htmlID(), "srcset", srcset)
+				} else {
+					imageView.session.removeProperty(imageView.htmlID(), "srcset")
+				}
+			}
+			imageView.propertyChangedEvent(Source)
+			return true
+		}
+		notCompatibleType(Source, value)
+
+	case SrcSet:
+		if text, ok := value.(string); ok {
+			if text == "" {
+				delete(imageView.properties, tag)
+			} else {
+				imageView.properties[tag] = text
+			}
+			if imageView.created {
+				_, srcset := imageView.src(text)
 				if srcset != "" {
 					imageView.session.updateProperty(imageView.htmlID(), "srcset", srcset)
 				} else {
@@ -196,6 +219,30 @@ func (imageView *imageViewData) imageListeners(tag string) []func(ImageView) {
 }
 
 func (imageView *imageViewData) srcSet(path string) string {
+	if value := imageView.getRaw(SrcSet); value != nil {
+		if text, ok := value.(string); ok {
+			srcset := strings.Split(text, ",")
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
+			for i, src := range srcset {
+				if i > 0 {
+					buffer.WriteString(", ")
+				}
+				src = strings.Trim(src, " \t\n")
+				buffer.WriteString(src)
+				if index := strings.LastIndex(src, "@"); index > 0 {
+					if ext := strings.LastIndex(src, "."); ext > index {
+						buffer.WriteRune(' ')
+						buffer.WriteString(src[index+1 : ext])
+					}
+				} else {
+					buffer.WriteString(" 1x")
+				}
+			}
+			return buffer.String()
+		}
+	}
+
 	if srcset, ok := resources.imageSrcSets[path]; ok {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)

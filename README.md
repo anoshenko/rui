@@ -631,7 +631,7 @@ which implements the Properties interface (see above). BoundsProperty has 4 Size
 | "top"     | rui.Top     | Top padding       |
 | "right"   | rui.Right   | Right padding     |
 | "bottom"  | rui.Bottom  | Bottom padding    |
-| "left"    | rui.Left    | Дуае padding      |
+| "left"    | rui.Left    | Left padding      |
 
 The NewBoundsProperty function is used to create the BoundsProperty interface. Example
 
@@ -1255,7 +1255,7 @@ The textual description of the polygonal cropping area is in the following forma
 
 	polygon{ points = "<x1 value>, <y1 value>, <x2 value>, <y2 value>,…" }
 
-### "оpacity" property
+### "opacity" property
 
 The "opacity" property (constant Opacity) of the float64 type sets the transparency of the View. Valid values are from 0 to 1.
 Where 1 - View is fully opaque, 0 - fully transparent.
@@ -1311,7 +1311,7 @@ The argument lists the effects to apply. The following effects are possible:
 | "invert"      | Invert     | float64  0…100%    | Invert colors           |
 | "opacity"     | Opacity    | float64  0…100%    | Changing transparency   |
 | "saturate"    | Saturate   | float64  0…10000%  | Saturation change       |
-| "sepia"       | Sepia      | float64  0…100%    | Conversion to serpia    |
+| "sepia"       | Sepia      | float64  0…100%    | Conversion to sepia     |
 
 Example
 
@@ -1871,7 +1871,7 @@ Several kinds of mouse events can be generated for the View
 | "mouse-up"           | MouseUp          | The mouse button has been released.                                    |
 | "mouse-move"         | MouseMove        | Mouse cursor moved                                                     |
 | "mouse-out"          | MouseOut         | The mouse cursor has moved outside the View, or entered the child View |
-| "mouse-over"         | MouseOver        | The mouse cursor has moved within the arrea of View                    |
+| "mouse-over"         | MouseOver        | The mouse cursor has moved within the area of View                     |
 | "click-event"        | ClickEvent       | There was a mouse click                                                |
 | "double-click-event" | DoubleClickEvent | There was a double mouse click                                         |
 | "context-menu-event" | ContextMenuEvent | The key for calling the context menu (right mouse button) is pressed   |
@@ -2130,7 +2130,7 @@ In addition to all View properties, this element has only one additional propert
 
 ### "content" property
 
-The "content" property (constant Сontent) defines an array of child Views. Interface Get function
+The "content" property (constant Content) defines an array of child Views. Interface Get function
 always returns []View for the given property.
 
 The following 5 data types can be passed as the value of the "content" property:
@@ -2298,7 +2298,7 @@ The "grid-auto-flow" property can take the following values:
 
 * RowAutoFlow (0) (text name "row") - Views are placed by filling each row in turn, adding new columns as necessary;
 
-* ColumnAutoFlow (1) (text name "colunm") - Views are placed by filling each column in turn, adding new columns as necessary;
+* ColumnAutoFlow (1) (text name "column") - Views are placed by filling each column in turn, adding new columns as necessary;
 
 * RowDenseAutoFlow (2) (text name "row-dense") - Views are placed by filling each row, adding new rows as necessary.
 "dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later.
@@ -3765,7 +3765,7 @@ A custom View is created based on another, which is named Super View.
 
 To simplify the task, there is already a basic CustomView implementation in the form of a CustomViewData structure.
 
-Let's consider creating a custom View using the built-in Buttom element as an example:
+Let's consider creating a custom View using the built-in Button element as an example:
 
 1) declare the Button interface as extending CustomView, and the buttonData structure as extending CustomViewData
 
@@ -4237,7 +4237,7 @@ without having to stop to further buffer the content.
 
 * "loaded-metadata-event" (LoadedMetadataEvent constant) is fired when the metadata has been loaded.
 
-* "loadstart-event" (LoadstartEvent constant) is fired when the browser starts loading the resource.
+* "loadstart-event" (LoadStartEvent constant) is fired when the browser starts loading the resource.
 
 * "pause-event" (PauseEvent constant) is fired when a pause request is processed and the action pauses, most often when the Pause () method is called.
 
@@ -4387,7 +4387,7 @@ The "arrow" property can take the following values
 | 0     | NoneArrow   | No arrow (default value)                     |
 | 1     | Top Arrow   | Arrow at the top side of the pop-up window   |
 | 2     | RightArrow  | Arrow on the right side of the pop-up window |
-| 3     | bottomarrow | Arrow at the bottom of the pop-up window     |
+| 3     | BottomArrow | Arrow at the bottom of the pop-up window     |
 | 4     | LeftArrow   | Arrow on the left side of the pop-up window  |
 
 The size of the arrow is specified using the "arrow-size" (ArrowSize constant) and "arrow-width" (ArrowWidth constant) SizeUnit properties.
@@ -5224,7 +5224,7 @@ For example
 			}
 		],
 		styles:portrait:width320 = [
-			sapmplePage {
+			samplePage {
 				width = 100%,
 				height = 50%,
 			},
