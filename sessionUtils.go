@@ -42,7 +42,7 @@ func viewByHTMLID(id string, startView View) View {
 		if startView.htmlID() == id {
 			return startView
 		}
-		if container, ok := startView.(ParanetView); ok {
+		if container, ok := startView.(ParentView); ok {
 			for _, view := range container.Views() {
 				if view != nil {
 					if v := viewByHTMLID(id, view); v != nil {

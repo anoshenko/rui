@@ -45,7 +45,7 @@ type View interface {
 	Focusable() bool
 	// Frame returns the location and size of the view in pixels
 	Frame() Frame
-	// Scroll returns the location size of the scrolable view in pixels
+	// Scroll returns the location size of the scrollable view in pixels
 	Scroll() Frame
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and

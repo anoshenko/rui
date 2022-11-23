@@ -72,7 +72,7 @@
 # v0.2.0
 
 * Added "animation" and "transition" properties, Animation interface, animation events
-* Renamed ColorPropery constant to ColorTag
+* Renamed ColorProperty constant to ColorTag
 * Updated readme
 * Added the Animation example to the demo
 * Bug fixing

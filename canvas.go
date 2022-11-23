@@ -182,7 +182,7 @@ type Canvas interface {
 	SetRadialGradientStrokeStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint)
 
 	// SetImageFillStyle set the image as the filling pattern.
-	//   repeate - indicating how to repeat the pattern's image. Possible values are:
+	//   repeat - indicating how to repeat the pattern's image. Possible values are:
 	//     NoRepeat (0) - neither direction,
 	//     RepeatXY (1) - both directions,
 	//     RepeatX (2) - horizontal only,
@@ -286,7 +286,7 @@ type Canvas interface {
 	DrawImage(x, y float64, image Image)
 	// DrawImageInRect draws the image in the rectangle (x, y, width, height), scaling in height and width if necessary
 	DrawImageInRect(x, y, width, height float64, image Image)
-	// DrawImageFragment draws the frament (described by srcX, srcY, srcWidth, srcHeight) of image
+	// DrawImageFragment draws the fragment (described by srcX, srcY, srcWidth, srcHeight) of image
 	// in the rectangle (dstX, dstY, dstWidth, dstHeight), scaling in height and width if necessary
 	DrawImageFragment(srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight float64, image Image)
 
@@ -302,12 +302,12 @@ func newCanvas(view CanvasView) Canvas {
 	canvas := new(canvasData)
 	canvas.view = view
 	canvas.session = view.Session()
-	canvas.session.cavnasStart(view.htmlID())
+	canvas.session.canvasStart(view.htmlID())
 	return canvas
 }
 
 func (canvas *canvasData) finishDraw() {
-	canvas.session.cavnasFinish()
+	canvas.session.canvasFinish()
 }
 
 func (canvas *canvasData) View() CanvasView {

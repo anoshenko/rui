@@ -23,7 +23,7 @@ const (
 	PasswordText = 1
 	// EmailText - e-mail type of EditView. Allows to enter one email
 	EmailText = 2
-	// EmailsText - e-mail type of EditView. Allows to enter multiple emails separeted by comma
+	// EmailsText - e-mail type of EditView. Allows to enter multiple emails separated by comma
 	EmailsText = 3
 	// URLText - url type of EditView. Allows to enter one url
 	URLText = 4
@@ -531,7 +531,7 @@ func GetHint(view View, subviewID ...string) string {
 	return ""
 }
 
-// GetMaxLength returns a maximal lenght of EditView. If a maximal lenght is not limited  then 0 is returned
+// GetMaxLength returns a maximal length of EditView. If a maximal length is not limited  then 0 is returned
 // If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned.
 func GetMaxLength(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, MaxLength, 0)
@@ -604,7 +604,7 @@ func AppendEditText(view View, subviewID string, text string) {
 	}
 }
 
-// GetCaretColor returns the color of the text input carret.
+// GetCaretColor returns the color of the text input caret.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCaretColor(view View, subviewID ...string) Color {
 	return colorStyledProperty(view, subviewID, CaretColor, false)

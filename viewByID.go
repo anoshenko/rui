@@ -12,7 +12,7 @@ func ViewByID(rootView View, id string) View {
 		return rootView
 	}
 
-	if container, ok := rootView.(ParanetView); ok {
+	if container, ok := rootView.(ParentView); ok {
 		if view := viewByID(container, id); view != nil {
 			return view
 		}
@@ -32,13 +32,13 @@ func ViewByID(rootView View, id string) View {
 	return nil
 }
 
-func viewByID(rootView ParanetView, id string) View {
+func viewByID(rootView ParentView, id string) View {
 	for _, view := range rootView.Views() {
 		if view != nil {
 			if view.ID() == id {
 				return view
 			}
-			if container, ok := view.(ParanetView); ok {
+			if container, ok := view.(ParentView); ok {
 				if v := viewByID(container, id); v != nil {
 					return v
 				}

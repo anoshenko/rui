@@ -85,7 +85,7 @@ const (
 	LinearTiming = "linear"
 )
 
-// StepsTiming return a timing function along stepCount stops along the transition, diplaying each stop for equal lengths of time
+// StepsTiming return a timing function along stepCount stops along the transition, displaying each stop for equal lengths of time
 func StepsTiming(stepCount int) string {
 	return "steps(" + strconv.Itoa(stepCount) + ")"
 }
@@ -130,7 +130,7 @@ type Animation interface {
 	writeTransitionString(tag string, buffer *strings.Builder)
 	animationCSS(session Session) string
 	transitionCSS(buffer *strings.Builder, session Session)
-	hasAnimatedPropery() bool
+	hasAnimatedProperty() bool
 	animationName() string
 }
 
@@ -160,7 +160,7 @@ func NewAnimation(params Params) Animation {
 	return animation
 }
 
-func (animation *animationData) hasAnimatedPropery() bool {
+func (animation *animationData) hasAnimatedProperty() bool {
 	props := animation.getRaw(PropertyTag)
 	if props == nil {
 		ErrorLog("There are no animated properties.")

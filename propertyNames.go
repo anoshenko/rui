@@ -421,7 +421,7 @@ const (
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	VerticalTextOrientation = "vertical-text-orientation"
 
-	// TextTverflow is the constant for the "text-overflow" property tag.
+	// TextOverflow is the constant for the "text-overflow" property tag.
 	// The "text-overflow" int property sets how hidden overflow content is signaled to users.
 	// It can be clipped or display an ellipsis ('…'). Valid values are
 	TextOverflow = "text-overflow"
@@ -538,7 +538,7 @@ const (
 
 	// AvoidBreak is the constant for the "avoid-break" property tag.
 	// The "avoid-break" bool property sets how region breaks should behave inside a generated box.
-	// If the property value is "true" then fvoids any break from being inserted within the principal box.
+	// If the property value is "true" then avoids any break from being inserted within the principal box.
 	// If the property value is "false" then allows, but does not force, any break to be inserted within
 	// the principal box.
 	AvoidBreak = "avoid-break"
@@ -656,7 +656,7 @@ const (
 	// allowing text and inline Views to wrap around it.
 	Float = "float"
 
-	// UsetData is the constant for the "user-data" property tag.
+	// UserData is the constant for the "user-data" property tag.
 	// The "user-data" property can contain any user data
 	UserData = "user-data"
 

@@ -218,7 +218,7 @@ type CellIndex struct {
 // TableView - text View
 type TableView interface {
 	View
-	ParanetView
+	ParentView
 	ReloadTableData()
 	CellFrame(row, column int) Frame
 

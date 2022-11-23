@@ -99,7 +99,7 @@ func (gradient *backgroundGradient) parseGradientText(value string) []Background
 	points := make([]BackgroundGradientPoint, count)
 	for i, element := range elements {
 		if !points[i].setValue(element) {
-			ErrorLogF(`Ivalid %d element of the conic gradient: "%s"`, i, element)
+			ErrorLogF(`Invalid %d element of the conic gradient: "%s"`, i, element)
 			return nil
 		}
 	}

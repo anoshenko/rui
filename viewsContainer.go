@@ -2,7 +2,7 @@ package rui
 
 import "strings"
 
-type ParanetView interface {
+type ParentView interface {
 	// Views return a list of child views
 	Views() []View
 }
@@ -10,7 +10,7 @@ type ParanetView interface {
 // ViewsContainer - mutable list-container of Views
 type ViewsContainer interface {
 	View
-	ParanetView
+	ParentView
 	// Append appends a view to the end of the list of a view children
 	Append(view View)
 	// Insert inserts a view to the "index" position in the list of a view children

@@ -34,7 +34,7 @@ const (
 // Resizable - grid-container of View
 type Resizable interface {
 	View
-	ParanetView
+	ParentView
 }
 
 type resizableData struct {

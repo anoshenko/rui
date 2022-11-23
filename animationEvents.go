@@ -30,7 +30,7 @@ const (
 	AnimationStartEvent = "animation-start-event"
 
 	// AnimationEndEvent is the constant for "animation-end-event" property tag.
-	// The "animation-end-event" is fired when aт фnimation has completed.
+	// The "animation-end-event" is fired when an animation has completed.
 	// If the animation aborts before reaching completion, such as if the element is removed
 	// or the animation is removed from the element, the "animation-end-event" is not fired.
 	AnimationEndEvent = "animation-end-event"
@@ -46,7 +46,7 @@ const (
 
 	// AnimationIterationEvent is the constant for "animation-iteration-event" property tag.
 	// The "animation-iteration-event" is fired when an iteration of an animation ends,
-	// and another one begins. This event does not occur at the same time as the animationend event,
+	// and another one begins. This event does not occur at the same time as the animation end event,
 	// and therefore does not occur for animations with an "iteration-count" of one.
 	AnimationIterationEvent = "animation-iteration-event"
 )

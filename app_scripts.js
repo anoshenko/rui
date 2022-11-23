@@ -1339,7 +1339,7 @@ function mediaSetVolume(elementId, volume) {
 	}
 }
 
-function startDowndload(url, filename) {
+function startDownload(url, filename) {
 	var element = document.getElementById("ruiDownloader");
 	if (element) {
 		element.href = url;

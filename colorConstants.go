@@ -55,8 +55,8 @@ const (
 	BlueViolet Color = 0xff8a2be2
 	// Brown color constant
 	Brown Color = 0xffa52a2a
-	// Burlywood color constant
-	Burlywood Color = 0xffdeb887
+	// BurlyWood color constant
+	BurlyWood Color = 0xffdeb887
 	// CadetBlue color constant
 	CadetBlue Color = 0xff5f9ea0
 	// Chartreuse color constant
@@ -67,8 +67,8 @@ const (
 	Coral Color = 0xffff7f50
 	// CornflowerBlue color constant
 	CornflowerBlue Color = 0xff6495ed
-	// Cornsilk color constant
-	Cornsilk Color = 0xfffff8dc
+	// CornSilk color constant
+	CornSilk Color = 0xfffff8dc
 	// Crimson color constant
 	Crimson Color = 0xffdc143c
 	// Cyan color constant
@@ -105,8 +105,8 @@ const (
 	DarkSlateBlue Color = 0xff483d8b
 	// DarkSlateGray color constant
 	DarkSlateGray Color = 0xff2f4f4f
-	// Darkslategrey color constant
-	Darkslategrey Color = 0xff2f4f4f
+	// DarkSlateGrey color constant
+	DarkSlateGrey Color = 0xff2f4f4f
 	// DarkTurquoise color constant
 	DarkTurquoise Color = 0xff00ced1
 	// DarkViolet color constant
@@ -135,8 +135,8 @@ const (
 	Gold Color = 0xffffd700
 	// GoldenRod color constant
 	GoldenRod Color = 0xffdaa520
-	// GreenyEllow color constant
-	GreenyEllow Color = 0xffadff2f
+	// GreenYellow color constant
+	GreenYellow Color = 0xffadff2f
 	// Grey color constant
 	Grey Color = 0xff808080
 	// Honeydew color constant
@@ -293,8 +293,8 @@ const (
 	Violet Color = 0xffee82ee
 	// Wheat color constant
 	Wheat Color = 0xfff5deb3
-	// Whitesmoke color constant
-	Whitesmoke Color = 0xfff5f5f5
+	// WhiteSmoke color constant
+	WhiteSmoke Color = 0xfff5f5f5
 	// YellowGreen color constant
 	YellowGreen Color = 0xff9acd32
 )

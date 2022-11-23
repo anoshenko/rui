@@ -104,7 +104,7 @@ func (data *sizeFuncData) parseArgs(args []any, allowNumber bool) bool {
 			}
 		}
 
-		ErrorLogF(`The %s function argument cann't be a number`, data.tag)
+		ErrorLogF(`The %s function argument can't be a number`, data.tag)
 		return false
 	}
 

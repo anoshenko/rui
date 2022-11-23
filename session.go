@@ -20,13 +20,13 @@ type webBridge interface {
 	writeMessage(text string) bool
 	addAnimationCSS(css string)
 	clearAnimation()
-	cavnasStart(htmlID string)
+	canvasStart(htmlID string)
 	callCanvasFunc(funcName string, args ...any)
 	callCanvasVarFunc(v any, funcName string, args ...any)
 	callCanvasImageFunc(url string, property string, funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
 	updateCanvasProperty(property string, value any)
-	cavnasFinish()
+	canvasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
 	htmlPropertyValue(htmlID, name string) string
 	answerReceived(answer DataObject)
@@ -125,13 +125,13 @@ type Session interface {
 	finishUpdateScript(htmlID string)
 	addAnimationCSS(css string)
 	clearAnimation()
-	cavnasStart(htmlID string)
+	canvasStart(htmlID string)
 	callCanvasFunc(funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
 	callCanvasVarFunc(v any, funcName string, args ...any)
 	callCanvasImageFunc(url string, property string, funcName string, args ...any)
 	updateCanvasProperty(property string, value any)
-	cavnasFinish()
+	canvasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
 	htmlPropertyValue(htmlID, name string) string
 	handleAnswer(data DataObject)
@@ -290,7 +290,11 @@ func (session *sessionData) writeInitScript(writer *strings.Builder) {
 
 	if session.rootView != nil {
 		writer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
-		viewHTML(session.rootView, writer)
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+		viewHTML(session.rootView, buffer)
+		text := strings.ReplaceAll(buffer.String(), "'", `\'`)
+		writer.WriteString(text)
 		writer.WriteString("';\nscanElementsSize();")
 	}
 }
@@ -424,9 +428,9 @@ func (session *sessionData) clearAnimation() {
 	}
 }
 
-func (session *sessionData) cavnasStart(htmlID string) {
+func (session *sessionData) canvasStart(htmlID string) {
 	if session.bridge != nil {
-		session.bridge.cavnasStart(htmlID)
+		session.bridge.canvasStart(htmlID)
 	}
 }
 
@@ -461,9 +465,9 @@ func (session *sessionData) callCanvasImageFunc(url string, property string, fun
 	}
 }
 
-func (session *sessionData) cavnasFinish() {
+func (session *sessionData) canvasFinish() {
 	if session.bridge != nil {
-		session.bridge.cavnasFinish()
+		session.bridge.canvasFinish()
 	}
 }
 

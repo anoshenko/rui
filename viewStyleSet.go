@@ -338,7 +338,7 @@ func (style *viewStyle) set(tag string, value any) bool {
 			return true
 
 		case DataObject:
-			if animation := parseAnimation(value); animation.hasAnimatedPropery() {
+			if animation := parseAnimation(value); animation.hasAnimatedProperty() {
 				style.properties[tag] = []Animation{animation}
 				return true
 			}
@@ -348,7 +348,7 @@ func (style *viewStyle) set(tag string, value any) bool {
 			result := true
 			for i := 0; i < value.ArraySize(); i++ {
 				if obj := value.ArrayElement(i).Object(); obj != nil {
-					if anim := parseAnimation(obj); anim.hasAnimatedPropery() {
+					if anim := parseAnimation(obj); anim.hasAnimatedProperty() {
 						animations = append(animations, anim)
 					} else {
 						result = false

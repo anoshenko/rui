@@ -47,7 +47,7 @@ const (
 // ListView - the list view interface
 type ListView interface {
 	View
-	ParanetView
+	ParentView
 	// ReloadListViewData updates ListView content
 	ReloadListViewData()
 

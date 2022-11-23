@@ -94,7 +94,7 @@ func GetTableSelectionMode(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, SelectionMode, NoneSelection, false)
 }
 
-// GetTableVerticalAlign returns a vertical align in a TavleView cell. Returns one of next values:
+// GetTableVerticalAlign returns a vertical align in a TableView cell. Returns one of next values:
 // TopAlign (0), BottomAlign (1), CenterAlign (2), and BaselineAlign (3)
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableVerticalAlign(view View, subviewID ...string) int {

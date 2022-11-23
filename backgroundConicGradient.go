@@ -209,7 +209,7 @@ func (gradient *backgroundConicGradient) parseGradientText(value string) []Backg
 	for i, element := range elements {
 		var ok bool
 		if vector[i], ok = gradient.stringToGradientPoint(strings.Trim(element, " ")); !ok {
-			ErrorLogF(`Ivalid %d element of the conic gradient: "%s"`, i, element)
+			ErrorLogF(`Invalid %d element of the conic gradient: "%s"`, i, element)
 			return nil
 		}
 	}
@@ -240,7 +240,7 @@ func (gradient *backgroundConicGradient) setGradient(value any) bool {
 			return true
 		}
 
-		ErrorLogF(`Ivalid conic gradient: "%s"`, value)
+		ErrorLogF(`Invalid conic gradient: "%s"`, value)
 		return false
 
 	case []BackgroundGradientAngle:
@@ -252,7 +252,7 @@ func (gradient *backgroundConicGradient) setGradient(value any) bool {
 
 		for i, point := range value {
 			if point.Color == nil {
-				ErrorLogF("Ivalid %d element of the conic gradient: Color is nil", i)
+				ErrorLogF("Invalid %d element of the conic gradient: Color is nil", i)
 				return false
 			}
 		}

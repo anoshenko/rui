@@ -146,7 +146,7 @@ func (bridge *wsBridge) argToString(arg any) (string, bool) {
 		}
 	}
 
-	ErrorLog("Unsupported agument type")
+	ErrorLog("Unsupported argument type")
 	return "", false
 }
 
@@ -238,7 +238,7 @@ if (styles) {
 }`)
 }
 
-func (bridge *wsBridge) cavnasStart(htmlID string) {
+func (bridge *wsBridge) canvasStart(htmlID string) {
 	bridge.canvasBuffer.Reset()
 	bridge.canvasBuffer.WriteString(`const ctx = getCanvasContext('`)
 	bridge.canvasBuffer.WriteString(htmlID)
@@ -328,7 +328,7 @@ func (bridge *wsBridge) callCanvasImageFunc(url string, property string, funcNam
 	bridge.canvasBuffer.WriteString(");\n}")
 }
 
-func (bridge *wsBridge) cavnasFinish() {
+func (bridge *wsBridge) canvasFinish() {
 	bridge.canvasBuffer.WriteString("\n")
 	script := bridge.canvasBuffer.String()
 	if ProtocolInDebugLog {

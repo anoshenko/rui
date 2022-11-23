@@ -135,7 +135,7 @@ func (bridge *wasmBridge) clearAnimation() {
 	styles.Set("textContent", "")
 }
 
-func (bridge *wasmBridge) cavnasStart(htmlID string) {
+func (bridge *wasmBridge) canvasStart(htmlID string) {
 	if ProtocolInDebugLog {
 		DebugLog("const ctx = document.getElementById('" + htmlID + "'elementId').getContext('2d');\nctx.save();")
 	}
@@ -204,7 +204,7 @@ func (bridge *wasmBridge) updateCanvasProperty(property string, value any) {
 	}
 }
 
-func (bridge *wasmBridge) cavnasFinish() {
+func (bridge *wasmBridge) canvasFinish() {
 	if !bridge.canvas.IsNull() {
 		DebugLog("ctx.restore()")
 		bridge.canvas.Call("restore")
