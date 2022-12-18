@@ -52,6 +52,24 @@ function sessionInfo() {
 		message += ",pixel-ratio=" + pixelRatio;
 	}
 
+	if (localStorage.length > 0) {
+		message += ",storage="
+		lead = "_{"
+		for (var i = 0; i < localStorage.length; i++) {
+			var key = localStorage.key(i)
+			var value = localStorage.getItem(key)
+			key = key.replaceAll(/\\/g, "\\\\")
+			key = key.replaceAll(/\"/g, "\\\"")
+			key = key.replaceAll(/\'/g, "\\\'")
+			value = value.replaceAll(/\\/g, "\\\\")
+			value = value.replaceAll(/\"/g, "\\\"")
+			value = value.replaceAll(/\'/g, "\\\'")
+			message += lead + "\"" + key + "\"=\"" + value + "\""
+			lead = ","
+		}
+		message += "}"
+	}
+
 	return message + "}";
 }
 
@@ -940,8 +958,8 @@ function radioButtonKeyClickEvent(element, event) {
 
 function editViewInputEvent(element) {
 	var text = element.value
-	text = text.replace(/\\/g, "\\\\")
-	text = text.replace(/\"/g, "\\\"")
+	text = text.replaceAll(/\\/g, "\\\\")
+	text = text.replaceAll(/\"/g, "\\\"")
 	var message = "textChanged{session=" + sessionID + ",id=" + element.id + ",text=\"" + text + "\"}"
 	sendMessage(message);
 }
@@ -1147,7 +1165,7 @@ function loadImage(url) {
 	img.addEventListener("error", function(event) {
 		var message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
 		if (event && event.message) {
-			var text = event.message.replace(new RegExp("\"", 'g'), "\\\"")
+			var text = event.message.replaceAll(new RegExp("\"", 'g'), "\\\"")
 			message += ",message=\"" + text + "\""; 
 		}
 		sendMessage(message + "}")
@@ -1178,7 +1196,7 @@ function loadInlineImage(url, content) {
 	img.addEventListener("error", function(event) {
 		var message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
 		if (event && event.message) {
-			var text = event.message.replace(new RegExp("\"", 'g'), "\\\"")
+			var text = event.message.replaceAll(new RegExp("\"", 'g'), "\\\"")
 			message += ",message=\"" + text + "\""; 
 		}
 		sendMessage(message + "}")
@@ -1841,4 +1859,20 @@ function getCanvasContext(elementId) {
 		}
 	}
 	return null;
+}
+
+function localStorageSet(key, value) {
+	try {
+		localStorage.setItem(key, value)
+	} catch (err) {
+		sendMessage("storageError{session=" + sessionID + ", error=`" + err + "`}")
+	}
+}
+
+function localStorageClear() {
+	try {
+		localStorage.setItem(key, value)
+	} catch (err) {
+		sendMessage("storageError{session=" + sessionID + ", error=`" + err + "`}")
+	}
 }

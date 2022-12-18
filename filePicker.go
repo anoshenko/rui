@@ -270,7 +270,7 @@ func (picker *filePickerData) htmlDisabledProperties(self View, buffer *strings.
 func (picker *filePickerData) handleCommand(self View, command string, data DataObject) bool {
 	switch command {
 	case "fileSelected":
-		if node := data.PropertyWithTag("files"); node != nil && node.Type() == ArrayNode {
+		if node := data.PropertyByTag("files"); node != nil && node.Type() == ArrayNode {
 			count := node.ArraySize()
 			files := make([]FileInfo, count)
 			for i := 0; i < count; i++ {

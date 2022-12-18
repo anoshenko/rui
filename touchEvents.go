@@ -140,7 +140,7 @@ func (event *TouchEvent) init(data DataObject) {
 
 	event.Touches = []Touch{}
 	event.TimeStamp = getTimeStamp(data)
-	if node := data.PropertyWithTag("touches"); node != nil && node.Type() == ArrayNode {
+	if node := data.PropertyByTag("touches"); node != nil && node.Type() == ArrayNode {
 		for i := 0; i < node.ArraySize(); i++ {
 			if element := node.ArrayElement(i); element != nil && element.IsObject() {
 				if obj := element.Object(); obj != nil {
