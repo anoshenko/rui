@@ -669,4 +669,9 @@ const (
 	// The "user-select" bool property controls whether the user can select text.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	UserSelect = "user-select"
+
+	// Order is the constant for the "Order" property tag.
+	// The "Order" int property sets the order to layout an item in a ListLayout or GridLayout container.
+	// Items in a container are sorted by ascending order value and then by their source code order.
+	Order = "Order"
 )

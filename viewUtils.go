@@ -159,6 +159,12 @@ func GetZIndex(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, ZIndex, 0)
 }
 
+// GetOrder returns the subview order to layout an item in a ListLayout or GridLayout container.
+// If the second argument (subviewID) is not specified or it is "" then an order of the first argument (view) is returned
+func GetOrder(view View, subviewID ...string) int {
+	return intStyledProperty(view, subviewID, Order, 0)
+}
+
 // GetWidth returns the subview width.
 // If the second argument (subviewID) is not specified or it is "" then a width of the first argument (view) is returned
 func GetWidth(view View, subviewID ...string) SizeUnit {

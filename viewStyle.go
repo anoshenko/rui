@@ -193,16 +193,20 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		outline.ViewOutline(session).cssValue(builder, session)
 	}
 
-	if z, ok := intProperty(style, ZIndex, session, 0); ok {
-		builder.add(ZIndex, strconv.Itoa(z))
+	for _, tag := range []string{ZIndex, Order} {
+		if value, ok := intProperty(style, tag, session, 0); ok {
+			builder.add(tag, strconv.Itoa(value))
+		}
 	}
 
 	if opacity, ok := floatProperty(style, Opacity, session, 1.0); ok && opacity >= 0 && opacity <= 1 {
 		builder.add(Opacity, strconv.FormatFloat(opacity, 'f', 3, 32))
 	}
 
-	if n, ok := intProperty(style, ColumnCount, session, 0); ok && n > 0 {
-		builder.add(ColumnCount, strconv.Itoa(n))
+	for _, tag := range []string{ColumnCount, TabSize} {
+		if value, ok := intProperty(style, tag, session, 0); ok && value > 0 {
+			builder.add(tag, strconv.Itoa(value))
+		}
 	}
 
 	for _, tag := range []string{
@@ -277,10 +281,6 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 				builder.add(prop.cssTag, prop.off)
 			}
 		}
-	}
-
-	if tabSize, ok := intProperty(style, TabSize, session, 8); ok && tabSize > 0 {
-		builder.add(TabSize, strconv.Itoa(tabSize))
 	}
 
 	if text := style.cssTextDecoration(session); text != "" {
