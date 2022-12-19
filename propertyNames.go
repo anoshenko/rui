@@ -676,8 +676,8 @@ const (
 	Order = "Order"
 
 	// BackgroundBlendMode is the constant for the "background-blend-mode" property tag.
-	// The "background-blend-mode" int property sets how an element's background images should blend
-	// with each other and with the element's background color.
+	// The "background-blend-mode" int property sets how an view's background images should blend
+	// with each other and with the view's background color.
 	// Valid values are "normal" (0), "multiply" (1), "screen" (2), "overlay" (3), "darken" (4), "lighten" (5),
 	// "color-dodge" (6), "color-burn" (7), "hard-light" (8), "soft-light" (9), "difference" (10),
 	// "exclusion" (11), "hue" (12), "saturation" (13), "color" (14), "luminosity" (15).
