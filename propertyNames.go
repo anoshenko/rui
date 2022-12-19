@@ -674,4 +674,20 @@ const (
 	// The "Order" int property sets the order to layout an item in a ListLayout or GridLayout container.
 	// Items in a container are sorted by ascending order value and then by their source code order.
 	Order = "Order"
+
+	// BackgroundBlendMode is the constant for the "background-blend-mode" property tag.
+	// The "background-blend-mode" int property sets how an element's background images should blend
+	// with each other and with the element's background color.
+	// Valid values are "normal" (0), "multiply" (1), "screen" (2), "overlay" (3), "darken" (4), "lighten" (5),
+	// "color-dodge" (6), "color-burn" (7), "hard-light" (8), "soft-light" (9), "difference" (10),
+	// "exclusion" (11), "hue" (12), "saturation" (13), "color" (14), "luminosity" (15).
+	BackgroundBlendMode = "background-blend-mode"
+
+	// MixBlendMode is the constant for the "mix-blend-mode" property tag.
+	// The "mix-blend-mode" int property sets how a view's content should blend
+	// with the content of the view's parent and the view's background.
+	// Valid values are "normal" (0), "multiply" (1), "screen" (2), "overlay" (3), "darken" (4), "lighten" (5),
+	// "color-dodge" (6), "color-burn" (7), "hard-light" (8), "soft-light" (9), "difference" (10),
+	// "exclusion" (11), "hue" (12), "saturation" (13), "color" (14), "luminosity" (15).
+	MixBlendMode = "mix-blend-mode"
 )

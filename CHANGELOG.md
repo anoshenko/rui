@@ -1,3 +1,10 @@
+# v.11.0
+
+* Added "order", "background-blend-mode", and "mix-blend-mode" properties 
+* Added GetOrder, GetBackgroundBlendMode, and GetMixBlendMode functions
+* ClientItem, SetClientItem, and RemoveAllClientItems method added to Session interface
+* PropertyWithTag method of DataObject interface renamed to PropertyByTag
+
 # v.10.0
 
 * The Canvas.TextWidth method replaced by Canvas.TextMetrics

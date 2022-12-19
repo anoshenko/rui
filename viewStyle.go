@@ -252,7 +252,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	for _, tag := range []string{
 		Overflow, TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
 		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
-		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize} {
+		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize, MixBlendMode, BackgroundBlendMode} {
 
 		if data, ok := enumProperties[tag]; ok {
 			if tag != VerticalTextOrientation || (writingMode != VerticalLeftToRight && writingMode != VerticalRightToLeft) {

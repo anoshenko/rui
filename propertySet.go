@@ -448,6 +448,16 @@ var enumProperties = map[string]struct {
 		"",
 		[]string{"none", "top", "right", "bottom", "left"},
 	},
+	MixBlendMode: {
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+		MixBlendMode,
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+	},
+	BackgroundBlendMode: {
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+		BackgroundBlendMode,
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+	},
 }
 
 func notCompatibleType(tag string, value any) {
