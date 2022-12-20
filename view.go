@@ -187,6 +187,14 @@ func (view *viewData) remove(tag string) {
 	case ID:
 		view.viewID = ""
 
+	case TabIndex, "tab-index":
+		delete(view.properties, tag)
+		if view.Focusable() {
+			view.session.updateProperty(view.htmlID(), "tabindex", "0")
+		} else {
+			view.session.updateProperty(view.htmlID(), "tabindex", "-1")
+		}
+
 	case UserData:
 		delete(view.properties, tag)
 
@@ -311,6 +319,18 @@ func (view *viewData) set(tag string, value any) bool {
 			return false
 		}
 		view.viewID = text
+
+	case TabIndex, "tab-index":
+		if !view.setIntProperty(tag, value) {
+			return false
+		}
+		if value, ok := intProperty(view, TabIndex, view.Session(), 0); ok {
+			view.session.updateProperty(view.htmlID(), "tabindex", strconv.Itoa(value))
+		} else if view.Focusable() {
+			view.session.updateProperty(view.htmlID(), "tabindex", "0")
+		} else {
+			view.session.updateProperty(view.htmlID(), "tabindex", "-1")
+		}
 
 	case UserData:
 		view.properties[tag] = value
@@ -758,8 +778,14 @@ func viewHTML(view View, buffer *strings.Builder) {
 		buffer.WriteRune(' ')
 	}
 
-	if view.Focusable() && !disabled {
-		buffer.WriteString(`tabindex="0" `)
+	if !disabled {
+		if value, ok := intProperty(view, TabIndex, view.Session(), -1); ok {
+			buffer.WriteString(`tabindex="`)
+			buffer.WriteString(strconv.Itoa(value))
+			buffer.WriteString(`" `)
+		} else if view.Focusable() {
+			buffer.WriteString(`tabindex="0" `)
+		}
 	}
 
 	buffer.WriteString(`onscroll="scrollEvent(this, event)" `)

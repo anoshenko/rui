@@ -690,4 +690,12 @@ const (
 	// "color-dodge" (6), "color-burn" (7), "hard-light" (8), "soft-light" (9), "difference" (10),
 	// "exclusion" (11), "hue" (12), "saturation" (13), "color" (14), "luminosity" (15).
 	MixBlendMode = "mix-blend-mode"
+
+	// TabIndex is the constant for the "tabindex" property tag.
+	// The "tabindex" int property indicates that View can be focused, and where it participates in sequential keyboard navigation
+	// (usually with the Tab key, hence the name).
+	// * A negative value means that View is not reachable via sequential keyboard navigation, but could be focused by clicking with the mouse or touching.
+	// * tabindex="0" means that View should be focusable in sequential keyboard navigation, after any positive tabindex values and its order is defined in order of its addition.
+	// * A positive value means View should be focusable in sequential keyboard navigation, with its order defined by the value of the number.
+	TabIndex = "tabindex"
 )

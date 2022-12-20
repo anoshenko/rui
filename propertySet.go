@@ -74,6 +74,7 @@ var intProperties = []string{
 	ColumnSpan,
 	ColumnCount,
 	Order,
+	TabIndex,
 }
 
 var floatProperties = map[string]struct{ min, max float64 }{

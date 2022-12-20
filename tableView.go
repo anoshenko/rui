@@ -606,7 +606,8 @@ func (table *tableViewData) propertyChanged(tag string) {
 
 			switch GetTableSelectionMode(table) {
 			case CellSelection:
-				session.updateProperty(htmlID, "tabindex", "0")
+				tabIndex, _ := intProperty(table, TabIndex, session, 0)
+				session.updateProperty(htmlID, "tabindex", tabIndex)
 				session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
 				session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
 				session.updateProperty(htmlID, "data-selection", "cell")
@@ -621,7 +622,8 @@ func (table *tableViewData) propertyChanged(tag string) {
 				session.updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)")
 
 			case RowSelection:
-				session.updateProperty(htmlID, "tabindex", "0")
+				tabIndex, _ := intProperty(table, TabIndex, session, 0)
+				session.updateProperty(htmlID, "tabindex", tabIndex)
 				session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
 				session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
 				session.updateProperty(htmlID, "data-selection", "row")
@@ -636,7 +638,11 @@ func (table *tableViewData) propertyChanged(tag string) {
 				session.updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)")
 
 			default: // NoneSelection
-				for _, prop := range []string{"tabindex", "data-current", "onfocus", "onblur", "onkeydown", "data-selection"} {
+				if tabIndex, ok := intProperty(table, TabIndex, session, -1); !ok || tabIndex < 0 {
+					session.removeProperty(htmlID, "tabindex")
+				}
+
+				for _, prop := range []string{"data-current", "onfocus", "onblur", "onkeydown", "data-selection"} {
 					session.removeProperty(htmlID, prop)
 				}
 			}
