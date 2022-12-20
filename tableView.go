@@ -831,7 +831,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	var view tableCellView
 	view.init(session)
 
-	ignorCells := []struct{ row, column int }{}
+	ignoreCells := []struct{ row, column int }{}
 	selectionMode := GetTableSelectionMode(table)
 
 	var allowCellSelection TableAllowCellSelection = nil
@@ -908,7 +908,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 			for column := 0; column < columnCount; column++ {
 				ignore := false
-				for _, cell := range ignorCells {
+				for _, cell := range ignoreCells {
 					if cell.row == row && cell.column == column {
 						ignore = true
 						break
@@ -994,7 +994,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						buffer.WriteString(strconv.Itoa(columnSpan))
 						buffer.WriteRune('"')
 						for c := column + 1; c < column+columnSpan; c++ {
-							ignorCells = append(ignorCells, struct {
+							ignoreCells = append(ignoreCells, struct {
 								row    int
 								column int
 							}{row: row, column: c})
@@ -1010,7 +1010,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						}
 						for r := row + 1; r < row+rowSpan; r++ {
 							for c := column; c < column+columnSpan; c++ {
-								ignorCells = append(ignorCells, struct {
+								ignoreCells = append(ignoreCells, struct {
 									row    int
 									column int
 								}{row: r, column: c})

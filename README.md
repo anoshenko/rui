@@ -2279,6 +2279,17 @@ alignment of items in the list. Valid values:
 The "list-row-gap" and "list-column-gap" SizeUnit properties (ListRowGap and ListColumnGap constants) 
 allow you to set the distance between the rows and columns of the container, respectively. The default is 0px.
 
+### "order"
+
+The "order" property (Order constant) of type int is used by Views placed in a ListLayout or GridLayout container (see below),
+to change its position in the container.
+The "order" property defines the order used to place the View in the container. The elements are arranged in ascending order by their order value.
+Elements with the same order value are placed in the order in which they were added to the container.
+
+The default value is 0. Therefore, negative values of the "order" property must be used to place the View at the beginning.
+
+Note: The "order" property only affects the visual order of the elements, not the logical order or tabs.
+
 ## GridLayout
 
 GridLayout is a container that implements the ViewsContainer interface. To create it, use the function
