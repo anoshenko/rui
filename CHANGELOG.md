@@ -1,7 +1,7 @@
 # v.11.0
 
-* Added "order", "background-blend-mode", and "mix-blend-mode" properties 
-* Added GetOrder, GetBackgroundBlendMode, and GetMixBlendMode functions
+* Added "tabindex", "order", "background-blend-mode", and "mix-blend-mode" properties 
+* Added GetTabIndex, GetOrder, GetBackgroundBlendMode, and GetMixBlendMode functions
 * ClientItem, SetClientItem, and RemoveAllClientItems method added to Session interface
 * PropertyWithTag method of DataObject interface renamed to PropertyByTag
 

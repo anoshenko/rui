@@ -1298,12 +1298,28 @@ The textual description of the polygonal cropping area is in the following forma
 
 ### "opacity" property
 
-The "opacity" property (constant Opacity) of the float64 type sets the transparency of the View. Valid values are from 0 to 1.
+The "opacity" property (Opacity constant) of the float64 type sets the transparency of the View. Valid values are from 0 to 1.
 Where 1 - View is fully opaque, 0 - fully transparent.
 
 You can get the value of this property using the function
 
 	func GetOpacity(view View, subviewID ...string) float64
+
+### "tabindex" property
+
+The "tabindex" int property (TabIndex constant) determines whether this View should participate in sequential navigation 
+throughout the page using the keyboard and in what order. It can take one of the following types of values:
+
+* negative value - View can be selected with the mouse or touch, but does not participate in sequential navigation;
+
+* 0 - View can be selected and reached using sequential navigation, the order of navigation is determined by the browser (usually in order of addition);
+
+* positive value - the element will be reached (and selected) using sequential navigation, and navigation is performed by ascending "tabindex" value.
+If multiple elements contain the same "tabindex" value, navigation is done in the order in which they were added.
+
+You can get the value of this property using the function
+
+	func GetTabIndex(viewView, subviewID ...string) int
 
 ### "z-index" property
 
