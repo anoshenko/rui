@@ -2496,7 +2496,7 @@ which implements the Properties interface (see above). ColumnSeparatorProperty c
 Line style can take the following values:
 
 | Value | Constant   | Name     | Description       |
-|:-----:|------------|----------| ------------------|
+|:-----:|------------|----------|-------------------|
 | 0     | NoneLine   | "none"   | No frame          |
 | 1     | SolidLine  | "solid"  | Solid line        |
 | 2     | DashedLine | "dashed" | Dashed line       |
@@ -2549,6 +2549,20 @@ equivalent to
 		rui.Width: rui.Px(1),
 		rui.ColorProperty: rui.Black,
 	}))
+
+### "column-fill" property
+
+The "column-fill" int property (ColumnFill constant) controls how an ColumnLayout's contents are balanced when broken into columns.
+Valid values:
+
+| Value | Constant          | Name      | Description                                                |
+|:-----:|-------------------|-----------|------------------------------------------------------------|
+| 0     | ColumnFillBalance | "balance" | Content is equally divided between columns (default value) |
+| 1     | ColumnFillAuto    | "auto"    | Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty |
+
+You can get the value of this property using the function
+
+	func GetColumnFill(view View, subviewID ...string) int
 
 ### "avoid-break" property
 
@@ -2807,7 +2821,7 @@ It determines how the text is cut if it goes out of bounds.
 This property of type int can take the following values
 
 | Value | Constant             | Name       | Cropping Text                                               |
-|:-----:|----------------------| -----------|-------------------------------------------------------------|
+|:-----:|----------------------|------------|-------------------------------------------------------------|
 | 0     | TextOverflowClip     | "clip"     | Text is clipped at the border (default)                     |
 | 1     | TextOverflowEllipsis | "ellipsis" | At the end of the visible part of the text '…' is displayed |
 

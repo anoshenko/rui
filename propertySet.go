@@ -459,6 +459,11 @@ var enumProperties = map[string]struct {
 		BackgroundBlendMode,
 		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
 	},
+	ColumnFill: {
+		[]string{"balance", "auto"},
+		ColumnFill,
+		[]string{"balance", "auto"},
+	},
 }
 
 func notCompatibleType(tag string, value any) {

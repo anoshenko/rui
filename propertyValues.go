@@ -388,4 +388,11 @@ const (
 	// The final color has the luminosity of the top color, while using the hue and saturation of the bottom color.
 	// This blend mode is equivalent to BlendColor, but with the layers swapped.
 	BlendLuminosity = 15
+
+	// ColumnFillBalance - value of the "column-fill" property: content is equally divided between columns.
+	ColumnFillBalance = 0
+
+	// ColumnFillAuto - value of the "column-fill" property:
+	// Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
+	ColumnFillAuto = 1
 )
