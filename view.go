@@ -626,6 +626,14 @@ func viewPropertyChanged(view *viewData, tag string) {
 			session.updateCSSProperty(htmlID, "user-select", "")
 		}
 		return
+
+	case ColumnSpanAll:
+		if spanAll, ok := boolProperty(view, ColumnSpanAll, session); ok && spanAll {
+			session.updateCSSProperty(htmlID, `column-span`, `all`)
+		} else {
+			session.updateCSSProperty(htmlID, `column-span`, `none`)
+		}
+		return
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {

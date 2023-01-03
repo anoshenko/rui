@@ -426,6 +426,7 @@ function mouseOutEvent(element, event) {
 function clickEvent(element, event) {
 	mouseEvent(element, event, "click-event")
 	event.preventDefault();
+	event.stopPropagation();
 }
 
 function doubleClickEvent(element, event) {

@@ -2603,6 +2603,20 @@ ViewBorder описана как
 
 	func GetAvoidBreak(view View, subviewID ...string) bool
 
+### Свойство "column-span-all"
+
+Свойство "column-span-all" (константа ColumnSpanAll) типа bool устанавливается для View помещенных в ColumnLayout.
+Если данное свойство установлено в true, то View расширяется на всю ширину ColumnLayout, занимая все колонки.
+Такое View будет как бы разрывать контейнер. 
+
+Обычно данное свойство используется для заголовков.
+
+Значение по умолчанию "false".
+
+Получить значение данного свойства можно с помощью функции
+
+	func IsColumnSpanAll(view View, subviewID ...string) bool
+
 ## StackLayout
 
 StackLayout является контейнером, реализующим интерфейс ViewsContainer. Все дочерние View

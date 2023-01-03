@@ -453,6 +453,14 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 			builder.add(`animation-play-state`, `running`)
 		}
 	}
+
+	if spanAll, ok := boolProperty(style, ColumnSpanAll, session); ok {
+		if spanAll {
+			builder.add(`column-span`, `all`)
+		} else {
+			builder.add(`column-span`, `none`)
+		}
+	}
 }
 
 func valueToOrientation(value any, session Session) (int, bool) {

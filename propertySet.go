@@ -63,6 +63,7 @@ var boolProperties = []string{
 	TabCloseButton,
 	Repeating,
 	UserSelect,
+	ColumnSpanAll,
 }
 
 var intProperties = []string{

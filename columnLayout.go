@@ -46,6 +46,10 @@ const (
 	// * ColumnFillBalance (0) - Content is equally divided between columns (default value);
 	// * ColumnFillAuto (1) - Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
 	ColumnFill = "column-fill"
+
+	// ColumnSpanAll is the constant for the "column-span-all" property tag.
+	// The "column-span-all" bool property makes it possible for a view to span across all columns when its value is set to true.
+	ColumnSpanAll = "column-span-all"
 )
 
 // ColumnLayout - grid-container of View
@@ -225,4 +229,10 @@ func GetColumnSeparatorColor(view View, subviewID ...string) Color {
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetColumnFill(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ColumnFill, ColumnFillBalance, true)
+}
+
+// IsColumnSpanAll returns a "column-span-all" property value of the subview.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsColumnSpanAll(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, ColumnSpanAll, false)
 }

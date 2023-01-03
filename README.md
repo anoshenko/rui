@@ -2579,6 +2579,20 @@ You can get the value of this property using the function
 
 	func GetAvoidBreak(view View, subviewID ...string) bool
 
+### "column-span-all" property
+
+The "column-span-all" bool property (ColumnSpanAll constant) is set for Views placed in the ColumnLayout.
+If this property is set to true, then the View expands to the full width of the ColumnLayout, covering all columns.
+Such a View will, as it were, break the container.
+
+Typically, this property is used for headers.
+
+The default value is "false".
+
+You can get the value of this property using the function
+
+	func IsColumnSpanAll(view View, subviewID ...string) bool
+
 ## StackLayout
 
 StackLayout is a container that implements the ViewsContainer interface. 
