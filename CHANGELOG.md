@@ -1,6 +1,14 @@
+# v.11.0
+
+* Added "tabindex", "order", "column-fill", "column-span-all", "background-blend-mode", and "mix-blend-mode" properties 
+* Added GetTabIndex, GetOrder, GetColumnFill, IsColumnSpanAll, GetBackgroundBlendMode, and GetMixBlendMode functions
+* ClientItem, SetClientItem, and RemoveAllClientItems method added to Session interface
+* PropertyWithTag method of DataObject interface renamed to PropertyByTag
+
 # v.10.0
 
 * The Canvas.TextWidth method replaced by Canvas.TextMetrics
+* Added support of WebAssembly
 
 # v0.9.0
 

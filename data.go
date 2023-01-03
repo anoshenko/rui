@@ -18,7 +18,7 @@ type DataObject interface {
 	Tag() string
 	PropertyCount() int
 	Property(index int) DataNode
-	PropertyWithTag(tag string) DataNode
+	PropertyByTag(tag string) DataNode
 	PropertyValue(tag string) (string, bool)
 	PropertyObject(tag string) DataObject
 	SetPropertyValue(tag, value string)
@@ -106,7 +106,7 @@ func (object *dataObject) Property(index int) DataNode {
 	return object.property[index]
 }
 
-func (object *dataObject) PropertyWithTag(tag string) DataNode {
+func (object *dataObject) PropertyByTag(tag string) DataNode {
 	if object.property != nil {
 		for _, node := range object.property {
 			if node.Tag() == tag {
@@ -118,14 +118,14 @@ func (object *dataObject) PropertyWithTag(tag string) DataNode {
 }
 
 func (object *dataObject) PropertyValue(tag string) (string, bool) {
-	if node := object.PropertyWithTag(tag); node != nil && node.Type() == TextNode {
+	if node := object.PropertyByTag(tag); node != nil && node.Type() == TextNode {
 		return node.Text(), true
 	}
 	return "", false
 }
 
 func (object *dataObject) PropertyObject(tag string) DataObject {
-	if node := object.PropertyWithTag(tag); node != nil && node.Type() == ObjectNode {
+	if node := object.PropertyByTag(tag); node != nil && node.Type() == ObjectNode {
 		return node.Object()
 	}
 	return nil

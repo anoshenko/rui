@@ -1195,6 +1195,47 @@ Can be one of the following int values:
 
 * ImageVerticalAlign,
 
+### "background-blend-mode" property
+
+The "background-blend-mode" int property (BackgroundBlendMode constant)sets how an view's background images should blend
+with each other and with the view's background color.
+
+Can take one of the following values:
+
+| Constant        | Value | Name         | Description                                                      |
+|-----------------|:-----:|--------------|------------------------------------------------------------------|
+| BlendNormal     | 0     | "normal"     | The final color is the top color, regardless of what the bottom color is. The effect is like two opaque pieces of paper overlapping. |
+| BlendMultiply   | 1     | "multiply"   | The final color is the result of multiplying the top and bottom colors. A black layer leads to a black final layer, and a white layer leads to no change. The effect is like two images printed on transparent film overlapping. |
+| BlendScreen     | 2     | "screen"     | The final color is the result of inverting the colors, multiplying them, and inverting that value. A black layer leads to no change, and a white layer leads to a white final layer. The effect is like two images shone onto a projection screen. |
+| BlendOverlay    | 3     | "overlay"    | The final color is the result of multiply if the bottom color is darker, or screen if the bottom color is lighter. This blend mode is equivalent to hard-light but with the layers swapped. |
+| BlendDarken     | 4     | "darken"     | The final color is composed of the darkest values of each color channel. |
+| BlendLighten    | 5     | "lighten"    | The final color is composed of the lightest values of each color channel. |
+| BlendColorDodge | 6     | "color-dodge"| The final color is the result of dividing the bottom color by the inverse of the top color. A black foreground leads to no change. A foreground with the inverse color of the backdrop leads to a fully lit color. This blend mode is similar to screen, but the foreground need only be as light as the inverse of the backdrop to create a fully lit color. |
+| BlendColorBurn  | 7     | "color-burn" | The final color is the result of inverting the bottom color, dividing the value by the top color, and inverting that value. A white foreground leads to no change. A foreground with the inverse color of the backdrop leads to a black final image. This blend mode is similar to multiply, but the foreground need only be as dark as the inverse of the backdrop to make the final image black. |
+| BlendHardLight  | 8     | "hard-light" | The final color is the result of multiply if the top color is darker, or screen if the top color is lighter. This blend mode is equivalent to overlay but with the layers swapped. The effect is similar to shining a harsh spotlight on the backdrop. |
+| BlendSoftLight  | 9     | "soft-light" | The final color is similar to hard-light, but softer. This blend mode behaves similar to hard-light. The effect is similar to shining a diffused spotlight on the backdrop*.* |
+| BlendDifference | 10    | "difference" |  The final color is the result of subtracting the darker of the two colors from the lighter one. A black layer has no effect, while a white layer inverts the other layer's color. |
+| BlendExclusion  | 11    | "exclusion"  | The final color is similar to difference, but with less contrast. As with difference, a black layer has no effect, while a white layer inverts the other layer's color. |
+| BlendHue        | 12    | "hue"        | The final color has the hue of the top color, while using the saturation and luminosity of the bottom color. |
+| BlendSaturation | 13    | "saturation" | The final color has the saturation of the top color, while using the hue and luminosity of the bottom color. A pure gray backdrop, having no saturation, will have no effect. |
+| BlendColor      | 14    | "color"      | The final color has the hue and saturation of the top color, while using the luminosity of the bottom color. The effect preserves gray levels and can be used to colorize the foreground. |
+| BlendLuminosity | 15    | "luminosity" | The final color has the luminosity of the top color, while using the hue and saturation of the bottom color. This blend mode is equivalent to BlendColor, but with the layers swapped. |
+
+You can get the value of this property using the function
+
+	func GetBackgroundBlendMode(view View, subviewID ...string) int
+
+### "mix-blend-mode" property
+
+The "mix-blend-mode" int property (MixBlendMode constant) sets how a view's content should blend
+with the content of the view's parent and the view's background.
+
+Possible values of this property are similar to the values of the "background-blend-mode" property (see above)
+
+You can get the value of this property using the function
+
+	func GetMixBlendMode(view View, subviewID ...string) int
+
 ### "clip" property
 
 The "clip" property (Clip constant) of the ClipShape type specifies the crop area.
@@ -1257,12 +1298,28 @@ The textual description of the polygonal cropping area is in the following forma
 
 ### "opacity" property
 
-The "opacity" property (constant Opacity) of the float64 type sets the transparency of the View. Valid values are from 0 to 1.
+The "opacity" property (Opacity constant) of the float64 type sets the transparency of the View. Valid values are from 0 to 1.
 Where 1 - View is fully opaque, 0 - fully transparent.
 
 You can get the value of this property using the function
 
 	func GetOpacity(view View, subviewID ...string) float64
+
+### "tabindex" property
+
+The "tabindex" int property (TabIndex constant) determines whether this View should participate in sequential navigation 
+throughout the page using the keyboard and in what order. It can take one of the following types of values:
+
+* negative value - View can be selected with the mouse or touch, but does not participate in sequential navigation;
+
+* 0 - View can be selected and reached using sequential navigation, the order of navigation is determined by the browser (usually in order of addition);
+
+* positive value - the element will be reached (and selected) using sequential navigation, and navigation is performed by ascending "tabindex" value.
+If multiple elements contain the same "tabindex" value, navigation is done in the order in which they were added.
+
+You can get the value of this property using the function
+
+	func GetTabIndex(viewView, subviewID ...string) int
 
 ### "z-index" property
 
@@ -2238,6 +2295,17 @@ alignment of items in the list. Valid values:
 The "list-row-gap" and "list-column-gap" SizeUnit properties (ListRowGap and ListColumnGap constants) 
 allow you to set the distance between the rows and columns of the container, respectively. The default is 0px.
 
+### "order"
+
+The "order" property (Order constant) of type int is used by Views placed in a ListLayout or GridLayout container (see below),
+to change its position in the container.
+The "order" property defines the order used to place the View in the container. The elements are arranged in ascending order by their order value.
+Elements with the same order value are placed in the order in which they were added to the container.
+
+The default value is 0. Therefore, negative values of the "order" property must be used to place the View at the beginning.
+
+Note: The "order" property only affects the visual order of the elements, not the logical order or tabs.
+
 ## GridLayout
 
 GridLayout is a container that implements the ViewsContainer interface. To create it, use the function
@@ -2428,7 +2496,7 @@ which implements the Properties interface (see above). ColumnSeparatorProperty c
 Line style can take the following values:
 
 | Value | Constant   | Name     | Description       |
-|:-----:|------------|----------| ------------------|
+|:-----:|------------|----------|-------------------|
 | 0     | NoneLine   | "none"   | No frame          |
 | 1     | SolidLine  | "solid"  | Solid line        |
 | 2     | DashedLine | "dashed" | Dashed line       |
@@ -2482,6 +2550,20 @@ equivalent to
 		rui.ColorProperty: rui.Black,
 	}))
 
+### "column-fill" property
+
+The "column-fill" int property (ColumnFill constant) controls how an ColumnLayout's contents are balanced when broken into columns.
+Valid values:
+
+| Value | Constant          | Name      | Description                                                |
+|:-----:|-------------------|-----------|------------------------------------------------------------|
+| 0     | ColumnFillBalance | "balance" | Content is equally divided between columns (default value) |
+| 1     | ColumnFillAuto    | "auto"    | Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty |
+
+You can get the value of this property using the function
+
+	func GetColumnFill(view View, subviewID ...string) int
+
 ### "avoid-break" property
 
 When forming columns, ColumnLayout can break some types of View, so that the beginning 
@@ -2496,6 +2578,20 @@ The default is "false".
 You can get the value of this property using the function
 
 	func GetAvoidBreak(view View, subviewID ...string) bool
+
+### "column-span-all" property
+
+The "column-span-all" bool property (ColumnSpanAll constant) is set for Views placed in the ColumnLayout.
+If this property is set to true, then the View expands to the full width of the ColumnLayout, covering all columns.
+Such a View will, as it were, break the container.
+
+Typically, this property is used for headers.
+
+The default value is "false".
+
+You can get the value of this property using the function
+
+	func IsColumnSpanAll(view View, subviewID ...string) bool
 
 ## StackLayout
 
@@ -2739,7 +2835,7 @@ It determines how the text is cut if it goes out of bounds.
 This property of type int can take the following values
 
 | Value | Constant             | Name       | Cropping Text                                               |
-|:-----:|----------------------| -----------|-------------------------------------------------------------|
+|:-----:|----------------------|------------|-------------------------------------------------------------|
 | 0     | TextOverflowClip     | "clip"     | Text is clipped at the border (default)                     |
 | 1     | TextOverflowEllipsis | "ellipsis" | At the end of the visible part of the text '…' is displayed |
 

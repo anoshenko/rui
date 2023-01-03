@@ -193,16 +193,20 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		outline.ViewOutline(session).cssValue(builder, session)
 	}
 
-	if z, ok := intProperty(style, ZIndex, session, 0); ok {
-		builder.add(ZIndex, strconv.Itoa(z))
+	for _, tag := range []string{ZIndex, Order} {
+		if value, ok := intProperty(style, tag, session, 0); ok {
+			builder.add(tag, strconv.Itoa(value))
+		}
 	}
 
 	if opacity, ok := floatProperty(style, Opacity, session, 1.0); ok && opacity >= 0 && opacity <= 1 {
 		builder.add(Opacity, strconv.FormatFloat(opacity, 'f', 3, 32))
 	}
 
-	if n, ok := intProperty(style, ColumnCount, session, 0); ok && n > 0 {
-		builder.add(ColumnCount, strconv.Itoa(n))
+	for _, tag := range []string{ColumnCount, TabSize} {
+		if value, ok := intProperty(style, tag, session, 0); ok && value > 0 {
+			builder.add(tag, strconv.Itoa(value))
+		}
 	}
 
 	for _, tag := range []string{
@@ -248,7 +252,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	for _, tag := range []string{
 		Overflow, TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
 		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
-		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize} {
+		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize, MixBlendMode, BackgroundBlendMode} {
 
 		if data, ok := enumProperties[tag]; ok {
 			if tag != VerticalTextOrientation || (writingMode != VerticalLeftToRight && writingMode != VerticalRightToLeft) {
@@ -277,10 +281,6 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 				builder.add(prop.cssTag, prop.off)
 			}
 		}
-	}
-
-	if tabSize, ok := intProperty(style, TabSize, session, 8); ok && tabSize > 0 {
-		builder.add(TabSize, strconv.Itoa(tabSize))
 	}
 
 	if text := style.cssTextDecoration(session); text != "" {
@@ -451,6 +451,14 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 			builder.add(`animation-play-state`, `paused`)
 		} else {
 			builder.add(`animation-play-state`, `running`)
+		}
+	}
+
+	if spanAll, ok := boolProperty(style, ColumnSpanAll, session); ok {
+		if spanAll {
+			builder.add(`column-span`, `all`)
+		} else {
+			builder.add(`column-span`, `none`)
 		}
 	}
 }

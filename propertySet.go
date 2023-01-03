@@ -63,6 +63,7 @@ var boolProperties = []string{
 	TabCloseButton,
 	Repeating,
 	UserSelect,
+	ColumnSpanAll,
 }
 
 var intProperties = []string{
@@ -73,6 +74,8 @@ var intProperties = []string{
 	RowSpan,
 	ColumnSpan,
 	ColumnCount,
+	Order,
+	TabIndex,
 }
 
 var floatProperties = map[string]struct{ min, max float64 }{
@@ -446,6 +449,21 @@ var enumProperties = map[string]struct {
 		[]string{"none", "top", "right", "bottom", "left"},
 		"",
 		[]string{"none", "top", "right", "bottom", "left"},
+	},
+	MixBlendMode: {
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+		MixBlendMode,
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+	},
+	BackgroundBlendMode: {
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+		BackgroundBlendMode,
+		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
+	},
+	ColumnFill: {
+		[]string{"balance", "auto"},
+		ColumnFill,
+		[]string{"balance", "auto"},
 	},
 }
 

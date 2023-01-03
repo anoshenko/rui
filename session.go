@@ -100,6 +100,10 @@ type Session interface {
 	// OpenURL opens the url in the new browser tab
 	OpenURL(url string)
 
+	ClientItem(key string) (string, bool)
+	SetClientItem(key, value string)
+	RemoveAllClientItems()
+
 	getCurrentTheme() Theme
 	registerAnimation(props []AnimatedProperty) string
 
@@ -183,6 +187,7 @@ type sessionData struct {
 	animationCounter int
 	animationCSS     string
 	updateScripts    map[string]*strings.Builder
+	clientStorage    map[string]string
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -199,6 +204,7 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.animationCounter = 0
 	session.animationCSS = ""
 	session.updateScripts = map[string]*strings.Builder{}
+	session.clientStorage = map[string]string{}
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {
@@ -516,7 +522,7 @@ func (session *sessionData) handleRootSize(data DataObject) {
 }
 
 func (session *sessionData) handleResize(data DataObject) {
-	if node := data.PropertyWithTag("views"); node != nil && node.Type() == ArrayNode {
+	if node := data.PropertyByTag("views"); node != nil && node.Type() == ArrayNode {
 		for _, el := range node.ArrayElements() {
 			if el.IsObject() {
 				obj := el.Object()
@@ -591,6 +597,16 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 			session.pixelRatio = f
 		}
 	}
+
+	if node := params.PropertyByTag("storage"); node != nil && node.Type() == ObjectNode {
+		if obj := node.Object(); obj != nil {
+			for i := 0; i < obj.PropertyCount(); i++ {
+				if element := obj.Property(i); element.Type() == TextNode {
+					session.clientStorage[element.Tag()] = element.Text()
+				}
+			}
+		}
+	}
 }
 
 func (session *sessionData) handleEvent(command string, data DataObject) {
@@ -609,6 +625,11 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 
 	case "sessionInfo":
 		session.handleSessionInfo(data)
+
+	case "storageError":
+		if text, ok := data.PropertyValue("error"); ok {
+			ErrorLog(text)
+		}
 
 	default:
 		if viewID, ok := data.PropertyValue("id"); ok {
@@ -640,4 +661,19 @@ func (session *sessionData) OpenURL(urlStr string) {
 		return
 	}
 	session.callFunc("openURL", urlStr)
+}
+
+func (session *sessionData) ClientItem(key string) (string, bool) {
+	value, ok := session.clientStorage[key]
+	return value, ok
+}
+
+func (session *sessionData) SetClientItem(key, value string) {
+	session.clientStorage[key] = value
+	session.bridge.callFunc("localStorageSet", key, value)
+}
+
+func (session *sessionData) RemoveAllClientItems() {
+	session.clientStorage = map[string]string{}
+	session.bridge.callFunc("localStorageClear")
 }

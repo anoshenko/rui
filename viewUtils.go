@@ -153,10 +153,35 @@ func GetOverflow(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, Overflow, defaultOverflow, false)
 }
 
+// GetTabIndex returns the subview tab-index.
+// If the second argument (subviewID) is not specified or it is "" then a tab-index of the first argument (view) is returned
+func GetTabIndex(view View, subviewID ...string) int {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	defaultValue := -1
+	if view != nil {
+		if view.Focusable() {
+			defaultValue = 0
+		}
+		if value, ok := intProperty(view, TabIndex, view.Session(), defaultValue); ok {
+			return value
+		}
+	}
+	return defaultValue
+}
+
 // GetZIndex returns the subview z-order.
 // If the second argument (subviewID) is not specified or it is "" then a z-order of the first argument (view) is returned
 func GetZIndex(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, ZIndex, 0)
+}
+
+// GetOrder returns the subview order to layout an item in a ListLayout or GridLayout container.
+// If the second argument (subviewID) is not specified or it is "" then an order of the first argument (view) is returned
+func GetOrder(view View, subviewID ...string) int {
+	return intStyledProperty(view, subviewID, Order, 0)
 }
 
 // GetWidth returns the subview width.
@@ -889,4 +914,28 @@ func isUserSelect(view View) (bool, bool) {
 	}
 
 	return false, false
+}
+
+// GetMixBlendMode returns a "mix-blend-mode" of the subview. Returns one of next values:
+//
+// BlendNormal (0), BlendMultiply (1), BlendScreen (2), BlendOverlay (3), BlendDarken (4),
+// BlendLighten (5), BlendColorDodge (6), BlendColorBurn (7), BlendHardLight (8),
+// BlendSoftLight (9), BlendDifference (10), BlendExclusion (11), BlendHue (12),
+// BlendSaturation (13), BlendColor (14), BlendLuminosity (15)
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMixBlendMode(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, MixBlendMode, BlendNormal, true)
+}
+
+// GetBackgroundBlendMode returns a "background-blend-mode" of the subview. Returns one of next values:
+//
+// BlendNormal (0), BlendMultiply (1), BlendScreen (2), BlendOverlay (3), BlendDarken (4),
+// BlendLighten (5), BlendColorDodge (6), BlendColorBurn (7), BlendHardLight (8),
+// BlendSoftLight (9), BlendDifference (10), BlendExclusion (11), BlendHue (12),
+// BlendSaturation (13), BlendColor (14), BlendLuminosity (15)
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetBackgroundBlendMode(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, BackgroundBlendMode, BlendNormal, true)
 }

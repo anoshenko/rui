@@ -286,7 +286,7 @@ func (border *borderProperty) setBorderObject(obj DataObject) bool {
 	result := true
 
 	for _, side := range []string{Top, Right, Bottom, Left} {
-		if node := obj.PropertyWithTag(side); node != nil {
+		if node := obj.PropertyByTag(side); node != nil {
 			if node.Type() == ObjectNode {
 				if !border.setSingleBorderObject(side, node.Object()) {
 					result = false

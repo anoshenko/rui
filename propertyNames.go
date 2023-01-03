@@ -669,4 +669,33 @@ const (
 	// The "user-select" bool property controls whether the user can select text.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	UserSelect = "user-select"
+
+	// Order is the constant for the "Order" property tag.
+	// The "Order" int property sets the order to layout an item in a ListLayout or GridLayout container.
+	// Items in a container are sorted by ascending order value and then by their source code order.
+	Order = "Order"
+
+	// BackgroundBlendMode is the constant for the "background-blend-mode" property tag.
+	// The "background-blend-mode" int property sets how an view's background images should blend
+	// with each other and with the view's background color.
+	// Valid values are "normal" (0), "multiply" (1), "screen" (2), "overlay" (3), "darken" (4), "lighten" (5),
+	// "color-dodge" (6), "color-burn" (7), "hard-light" (8), "soft-light" (9), "difference" (10),
+	// "exclusion" (11), "hue" (12), "saturation" (13), "color" (14), "luminosity" (15).
+	BackgroundBlendMode = "background-blend-mode"
+
+	// MixBlendMode is the constant for the "mix-blend-mode" property tag.
+	// The "mix-blend-mode" int property sets how a view's content should blend
+	// with the content of the view's parent and the view's background.
+	// Valid values are "normal" (0), "multiply" (1), "screen" (2), "overlay" (3), "darken" (4), "lighten" (5),
+	// "color-dodge" (6), "color-burn" (7), "hard-light" (8), "soft-light" (9), "difference" (10),
+	// "exclusion" (11), "hue" (12), "saturation" (13), "color" (14), "luminosity" (15).
+	MixBlendMode = "mix-blend-mode"
+
+	// TabIndex is the constant for the "tabindex" property tag.
+	// The "tabindex" int property indicates that View can be focused, and where it participates in sequential keyboard navigation
+	// (usually with the Tab key, hence the name).
+	// * A negative value means that View is not reachable via sequential keyboard navigation, but could be focused by clicking with the mouse or touching.
+	// * tabindex="0" means that View should be focusable in sequential keyboard navigation, after any positive tabindex values and its order is defined in order of its addition.
+	// * A positive value means View should be focusable in sequential keyboard navigation, with its order defined by the value of the number.
+	TabIndex = "tabindex"
 )

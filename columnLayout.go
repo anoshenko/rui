@@ -11,28 +11,45 @@ const (
 	// Values less than zero are not valid. if the "column-count" property value is 0 then
 	// the number of columns is calculated based on the "column-width" property
 	ColumnCount = "column-count"
+
 	// ColumnWidth is the constant for the "column-width" property tag.
 	// The "column-width" SizeUnit property specifies the width of each column.
 	ColumnWidth = "column-width"
+
 	// ColumnGap is the constant for the "column-gap" property tag.
 	// The "column-width" SizeUnit property sets the size of the gap (gutter) between columns.
 	ColumnGap = "column-gap"
+
 	// ColumnSeparator is the constant for the "column-separator" property tag.
 	// The "column-separator" property specifies the line drawn between columns in a multi-column layout.
 	ColumnSeparator = "column-separator"
+
 	// ColumnSeparatorStyle is the constant for the "column-separator-style" property tag.
 	// The "column-separator-style" int property sets the style of the line drawn between
 	// columns in a multi-column layout.
 	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
 	ColumnSeparatorStyle = "column-separator-style"
+
 	// ColumnSeparatorWidth is the constant for the "column-separator-width" property tag.
 	// The "column-separator-width" SizeUnit property sets the width of the line drawn between
 	// columns in a multi-column layout.
 	ColumnSeparatorWidth = "column-separator-width"
+
 	// ColumnSeparatorColor is the constant for the "column-separator-color" property tag.
 	// The "column-separator-color" Color property sets the color of the line drawn between
 	// columns in a multi-column layout.
 	ColumnSeparatorColor = "column-separator-color"
+
+	// ColumnFill is the constant for the "column-fill" property tag.
+	// The "column-fill" int property controls how an ColumnLayout's contents are balanced when broken into columns.
+	// Valid values are
+	// * ColumnFillBalance (0) - Content is equally divided between columns (default value);
+	// * ColumnFillAuto (1) - Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
+	ColumnFill = "column-fill"
+
+	// ColumnSpanAll is the constant for the "column-span-all" property tag.
+	// The "column-span-all" bool property makes it possible for a view to span across all columns when its value is set to true.
+	ColumnSpanAll = "column-span-all"
 )
 
 // ColumnLayout - grid-container of View
@@ -205,4 +222,17 @@ func GetColumnSeparatorWidth(view View, subviewID ...string) SizeUnit {
 func GetColumnSeparatorColor(view View, subviewID ...string) Color {
 	border := getColumnSeparator(view, subviewID)
 	return border.Color
+}
+
+// GetColumnFill returns a "column-fill" property value of the subview.
+// Returns one of next values: ColumnFillBalance (0) or ColumnFillAuto (1)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetColumnFill(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, ColumnFill, ColumnFillBalance, true)
+}
+
+// IsColumnSpanAll returns a "column-span-all" property value of the subview.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsColumnSpanAll(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, ColumnSpanAll, false)
 }
