@@ -115,13 +115,14 @@ ul:focus {
   display: grid;
 }
 
+.ruiSvgImageView {
+  display: grid;
+}
+
 .ruiListView {
   overflow: auto;
-  /*
-	display: flex;
-	align-content: stretch;
-  */
 }
+
 /*
 @media (prefers-color-scheme: light) {
   body {

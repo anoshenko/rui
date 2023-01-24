@@ -77,7 +77,7 @@ func getStartPage(buffer *strings.Builder, params AppParams, addScripts string) 
 	</head>
 	<body>
 		<div class="ruiRoot" id="ruiRootView"></div>
-		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden;" onclick="clickOutsidePopup(event)"></div>
+		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate;" onclick="clickOutsidePopup(event)"></div>
 		<a id="ruiDownloader" download style="display: none;"></a>
 	</body>`)
 }

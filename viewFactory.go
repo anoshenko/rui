@@ -30,6 +30,7 @@ var viewCreators = map[string]func(Session) View{
 	"ListView":       newListView,
 	"CanvasView":     newCanvasView,
 	"ImageView":      newImageView,
+	"SvgImageView":   newSvgImageView,
 	"TableView":      newTableView,
 	"AudioPlayer":    newAudioPlayer,
 	"VideoPlayer":    newVideoPlayer,

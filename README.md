@@ -2914,6 +2914,39 @@ The following functions can be used to retrieve ImageView property values:
 	func GetImageViewVerticalAlign(view View, subviewID ...string) int
 	func GetImageViewHorizontalAlign(view View, subviewID ...string) int
 
+## SvgImageView
+
+The SvgImageView element extending the View interface is designed to display svg images.
+
+To create an SvgImageView function is used:
+
+	func NewSvgImageView(session Session, params Params) ImageView
+
+The image to be displayed is specified by the string property "content" (constant Content).
+The value of this property can be assigned
+* the image file name in the images folder of the resources;
+* image url;
+* content of the svg image.
+
+Examples
+
+	rui.Set(rootView, "iconView", rui.Content, "icon.svg")
+
+	rui.Set(rootView, "iconView", rui.Content, `<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+	<g transform="translate(-499.08 -247.12)">
+		<path d="m508.08 249.12 14 14-14 14" fill="none" stroke="#0f0" stroke-linecap="round" stroke-width="1px"/>
+	</g>
+	</svg>`)
+
+Regardless of how you determined the property of "Content" to the client is always transmitted the contents of the SVG image. For example, if you set the image as follows
+
+	rui.Set(rootView, "iconView", rui.Content, "icon.svg")
+
+then the program will first upload the contents of the "icon.svg" file to the memory, 
+and then transmit this contents to the client as the value of the "content" property.
+
+This allows you to include SVG images in the resources of a WebAssembly application.
+
 ## EditView
 
 The EditView element is a test editor and extends the View interface.
