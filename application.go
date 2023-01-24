@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-var wasmMediaResources = false
-
 //go:embed app_scripts.js
 var defaultScripts string
 

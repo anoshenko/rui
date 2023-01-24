@@ -1,7 +1,9 @@
 package rui
 
 import (
+	"encoding/base64"
 	"net"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -75,4 +77,32 @@ func dataFloatProperty(data DataObject, tag string) float64 {
 		}
 	}
 	return 0
+}
+
+// InlineImageFromResource reads image from resources and converts it to an inline image.
+// Supported png, jpeg, gif, and svg files
+func InlineImageFromResource(filename string) (string, bool) {
+	if image, ok := resources.images[filename]; ok && image.fs != nil {
+		dataType := map[string]string{
+			".svg":  "data:image/svg+xml",
+			".png":  "data:image/png",
+			".jpg":  "data:image/jpg",
+			".jpeg": "data:image/jpg",
+			".gif":  "data:image/gif",
+		}
+		ext := strings.ToLower(filepath.Ext(filename))
+		if prefix, ok := dataType[ext]; ok {
+			if data, err := image.fs.ReadFile(image.path); err == nil {
+				return prefix + ";base64," + base64.StdEncoding.EncodeToString(data), true
+			} else {
+				DebugLog(err.Error())
+			}
+		} else {
+			DebugLogF(`InlineImageFromResource("%s") error: Unsupported file`, filename)
+		}
+	} else {
+		DebugLogF(`The resource image "%s" not found`, filename)
+	}
+
+	return "", false
 }

@@ -2848,7 +2848,25 @@ To create an ImageView function is used:
 	func NewImageView(session Session, params Params) ImageView
 
 The displayed image is specified by the string property "src" (Source constant).
-As a value, this property is assigned either the name of the image in the "images" folder of the resources, or the url of the image.
+As a value, this property is assigned either the name of the image in the "images" folder of the resources, or the url of the image, or inline-image.
+
+An inline-image is the content of an image file encoded in base64 format.
+To get an inline-image from the application resources, use the function
+
+	func InlineImageFromResource(filename string) (string, bool)
+
+Inline-images must be used in WebAssembly applications 
+if you want to host images in resources rather than on an external server.
+Inline-images can cause app freezes in Safari and should be avoided.
+Example
+
+	if runtime.GOOS == "js" {
+		if image, ok := rui.InlineImageFromResource("image.png"); ok {
+			view.Set(rui.Source, image)
+		}
+	} else {
+		view.Set(rui.Source, "image.png")
+	}
 
 ImageView allows you to display different images depending on screen density
 (See section "Images for screens with different pixel densities").

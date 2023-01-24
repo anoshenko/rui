@@ -1,6 +1,7 @@
 # v0.12.0
 
 * Added SvgImageView
+* Added InlineImageFromResource function
 
 # v0.11.0
 

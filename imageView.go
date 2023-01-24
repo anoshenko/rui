@@ -1,10 +1,7 @@
 package rui
 
 import (
-	"encoding/base64"
 	"fmt"
-	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -272,27 +269,7 @@ func (imageView *imageViewData) src(src string) (string, string) {
 	}
 
 	if src != "" {
-		srcset := imageView.srcSet(src)
-		if runtime.GOOS == "js" && wasmMediaResources {
-			if image, ok := resources.images[src]; ok && image.fs != nil {
-				dataType := map[string]string{
-					".svg":  "data:image/svg+xml",
-					".png":  "data:image/png",
-					".jpg":  "data:image/jpg",
-					".jpeg": "data:image/jpg",
-					".gif":  "data:image/gif",
-				}
-				ext := strings.ToLower(filepath.Ext(src))
-				if prefix, ok := dataType[ext]; ok {
-					if data, err := image.fs.ReadFile(image.path); err == nil {
-						return prefix + ";base64," + base64.StdEncoding.EncodeToString(data), ""
-					} else {
-						DebugLog(err.Error())
-					}
-				}
-			}
-		}
-		return src, srcset
+		return src, imageView.srcSet(src)
 	}
 	return "", ""
 }
