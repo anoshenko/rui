@@ -123,7 +123,7 @@ func scanEmbedImagesDir(fs *embed.FS, dir, prefix string) {
 			} else {
 				ext := strings.ToLower(filepath.Ext(name))
 				switch ext {
-				case ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp":
+				case ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp", ".webp":
 					registerImage(fs, path, prefix+name)
 				}
 			}
@@ -272,8 +272,8 @@ func serveResourceFile(filename string, w http.ResponseWriter, r *http.Request) 
 			if serveEmbed(fs, dir+"/"+filename) {
 				return true
 			}
-			if subdirs, err := fs.ReadDir(dir); err == nil {
-				for _, subdir := range subdirs {
+			if subDirs, err := fs.ReadDir(dir); err == nil {
+				for _, subdir := range subDirs {
 					if subdir.IsDir() {
 						if serveEmbed(fs, dir+"/"+subdir.Name()+"/"+filename) {
 							return true
