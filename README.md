@@ -3071,13 +3071,21 @@ The following functions can be used to get the values of the properties of an Ed
 The "edit-text-changed" event (EditTextChangedEvent constant) is used to track changes to the text. 
 The main event listener has the following format:
 
-	func(EditView, string)
+	func(EditView, string, string)
 
-where the second argument is the new text value
+where the second argument is the new text value the third argument is the previous text value.
+
+Additional event listeners can have the following format
+
+	func(EditView, newText string)
+	func(newText, oldText string)
+	func(newText string)
+	func(EditView)
+	func()
 
 You can get the current list of text change listeners using the function
 
-	func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string)
+	func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string, string)
 
 ## NumberPicker
 
@@ -3393,11 +3401,19 @@ The main event listener has the following format:
 
 	func(list DropDownList, newCurrent int)
 
-where the second argument is the index of the selected item
+where the second argument is the index of the selected item, the third argument is the previous index value.
+
+Additional event listeners can have the following format
+
+	func(list DropDownList, newCurrent int)
+	func(newCurrent, oldCurrent int)
+	func(newCurrent int)
+	func(list DropDownList)
+	func()
 
 You can get the current list of date change listeners using the function
 
-	func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int)
+	func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int, int)
 
 ## ProgressBar
 

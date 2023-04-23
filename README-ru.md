@@ -3107,13 +3107,21 @@ string свойство "edit-view-pattern" (константа EditViewPattern)
 Для отслеживания изменения текста используется событие "edit-text-changed" (константа
 EditTextChangedEvent). Основной слушатель события имеет следующий формат:
 
-	func(EditView, string)
+	func(EditView, string, string)
 
-где второй аргумент это новое значение текста
+где второй аргумент это новое значение текста, третий аргумент - предыдущее значение текста.
+
+Дополнительные слушатели события могут иметь следующий формат
+
+	func(EditView, newText string)
+	func(newText, oldText string)
+	func(newText string)
+	func(EditView)
+	func()
 
 Получить текущий список слушателей изменения текста можно с помощью функции
 
-	func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string)
+	func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string, string)
 
 ## NumberPicker
 
@@ -3425,13 +3433,21 @@ float32, float64, int, int8…int64, uint, uint8…uint64.
 Для отслеживания изменения свойства "current" используется событие "drop-down-event" (константа
 DropDownEvent). Основной слушатель события имеет следующий формат:
 
-	func(list DropDownList, newCurrent int)
+	func(list DropDownList, newCurrent, oldCurrent int)
 
-где второй аргумент это индекс выбранного элемента
+где второй аргумент это индекс выбранного элемента, третий аргумент - предыдущее значение индекса.
+
+Дополнительные слушатели события могут иметь следующий формат
+
+	func(list DropDownList, newCurrent int)
+	func(newCurrent, oldCurrent int)
+	func(newCurrent int)
+	func(list DropDownList)
+	func()
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int)
+	func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int, int)
 
 ## ProgressBar
 

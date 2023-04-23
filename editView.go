@@ -41,7 +41,7 @@ type EditView interface {
 
 type editViewData struct {
 	viewData
-	textChangeListeners []func(EditView, string)
+	textChangeListeners []func(EditView, string, string)
 }
 
 // NewEditView create new EditView object and return it
@@ -58,7 +58,7 @@ func newEditView(session Session) View {
 
 func (edit *editViewData) init(session Session) {
 	edit.viewData.init(session)
-	edit.textChangeListeners = []func(EditView, string){}
+	edit.textChangeListeners = []func(EditView, string, string){}
 	edit.tag = "EditView"
 }
 
@@ -125,7 +125,7 @@ func (edit *editViewData) remove(tag string) {
 
 	case EditTextChangedEvent:
 		if len(edit.textChangeListeners) > 0 {
-			edit.textChangeListeners = []func(EditView, string){}
+			edit.textChangeListeners = []func(EditView, string, string){}
 			edit.propertyChangedEvent(tag)
 		}
 
@@ -134,7 +134,7 @@ func (edit *editViewData) remove(tag string) {
 			oldText := GetText(edit)
 			delete(edit.properties, tag)
 			if oldText != "" {
-				edit.textChanged("")
+				edit.textChanged("", oldText)
 				if edit.created {
 					edit.session.callFunc("setInputValue", edit.htmlID(), "")
 				}
@@ -205,7 +205,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 		if text, ok := value.(string); ok {
 			edit.properties[Text] = text
 			if text = GetText(edit); oldText != text {
-				edit.textChanged(text)
+				edit.textChanged(text, oldText)
 				if edit.created {
 					if GetEditViewType(edit) == MultiLineText {
 						updateInnerHTML(edit.htmlID(), edit.Session())
@@ -328,12 +328,12 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case EditTextChangedEvent:
-		listeners, ok := valueToEventListeners[EditView, string](value)
+		listeners, ok := valueToEventWithOldListeners[EditView, string](value)
 		if !ok {
 			notCompatibleType(tag, value)
 			return false
 		} else if listeners == nil {
-			listeners = []func(EditView, string){}
+			listeners = []func(EditView, string, string){}
 		}
 		edit.textChangeListeners = listeners
 		edit.propertyChangedEvent(tag)
@@ -358,10 +358,11 @@ func (edit *editViewData) AppendText(text string) {
 	if GetEditViewType(edit) == MultiLineText {
 		if value := edit.getRaw(Text); value != nil {
 			if textValue, ok := value.(string); ok {
+				oldText := textValue
 				textValue += text
 				edit.properties[Text] = textValue
 				edit.session.callFunc("appendToInnerHTML", edit.htmlID(), text)
-				edit.textChanged(textValue)
+				edit.textChanged(textValue, oldText)
 				return
 			}
 		}
@@ -371,9 +372,9 @@ func (edit *editViewData) AppendText(text string) {
 	}
 }
 
-func (edit *editViewData) textChanged(newText string) {
+func (edit *editViewData) textChanged(newText, oldText string) {
 	for _, listener := range edit.textChangeListeners {
-		listener(edit, newText)
+		listener(edit, newText, oldText)
 	}
 	edit.propertyChangedEvent(Text)
 }
@@ -485,7 +486,7 @@ func (edit *editViewData) handleCommand(self View, command string, data DataObje
 		if text, ok := data.PropertyValue("text"); ok {
 			edit.properties[Text] = text
 			if text := GetText(edit); text != oldText {
-				edit.textChanged(text)
+				edit.textChanged(text, oldText)
 			}
 		}
 		return true
@@ -552,8 +553,8 @@ func IsSpellcheck(view View, subviewID ...string) bool {
 // GetTextChangedListeners returns the TextChangedListener list of an EditView or MultiLineEditView subview.
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string) {
-	return getEventListeners[EditView, string](view, subviewID, EditTextChangedEvent)
+func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string, string) {
+	return getEventWithOldListeners[EditView, string](view, subviewID, EditTextChangedEvent)
 }
 
 // GetEditViewType returns a value of the Type property of EditView.

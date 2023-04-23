@@ -21,7 +21,7 @@ type dropDownListData struct {
 	viewData
 	items            []string
 	disabledItems    []any
-	dropDownListener []func(DropDownList, int)
+	dropDownListener []func(DropDownList, int, int)
 }
 
 // NewDropDownList create new DropDownList object and return it
@@ -41,7 +41,7 @@ func (list *dropDownListData) init(session Session) {
 	list.tag = "DropDownList"
 	list.items = []string{}
 	list.disabledItems = []any{}
-	list.dropDownListener = []func(DropDownList, int){}
+	list.dropDownListener = []func(DropDownList, int, int){}
 }
 
 func (list *dropDownListData) String() string {
@@ -78,7 +78,7 @@ func (list *dropDownListData) remove(tag string) {
 
 	case DropDownEvent:
 		if len(list.dropDownListener) > 0 {
-			list.dropDownListener = []func(DropDownList, int){}
+			list.dropDownListener = []func(DropDownList, int, int){}
 			list.propertyChangedEvent(tag)
 		}
 
@@ -89,7 +89,7 @@ func (list *dropDownListData) remove(tag string) {
 			if list.created {
 				list.session.callFunc("selectDropDownListItem", list.htmlID(), 0)
 			}
-			list.onSelectedItemChanged(0)
+			list.onSelectedItemChanged(0, oldCurrent)
 		}
 
 	default:
@@ -116,12 +116,12 @@ func (list *dropDownListData) set(tag string, value any) bool {
 		return list.setDisabledItems(value)
 
 	case DropDownEvent:
-		listeners, ok := valueToEventListeners[DropDownList, int](value)
+		listeners, ok := valueToEventWithOldListeners[DropDownList, int](value)
 		if !ok {
 			notCompatibleType(tag, value)
 			return false
 		} else if listeners == nil {
-			listeners = []func(DropDownList, int){}
+			listeners = []func(DropDownList, int, int){}
 		}
 		list.dropDownListener = listeners
 		list.propertyChangedEvent(tag)
@@ -137,7 +137,7 @@ func (list *dropDownListData) set(tag string, value any) bool {
 			if list.created {
 				list.session.callFunc("selectDropDownListItem", list.htmlID(), current)
 			}
-			list.onSelectedItemChanged(current)
+			list.onSelectedItemChanged(current, oldCurrent)
 		}
 		return true
 	}
@@ -377,9 +377,9 @@ func (list *dropDownListData) htmlDisabledProperties(self View, buffer *strings.
 	}
 }
 
-func (list *dropDownListData) onSelectedItemChanged(number int) {
+func (list *dropDownListData) onSelectedItemChanged(number, old int) {
 	for _, listener := range list.dropDownListener {
-		listener(list, number)
+		listener(list, number, old)
 	}
 	list.propertyChangedEvent(Current)
 }
@@ -390,8 +390,9 @@ func (list *dropDownListData) handleCommand(self View, command string, data Data
 		if text, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(text); err == nil {
 				if GetCurrent(list) != number && number >= 0 && number < len(list.items) {
+					old := GetCurrent(list)
 					list.properties[Current] = number
-					list.onSelectedItemChanged(number)
+					list.onSelectedItemChanged(number, old)
 				}
 			} else {
 				ErrorLog(err.Error())
@@ -406,8 +407,8 @@ func (list *dropDownListData) handleCommand(self View, command string, data Data
 
 // GetDropDownListeners returns the "drop-down-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int) {
-	return getEventListeners[DropDownList, int](view, subviewID, DropDownEvent)
+func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int, int) {
+	return getEventWithOldListeners[DropDownList, int](view, subviewID, DropDownEvent)
 }
 
 // GetDropDownItems return the DropDownList items list.

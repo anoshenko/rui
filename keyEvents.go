@@ -193,6 +193,185 @@ func valueToEventListeners[V View, E any](value any) ([]func(V, E), bool) {
 	return nil, false
 }
 
+func valueToEventWithOldListeners[V View, E any](value any) ([]func(V, E, E), bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case func(V, E, E):
+		return []func(V, E, E){value}, true
+
+	case func(V, E):
+		fn := func(v V, val, _ E) {
+			value(v, val)
+		}
+		return []func(V, E, E){fn}, true
+
+	case func(E, E):
+		fn := func(_ V, val, old E) {
+			value(val, old)
+		}
+		return []func(V, E, E){fn}, true
+
+	case func(E):
+		fn := func(_ V, val, _ E) {
+			value(val)
+		}
+		return []func(V, E, E){fn}, true
+
+	case func(V):
+		fn := func(v V, _, _ E) {
+			value(v)
+		}
+		return []func(V, E, E){fn}, true
+
+	case func():
+		fn := func(V, E, E) {
+			value()
+		}
+		return []func(V, E, E){fn}, true
+
+	case []func(V, E, E):
+		if len(value) == 0 {
+			return nil, true
+		}
+		for _, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+		}
+		return value, true
+
+	case []func(V, E):
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(V, E, E), count)
+		for i, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+			listeners[i] = func(view V, val, _ E) {
+				fn(view, val)
+			}
+		}
+		return listeners, true
+
+	case []func(E):
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(V, E, E), count)
+		for i, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+			listeners[i] = func(_ V, val, _ E) {
+				fn(val)
+			}
+		}
+		return listeners, true
+
+	case []func(E, E):
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(V, E, E), count)
+		for i, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+			listeners[i] = func(_ V, val, old E) {
+				fn(val, old)
+			}
+		}
+		return listeners, true
+
+	case []func(V):
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(V, E, E), count)
+		for i, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+			listeners[i] = func(view V, _, _ E) {
+				fn(view)
+			}
+		}
+		return listeners, true
+
+	case []func():
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(V, E, E), count)
+		for i, fn := range value {
+			if fn == nil {
+				return nil, false
+			}
+			listeners[i] = func(V, E, E) {
+				fn()
+			}
+		}
+		return listeners, true
+
+	case []any:
+		count := len(value)
+		if count == 0 {
+			return nil, true
+		}
+		listeners := make([]func(V, E, E), count)
+		for i, v := range value {
+			if v == nil {
+				return nil, false
+			}
+			switch fn := v.(type) {
+			case func(V, E, E):
+				listeners[i] = fn
+
+			case func(V, E):
+				listeners[i] = func(view V, val, _ E) {
+					fn(view, val)
+				}
+
+			case func(E, E):
+				listeners[i] = func(_ V, val, old E) {
+					fn(val, old)
+				}
+
+			case func(E):
+				listeners[i] = func(_ V, val, _ E) {
+					fn(val)
+				}
+
+			case func(V):
+				listeners[i] = func(view V, _, _ E) {
+					fn(view)
+				}
+
+			case func():
+				listeners[i] = func(V, E, E) {
+					fn()
+				}
+
+			default:
+				return nil, false
+			}
+		}
+		return listeners, true
+	}
+
+	return nil, false
+}
+
 var keyEvents = map[string]struct{ jsEvent, jsFunc string }{
 	KeyDownEvent: {jsEvent: "onkeydown", jsFunc: "keyDownEvent"},
 	KeyUpEvent:   {jsEvent: "onkeyup", jsFunc: "keyUpEvent"},
@@ -227,6 +406,19 @@ func (view *viewData) removeKeyListener(tag string) {
 	}
 }
 
+func getEventWithOldListeners[V View, E any](view View, subviewID []string, tag string) []func(V, E, E) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+	if view != nil {
+		if value := view.Get(tag); value != nil {
+			if result, ok := value.([]func(V, E, E)); ok {
+				return result
+			}
+		}
+	}
+	return []func(V, E, E){}
+}
 func getEventListeners[V View, E any](view View, subviewID []string, tag string) []func(V, E) {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
