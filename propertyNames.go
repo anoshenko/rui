@@ -277,6 +277,10 @@ const (
 	// The "outline-width" SizeUnit property sets the width of an view's outline.
 	OutlineWidth = "outline-width"
 
+	// OutlineWidth is the constant for the "outline-offset" property tag.
+	// The "outline-offset" SizeUnit property sets the amount of space between an outline and the edge or border of an element..
+	OutlineOffset = "outline-offset"
+
 	// Shadow is the constant for the "shadow" property tag.
 	// The "shadow" property adds shadow effects around a view's frame. A shadow is described
 	// by X and Y offsets relative to the element, blur and spread radius, and color.

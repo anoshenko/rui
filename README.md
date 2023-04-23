@@ -745,7 +745,7 @@ If all the lines of the frame are the same, then the following properties can be
 |-----------|----------|----------|---------------------|
 | "style"   | Style    | int      | Border line style   |
 | "width"   | Width    | SizeUnit | Border line width   |
-| "color"   | Color    | Color    | Border line color   |
+| "color"   | ColorTag | Color    | Border line color   |
 
 Example
 
@@ -835,6 +835,48 @@ equivalent to
 		rui.Width: rui.Px(1),
 		rui.ColorProperty: rui.Black,
 	}))
+
+### "outline" and "outline-offset" properties
+
+The "outline" property defines the border outside the View.
+A frame line is described by three attributes: line style, thickness, and color.
+
+The "outline" property is similar to the "border" property. The three main differences between an "outline" frame and a "border" frame are:
+
+1) the "border" frame is always located inside the boundaries of the View, and the "outline" frame can be located both inside the View and outside it;
+
+2) all sides of the "outline" frame are the same, while the sides of the "border" frame can have different color, style and thickness.
+
+3) "border" thickness is added to "padding" and "outline" thickness does not affect "padding".
+
+The value of the "border" property is stored as an OutlineProperty interface that implements the Properties interface (see above).
+OutlineProperty can contain the following properties:
+
+| Property  | Constant | Type     | Description         |
+|-----------|----------|----------|---------------------|
+| "style"   | Style    | int      | Border line style   |
+| "width"   | Width    | SizeUnit | Border line width   |
+| "color"   | ColorTag | Color    | Border line color   |
+
+Line style can take the following values:
+
+| Value | Constant   | Name     | Description         |
+|:-----:|------------|----------|---------------------|
+| 0     | NoneLine   | "none"   | No frame            |
+| 1     | SolidLine  | "solid"  | Solid line          |
+| 2     | DashedLine | "dashed" | Dashed line         |
+| 3     | DottedLine | "dotted" | Dotted line         |
+| 4     | DoubleLine | "double" | Double solid line   |
+
+All other style values are ignored.
+
+The NewOutline function is used to create the OutlineProperty interface.
+
+By default, the inner border of the "outline" border is the same as the border of the View (i.e. the border is drawn around the View).
+To change this behavior, use the "outline-offset" SizeUnit property (OutlineOffset constant).
+This property defines the distance between the inner border of the frame and the border of the View.
+A positive value moves the frame away from the View's boundaries, while a negative value forces the frame to be inside the View
+(in this case, the frame is drawn on top of the contents of the View).
 
 ### "radius" property
 

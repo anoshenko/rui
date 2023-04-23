@@ -212,7 +212,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	for _, tag := range []string{
 		Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight, Left, Right, Top, Bottom,
 		TextSize, TextIndent, LetterSpacing, WordSpacing, LineHeight, TextLineThickness,
-		ListRowGap, ListColumnGap, GridRowGap, GridColumnGap, ColumnGap, ColumnWidth} {
+		ListRowGap, ListColumnGap, GridRowGap, GridColumnGap, ColumnGap, ColumnWidth, OutlineOffset} {
 
 		if size, ok := sizeProperty(style, tag, session); ok && size.Type != Auto {
 			cssTag, ok := sizeProperties[tag]

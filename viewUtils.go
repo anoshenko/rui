@@ -321,6 +321,12 @@ func GetOutline(view View, subviewID ...string) ViewOutline {
 	return ViewOutline{Style: NoneLine, Width: AutoSize(), Color: 0}
 }
 
+// GetOutlineOffset returns the subview outline offset.
+// If the second argument (subviewID) is not specified or it is "" then a offset of the first argument (view) is returned
+func GetOutlineOffset(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, OutlineOffset, false)
+}
+
 // GetViewShadows returns shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
 func GetViewShadows(view View, subviewID ...string) []ViewShadow {

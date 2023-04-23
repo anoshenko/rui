@@ -136,6 +136,7 @@ var sizeProperties = map[string]string{
 	BorderTopWidth:     BorderTopWidth,
 	BorderBottomWidth:  BorderBottomWidth,
 	OutlineWidth:       OutlineWidth,
+	OutlineOffset:      OutlineOffset,
 	XOffset:            XOffset,
 	YOffset:            YOffset,
 	BlurRadius:         BlurRadius,
