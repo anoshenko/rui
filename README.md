@@ -3147,9 +3147,9 @@ where the second argument is the new value, the third argument is the previous v
 
 Additional event listeners can have the following format
 
-	func(picker NumberPicker, newValue string)
-	func(newValue, oldValue string)
-	func(newValue string)
+	func(picker NumberPicker, newValue float64)
+	func(newValue, oldValue float64)
+	func(newValue float64)
 	func(picker NumberPicker)
 	func()
 
@@ -3196,13 +3196,21 @@ You can read the values of these properties using the functions:
 The "date-changed" event (DateChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
 
-	func(picker DatePicker, newDate time.Time)
+	func(picker DatePicker, newDate, oldDate time.Time)
 
-where the second argument is the new date value
+where the second argument is the new date value, the third argument is the previous date value.
+
+Additional event listeners can have the following format
+
+	func(picker DatePicker, newDate time.Time)
+	func(newDate, oldDate time.Time)
+	func(newDate time.Time)
+	func(picker DatePicker)
+	func()
 
 You can get the current list of date change listeners using the function
 
-	func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time)
+	func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time, time.Time)
 
 ## TimePicker
 

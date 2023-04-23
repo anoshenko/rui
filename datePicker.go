@@ -22,7 +22,7 @@ type DatePicker interface {
 
 type datePickerData struct {
 	viewData
-	dateChangedListeners []func(DatePicker, time.Time)
+	dateChangedListeners []func(DatePicker, time.Time, time.Time)
 }
 
 // NewDatePicker create new DatePicker object and return it
@@ -40,7 +40,7 @@ func newDatePicker(session Session) View {
 func (picker *datePickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "DatePicker"
-	picker.dateChangedListeners = []func(DatePicker, time.Time){}
+	picker.dateChangedListeners = []func(DatePicker, time.Time, time.Time){}
 }
 
 func (picker *datePickerData) String() string {
@@ -69,7 +69,7 @@ func (picker *datePickerData) remove(tag string) {
 	switch tag {
 	case DateChangedEvent:
 		if len(picker.dateChangedListeners) > 0 {
-			picker.dateChangedListeners = []func(DatePicker, time.Time){}
+			picker.dateChangedListeners = []func(DatePicker, time.Time, time.Time){}
 			picker.propertyChangedEvent(tag)
 		}
 		return
@@ -94,13 +94,14 @@ func (picker *datePickerData) remove(tag string) {
 
 	case DatePickerValue:
 		if _, ok := picker.properties[DatePickerValue]; ok {
+			oldDate := GetDatePickerValue(picker)
 			delete(picker.properties, DatePickerValue)
 			date := GetDatePickerValue(picker)
 			if picker.created {
 				picker.session.callFunc("setInputValue", picker.htmlID(), date.Format(dateFormat))
 			}
 			for _, listener := range picker.dateChangedListeners {
-				listener(picker, date)
+				listener(picker, date, oldDate)
 			}
 		} else {
 			return
@@ -226,7 +227,7 @@ func (picker *datePickerData) set(tag string, value any) bool {
 					picker.session.callFunc("setInputValue", picker.htmlID(), date.Format(dateFormat))
 				}
 				for _, listener := range picker.dateChangedListeners {
-					listener(picker, date)
+					listener(picker, date, oldDate)
 				}
 				picker.propertyChangedEvent(tag)
 			}
@@ -234,12 +235,12 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		}
 
 	case DateChangedEvent:
-		listeners, ok := valueToEventListeners[DatePicker, time.Time](value)
+		listeners, ok := valueToEventWithOldListeners[DatePicker, time.Time](value)
 		if !ok {
 			notCompatibleType(tag, value)
 			return false
 		} else if listeners == nil {
-			listeners = []func(DatePicker, time.Time){}
+			listeners = []func(DatePicker, time.Time, time.Time){}
 		}
 		picker.dateChangedListeners = listeners
 		picker.propertyChangedEvent(tag)
@@ -318,7 +319,7 @@ func (picker *datePickerData) handleCommand(self View, command string, data Data
 				picker.properties[DatePickerValue] = value
 				if value != oldValue {
 					for _, listener := range picker.dateChangedListeners {
-						listener(picker, value)
+						listener(picker, value, oldValue)
 					}
 				}
 			}
@@ -410,6 +411,6 @@ func GetDatePickerValue(view View, subviewID ...string) time.Time {
 // GetDateChangedListeners returns the DateChangedListener list of an DatePicker subview.
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time) {
-	return getEventListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
+func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time, time.Time) {
+	return getEventWithOldListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
 }

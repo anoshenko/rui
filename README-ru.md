@@ -3184,9 +3184,9 @@ NumberChangedEvent).  Основной слушатель события име�
 
 Дополнительные слушатели события могут иметь следующий формат
 
-	func(picker NumberPicker, newValue string)
-	func(newValue, oldValue string)
-	func(newValue string)
+	func(picker NumberPicker, newValue float64)
+	func(newValue, oldValue float64)
+	func(newValue float64)
 	func(picker NumberPicker)
 	func()
 
@@ -3232,13 +3232,21 @@ NumberChangedEvent).  Основной слушатель события име�
 Для отслеживания изменения вводимого значения используется событие "date-changed" (константа
 DateChangedEvent).  Основной слушатель события имеет следующий формат:
 
-	func(picker DatePicker, newDate time.Time)
+	func(picker DatePicker, newDate, oldDate time.Time)
 
-где второй аргумент это новое значение даты
+где второй аргумент это новое значение даты, третий аргумент - предыдущее значение даты.
+
+Дополнительные слушатели события могут иметь следующий формат
+
+	func(picker DatePicker, newDate time.Time)
+	func(newDate, oldDate time.Time)
+	func(newDate time.Time)
+	func(picker DatePicker)
+	func()
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time)
+	func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time, time.Time)
 
 ## TimePicker
 
