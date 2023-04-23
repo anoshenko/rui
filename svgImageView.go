@@ -3,6 +3,7 @@ package rui
 import (
 	"io"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -107,8 +108,21 @@ func (imageView *svgImageViewData) htmlTag() string {
 func (imageView *svgImageViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value := imageView.getRaw(Content); value != nil {
 		if content, ok := value.(string); ok && content != "" {
-			if image, ok := resources.images[content]; ok && image.fs != nil {
-				if data, err := image.fs.ReadFile(image.path); err == nil {
+			if strings.HasPrefix(content, "@") {
+				if name, ok := imageView.session.ImageConstant(content[1:]); ok {
+					content = name
+				}
+			}
+
+			if image, ok := resources.images[content]; ok {
+				if image.fs != nil {
+					if data, err := image.fs.ReadFile(image.path); err == nil {
+						buffer.WriteString(string(data))
+						return
+					} else {
+						DebugLog(err.Error())
+					}
+				} else if data, err := os.ReadFile(image.path); err == nil {
 					buffer.WriteString(string(data))
 					return
 				} else {
