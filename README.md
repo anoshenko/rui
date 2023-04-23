@@ -767,9 +767,9 @@ Example
 equivalent to
 
 	view.Set(rui.Border, NewBorder(rui.Params{
-		rui.Style: rui.SolidBorder,
-		rui.Width: rui.Px(1),
-		rui.ColorProperty: rui.Black,
+		rui.Style   : rui.SolidBorder,
+		rui.Width   : rui.Px(1),
+		rui.ColorTag: rui.Black,
 	}))
 
 The BorderProperty interface can be converted to a ViewBorders structure using the Border function.
@@ -831,9 +831,9 @@ Example
 equivalent to
 
 	view.Set(rui.Border, NewBorder(rui.Params{
-		rui.Style: rui.SolidBorder,
-		rui.Width: rui.Px(1),
-		rui.ColorProperty: rui.Black,
+		rui.Style   : rui.SolidBorder,
+		rui.Width   : rui.Px(1),
+		rui.ColorTag: rui.Black,
 	}))
 
 ### "outline" and "outline-offset" properties
@@ -1012,7 +1012,7 @@ The shadow has the following properties:
 
 | Property        | Constant      | Type     | Description                                                           |
 |-----------------|---------------|----------|-----------------------------------------------------------------------|
-| "color"         | ColorProperty | Color    | Shadow color                                                          |
+| "color"         | ColorTag      | Color    | Shadow color                                                          |
 | "inset"         | Inset         | bool     | true - the shadow inside the View, false - outside                    |
 | "x-offset"      | XOffset       | SizeUnit | Offset the shadow along the X axis                                    |
 | "y-offset"      | YOffset       | SizeUnit | Offset the shadow along the Y axis                                    |
@@ -1031,9 +1031,9 @@ The NewShadowWithParams function is used when constants must be used as paramete
 For example:
 
 	shadow := NewShadowWithParams(rui.Params{
-		rui.ColorProperty : "@shadowColor",
-		rui.BlurRadius : 8.0,
-		rui.Dilation : 16.0,
+		rui.ColorTag  : "@shadowColor",
+		rui.BlurRadius: 8.0,
+		rui.Dilation  : 16.0,
 	})
 
 ViewShadow, ViewShadow array, and ViewShadow textual representation can be assigned as a value to the "shadow" property.
@@ -1652,8 +1652,8 @@ To create a ViewShadow for the text shadow, the following functions are used:
 The NewShadowWithParams function is used when constants must be used as parameters. For example:
 
 	shadow := NewShadowWithParams(rui.Params{
-		rui.ColorProperty : "@shadowColor",
-		rui.BlurRadius    : 8.0,
+		rui.ColorTag  : "@shadowColor",
+		rui.BlurRadius: 8.0,
 	})
 
 ViewShadow, ViewShadow array, ViewShadow textual representation can be assigned as a value to the "text-shadow" property (see above, section "The 'shadow' property").
@@ -2529,11 +2529,11 @@ The separator line is described by three attributes: line style, thickness, and 
 The value of the "column-separator" property is stored as the ColumnSeparatorProperty interface, 
 which implements the Properties interface (see above). ColumnSeparatorProperty can contain the following properties:
 
-| Property | Constant      | Type     | Description    |
-|----------|---------------|----------|----------------|
-| "style"  | Style         | int      | Line style     |
-| "width"  | Width         | SizeUnit | Line thickness |
-| "color"  | ColorProperty | Color    | Line color     |
+| Property | Constant  | Type     | Description    |
+|----------|-----------|----------|----------------|
+| "style"  | Style     | int      | Line style     |
+| "width"  | Width     | SizeUnit | Line thickness |
+| "color"  | ColorTag  | Color    | Line color     |
 
 Line style can take the following values:
 
@@ -2587,9 +2587,9 @@ For example
 equivalent to
 
 	view.Set(rui.ColumnSeparator, ColumnSeparatorProperty(rui.Params{
-		rui.Style: rui.SolidBorder,
-		rui.Width: rui.Px(1),
-		rui.ColorProperty: rui.Black,
+		rui.Style   : rui.SolidBorder,
+		rui.Width   : rui.Px(1),
+		rui.ColorTag: rui.Black,
 	}))
 
 ### "column-fill" property
@@ -3141,13 +3141,21 @@ You can read the values of these properties using the functions:
 The "number-changed" event (NumberChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
 
-	func(picker NumberPicker, newValue float64)
+	func(picker NumberPicker, newValue, oldValue float64)
 
-where the second argument is the new value
+where the second argument is the new value, the third argument is the previous value.
+
+Additional event listeners can have the following format
+
+	func(picker NumberPicker, newValue string)
+	func(newValue, oldValue string)
+	func(newValue string)
+	func(picker NumberPicker)
+	func()
 
 You can get the current list of value change listeners using the function
 
-	func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64)
+	func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64)
 
 ## DatePicker
 

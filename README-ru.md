@@ -3178,13 +3178,21 @@ NumberPicker может работать в двух режимах: редак�
 Для отслеживания изменения вводимого значения используется событие "number-changed" (константа
 NumberChangedEvent).  Основной слушатель события имеет следующий формат:
 
-	func(picker NumberPicker, newValue float64)
+	func(picker NumberPicker, newValue, oldValue float64)
 
-где второй аргумент это новое значение
+где второй аргумент это новое значение, третий аргумент - предыдущее значение.
+
+Дополнительные слушатели события могут иметь следующий формат
+
+	func(picker NumberPicker, newValue string)
+	func(newValue, oldValue string)
+	func(newValue string)
+	func(picker NumberPicker)
+	func()
 
 Получить текущий список слушателей изменения значения можно с помощью функции
 
-	func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64)
+	func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64)
 
 ## DatePicker
 

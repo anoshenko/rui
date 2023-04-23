@@ -29,7 +29,7 @@ type NumberPicker interface {
 
 type numberPickerData struct {
 	viewData
-	numberChangedListeners []func(NumberPicker, float64)
+	numberChangedListeners []func(NumberPicker, float64, float64)
 }
 
 // NewNumberPicker create new NumberPicker object and return it
@@ -47,7 +47,7 @@ func newNumberPicker(session Session) View {
 func (picker *numberPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "NumberPicker"
-	picker.numberChangedListeners = []func(NumberPicker, float64){}
+	picker.numberChangedListeners = []func(NumberPicker, float64, float64){}
 }
 
 func (picker *numberPickerData) String() string {
@@ -76,7 +76,20 @@ func (picker *numberPickerData) remove(tag string) {
 	switch tag {
 	case NumberChangedEvent:
 		if len(picker.numberChangedListeners) > 0 {
-			picker.numberChangedListeners = []func(NumberPicker, float64){}
+			picker.numberChangedListeners = []func(NumberPicker, float64, float64){}
+			picker.propertyChangedEvent(tag)
+		}
+
+	case NumberPickerValue:
+		oldValue := GetNumberPickerValue(picker)
+		picker.viewData.remove(tag)
+		if oldValue != 0 {
+			if picker.created {
+				picker.session.callFunc("setInputValue", picker.htmlID(), 0)
+			}
+			for _, listener := range picker.numberChangedListeners {
+				listener(picker, 0, oldValue)
+			}
 			picker.propertyChangedEvent(tag)
 		}
 
@@ -98,12 +111,12 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 
 	switch tag {
 	case NumberChangedEvent:
-		listeners, ok := valueToEventListeners[NumberPicker, float64](value)
+		listeners, ok := valueToEventWithOldListeners[NumberPicker, float64](value)
 		if !ok {
 			notCompatibleType(tag, value)
 			return false
 		} else if listeners == nil {
-			listeners = []func(NumberPicker, float64){}
+			listeners = []func(NumberPicker, float64, float64){}
 		}
 		picker.numberChangedListeners = listeners
 		picker.propertyChangedEvent(tag)
@@ -119,7 +132,7 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 					picker.session.callFunc("setInputValue", picker.htmlID(), newValue)
 				}
 				for _, listener := range picker.numberChangedListeners {
-					listener(picker, f)
+					listener(picker, f, oldValue)
 				}
 				picker.propertyChangedEvent(tag)
 			}
@@ -158,13 +171,6 @@ func (picker *numberPickerData) propertyChanged(tag string) {
 				picker.session.updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32))
 			} else {
 				picker.session.updateProperty(picker.htmlID(), Step, "any")
-			}
-
-		case NumberPickerValue:
-			value := GetNumberPickerValue(picker)
-			picker.session.callFunc("setInputValue", picker.htmlID(), value)
-			for _, listener := range picker.numberChangedListeners {
-				listener(picker, value)
 			}
 		}
 	}
@@ -242,7 +248,7 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 				picker.properties[NumberPickerValue] = text
 				if value != oldValue {
 					for _, listener := range picker.numberChangedListeners {
-						listener(picker, value)
+						listener(picker, value, oldValue)
 					}
 				}
 			}
@@ -323,6 +329,6 @@ func GetNumberPickerValue(view View, subviewID ...string) float64 {
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64) {
-	return getEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
+func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64) {
+	return getEventWithOldListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
 }
