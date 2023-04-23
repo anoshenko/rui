@@ -3073,7 +3073,7 @@ The main event listener has the following format:
 
 	func(EditView, string, string)
 
-where the second argument is the new text value the third argument is the previous text value.
+where the second argument is the new text value, the third argument is the previous text value.
 
 Additional event listeners can have the following format
 
@@ -3265,13 +3265,21 @@ The value of the property "color-picker-value" can also be read using the functi
 The "color-changed" event (ColorChangedEvent constant) is used to track the change in the selected color. 
 The main event listener has the following format:
 
-	func(picker ColorPicker, newColor Color)
+	func(picker ColorPicker, newColor, oldColor Color)
 
-where the second argument is the new color value
+where the second argument is the new color value, the third argument is the previous color value.
+
+Additional event listeners can have the following format
+
+	func(picker ColorPicker, newColor string)
+	func(newColor, oldColor string)
+	func(newColor string)
+	func(picker ColorPicker)
+	func()
 
 You can get the current list of date change listeners using the function
 
-	func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color)
+	func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color, Color)
 
 ## FilePicker
 

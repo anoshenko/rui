@@ -3300,13 +3300,21 @@ TimeChangedEvent).  Основной слушатель события имее�
 Для отслеживания изменения выбранного цвета используется событие "color-changed" (константа
 ColorChangedEvent).  Основной слушатель события имеет следующий формат:
 
-	func(picker ColorPicker, newColor Color)
+	func(picker ColorPicker, newColor, oldColor Color)
 
-где второй аргумент это новое значение цвета
+где второй аргумент это новое значение цвета, третий аргумент - предыдущее значение цвета.
+
+Дополнительные слушатели события могут иметь следующий формат
+
+	func(picker ColorPicker, newColor string)
+	func(newColor, oldColor string)
+	func(newColor string)
+	func(picker ColorPicker)
+	func()
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color)
+	func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color, Color)
 
 ## FilePicker
 
