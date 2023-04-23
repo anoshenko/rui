@@ -3286,13 +3286,21 @@ DateChangedEvent).  Основной слушатель события имее�
 Для отслеживания изменения вводимого значения используется событие "time-changed" (константа
 TimeChangedEvent).  Основной слушатель события имеет следующий формат:
 
-	func(picker TimePicker, newTime time.Time)
+	func(picker TimePicker, newTime, oldTime time.Time)
 
-где второй аргумент это новое значение времени
+где второй аргумент это новое значение времени, третий аргумент - предыдущее значение времени.
+
+Дополнительные слушатели события могут иметь следующий формат
+
+	func(picker TimePicker, newTime time.Time)
+	func(newTime, oldTime time.Time)
+	func(newTime time.Time)
+	func(picker TimePicker)
+	func()
 
 Получить текущий список слушателей изменения даты можно с помощью функции
 
-	func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time)
+	func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time, time.Time)
 
 ## ColorPicker
 

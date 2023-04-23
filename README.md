@@ -3251,13 +3251,21 @@ You can read the values of these properties using the functions:
 The "time-changed" event (TimeChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
 
-	func(picker TimePicker, newTime time.Time)
+	func(picker TimePicker, newTime, oldTime time.Time)
 
-where the second argument is the new time value
+where the second argument is the new time value, the third argument is the previous time value.
+
+Additional event listeners can have the following format
+
+	func(picker TimePicker, newTime time.Time)
+	func(newTime, oldTime time.Time)
+	func(newTime time.Time)
+	func(picker TimePicker)
+	func()
 
 You can get the current list of date change listeners using the function
 
-	func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time)
+	func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time, time.Time)
 
 ## ColorPicker
 
