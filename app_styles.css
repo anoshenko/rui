@@ -112,7 +112,7 @@ ul:focus {
 }
 
 .ruiImageView {
-  display: grid;
+  display: block;
 }
 
 .ruiSvgImageView {

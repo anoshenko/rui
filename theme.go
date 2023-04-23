@@ -525,18 +525,37 @@ func (theme *theme) cssText(session Session) string {
 	var builder cssStyleBuilder
 	builder.init()
 
-	for tag, style := range theme.styles {
-		builder.startStyle(tag)
-		style.cssViewStyle(&builder, session)
-		builder.endStyle()
+	styleList := func(styles map[string]ViewStyle) []string {
+		ruiStyles := []string{}
+		customStyles := []string{}
+		for tag, _ := range styles {
+			if strings.HasPrefix(tag, "rui") {
+				ruiStyles = append(ruiStyles, tag)
+			} else {
+				customStyles = append(customStyles, tag)
+			}
+		}
+		sort.Strings(ruiStyles)
+		sort.Strings(customStyles)
+		return append(ruiStyles, customStyles...)
+	}
+
+	for _, tag := range styleList(theme.styles) {
+		if style := theme.styles[tag]; style != nil {
+			builder.startStyle(tag)
+			style.cssViewStyle(&builder, session)
+			builder.endStyle()
+		}
 	}
 
 	for _, media := range theme.mediaStyles {
 		builder.startMedia(media.cssText())
-		for tag, style := range media.styles {
-			builder.startStyle(tag)
-			style.cssViewStyle(&builder, session)
-			builder.endStyle()
+		for _, tag := range styleList(media.styles) {
+			if style := media.styles[tag]; style != nil {
+				builder.startStyle(tag)
+				style.cssViewStyle(&builder, session)
+				builder.endStyle()
+			}
 		}
 		builder.endMedia()
 	}

@@ -67,8 +67,7 @@ func newImageView(session Session) View {
 func (imageView *imageViewData) init(session Session) {
 	imageView.viewData.init(session)
 	imageView.tag = "ImageView"
-	//imageView.systemClass = "ruiImageView"
-
+	imageView.systemClass = "ruiImageView"
 }
 
 func (imageView *imageViewData) String() string {
