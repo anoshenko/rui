@@ -17,6 +17,8 @@ type ViewsContainer interface {
 	Insert(view View, index int)
 	// Remove removes a view from the list of a view children and return it
 	RemoveView(index int) View
+	// ViewIndex returns the index of view, -1 overwise
+	ViewIndex(view View) int
 }
 
 type viewsContainerData struct {
@@ -115,6 +117,15 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	updateInnerHTML(container.htmlID(), container.session)
 	container.propertyChangedEvent(Content)
 	return view
+}
+
+func (container *viewsContainerData) ViewIndex(view View) int {
+	for index, v := range container.views {
+		if v == view {
+			return index
+		}
+	}
+	return -1
 }
 
 func (container *viewsContainerData) cssStyle(self View, builder cssBuilder) {

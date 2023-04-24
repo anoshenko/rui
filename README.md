@@ -2270,6 +2270,15 @@ If index is less than 0, then to the beginning of the list.
 This function removes the View from the given position and returns it. 
 If index points outside the bounds of the list, then nothing is removed, and the function returns nil.
 
+	ViewIndex(view View) int
+
+This function returns the index of the child View, or -1 if there is no such View in the container.
+It is often used in conjunction with RemoveView if the index of the child View is unknown:
+
+	if index := container.ViewIndex(view); index >= 0 {
+		container.RemoveView(index)
+	}
+
 ## ListLayout
 
 ListLayout is a container that implements the ViewsContainer interface. To create it, use the function

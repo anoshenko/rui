@@ -243,8 +243,17 @@ func (customView *CustomViewData) RemoveView(index int) View {
 			return container.RemoveView(index)
 		}
 	}
-
 	return nil
+}
+
+// Remove removes a view from the list of a view children and return it
+func (customView *CustomViewData) ViewIndex(view View) int {
+	if customView.superView != nil {
+		if container, ok := customView.superView.(ViewsContainer); ok {
+			return container.ViewIndex(view)
+		}
+	}
+	return -1
 }
 
 func (customView *CustomViewData) String() string {
