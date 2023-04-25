@@ -1453,6 +1453,12 @@ It also helps to voice the interface to systems for people with disabilities:
 | 18    | "blockquote"     | Quote. Changes the style of the text                |
 | 19    | "code"           | Program code. Changes the style of the text         |
 
+### "tooltip" property
+
+The "tooltip" string property (Tooltip constant) specifies the tooltip text.
+Tooltip pops up when hovering the mouse cursor.
+You can use html tags when formatting the tooltip text.
+
 ### Text properties
 
 All properties listed in this section are inherited, i.e. the property will apply 
@@ -5542,6 +5548,9 @@ System color constants that you can override:
 | ruiPopupTextColor          | Popup text color                                    |
 | ruiPopupTitleColor         | Popup title background color                        |
 | ruiPopupTitleTextColor     | Popup Title Text Color                              |
+| ruiTooltipBackground       | Tooltip background color                            |
+| ruiTooltipTextColor        | Tooltip text color                                  |
+| ruiTooltipShadowColor      | Tooltip shadow color                                |
 
 Constants that you can override:
 

@@ -184,13 +184,18 @@ func (view *viewData) removeMouseListener(tag string) {
 	}
 }
 
-func mouseEventsHtml(view View, buffer *strings.Builder) {
+func mouseEventsHtml(view View, buffer *strings.Builder, hasTooltip bool) {
 	for tag, js := range mouseEvents {
 		if value := view.getRaw(tag); value != nil {
 			if listeners, ok := value.([]func(View, MouseEvent)); ok && len(listeners) > 0 {
 				buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
 			}
 		}
+	}
+
+	if hasTooltip {
+		buffer.WriteString(`onmouseenter="mouseEnterEvent(this, event)" `)
+		buffer.WriteString(`onmouseleave="mouseLeaveEvent(this, event)" `)
 	}
 }
 

@@ -634,6 +634,16 @@ func viewPropertyChanged(view *viewData, tag string) {
 			session.updateCSSProperty(htmlID, `column-span`, `none`)
 		}
 		return
+
+	case Tooltip:
+		if tooltip := GetTooltip(view); tooltip == "" {
+			session.removeProperty(htmlID, "data-tooltip")
+		} else {
+			session.updateProperty(htmlID, "data-tooltip", tooltip)
+			session.updateProperty(htmlID, "onmouseenter", "mouseEnterEvent(this, event)")
+			session.updateProperty(htmlID, "onmouseleave", "mouseLeaveEvent(this, event)")
+		}
+		return
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {
@@ -796,10 +806,18 @@ func viewHTML(view View, buffer *strings.Builder) {
 		}
 	}
 
+	hasTooltip := false
+	if tooltip := GetTooltip(view); tooltip != "" {
+		buffer.WriteString(`data-tooltip=" `)
+		buffer.WriteString(tooltip)
+		buffer.WriteString(`" `)
+		hasTooltip = true
+	}
+
 	buffer.WriteString(`onscroll="scrollEvent(this, event)" `)
 
 	keyEventsHtml(view, buffer)
-	mouseEventsHtml(view, buffer)
+	mouseEventsHtml(view, buffer, hasTooltip)
 	pointerEventsHtml(view, buffer)
 	touchEventsHtml(view, buffer)
 	focusEventsHtml(view, buffer)

@@ -945,3 +945,21 @@ func GetMixBlendMode(view View, subviewID ...string) int {
 func GetBackgroundBlendMode(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, BackgroundBlendMode, BlendNormal, true)
 }
+
+// GetTooltip returns a tooltip text of the subview.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTooltip(view View, subviewID ...string) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	if view != nil {
+		if value := view.Get(Tooltip); value != nil {
+			if text, ok := value.(string); ok {
+				return text
+			}
+		}
+	}
+
+	return ""
+}

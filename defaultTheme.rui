@@ -23,6 +23,9 @@ theme {
 		ruiTabTextColor = #FF404040,
 		ruiCurrentTabColor = #FFFFFFFF,
 		ruiCurrentTabTextColor = #FF000000,
+		ruiTooltipBackground = #FFFFFFFF,
+		ruiTooltipTextColor = #FF000000,
+		ruiTooltipShadowColor = #FF808080,
 	},
 	colors:dark = _{
 		ruiTextColor = #FFE0E0E0,
@@ -43,6 +46,9 @@ theme {
 		ruiTabTextColor = #FFE0E0E0,
 		ruiCurrentTabColor = #FF000000,
 		ruiCurrentTabTextColor = #FFFFFFFF,
+		ruiTooltipBackground = #FF303030,
+		ruiTooltipTextColor = #FFDDDDDD,
+		ruiTooltipShadowColor = #FFDDDDDD,
 	},
 	constants = _{
 		ruiButtonHorizontalPadding = 16px,

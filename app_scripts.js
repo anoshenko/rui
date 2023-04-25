@@ -1877,3 +1877,124 @@ function localStorageClear() {
 		sendMessage("storageError{session=" + sessionID + ", error=`" + err + "`}")
 	}
 }
+
+function showTooltip(element, tooltip) {
+	const layer = document.getElementById("ruiTooltipLayer");
+	if (!layer) {
+		return;
+	}
+
+	layer.style.left = "0px";
+	layer.style.right = "0px";
+
+	var tooltipBox = document.getElementById("ruiTooltipText");
+	if (tooltipBox) {
+		tooltipBox.innerHTML = tooltip;
+	}
+
+	var left = element.offsetLeft;
+	var top = element.offsetTop;
+	var width = element.offsetWidth;
+	var height = element.offsetHeight;
+	var parent = element.offsetParent;
+
+	while (parent) {
+		left += parent.offsetLeft;
+		top += parent.offsetTop;
+		width = parent.offsetWidth;
+		height = parent.offsetHeight;
+		parent = parent.offsetParent;
+	}
+
+	if (element.offsetWidth >= tooltipBox.offsetWidth) {
+		layer.style.left = left + "px";
+		layer.style.justifyItems = "start";
+	} else {
+		const rightOff = width - (left + element.offsetWidth);
+		if (left > rightOff) {
+			if (width - left < tooltipBox.offsetWidth) {
+				layer.style.right = rightOff + "px";
+				layer.style.justifyItems = "end";
+			} else {
+				layer.style.left = (left - rightOff) + "px";
+				layer.style.right = "0px";
+				layer.style.justifyItems = "center";
+			}
+		} else {
+			if (width - rightOff < tooltipBox.offsetWidth) {
+				layer.style.left = left + "px";
+				layer.style.justifyItems = "start";
+			} else {
+				layer.style.right = (rightOff - left) + "px";
+				layer.style.justifyItems = "center";
+			}
+		}
+	}
+
+	const bottomOff = height - (top + element.offsetHeight);
+	var arrow = document.getElementById("ruiTooltipTopArrow");
+
+	if (bottomOff < arrow.offsetHeight + tooltipBox.offsetHeight) {
+		if (arrow) {
+			arrow.style.visibility = "hidden";
+		}
+
+		arrow = document.getElementById("ruiTooltipBottomArrow");
+		if (arrow) {
+			arrow.style.visibility = "visible";
+		}
+
+		layer.style.top = "0px";
+		layer.style.bottom = height - top - arrow.offsetHeight / 2 + "px"; 
+		layer.style.gridTemplateRows = "1fr auto auto"
+
+	} else {
+		if (arrow) {
+			arrow.style.visibility = "visible";
+		}
+
+		layer.style.top = top + element.offsetHeight - arrow.offsetHeight / 2 + "px";
+		layer.style.bottom = "0px";
+		layer.style.gridTemplateRows = "auto auto 1fr"
+
+		arrow = document.getElementById("ruiTooltipBottomArrow");
+		if (arrow) {
+			arrow.style.visibility = "hidden";
+		}
+	}
+	
+	layer.style.visibility = "visible";
+	layer.style.opacity = 1;
+}
+
+function mouseEnterEvent(element, event) {
+	event.stopPropagation();
+
+	let tooltip = element.getAttribute("data-tooltip");
+	if (tooltip) {
+		showTooltip(element, tooltip);
+	}
+
+	sendMessage("mouse-enter{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}");
+}
+
+function mouseLeaveEvent(element, event) {
+	event.stopPropagation();
+
+	if (element.getAttribute("data-tooltip")) {
+		const layer = document.getElementById("ruiTooltipLayer");
+		if (layer) {
+			layer.style.opacity = 0;
+			layer.style.visibility = "hidden";
+		}
+	}
+
+	sendMessage("mouse-leave{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}");
+}
+
+function setCssVar(tag, value) {
+	const root = document.querySelector(':root');
+	if (root) {
+		root.style.setProperty(tag, value);
+	}
+}

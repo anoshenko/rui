@@ -702,4 +702,6 @@ const (
 	// * tabindex="0" means that View should be focusable in sequential keyboard navigation, after any positive tabindex values and its order is defined in order of its addition.
 	// * A positive value means View should be focusable in sequential keyboard navigation, with its order defined by the value of the number.
 	TabIndex = "tabindex"
+
+	Tooltip = "tooltip"
 )

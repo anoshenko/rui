@@ -8,6 +8,13 @@
   text-overflow: ellipsis;
 }
 
+:root {
+  --tooltip-arrow-size: 6px;
+  --tooltip-background: white;
+  --tooltip-text-color: black;
+  --tooltip-shadow-color: gray;
+}
+
 body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -76,7 +83,54 @@ ul:focus {
   left: 0px;
 }
 
+.ruiTooltipLayer {
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
+  align-items: center;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+  transition: opacity 0.5s ease-out;
+  filter: drop-shadow(0px 0px 2px var(--tooltip-shadow-color));
+}
+
+.ruiTooltipTopArrow {
+  grid-row-start: 1; 
+  grid-row-end: 2;
+  border-width: var(--tooltip-arrow-size); 
+  border-style: solid; 
+  border-color: transparent transparent var(--tooltip-background) transparent;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.ruiTooltipBottomArrow {
+  grid-row-start: 3; 
+  grid-row-end: 4;
+  border-width: var(--tooltip-arrow-size); 
+  border-style: solid; 
+  border-color: var(--tooltip-background) transparent transparent transparent;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.ruiTooltipText {
+  grid-row-start: 2; 
+  grid-row-end: 3;
+  padding: 4px 8px 4px 8px; 
+  margin-left: 8px;
+  margin-right: 8px;
+  background-color: var(--tooltip-background); 
+  color: var(--tooltip-text-color);
+  /*box-shadow: 0px 0px 4px 2px #8888;*/
+  border-radius: 4px;
+}
+
 .ruiView {
+  box-sizing: border-box;
 }
 
 .ruiAbsoluteLayout {

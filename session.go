@@ -303,6 +303,21 @@ func (session *sessionData) writeInitScript(writer *strings.Builder) {
 		writer.WriteString(text)
 		writer.WriteString("';\nscanElementsSize();")
 	}
+
+	session.updateTooltipConstants()
+}
+
+func (session *sessionData) updateTooltipConstants() {
+	if color, ok := session.Color("ruiTooltipBackground"); ok {
+		session.bridge.callFunc("setCssVar", "--tooltip-background", color.cssString())
+	}
+	if color, ok := session.Color("ruiTooltipTextColor"); ok {
+		session.bridge.callFunc("setCssVar", "--tooltip-text-color", color.cssString())
+	}
+	if color, ok := session.Color("ruiTooltipShadowColor"); ok {
+		session.bridge.callFunc("setCssVar", "--tooltip-shadow-color", color.cssString())
+	}
+
 }
 
 func (session *sessionData) reload() {
@@ -323,6 +338,7 @@ func (session *sessionData) reload() {
 	}
 
 	session.bridge.writeMessage(buffer.String())
+	session.updateTooltipConstants()
 }
 
 func (session *sessionData) ignoreViewUpdates() bool {
