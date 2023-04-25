@@ -638,6 +638,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 	session.callFunc("blurCurrent")
 	manager.updatePopupLayerInnerHTML(session)
 	session.updateCSSProperty("ruiTooltipLayer", "visibility", "hidden")
+	session.updateCSSProperty("ruiTooltipLayer", "opacity", "0")
 	session.updateCSSProperty("ruiPopupLayer", "visibility", "visible")
 	session.updateCSSProperty("ruiRoot", "pointer-events", "none")
 }
