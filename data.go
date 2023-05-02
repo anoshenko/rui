@@ -440,8 +440,8 @@ func ParseDataText(text string) DataObject {
 		endPos := pos
 		skipSpaces(false)
 		if startPos == endPos {
-			ErrorLog("empty tag")
-			return "", false
+			//ErrorLog("empty tag")
+			return "", true
 		}
 		return string(data[startPos:endPos]), true
 	}

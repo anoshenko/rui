@@ -175,6 +175,17 @@ func (view *viewData) Focusable() bool {
 	if focus, ok := boolProperty(view, Focusable, view.session); ok {
 		return focus
 	}
+
+	if style, ok := stringProperty(view, Style, view.session); ok {
+		if style, ok := view.session.resolveConstants(style); ok {
+			if value := view.session.styleProperty(style, Focusable); ok {
+				if focus, ok := valueToBool(value, view.Session()); ok {
+					return focus
+				}
+			}
+		}
+	}
+
 	return false
 }
 
