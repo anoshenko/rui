@@ -1992,6 +1992,10 @@ function mouseLeaveEvent(element, event) {
 	sendMessage("mouse-leave{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}");
 }
 
+function stopEventPropagation(element, event) {
+	event.stopPropagation();
+}
+
 function setCssVar(tag, value) {
 	const root = document.querySelector(':root');
 	if (root) {
