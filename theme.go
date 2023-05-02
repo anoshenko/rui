@@ -528,7 +528,7 @@ func (theme *theme) cssText(session Session) string {
 	styleList := func(styles map[string]ViewStyle) []string {
 		ruiStyles := []string{}
 		customStyles := []string{}
-		for tag, _ := range styles {
+		for tag := range styles {
 			if strings.HasPrefix(tag, "rui") {
 				ruiStyles = append(ruiStyles, tag)
 			} else {

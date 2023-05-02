@@ -188,7 +188,10 @@ func mouseEventsHtml(view View, buffer *strings.Builder, hasTooltip bool) {
 	for tag, js := range mouseEvents {
 		if value := view.getRaw(tag); value != nil {
 			if listeners, ok := value.([]func(View, MouseEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
+				buffer.WriteString(js.jsEvent)
+				buffer.WriteString(`="`)
+				buffer.WriteString(js.jsFunc)
+				buffer.WriteString(`(this, event)" `)
 			}
 		}
 	}

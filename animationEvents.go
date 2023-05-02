@@ -91,7 +91,10 @@ func transitionEventsHtml(view View, buffer *strings.Builder) {
 	for tag, js := range transitionEvents {
 		if value := view.getRaw(tag); value != nil {
 			if listeners, ok := value.([]func(View, string)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
+				buffer.WriteString(js.jsEvent)
+				buffer.WriteString(`="`)
+				buffer.WriteString(js.jsFunc)
+				buffer.WriteString(`(this, event)" `)
 			}
 		}
 	}
@@ -157,7 +160,10 @@ func animationEventsHtml(view View, buffer *strings.Builder) {
 	for tag, js := range animationEvents {
 		if value := view.getRaw(tag); value != nil {
 			if listeners, ok := value.([]func(View)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
+				buffer.WriteString(js.jsEvent)
+				buffer.WriteString(`="`)
+				buffer.WriteString(js.jsFunc)
+				buffer.WriteString(`(this, event)" `)
 			}
 		}
 	}

@@ -143,7 +143,10 @@ func getFocusListeners(view View, subviewID []string, tag string) []func(View) {
 func focusEventsHtml(view View, buffer *strings.Builder) {
 	if view.Focusable() {
 		for _, js := range focusEvents {
-			buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
+			buffer.WriteString(js.jsEvent)
+			buffer.WriteString(`="`)
+			buffer.WriteString(js.jsFunc)
+			buffer.WriteString(`(this, event)" `)
 		}
 	}
 }

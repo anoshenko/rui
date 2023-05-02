@@ -372,11 +372,12 @@ func valueToEventWithOldListeners[V View, E any](value any) ([]func(V, E, E), bo
 	return nil, false
 }
 
-var keyEvents = map[string]struct{ jsEvent, jsFunc string }{
-	KeyDownEvent: {jsEvent: "onkeydown", jsFunc: "keyDownEvent"},
-	KeyUpEvent:   {jsEvent: "onkeyup", jsFunc: "keyUpEvent"},
-}
-
+/*
+	var keyEvents = map[string]struct{ jsEvent, jsFunc string }{
+		KeyDownEvent: {jsEvent: "onkeydown", jsFunc: "keyDownEvent"},
+		KeyUpEvent:   {jsEvent: "onkeyup", jsFunc: "keyUpEvent"},
+	}
+*/
 func (view *viewData) setKeyListener(tag string, value any) bool {
 	listeners, ok := valueToEventListeners[View, KeyEvent](value)
 	if !ok {
@@ -386,22 +387,37 @@ func (view *viewData) setKeyListener(tag string, value any) bool {
 
 	if listeners == nil {
 		view.removeKeyListener(tag)
-	} else if js, ok := keyEvents[tag]; ok {
-		view.properties[tag] = listeners
-		if view.created {
-			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
-		}
 	} else {
-		return false
+		switch tag {
+		case KeyDownEvent:
+			if view.created {
+				view.session.updateProperty(view.htmlID(), "onkeydown", "keyDownEvent(this, event)")
+			}
+
+		case KeyUpEvent:
+			if view.created {
+				view.session.updateProperty(view.htmlID(), "onkeyup", "keyUpEvent(this, event)")
+			}
+
+		default:
+			return false
+		}
 	}
+
 	return true
 }
 
 func (view *viewData) removeKeyListener(tag string) {
 	delete(view.properties, tag)
 	if view.created {
-		if js, ok := keyEvents[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
+		switch tag {
+		case KeyDownEvent:
+			if !view.Focusable() {
+				view.session.removeProperty(view.htmlID(), "onkeydown")
+			}
+
+		case KeyUpEvent:
+			view.session.removeProperty(view.htmlID(), "onkeyup")
 		}
 	}
 }
@@ -434,21 +450,51 @@ func getEventListeners[V View, E any](view View, subviewID []string, tag string)
 }
 
 func keyEventsHtml(view View, buffer *strings.Builder) {
-	for tag, js := range keyEvents {
-		if listeners := getEventListeners[View, KeyEvent](view, nil, tag); len(listeners) > 0 {
-			buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
+	if len(getEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 {
+		buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)
+	} else if view.Focusable() {
+		if len(getEventListeners[View, MouseEvent](view, nil, ClickEvent)) > 0 {
+			buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)
 		}
+	}
+
+	if listeners := getEventListeners[View, KeyEvent](view, nil, KeyUpEvent); len(listeners) > 0 {
+		buffer.WriteString(`onkeyup="keyUpEvent(this, event)" `)
 	}
 }
 
 func handleKeyEvents(view View, tag string, data DataObject) {
+	var event KeyEvent
+	event.init(data)
 	listeners := getEventListeners[View, KeyEvent](view, nil, tag)
-	if len(listeners) > 0 {
-		var event KeyEvent
-		event.init(data)
 
+	if len(listeners) > 0 {
 		for _, listener := range listeners {
 			listener(view, event)
+		}
+		return
+	}
+
+	if tag == KeyDownEvent && view.Focusable() && (event.Key == " " || event.Key == "Enter") && !IsDisabled(view) {
+		if listeners := getEventListeners[View, MouseEvent](view, nil, ClickEvent); len(listeners) > 0 {
+			clickEvent := MouseEvent{
+				TimeStamp: event.TimeStamp,
+				Button:    PrimaryMouseButton,
+				Buttons:   PrimaryMouseMask,
+				CtrlKey:   event.CtrlKey,
+				AltKey:    event.AltKey,
+				ShiftKey:  event.ShiftKey,
+				MetaKey:   event.MetaKey,
+				ClientX:   view.Frame().Width / 2,
+				ClientY:   view.Frame().Height / 2,
+				X:         view.Frame().Width / 2,
+				Y:         view.Frame().Height / 2,
+				ScreenX:   view.Frame().Left + view.Frame().Width/2,
+				ScreenY:   view.Frame().Top + view.Frame().Height/2,
+			}
+			for _, listener := range listeners {
+				listener(view, clickEvent)
+			}
 		}
 	}
 }

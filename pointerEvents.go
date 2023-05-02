@@ -129,7 +129,10 @@ func pointerEventsHtml(view View, buffer *strings.Builder) {
 	for tag, js := range pointerEvents {
 		if value := view.getRaw(tag); value != nil {
 			if listeners, ok := value.([]func(View, PointerEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent + `="` + js.jsFunc + `(this, event)" `)
+				buffer.WriteString(js.jsEvent)
+				buffer.WriteString(`="`)
+				buffer.WriteString(js.jsFunc)
+				buffer.WriteString(`(this, event)" `)
 			}
 		}
 	}
