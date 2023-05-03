@@ -127,10 +127,14 @@ func (popup *popupMenuData) ListSize() int {
 }
 
 func (popup *popupMenuData) ListItem(index int, session Session) View {
-	return NewTextView(popup.session, Params{
+	view := NewTextView(popup.session, Params{
 		Text:  popup.items[index],
 		Style: "ruiPopupMenuItem",
 	})
+	if !popup.IsListItemEnabled(index) {
+		view.Set(TextColor, "@ruiDisabledTextColor")
+	}
+	return view
 }
 
 func (popup *popupMenuData) IsListItemEnabled(index int) bool {

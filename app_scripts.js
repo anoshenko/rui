@@ -590,6 +590,10 @@ function selectDropDownListItem(elementId, number) {
 function listItemClickEvent(element, event) {
 	event.stopPropagation();
 	
+	if(element.getAttribute("data-disabled") == "1") {
+		return
+	}
+
 	var selected = false;
 	if (element.classList) {
 		const focusStyle = getListFocusedItemStyle(element);
@@ -707,6 +711,9 @@ function findRightListItem(list, x, y) {
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
 		var item = list.childNodes[i];
+		if (item.getAttribute("data-disabled") == "1") {
+			continue;
+		}
 		if (item.offsetLeft >= x) {
 			if (result) {
 				var result_dy = Math.abs(result.offsetTop - y);
@@ -728,6 +735,9 @@ function findLeftListItem(list, x, y) {
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
 		var item = list.childNodes[i];
+		if (item.getAttribute("data-disabled") == "1") {
+			continue;
+		}
 		if (item.offsetLeft < x) {
 			if (result) {
 				var result_dy = Math.abs(result.offsetTop - y);
@@ -749,6 +759,9 @@ function findTopListItem(list, x, y) {
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
 		var item = list.childNodes[i];
+		if (item.getAttribute("data-disabled") == "1") {
+			continue;
+		}
 		if (item.offsetTop < y) {
 			if (result) {
 				var result_dx = Math.abs(result.offsetLeft - x);
@@ -770,6 +783,9 @@ function findBottomListItem(list, x, y) {
 	var count = list.childNodes.length;
 	for (var i = 0; i < count; i++) {
 		var item = list.childNodes[i];
+		if (item.getAttribute("data-disabled") == "1") {
+			continue;
+		}
 		if (item.offsetTop >= y) {
 			if (result) {
 				var result_dx = Math.abs(result.offsetLeft - x);
@@ -818,49 +834,76 @@ function listViewKeyDownEvent(element, event) {
 		if (current) {
 			var item
 			switch (key) {
-			case " ": 
-			case "Enter":
-				var message = "itemClick{session=" + sessionID + ",id=" + element.id + "}";
-				sendMessage(message);
-				break;
+				case " ": 
+				case "Enter":
+					var message = "itemClick{session=" + sessionID + ",id=" + element.id + "}";
+					sendMessage(message);
+					break;
 
-			case "ArrowLeft":
-				item = findLeftListItem(element, current.offsetLeft, current.offsetTop);
-				break;
-			
-			case "ArrowRight":
-				item = findRightListItem(element, current.offsetLeft + current.offsetWidth, current.offsetTop);
-				break;
-	
-			case "ArrowDown":
-				item = findBottomListItem(element, current.offsetLeft, current.offsetTop + current.offsetHeight);
-				break;
+				case "ArrowLeft":
+					item = findLeftListItem(element, current.offsetLeft, current.offsetTop);
+					break;
+				
+				case "ArrowRight":
+					item = findRightListItem(element, current.offsetLeft + current.offsetWidth, current.offsetTop);
+					break;
+		
+				case "ArrowDown":
+					item = findBottomListItem(element, current.offsetLeft, current.offsetTop + current.offsetHeight);
+					break;
 
-			case "ArrowUp":
-				item = findTopListItem(element, current.offsetLeft, current.offsetTop);
-				break;
+				case "ArrowUp":
+					item = findTopListItem(element, current.offsetLeft, current.offsetTop);
+					break;
 
-			case "Home":
-				item = element.childNodes[0];
-				break;
+				case "Home":
+					item = element.childNodes[0];
+					break;
 
-			case "End":
-				item = element.childNodes[element.childNodes.length - 1];
-				break;
+				case "End":
+					item = element.childNodes[element.childNodes.length - 1];
+					break;
 
-			case "PageUp":
-				// TODO
-				break;
+				case "PageUp":
+					// TODO
+					break;
 
-			case "PageDown":
-				// TODO
-				break;
+				case "PageDown":
+					// TODO
+					break;
 
-			default:
-				return;
+				default:
+					return;
 			}
 			if (item && item !== current) {
 				selectListItem(element, item, true);
+			}
+		} else {
+			switch (key) {
+				case " ": 
+				case "Enter":
+				case "ArrowLeft":
+				case "ArrowUp":
+				case "ArrowRight":
+				case "ArrowDown":
+				case "Home":
+				case "End":
+				case "PageUp":
+				case "PageDown":
+					var list = element.childNodes[0];
+					var count = list.childNodes.length;
+					for (var i = 0; i < count; i++) {
+						var item = list.childNodes[i];
+						if (item.getAttribute("data-disabled") == "1") {
+							continue;
+						}
+						selectListItem(element, item, true);
+						return;
+					}
+					break;
+
+				default:
+					return;
 			}
 		}
 	}
