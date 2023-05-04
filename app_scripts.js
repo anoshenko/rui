@@ -242,22 +242,26 @@ function enterOrSpaceKeyClickEvent(event) {
 function activateTab(layoutId, tabNumber) {
 	var element = document.getElementById(layoutId);
 	if (element) {
-		var currentTabId = element.getAttribute("data-current");
-		var newTabId = layoutId + '-' + tabNumber;
-		if (currentTabId != newTabId) {
-			function setTab(tabId, styleProperty, display) {
-				var tab = document.getElementById(tabId);
+		var currentNumber = element.getAttribute("data-current");
+		if (currentNumber != tabNumber) {
+			function setTab(number, styleProperty, display) {
+				var tab = document.getElementById(layoutId + '-' + number);
 				if (tab) {	
 					tab.className = element.getAttribute(styleProperty);
 					var page = document.getElementById(tab.getAttribute("data-view"));
 					if (page) {
 						page.style.display = display;
 					}
+					return
+				}
+				var page = document.getElementById(layoutId + "-page" + number);
+				if (page) {
+					page.style.display = display;
 				}
 			}
-			setTab(currentTabId, "data-inactiveTabStyle", "none")
-			setTab(newTabId, "data-activeTabStyle", "");
-			element.setAttribute("data-current", newTabId);
+			setTab(currentNumber, "data-inactiveTabStyle", "none")
+			setTab(tabNumber, "data-activeTabStyle", "");
+			element.setAttribute("data-current", tabNumber);
 			scanElementsSize()
 		}
 	}
@@ -1557,6 +1561,8 @@ function tableViewCellKeyDownEvent(element, event) {
 			case "End":
 			case "PageUp":
 			case "PageDown":
+				event.stopPropagation();
+				event.preventDefault();
 				const rows = element.getAttribute("data-rows");
 				const columns = element.getAttribute("data-columns");
 				if (rows && columns) {
@@ -1567,8 +1573,6 @@ function tableViewCellKeyDownEvent(element, event) {
 						column = 0;
 						while (columns < columnCount) {
 							if (setTableCellCursor(element, row, column)) {
-								event.stopPropagation();
-								event.preventDefault();
 								return;
 							}
 							column++;
@@ -1576,8 +1580,6 @@ function tableViewCellKeyDownEvent(element, event) {
 						row++;
 					}
 				}
-				event.stopPropagation();
-				event.preventDefault();
 				break;
 		}
 		return;

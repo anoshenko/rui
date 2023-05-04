@@ -1,7 +1,6 @@
 package rui
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -650,10 +649,6 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 	return view
 }
 
-func (tabsLayout *tabsLayoutData) currentID() string {
-	return fmt.Sprintf("%s-%d", tabsLayout.htmlID(), tabsLayout.currentItem(0))
-}
-
 func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Builder) {
 	tabsLayout.viewsContainerData.htmlProperties(self, buffer)
 	buffer.WriteString(` data-inactiveTabStyle="`)
@@ -661,7 +656,7 @@ func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Buil
 	buffer.WriteString(`" data-activeTabStyle="`)
 	buffer.WriteString(tabsLayout.activeTabStyle())
 	buffer.WriteString(`" data-current="`)
-	buffer.WriteString(tabsLayout.currentID())
+	buffer.WriteString(strconv.Itoa(tabsLayout.currentItem(0)))
 	buffer.WriteRune('"')
 }
 
