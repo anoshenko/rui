@@ -228,11 +228,21 @@ func (adapter *textTableAdapter) Cell(row, column int) any {
 	return nil
 }
 
-type simpleTableRowStyle struct {
+type simpleTableLineStyle struct {
 	params []Params
 }
 
-func (style *simpleTableRowStyle) RowStyle(row int) Params {
+func (style *simpleTableLineStyle) ColumnStyle(column int) Params {
+	if column < len(style.params) {
+		params := style.params[column]
+		if len(params) > 0 {
+			return params
+		}
+	}
+	return nil
+}
+
+func (style *simpleTableLineStyle) RowStyle(row int) Params {
 	if row < len(style.params) {
 		params := style.params[row]
 		if len(params) > 0 {
@@ -242,56 +252,38 @@ func (style *simpleTableRowStyle) RowStyle(row int) Params {
 	return nil
 }
 
-func (table *tableViewData) setRowStyle(value any) bool {
-	newSimpleTableRowStyle := func(params []Params) TableRowStyle {
-		if len(params) == 0 {
-			return nil
-		}
-		result := new(simpleTableRowStyle)
-		result.params = params
-		return result
-	}
-
+func (table *tableViewData) setLineStyle(tag string, value any) bool {
 	switch value := value.(type) {
-	case TableRowStyle:
-		table.properties[RowStyle] = value
-
 	case []Params:
-		if style := newSimpleTableRowStyle(value); style != nil {
-			table.properties[RowStyle] = style
+		if len(value) > 0 {
+			style := new(simpleTableLineStyle)
+			style.params = value
+			table.properties[tag] = style
 		} else {
-			delete(table.properties, RowStyle)
+			delete(table.properties, tag)
 		}
 
 	case DataNode:
-		if value.Type() == ArrayNode {
-			params := make([]Params, value.ArraySize())
-			for i, element := range value.ArrayElements() {
-				params[i] = Params{}
-				if element.IsObject() {
-					obj := element.Object()
-					for k := 0; k < obj.PropertyCount(); k++ {
-						if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-							params[i][prop.Tag()] = prop.Text()
-						}
-					}
-				} else {
-					params[i][Style] = element.Value()
-				}
-			}
-			if style := newSimpleTableRowStyle(params); style != nil {
-				table.properties[RowStyle] = style
-			} else {
-				delete(table.properties, RowStyle)
-			}
+		if params := value.ArrayAsParams(); len(params) > 0 {
+			style := new(simpleTableLineStyle)
+			style.params = params
+			table.properties[tag] = style
 		} else {
-			return false
+			delete(table.properties, tag)
 		}
 
 	default:
 		return false
 	}
 	return true
+}
+
+func (table *tableViewData) setRowStyle(value any) bool {
+	switch value := value.(type) {
+	case TableRowStyle:
+		table.properties[RowStyle] = value
+	}
+	return table.setLineStyle(RowStyle, value)
 }
 
 func (table *tableViewData) getRowStyle() TableRowStyle {
@@ -305,70 +297,12 @@ func (table *tableViewData) getRowStyle() TableRowStyle {
 	return nil
 }
 
-type simpleTableColumnStyle struct {
-	params []Params
-}
-
-func (style *simpleTableColumnStyle) ColumnStyle(row int) Params {
-	if row < len(style.params) {
-		params := style.params[row]
-		if len(params) > 0 {
-			return params
-		}
-	}
-	return nil
-}
-
 func (table *tableViewData) setColumnStyle(value any) bool {
-	newSimpleTableColumnStyle := func(params []Params) TableColumnStyle {
-		if len(params) == 0 {
-			return nil
-		}
-		result := new(simpleTableColumnStyle)
-		result.params = params
-		return result
-	}
-
 	switch value := value.(type) {
 	case TableColumnStyle:
 		table.properties[ColumnStyle] = value
-
-	case []Params:
-		if style := newSimpleTableColumnStyle(value); style != nil {
-			table.properties[ColumnStyle] = style
-		} else {
-			delete(table.properties, ColumnStyle)
-		}
-
-	case DataNode:
-		if value.Type() == ArrayNode {
-			params := make([]Params, value.ArraySize())
-			for i, element := range value.ArrayElements() {
-				params[i] = Params{}
-				if element.IsObject() {
-					obj := element.Object()
-					for k := 0; k < obj.PropertyCount(); k++ {
-						if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-							params[i][prop.Tag()] = prop.Text()
-						}
-					}
-				} else {
-					params[i][Style] = element.Value()
-				}
-			}
-			if style := newSimpleTableColumnStyle(params); style != nil {
-				table.properties[ColumnStyle] = style
-			} else {
-				delete(table.properties, ColumnStyle)
-			}
-		} else {
-			return false
-		}
-
-	default:
-		return false
 	}
-	return true
+	return table.setLineStyle(ColumnStyle, value)
 }
 
 func (table *tableViewData) getColumnStyle() TableColumnStyle {

@@ -1120,7 +1120,8 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	footHeight := GetTableFootHeight(table)
 	cellBorder := table.getCellBorder()
 	cellPadding := table.boundsProperty(CellPadding)
-	if cellPadding == nil {
+	if cellPadding == nil || len(cellPadding.AllTags()) == 0 {
+		cellPadding = nil
 		if style, ok := stringProperty(table, Style, table.Session()); ok {
 			if style, ok := table.Session().resolveConstants(style); ok {
 				cellPadding = table.cellPaddingFromStyle(style)

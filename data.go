@@ -23,6 +23,7 @@ type DataObject interface {
 	PropertyObject(tag string) DataObject
 	SetPropertyValue(tag, value string)
 	SetPropertyObject(tag string, object DataObject)
+	ToParams() Params
 }
 
 const (
@@ -43,6 +44,7 @@ type DataNode interface {
 	ArraySize() int
 	ArrayElement(index int) DataValue
 	ArrayElements() []DataValue
+	ArrayAsParams() []Params
 }
 
 /******************************************************************************/
@@ -165,6 +167,42 @@ func (object *dataObject) SetPropertyObject(tag string, obj DataObject) {
 	object.setNode(node)
 }
 
+func (object *dataObject) ToParams() Params {
+	params := Params{}
+	for _, node := range object.property {
+		switch node.Type() {
+		case TextNode:
+			if text := node.Text(); text != "" {
+				params[node.Tag()] = text
+			}
+
+		case ObjectNode:
+			if obj := node.Object(); obj != nil {
+				params[node.Tag()] = node.Object()
+			}
+
+		case ArrayNode:
+			array := []any{}
+			for i := 0; i < node.ArraySize(); i++ {
+				if data := node.ArrayElement(i); data != nil {
+					if data.IsObject() {
+						if obj := data.Object(); obj != nil {
+							array = append(array, obj)
+						}
+					} else if text := data.Value(); text != "" {
+						array = append(array, text)
+					}
+				}
+			}
+			if len(array) > 0 {
+				params[node.Tag()] = array
+			}
+		}
+	}
+
+	return params
+}
+
 /******************************************************************************/
 type dataNode struct {
 	tag   string
@@ -219,6 +257,22 @@ func (node *dataNode) ArrayElements() []DataValue {
 		return node.array
 	}
 	return []DataValue{}
+}
+
+func (node *dataNode) ArrayAsParams() []Params {
+	result := []Params{}
+	if node.array != nil {
+		for _, data := range node.array {
+			if data.IsObject() {
+				if obj := data.Object(); obj != nil {
+					if params := obj.ToParams(); len(params) > 0 {
+						result = append(result, params)
+					}
+				}
+			}
+		}
+	}
+	return result
 }
 
 // ParseDataText - parse text and return DataNode

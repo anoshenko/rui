@@ -202,6 +202,60 @@ func (style *viewStyle) set(tag string, value any) bool {
 	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
 		return style.setBoundsSide(CellPadding, tag, value)
 
+	case HeadStyle, FootStyle:
+		switch value := value.(type) {
+		case string:
+			style.properties[tag] = value
+			return true
+
+		case Params:
+			style.properties[tag] = value
+			return true
+
+		case DataObject:
+			if params := value.ToParams(); len(params) > 0 {
+				style.properties[tag] = params
+			}
+			return true
+		}
+
+	case CellStyle, ColumnStyle, RowStyle:
+		switch value := value.(type) {
+		case string:
+			style.properties[tag] = value
+			return true
+
+		case Params:
+			style.properties[tag] = value
+			return true
+
+		case DataObject:
+			if params := value.ToParams(); len(params) > 0 {
+				style.properties[tag] = params
+			}
+			return true
+
+		case DataNode:
+			switch value.Type() {
+			case TextNode:
+				if text := value.Text(); text != "" {
+					style.properties[tag] = text
+				}
+				return true
+
+			case ObjectNode:
+				if obj := value.Object(); obj != nil {
+					if params := obj.ToParams(); len(params) > 0 {
+						style.properties[tag] = params
+					}
+					return true
+				}
+
+			case ArrayNode:
+				// TODO
+			}
+		}
+
 	case Outline:
 		return style.setOutline(value)
 
