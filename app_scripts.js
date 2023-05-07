@@ -1253,11 +1253,6 @@ function loadInlineImage(url, content) {
 	img.src = content;
 }
 
-function clickOutsidePopup(e) {
-	sendMessage("clickOutsidePopup{session=" + sessionID + "}")
-	e.stopPropagation();
-}
-
 function clickClosePopup(element, e) {
 	var popupId = element.getAttribute("data-popupId");
 	sendMessage("clickClosePopup{session=" + sessionID + ",id=" + popupId + "}")
@@ -2070,6 +2065,14 @@ function mouseLeaveEvent(element, event) {
 	}
 
 	sendMessage("mouse-leave{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}");
+}
+
+function hideTooltip() {
+	const layer = document.getElementById("ruiTooltipLayer");
+	if (layer) {
+		layer.style.opacity = 0;
+		layer.style.visibility = "hidden";
+	}
 }
 
 function stopEventPropagation(element, event) {

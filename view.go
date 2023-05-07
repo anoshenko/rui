@@ -412,10 +412,12 @@ func viewPropertyChanged(view *viewData, tag string) {
 		case Invisible:
 			session.updateCSSProperty(htmlID, Visibility, "hidden")
 			session.updateCSSProperty(htmlID, "display", "")
+			session.callFunc("hideTooltip")
 
 		case Gone:
 			session.updateCSSProperty(htmlID, Visibility, "hidden")
 			session.updateCSSProperty(htmlID, "display", "none")
+			session.callFunc("hideTooltip")
 
 		default:
 			session.updateCSSProperty(htmlID, Visibility, "visible")

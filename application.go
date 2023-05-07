@@ -75,7 +75,7 @@ func getStartPage(buffer *strings.Builder, params AppParams, addScripts string) 
 	</head>
 	<body>
 		<div class="ruiRoot" id="ruiRootView"></div>
-		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate;" onclick="clickOutsidePopup(event)"></div>
+		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate;"></div>
 		<div class="ruiTooltipLayer" id="ruiTooltipLayer" style="visibility: hidden; opacity: 0;">
 		<div id="ruiTooltipText" class="ruiTooltipText"></div>
 		<div id="ruiTooltipTopArrow" class="ruiTooltipTopArrow"></div>

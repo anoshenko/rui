@@ -652,7 +652,7 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 			if view := session.viewByHTMLID(viewID); view != nil {
 				view.handleCommand(view, command, data)
 			}
-		} else if command != "clickOutsidePopup" {
+		} else {
 			ErrorLog(`"id" property not found. Event: ` + command)
 		}
 	}

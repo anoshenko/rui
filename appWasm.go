@@ -149,7 +149,6 @@ func (app *wasmApp) init(params AppParams) {
 	div = document.Call("createElement", "div")
 	div.Set("className", "ruiPopupLayer")
 	div.Set("id", "ruiPopupLayer")
-	div.Set("onclick", "clickOutsidePopup(event)")
 	div.Set("style", "visibility: hidden;")
 	body.Call("appendChild", div)
 

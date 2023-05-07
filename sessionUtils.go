@@ -27,6 +27,8 @@ func updateInnerHTML(htmlID string, session Session) {
 			view = session.viewByHTMLID(htmlID)
 		}
 		if view != nil {
+			session.callFunc("hideTooltip")
+
 			script := allocStringBuilder()
 			defer freeStringBuilder(script)
 
