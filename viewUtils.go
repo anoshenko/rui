@@ -830,9 +830,13 @@ func colorStyledProperty(view View, subviewID []string, tag string, inherit bool
 	return Color(0)
 }
 
-// FocusView sets focus on the specified View, if it can be focused.
+// FocusView sets focus on the specified subview, if it can be focused.
 // The focused View is the View which will receive keyboard events by default.
-func FocusView(view View) {
+// If the second argument (subviewID) is not specified or it is "" then focus is set on the first argument (view)
+func FocusView(view View, subviewID ...string) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
 	if view != nil {
 		view.Session().callFunc("focus", view.htmlID())
 	}

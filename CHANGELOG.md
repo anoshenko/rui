@@ -6,6 +6,7 @@
 * Changed the main event listener format for "drop-down-event", "edit-text-changed", 
 "color-changed", "number-changed", "date-changed", and "time-changed" events. 
 Old format is "<listener>(<view>, <new value>)", new format is "<listener>(<view>, <new value>, <old value>)"
+* Changed FocusView function
 * Bug fixing
 
 # v0.12.0
