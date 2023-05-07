@@ -28,6 +28,7 @@ func (button *buttonData) CreateSuperView(session Session) View {
 		HorizontalAlign: CenterAlign,
 		VerticalAlign:   CenterAlign,
 		Orientation:     StartToEndOrientation,
+		TabIndex:        0,
 	})
 }
 

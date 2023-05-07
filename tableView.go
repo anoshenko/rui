@@ -524,10 +524,6 @@ func (table *tableViewData) set(tag string, value any) bool {
 
 	case Current:
 		switch value := value.(type) {
-		case int:
-			table.current.Row = value
-			table.current.Column = -1
-
 		case CellIndex:
 			table.current = value
 
@@ -554,6 +550,7 @@ func (table *tableViewData) set(tag string, value any) bool {
 					table.current.Column = n[1]
 				} else {
 					notCompatibleType(tag, value)
+					return false
 				}
 			} else {
 				n, err := strconv.Atoi(value)
@@ -566,8 +563,13 @@ func (table *tableViewData) set(tag string, value any) bool {
 			}
 
 		default:
-			notCompatibleType(tag, value)
-			return false
+			if n, ok := isInt(value); ok {
+				table.current.Row = n
+				table.current.Column = -1
+			} else {
+				notCompatibleType(tag, value)
+				return false
+			}
 		}
 
 	default:
@@ -585,8 +587,17 @@ func (table *tableViewData) propertyChanged(tag string) {
 			CellBorder, HeadHeight, HeadStyle, FootHeight, FootStyle,
 			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
 			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
-			TableRowSelectedEvent, AllowSelection, Current:
+			TableRowSelectedEvent, AllowSelection:
 			table.ReloadTableData()
+
+		case Current:
+			switch GetTableSelectionMode(table) {
+			case CellSelection:
+				table.session.callFunc("setTableCellCursorByID", table.htmlID(), table.current.Row, table.current.Column)
+
+			case RowSelection:
+				table.session.callFunc("setTableRowCursorByID", table.htmlID(), table.current.Row)
+			}
 
 		case Gap:
 			htmlID := table.htmlID()

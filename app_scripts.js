@@ -1474,6 +1474,24 @@ function tableViewBlurEvent(element, event) {
 	}
 }
 
+function setTableCellCursorByID(tableID, row, column) {
+	var table = document.getElementById(tableID);
+	if (table) {
+		if (!setTableCellCursor(table, row, column)) {
+			const focusStyle = getTableFocusedItemStyle(table);
+			const oldCellID = table.getAttribute("data-current");
+			if (oldCellID) {
+				const oldCell = document.getElementById(oldCellID);
+				if (oldCell && oldCell.classList) {
+					oldCell.classList.remove(focusStyle);
+					oldCell.classList.remove(getTableSelectedItemStyle(table));
+				}
+				table.removeAttribute("data-current");
+			}
+		}
+	}
+}
+
 function setTableCellCursor(element, row, column) {
 	const cellID = element.id + "-" + row + "-" + column;
 	var cell = document.getElementById(cellID);
@@ -1647,6 +1665,24 @@ function tableViewCellKeyDownEvent(element, event) {
 	}
 }
 
+function setTableRowCursorByID(tableID, row) {
+	var table = document.getElementById(tableID);
+	if (table) {
+		if (!setTableRowCursor(table, row)) {
+			const focusStyle = getTableFocusedItemStyle(table);
+			const oldRowID = table.getAttribute("data-current");
+			if (oldRowID) {
+				const oldRow = document.getElementById(oldRowID);
+				if (oldRow && oldRow.classList) {
+					oldRow.classList.remove(focusStyle);
+					oldRow.classList.remove(getTableSelectedItemStyle(table));
+				}
+				table.removeAttribute("data-current");
+			}
+		}
+	}
+}
+
 function setTableRowCursor(element, row) {
 	const tableRowID = element.id + "-" + row;
 	var tableRow = document.getElementById(tableRowID);
@@ -1661,7 +1697,6 @@ function setTableRowCursor(element, row) {
 		if (oldRow && oldRow.classList) {
 			oldRow.classList.remove(focusStyle);
 			oldRow.classList.remove(getTableSelectedItemStyle(element));
-
 		}
 	}
 
