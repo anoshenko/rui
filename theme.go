@@ -150,7 +150,7 @@ func parseMediaRule(text string) (mediaStyle, bool) {
 				}
 				rule.maxHeight = size
 			} else {
-				ErrorLogF(`Unknown elemnet "%s" in the style section name "%s"`, element, text)
+				ErrorLogF(`Unknown element "%s" in the style section name "%s"`, element, text)
 				return rule, false
 			}
 		}
@@ -830,7 +830,7 @@ func (theme *theme) String() string {
 	writeConstants("constants", theme.constants)
 	writeConstants("constants:touch", theme.touchConstants)
 
-	writeStyles := func(orientation, maxWidth, maxHeihgt int, styles map[string]ViewStyle) bool {
+	writeStyles := func(orientation, maxWidth, maxHeight int, styles map[string]ViewStyle) bool {
 		count := len(styles)
 		if count == 0 {
 			return false
@@ -853,8 +853,8 @@ func (theme *theme) String() string {
 		if maxWidth > 0 {
 			buffer.WriteString(fmt.Sprintf(":width%d", maxWidth))
 		}
-		if maxHeihgt > 0 {
-			buffer.WriteString(fmt.Sprintf(":heihgt%d", maxHeihgt))
+		if maxHeight > 0 {
+			buffer.WriteString(fmt.Sprintf(":height%d", maxHeight))
 		}
 		buffer.WriteString(" = [\n")
 
@@ -862,7 +862,7 @@ func (theme *theme) String() string {
 			if style, ok := styles[tag]; ok {
 				buffer.WriteString("\t\t")
 				writeViewStyle(tag, style, buffer, "\t\t")
-				buffer.WriteString(",")
+				buffer.WriteString(",\n")
 			}
 		}
 		buffer.WriteString("\t],\n")
