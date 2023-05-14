@@ -566,7 +566,22 @@ func (tabsLayout *tabsLayoutData) IsListItemEnabled(index int) bool {
 	return true
 }
 
-func (tabsLayout *tabsLayoutData) updateContent(view View, tag string) {
+func (tabsLayout *tabsLayoutData) updateTitle(view View, tag string) {
+	session := tabsLayout.session
+	title, _ := stringProperty(view, Title, session)
+	if !GetNotTranslate(tabsLayout) {
+		title, _ = session.GetString(title)
+	}
+	session.updateInnerHTML(view.htmlID()+"-title", title)
+}
+
+func (tabsLayout *tabsLayoutData) updateIcon(view View, tag string) {
+	session := tabsLayout.session
+	icon, _ := stringProperty(view, Icon, session)
+	session.updateProperty(view.htmlID()+"-icon", "src", icon)
+}
+
+func (tabsLayout *tabsLayoutData) updateTabCloseButton(view View, tag string) {
 	updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
 }
 
@@ -577,9 +592,9 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 	}
 	if view != nil {
 		tabsLayout.viewsContainerData.Append(view)
-		view.SetChangeListener(Title, tabsLayout.updateContent)
-		view.SetChangeListener(Icon, tabsLayout.updateContent)
-		view.SetChangeListener(TabCloseButton, tabsLayout.updateContent)
+		view.SetChangeListener(Title, tabsLayout.updateTitle)
+		view.SetChangeListener(Icon, tabsLayout.updateIcon)
+		view.SetChangeListener(TabCloseButton, tabsLayout.updateTabCloseButton)
 		if len(tabsLayout.views) == 1 {
 			tabsLayout.properties[Current] = 0
 			for _, listener := range tabsLayout.tabListener {
@@ -601,9 +616,9 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 			defer tabsLayout.propertyChangedEvent(Current)
 		}
 		tabsLayout.viewsContainerData.Insert(view, index)
-		view.SetChangeListener(Title, tabsLayout.updateContent)
-		view.SetChangeListener(Icon, tabsLayout.updateContent)
-		view.SetChangeListener(TabCloseButton, tabsLayout.updateContent)
+		view.SetChangeListener(Title, tabsLayout.updateTitle)
+		view.SetChangeListener(Icon, tabsLayout.updateIcon)
+		view.SetChangeListener(TabCloseButton, tabsLayout.updateTabCloseButton)
 	}
 }
 
@@ -721,7 +736,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		notTranslate := GetNotTranslate(tabsLayout)
 		closeButton, _ := boolProperty(tabsLayout, TabCloseButton, tabsLayout.session)
 
-		var tabStyle, titleDiv string
+		var tabStyle, titleStyle string
 		switch location {
 		case LeftTabs, RightTabs:
 			tabStyle = `display: grid; grid-template-rows: auto 1fr auto; align-items: center; justify-items: center; grid-row-gap: 8px;`
@@ -735,13 +750,13 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 
 		switch location {
 		case LeftTabs:
-			titleDiv = `<div style="writing-mode: vertical-lr; transform: rotate(180deg); grid-row-start: 2; grid-row-end: 3; grid-column-start: 1; grid-column-end: 2;">`
+			titleStyle = ` style="writing-mode: vertical-lr; transform: rotate(180deg); grid-row-start: 2; grid-row-end: 3; grid-column-start: 1; grid-column-end: 2;">`
 
 		case RightTabs:
-			titleDiv = `<div style="writing-mode: vertical-lr; grid-row-start: 2; grid-row-end: 3; grid-column-start: 1; grid-column-end: 2;">`
+			titleStyle = ` style="writing-mode: vertical-lr; grid-row-start: 2; grid-row-end: 3; grid-column-start: 1; grid-column-end: 2;">`
 
 		default:
-			titleDiv = `<div style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 2; grid-column-end: 3;">`
+			titleStyle = ` style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 2; grid-column-end: 3;">`
 		}
 
 		for n, view := range tabsLayout.views {
@@ -780,21 +795,26 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(`">`)
 
 			if icon != "" {
+				buffer.WriteString(`<img id="`)
+				buffer.WriteString(view.htmlID())
 				switch location {
 				case LeftTabs:
-					buffer.WriteString(`<img style="grid-row-start: 3; grid-row-end: 4; grid-column-start: 1; grid-column-end: 2;" src="`)
+					buffer.WriteString(`-icon" style="grid-row-start: 3; grid-row-end: 4; grid-column-start: 1; grid-column-end: 2;" src="`)
 
 				case RightTabs:
-					buffer.WriteString(`<img style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;" src="`)
+					buffer.WriteString(`-icon" style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;" src="`)
 
 				default:
-					buffer.WriteString(`<img style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;" src="`)
+					buffer.WriteString(`-icon" style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;" src="`)
 				}
 				buffer.WriteString(icon)
 				buffer.WriteString(`">`)
 			}
 
-			buffer.WriteString(titleDiv)
+			buffer.WriteString(`<div id="`)
+			buffer.WriteString(view.htmlID())
+			buffer.WriteString(`-title"`)
+			buffer.WriteString(titleStyle)
 			buffer.WriteString(title)
 			buffer.WriteString(`</div>`)
 
@@ -811,7 +831,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 				buffer.WriteString(tabsLayoutID)
 				buffer.WriteString(`', `)
 				buffer.WriteString(strconv.Itoa(n))
-				buffer.WriteString(`, event)"  style="display: grid; `)
+				buffer.WriteString(`, event)" style="display: grid; `)
 
 				switch location {
 				case LeftTabs:

@@ -220,6 +220,7 @@ type TableView interface {
 	View
 	ParentView
 	ReloadTableData()
+	ReloadCell(row, column int)
 	CellFrame(row, column int) Frame
 
 	content() TableAdapter
@@ -880,7 +881,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	vAlign := vAlignCss[vAlignValue]
 
 	tableCSS := func(startRow, endRow int, cellTag string, cellBorder BorderProperty, cellPadding BoundsProperty) {
-		var namedColors []NamedColor = nil
+		//var namedColors []NamedColor = nil
 
 		for row := startRow; row < endRow; row++ {
 			cssBuilder.buffer.Reset()
@@ -1042,57 +1043,60 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					}
 					buffer.WriteRune('>')
 
-					switch value := adapter.Cell(row, column).(type) {
-					case string:
-						buffer.WriteString(value)
+					table.writeCellHtml(adapter, row, column, buffer)
+					/*
+						switch value := adapter.Cell(row, column).(type) {
+						case string:
+							buffer.WriteString(value)
 
-					case View:
-						viewHTML(value, buffer)
-						table.cellViews = append(table.cellViews, value)
+						case View:
+							viewHTML(value, buffer)
+							table.cellViews = append(table.cellViews, value)
 
-					case Color:
-						buffer.WriteString(`<div style="display: inline; height: 1em; background-color: `)
-						buffer.WriteString(value.cssString())
-						buffer.WriteString(`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `)
-						buffer.WriteString(value.String())
-						if namedColors == nil {
-							namedColors = NamedColors()
-						}
-						for _, namedColor := range namedColors {
-							if namedColor.Color == value {
-								buffer.WriteString(" (")
-								buffer.WriteString(namedColor.Name)
-								buffer.WriteRune(')')
-								break
+						case Color:
+							buffer.WriteString(`<div style="display: inline; height: 1em; background-color: `)
+							buffer.WriteString(value.cssString())
+							buffer.WriteString(`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `)
+							buffer.WriteString(value.String())
+							if namedColors == nil {
+								namedColors = NamedColors()
+							}
+							for _, namedColor := range namedColors {
+								if namedColor.Color == value {
+									buffer.WriteString(" (")
+									buffer.WriteString(namedColor.Name)
+									buffer.WriteRune(')')
+									break
+								}
+							}
+
+						case fmt.Stringer:
+							buffer.WriteString(value.String())
+
+						case rune:
+							buffer.WriteString(string(value))
+
+						case float32:
+							buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+
+						case float64:
+							buffer.WriteString(fmt.Sprintf("%g", value))
+
+						case bool:
+							if value {
+								buffer.WriteString(session.checkboxOnImage())
+							} else {
+								buffer.WriteString(session.checkboxOffImage())
+							}
+
+						default:
+							if n, ok := isInt(value); ok {
+								buffer.WriteString(fmt.Sprintf("%d", n))
+							} else {
+								buffer.WriteString("<Unsupported value>")
 							}
 						}
-
-					case fmt.Stringer:
-						buffer.WriteString(value.String())
-
-					case rune:
-						buffer.WriteString(string(value))
-
-					case float32:
-						buffer.WriteString(fmt.Sprintf("%g", float64(value)))
-
-					case float64:
-						buffer.WriteString(fmt.Sprintf("%g", value))
-
-					case bool:
-						if value {
-							buffer.WriteString(session.checkboxOnImage())
-						} else {
-							buffer.WriteString(session.checkboxOffImage())
-						}
-
-					default:
-						if n, ok := isInt(value); ok {
-							buffer.WriteString(fmt.Sprintf("%d", n))
-						} else {
-							buffer.WriteString("<Unsupported value>")
-						}
-					}
+					*/
 
 					buffer.WriteString(`</`)
 					buffer.WriteString(cellTag)
@@ -1308,6 +1312,59 @@ func (table *tableViewData) cellPaddingFromStyle(style string) BoundsProperty {
 	return nil
 }
 
+func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int, buffer *strings.Builder) {
+	switch value := adapter.Cell(row, column).(type) {
+	case string:
+		buffer.WriteString(value)
+
+	case View:
+		viewHTML(value, buffer)
+		table.cellViews = append(table.cellViews, value)
+
+	case Color:
+		buffer.WriteString(`<div style="display: inline; height: 1em; background-color: `)
+		buffer.WriteString(value.cssString())
+		buffer.WriteString(`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `)
+		buffer.WriteString(value.String())
+
+		namedColors := NamedColors()
+		for _, namedColor := range namedColors {
+			if namedColor.Color == value {
+				buffer.WriteString(" (")
+				buffer.WriteString(namedColor.Name)
+				buffer.WriteRune(')')
+				break
+			}
+		}
+
+	case fmt.Stringer:
+		buffer.WriteString(value.String())
+
+	case rune:
+		buffer.WriteString(string(value))
+
+	case float32:
+		buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+
+	case float64:
+		buffer.WriteString(fmt.Sprintf("%g", value))
+
+	case bool:
+		if value {
+			buffer.WriteString(table.Session().checkboxOnImage())
+		} else {
+			buffer.WriteString(table.Session().checkboxOffImage())
+		}
+
+	default:
+		if n, ok := isInt(value); ok {
+			buffer.WriteString(fmt.Sprintf("%d", n))
+		} else {
+			buffer.WriteString("<Unsupported value>")
+		}
+	}
+}
+
 func (table *tableViewData) cellBorderFromStyle(style string) BorderProperty {
 	if value := table.Session().styleProperty(style, CellBorder); value != nil {
 		if border, ok := value.(BorderProperty); ok {
@@ -1393,6 +1450,19 @@ func (table *tableViewData) CellFrame(row, column int) Frame {
 		}
 	}
 	return Frame{}
+}
+
+func (table *tableViewData) ReloadCell(row, column int) {
+	adapter := table.content()
+	if adapter == nil {
+		return
+	}
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	table.writeCellHtml(adapter, row, column, buffer)
+	table.session.updateInnerHTML(table.cellID(row, column), buffer.String())
 }
 
 func (table *tableViewData) Views() []View {

@@ -1,6 +1,8 @@
 # v0.13.0
 
 * Added ViewIndex function to ViewsContainer interface
+* Added ReloadCell function to TableView interface
+* Added ReloadTableViewCell function
 * Added "tooltip" property and GetTooltip function
 * Added "outline-offset" property and GetOutlineOffset function
 * Changed the main event listener format for "drop-down-event", "edit-text-changed", 

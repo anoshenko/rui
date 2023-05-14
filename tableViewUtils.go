@@ -182,6 +182,7 @@ func GetTableRowSelectedListeners(view View, subviewID ...string) []func(TableVi
 }
 
 // ReloadTableViewData updates TableView
+// If the second argument (subviewID) is not specified or it is "" then updates the first argument (TableView).
 func ReloadTableViewData(view View, subviewID ...string) bool {
 	var tableView TableView
 	if len(subviewID) > 0 && subviewID[0] != "" {
@@ -196,5 +197,24 @@ func ReloadTableViewData(view View, subviewID ...string) bool {
 	}
 
 	tableView.ReloadTableData()
+	return true
+}
+
+// ReloadTableViewCell updates the given table cell.
+// If the last argument (subviewID) is not specified or it is "" then updates the cell of the first argument (TableView).
+func ReloadTableViewCell(row, column int, view View, subviewID ...string) bool {
+	var tableView TableView
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		if tableView = TableViewByID(view, subviewID[0]); tableView == nil {
+			return false
+		}
+	} else {
+		var ok bool
+		if tableView, ok = view.(TableView); !ok {
+			return false
+		}
+	}
+
+	tableView.ReloadCell(row, column)
 	return true
 }

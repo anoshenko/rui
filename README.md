@@ -3763,6 +3763,18 @@ The "content" property can also be assigned the following data types
 
 [][]any and [][]string are converted to a TableAdapter when assigned.
 
+If the elements of the table change during operation, then to update the contents of the table, 
+you must call one of the two methods of the TableView interface
+
+* ReloadTableData()
+* ReloadCell(row, column int)
+
+The ReloadTableData method updates the entire table, while ReloadCell updates the contents of only a specific table cell.
+Global functions can be used to call the ReloadTableData and ReloadCell methods
+
+	func ReloadTableViewData(view View, subviewID ...string) bool
+	func ReloadTableViewCell(row, column int, view View, subviewID ...string) bool
+
 ### "cell-style" property
 
 The "cell-style" property (CellStyle constant) is used to customize the appearance of a table cell. 
