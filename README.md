@@ -5171,6 +5171,9 @@ It is used when the client needs to transfer a file from the server.
 * DownloadFileData(filename string, data [] byte) downloads (saves) on the client side a file 
 with a specified name and specified content. Typically used to transfer a file generated in server memory.
 
+* SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Session)) - sets the function that will be called 
+when the given hotkey is pressed.
+
 ## Resource description format
 
 Application resources (themes, views, translations) can be described as text (utf-8). 

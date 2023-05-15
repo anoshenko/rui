@@ -1,5 +1,6 @@
 # v0.13.0
 
+* Added SetHotKey function to Session interface
 * Added ViewIndex function to ViewsContainer interface
 * Added ReloadCell function to TableView interface
 * Added ReloadTableViewCell function

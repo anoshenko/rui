@@ -100,9 +100,16 @@ type Session interface {
 	// OpenURL opens the url in the new browser tab
 	OpenURL(url string)
 
+	// ClientItem reads value by key from the client-side storage
 	ClientItem(key string) (string, bool)
+	// SetClientItem stores a key-value pair in the client-side storage
 	SetClientItem(key, value string)
+	// RemoveAllClientItems removes all key-value pair from the client-side storage
 	RemoveAllClientItems()
+
+	// SetHotKey sets the function that will be called when the given hotkey is pressed.
+	// Invoke SetHotKey(..., ..., nil) for remove hotkey function.
+	SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Session))
 
 	getCurrentTheme() Theme
 	registerAnimation(props []AnimatedProperty) string
@@ -188,6 +195,7 @@ type sessionData struct {
 	animationCSS     string
 	updateScripts    map[string]*strings.Builder
 	clientStorage    map[string]string
+	hotkeys          map[string]func(Session)
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -205,6 +213,7 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.animationCSS = ""
 	session.updateScripts = map[string]*strings.Builder{}
 	session.clientStorage = map[string]string{}
+	session.hotkeys = map[string]func(Session){}
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {
@@ -672,7 +681,57 @@ func (session *sessionData) hotKey(event KeyEvent) {
 			return
 		}
 	}
-	// TODO
+
+	var controlKeys ControlKeyMask = 0
+	if event.AltKey {
+		controlKeys |= AltKey
+	}
+	if event.CtrlKey {
+		controlKeys |= CtrlKey
+	}
+	if event.MetaKey {
+		controlKeys |= MetaKey
+	}
+	if event.ShiftKey {
+		controlKeys |= ShiftKey
+	}
+
+	key := hotkeyCode(KeyCode(event.Code), controlKeys)
+	if fn, ok := session.hotkeys[key]; ok && fn != nil {
+		fn(session)
+	}
+}
+
+func hotkeyCode(keyCode KeyCode, controlKeys ControlKeyMask) string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	buffer.WriteString(strings.ToLower(string(keyCode)))
+	if controlKeys != 0 {
+		buffer.WriteRune('-')
+		if controlKeys&AltKey != 0 {
+			buffer.WriteRune('a')
+		}
+		if controlKeys&CtrlKey != 0 {
+			buffer.WriteRune('c')
+		}
+		if controlKeys&MetaKey != 0 {
+			buffer.WriteRune('m')
+		}
+		if controlKeys&ShiftKey != 0 {
+			buffer.WriteRune('s')
+		}
+	}
+	return buffer.String()
+}
+
+func (session *sessionData) SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Session)) {
+	hotkey := hotkeyCode(keyCode, controlKeys)
+	if fn == nil {
+		delete(session.hotkeys, hotkey)
+	} else {
+		session.hotkeys[hotkey] = fn
+	}
 }
 
 func (session *sessionData) SetTitle(title string) {
