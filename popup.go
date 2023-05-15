@@ -78,11 +78,21 @@ const (
 	// LeftArrow is value of the popup "arrow" property:
 	// Arrow on the left side of the pop-up window
 	LeftArrow = 4
+
+	// NormalButton is the constant of the popup button type: the normal button
+	NormalButton PopupButtonType = 0
+	// DefaultButton is the constant of the popup button type: button that fires when the "Enter" key is pressed
+	DefaultButton PopupButtonType = 1
+	// CancelButton is the constant of the popup button type: button that fires when the "Escape" key is pressed
+	CancelButton PopupButtonType = 2
 )
+
+type PopupButtonType int
 
 // PopupButton describes a button that will be placed at the bottom of the window.
 type PopupButton struct {
 	Title   string
+	Type    PopupButtonType
 	OnClick func(Popup)
 }
 
@@ -95,11 +105,14 @@ type Popup interface {
 	onDismiss()
 	html(buffer *strings.Builder)
 	viewByHTMLID(id string) View
+	keyEvent(event KeyEvent) bool
 }
 
 type popupData struct {
 	layerView       View
 	view            View
+	buttons         []PopupButton
+	cancelable      bool
 	dismissListener []func(Popup)
 }
 
@@ -273,6 +286,7 @@ func (arrow *popupArrow) createView(popupView View) View {
 
 func (popup *popupData) init(view View, popupParams Params) {
 	popup.view = view
+	popup.cancelable = false
 	session := view.Session()
 
 	columnCount := 3
@@ -392,13 +406,15 @@ func (popup *popupData) init(view View, popupParams Params) {
 					TextSize:            Px(20),
 					Content:             "✕",
 					NotTranslate:        true,
-					ClickEvent: func(View) {
-						popup.Dismiss()
-					},
+					ClickEvent:          popup.cancel,
 				})
+				popup.cancelable = true
 
 			case OutsideClose:
 				outsideClose, _ = boolProperty(popupParams, OutsideClose, session)
+				if outsideClose {
+					popup.cancelable = true
+				}
 
 			case Buttons:
 				switch value := value.(type) {
@@ -494,6 +510,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 	view.Set(Row, viewRow)
 	popupView.Append(view)
 
+	popup.buttons = buttons
 	if buttonCount := len(buttons); buttonCount > 0 {
 		buttonsAlign, _ := enumProperty(params, ButtonsAlign, session, RightAlign)
 		popupCellHeight = append(popupCellHeight, AutoSize())
@@ -511,21 +528,31 @@ func (popup *popupData) init(view View, popupParams Params) {
 			buttonsPanel.Set(Margin, gap)
 		}
 
-		createButton := func(n int, button PopupButton) Button {
-			return NewButton(session, Params{
-				Column:  n,
-				Content: button.Title,
-				ClickEvent: func() {
-					if button.OnClick != nil {
-						button.OnClick(popup)
-					} else {
-						popup.Dismiss()
-					}
-				},
-			})
-		}
 		for i, button := range buttons {
-			buttonsPanel.Append(createButton(i, button))
+			title := button.Title
+			if title == "" && button.Type == CancelButton {
+				title = "Cancel"
+			}
+
+			buttonView := NewButton(session, Params{
+				Column:  i,
+				Content: title,
+			})
+
+			if button.OnClick != nil {
+				fn := button.OnClick
+				buttonView.Set(ClickEvent, func() {
+					fn(popup)
+				})
+			} else if button.Type == CancelButton {
+				buttonView.Set(ClickEvent, popup.cancel)
+			}
+
+			if button.Type == DefaultButton {
+				buttonView.Set(Style, "ruiDefaultButton")
+			}
+
+			buttonsPanel.Append(buttonView)
 		}
 
 		popupView.Append(NewGridLayout(session, Params{
@@ -544,11 +571,8 @@ func (popup *popupData) init(view View, popupParams Params) {
 	}
 
 	popup.layerView = NewGridLayout(session, layerParams)
-
 	if outsideClose {
-		popup.layerView.Set(ClickEvent, func(View) {
-			popup.Dismiss()
-		})
+		popup.layerView.Set(ClickEvent, popup.cancel)
 	}
 }
 
@@ -560,12 +584,21 @@ func (popup *popupData) Session() Session {
 	return popup.view.Session()
 }
 
+func (popup *popupData) cancel() {
+	for _, button := range popup.buttons {
+		if button.Type == CancelButton && button.OnClick != nil {
+			button.OnClick(popup)
+			return
+		}
+	}
+	popup.Dismiss()
+}
+
 func (popup *popupData) Dismiss() {
 	popup.Session().popupManager().dismissPopup(popup)
 	for _, listener := range popup.dismissListener {
 		listener(popup)
 	}
-	// TODO
 }
 
 func (popup *popupData) Show() {
@@ -585,6 +618,27 @@ func (popup *popupData) onDismiss() {
 	for _, listener := range popup.dismissListener {
 		listener(popup)
 	}
+}
+
+func (popup *popupData) keyEvent(event KeyEvent) bool {
+	if !event.AltKey && !event.CtrlKey && !event.ShiftKey && !event.MetaKey {
+		switch strings.ToLower(event.Code) {
+		case "enter":
+			for _, button := range popup.buttons {
+				if button.Type == DefaultButton && button.OnClick != nil {
+					button.OnClick(popup)
+					return true
+				}
+			}
+
+		case "escape":
+			if popup.cancelable {
+				popup.Dismiss()
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // NewPopup creates a new Popup

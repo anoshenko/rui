@@ -18,6 +18,117 @@ const (
 	// The additional listener formats:
 	//   func(KeyEvent), func(View), and func().
 	KeyUpEvent = "key-up-event"
+
+	// AltKey is the mask of the "alt" key
+	AltKey = 1
+	// CtrlKey is the mask of the "ctrl" key
+	CtrlKey = 2
+	// ShiftKey is the mask of the "shift" key
+	ShiftKey = 4
+	// MetaKey is the mask of the "meta" key
+	MetaKey = 8
+
+	KeyA              = "KeyA"
+	KeyB              = "KeyB"
+	KeyC              = "KeyC"
+	KeyD              = "KeyD"
+	KeyE              = "KeyE"
+	KeyF              = "KeyF"
+	KeyG              = "KeyG"
+	KeyH              = "KeyH"
+	KeyI              = "KeyI"
+	KeyJ              = "KeyJ"
+	KeyK              = "KeyK"
+	KeyL              = "KeyL"
+	KeyM              = "KeyM"
+	KeyN              = "KeyN"
+	KeyO              = "KeyO"
+	KeyP              = "KeyP"
+	KeyQ              = "KeyQ"
+	KeyR              = "KeyR"
+	KeyS              = "KeyS"
+	KeyT              = "KeyT"
+	KeyU              = "KeyU"
+	KeyV              = "KeyV"
+	KeyW              = "KeyW"
+	KeyX              = "KeyX"
+	KeyY              = "KeyY"
+	KeyZ              = "KeyZ"
+	Digit0Key         = "Digit0"
+	Digit1Key         = "Digit1"
+	Digit2Key         = "Digit2"
+	Digit3Key         = "Digit3"
+	Digit4Key         = "Digit4"
+	Digit5Key         = "Digit5"
+	Digit6Key         = "Digit6"
+	Digit7Key         = "Digit7"
+	Digit8Key         = "Digit8"
+	Digit9Key         = "Digit9"
+	SpaceKey          = "Space"
+	MinusKey          = "Minus"
+	EqualKey          = "Equal"
+	IntlBackslashKey  = "IntlBackslash"
+	BracketLeftKey    = "BracketLeft"
+	BracketRightKey   = "BracketRight"
+	SemicolonKey      = "Semicolon"
+	CommaKey          = "Comma"
+	PeriodKey         = "Period"
+	QuoteKey          = "Quote"
+	BackquoteKey      = "Backquote"
+	SlashKey          = "Slash"
+	EscapeKey         = "Escape"
+	EnterKey          = "Enter"
+	TabKey            = "Tab"
+	CapsLockKey       = "CapsLock"
+	DeleteKey         = "Delete"
+	HelpKey           = "Help"
+	BackspaceKey      = "Backspace"
+	ArrowLeftKey      = "ArrowLeft"
+	ArrowRightKey     = "ArrowRight"
+	ArrowUpKey        = "ArrowUp"
+	ArrowDownKey      = "ArrowDown"
+	HomeKey           = "Home"
+	EndKey            = "End"
+	PageUpKey         = "PageUp"
+	PageDownKey       = "PageDown"
+	F1Key             = "F1"
+	F2Key             = "F2"
+	F3Key             = "F3"
+	F4Key             = "F4"
+	F5Key             = "F5"
+	F6Key             = "F6"
+	F7Key             = "F7"
+	F8Key             = "F8"
+	F9Key             = "F9"
+	F10Key            = "F10"
+	F11Key            = "F11"
+	F12Key            = "F12"
+	F13Key            = "F13"
+	NumLockKey        = "NumLock"
+	NumpadKey0        = "Numpad0"
+	NumpadKey1        = "Numpad1"
+	NumpadKey2        = "Numpad2"
+	NumpadKey3        = "Numpad3"
+	NumpadKey4        = "Numpad4"
+	NumpadKey5        = "Numpad5"
+	NumpadKey6        = "Numpad6"
+	NumpadKey7        = "Numpad7"
+	NumpadKey8        = "Numpad8"
+	NumpadKey9        = "Numpad9"
+	NumpadDecimalKey  = "NumpadDecimal"
+	NumpadEnterKey    = "NumpadEnter"
+	NumpadAddKey      = "NumpadAdd"
+	NumpadSubtractKey = "NumpadSubtract"
+	NumpadMultiplyKey = "NumpadMultiply"
+	NumpadDivideKey   = "NumpadDivide"
+	ShiftLeftKey      = "ShiftLeft"
+	ShiftRightKey     = "ShiftRight"
+	ControlLeftKey    = "ControlLeft"
+	ControlRightKey   = "ControlRight"
+	AltLeftKey        = "AltLeft"
+	AltRightKey       = "AltRight"
+	MetaLeftKey       = "MetaLeft"
+	MetaRightKey      = "MetaRight"
 )
 
 type KeyEvent struct {
@@ -372,12 +483,6 @@ func valueToEventWithOldListeners[V View, E any](value any) ([]func(V, E, E), bo
 	return nil, false
 }
 
-/*
-	var keyEvents = map[string]struct{ jsEvent, jsFunc string }{
-		KeyDownEvent: {jsEvent: "onkeydown", jsFunc: "keyDownEvent"},
-		KeyUpEvent:   {jsEvent: "onkeyup", jsFunc: "keyUpEvent"},
-	}
-*/
 func (view *viewData) setKeyListener(tag string, value any) bool {
 	listeners, ok := valueToEventListeners[View, KeyEvent](value)
 	if !ok {
@@ -390,11 +495,13 @@ func (view *viewData) setKeyListener(tag string, value any) bool {
 	} else {
 		switch tag {
 		case KeyDownEvent:
+			view.properties[tag] = listeners
 			if view.created {
 				view.session.updateProperty(view.htmlID(), "onkeydown", "keyDownEvent(this, event)")
 			}
 
 		case KeyUpEvent:
+			view.properties[tag] = listeners
 			if view.created {
 				view.session.updateProperty(view.htmlID(), "onkeyup", "keyUpEvent(this, event)")
 			}
@@ -435,6 +542,7 @@ func getEventWithOldListeners[V View, E any](view View, subviewID []string, tag 
 	}
 	return []func(V, E, E){}
 }
+
 func getEventListeners[V View, E any](view View, subviewID []string, tag string) []func(V, E) {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])

@@ -649,13 +649,30 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 
 	default:
 		if viewID, ok := data.PropertyValue("id"); ok {
-			if view := session.viewByHTMLID(viewID); view != nil {
-				view.handleCommand(view, command, data)
+			if viewID != "body" {
+				if view := session.viewByHTMLID(viewID); view != nil {
+					view.handleCommand(view, command, data)
+				}
+			}
+			if command == KeyDownEvent {
+				var event KeyEvent
+				event.init(data)
+				session.hotKey(event)
 			}
 		} else {
 			ErrorLog(`"id" property not found. Event: ` + command)
 		}
 	}
+}
+
+func (session *sessionData) hotKey(event KeyEvent) {
+	popups := session.popupManager().popups
+	if count := len(popups); count > 0 {
+		if popups[count-1].keyEvent(event) {
+			return
+		}
+	}
+	// TODO
 }
 
 func (session *sessionData) SetTitle(title string) {

@@ -110,6 +110,26 @@ theme {
 		ruiButton:active {
 			background-color = @ruiButtonActiveColor
 		},
+		ruiDefaultButton {
+			align = center,
+			padding = "@ruiButtonVerticalPadding, @ruiButtonHorizontalPadding, @ruiButtonVerticalPadding, @ruiButtonHorizontalPadding",
+			margin = @ruiButtonMargin,
+			radius = @ruiButtonRadius,
+			background-color = @ruiButtonColor,
+			text-color = @ruiButtonTextColor,
+			text-weight = bold,
+			border = _{width = 1px, style = solid, color = @ruiButtonTextColor}
+		},
+		ruiDefaultButton:hover {
+			text-color = @ruiTextColor,
+			background-color = @ruiBackgroundColor,
+		},
+		ruiDefaultButton:focus {
+			shadow = _{spread-radius = @ruiButtonHighlightDilation, blur = @ruiButtonHighlightBlur, color = @ruiHighlightColor },
+		},
+		ruiDefaultButton:active {
+			background-color = @ruiButtonActiveColor
+		},
 		ruiCheckbox {
 			radius = 2px,
 			padding = 1px,

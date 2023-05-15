@@ -73,7 +73,7 @@ func getStartPage(buffer *strings.Builder, params AppParams, addScripts string) 
 	buffer.WriteString(addScripts)
 	buffer.WriteString(`</script>
 	</head>
-	<body>
+	<body id="body" onkeydown="keyDownEvent(this, event)">
 		<div class="ruiRoot" id="ruiRootView"></div>
 		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate;"></div>
 		<div class="ruiTooltipLayer" id="ruiTooltipLayer" style="visibility: hidden; opacity: 0;">
