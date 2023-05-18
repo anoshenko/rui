@@ -129,78 +129,92 @@ func (listView *listViewData) remove(tag string) {
 	case Gap:
 		listView.remove(ListRowGap)
 		listView.remove(ListColumnGap)
+		return
 
 	case Checked:
-		if len(listView.checkedItem) > 0 {
-			listView.checkedItem = []int{}
-			if listView.created {
-				updateInnerHTML(listView.htmlID(), listView.session)
-			}
-			listView.propertyChangedEvent(tag)
+		if len(listView.checkedItem) == 0 {
+			return
+		}
+		listView.checkedItem = []int{}
+		if listView.created {
+			updateInnerHTML(listView.htmlID(), listView.session)
 		}
 
 	case Items:
-		if listView.adapter != nil {
-			listView.adapter = nil
-			if listView.created {
-				updateInnerHTML(listView.htmlID(), listView.session)
-			}
-			listView.propertyChangedEvent(tag)
+		if listView.adapter == nil {
+			return
+		}
+		listView.adapter = nil
+		if listView.created {
+			updateInnerHTML(listView.htmlID(), listView.session)
 		}
 
 	case Orientation, ListWrap:
-		if _, ok := listView.properties[tag]; ok {
-			delete(listView.properties, tag)
-			if listView.created {
-				updateCSSStyle(listView.htmlID(), listView.session)
-			}
-			listView.propertyChangedEvent(tag)
+		if _, ok := listView.properties[tag]; !ok {
+			return
+		}
+		delete(listView.properties, tag)
+		if listView.created {
+			updateCSSStyle(listView.htmlID(), listView.session)
 		}
 
 	case Current:
 		current := GetCurrent(listView)
+		if current == -1 {
+			return
+		}
 		delete(listView.properties, tag)
 		if listView.created {
-			updateInnerHTML(listView.htmlID(), listView.session)
+			htmlID := listView.htmlID()
+			session := listView.session
+			session.removeProperty(htmlID, "data-current")
+			updateInnerHTML(htmlID, session)
 		}
 		if current != -1 {
 			for _, listener := range listView.selectedListeners {
 				listener(listView, -1)
 			}
-			listView.propertyChangedEvent(tag)
 		}
 
 	case ItemWidth, ItemHeight, ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox,
-		CheckboxHorizontalAlign, CheckboxVerticalAlign, ListItemStyle, CurrentStyle, CurrentInactiveStyle:
-		if _, ok := listView.properties[tag]; ok {
-			delete(listView.properties, tag)
-			if listView.created {
-				updateInnerHTML(listView.htmlID(), listView.session)
-			}
-			listView.propertyChangedEvent(tag)
+		CheckboxHorizontalAlign, CheckboxVerticalAlign:
+		if _, ok := listView.properties[tag]; !ok {
+			return
+		}
+		delete(listView.properties, tag)
+		if listView.created {
+			updateInnerHTML(listView.htmlID(), listView.session)
+		}
+
+	case ListItemStyle, CurrentStyle, CurrentInactiveStyle:
+		if !listView.setItemStyle(tag, "") {
+			return
 		}
 
 	case ListItemClickedEvent:
-		if len(listView.clickedListeners) > 0 {
-			listView.clickedListeners = []func(ListView, int){}
-			listView.propertyChangedEvent(tag)
+		if len(listView.clickedListeners) == 0 {
+			return
 		}
+		listView.clickedListeners = []func(ListView, int){}
 
 	case ListItemSelectedEvent:
-		if len(listView.selectedListeners) > 0 {
-			listView.selectedListeners = []func(ListView, int){}
-			listView.propertyChangedEvent(tag)
+		if len(listView.selectedListeners) == 0 {
+			return
 		}
+		listView.selectedListeners = []func(ListView, int){}
 
 	case ListItemCheckedEvent:
-		if len(listView.checkedListeners) > 0 {
-			listView.checkedListeners = []func(ListView, []int){}
-			listView.propertyChangedEvent(tag)
+		if len(listView.checkedListeners) == 0 {
+			return
 		}
+		listView.checkedListeners = []func(ListView, []int){}
 
 	default:
 		listView.viewData.remove(tag)
+		return
 	}
+
+	listView.propertyChangedEvent(tag)
 }
 
 func (listView *listViewData) Set(tag string, value any) bool {
@@ -268,11 +282,20 @@ func (listView *listViewData) set(tag string, value any) bool {
 		if !listView.setIntProperty(Current, value) {
 			return false
 		}
+
 		current := GetCurrent(listView)
 		if oldCurrent == current {
 			return true
 		}
 
+		if listView.created {
+			htmlID := listView.htmlID()
+			if current >= 0 {
+				listView.session.updateProperty(htmlID, "data-current", fmt.Sprintf("%s-%d", htmlID, current))
+			} else {
+				listView.session.removeProperty(htmlID, "data-current")
+			}
+		}
 		for _, listener := range listView.selectedListeners {
 			listener(listView, current)
 		}
@@ -290,12 +313,7 @@ func (listView *listViewData) set(tag string, value any) bool {
 		}
 
 	case ListItemStyle, CurrentStyle, CurrentInactiveStyle:
-		switch value := value.(type) {
-		case string:
-			listView.properties[tag] = value
-
-		default:
-			notCompatibleType(tag, value)
+		if !listView.setItemStyle(tag, value) {
 			return false
 		}
 
@@ -307,6 +325,33 @@ func (listView *listViewData) set(tag string, value any) bool {
 		updateInnerHTML(listView.htmlID(), listView.session)
 	}
 	listView.propertyChangedEvent(tag)
+	return true
+}
+
+func (listView *listViewData) setItemStyle(tag string, value any) bool {
+	switch value := value.(type) {
+	case string:
+		if value == "" {
+			delete(listView.properties, tag)
+		} else {
+			listView.properties[tag] = value
+		}
+
+	default:
+		notCompatibleType(tag, value)
+		return false
+	}
+
+	if listView.created {
+		switch tag {
+		case CurrentStyle:
+			listView.session.updateProperty(listView.htmlID(), "data-focusitemstyle", listView.currentStyle())
+
+		case CurrentInactiveStyle:
+			listView.session.updateProperty(listView.htmlID(), "data-bluritemstyle", listView.currentInactiveStyle())
+		}
+	}
+
 	return true
 }
 

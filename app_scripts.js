@@ -594,7 +594,7 @@ function selectDropDownListItem(elementId, number) {
 function listItemClickEvent(element, event) {
 	event.stopPropagation();
 	
-	if(element.getAttribute("data-disabled") == "1") {
+	if (element.getAttribute("data-disabled") == "1") {
 		return
 	}
 

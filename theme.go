@@ -49,6 +49,7 @@ type Theme interface {
 	ImageConstantTags() []string
 	Style(tag string) ViewStyle
 	SetStyle(tag string, style ViewStyle)
+	RemoveStyle(tag string)
 	MediaStyle(tag string, orientation, maxWidth, maxHeight int) ViewStyle
 	SetMediaStyle(tag string, orientation, maxWidth, maxHeight int, style ViewStyle)
 	StyleTags() []string
@@ -261,6 +262,25 @@ func (theme *theme) SetStyle(tag string, style ViewStyle) {
 		theme.styles[tag] = style
 	} else {
 		delete(theme.styles, tag)
+	}
+}
+
+func (theme *theme) RemoveStyle(tag string) {
+	tag2 := tag + ":"
+	remove := func(styles map[string]ViewStyle) {
+		tags := []string{tag}
+		for t := range styles {
+			if strings.HasPrefix(t, tag2) {
+				tags = append(tags, t)
+			}
+		}
+		for _, t := range tags {
+			delete(styles, t)
+		}
+	}
+	remove(theme.styles)
+	for _, mediaStyle := range theme.mediaStyles {
+		remove(mediaStyle.styles)
 	}
 }
 

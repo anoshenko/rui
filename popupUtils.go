@@ -29,20 +29,22 @@ func ShowQuestion(title, text string, session Session, onYes func(), onNo func()
 		OutsideClose: false,
 		Buttons: []PopupButton{
 			{
-				Title: "No",
-				OnClick: func(popup Popup) {
-					popup.Dismiss()
-					if onNo != nil {
-						onNo()
-					}
-				},
-			},
-			{
 				Title: "Yes",
+				Type:  DefaultButton,
 				OnClick: func(popup Popup) {
 					popup.Dismiss()
 					if onYes != nil {
 						onYes()
+					}
+				},
+			},
+			{
+				Title: "No",
+				Type:  CancelButton,
+				OnClick: func(popup Popup) {
+					popup.Dismiss()
+					if onNo != nil {
+						onNo()
 					}
 				},
 			},
@@ -68,11 +70,12 @@ func ShowCancellableQuestion(title, text string, session Session, onYes func(), 
 		OutsideClose: false,
 		Buttons: []PopupButton{
 			{
-				Title: "Cancel",
+				Title: "Yes",
+				Type:  DefaultButton,
 				OnClick: func(popup Popup) {
 					popup.Dismiss()
-					if onCancel != nil {
-						onCancel()
+					if onYes != nil {
+						onYes()
 					}
 				},
 			},
@@ -86,11 +89,12 @@ func ShowCancellableQuestion(title, text string, session Session, onYes func(), 
 				},
 			},
 			{
-				Title: "Yes",
+				Title: "Cancel",
+				Type:  CancelButton,
 				OnClick: func(popup Popup) {
 					popup.Dismiss()
-					if onYes != nil {
-						onYes()
+					if onCancel != nil {
+						onCancel()
 					}
 				},
 			},
