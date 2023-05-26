@@ -10,6 +10,8 @@
 "color-changed", "number-changed", "date-changed", and "time-changed" events. 
 Old format is "<listener>(<view>, <new value>)", new format is "<listener>(<view>, <new value>, <old value>)"
 * Changed FocusView function
+* Added support for height and width range in media styles. 
+Changed MediaStyle, SetMediaStyle, and MediaStyles functions of Theme interface
 * Bug fixing
 
 # v0.12.0

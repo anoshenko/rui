@@ -13,11 +13,17 @@ const (
 	LandscapeMedia = 2
 )
 
+type MediaStyleParams struct {
+	Orientation int
+	MinWidth    int
+	MaxWidth    int
+	MinHeight   int
+	MaxHeight   int
+}
+
 type mediaStyle struct {
-	orientation int
-	maxWidth    int
-	maxHeight   int
-	styles      map[string]ViewStyle
+	MediaStyleParams
+	styles map[string]ViewStyle
 }
 
 type theme struct {
@@ -50,12 +56,12 @@ type Theme interface {
 	Style(tag string) ViewStyle
 	SetStyle(tag string, style ViewStyle)
 	RemoveStyle(tag string)
-	MediaStyle(tag string, orientation, maxWidth, maxHeight int) ViewStyle
-	SetMediaStyle(tag string, orientation, maxWidth, maxHeight int, style ViewStyle)
+	MediaStyle(tag string, params MediaStyleParams) ViewStyle
+	SetMediaStyle(tag string, params MediaStyleParams, style ViewStyle)
 	StyleTags() []string
 	MediaStyles(tag string) []struct {
-		Selectors                        string
-		Orientation, MaxWidth, MaxHeight int
+		Selectors string
+		Params    MediaStyleParams
 	}
 	Append(anotherTheme Theme)
 
@@ -71,7 +77,7 @@ func (rule mediaStyle) cssText() string {
 	builder := allocStringBuilder()
 	defer freeStringBuilder(builder)
 
-	switch rule.orientation {
+	switch rule.Orientation {
 	case PortraitMedia:
 		builder.WriteString(" and (orientation: portrait)")
 
@@ -79,78 +85,107 @@ func (rule mediaStyle) cssText() string {
 		builder.WriteString(" and (orientation: landscape)")
 	}
 
-	if rule.maxWidth > 0 {
-		builder.WriteString(" and (max-width: ")
-		builder.WriteString(strconv.Itoa(rule.maxWidth))
-		builder.WriteString("px)")
+	writeSize := func(tag string, minSize, maxSize int) {
+		if minSize != maxSize {
+			if minSize > 0 {
+				builder.WriteString(fmt.Sprintf(" and (min-%s: %d.001px)", tag, minSize))
+			}
+			if maxSize > 0 {
+				builder.WriteString(fmt.Sprintf(" and (max-%s: %dpx)", tag, maxSize))
+			}
+		} else if minSize > 0 {
+			builder.WriteString(fmt.Sprintf(" and (%s: %dpx)", tag, minSize))
+		}
 	}
 
-	if rule.maxHeight > 0 {
-		builder.WriteString(" and (max-height: ")
-		builder.WriteString(strconv.Itoa(rule.maxHeight))
-		builder.WriteString("px)")
-	}
+	writeSize("width", rule.MinWidth, rule.MaxWidth)
+	writeSize("height", rule.MinHeight, rule.MaxHeight)
 
 	return builder.String()
 }
 
 func parseMediaRule(text string) (mediaStyle, bool) {
 	rule := mediaStyle{
-		orientation: DefaultMedia,
-		maxWidth:    0,
-		maxHeight:   0,
-		styles:      map[string]ViewStyle{},
+		styles: map[string]ViewStyle{},
 	}
 
 	elements := strings.Split(text, ":")
 	for i := 1; i < len(elements); i++ {
 		switch element := elements[i]; element {
 		case "portrait":
-			if rule.orientation != DefaultMedia {
+			if rule.Orientation != DefaultMedia {
 				ErrorLog(`Duplicate orientation tag in the style section "` + text + `"`)
 				return rule, false
 			}
-			rule.orientation = PortraitMedia
+			rule.Orientation = PortraitMedia
 
 		case "landscape":
-			if rule.orientation != DefaultMedia {
+			if rule.Orientation != DefaultMedia {
 				ErrorLog(`Duplicate orientation tag in the style section "` + text + `"`)
 				return rule, false
 			}
-			rule.orientation = LandscapeMedia
+			rule.Orientation = LandscapeMedia
 
 		default:
-			elementSize := func(name string) (int, bool) {
+			elementSize := func(name string) (int, int, bool, error) {
 				if strings.HasPrefix(element, name) {
-					size, err := strconv.Atoi(element[len(name):])
-					if err == nil && size > 0 {
-						return size, true
+					var err error = nil
+					min := 0
+					max := 0
+					data := element[len(name):]
+					if pos := strings.Index(data, "-"); pos >= 0 {
+						if pos > 0 {
+							min, err = strconv.Atoi(data[:pos])
+						}
+						if err == nil && pos+1 < len(data) {
+							max, err = strconv.Atoi(data[pos+1:])
+						}
+					} else {
+						max, err = strconv.Atoi(data)
 					}
-					ErrorLogF(`Invalid style section name "%s": %s`, text, err.Error())
-					return 0, false
+					return min, max, true, err
 				}
-				return 0, true
+				return 0, 0, false, nil
 			}
 
-			if size, ok := elementSize("width"); !ok || size > 0 {
-				if !ok {
+			if min, max, ok, err := elementSize("width"); ok {
+
+				if err != nil {
+					ErrorLogF(`Invalid style section name "%s": %s`, text, err.Error())
 					return rule, false
 				}
-				if rule.maxWidth != 0 {
+				if rule.MinWidth != 0 || rule.MaxWidth != 0 {
 					ErrorLog(`Duplicate "width" tag in the style section "` + text + `"`)
 					return rule, false
 				}
-				rule.maxWidth = size
-			} else if size, ok := elementSize("height"); !ok || size > 0 {
-				if !ok {
+				if min == 0 && max == 0 {
+					ErrorLog(`Invalid arguments of "width" tag in the style section "` + text + `"`)
 					return rule, false
 				}
-				if rule.maxHeight != 0 {
+
+				rule.MinWidth = min
+				rule.MaxWidth = max
+
+			} else if min, max, ok, err := elementSize("height"); ok {
+
+				if err != nil {
+					ErrorLogF(`Invalid style section name "%s": %s`, text, err.Error())
+					return rule, false
+				}
+				if rule.MinHeight != 0 || rule.MaxHeight != 0 {
 					ErrorLog(`Duplicate "height" tag in the style section "` + text + `"`)
 					return rule, false
 				}
-				rule.maxHeight = size
+				if min == 0 && max == 0 {
+					ErrorLog(`Invalid arguments of "height" tag in the style section "` + text + `"`)
+					return rule, false
+				}
+
+				rule.MinHeight = min
+				rule.MaxHeight = max
+
 			} else {
+
 				ErrorLogF(`Unknown element "%s" in the style section name "%s"`, element, text)
 				return rule, false
 			}
@@ -284,36 +319,53 @@ func (theme *theme) RemoveStyle(tag string) {
 	}
 }
 
-func (theme *theme) MediaStyle(tag string, orientation, maxWidth, maxHeight int) ViewStyle {
+func (theme *theme) MediaStyle(tag string, params MediaStyleParams) ViewStyle {
 	for _, styles := range theme.mediaStyles {
-		if styles.orientation == orientation && styles.maxWidth == maxWidth && styles.maxHeight == maxHeight {
+		if styles.Orientation == params.Orientation &&
+			styles.MaxWidth == params.MaxWidth &&
+			styles.MinWidth == params.MinWidth &&
+			styles.MaxHeight == params.MaxHeight &&
+			styles.MinHeight == params.MinHeight {
 			if style, ok := styles.styles[tag]; ok {
 				return style
 			}
 		}
 	}
-	if orientation == 0 && maxWidth <= 0 && maxHeight <= 0 {
+
+	if params.Orientation == 0 && params.MaxWidth == 0 && params.MinWidth == 0 &&
+		params.MaxHeight == 0 && params.MinHeight == 0 {
 		return theme.style(tag)
 	}
 
 	return nil
 }
 
-func (theme *theme) SetMediaStyle(tag string, orientation, maxWidth, maxHeight int, style ViewStyle) {
-	if maxWidth < 0 {
-		maxWidth = 0
+func (theme *theme) SetMediaStyle(tag string, params MediaStyleParams, style ViewStyle) {
+	if params.MaxWidth < 0 {
+		params.MaxWidth = 0
 	}
-	if maxHeight < 0 {
-		maxHeight = 0
+	if params.MinWidth < 0 {
+		params.MinWidth = 0
+	}
+	if params.MaxHeight < 0 {
+		params.MaxHeight = 0
+	}
+	if params.MinHeight < 0 {
+		params.MinHeight = 0
 	}
 
-	if orientation == DefaultMedia && maxWidth == 0 && maxHeight == 0 {
+	if params.Orientation == 0 && params.MaxWidth == 0 && params.MinWidth == 0 &&
+		params.MaxHeight == 0 && params.MinHeight == 0 {
 		theme.SetStyle(tag, style)
 		return
 	}
 
 	for i, styles := range theme.mediaStyles {
-		if styles.orientation == orientation && styles.maxWidth == maxWidth && styles.maxHeight == maxHeight {
+		if styles.Orientation == params.Orientation &&
+			styles.MaxWidth == params.MaxWidth &&
+			styles.MinWidth == params.MinWidth &&
+			styles.MaxHeight == params.MaxHeight &&
+			styles.MinHeight == params.MinHeight {
 			if style != nil {
 				theme.mediaStyles[i].styles[tag] = style
 			} else {
@@ -325,10 +377,8 @@ func (theme *theme) SetMediaStyle(tag string, orientation, maxWidth, maxHeight i
 
 	if style != nil {
 		theme.mediaStyles = append(theme.mediaStyles, mediaStyle{
-			orientation: orientation,
-			maxWidth:    maxWidth,
-			maxHeight:   maxHeight,
-			styles:      map[string]ViewStyle{tag: style},
+			MediaStyleParams: params,
+			styles:           map[string]ViewStyle{tag: style},
 		})
 		theme.sortMediaStyles()
 	}
@@ -426,12 +476,12 @@ func (theme *theme) StyleTags() []string {
 }
 
 func (theme *theme) MediaStyles(tag string) []struct {
-	Selectors                        string
-	Orientation, MaxWidth, MaxHeight int
+	Selectors string
+	Params    MediaStyleParams
 } {
 	result := []struct {
-		Selectors                        string
-		Orientation, MaxWidth, MaxHeight int
+		Selectors string
+		Params    MediaStyleParams
 	}{}
 
 	prefix := tag + ":"
@@ -439,13 +489,11 @@ func (theme *theme) MediaStyles(tag string) []struct {
 	for themeTag := range theme.styles {
 		if strings.HasPrefix(themeTag, prefix) {
 			result = append(result, struct {
-				Selectors                        string
-				Orientation, MaxWidth, MaxHeight int
+				Selectors string
+				Params    MediaStyleParams
 			}{
-				Selectors:   themeTag[prefixLen:],
-				Orientation: DefaultMedia,
-				MaxWidth:    0,
-				MaxHeight:   0,
+				Selectors: themeTag[prefixLen:],
+				Params:    MediaStyleParams{},
 			})
 		}
 	}
@@ -453,25 +501,21 @@ func (theme *theme) MediaStyles(tag string) []struct {
 	for _, media := range theme.mediaStyles {
 		if _, ok := media.styles[tag]; ok {
 			result = append(result, struct {
-				Selectors                        string
-				Orientation, MaxWidth, MaxHeight int
+				Selectors string
+				Params    MediaStyleParams
 			}{
-				Selectors:   "",
-				Orientation: media.orientation,
-				MaxWidth:    media.maxWidth,
-				MaxHeight:   media.maxHeight,
+				Selectors: "",
+				Params:    media.MediaStyleParams,
 			})
 		}
 		for themeTag := range media.styles {
 			if strings.HasPrefix(themeTag, prefix) {
 				result = append(result, struct {
-					Selectors                        string
-					Orientation, MaxWidth, MaxHeight int
+					Selectors string
+					Params    MediaStyleParams
 				}{
-					Selectors:   themeTag[prefixLen:],
-					Orientation: media.orientation,
-					MaxWidth:    media.maxWidth,
-					MaxHeight:   media.maxHeight,
+					Selectors: themeTag[prefixLen:],
+					Params:    media.MediaStyleParams,
 				})
 			}
 		}
@@ -520,9 +564,11 @@ func (theme *theme) Append(anotherTheme Theme) {
 	for _, anotherMedia := range another.mediaStyles {
 		exists := false
 		for _, media := range theme.mediaStyles {
-			if anotherMedia.maxHeight == media.maxHeight &&
-				anotherMedia.maxWidth == media.maxWidth &&
-				anotherMedia.orientation == media.orientation {
+			if anotherMedia.MinHeight == media.MinHeight &&
+				anotherMedia.MaxHeight == media.MaxHeight &&
+				anotherMedia.MinWidth == media.MinWidth &&
+				anotherMedia.MaxWidth == media.MaxWidth &&
+				anotherMedia.Orientation == media.Orientation {
 				for tag, style := range anotherMedia.styles {
 					media.styles[tag] = style
 				}
@@ -726,13 +772,19 @@ func (theme *theme) addText(themeText string) bool {
 func (theme *theme) sortMediaStyles() {
 	if len(theme.mediaStyles) > 1 {
 		sort.SliceStable(theme.mediaStyles, func(i, j int) bool {
-			if theme.mediaStyles[i].orientation != theme.mediaStyles[j].orientation {
-				return theme.mediaStyles[i].orientation < theme.mediaStyles[j].orientation
+			if theme.mediaStyles[i].Orientation != theme.mediaStyles[j].Orientation {
+				return theme.mediaStyles[i].Orientation < theme.mediaStyles[j].Orientation
 			}
-			if theme.mediaStyles[i].maxWidth != theme.mediaStyles[j].maxWidth {
-				return theme.mediaStyles[i].maxWidth < theme.mediaStyles[j].maxWidth
+			if theme.mediaStyles[i].MinWidth != theme.mediaStyles[j].MinWidth {
+				return theme.mediaStyles[i].MinWidth < theme.mediaStyles[j].MinWidth
 			}
-			return theme.mediaStyles[i].maxHeight < theme.mediaStyles[j].maxHeight
+			if theme.mediaStyles[i].MinHeight != theme.mediaStyles[j].MinHeight {
+				return theme.mediaStyles[i].MinHeight < theme.mediaStyles[j].MinHeight
+			}
+			if theme.mediaStyles[i].MaxWidth != theme.mediaStyles[j].MaxWidth {
+				return theme.mediaStyles[i].MaxWidth < theme.mediaStyles[j].MaxWidth
+			}
+			return theme.mediaStyles[i].MaxHeight < theme.mediaStyles[j].MaxHeight
 		})
 	}
 }
@@ -879,7 +931,7 @@ func (theme *theme) String() string {
 		buffer.WriteString(" = [\n")
 
 		for _, tag := range tags {
-			if style, ok := styles[tag]; ok {
+			if style, ok := styles[tag]; ok && len(style.AllTags()) > 0 {
 				buffer.WriteString("\t\t")
 				writeViewStyle(tag, style, buffer, "\t\t")
 				buffer.WriteString(",\n")
@@ -891,7 +943,53 @@ func (theme *theme) String() string {
 
 	writeStyles(0, 0, 0, theme.styles)
 	for _, media := range theme.mediaStyles {
-		writeStyles(media.orientation, media.maxWidth, media.maxHeight, media.styles)
+		//writeStyles(media.orientation, media.maxWidth, media.maxHeight, media.styles)
+		if count := len(media.styles); count > 0 {
+
+			tags := make([]string, 0, count)
+			for name := range media.styles {
+				tags = append(tags, name)
+			}
+			sort.Strings(tags)
+
+			buffer.WriteString("\tstyles")
+			switch media.Orientation {
+			case PortraitMedia:
+				buffer.WriteString(":portrait")
+
+			case LandscapeMedia:
+				buffer.WriteString(":landscape")
+			}
+
+			if media.MinWidth > 0 {
+				buffer.WriteString(fmt.Sprintf(":width%d-", media.MinWidth))
+				if media.MaxWidth > 0 {
+					buffer.WriteString(strconv.Itoa(media.MaxWidth))
+				}
+			} else if media.MaxWidth > 0 {
+				buffer.WriteString(fmt.Sprintf(":width%d", media.MaxWidth))
+			}
+
+			if media.MinHeight > 0 {
+				buffer.WriteString(fmt.Sprintf(":height%d-", media.MinHeight))
+				if media.MaxHeight > 0 {
+					buffer.WriteString(strconv.Itoa(media.MaxHeight))
+				}
+			} else if media.MaxHeight > 0 {
+				buffer.WriteString(fmt.Sprintf(":height%d", media.MaxHeight))
+			}
+
+			buffer.WriteString(" = [\n")
+
+			for _, tag := range tags {
+				if style, ok := media.styles[tag]; ok && len(style.AllTags()) > 0 {
+					buffer.WriteString("\t\t")
+					writeViewStyle(tag, style, buffer, "\t\t")
+					buffer.WriteString(",\n")
+				}
+			}
+			buffer.WriteString("\t],\n")
+		}
 	}
 
 	buffer.WriteString("}\n")

@@ -5461,9 +5461,17 @@ In addition to general styles, you can add styles for specific work modes. To do
 * ":portrait" or ":landscape" are respectively styles for portrait or landscape mode of the program.
 Attention means the aspect ratio of the program window, not the screen.
 
-* ":width< size >" are styles for a screen whose width does not exceed the specified size in logical pixels.
+* ":width<min-width>-<max-width>" - styles for a screen whose width is in the range specified in logical pixels.
 
-* ":height< size >" are styles for a screen whose height does not exceed the specified size in logical pixels.
+* ":width<max-width>" - styles for a screen whose width does not exceed the specified value in logical pixels.
+
+* ":width<min-width>-" - styles for a screen whose width is greater than the specified value in logical pixels.
+
+* ":height<min-height>-<max-height>" - styles for a screen whose height is in the range specified in logical pixels.
+
+* ":height<max-height>" - styles for a screen whose height does not exceed the specified value in logical pixels.
+
+* ":height<minimum-height>-" - styles for a screen whose height is greater than the specified value in logical pixels.
 
 For example
 
@@ -5495,7 +5503,19 @@ For example
 				width = 100%,
 				height = 50%,
 			},
-		]
+		],
+		styles:portrait:width320-640 = [
+			samplePage {
+				width = 90%,
+				height = 60%,
+			},
+		],
+		styles:portrait:width640- = [
+			samplePage {
+				width = 80%,
+				height = 70%,
+			},
+		],
 	}
 
 ## Standard constants and styles
