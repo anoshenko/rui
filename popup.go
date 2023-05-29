@@ -622,8 +622,8 @@ func (popup *popupData) onDismiss() {
 
 func (popup *popupData) keyEvent(event KeyEvent) bool {
 	if !event.AltKey && !event.CtrlKey && !event.ShiftKey && !event.MetaKey {
-		switch strings.ToLower(event.Code) {
-		case "enter":
+		switch event.Code {
+		case EnterKey:
 			for _, button := range popup.buttons {
 				if button.Type == DefaultButton && button.OnClick != nil {
 					button.OnClick(popup)
@@ -631,7 +631,7 @@ func (popup *popupData) keyEvent(event KeyEvent) bool {
 				}
 			}
 
-		case "escape":
+		case EscapeKey:
 			if popup.cancelable {
 				popup.Dismiss()
 				return true

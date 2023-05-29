@@ -153,7 +153,7 @@ type KeyEvent struct {
 
 	// Code holds a string that identifies the physical key being pressed. The value is not affected
 	// by the current keyboard layout or modifier state, so a particular key will always return the same value.
-	Code string
+	Code KeyCode
 
 	// Repeat == true if a key has been depressed long enough to trigger key repetition, otherwise false.
 	Repeat bool
@@ -180,7 +180,8 @@ func (event *KeyEvent) init(data DataObject) {
 	}
 
 	event.Key, _ = data.PropertyValue("key")
-	event.Code, _ = data.PropertyValue("code")
+	code, _ := data.PropertyValue("code")
+	event.Code = KeyCode(code)
 	event.TimeStamp = getTimeStamp(data)
 	event.Repeat = getBool("repeat")
 	event.CtrlKey = getBool("ctrlKey")
