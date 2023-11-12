@@ -1623,7 +1623,7 @@ You can get the value of this property using the function
 
 #### "text-weight" property
 
-Свойство "text-weight" (константа TextWeight) - свойство типа int устанавливает начертание шрифта. Допустимые значения:
+The "text-weight" int property (TextWeight constant) sets the font style. Valid values:
 
 | Value | Constant       | Common name of the face   |
 |:-----:|----------------|---------------------------|
@@ -4400,7 +4400,7 @@ AudioPlayer and VideoPlayer are elements for audio and video playback.
 Both elements implement the MediaPlayer interface. Most of the properties and all events 
 of AudioPlayer and VideoPlayer are implemented through the MediaPlayer.
 
-### Свойство "src"
+### "src" property
 
 The "src" property (Source constant) specifies one or more media sources. The "src" property can take on the following types:
 
