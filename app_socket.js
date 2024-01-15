@@ -1,5 +1,5 @@
-var socket
-var socketUrl
+let socket
+let socketUrl
 
 function sendMessage(message) {
 	if (socket) {
@@ -10,7 +10,7 @@ function sendMessage(message) {
 window.onload = function() {
 	socketUrl = document.location.protocol == "https:" ? "wss://" : "ws://" 
 	socketUrl += document.location.hostname
-	var port = document.location.port
+	const port = document.location.port
 	if (port) {
 		socketUrl += ":" + port
 	}
