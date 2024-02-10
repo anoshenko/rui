@@ -17,6 +17,7 @@ type wsBridge struct {
 	answer          map[int]chan DataObject
 	answerID        int
 	answerMutex     sync.Mutex
+	writeMutex      sync.Mutex
 	closed          bool
 	buffer          strings.Builder
 	canvasBuffer    strings.Builder
@@ -51,7 +52,8 @@ func CreateSocketBridge(w http.ResponseWriter, req *http.Request) webBridge {
 
 func (bridge *wsBridge) close() {
 	bridge.closed = true
-	bridge.conn.Close()
+	defer bridge.conn.Close()
+	bridge.conn = nil
 }
 
 func (bridge *wsBridge) startUpdateScript(htmlID string) bool {
@@ -60,7 +62,7 @@ func (bridge *wsBridge) startUpdateScript(htmlID string) bool {
 	}
 	buffer := allocStringBuilder()
 	bridge.updateScripts[htmlID] = buffer
-	buffer.WriteString("var element = document.getElementById('")
+	buffer.WriteString("let element = document.getElementById('")
 	buffer.WriteString(htmlID)
 	buffer.WriteString("');\nif (element) {\n")
 	return true
@@ -171,7 +173,11 @@ func (bridge *wsBridge) callFunc(funcName string, args ...any) bool {
 	if ProtocolInDebugLog {
 		DebugLog("Run func: " + funcText)
 	}
-	if err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(funcText)); err != nil {
+
+	bridge.writeMutex.Lock()
+	err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(funcText))
+	bridge.writeMutex.Unlock()
+	if err != nil {
 		ErrorLog(err.Error())
 		return false
 	}
@@ -271,7 +277,7 @@ func (bridge *wsBridge) updateCanvasProperty(property string, value any) {
 func (bridge *wsBridge) createCanvasVar(funcName string, args ...any) any {
 	bridge.canvasVarNumber++
 	result := canvasVar{name: fmt.Sprintf("v%d", bridge.canvasVarNumber)}
-	bridge.canvasBuffer.WriteString("\nvar ")
+	bridge.canvasBuffer.WriteString("\nlet ")
 	bridge.canvasBuffer.WriteString(result.name)
 	bridge.canvasBuffer.WriteString(" = ctx.")
 	bridge.canvasBuffer.WriteString(funcName)
@@ -335,11 +341,13 @@ func (bridge *wsBridge) canvasFinish() {
 		DebugLog("Run script:")
 		DebugLog(script)
 	}
+	bridge.writeMutex.Lock()
 	if bridge.conn == nil {
 		ErrorLog("No connection")
 	} else if err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(script)); err != nil {
 		ErrorLog(err.Error())
 	}
+	bridge.writeMutex.Unlock()
 }
 
 func (bridge *wsBridge) readMessage() (string, bool) {
@@ -363,7 +371,10 @@ func (bridge *wsBridge) writeMessage(script string) bool {
 		ErrorLog("No connection")
 		return false
 	}
-	if err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(script)); err != nil {
+	bridge.writeMutex.Lock()
+	err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(script))
+	bridge.writeMutex.Unlock()
+	if err != nil {
 		ErrorLog(err.Error())
 		return false
 	}
