@@ -169,10 +169,10 @@ func (app *application) socketReader(bridge webBridge) {
 				session.handleAnswer(obj)
 
 			case "imageLoaded":
-				session.imageManager().imageLoaded(obj, session)
+				session.imageManager().imageLoaded(obj)
 
 			case "imageError":
-				session.imageManager().imageLoadError(obj, session)
+				session.imageManager().imageLoadError(obj)
 
 			default:
 				events <- obj
@@ -295,7 +295,7 @@ func OpenBrowser(url string) bool {
 	case "linux":
 		for _, provider := range []string{"xdg-open", "x-www-browser", "www-browser"} {
 			if _, err = exec.LookPath(provider); err == nil {
-				if exec.Command(provider, url).Start(); err == nil {
+				if err = exec.Command(provider, url).Start(); err == nil {
 					return true
 				}
 			}
