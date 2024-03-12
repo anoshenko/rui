@@ -38,9 +38,12 @@ type AppParams struct {
 	KeyFile string
 	// Redirect80 - if true then the function of redirect from port 80 to 443 is created
 	Redirect80 bool
+	// NoSocket - if true then WebSockets will not be used and information exchange
+	// between the client and the server will be carried out only via http.
+	NoSocket bool
 }
 
-func getStartPage(buffer *strings.Builder, params AppParams, addScripts string) {
+func getStartPage(buffer *strings.Builder, params AppParams) {
 	buffer.WriteString(`<head>
 		<meta charset="utf-8">
 		<title>`)
@@ -67,11 +70,7 @@ func getStartPage(buffer *strings.Builder, params AppParams, addScripts string) 
 	buffer.WriteString(appStyles)
 	buffer.WriteString(`</style>
 		<style id="ruiAnimations"></style>
-		<script>
-`)
-	buffer.WriteString(defaultScripts)
-	buffer.WriteString(addScripts)
-	buffer.WriteString(`</script>
+		<script src="/script.js"></script>
 	</head>
 	<body id="body" onkeydown="keyDownEvent(this, event)">
 		<div class="ruiRoot" id="ruiRootView"></div>

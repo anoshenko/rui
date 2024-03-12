@@ -80,6 +80,7 @@ func (manager *imageManager) loadImage(url string, onLoaded func(Image), session
 	manager.images[url] = image
 
 	session.callFunc("loadImage", url)
+	session.sendResponse()
 	return image
 }
 

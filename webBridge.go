@@ -12,17 +12,30 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type webBridge struct {
+	answer              map[int]chan DataObject
+	answerID            int
+	answerMutex         sync.Mutex
+	writeMutex          sync.Mutex
+	closed              bool
+	canvasBuffer        strings.Builder
+	canvasVarNumber     int
+	updateScripts       map[string]*strings.Builder
+	writeMessage        func(string) bool
+	callFuncImmediately func(funcName string, args ...any) bool
+}
+
 type wsBridge struct {
-	conn            *websocket.Conn
-	answer          map[int]chan DataObject
-	answerID        int
-	answerMutex     sync.Mutex
-	writeMutex      sync.Mutex
-	closed          bool
-	buffer          strings.Builder
-	canvasBuffer    strings.Builder
-	canvasVarNumber int
-	updateScripts   map[string]*strings.Builder
+	webBridge
+	conn *websocket.Conn
+}
+
+type httpBridge struct {
+	webBridge
+	responseBuffer strings.Builder
+	response       chan string
+	remoteAddress  string
+	//conn *websocket.Conn
 }
 
 type canvasVar struct {
@@ -34,7 +47,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 8096,
 }
 
-func CreateSocketBridge(w http.ResponseWriter, req *http.Request) webBridge {
+func createSocketBridge(w http.ResponseWriter, req *http.Request) *wsBridge {
 	conn, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		ErrorLog(err.Error())
@@ -42,42 +55,84 @@ func CreateSocketBridge(w http.ResponseWriter, req *http.Request) webBridge {
 	}
 
 	bridge := new(wsBridge)
-	bridge.answerID = 1
-	bridge.answer = make(map[int]chan DataObject)
+	bridge.initBridge()
 	bridge.conn = conn
-	bridge.closed = false
-	bridge.updateScripts = map[string]*strings.Builder{}
+	bridge.writeMessage = func(script string) bool {
+		if ProtocolInDebugLog {
+			DebugLog("🖥️ <- " + script)
+		}
+
+		if bridge.conn == nil {
+			ErrorLog("No connection")
+			return false
+		}
+
+		bridge.writeMutex.Lock()
+		err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(script))
+		bridge.writeMutex.Unlock()
+
+		if err != nil {
+			ErrorLog(err.Error())
+			return false
+		}
+		return true
+	}
+	bridge.callFuncImmediately = bridge.callFunc
 	return bridge
 }
 
-func (bridge *wsBridge) close() {
-	bridge.closed = true
-	defer bridge.conn.Close()
-	bridge.conn = nil
+func createHttpBridge(req *http.Request) *httpBridge {
+	bridge := new(httpBridge)
+	bridge.initBridge()
+	bridge.response = make(chan string, 10)
+	bridge.writeMessage = func(script string) bool {
+		if script != "" {
+			if ProtocolInDebugLog {
+				DebugLog(script)
+			}
+
+			if bridge.responseBuffer.Len() > 0 {
+				bridge.responseBuffer.WriteRune('\n')
+			}
+			bridge.responseBuffer.WriteString(script)
+		}
+		return true
+	}
+	bridge.callFuncImmediately = bridge.callImmediately
+	bridge.remoteAddress = req.RemoteAddr
+	return bridge
 }
 
-func (bridge *wsBridge) startUpdateScript(htmlID string) bool {
+func (bridge *webBridge) initBridge() {
+	bridge.answerID = 1
+	bridge.answer = make(map[int]chan DataObject)
+	bridge.closed = false
+	bridge.updateScripts = map[string]*strings.Builder{}
+}
+
+func (bridge *webBridge) startUpdateScript(htmlID string) bool {
 	if _, ok := bridge.updateScripts[htmlID]; ok {
 		return false
 	}
 	buffer := allocStringBuilder()
 	bridge.updateScripts[htmlID] = buffer
-	buffer.WriteString("let element = document.getElementById('")
+	buffer.WriteString("{\nlet element = document.getElementById('")
 	buffer.WriteString(htmlID)
 	buffer.WriteString("');\nif (element) {\n")
 	return true
 }
 
-func (bridge *wsBridge) finishUpdateScript(htmlID string) {
+func (bridge *webBridge) finishUpdateScript(htmlID string) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
-		buffer.WriteString("scanElementsSize();\n}\n")
+		buffer.WriteString("scanElementsSize();\n}\n}\n")
 		bridge.writeMessage(buffer.String())
+
 		freeStringBuilder(buffer)
 		delete(bridge.updateScripts, htmlID)
 	}
 }
 
-func (bridge *wsBridge) argToString(arg any) (string, bool) {
+func (bridge *webBridge) argToString(arg any) (string, bool) {
 	switch arg := arg.(type) {
 	case string:
 		arg = strings.ReplaceAll(arg, "\\", `\\`)
@@ -152,47 +207,44 @@ func (bridge *wsBridge) argToString(arg any) (string, bool) {
 	return "", false
 }
 
-func (bridge *wsBridge) callFunc(funcName string, args ...any) bool {
-	bridge.buffer.Reset()
-	bridge.buffer.WriteString(funcName)
-	bridge.buffer.WriteRune('(')
+func (bridge *webBridge) callFuncScript(funcName string, args ...any) (string, bool) {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	buffer.WriteString(funcName)
+	buffer.WriteRune('(')
 	for i, arg := range args {
 		argText, ok := bridge.argToString(arg)
 		if !ok {
-			return false
+			return "", false
 		}
 
 		if i > 0 {
-			bridge.buffer.WriteString(", ")
+			buffer.WriteString(", ")
 		}
-		bridge.buffer.WriteString(argText)
+		buffer.WriteString(argText)
 	}
-	bridge.buffer.WriteString(");")
+	buffer.WriteString(");")
 
-	funcText := bridge.buffer.String()
-	if ProtocolInDebugLog {
-		DebugLog("Run func: " + funcText)
-	}
-
-	bridge.writeMutex.Lock()
-	err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(funcText))
-	bridge.writeMutex.Unlock()
-	if err != nil {
-		ErrorLog(err.Error())
-		return false
-	}
-	return true
+	return buffer.String(), true
 }
 
-func (bridge *wsBridge) updateInnerHTML(htmlID, html string) {
+func (bridge *webBridge) callFunc(funcName string, args ...any) bool {
+	if funcText, ok := bridge.callFuncScript(funcName, args...); ok {
+		return bridge.writeMessage(funcText)
+	}
+	return false
+}
+
+func (bridge *webBridge) updateInnerHTML(htmlID, html string) {
 	bridge.callFunc("updateInnerHTML", htmlID, html)
 }
 
-func (bridge *wsBridge) appendToInnerHTML(htmlID, html string) {
+func (bridge *webBridge) appendToInnerHTML(htmlID, html string) {
 	bridge.callFunc("appendToInnerHTML", htmlID, html)
 }
 
-func (bridge *wsBridge) updateCSSProperty(htmlID, property, value string) {
+func (bridge *webBridge) updateCSSProperty(htmlID, property, value string) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
 		buffer.WriteString(`element.style['`)
 		buffer.WriteString(property)
@@ -204,7 +256,7 @@ func (bridge *wsBridge) updateCSSProperty(htmlID, property, value string) {
 	}
 }
 
-func (bridge *wsBridge) updateProperty(htmlID, property string, value any) {
+func (bridge *webBridge) updateProperty(htmlID, property string, value any) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
 		if val, ok := bridge.argToString(value); ok {
 			buffer.WriteString(`element.setAttribute('`)
@@ -218,7 +270,7 @@ func (bridge *wsBridge) updateProperty(htmlID, property string, value any) {
 	}
 }
 
-func (bridge *wsBridge) removeProperty(htmlID, property string) {
+func (bridge *webBridge) removeProperty(htmlID, property string) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
 		buffer.WriteString(`if (element.hasAttribute('`)
 		buffer.WriteString(property)
@@ -230,28 +282,34 @@ func (bridge *wsBridge) removeProperty(htmlID, property string) {
 	}
 }
 
-func (bridge *wsBridge) addAnimationCSS(css string) {
-	bridge.writeMessage(`var styles = document.getElementById('ruiAnimations');
-if (styles) {
-	styles.textContent += '` + css + `';
+func (bridge *webBridge) appendAnimationCSS(css string) {
+	//bridge.callFunc("appendAnimationCSS", css)
+	bridge.writeMessage(`{
+	let styles = document.getElementById('ruiAnimations');
+	if (styles) {
+		styles.textContent += '` + css + `';
+	}
 }`)
 }
 
-func (bridge *wsBridge) clearAnimation() {
-	bridge.writeMessage(`var styles = document.getElementById('ruiAnimations');
-if (styles) {
-	styles.textContent = '';
+func (bridge *webBridge) setAnimationCSS(css string) {
+	//bridge.callFunc("setAnimationCSS", css)
+	bridge.writeMessage(`{
+	let styles = document.getElementById('ruiAnimations');
+	if (styles) {
+		styles.textContent = '` + css + `';
+	}
 }`)
 }
 
-func (bridge *wsBridge) canvasStart(htmlID string) {
+func (bridge *webBridge) canvasStart(htmlID string) {
 	bridge.canvasBuffer.Reset()
-	bridge.canvasBuffer.WriteString(`const ctx = getCanvasContext('`)
+	bridge.canvasBuffer.WriteString("{\nconst ctx = getCanvasContext('")
 	bridge.canvasBuffer.WriteString(htmlID)
 	bridge.canvasBuffer.WriteString(`');`)
 }
 
-func (bridge *wsBridge) callCanvasFunc(funcName string, args ...any) {
+func (bridge *webBridge) callCanvasFunc(funcName string, args ...any) {
 	bridge.canvasBuffer.WriteString("\nctx.")
 	bridge.canvasBuffer.WriteString(funcName)
 	bridge.canvasBuffer.WriteRune('(')
@@ -265,7 +323,7 @@ func (bridge *wsBridge) callCanvasFunc(funcName string, args ...any) {
 	bridge.canvasBuffer.WriteString(");")
 }
 
-func (bridge *wsBridge) updateCanvasProperty(property string, value any) {
+func (bridge *webBridge) updateCanvasProperty(property string, value any) {
 	bridge.canvasBuffer.WriteString("\nctx.")
 	bridge.canvasBuffer.WriteString(property)
 	bridge.canvasBuffer.WriteString(" = ")
@@ -274,7 +332,7 @@ func (bridge *wsBridge) updateCanvasProperty(property string, value any) {
 	bridge.canvasBuffer.WriteString(";")
 }
 
-func (bridge *wsBridge) createCanvasVar(funcName string, args ...any) any {
+func (bridge *webBridge) createCanvasVar(funcName string, args ...any) any {
 	bridge.canvasVarNumber++
 	result := canvasVar{name: fmt.Sprintf("v%d", bridge.canvasVarNumber)}
 	bridge.canvasBuffer.WriteString("\nlet ")
@@ -293,7 +351,7 @@ func (bridge *wsBridge) createCanvasVar(funcName string, args ...any) any {
 	return result
 }
 
-func (bridge *wsBridge) callCanvasVarFunc(v any, funcName string, args ...any) {
+func (bridge *webBridge) callCanvasVarFunc(v any, funcName string, args ...any) {
 	varName, ok := v.(canvasVar)
 	if !ok {
 		return
@@ -313,7 +371,7 @@ func (bridge *wsBridge) callCanvasVarFunc(v any, funcName string, args ...any) {
 	bridge.canvasBuffer.WriteString(");")
 }
 
-func (bridge *wsBridge) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
+func (bridge *webBridge) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
 
 	bridge.canvasBuffer.WriteString("\nimg = images.get('")
 	bridge.canvasBuffer.WriteString(url)
@@ -334,56 +392,12 @@ func (bridge *wsBridge) callCanvasImageFunc(url string, property string, funcNam
 	bridge.canvasBuffer.WriteString(");\n}")
 }
 
-func (bridge *wsBridge) canvasFinish() {
-	bridge.canvasBuffer.WriteString("\n")
-	script := bridge.canvasBuffer.String()
-	if ProtocolInDebugLog {
-		DebugLog("Run script:")
-		DebugLog(script)
-	}
-	bridge.writeMutex.Lock()
-	if bridge.conn == nil {
-		ErrorLog("No connection")
-	} else if err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(script)); err != nil {
-		ErrorLog(err.Error())
-	}
-	bridge.writeMutex.Unlock()
+func (bridge *webBridge) canvasFinish() {
+	bridge.canvasBuffer.WriteString("\n}\n")
+	bridge.writeMessage(bridge.canvasBuffer.String())
 }
 
-func (bridge *wsBridge) readMessage() (string, bool) {
-	_, p, err := bridge.conn.ReadMessage()
-	if err != nil {
-		if !bridge.closed {
-			ErrorLog(err.Error())
-		}
-		return "", false
-	}
-
-	return string(p), true
-}
-
-func (bridge *wsBridge) writeMessage(script string) bool {
-	if ProtocolInDebugLog {
-		DebugLog("Run script:")
-		DebugLog(script)
-	}
-	if bridge.conn == nil {
-		ErrorLog("No connection")
-		return false
-	}
-	bridge.writeMutex.Lock()
-	err := bridge.conn.WriteMessage(websocket.TextMessage, []byte(script))
-	bridge.writeMutex.Unlock()
-	if err != nil {
-		ErrorLog(err.Error())
-		return false
-	}
-	return true
-}
-
-func (bridge *wsBridge) canvasTextMetrics(htmlID, font, text string) TextMetrics {
-	result := TextMetrics{}
-
+func (bridge *webBridge) removeValue(funcName, htmlID string, args ...string) (DataObject, bool) {
 	bridge.answerMutex.Lock()
 	answerID := bridge.answerID
 	bridge.answerID++
@@ -392,36 +406,40 @@ func (bridge *wsBridge) canvasTextMetrics(htmlID, font, text string) TextMetrics
 	answer := make(chan DataObject)
 	bridge.answer[answerID] = answer
 
-	if bridge.callFunc("canvasTextMetrics", answerID, htmlID, font, text) {
-		data := <-answer
-		result.Width = dataFloatProperty(data, "width")
+	funcArgs := []any{answerID, htmlID}
+	for _, arg := range args {
+		funcArgs = append(funcArgs, arg)
 	}
 
+	var result DataObject = nil
+	ok := bridge.callFuncImmediately(funcName, funcArgs...)
+	if ok {
+		result = <-answer
+	}
+
+	close(answer)
 	delete(bridge.answer, answerID)
+	return result, true
+}
+
+func (bridge *webBridge) canvasTextMetrics(htmlID, font, text string) TextMetrics {
+	result := TextMetrics{}
+	if data, ok := bridge.removeValue("canvasTextMetrics", htmlID, font, text); ok {
+		result.Width = dataFloatProperty(data, "width")
+	}
 	return result
 }
 
-func (bridge *wsBridge) htmlPropertyValue(htmlID, name string) string {
-	bridge.answerMutex.Lock()
-	answerID := bridge.answerID
-	bridge.answerID++
-	bridge.answerMutex.Unlock()
-
-	answer := make(chan DataObject)
-	bridge.answer[answerID] = answer
-
-	if bridge.callFunc("getPropertyValue", answerID, htmlID, name) {
-		data := <-answer
+func (bridge *webBridge) htmlPropertyValue(htmlID, name string) string {
+	if data, ok := bridge.removeValue("getPropertyValue", htmlID, name); ok {
 		if value, ok := data.PropertyValue("value"); ok {
 			return value
 		}
 	}
-
-	delete(bridge.answer, answerID)
 	return ""
 }
 
-func (bridge *wsBridge) answerReceived(answer DataObject) {
+func (bridge *webBridge) answerReceived(answer DataObject) {
 	if text, ok := answer.PropertyValue("answerID"); ok {
 		if id, err := strconv.Atoi(text); err == nil {
 			if chanel, ok := bridge.answer[id]; ok {
@@ -438,6 +456,55 @@ func (bridge *wsBridge) answerReceived(answer DataObject) {
 	}
 }
 
+func (bridge *wsBridge) close() {
+	bridge.closed = true
+	defer bridge.conn.Close()
+	bridge.conn = nil
+}
+
+func (bridge *wsBridge) readMessage() (string, bool) {
+	_, p, err := bridge.conn.ReadMessage()
+	if err != nil {
+		if !bridge.closed {
+			ErrorLog(err.Error())
+		}
+		return "", false
+	}
+
+	return string(p), true
+}
+
+func (bridge *wsBridge) sendResponse() {
+}
+
 func (bridge *wsBridge) remoteAddr() string {
 	return bridge.conn.RemoteAddr().String()
+}
+
+func (bridge *httpBridge) close() {
+	bridge.closed = true
+	// TODO
+}
+
+func (bridge *httpBridge) callImmediately(funcName string, args ...any) bool {
+	if funcText, ok := bridge.callFuncScript(funcName, args...); ok {
+		if ProtocolInDebugLog {
+			DebugLog("Run func: " + funcText)
+		}
+		bridge.response <- funcText
+		return true
+	}
+	return false
+}
+
+func (bridge *httpBridge) sendResponse() {
+	bridge.writeMutex.Lock()
+	text := bridge.responseBuffer.String()
+	bridge.responseBuffer.Reset()
+	bridge.writeMutex.Unlock()
+	bridge.response <- text
+}
+
+func (bridge *httpBridge) remoteAddr() string {
+	return bridge.remoteAddress
 }

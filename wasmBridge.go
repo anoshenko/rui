@@ -16,7 +16,7 @@ type wasmBridge struct {
 	closeEvent chan DataObject
 }
 
-func createWasmBridge(close chan DataObject) webBridge {
+func createWasmBridge(close chan DataObject) bridge {
 	bridge := new(wasmBridge)
 	bridge.answerID = 1
 	bridge.answer = make(map[int]chan DataObject)
@@ -102,10 +102,6 @@ func (bridge *wasmBridge) close() {
 	bridge.closeEvent <- NewDataObject("close")
 }
 
-func (bridge *wasmBridge) readMessage() (string, bool) {
-	return "", false
-}
-
 func (bridge *wasmBridge) writeMessage(script string) bool {
 	if ProtocolInDebugLog {
 		DebugLog("Run script:")
@@ -118,21 +114,24 @@ func (bridge *wasmBridge) writeMessage(script string) bool {
 	return true
 }
 
-func (bridge *wasmBridge) addAnimationCSS(css string) {
+func (bridge *wasmBridge) prepareCSS(css string) string {
 	css = strings.ReplaceAll(css, `\t`, "\t")
 	css = strings.ReplaceAll(css, `\n`, "\n")
 	css = strings.ReplaceAll(css, `\'`, "'")
 	css = strings.ReplaceAll(css, `\"`, "\"")
 	css = strings.ReplaceAll(css, `\\`, "\\")
-
-	styles := js.Global().Get("document").Call("getElementById", "ruiAnimations")
-	content := styles.Get("textContent").String()
-	styles.Set("textContent", content+"\n"+css)
+	return css
 }
 
-func (bridge *wasmBridge) clearAnimation() {
+func (bridge *wasmBridge) appendAnimationCSS(css string) {
 	styles := js.Global().Get("document").Call("getElementById", "ruiAnimations")
-	styles.Set("textContent", "")
+	content := styles.Get("textContent").String()
+	styles.Set("textContent", content+"\n"+bridge.prepareCSS(css))
+}
+
+func (bridge *wasmBridge) setAnimationCSS(css string) {
+	styles := js.Global().Get("document").Call("getElementById", "ruiAnimations")
+	styles.Set("textContent", bridge.prepareCSS(css))
 }
 
 func (bridge *wasmBridge) canvasStart(htmlID string) {
@@ -275,4 +274,7 @@ func (bridge *wasmBridge) answerReceived(answer DataObject) {
 
 func (bridge *wasmBridge) remoteAddr() string {
 	return "localhost"
+}
+
+func (bridge *wasmBridge) sendResponse() {
 }

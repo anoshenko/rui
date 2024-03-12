@@ -1902,8 +1902,26 @@ function getPropertyValue(answerID, elementId, name) {
 	sendMessage('answer{answerID=' + answerID + ', value=""}')
 }
 
+function setStyles(styles) {
+	document.querySelector('style').textContent = styles
+}
+
 function appendStyles(styles) {
 	document.querySelector('style').textContent += styles
+}
+
+function appendAnimationCSS(css) {
+	let styles = document.getElementById('ruiAnimations');
+	if (styles) {
+		styles.textContent += css;
+	}
+}
+
+function setAnimationCSS(css) {
+	let styles = document.getElementById('ruiAnimations');
+	if (styles) {
+		styles.textContent = css;
+	}
 }
 
 function getCanvasContext(elementId) {

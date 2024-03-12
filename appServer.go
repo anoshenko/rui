@@ -20,6 +20,9 @@ import (
 //go:embed app_socket.js
 var socketScripts string
 
+//go:embed app_post.js
+var httpPostScripts string
+
 func debugLog(text string) {
 	log.Println("\033[34m" + text)
 }
@@ -28,11 +31,16 @@ func errorLog(text string) {
 	log.Println("\033[31m" + text)
 }
 
+type sessionInfo struct {
+	session  Session
+	response chan string
+}
+
 type application struct {
 	server            *http.Server
 	params            AppParams
 	createContentFunc func(Session) SessionContent
-	sessions          map[int]Session
+	sessions          map[int]sessionInfo
 }
 
 func (app *application) getStartPage() string {
@@ -40,14 +48,18 @@ func (app *application) getStartPage() string {
 	defer freeStringBuilder(buffer)
 
 	buffer.WriteString("<!DOCTYPE html>\n<html>\n")
-	getStartPage(buffer, app.params, socketScripts)
+	getStartPage(buffer, app.params)
 	buffer.WriteString("\n</html>")
 	return buffer.String()
 }
 
 func (app *application) Finish() {
 	for _, session := range app.sessions {
-		session.close()
+		session.session.close()
+		if session.response != nil {
+			close(session.response)
+			session.response = nil
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -69,7 +81,12 @@ func (app *application) nextSessionID() int {
 }
 
 func (app *application) removeSession(id int) {
-	delete(app.sessions, id)
+	if info, ok := app.sessions[id]; ok {
+		if info.response != nil {
+			close(info.response)
+		}
+		delete(app.sessions, id)
+	}
 }
 
 func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -79,6 +96,11 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	switch req.Method {
+	case "POST":
+		if req.URL.Path == "/" {
+			app.postHandler(w, req)
+		}
+
 	case "GET":
 		switch req.URL.Path {
 		case "/":
@@ -86,9 +108,19 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			io.WriteString(w, app.getStartPage())
 
 		case "/ws":
-			if bridge := CreateSocketBridge(w, req); bridge != nil {
+			if bridge := createSocketBridge(w, req); bridge != nil {
 				go app.socketReader(bridge)
 			}
+
+		case "/script.js":
+			w.WriteHeader(http.StatusOK)
+			if app.params.NoSocket {
+				io.WriteString(w, httpPostScripts)
+			} else {
+				io.WriteString(w, socketScripts)
+			}
+			io.WriteString(w, "\n")
+			io.WriteString(w, defaultScripts)
 
 		default:
 			filename := req.URL.Path[1:]
@@ -104,7 +136,92 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (app *application) socketReader(bridge webBridge) {
+func setSessionIDCookie(w http.ResponseWriter, sessionID int) {
+	cookie := http.Cookie{
+		Name:     "session",
+		Value:    strconv.Itoa(sessionID),
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+}
+
+func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
+
+	if reqBody, err := io.ReadAll(req.Body); err == nil {
+		message := string(reqBody)
+
+		if ProtocolInDebugLog {
+			DebugLog(message)
+		}
+
+		if obj := ParseDataText(message); obj != nil {
+			var session Session = nil
+			var response chan string = nil
+
+			if cookie, err := req.Cookie("session"); err == nil {
+				sessionID, err := strconv.Atoi(cookie.Value)
+				if err != nil {
+					ErrorLog(err.Error())
+				} else if info, ok := app.sessions[sessionID]; ok && info.response != nil {
+					response = info.response
+					session = info.session
+				}
+			}
+
+			command := obj.Tag()
+
+			if session == nil {
+				switch command {
+				case "startSession":
+					events := make(chan DataObject, 1024)
+					bridge := createHttpBridge(req)
+					response = bridge.response
+					answer := ""
+					session, answer = app.startSession(obj, events, bridge, response)
+
+					bridge.writeMessage(answer)
+					session.onStart()
+					bridge.sendResponse()
+
+					setSessionIDCookie(w, session.ID())
+
+					go sessionEventHandler(session, events, bridge)
+
+				default:
+					return
+				}
+			}
+
+			switch command {
+			case "startSession":
+
+			case "nop":
+				session.sendResponse()
+				/*
+					case "disconnect":
+						session.onDisconnect()
+						return
+				*/
+			case "session-close":
+				session.onFinish()
+				session.App().removeSession(session.ID())
+				return
+
+			default:
+				if !session.handleAnswer(command, obj) {
+					session.addToEventsQueue(obj)
+				}
+			}
+
+			io.WriteString(w, <-response)
+			for len(response) > 0 {
+				io.WriteString(w, <-response)
+			}
+		}
+	}
+}
+
+func (app *application) socketReader(bridge *wsBridge) {
 	var session Session
 	events := make(chan DataObject, 1024)
 
@@ -116,7 +233,7 @@ func (app *application) socketReader(bridge webBridge) {
 		}
 
 		if ProtocolInDebugLog {
-			DebugLog(message)
+			DebugLog("🖥️ -> " + message)
 		}
 
 		if obj := ParseDataText(message); obj != nil {
@@ -124,7 +241,7 @@ func (app *application) socketReader(bridge webBridge) {
 			switch command {
 			case "startSession":
 				answer := ""
-				if session, answer = app.startSession(obj, events, bridge); session != nil {
+				if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
 					if !bridge.writeMessage(answer) {
 						return
 					}
@@ -135,7 +252,8 @@ func (app *application) socketReader(bridge webBridge) {
 			case "reconnect":
 				if sessionText, ok := obj.PropertyValue("session"); ok {
 					if sessionID, err := strconv.Atoi(sessionText); err == nil {
-						if session = app.sessions[sessionID]; session != nil {
+						if info, ok := app.sessions[sessionID]; ok {
+							session := info.session
 							session.setBridge(events, bridge)
 							answer := allocStringBuilder()
 							defer freeStringBuilder(answer)
@@ -157,7 +275,7 @@ func (app *application) socketReader(bridge webBridge) {
 				}
 
 				answer := ""
-				if session, answer = app.startSession(obj, events, bridge); session != nil {
+				if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
 					if !bridge.writeMessage(answer) {
 						return
 					}
@@ -165,23 +283,16 @@ func (app *application) socketReader(bridge webBridge) {
 					go sessionEventHandler(session, events, bridge)
 				}
 
-			case "answer":
-				session.handleAnswer(obj)
-
-			case "imageLoaded":
-				session.imageManager().imageLoaded(obj)
-
-			case "imageError":
-				session.imageManager().imageLoadError(obj)
-
 			default:
-				events <- obj
+				if !session.handleAnswer(command, obj) {
+					events <- obj
+				}
 			}
 		}
 	}
 }
 
-func sessionEventHandler(session Session, events chan DataObject, bridge webBridge) {
+func sessionEventHandler(session Session, events chan DataObject, bridge bridge) {
 	for {
 		data := <-events
 
@@ -201,7 +312,9 @@ func sessionEventHandler(session Session, events chan DataObject, bridge webBrid
 	}
 }
 
-func (app *application) startSession(params DataObject, events chan DataObject, bridge webBridge) (Session, string) {
+func (app *application) startSession(params DataObject, events chan DataObject,
+	bridge bridge, response chan string) (Session, string) {
+
 	if app.createContentFunc == nil {
 		return nil, ""
 	}
@@ -212,7 +325,10 @@ func (app *application) startSession(params DataObject, events chan DataObject, 
 		return nil, ""
 	}
 
-	app.sessions[session.ID()] = session
+	app.sessions[session.ID()] = sessionInfo{
+		session:  session,
+		response: response,
+	}
 
 	answer := allocStringBuilder()
 	defer freeStringBuilder(answer)
@@ -236,7 +352,7 @@ var apps = []*application{}
 func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
 	app := new(application)
 	app.params = params
-	app.sessions = map[int]Session{}
+	app.sessions = map[int]sessionInfo{}
 	app.createContentFunc = createContentFunc
 	apps = append(apps, app)
 
