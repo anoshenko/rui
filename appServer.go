@@ -169,47 +169,42 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 			}
 
 			command := obj.Tag()
+			startSession := false
 
-			if session == nil {
-				switch command {
-				case "startSession":
-					events := make(chan DataObject, 1024)
-					bridge := createHttpBridge(req)
-					response = bridge.response
-					answer := ""
-					session, answer = app.startSession(obj, events, bridge, response)
+			if session == nil || command == "startSession" {
+				events := make(chan DataObject, 1024)
+				bridge := createHttpBridge(req)
+				response = bridge.response
+				answer := ""
+				session, answer = app.startSession(obj, events, bridge, response)
 
-					bridge.writeMessage(answer)
-					session.onStart()
-					bridge.sendResponse()
-
-					setSessionIDCookie(w, session.ID())
-
-					go sessionEventHandler(session, events, bridge)
-
-				default:
-					return
+				bridge.writeMessage(answer)
+				session.onStart()
+				if command == "session-resume" {
+					session.onResume()
 				}
+				bridge.sendResponse()
+
+				setSessionIDCookie(w, session.ID())
+				startSession = true
+
+				go sessionEventHandler(session, events, bridge)
 			}
 
-			switch command {
-			case "startSession":
+			if !startSession {
+				switch command {
+				case "nop":
+					session.sendResponse()
 
-			case "nop":
-				session.sendResponse()
-				/*
-					case "disconnect":
-						session.onDisconnect()
-						return
-				*/
-			case "session-close":
-				session.onFinish()
-				session.App().removeSession(session.ID())
-				return
+				case "session-close":
+					session.onFinish()
+					session.App().removeSession(session.ID())
+					return
 
-			default:
-				if !session.handleAnswer(command, obj) {
-					session.addToEventsQueue(obj)
+				default:
+					if !session.handleAnswer(command, obj) {
+						session.addToEventsQueue(obj)
+					}
 				}
 			}
 

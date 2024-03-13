@@ -526,7 +526,9 @@ func (session *sessionData) htmlPropertyValue(htmlID, name string) string {
 func (session *sessionData) handleAnswer(command string, data DataObject) bool {
 	switch command {
 	case "answer":
-		session.bridge.answerReceived(data)
+		if session.bridge != nil {
+			session.bridge.answerReceived(data)
+		}
 
 	case "imageLoaded":
 		session.imageManager().imageLoaded(data)
@@ -538,7 +540,9 @@ func (session *sessionData) handleAnswer(command string, data DataObject) bool {
 		return false
 	}
 
-	session.bridge.sendResponse()
+	if session.bridge != nil {
+		session.bridge.sendResponse()
+	}
 	return true
 }
 

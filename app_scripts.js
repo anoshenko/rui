@@ -5,11 +5,11 @@ window.onresize = function() {
 	scanElementsSize();
 }
 
-window.onbeforeunload = function(event) {
+window.onbeforeunload = function() {
 	sendMessage( "session-close{session=" + sessionID +"}" );
 }
 
-window.onblur = function(event) {
+window.onblur = function() {
 	windowFocus = false
 	sendMessage( "session-pause{session=" + sessionID +"}" );
 }
