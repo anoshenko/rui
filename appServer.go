@@ -156,14 +156,7 @@ func (app *application) socketReader(bridge webBridge) {
 					ErrorLog(`"session" key not found`)
 				}
 
-				answer := ""
-				if session, answer = app.startSession(obj, events, bridge); session != nil {
-					if !bridge.writeMessage(answer) {
-						return
-					}
-					session.onStart()
-					go sessionEventHandler(session, events, bridge)
-				}
+				bridge.writeMessage("restartSession();")
 
 			case "answer":
 				session.handleAnswer(obj)
