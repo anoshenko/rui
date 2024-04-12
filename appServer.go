@@ -288,7 +288,7 @@ func OpenBrowser(url string) bool {
 	case "linux":
 		for _, provider := range []string{"xdg-open", "x-www-browser", "www-browser"} {
 			if _, err = exec.LookPath(provider); err == nil {
-				if exec.Command(provider, url).Start(); err == nil {
+				if err = exec.Command(provider, url).Start(); err == nil {
 					return true
 				}
 			}

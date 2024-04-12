@@ -311,7 +311,11 @@ function keyEvent(element, event, tag) {
 		message += ",timeStamp=" + event.timeStamp;
 	}
 	if (event.key) {
-		message += ",key=\"" + event.key + "\"";
+		if (event.key == '"') {
+			message += ",key=`" + event.key + "`";
+		} else {
+			message += ",key=\"" + event.key + "\"";
+		}
 	}
 	if (event.code) {
 		message += ",code=\"" + event.code + "\"";
