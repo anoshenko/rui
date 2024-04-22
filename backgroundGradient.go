@@ -224,6 +224,33 @@ func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
 	return 0, false
 }
 
+func (point *BackgroundGradientPoint) String() string {
+	result := "black"
+	if point.Color != nil {
+		switch color := point.Color.(type) {
+		case string:
+			result = color
+
+		case Color:
+			result = color.String()
+		}
+	}
+
+	if point.Pos != nil {
+		switch value := point.Pos.(type) {
+		case string:
+			result += " " + value
+
+		case SizeUnit:
+			if value.Type != Auto {
+				result += " " + value.String()
+			}
+		}
+	}
+
+	return result
+}
+
 func (gradient *backgroundGradient) writeGradient(session Session, buffer *strings.Builder) bool {
 
 	value, ok := gradient.properties[Gradient]
@@ -367,6 +394,21 @@ func (gradient *backgroundLinearGradient) cssStyle(session Session) string {
 	}
 
 	buffer.WriteString(") ")
+	return buffer.String()
+}
+
+func (gradient *backgroundLinearGradient) writeString(buffer *strings.Builder, indent string) {
+	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []string{
+		Gradient,
+		Repeating,
+		Direction,
+	})
+}
+
+func (gradient *backgroundLinearGradient) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	gradient.writeString(buffer, "")
 	return buffer.String()
 }
 
@@ -608,5 +650,22 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 
 	buffer.WriteString(") ")
 
+	return buffer.String()
+}
+func (gradient *backgroundRadialGradient) writeString(buffer *strings.Builder, indent string) {
+	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []string{
+		Gradient,
+		CenterX,
+		CenterY,
+		Repeating,
+		RadialGradientShape,
+		RadialGradientRadius,
+	})
+}
+
+func (gradient *backgroundRadialGradient) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	gradient.writeString(buffer, "")
 	return buffer.String()
 }

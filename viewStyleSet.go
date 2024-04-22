@@ -32,42 +32,52 @@ func (style *viewStyle) setRange(tag string, value any) bool {
 }
 
 func (style *viewStyle) setBackground(value any) bool {
+	background := []BackgroundElement{}
+
 	switch value := value.(type) {
 	case BackgroundElement:
-		style.properties[Background] = []BackgroundElement{value}
-		return true
+		background = []BackgroundElement{value}
 
 	case []BackgroundElement:
-		style.properties[Background] = value
-		return true
+		background = value
+
+	case []DataValue:
+		for _, el := range value {
+			if el.IsObject() {
+				if element := createBackground(el.Object()); element != nil {
+					background = append(background, element)
+				}
+			} else if obj := ParseDataText(el.Value()); obj != nil {
+				if element := createBackground(obj); element != nil {
+					background = append(background, element)
+				}
+			}
+		}
 
 	case DataObject:
 		if element := createBackground(value); element != nil {
-			style.properties[Background] = []BackgroundElement{element}
-			return true
+			background = []BackgroundElement{element}
 		}
 
 	case []DataObject:
 		for _, obj := range value {
-			background := []BackgroundElement{}
 			if element := createBackground(obj); element != nil {
 				background = append(background, element)
-			}
-			if len(background) > 0 {
-				style.properties[Background] = background
-				return true
 			}
 		}
 
 	case string:
 		if obj := ParseDataText(value); obj != nil {
 			if element := createBackground(obj); element != nil {
-				style.properties[Background] = []BackgroundElement{element}
-				return true
+				background = []BackgroundElement{element}
 			}
 		}
 	}
 
+	if len(background) > 0 {
+		style.properties[Background] = background
+		return true
+	}
 	return false
 }
 

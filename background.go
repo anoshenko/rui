@@ -1,6 +1,9 @@
 package rui
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	// NoRepeat is value of the Repeat property of an background image:
@@ -61,6 +64,8 @@ const (
 // BackgroundElement describes the background element.
 type BackgroundElement interface {
 	Properties
+	fmt.Stringer
+	stringWriter
 	cssStyle(session Session) string
 	Tag() string
 	Clone() BackgroundElement
@@ -238,4 +243,24 @@ func (image *backgroundImage) cssStyle(session Session) string {
 	}
 
 	return ""
+}
+
+func (image *backgroundImage) writeString(buffer *strings.Builder, indent string) {
+	image.writeToBuffer(buffer, indent, image.Tag(), []string{
+		Source,
+		Width,
+		Height,
+		ImageHorizontalAlign,
+		ImageVerticalAlign,
+		backgroundFit,
+		Repeat,
+		Attachment,
+	})
+}
+
+func (image *backgroundImage) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	image.writeString(buffer, "")
+	return buffer.String()
 }

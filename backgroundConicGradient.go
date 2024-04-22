@@ -336,3 +336,19 @@ func (gradient *backgroundConicGradient) cssStyle(session Session) string {
 
 	return buffer.String()
 }
+
+func (gradient *backgroundConicGradient) writeString(buffer *strings.Builder, indent string) {
+	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []string{
+		Gradient,
+		CenterX,
+		CenterY,
+		Repeating,
+	})
+}
+
+func (gradient *backgroundConicGradient) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	gradient.writeString(buffer, "")
+	return buffer.String()
+}

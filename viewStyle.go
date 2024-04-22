@@ -573,6 +573,9 @@ func supportedPropertyValue(value any) bool {
 	case []ViewShadow:
 	case []View:
 	case []any:
+	case []BackgroundElement:
+	case []BackgroundGradientPoint:
+	case []BackgroundGradientAngle:
 	case map[string]Animation:
 	default:
 		return false
@@ -701,7 +704,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 	case []View:
 		switch len(value) {
 		case 0:
-			buffer.WriteString("[]\n")
+			buffer.WriteString("[]")
 
 		case 1:
 			writeViewStyle(value[0].Tag(), value[0], buffer, indent)
@@ -739,6 +742,47 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			}
 			buffer.WriteString(" ]")
 		}
+
+	case []BackgroundElement:
+		switch len(value) {
+		case 0:
+			buffer.WriteString("[]\n")
+
+		case 1:
+			value[0].writeString(buffer, indent)
+
+		default:
+			buffer.WriteString("[\n")
+			indent2 := indent + "\t"
+			for _, element := range value {
+				buffer.WriteString(indent2)
+				element.writeString(buffer, indent2)
+				buffer.WriteString(",\n")
+			}
+
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
+
+	case []BackgroundGradientPoint:
+		buffer.WriteRune('"')
+		for i, point := range value {
+			if i > 0 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString(point.String())
+		}
+		buffer.WriteRune('"')
+
+	case []BackgroundGradientAngle:
+		buffer.WriteRune('"')
+		for i, point := range value {
+			if i > 0 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString(point.String())
+		}
+		buffer.WriteRune('"')
 
 	case map[string]Animation:
 		switch count := len(value); count {
