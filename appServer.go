@@ -269,14 +269,7 @@ func (app *application) socketReader(bridge *wsBridge) {
 					ErrorLog(`"session" key not found`)
 				}
 
-				answer := ""
-				if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
-					if !bridge.writeMessage(answer) {
-						return
-					}
-					session.onStart()
-					go sessionEventHandler(session, events, bridge)
-				}
+				bridge.writeMessage("restartSession();")
 
 			default:
 				if !session.handleAnswer(command, obj) {

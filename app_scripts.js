@@ -73,6 +73,10 @@ function sessionInfo() {
 	return message + "}";
 }
 
+function restartSession() {
+	sendMessage( sessionInfo() );
+}
+
 function getIntAttribute(element, tag) {
 	let value = element.getAttribute(tag);
 	if (value) {
