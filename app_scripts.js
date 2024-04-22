@@ -1861,6 +1861,28 @@ function imageError(element, event) {
 	sendMessage(message);
 }
 
+let timers = new Map();
+
+function startTimer(ms, timerID) {
+	let data = {
+		id: setInterval(timerFunc, ms, timerID),
+		ms: ms,
+	};
+	timers.set(timerID, data);
+}
+
+function timerFunc(timerID) {
+	sendMessage("timer{session=" + sessionID + ",timerID=" + timerID + "}");
+}
+
+function stopTimer(timerID) {
+	let timer = timers.get(timerID);
+	if (timer) {
+		clearInterval(timer.id);
+		timers.delete(timerID);
+	}
+}
+
 function canvasTextMetrics(answerID, elementId, font, text) {
 	let w = 0;
 	let ascent = 0;

@@ -110,6 +110,14 @@ type Session interface {
 	// Invoke SetHotKey(..., ..., nil) for remove hotkey function.
 	SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Session))
 
+	// StartTimer starts a timer on the client side.
+	// The first argument specifies the timer period in milliseconds.
+	// The second argument specifies a function that will be called on each timer event.
+	// The result is the id of the timer, which is used to stop the timer
+	StartTimer(ms int, timerFunc func(Session)) int
+	// StopTimer the timer with the given id
+	StopTimer(timerID int)
+
 	getCurrentTheme() Theme
 	registerAnimation(props []AnimatedProperty) string
 
@@ -197,6 +205,8 @@ type sessionData struct {
 	updateScripts    map[string]*strings.Builder
 	clientStorage    map[string]string
 	hotkeys          map[string]func(Session)
+	timers           map[int]func(Session)
+	nextTimerID      int
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -215,6 +225,8 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.updateScripts = map[string]*strings.Builder{}
 	session.clientStorage = map[string]string{}
 	session.hotkeys = map[string]func(Session){}
+	session.timers = map[int]func(Session){}
+	session.nextTimerID = 1
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {
@@ -664,6 +676,22 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 	case "session-resume":
 		session.onResume()
 
+	case "timer":
+		if text, ok := data.PropertyValue("timerID"); ok {
+			timerID, err := strconv.Atoi(text)
+			if err == nil {
+				if fn, ok := session.timers[timerID]; ok {
+					fn(session)
+				} else {
+					ErrorLog(`Timer (id = ` + text + `) not exists`)
+				}
+			} else {
+				ErrorLog(err.Error())
+			}
+		} else {
+			ErrorLog(`"timerID" property not found`)
+		}
+
 	case "root-size":
 		session.handleRootSize(data)
 
@@ -796,4 +824,22 @@ func (session *sessionData) RemoveAllClientItems() {
 
 func (session *sessionData) addToEventsQueue(data DataObject) {
 	session.events <- data
+}
+
+func (session *sessionData) StartTimer(ms int, timerFunc func(Session)) int {
+	timerID := 0
+	if session.bridge != nil {
+		timerID = session.nextTimerID
+		session.nextTimerID++
+		session.timers[timerID] = timerFunc
+		session.bridge.callFunc("startTimer", ms, timerID)
+	}
+	return timerID
+}
+
+func (session *sessionData) StopTimer(timerID int) {
+	if session.bridge != nil {
+		session.bridge.callFunc("stopTimer", timerID)
+		delete(session.timers, timerID)
+	}
 }

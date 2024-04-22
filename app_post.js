@@ -1,16 +1,15 @@
 
-function sendMessage(message) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', '/', true);
-    xhr.onreadystatechange = function() {
-		const script = this.responseText
-		if (script != "") {
-        	window.eval(script)
-			//sendMessage("nop{session=" + sessionID +"}")
-		}
-        
-    }
-    xhr.send(message);
+async function sendMessage(message) {
+	const response = await fetch('/', {
+		method			: 'POST',
+		body			: message,
+		"Content-Type"	: "text/plain",
+	  });
+
+	const text = await response.text();
+	if (text != "") {
+		window.eval(text)
+	}
 }
 
 window.onload = function() {

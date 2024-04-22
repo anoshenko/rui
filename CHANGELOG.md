@@ -1,3 +1,12 @@
+# v0.14.0
+* Added the ability to work without creating a WebSocket. Added NoSocket property of AppParams.
+* Added the ability to run a timer on the client side. Added StartTimer and StopTimer methods to Session interface.
+* Bug fixing
+
+# v0.13.x
+* Added NewHandler function
+* Bug fixing
+
 # v0.13.0
 
 * Added SetHotKey function to Session interface

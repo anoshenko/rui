@@ -397,7 +397,7 @@ func (bridge *webBridge) canvasFinish() {
 	bridge.writeMessage(bridge.canvasBuffer.String())
 }
 
-func (bridge *webBridge) removeValue(funcName, htmlID string, args ...string) (DataObject, bool) {
+func (bridge *webBridge) remoteValue(funcName string, args ...any) (DataObject, bool) {
 	bridge.answerMutex.Lock()
 	answerID := bridge.answerID
 	bridge.answerID++
@@ -406,11 +406,7 @@ func (bridge *webBridge) removeValue(funcName, htmlID string, args ...string) (D
 	answer := make(chan DataObject)
 	bridge.answer[answerID] = answer
 
-	funcArgs := []any{answerID, htmlID}
-	for _, arg := range args {
-		funcArgs = append(funcArgs, arg)
-	}
-
+	funcArgs := append([]any{answerID}, args...)
 	var result DataObject = nil
 	ok := bridge.callFuncImmediately(funcName, funcArgs...)
 	if ok {
@@ -424,14 +420,14 @@ func (bridge *webBridge) removeValue(funcName, htmlID string, args ...string) (D
 
 func (bridge *webBridge) canvasTextMetrics(htmlID, font, text string) TextMetrics {
 	result := TextMetrics{}
-	if data, ok := bridge.removeValue("canvasTextMetrics", htmlID, font, text); ok {
+	if data, ok := bridge.remoteValue("canvasTextMetrics", htmlID, font, text); ok {
 		result.Width = dataFloatProperty(data, "width")
 	}
 	return result
 }
 
 func (bridge *webBridge) htmlPropertyValue(htmlID, name string) string {
-	if data, ok := bridge.removeValue("getPropertyValue", htmlID, name); ok {
+	if data, ok := bridge.remoteValue("getPropertyValue", htmlID, name); ok {
 		if value, ok := data.PropertyValue("value"); ok {
 			return value
 		}
