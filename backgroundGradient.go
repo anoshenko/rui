@@ -406,10 +406,7 @@ func (gradient *backgroundLinearGradient) writeString(buffer *strings.Builder, i
 }
 
 func (gradient *backgroundLinearGradient) String() string {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-	gradient.writeString(buffer, "")
-	return buffer.String()
+	return runStringWriter(gradient)
 }
 
 func (gradient *backgroundRadialGradient) Tag() string {
@@ -664,8 +661,5 @@ func (gradient *backgroundRadialGradient) writeString(buffer *strings.Builder, i
 }
 
 func (gradient *backgroundRadialGradient) String() string {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-	gradient.writeString(buffer, "")
-	return buffer.String()
+	return runStringWriter(gradient)
 }

@@ -347,8 +347,5 @@ func (gradient *backgroundConicGradient) writeString(buffer *strings.Builder, in
 }
 
 func (gradient *backgroundConicGradient) String() string {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-	gradient.writeString(buffer, "")
-	return buffer.String()
+	return runStringWriter(gradient)
 }

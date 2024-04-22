@@ -695,6 +695,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			for _, shadow := range value {
 				buffer.WriteString(indent2)
 				shadow.writeString(buffer, indent)
+				buffer.WriteRune(',')
 			}
 			buffer.WriteRune('\n')
 			buffer.WriteString(indent)

@@ -259,8 +259,5 @@ func (image *backgroundImage) writeString(buffer *strings.Builder, indent string
 }
 
 func (image *backgroundImage) String() string {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-	image.writeString(buffer, "")
-	return buffer.String()
+	return runStringWriter(image)
 }
