@@ -517,19 +517,30 @@ func GetHint(view View, subviewID ...string) string {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
+
+	session := view.Session()
+	text := ""
 	if view != nil {
-		if text, ok := stringProperty(view, Hint, view.Session()); ok {
-			return text
-		}
-		if value := valueFromStyle(view, Hint); value != nil {
-			if text, ok := value.(string); ok {
-				if text, ok = view.Session().resolveConstants(text); ok {
-					return text
+		var ok bool
+		text, ok = stringProperty(view, Hint, view.Session())
+		if !ok {
+			if value := valueFromStyle(view, Hint); value != nil {
+				if text, ok = value.(string); ok {
+					if text, ok = session.resolveConstants(text); !ok {
+						text = ""
+					}
+				} else {
+					text = ""
 				}
 			}
 		}
 	}
-	return ""
+
+	if text != "" && !GetNotTranslate(view) {
+		text, _ = session.GetString(text)
+	}
+
+	return text
 }
 
 // GetMaxLength returns a maximal length of EditView. If a maximal length is not limited  then 0 is returned
