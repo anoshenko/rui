@@ -83,6 +83,7 @@ func newFilePicker(session Session) View {
 func (picker *filePickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "FilePicker"
+	picker.hasHtmlDisabled = true
 	picker.files = []FileInfo{}
 	picker.loader = map[int]func(FileInfo, []byte){}
 	picker.fileSelectedListeners = []func(FilePicker, []FileInfo){}
@@ -258,13 +259,6 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
-}
-
-func (picker *filePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
-		buffer.WriteString(` disabled`)
-	}
-	picker.viewData.htmlDisabledProperties(self, buffer)
 }
 
 func (picker *filePickerData) handleCommand(self View, command string, data DataObject) bool {

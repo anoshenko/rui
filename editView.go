@@ -58,6 +58,7 @@ func newEditView(session Session) View {
 
 func (edit *editViewData) init(session Session) {
 	edit.viewData.init(session)
+	edit.hasHtmlDisabled = true
 	edit.textChangeListeners = []func(EditView, string, string){}
 	edit.tag = "EditView"
 }
@@ -464,13 +465,6 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 			buffer.WriteByte('"')
 		}
 	}
-}
-
-func (edit *editViewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
-		buffer.WriteString(` disabled`)
-	}
-	edit.viewData.htmlDisabledProperties(self, buffer)
 }
 
 func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {

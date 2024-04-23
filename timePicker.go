@@ -40,6 +40,7 @@ func newTimePicker(session Session) View {
 func (picker *timePickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "TimePicker"
+	picker.hasHtmlDisabled = true
 	picker.timeChangedListeners = []func(TimePicker, time.Time, time.Time){}
 }
 
@@ -289,13 +290,6 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
-}
-
-func (picker *timePickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
-		buffer.WriteString(` disabled`)
-	}
-	picker.viewData.htmlDisabledProperties(self, buffer)
 }
 
 func (picker *timePickerData) handleCommand(self View, command string, data DataObject) bool {

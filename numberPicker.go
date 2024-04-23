@@ -47,6 +47,7 @@ func newNumberPicker(session Session) View {
 func (picker *numberPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "NumberPicker"
+	picker.hasHtmlDisabled = true
 	picker.numberChangedListeners = []func(NumberPicker, float64, float64){}
 }
 
@@ -230,13 +231,6 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
-}
-
-func (picker *numberPickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
-		buffer.WriteString(` disabled`)
-	}
-	picker.viewData.htmlDisabledProperties(self, buffer)
 }
 
 func (picker *numberPickerData) handleCommand(self View, command string, data DataObject) bool {

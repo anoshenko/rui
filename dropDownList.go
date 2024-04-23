@@ -39,6 +39,7 @@ func newDropDownList(session Session) View {
 func (list *dropDownListData) init(session Session) {
 	list.viewData.init(session)
 	list.tag = "DropDownList"
+	list.hasHtmlDisabled = true
 	list.items = []string{}
 	list.disabledItems = []any{}
 	list.dropDownListener = []func(DropDownList, int, int){}
@@ -368,13 +369,6 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 func (list *dropDownListData) htmlProperties(self View, buffer *strings.Builder) {
 	list.viewData.htmlProperties(self, buffer)
 	buffer.WriteString(` size="1" onchange="dropDownListEvent(this, event)"`)
-}
-
-func (list *dropDownListData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	list.viewData.htmlDisabledProperties(self, buffer)
-	if IsDisabled(list) {
-		buffer.WriteString(`disabled`)
-	}
 }
 
 func (list *dropDownListData) onSelectedItemChanged(number, old int) {
