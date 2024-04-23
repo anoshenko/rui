@@ -35,24 +35,33 @@ type View interface {
 
 	// Session returns the current Session interface
 	Session() Session
+
 	// Parent returns the parent view
 	Parent() View
+
 	// Tag returns the tag of View interface
 	Tag() string
+
 	// ID returns the id of the view
 	ID() string
+
 	// Focusable returns true if the view receives the focus
 	Focusable() bool
+
 	// Frame returns the location and size of the view in pixels
 	Frame() Frame
+
 	// Scroll returns the location size of the scrollable view in pixels
 	Scroll() Frame
+
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
 	SetAnimated(tag string, value any, animation Animation) bool
+
 	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag string, listener func(View, string))
+
 	// HasFocus returns 'true' if the view has focus
 	HasFocus() bool
 

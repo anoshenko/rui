@@ -13,15 +13,18 @@ const (
 	// to control audio/video playback, including volume, seeking, and pause/resume playback.
 	// Its default value is false.
 	Controls = "controls"
+
 	// Loop is the constant for the "loop" property tag.
 	// If the "loop" bool property is "true", the audio/video player will automatically seek back
 	// to the start upon reaching the end of the audio/video.
 	// Its default value is false.
 	Loop = "loop"
+
 	// Muted is the constant for the "muted" property tag.
 	// The "muted" bool property indicates whether the audio/video will be initially silenced.
 	// Its default value is false.
 	Muted = "muted"
+
 	// Preload is the constant for the "preload" property tag.
 	// The "preload" int property is intended to provide a hint to the browser about what
 	// the author thinks will lead to the best user experience. It may have one of the following values:
@@ -32,72 +35,94 @@ const (
 	// AbortEvent is the constant for the "abort-event" property tag.
 	// The "abort-event" event fired when the resource was not fully loaded, but not as the result of an error.
 	AbortEvent = "abort-event"
+
 	// CanPlayEvent is the constant for the "can-play-event" property tag.
 	// The "can-play-event" event occurs when the browser can play the media, but estimates that not enough data has been
 	// loaded to play the media up to its end without having to stop for further buffering of content.
 	CanPlayEvent = "can-play-event"
+
 	// CanPlayThroughEvent is the constant for the "can-play-through-event" property tag.
 	// The "can-play-through-event" event occurs when the browser estimates it can play the media up
 	// to its end without stopping for content buffering.
 	CanPlayThroughEvent = "can-play-through-event"
+
 	// CompleteEvent is the constant for the "complete-event" property tag.
 	// The "complete-event" event occurs when the rendering of an OfflineAudioContext is terminated.
 	CompleteEvent = "complete-event"
+
 	// DurationChangedEvent is the constant for the "duration-changed-event" property tag.
 	// The "duration-changed-event" event occurs when the duration attribute has been updated.
 	DurationChangedEvent = "duration-changed-event"
+
 	// EmptiedEvent is the constant for the "emptied-event" property tag.
 	// The "emptied-event" event occurs when the media has become empty; for example, this event is sent if the media has already been loaded
 	// (or partially loaded), and the HTMLMediaElement.load method is called to reload it.
 	EmptiedEvent = "emptied-event"
+
 	// EndedEvent is the constant for the "ended-event" property tag.
 	// The "ended-event" event occurs when the playback has stopped because the end of the media was reached.
 	EndedEvent = "ended-event"
+
 	// LoadedDataEvent is the constant for the "loaded-data-event" property tag.
 	// The "loaded-data-event" event occurs when the first frame of the media has finished loading.
 	LoadedDataEvent = "loaded-data-event"
+
 	// LoadedMetadataEvent is the constant for the "loaded-metadata-event" property tag.
 	// The "loaded-metadata-event" event occurs when the metadata has been loaded.
 	LoadedMetadataEvent = "loaded-metadata-event"
+
 	// LoadStartEvent is the constant for the "load-start-event" property tag.
 	// The "load-start-event" event is fired when the browser has started to load a resource.
 	LoadStartEvent = "load-start-event"
+
 	// PauseEvent is the constant for the "pause-event" property tag.
 	// The "pause-event" event occurs when the playback has been paused.
 	PauseEvent = "pause-event"
+
 	// PlayEvent is the constant for the "play-event" property tag.
 	// The "play-event" event occurs when the playback has begun.
 	PlayEvent = "play-event"
+
 	// PlayingEvent is the constant for the "playing-event" property tag.
 	// The "playing-event" event occurs when the playback is ready to start after having been paused or delayed due to lack of data.
 	PlayingEvent = "playing-event"
+
 	// ProgressEvent is the constant for the "progress-event" property tag.
 	// The "progress-event" event is fired periodically as the browser loads a resource.
 	ProgressEvent = "progress-event"
+
 	// RateChangeEvent is the constant for the "rate-change-event" property tag.
 	// The "rate-change-event" event occurs when the playback rate has changed.
 	RateChangedEvent = "rate-changed-event"
+
 	// SeekedEvent is the constant for the "seeked-event" property tag.
 	// The "seeked-event" event occurs when a seek operation completed.
 	SeekedEvent = "seeked-event"
+
 	// SeekingEvent is the constant for the "seeking-event" property tag.
 	// The "seeking-event" event occurs when a seek operation began.
 	SeekingEvent = "seeking-event"
+
 	// StalledEvent is the constant for the "stalled-event" property tag.
 	// The "stalled-event" event occurs when the user agent is trying to fetch media data, but data is unexpectedly not forthcoming.
 	StalledEvent = "stalled-event"
+
 	// SuspendEvent is the constant for the "suspend-event" property tag.
 	// The "suspend-event" event occurs when the media data loading has been suspended.
 	SuspendEvent = "suspend-event"
+
 	// TimeUpdateEvent is the constant for the "time-update-event" property tag.
 	// The "time-update-event" event occurs when the time indicated by the currentTime attribute has been updated.
 	TimeUpdateEvent = "time-update-event"
+
 	// VolumeChangedEvent is the constant for the "volume-change-event" property tag.
 	// The "volume-change-event" event occurs when the volume has changed.
 	VolumeChangedEvent = "volume-changed-event"
+
 	// WaitingEvent is the constant for the "waiting-event" property tag.
 	// The "waiting-event" event occurs when the playback has stopped because of a temporary lack of data
 	WaitingEvent = "waiting-event"
+
 	// PlayerErrorEvent is the constant for the "player-error-event" property tag.
 	// The "player-error-event" event is fired when the resource could not be loaded due to an error
 	// (for example, a network connectivity problem).
@@ -105,51 +130,68 @@ const (
 
 	// PreloadNone - value of the view "preload" property: indicates that the audio/video should not be preloaded.
 	PreloadNone = 0
+
 	// PreloadMetadata - value of the view "preload" property: indicates that only audio/video metadata (e.g. length) is fetched.
 	PreloadMetadata = 1
+
 	// PreloadAuto - value of the view "preload" property: indicates that the whole audio file can be downloaded,
 	// even if the user is not expected to use it.
 	PreloadAuto = 2
 
 	// PlayerErrorUnknown - MediaPlayer error code: An unknown error.
 	PlayerErrorUnknown = 0
+
 	// PlayerErrorAborted - MediaPlayer error code: The fetching of the associated resource was aborted by the user's request.
 	PlayerErrorAborted = 1
+
 	// PlayerErrorNetwork - MediaPlayer error code: Some kind of network error occurred which prevented the media
 	// from being successfully fetched, despite having previously been available.
 	PlayerErrorNetwork = 2
+
 	// PlayerErrorDecode - MediaPlayer error code: Despite having previously been determined to be usable,
 	// an error occurred while trying to decode the media resource, resulting in an error.
 	PlayerErrorDecode = 3
+
 	// PlayerErrorSourceNotSupported - MediaPlayer error code: The associated resource or media provider object has been found to be unsuitable.
 	PlayerErrorSourceNotSupported = 4
 )
 
 type MediaPlayer interface {
 	View
+
 	// Play attempts to begin playback of the media.
 	Play()
+
 	// Pause will pause playback of the media, if the media is already in a paused state this method will have no effect.
 	Pause()
+
 	// SetCurrentTime sets the current playback time in seconds.
 	SetCurrentTime(seconds float64)
+
 	// CurrentTime returns the current playback time in seconds.
 	CurrentTime() float64
+
 	// Duration returns the value indicating the total duration of the media in seconds.
 	// If no media data is available, the returned value is NaN.
 	Duration() float64
+
 	// SetPlaybackRate sets the rate at which the media is being played back. This is used to implement user controls
 	// for fast forward, slow motion, and so forth. The normal playback rate is multiplied by this value to obtain
 	// the current rate, so a value of 1.0 indicates normal speed.
 	SetPlaybackRate(rate float64)
+
 	// PlaybackRate returns the rate at which the media is being played back.
 	PlaybackRate() float64
+
 	// SetVolume sets the audio volume, from 0.0 (silent) to 1.0 (loudest).
 	SetVolume(volume float64)
+
 	// Volume returns the audio volume, from 0.0 (silent) to 1.0 (loudest).
 	Volume() float64
+
 	// IsEnded function tells whether the media element is ended.
 	IsEnded() bool
+
 	// IsPaused function tells whether the media element is paused.
 	IsPaused() bool
 }

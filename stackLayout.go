@@ -22,10 +22,33 @@ const (
 // StackLayout - list-container of View
 type StackLayout interface {
 	ViewsContainer
+
+	// Peek returns the current (visible) View. If StackLayout is empty then it returns nil.
 	Peek() View
+
+	// RemovePeek removes the current View and returns it. If StackLayout is empty then it doesn't do anything and returns nil.
+	RemovePeek() View
+
+	// MoveToFront makes the given View current. Returns true if successful, false otherwise.
 	MoveToFront(view View) bool
+
+	// MoveToFrontByID makes the View current by viewID. Returns true if successful, false otherwise.
 	MoveToFrontByID(viewID string) bool
+
+	// Push adds a new View to the container and makes it current.
+	// It is similar to Append, but the addition is done using an animation effect.
+	// The animation type is specified by the second argument and can take the following values:
+	// * DefaultAnimation (0) - Default animation. For the Push function it is EndToStartAnimation, for Pop - StartToEndAnimation;
+	// * StartToEndAnimation (1) - Animation from beginning to end. The beginning and the end are determined by the direction of the text output;
+	// * EndToStartAnimation (2) - End-to-Beginning animation;
+	// * TopDownAnimation (3) - Top-down animation;
+	// * BottomUpAnimation (4) - Bottom up animation.
+	// The third argument `onPushFinished` is the function to be called when the animation ends. It may be nil.
 	Push(view View, animation int, onPushFinished func())
+
+	// Pop removes the current View from the container using animation.
+	// The second argument `onPopFinished`` is the function to be called when the animation ends. It may be nil.
+	// The function will return false if the StackLayout is empty and true if the current item has been removed.
 	Pop(animation int, onPopFinished func(View)) bool
 }
 
@@ -275,6 +298,10 @@ func (layout *stackLayoutData) RemoveView(index int) View {
 	}
 	defer layout.propertyChangedEvent(Current)
 	return layout.viewsContainerData.RemoveView(index)
+}
+
+func (layout *stackLayoutData) RemovePeek() View {
+	return layout.RemoveView(len(layout.views) - 1)
 }
 
 func (layout *stackLayoutData) Push(view View, animation int, onPushFinished func()) {

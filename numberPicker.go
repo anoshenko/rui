@@ -7,17 +7,37 @@ import (
 )
 
 const (
+	// NumberChangedEvent is the constant for the "" property tag.
+	// The "number-changed" property sets listener(s) that track the change in the entered value.
 	NumberChangedEvent = "number-changed"
-	NumberPickerType   = "number-picker-type"
-	NumberPickerMin    = "number-picker-min"
-	NumberPickerMax    = "number-picker-max"
-	NumberPickerStep   = "number-picker-step"
-	NumberPickerValue  = "number-picker-value"
+
+	// NumberPickerType is the constant for the "number-picker-type" property tag.
+	// The "number-picker-type" int property sets the mode of NumberPicker. It can take the following values:
+	// * NumberEditor (0) - NumberPicker is presented by editor. Default value;
+	// * NumberSlider (1) - NumberPicker is presented by slider.                     |
+	NumberPickerType = "number-picker-type"
+
+	// NumberPickerMin is the constant for the "number-picker-min" property tag.
+	// The "number-picker-min" int property sets the minimum value of NumberPicker. The default value is 0.
+	NumberPickerMin = "number-picker-min"
+
+	// NumberPickerMax is the constant for the "number-picker-max" property tag.
+	// The "number-picker-max" int property sets the maximum value of NumberPicker. The default value is 1.
+	NumberPickerMax = "number-picker-max"
+
+	// NumberPickerStep is the constant for the "number-picker-step" property tag.
+	// The "number-picker-step" int property sets the value change step of NumberPicker
+	NumberPickerStep = "number-picker-step"
+
+	// NumberPickerValue is the constant for the "number-picker-value" property tag.
+	// The "number-picker-value" int property sets the current value of NumberPicker. The default value is 0.
+	NumberPickerValue = "number-picker-value"
 )
 
 const (
 	// NumberEditor - type of NumberPicker. NumberPicker is presented by editor
 	NumberEditor = 0
+
 	// NumberSlider - type of NumberPicker. NumberPicker is presented by slider
 	NumberSlider = 1
 )

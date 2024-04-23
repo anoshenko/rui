@@ -13,8 +13,10 @@ type ViewStyle interface {
 
 	// Transition returns the transition animation of the property. Returns nil is there is no transition animation.
 	Transition(tag string) Animation
+
 	// Transitions returns the map of transition animations. The result is always non-nil.
 	Transitions() map[string]Animation
+
 	// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
 	// removes the transition animation of the property if "animation" argument  is nil.
 	// The "tag" argument is the property name.
