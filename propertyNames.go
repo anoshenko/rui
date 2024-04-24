@@ -666,7 +666,8 @@ const (
 
 	// Resize is the constant for the "resize" property tag.
 	// The "resize" int property sets whether an element is resizable, and if so, in which directions.
-	// Valid values are "none" (0), "both" (1), horizontal (2), and "vertical" (3)
+	// Valid values are "none" / NoneResize (0), "both" / BothResize (1),
+	// "horizontal" / HorizontalResize (2), and "vertical" / VerticalResize (3)
 	Resize = "resize"
 
 	// UserSelect is the constant for the "user-select" property tag.

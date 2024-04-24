@@ -57,9 +57,10 @@ button {
 
 textarea {
   margin: 2px;
-  padding: 1px;
+  padding: 4px;
   overflow: auto;
   font-size: inherit;
+  resize: none;
 }
 
 ul:focus {
