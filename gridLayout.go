@@ -5,6 +5,44 @@ import (
 	"strings"
 )
 
+const (
+	// CellVerticalAlign is the constant for the "cell-vertical-align" property tag.
+	// The "cell-vertical-align" int property sets the default vertical alignment
+	// of GridLayout children within the cell they are occupying. Valid values:
+	// * TopAlign (0) / "top"
+	// * BottomAlign (1) / "bottom"
+	// * CenterAlign (2) / "center", and
+	// * StretchAlign (2) / "stretch"
+	CellVerticalAlign = "cell-vertical-align"
+
+	// CellHorizontalAlign is the constant for the "cell-horizontal-align" property tag.
+	// The "cell-horizontal-align" int property sets the default horizontal alignment
+	// of GridLayout children within the occupied cell. Valid values:
+	// * LeftAlign (0) / "left"
+	// * RightAlign (1) / "right"
+	// * CenterAlign (2) / "center"
+	// * StretchAlign (3) / "stretch"
+	CellHorizontalAlign = "cell-horizontal-align"
+
+	// CellVerticalSelfAlign is the constant for the "cell-vertical-self-align" property tag.
+	// The "cell-vertical-align" int property sets the vertical alignment of GridLayout children
+	// within the cell they are occupying. The property is set for the child view of GridLayout. Valid values:
+	// * TopAlign (0) / "top"
+	// * BottomAlign (1) / "bottom"
+	// * CenterAlign (2) / "center", and
+	// * StretchAlign (2) / "stretch"
+	CellVerticalSelfAlign = "cell-vertical-self-align"
+
+	// CellHorizontalSelfAlign is the constant for the "cell-horizontal-self-align" property tag.
+	// The "cell-horizontal-self align" int property sets the horizontal alignment of GridLayout children
+	// within the occupied cell. The property is set for the child view of GridLayout. Valid values:
+	// * LeftAlign (0) / "left"
+	// * RightAlign (1) / "right"
+	// * CenterAlign (2) / "center"
+	// * StretchAlign (3) / "stretch"
+	CellHorizontalSelfAlign = "cell-horizontal-self-align"
+)
+
 // GridLayout - grid-container of View
 type GridLayout interface {
 	ViewsContainer

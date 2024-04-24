@@ -650,6 +650,8 @@ func viewPropertyChanged(view *viewData, tag string) {
 	case ZIndex, Order, TabSize:
 		if i, ok := intProperty(view, tag, session, 0); ok {
 			session.updateCSSProperty(htmlID, tag, strconv.Itoa(i))
+		} else {
+			session.updateCSSProperty(htmlID, tag, "")
 		}
 		return
 
@@ -697,8 +699,11 @@ func viewPropertyChanged(view *viewData, tag string) {
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {
-		size, _ := sizeProperty(view, tag, session)
-		session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
+		if size, ok := sizeProperty(view, tag, session); ok {
+			session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
+		} else {
+			session.updateCSSProperty(htmlID, cssTag, "")
+		}
 		return
 	}
 
@@ -719,8 +724,11 @@ func viewPropertyChanged(view *viewData, tag string) {
 	}
 
 	if valuesData, ok := enumProperties[tag]; ok && valuesData.cssTag != "" {
-		n, _ := enumProperty(view, tag, session, 0)
-		session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
+		if n, ok := enumProperty(view, tag, session, 0); ok {
+			session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
+		} else {
+			session.updateCSSProperty(htmlID, valuesData.cssTag, "")
+		}
 		return
 	}
 
@@ -728,6 +736,8 @@ func viewPropertyChanged(view *viewData, tag string) {
 		if tag == floatTag {
 			if f, ok := floatTextProperty(view, floatTag, session, 0); ok {
 				session.updateCSSProperty(htmlID, floatTag, f)
+			} else {
+				session.updateCSSProperty(htmlID, floatTag, "")
 			}
 			return
 		}

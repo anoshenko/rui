@@ -11,22 +11,23 @@ const (
 	// The "side" int property determines which side of the container is used to resize.
 	// The value of property is or-combination of TopSide (1), RightSide (2), BottomSide (4), and LeftSide (8)
 	Side = "side"
+
 	// ResizeBorderWidth is the constant for the "resize-border-width" property tag.
 	// The "ResizeBorderWidth" SizeUnit property determines the width of the resizing border
 	ResizeBorderWidth = "resize-border-width"
-	// CellVerticalAlign is the constant for the "cell-vertical-align" property tag.
-	CellVerticalAlign = "cell-vertical-align"
-	// CellHorizontalAlign is the constant for the "cell-horizontal-align" property tag.
-	CellHorizontalAlign = "cell-horizontal-align"
 
 	// TopSide is value of the "side" property: the top side is used to resize
 	TopSide = 1
+
 	// RightSide is value of the "side" property: the right side is used to resize
 	RightSide = 2
+
 	// BottomSide is value of the "side" property: the bottom side is used to resize
 	BottomSide = 4
+
 	// LeftSide is value of the "side" property: the left side is used to resize
 	LeftSide = 8
+
 	// AllSides is value of the "side" property: all sides is used to resize
 	AllSides = TopSide | RightSide | BottomSide | LeftSide
 )
