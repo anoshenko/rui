@@ -1,5 +1,7 @@
 package rui
 
+import "time"
+
 // SessionStartListener is the listener interface of a session start event
 type SessionStartListener interface {
 	OnStart(session Session)
@@ -50,13 +52,25 @@ func (session *sessionData) onFinish() {
 
 func (session *sessionData) onPause() {
 	if session.content != nil {
+		session.pauseTime = time.Now().Unix()
 		if listener, ok := session.content.(SessionPauseListener); ok {
 			listener.OnPause(session)
+		}
+		if timeout := session.app.Params().SocketAutoClose; timeout > 0 {
+			go session.autoClose(session.pauseTime, timeout)
 		}
 	}
 }
 
+func (session *sessionData) autoClose(start int64, timeout int) {
+	time.Sleep(time.Second * time.Duration(timeout))
+	if session.pauseTime == start {
+		session.bridge.callFunc("closeSocket")
+	}
+}
+
 func (session *sessionData) onResume() {
+	session.pauseTime = 0
 	if session.content != nil {
 		if listener, ok := session.content.(SessionResumeListener); ok {
 			listener.OnResume(session)

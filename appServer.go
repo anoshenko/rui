@@ -53,6 +53,14 @@ func (app *application) getStartPage() string {
 	return buffer.String()
 }
 
+func (app *application) Params() AppParams {
+	params := app.params
+	if params.NoSocket {
+		params.SocketAutoClose = 0
+	}
+	return params
+}
+
 func (app *application) Finish() {
 	for _, session := range app.sessions {
 		session.session.close()
@@ -245,23 +253,18 @@ func (app *application) socketReader(bridge *wsBridge) {
 				}
 
 			case "reconnect":
+				session = nil
 				if sessionText, ok := obj.PropertyValue("session"); ok {
 					if sessionID, err := strconv.Atoi(sessionText); err == nil {
 						if info, ok := app.sessions[sessionID]; ok {
-							session := info.session
+							session = info.session
 							session.setBridge(events, bridge)
-							answer := allocStringBuilder()
-							defer freeStringBuilder(answer)
 
-							session.writeInitScript(answer)
-							if !bridge.writeMessage(answer.String()) {
-								return
-							}
-							session.onReconnect()
 							go sessionEventHandler(session, events, bridge)
-							return
+							session.onReconnect()
+						} else {
+							DebugLogF("Session #%d not exists", sessionID)
 						}
-						DebugLogF("Session #%d not exists", sessionID)
 					} else {
 						ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
 					}
@@ -269,7 +272,20 @@ func (app *application) socketReader(bridge *wsBridge) {
 					ErrorLog(`"session" key not found`)
 				}
 
-				bridge.writeMessage("restartSession();")
+				if session == nil {
+					/* answer := ""
+					if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
+						if !bridge.writeMessage(answer) {
+							return
+						}
+						session.onStart()
+						go sessionEventHandler(session, events, bridge)
+						bridge.writeMessage("restartSession();")
+					}
+					*/
+					bridge.writeMessage("reloadPage();")
+					return
+				}
 
 			default:
 				if !session.handleAnswer(command, obj) {

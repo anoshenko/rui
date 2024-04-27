@@ -1,5 +1,6 @@
 # v0.14.0
-* Added the ability to work without creating a WebSocket. Added NoSocket property of AppParams.
+* Added the ability to work without creating a WebSocket. Added NoSocket property to AppParams.
+* Added SocketAutoClose property to AppParams.
 * Added the ability to run a timer on the client side. Added StartTimer and StopTimer methods to Session interface.
 * Added "cell-vertical-self-align", and "cell-horizontal-self-align" properties 
 * Bug fixing

@@ -14,6 +14,10 @@ window.onblur = function() {
 	sendMessage( "session-pause{session=" + sessionID +"}" );
 }
 
+function reloadPage() {
+	location.reload();
+}
+
 function sessionInfo() {
 
 	const touch_screen = (('ontouchstart' in document.documentElement) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)) ? "1" : "0";

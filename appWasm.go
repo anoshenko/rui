@@ -25,6 +25,12 @@ func (app *wasmApp) Finish() {
 	app.session.close()
 }
 
+func (app *wasmApp) Params() AppParams {
+	params := app.params
+	params.SocketAutoClose = 0
+	return params
+}
+
 func debugLog(text string) {
 	js.Global().Get("console").Call("log", text)
 }

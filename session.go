@@ -207,6 +207,7 @@ type sessionData struct {
 	hotkeys          map[string]func(Session)
 	timers           map[int]func(Session)
 	nextTimerID      int
+	pauseTime        int64
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {

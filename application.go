@@ -17,6 +17,7 @@ var defaultThemeText string
 // Application - app interface
 type Application interface {
 	Finish()
+	Params() AppParams
 	removeSession(id int)
 }
 
@@ -24,23 +25,34 @@ type Application interface {
 type AppParams struct {
 	// Title - title of the app window/tab
 	Title string
+
 	// TitleColor - background color of the app window/tab (applied only for Safari and Chrome for Android)
 	TitleColor Color
+
 	// Icon - the icon file name
 	Icon string
+
 	// CertFile - path of a certificate for the server must be provided
 	// if neither the Server's TLSConfig.Certificates nor TLSConfig.GetCertificate are populated.
 	// If the certificate is signed by a certificate authority, the certFile should be the concatenation
 	// of the server's certificate, any intermediates, and the CA's certificate.
 	CertFile string
+
 	// KeyFile - path of a private key for the server must be provided
 	// if neither the Server's TLSConfig.Certificates nor TLSConfig.GetCertificate are populated.
 	KeyFile string
+
 	// Redirect80 - if true then the function of redirect from port 80 to 443 is created
 	Redirect80 bool
+
 	// NoSocket - if true then WebSockets will not be used and information exchange
 	// between the client and the server will be carried out only via http.
 	NoSocket bool
+
+	// SocketAutoClose - time in seconds after which the socket is automatically closed for an inactive session.
+	// The countdown begins after the OnPause event arrives.
+	// If the value of this property is less than or equal to 0 then the socket is not closed.
+	SocketAutoClose int
 }
 
 func getStartPage(buffer *strings.Builder, params AppParams) {

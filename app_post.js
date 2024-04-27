@@ -20,3 +20,6 @@ window.onfocus = function() {
 	windowFocus = true
 	sendMessage( "session-resume{}" );
 }
+
+function closeSocket() {
+}
