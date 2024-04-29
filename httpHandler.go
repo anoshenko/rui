@@ -42,7 +42,7 @@ Example for echo:
 func NewHandler(urlPrefix string, createContentFunc func(Session) SessionContent, params AppParams) *httpHandler {
 	app := new(application)
 	app.params = params
-	app.sessions = map[int]Session{}
+	app.sessions = map[int]sessionInfo{}
 	app.createContentFunc = createContentFunc
 	apps = append(apps, app)
 
