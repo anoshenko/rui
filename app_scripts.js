@@ -313,7 +313,18 @@ function keyEvent(element, event, tag) {
 		message += ",timeStamp=" + event.timeStamp;
 	}
 	if (event.key) {
-		message += ",key=\"" + event.key + "\"";
+		switch (event.key) {
+			case '"':
+				message += ",key=`\"`";
+				break
+
+			case '\\':
+				message += ",key=`\\`";
+				break
+
+			default:
+				message += ",key=\"" + event.key + "\"";
+		}
 	}
 	if (event.code) {
 		message += ",code=\"" + event.code + "\"";
