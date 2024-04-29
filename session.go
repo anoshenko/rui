@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type webBridge interface {
+type bridge interface {
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
 	callFunc(funcName string, args ...any) bool
@@ -16,10 +16,9 @@ type webBridge interface {
 	updateCSSProperty(htmlID, property, value string)
 	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
-	readMessage() (string, bool)
-	writeMessage(text string) bool
-	addAnimationCSS(css string)
-	clearAnimation()
+	sendResponse()
+	setAnimationCSS(css string)
+	appendAnimationCSS(css string)
 	canvasStart(htmlID string)
 	callCanvasFunc(funcName string, args ...any)
 	callCanvasVarFunc(v any, funcName string, args ...any)
@@ -111,6 +110,14 @@ type Session interface {
 	// Invoke SetHotKey(..., ..., nil) for remove hotkey function.
 	SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Session))
 
+	// StartTimer starts a timer on the client side.
+	// The first argument specifies the timer period in milliseconds.
+	// The second argument specifies a function that will be called on each timer event.
+	// The result is the id of the timer, which is used to stop the timer
+	StartTimer(ms int, timerFunc func(Session)) int
+	// StopTimer the timer with the given id
+	StopTimer(timerID int)
+
 	getCurrentTheme() Theme
 	registerAnimation(props []AnimatedProperty) string
 
@@ -124,7 +131,7 @@ type Session interface {
 	nextViewID() string
 	styleProperty(styleTag, property string) any
 
-	setBridge(events chan DataObject, bridge webBridge)
+	setBridge(events chan DataObject, bridge bridge)
 	writeInitScript(writer *strings.Builder)
 	callFunc(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
@@ -134,6 +141,7 @@ type Session interface {
 	removeProperty(htmlID, property string)
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
+	sendResponse()
 	addAnimationCSS(css string)
 	clearAnimation()
 	canvasStart(htmlID string)
@@ -145,7 +153,8 @@ type Session interface {
 	canvasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
 	htmlPropertyValue(htmlID, name string) string
-	handleAnswer(data DataObject)
+	addToEventsQueue(data DataObject)
+	handleAnswer(command string, data DataObject) bool
 	handleRootSize(data DataObject)
 	handleResize(data DataObject)
 	handleEvent(command string, data DataObject)
@@ -189,13 +198,16 @@ type sessionData struct {
 	ignoreUpdates    bool
 	popups           *popupManager
 	images           *imageManager
-	bridge           webBridge
+	bridge           bridge
 	events           chan DataObject
 	animationCounter int
 	animationCSS     string
 	updateScripts    map[string]*strings.Builder
 	clientStorage    map[string]string
 	hotkeys          map[string]func(Session)
+	timers           map[int]func(Session)
+	nextTimerID      int
+	pauseTime        int64
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -214,6 +226,8 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.updateScripts = map[string]*strings.Builder{}
 	session.clientStorage = map[string]string{}
 	session.hotkeys = map[string]func(Session){}
+	session.timers = map[int]func(Session){}
+	session.nextTimerID = 1
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {
@@ -237,7 +251,7 @@ func (session *sessionData) ID() int {
 	return session.sessionID
 }
 
-func (session *sessionData) setBridge(events chan DataObject, bridge webBridge) {
+func (session *sessionData) setBridge(events chan DataObject, bridge bridge) {
 	session.events = events
 	session.bridge = bridge
 }
@@ -330,23 +344,19 @@ func (session *sessionData) updateTooltipConstants() {
 }
 
 func (session *sessionData) reload() {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
 
 	css := appStyles + session.getCurrentTheme().cssText(session) + session.animationCSS
-	css = strings.ReplaceAll(css, "\n", `\n`)
-	css = strings.ReplaceAll(css, "\t", `\t`)
-	buffer.WriteString(`document.querySelector('style').textContent = "`)
-	buffer.WriteString(css)
-	buffer.WriteString("\";\n")
+	session.bridge.callFunc("setStyles", css)
 
 	if session.rootView != nil {
-		buffer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
 		viewHTML(session.rootView, buffer)
-		buffer.WriteString("';\nscanElementsSize();")
+		session.bridge.updateInnerHTML("ruiRootView", buffer.String())
+		session.bridge.callFunc("scanElementsSize")
 	}
 
-	session.bridge.writeMessage(buffer.String())
 	session.updateTooltipConstants()
 }
 
@@ -447,15 +457,21 @@ func (session *sessionData) finishUpdateScript(htmlID string) {
 	}
 }
 
+func (session *sessionData) sendResponse() {
+	if session.bridge != nil {
+		session.bridge.sendResponse()
+	}
+}
+
 func (session *sessionData) addAnimationCSS(css string) {
 	if session.bridge != nil {
-		session.bridge.addAnimationCSS(css)
+		session.bridge.appendAnimationCSS(css)
 	}
 }
 
 func (session *sessionData) clearAnimation() {
 	if session.bridge != nil {
-		session.bridge.clearAnimation()
+		session.bridge.setAnimationCSS("")
 	}
 }
 
@@ -520,8 +536,27 @@ func (session *sessionData) htmlPropertyValue(htmlID, name string) string {
 	return ""
 }
 
-func (session *sessionData) handleAnswer(data DataObject) {
-	session.bridge.answerReceived(data)
+func (session *sessionData) handleAnswer(command string, data DataObject) bool {
+	switch command {
+	case "answer":
+		if session.bridge != nil {
+			session.bridge.answerReceived(data)
+		}
+
+	case "imageLoaded":
+		session.imageManager().imageLoaded(data)
+
+	case "imageError":
+		session.imageManager().imageLoadError(data)
+
+	default:
+		return false
+	}
+
+	if session.bridge != nil {
+		session.bridge.sendResponse()
+	}
+	return true
 }
 
 func (session *sessionData) handleRootSize(data DataObject) {
@@ -642,6 +677,22 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 	case "session-resume":
 		session.onResume()
 
+	case "timer":
+		if text, ok := data.PropertyValue("timerID"); ok {
+			timerID, err := strconv.Atoi(text)
+			if err == nil {
+				if fn, ok := session.timers[timerID]; ok {
+					fn(session)
+				} else {
+					ErrorLog(`Timer (id = ` + text + `) not exists`)
+				}
+			} else {
+				ErrorLog(err.Error())
+			}
+		} else {
+			ErrorLog(`"timerID" property not found`)
+		}
+
 	case "root-size":
 		session.handleRootSize(data)
 
@@ -672,6 +723,8 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 			ErrorLog(`"id" property not found. Event: ` + command)
 		}
 	}
+
+	session.bridge.sendResponse()
 }
 
 func (session *sessionData) hotKey(event KeyEvent) {
@@ -768,4 +821,26 @@ func (session *sessionData) SetClientItem(key, value string) {
 func (session *sessionData) RemoveAllClientItems() {
 	session.clientStorage = map[string]string{}
 	session.bridge.callFunc("localStorageClear")
+}
+
+func (session *sessionData) addToEventsQueue(data DataObject) {
+	session.events <- data
+}
+
+func (session *sessionData) StartTimer(ms int, timerFunc func(Session)) int {
+	timerID := 0
+	if session.bridge != nil {
+		timerID = session.nextTimerID
+		session.nextTimerID++
+		session.timers[timerID] = timerFunc
+		session.bridge.callFunc("startTimer", ms, timerID)
+	}
+	return timerID
+}
+
+func (session *sessionData) StopTimer(timerID int) {
+	if session.bridge != nil {
+		session.bridge.callFunc("stopTimer", timerID)
+		delete(session.timers, timerID)
+	}
 }

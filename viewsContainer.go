@@ -11,12 +11,16 @@ type ParentView interface {
 type ViewsContainer interface {
 	View
 	ParentView
+
 	// Append appends a view to the end of the list of a view children
 	Append(view View)
+
 	// Insert inserts a view to the "index" position in the list of a view children
 	Insert(view View, index int)
+
 	// Remove removes a view from the list of a view children and return it
 	RemoveView(index int) View
+
 	// ViewIndex returns the index of view, -1 overwise
 	ViewIndex(view View) int
 }

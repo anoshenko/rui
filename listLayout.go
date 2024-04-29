@@ -7,16 +7,22 @@ import (
 const (
 	// TopDownOrientation - subviews are arranged from top to bottom. Synonym of VerticalOrientation
 	TopDownOrientation = 0
+
 	// StartToEndOrientation - subviews are arranged from left to right. Synonym of HorizontalOrientation
 	StartToEndOrientation = 1
+
 	// BottomUpOrientation - subviews are arranged from bottom to top
 	BottomUpOrientation = 2
+
 	// EndToStartOrientation - subviews are arranged from right to left
 	EndToStartOrientation = 3
+
 	// ListWrapOff - subviews are scrolled and "true" if a new row/column starts
 	ListWrapOff = 0
+
 	// ListWrapOn - the new row/column starts at bottom/right
 	ListWrapOn = 1
+
 	// ListWrapReverse - the new row/column starts at top/left
 	ListWrapReverse = 2
 )

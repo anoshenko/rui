@@ -2,8 +2,13 @@ package rui
 
 // ListAdapter - the list data source
 type ListAdapter interface {
+	// ListSize returns the number of elements in the list
 	ListSize() int
+
+	// ListItem creates a View of a list item at the given index
 	ListItem(index int, session Session) View
+
+	// IsListItemEnabled returns the status (enabled/disabled) of a list item at the given index
 	IsListItemEnabled(index int) bool
 }
 

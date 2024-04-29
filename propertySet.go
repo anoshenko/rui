@@ -331,6 +331,16 @@ var enumProperties = map[string]struct {
 		"justify-items",
 		[]string{"start", "end", "center", "stretch"},
 	},
+	CellVerticalSelfAlign: {
+		[]string{"top", "bottom", "center", "stretch"},
+		"align-self",
+		[]string{"start", "end", "center", "stretch"},
+	},
+	CellHorizontalSelfAlign: {
+		[]string{"left", "right", "center", "stretch"},
+		"justify-self",
+		[]string{"start", "end", "center", "stretch"},
+	},
 	GridAutoFlow: {
 		[]string{"row", "column", "row-dense", "column-dense"},
 		GridAutoFlow,

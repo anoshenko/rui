@@ -82,24 +82,32 @@ const (
 
 	// PrimaryMouseButton is a number of the main pressed button, usually the left button or the un-initialized state
 	PrimaryMouseButton = 0
+
 	// AuxiliaryMouseButton is a number of the auxiliary pressed button, usually the wheel button
 	// or the middle button (if present)
 	AuxiliaryMouseButton = 1
+
 	// SecondaryMouseButton is a number of the secondary pressed button, usually the right button
 	SecondaryMouseButton = 2
+
 	// MouseButton4 is a number of the fourth button, typically the Browser Back button
 	MouseButton4 = 3
+
 	// MouseButton5 is a number of the fifth button, typically the Browser Forward button
 	MouseButton5 = 4
 
 	// PrimaryMouseMask is the mask of the primary button (usually the left button)
 	PrimaryMouseMask = 1
+
 	// SecondaryMouseMask is the mask of the secondary button (usually the right button)
 	SecondaryMouseMask = 2
+
 	// AuxiliaryMouseMask  is the mask of the auxiliary button (usually the mouse wheel button or middle button)
 	AuxiliaryMouseMask = 4
+
 	// MouseMask4 is the mask of the 4th button (typically the "Browser Back" button)
 	MouseMask4 = 8
+
 	//MouseMask5 is the mask of the  5th button (typically the "Browser Forward" button)
 	MouseMask5 = 16
 )

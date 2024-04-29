@@ -80,10 +80,11 @@ func (manager *imageManager) loadImage(url string, onLoaded func(Image), session
 	manager.images[url] = image
 
 	session.callFunc("loadImage", url)
+	session.sendResponse()
 	return image
 }
 
-func (manager *imageManager) imageLoaded(obj DataObject, session Session) {
+func (manager *imageManager) imageLoaded(obj DataObject) {
 	if manager.images == nil {
 		manager.images = make(map[string]*imageData)
 		return
@@ -109,7 +110,7 @@ func (manager *imageManager) imageLoaded(obj DataObject, session Session) {
 	}
 }
 
-func (manager *imageManager) imageLoadError(obj DataObject, session Session) {
+func (manager *imageManager) imageLoadError(obj DataObject) {
 	if manager.images == nil {
 		manager.images = make(map[string]*imageData)
 		return

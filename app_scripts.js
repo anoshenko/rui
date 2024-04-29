@@ -1,27 +1,31 @@
-var sessionID = "0"
-var windowFocus = true
+let sessionID = "0"
+let windowFocus = true
 
 window.onresize = function() {
 	scanElementsSize();
 }
 
-window.onbeforeunload = function(event) {
+window.onbeforeunload = function() {
 	sendMessage( "session-close{session=" + sessionID +"}" );
 }
 
-window.onblur = function(event) {
+window.onblur = function() {
 	windowFocus = false
 	sendMessage( "session-pause{session=" + sessionID +"}" );
+}
+
+function reloadPage() {
+	location.reload();
 }
 
 function sessionInfo() {
 
 	const touch_screen = (('ontouchstart' in document.documentElement) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)) ? "1" : "0";
-	var message = "startSession{touch=" + touch_screen 
+	let message = "startSession{touch=" + touch_screen 
 	
 	const style = window.getComputedStyle(document.body);
 	if (style) {
-		var direction = style.getPropertyValue('direction');
+		const direction = style.getPropertyValue('direction');
 		if (direction) {
 			message += ",direction=" + direction
 		}
@@ -55,9 +59,9 @@ function sessionInfo() {
 	if (localStorage.length > 0) {
 		message += ",storage="
 		lead = "_{"
-		for (var i = 0; i < localStorage.length; i++) {
-			var key = localStorage.key(i)
-			var value = localStorage.getItem(key)
+		for (let i = 0; i < localStorage.length; i++) {
+			let key = localStorage.key(i)
+			let value = localStorage.getItem(key)
 			key = key.replaceAll(/\\/g, "\\\\")
 			key = key.replaceAll(/\"/g, "\\\"")
 			key = key.replaceAll(/\'/g, "\\\'")
@@ -86,42 +90,41 @@ function getIntAttribute(element, tag) {
 }
 
 function scanElementsSize() {
-	var element = document.getElementById("ruiRootView");
-	if (element) {
-		let rect = element.getBoundingClientRect();
-		let width = getIntAttribute(element, "data-width");
-		let height = getIntAttribute(element, "data-height");
+	const rootView = document.getElementById("ruiRootView");
+	if (rootView) {
+		let rect = rootView.getBoundingClientRect();
+		let width = getIntAttribute(rootView, "data-width");
+		let height = getIntAttribute(rootView, "data-height");
 		if (rect.width > 0 && rect.height > 0 && (width != rect.width || height != rect.height)) {
-			element.setAttribute("data-width", rect.width);
-			element.setAttribute("data-height", rect.height);
+			rootView.setAttribute("data-width", rect.width);
+			rootView.setAttribute("data-height", rect.height);
 			sendMessage("root-size{session=" + sessionID + ",width=" + rect.width + ",height=" + rect.height +"}");
 		}
 	}
 	
-	var views = document.getElementsByClassName("ruiView");
+	const views = document.getElementsByClassName("ruiView");
 	if (views) {
-		var message = "resize{session=" + sessionID + ",views=["
-		var count = 0
-		for (var i = 0; i < views.length; i++) {
-			let element = views[i];
-			let noresize = element.getAttribute("data-noresize");
+		let message = "resize{session=" + sessionID + ",views=["
+		let count = 0
+		for (const view of views) {
+			let noresize = view.getAttribute("data-noresize");
 			if (!noresize) {
-				let rect = element.getBoundingClientRect();
-				let top = getIntAttribute(element, "data-top");
-				let left = getIntAttribute(element, "data-left");
-				let width = getIntAttribute(element, "data-width");
-				let height = getIntAttribute(element, "data-height");
+				let rect = view.getBoundingClientRect();
+				let top = getIntAttribute(view, "data-top");
+				let left = getIntAttribute(view, "data-left");
+				let width = getIntAttribute(view, "data-width");
+				let height = getIntAttribute(view, "data-height");
 				if (rect.width > 0 && rect.height > 0 && 
 					(width != rect.width || height != rect.height || left != rect.left || top != rect.top)) {
-					element.setAttribute("data-top", rect.top);
-					element.setAttribute("data-left", rect.left);
-					element.setAttribute("data-width", rect.width);
-					element.setAttribute("data-height", rect.height);
+					view.setAttribute("data-top", rect.top);
+					view.setAttribute("data-left", rect.left);
+					view.setAttribute("data-width", rect.width);
+					view.setAttribute("data-height", rect.height);
 					if (count > 0) {
 						message += ",";
 					}
-					message += "view{id=" + element.id + ",x=" + rect.left + ",y=" + rect.top + ",width=" + rect.width + ",height=" + rect.height + 
-						",scroll-x=" + element.scrollLeft + ",scroll-y=" + element.scrollTop + ",scroll-width=" + element.scrollWidth + ",scroll-height=" + element.scrollHeight + "}";
+					message += "view{id=" + view.id + ",x=" + rect.left + ",y=" + rect.top + ",width=" + rect.width + ",height=" + rect.height + 
+						",scroll-x=" + view.scrollLeft + ",scroll-y=" + view.scrollTop + ",scroll-width=" + view.scrollWidth + ",scroll-height=" + view.scrollHeight + "}";
 					count += 1;
 				}
 			}
@@ -139,11 +142,11 @@ function scrollEvent(element, event) {
 }
 
 function updateCSSRule(selector, ruleText) {
-	var styleSheet = document.styleSheets[0];
-	var rules = styleSheet.cssRules ? styleSheet.cssRules : styleSheet.rules
+	const styleSheet = document.styleSheets[0];
+	const rules = styleSheet.cssRules ? styleSheet.cssRules : styleSheet.rules
 	selector = "." + selector
-	for (var i = 0; i < rules.length; i++) {
-		var rule = rules[i]
+	for (let i = 0; i < rules.length; i++) {
+		const rule = rules[i]
 		if (!rule.selectorText) {
 			continue;
 		}
@@ -165,7 +168,7 @@ function updateCSSRule(selector, ruleText) {
 }
 
 function updateCSSStyle(elementId, style) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.style = style;
 		scanElementsSize();
@@ -173,7 +176,7 @@ function updateCSSStyle(elementId, style) {
 }
 
 function updateCSSProperty(elementId, property, value) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.style[property] = value;
 		scanElementsSize();
@@ -181,7 +184,7 @@ function updateCSSProperty(elementId, property, value) {
 }
 
 function updateProperty(elementId, property, value) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.setAttribute(property, value);
 		scanElementsSize();
@@ -189,7 +192,7 @@ function updateProperty(elementId, property, value) {
 }
 
 function removeProperty(elementId, property) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element && element.hasAttribute(property)) {
 		element.removeAttribute(property);
 		scanElementsSize();
@@ -197,7 +200,7 @@ function removeProperty(elementId, property) {
 }
 
 function updateInnerHTML(elementId, content) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.innerHTML = content;
 		scanElementsSize();
@@ -205,7 +208,7 @@ function updateInnerHTML(elementId, content) {
 }
 
 function appendToInnerHTML(elementId, content) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.innerHTML += content;
 		scanElementsSize();
@@ -213,7 +216,7 @@ function appendToInnerHTML(elementId, content) {
 }
 
 function setDisabled(elementId, disabled) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		if ('disabled' in element) {
 			element.disabled = disabled
@@ -244,21 +247,21 @@ function enterOrSpaceKeyClickEvent(event) {
 }
 
 function activateTab(layoutId, tabNumber) {
-	var element = document.getElementById(layoutId);
+	const element = document.getElementById(layoutId);
 	if (element) {
-		var currentNumber = element.getAttribute("data-current");
+		const currentNumber = element.getAttribute("data-current");
 		if (currentNumber != tabNumber) {
 			function setTab(number, styleProperty, display) {
-				var tab = document.getElementById(layoutId + '-' + number);
+				const tab = document.getElementById(layoutId + '-' + number);
 				if (tab) {	
 					tab.className = element.getAttribute(styleProperty);
-					var page = document.getElementById(tab.getAttribute("data-view"));
+					const page = document.getElementById(tab.getAttribute("data-view"));
 					if (page) {
 						page.style.display = display;
 					}
 					return
 				}
-				var page = document.getElementById(layoutId + "-page" + number);
+				const page = document.getElementById(layoutId + "-page" + number);
 				if (page) {
 					page.style.display = display;
 				}
@@ -302,11 +305,10 @@ function tabCloseKeyClickEvent(layoutId, tabNumber, event) {
 	}
 }
 
-
 function keyEvent(element, event, tag) {
 	event.stopPropagation();
 
-	var message = tag + "{session=" + sessionID + ",id=" + element.id;
+	let message = tag + "{session=" + sessionID + ",id=" + element.id;
 	if (event.timeStamp) {
 		message += ",timeStamp=" + event.timeStamp;
 	}
@@ -356,7 +358,7 @@ function keyUpEvent(element, event) {
 }
 
 function mouseEventData(element, event) {
-	var message = ""
+	let message = ""
 
 	if (event.timeStamp) {
 		message += ",timeStamp=" + event.timeStamp;
@@ -368,8 +370,8 @@ function mouseEventData(element, event) {
 		message += ",buttons=" + event.buttons;
 	}
 	if (event.clientX) {
-		var x = event.clientX;
-		var el = element;
+		let x = event.clientX;
+		let el = element;
 		if (el.parentElement) {
 			x += el.parentElement.scrollLeft;
 		}
@@ -381,8 +383,8 @@ function mouseEventData(element, event) {
 		message += ",x=" + x + ",clientX=" + event.clientX;
 	}
 	if (event.clientY) {
-		var y = event.clientY;
-		var el = element;
+		let y = event.clientY;
+		let el = element;
 		if (el.parentElement) {
 			y += el.parentElement.scrollTop;
 		}
@@ -418,7 +420,7 @@ function mouseEvent(element, event, tag) {
 	event.stopPropagation();
 	//event.preventDefault()
 
-	var message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}";
+	const message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}";
 	sendMessage(message);
 }
 
@@ -461,7 +463,7 @@ function contextMenuEvent(element, event) {
 function pointerEvent(element, event, tag) {
 	event.stopPropagation();
 
-	var message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event);
+	let message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event);
 
 	if (event.pointerId) {
 		message += ",pointerId=" + event.pointerId;
@@ -525,23 +527,23 @@ function pointerOutEvent(element, event) {
 function touchEvent(element, event, tag) {
 	event.stopPropagation();
 
-	var message = tag + "{session=" + sessionID + ",id=" + element.id;
+	let message = tag + "{session=" + sessionID + ",id=" + element.id;
 	if (event.timeStamp) {
 		message += ",timeStamp=" + event.timeStamp;
 	}
 	if (event.touches && event.touches.length > 0) {
 		message += ",touches=["
-		for (var i = 0; i < event.touches.length; i++) {
-			var touch = event.touches.item(i)
+		for (let i = 0; i < event.touches.length; i++) {
+			const touch = event.touches.item(i)
 			if (touch) {
 				if (i > 0) {
 					message += ","	
 				}
 				message += "touch{identifier=" + touch.identifier;
 
-				var x = touch.clientX;
-				var y = touch.clientY;
-				var el = element;
+				let x = touch.clientX;
+				let y = touch.clientY;
+				let el = element;
 				if (el.parentElement) {
 					x += el.parentElement.scrollLeft;
 					y += el.parentElement.scrollTop;
@@ -594,12 +596,12 @@ function touchCancelEvent(element, event) {
 
 function dropDownListEvent(element, event) {
 	event.stopPropagation();
-	var message = "itemSelected{session=" + sessionID + ",id=" + element.id + ",number=" + element.selectedIndex.toString() + "}"
+	const message = "itemSelected{session=" + sessionID + ",id=" + element.id + ",number=" + element.selectedIndex.toString() + "}"
 	sendMessage(message);
 }
 
 function selectDropDownListItem(elementId, number) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.selectedIndex = number;
 		scanElementsSize();
@@ -613,33 +615,33 @@ function listItemClickEvent(element, event) {
 		return
 	}
 
-	var selected = false;
+	let selected = false;
 	if (element.classList) {
 		const focusStyle = getListFocusedItemStyle(element);
 		const blurStyle = getListSelectedItemStyle(element);
 		selected = (element.classList.contains(focusStyle) || element.classList.contains(blurStyle));
 	} 
 
-	var list = element.parentNode.parentNode
+	const list = element.parentNode.parentNode
 	if (list) {
 		if (!selected) {
 			selectListItem(list, element, true)
 		}
 
-		var message = "itemClick{session=" + sessionID + ",id=" + list.id + "}"
+		const message = "itemClick{session=" + sessionID + ",id=" + list.id + "}"
 		sendMessage(message);
 	}
 }
 
 function getListItemNumber(itemId) {
-	var pos = itemId.indexOf("-")
+	const pos = itemId.indexOf("-")
 	if (pos >= 0) {
 		return parseInt(itemId.substring(pos+1))
 	}
 }
 
 function getStyleAttribute(element, attr, defValue) {
-	var result = element.getAttribute(attr);
+	const result = element.getAttribute(attr);
 	if (result) {
 		return result;
 	}
@@ -655,13 +657,13 @@ function getListSelectedItemStyle(element) {
 }
 
 function selectListItem(element, item, needSendMessage) {
-	var currentId = element.getAttribute("data-current");
-	var message;
+	const currentId = element.getAttribute("data-current");
+	let message;
 	const focusStyle = getListFocusedItemStyle(element);
 	const blurStyle = getListSelectedItemStyle(element);
 
 	if (currentId) {
-		var current = document.getElementById(currentId);
+		const current = document.getElementById(currentId);
 		if (current) {
 			if (current.classList) {
 				current.classList.remove(focusStyle, blurStyle);
@@ -685,7 +687,7 @@ function selectListItem(element, item, needSendMessage) {
 
 		element.setAttribute("data-current", item.id);
 		if (sendMessage) {
-			var number = getListItemNumber(item.id)
+			const number = getListItemNumber(item.id)
 			if (number != undefined) {
 				message = "itemSelected{session=" + sessionID + ",id=" + element.id + ",number=" + number + "}";
 			}
@@ -697,22 +699,22 @@ function selectListItem(element, item, needSendMessage) {
 			item.scrollIntoView({block: "nearest", inline: "nearest"});
 		}
 	/*
-		var left = item.offsetLeft - element.offsetLeft;
+		let left = item.offsetLeft - element.offsetLeft;
 		if (left < element.scrollLeft) {
 			element.scrollLeft = left;
 		}
 
-		var top = item.offsetTop - element.offsetTop;
+		let top = item.offsetTop - element.offsetTop;
 		if (top < element.scrollTop) {
 			element.scrollTop = top;
 		}
 		
-		var right = left + item.offsetWidth;
+		let right = left + item.offsetWidth;
 		if (right > element.scrollLeft + element.clientWidth) {
 			element.scrollLeft = right - element.clientWidth;
 		}
 
-		var bottom = top + item.offsetHeight
+		let bottom = top + item.offsetHeight
 		if (bottom > element.scrollTop + element.clientHeight) {
 			element.scrollTop = bottom - element.clientHeight;
 		}*/
@@ -726,17 +728,15 @@ function selectListItem(element, item, needSendMessage) {
 
 function findRightListItem(list, x, y) {
 	list = list.childNodes[0];
-	var result;
-	var count = list.childNodes.length;
-	for (var i = 0; i < count; i++) {
-		var item = list.childNodes[i];
+	let result;
+	for (const item of list.childNodes) {
 		if (item.getAttribute("data-disabled") == "1") {
 			continue;
 		}
 		if (item.offsetLeft >= x) {
 			if (result) {
-				var result_dy = Math.abs(result.offsetTop - y);
-				var item_dy = Math.abs(item.offsetTop - y);
+				const result_dy = Math.abs(result.offsetTop - y);
+				const item_dy = Math.abs(item.offsetTop - y);
 				if (item_dy < result_dy || (item_dy == result_dy && (item.offsetLeft - x) < (result.offsetLeft - x))) {
 					result = item;	
 				}
@@ -750,17 +750,15 @@ function findRightListItem(list, x, y) {
 
 function findLeftListItem(list, x, y) {
 	list = list.childNodes[0];
-	var result;
-	var count = list.childNodes.length;
-	for (var i = 0; i < count; i++) {
-		var item = list.childNodes[i];
+	let result;
+	for (const item of list.childNodes) {
 		if (item.getAttribute("data-disabled") == "1") {
 			continue;
 		}
 		if (item.offsetLeft < x) {
 			if (result) {
-				var result_dy = Math.abs(result.offsetTop - y);
-				var item_dy = Math.abs(item.offsetTop - y);
+				const result_dy = Math.abs(result.offsetTop - y);
+				const item_dy = Math.abs(item.offsetTop - y);
 				if (item_dy < result_dy || (item_dy == result_dy && (x - item.offsetLeft) < (x - result.offsetLeft))) {
 					result = item;	
 				}
@@ -774,17 +772,15 @@ function findLeftListItem(list, x, y) {
 
 function findTopListItem(list, x, y) {
 	list = list.childNodes[0];
-	var result;
-	var count = list.childNodes.length;
-	for (var i = 0; i < count; i++) {
-		var item = list.childNodes[i];
+	let result;
+	for (const item of list.childNodes) {
 		if (item.getAttribute("data-disabled") == "1") {
 			continue;
 		}
 		if (item.offsetTop < y) {
 			if (result) {
-				var result_dx = Math.abs(result.offsetLeft - x);
-				var item_dx = Math.abs(item.offsetLeft - x);
+				const result_dx = Math.abs(result.offsetLeft - x);
+				const item_dx = Math.abs(item.offsetLeft - x);
 				if (item_dx < result_dx || (item_dx == result_dx && (y - item.offsetTop) < (y - result.offsetTop))) {
 					result = item;	
 				}
@@ -798,17 +794,15 @@ function findTopListItem(list, x, y) {
 
 function findBottomListItem(list, x, y) {
 	list = list.childNodes[0];
-	var result;
-	var count = list.childNodes.length;
-	for (var i = 0; i < count; i++) {
-		var item = list.childNodes[i];
+	let result;
+	for (const item of list.childNodes) {
 		if (item.getAttribute("data-disabled") == "1") {
 			continue;
 		}
 		if (item.offsetTop >= y) {
 			if (result) {
-				var result_dx = Math.abs(result.offsetLeft - x);
-				var item_dx = Math.abs(item.offsetLeft - x);
+				const result_dx = Math.abs(result.offsetLeft - x);
+				const item_dx = Math.abs(item.offsetLeft - x);
 				if (item_dx < result_dx || (item_dx == result_dx && (item.offsetTop - y) < (result.offsetTop - y))) {
 					result = item;	
 				}
@@ -844,18 +838,18 @@ function getKey(event) {
 function listViewKeyDownEvent(element, event) {
 	const key = getKey(event);
 	if (key) {
-		var currentId = element.getAttribute("data-current");
-		var current
+		const currentId = element.getAttribute("data-current");
+		let current
 		if (currentId) {
 			current = document.getElementById(currentId);
 			//number = getListItemNumber(currentId);
 		}
 		if (current) {
-			var item
+			let item
 			switch (key) {
 				case " ": 
 				case "Enter":
-					var message = "itemClick{session=" + sessionID + ",id=" + element.id + "}";
+					const message = "itemClick{session=" + sessionID + ",id=" + element.id + "}";
 					sendMessage(message);
 					break;
 
@@ -909,10 +903,8 @@ function listViewKeyDownEvent(element, event) {
 				case "End":
 				case "PageUp":
 				case "PageDown":
-					var list = element.childNodes[0];
-					var count = list.childNodes.length;
-					for (var i = 0; i < count; i++) {
-						var item = list.childNodes[i];
+					const list = element.childNodes[0];
+					for (const item of list.childNodes) {
 						if (item.getAttribute("data-disabled") == "1") {
 							continue;
 						}
@@ -932,9 +924,9 @@ function listViewKeyDownEvent(element, event) {
 }
 
 function listViewFocusEvent(element, event) {
-	var currentId = element.getAttribute("data-current");
+	const currentId = element.getAttribute("data-current");
 	if (currentId) {
-		var current = document.getElementById(currentId);
+		const current = document.getElementById(currentId);
 		if (current) {
 			if (current.classList) {
 				current.classList.remove(getListSelectedItemStyle(element));
@@ -945,9 +937,9 @@ function listViewFocusEvent(element, event) {
 }
 
 function listViewBlurEvent(element, event) {
-	var currentId = element.getAttribute("data-current");
+	const currentId = element.getAttribute("data-current");
 	if (currentId) {
-		var current = document.getElementById(currentId);
+		const current = document.getElementById(currentId);
 		if (current) {
 			if (current.classList) {
 				current.classList.remove(getListFocusedItemStyle(element));
@@ -958,30 +950,30 @@ function listViewBlurEvent(element, event) {
 }
 
 function selectRadioButton(radioButtonId) {
-	var element = document.getElementById(radioButtonId);
+	const element = document.getElementById(radioButtonId);
 	if (element) {
-		var list = element.parentNode
+		const list = element.parentNode
 		if (list) {
-			var current = list.getAttribute("data-current");
+			const current = list.getAttribute("data-current");
 			if (current) {
 				if (current === radioButtonId) {
 					return
 				}
 
-				var mark = document.getElementById(current + "mark");
+				const mark = document.getElementById(current + "mark");
 				if (mark) {
 					//mark.hidden = true
 					mark.style.visibility = "hidden"
 				}
 			}
 
-			var mark = document.getElementById(radioButtonId + "mark");
+			const mark = document.getElementById(radioButtonId + "mark");
 			if (mark) {
 				//mark.hidden = false
 				mark.style.visibility = "visible"
 			}
 			list.setAttribute("data-current", radioButtonId);
-			var message = "radioButtonSelected{session=" + sessionID + ",id=" + list.id + ",radioButton=" + radioButtonId + "}"
+			const message = "radioButtonSelected{session=" + sessionID + ",id=" + list.id + ",radioButton=" + radioButtonId + "}"
 			sendMessage(message);
 			scanElementsSize();
 		}
@@ -989,11 +981,11 @@ function selectRadioButton(radioButtonId) {
 }
 
 function unselectRadioButtons(radioButtonsId) {
-	var list = document.getElementById(radioButtonsId);
+	const list = document.getElementById(radioButtonsId);
 	if (list) {
-		var current = list.getAttribute("data-current");
+		const current = list.getAttribute("data-current");
 		if (current) {
-			var mark = document.getElementById(current + "mark");
+			const mark = document.getElementById(current + "mark");
 			if (mark) {
 				mark.style.visibility = "hidden"
 			}
@@ -1001,7 +993,7 @@ function unselectRadioButtons(radioButtonsId) {
 			list.removeAttribute("data-current");
 		}
 
-		var message = "radioButtonUnselected{session=" + sessionID + ",id=" + list.id + "}"
+		const message = "radioButtonUnselected{session=" + sessionID + ",id=" + list.id + "}"
 		sendMessage(message);
 		scanElementsSize();
 	}
@@ -1020,15 +1012,15 @@ function radioButtonKeyClickEvent(element, event) {
 }
 
 function editViewInputEvent(element) {
-	var text = element.value
+	let text = element.value
 	text = text.replaceAll(/\\/g, "\\\\")
 	text = text.replaceAll(/\"/g, "\\\"")
-	var message = "textChanged{session=" + sessionID + ",id=" + element.id + ",text=\"" + text + "\"}"
+	const message = "textChanged{session=" + sessionID + ",id=" + element.id + ",text=\"" + text + "\"}"
 	sendMessage(message);
 }
 
 function setInputValue(elementId, text) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.value = text;
 		scanElementsSize();
@@ -1036,10 +1028,10 @@ function setInputValue(elementId, text) {
 }
 
 function fileSelectedEvent(element) {
-	var files = element.files;
+	const files = element.files;
 	if (files) {
-		var message = "fileSelected{session=" + sessionID + ",id=" + element.id + ",files=[";
-		for(var i = 0; i < files.length; i++) {
+		let message = "fileSelected{session=" + sessionID + ",id=" + element.id + ",files=[";
+		for(let i = 0; i < files.length; i++) {
 			if (i > 0) {
 				message += ",";
 			}
@@ -1053,9 +1045,9 @@ function fileSelectedEvent(element) {
 }
 
 function loadSelectedFile(elementId, index) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
-		var files = element.files;
+		const files = element.files;
 		if (files && index >= 0 && index < files.length) {
 			const reader = new FileReader();
          	reader.onload = function() { 
@@ -1080,15 +1072,15 @@ function loadSelectedFile(elementId, index) {
 }
 
 function startResize(element, mx, my, event) {
-	var view = element.parentNode;
+	const view = element.parentNode;
 	if (!view) {
 		return;
 	}
 
-	var startX = event.clientX;
-	var startY = event.clientY;
-	var startWidth = view.offsetWidth
-	var startHeight = view.offsetHeight
+	let startX = event.clientX;
+	let startY = event.clientY;
+	let startWidth = view.offsetWidth
+	let startHeight = view.offsetHeight
 
 	document.addEventListener("mousemove", moveHandler, true);
 	document.addEventListener("mouseup", upHandler, true);
@@ -1098,7 +1090,7 @@ function startResize(element, mx, my, event) {
 
 	function moveHandler(e) {
 		if (mx != 0) {
-			var width = startWidth + (e.clientX - startX) * mx;
+			let width = startWidth + (e.clientX - startX) * mx;
 			if (width <= 0) {
 				width = 1;
 			}
@@ -1107,7 +1099,7 @@ function startResize(element, mx, my, event) {
 		}
 		
 		if (my != 0) {
-			var height = startHeight + (e.clientY - startY) * my;
+			let height = startHeight + (e.clientY - startY) * my;
 			if (height <= 0) {
 				height = 1;
 			}
@@ -1128,7 +1120,7 @@ function startResize(element, mx, my, event) {
 }
 
 function transitionStartEvent(element, event) {
-	var message = "transition-start-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "transition-start-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.propertyName) {
 		message += ",property=" + event.propertyName
 	}
@@ -1137,7 +1129,7 @@ function transitionStartEvent(element, event) {
 }
 
 function transitionRunEvent(element, event) {
-	var message = "transition-run-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "transition-run-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.propertyName) {
 		message += ",property=" + event.propertyName
 	}
@@ -1146,7 +1138,7 @@ function transitionRunEvent(element, event) {
 }
 
 function transitionEndEvent(element, event) {
-	var message = "transition-end-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "transition-end-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.propertyName) {
 		message += ",property=" + event.propertyName
 	}
@@ -1155,7 +1147,7 @@ function transitionEndEvent(element, event) {
 }
 
 function transitionCancelEvent(element, event) {
-	var message = "transition-cancel-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "transition-cancel-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.propertyName) {
 		message += ",property=" + event.propertyName
 	}
@@ -1164,7 +1156,7 @@ function transitionCancelEvent(element, event) {
 }
 
 function animationStartEvent(element, event) {
-	var message = "animation-start-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "animation-start-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.animationName) {
 		message += ",name=" + event.animationName
 	}
@@ -1173,7 +1165,7 @@ function animationStartEvent(element, event) {
 }
 
 function animationEndEvent(element, event) {
-	var message = "animation-end-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "animation-end-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.animationName) {
 		message += ",name=" + event.animationName
 	}
@@ -1182,7 +1174,7 @@ function animationEndEvent(element, event) {
 }
 
 function animationCancelEvent(element, event) {
-	var message = "animation-cancel-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "animation-cancel-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.animationName) {
 		message += ",name=" + event.animationName
 	}
@@ -1191,7 +1183,7 @@ function animationCancelEvent(element, event) {
 }
 
 function animationIterationEvent(element, event) {
-	var message = "animation-iteration-event{session=" + sessionID + ",id=" + element.id; 
+	let message = "animation-iteration-event{session=" + sessionID + ",id=" + element.id; 
 	if (event.animationName) {
 		message += ",name=" + event.animationName
 	}
@@ -1204,10 +1196,10 @@ function stackTransitionEndEvent(stackId, propertyName, event) {
 	event.stopPropagation();
 }
 
-var images = new Map();
+const images = new Map();
 
 function loadImage(url) {
-	var img = images.get(url);
+	let img = images.get(url);
 	if (img != undefined) {
 		return
 	}
@@ -1215,7 +1207,7 @@ function loadImage(url) {
 	img = new Image(); 
 	img.addEventListener("load", function() {
 		images.set(url, img)
-		var message = "imageLoaded{session=" + sessionID + ",url=\"" + url + "\""; 
+		let message = "imageLoaded{session=" + sessionID + ",url=\"" + url + "\""; 
 		if (img.naturalWidth) {
 			message += ",width=" + img.naturalWidth
 		}
@@ -1226,9 +1218,9 @@ function loadImage(url) {
 	}, false);
 
 	img.addEventListener("error", function(event) {
-		var message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
+		let message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
 		if (event && event.message) {
-			var text = event.message.replaceAll(new RegExp("\"", 'g'), "\\\"")
+			const text = event.message.replaceAll(new RegExp("\"", 'g'), "\\\"")
 			message += ",message=\"" + text + "\""; 
 		}
 		sendMessage(message + "}")
@@ -1238,7 +1230,7 @@ function loadImage(url) {
 }
 
 function loadInlineImage(url, content) {
-	var img = images.get(url);
+	let img = images.get(url);
 	if (img != undefined) {
 		return
 	}
@@ -1246,7 +1238,7 @@ function loadInlineImage(url, content) {
 	img = new Image(); 
 	img.addEventListener("load", function() {
 		images.set(url, img)
-		var message = "imageLoaded{session=" + sessionID + ",url=\"" + url + "\""; 
+		let message = "imageLoaded{session=" + sessionID + ",url=\"" + url + "\""; 
 		if (img.naturalWidth) {
 			message += ",width=" + img.naturalWidth
 		}
@@ -1257,9 +1249,9 @@ function loadInlineImage(url, content) {
 	}, false);
 
 	img.addEventListener("error", function(event) {
-		var message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
+		let message = "imageError{session=" + sessionID + ",url=\"" + url + "\""; 
 		if (event && event.message) {
-			var text = event.message.replaceAll(new RegExp("\"", 'g'), "\\\"")
+			const text = event.message.replaceAll(new RegExp("\"", 'g'), "\\\"")
 			message += ",message=\"" + text + "\""; 
 		}
 		sendMessage(message + "}")
@@ -1269,41 +1261,41 @@ function loadInlineImage(url, content) {
 }
 
 function clickClosePopup(element, e) {
-	var popupId = element.getAttribute("data-popupId");
+	const popupId = element.getAttribute("data-popupId");
 	sendMessage("clickClosePopup{session=" + sessionID + ",id=" + popupId + "}")
 	e.stopPropagation();
 }
 
 function scrollTo(elementId, x, y) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.scrollTo(x, y);
 	}
 }
 
 function scrollToStart(elementId) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.scrollTo(0, 0);
 	}
 }
 
 function scrollToEnd(elementId) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.scrollTo(0, element.scrollHeight - element.offsetHeight);
 	}
 }
 
 function focus(elementId) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.focus();
 	}
 }
 
 function blur(elementId) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.blur();
 	}
@@ -1321,7 +1313,7 @@ function playerEvent(element, tag) {
 }
 
 function playerTimeUpdatedEvent(element) {
-	var message = "time-update-event{session=" + sessionID + ",id=" + element.id + ",value=";
+	let message = "time-update-event{session=" + sessionID + ",id=" + element.id + ",value=";
 	if (element.currentTime) {
 		message += element.currentTime;
 	} else {
@@ -1331,7 +1323,7 @@ function playerTimeUpdatedEvent(element) {
 }
 
 function playerDurationChangedEvent(element) {
-	var message = "duration-changed-event{session=" + sessionID + ",id=" + element.id + ",value=";
+	let message = "duration-changed-event{session=" + sessionID + ",id=" + element.id + ",value=";
 	if (element.duration) {
 		message += element.duration;
 	} else {
@@ -1341,7 +1333,7 @@ function playerDurationChangedEvent(element) {
 }
 
 function playerVolumeChangedEvent(element) {
-	var message = "volume-changed-event{session=" + sessionID + ",id=" + element.id + ",value=";
+	let message = "volume-changed-event{session=" + sessionID + ",id=" + element.id + ",value=";
 	if (element.volume && !element.muted) {
 		message += element.volume;
 	} else {
@@ -1351,7 +1343,7 @@ function playerVolumeChangedEvent(element) {
 }
 
 function playerRateChangedEvent(element) {
-	var message = "rate-changed-event{session=" + sessionID + ",id=" + element.id + ",value=";
+	let message = "rate-changed-event{session=" + sessionID + ",id=" + element.id + ",value=";
 	if (element.playbackRate) {
 		message += element.playbackRate;
 	} else {
@@ -1361,7 +1353,7 @@ function playerRateChangedEvent(element) {
 }
 
 function playerErrorEvent(element) {
-	var message = "player-error-event{session=" + sessionID + ",id=" + element.id;
+	let message = "player-error-event{session=" + sessionID + ",id=" + element.id;
 	if (element.error) {
 		if (element.error.code) {
 			message += ",code=" + element.error.code;
@@ -1374,49 +1366,49 @@ function playerErrorEvent(element) {
 }
 
 function setMediaMuted(elementId, value) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.muted = value
 	}
 }
 
 function mediaPlay(elementId) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element && element.play) {
 		element.play()
 	}
 }
 
 function mediaPause(elementId) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element && element.pause) {
 		element.pause()
 	}
 }
 
 function mediaSetSetCurrentTime(elementId, time) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.currentTime = time
 	}
 }
 
 function mediaSetPlaybackRate(elementId, time) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.playbackRate = time
 	}
 }
 
 function mediaSetVolume(elementId, volume) {
-	var element = document.getElementById(elementId);
+	const element = document.getElementById(elementId);
 	if (element) {
 		element.volume = volume
 	}
 }
 
 function startDownload(url, filename) {
-	var element = document.getElementById("ruiDownloader");
+	const element = document.getElementById("ruiDownloader");
 	if (element) {
 		element.href = url;
 		element.setAttribute("download", filename);
@@ -1429,16 +1421,16 @@ function setTitle(title) {
 }
 
 function setTitleColor(color) {
-	var metas = document.getElementsByTagName('meta');
+	const metas = document.getElementsByTagName('meta');
 	if (metas) {
-		var item = metas.namedItem('theme-color');
+		const item = metas.namedItem('theme-color');
 		if (item) {
 			item.setAttribute('content', color)
 			return
 		}
 	}
 
-	var meta = document.createElement('meta');
+	const meta = document.createElement('meta');
 	meta.setAttribute('name', 'theme-color');
 	meta.setAttribute('content', color);
 	document.getElementsByTagName('head')[0].appendChild(meta);
@@ -1461,9 +1453,9 @@ function getTableSelectedItemStyle(element) {
 }
 
 function tableViewFocusEvent(element, event) {
-	var currentId = element.getAttribute("data-current");
+	const currentId = element.getAttribute("data-current");
 	if (currentId) {
-		var current = document.getElementById(currentId);
+		const current = document.getElementById(currentId);
 		if (current) {
 			if (current.classList) {
 				current.classList.remove(getTableSelectedItemStyle(element));
@@ -1474,9 +1466,9 @@ function tableViewFocusEvent(element, event) {
 }
 
 function tableViewBlurEvent(element, event) {
-	var currentId = element.getAttribute("data-current");
+	const currentId = element.getAttribute("data-current");
 	if (currentId) {
-		var current = document.getElementById(currentId);
+		const current = document.getElementById(currentId);
 		if (current && current.classList) {
 			current.classList.remove(getTableFocusedItemStyle(element));
 			current.classList.add(getTableSelectedItemStyle(element));
@@ -1485,7 +1477,7 @@ function tableViewBlurEvent(element, event) {
 }
 
 function setTableCellCursorByID(tableID, row, column) {
-	var table = document.getElementById(tableID);
+	const table = document.getElementById(tableID);
 	if (table) {
 		if (!setTableCellCursor(table, row, column)) {
 			const focusStyle = getTableFocusedItemStyle(table);
@@ -1504,7 +1496,7 @@ function setTableCellCursorByID(tableID, row, column) {
 
 function setTableCellCursor(element, row, column) {
 	const cellID = element.id + "-" + row + "-" + column;
-	var cell = document.getElementById(cellID);
+	const cell = document.getElementById(cellID);
 	if (!cell || cell.getAttribute("data-disabled")) {
 		return false;
 	}
@@ -1551,7 +1543,7 @@ function moveTableCellCursor(element, row, column, dr, dc) {
 		if (setTableCellCursor(element, row, column)) {
 			return;
 		} else if (dr == 0) {
-			var r2 = row - 1;
+			let r2 = row - 1;
 			while (r2 >= 0) {
 				if (setTableCellCursor(element, r2, column)) {
 					return;
@@ -1559,7 +1551,7 @@ function moveTableCellCursor(element, row, column, dr, dc) {
 				r2--;
 			}
 		} else if (dc == 0) {
-			var c2 = column - 1;
+			let c2 = column - 1;
 			while (c2 >= 0) {
 				if (setTableCellCursor(element, row, c2)) {
 					return;
@@ -1596,9 +1588,9 @@ function tableViewCellKeyDownEvent(element, event) {
 				if (rows && columns) {
 					const rowCount = parseInt(rows);
 					const columnCount = parseInt(rows);
-					row = 0;
+					let row = 0;
 					while (row < rowCount) {
-						column = 0;
+						let column = 0;
 						while (columns < columnCount) {
 							if (setTableCellCursor(element, row, column)) {
 								return;
@@ -1646,13 +1638,13 @@ function tableViewCellKeyDownEvent(element, event) {
 				break;
 
 			case "End":
-				/*var newRow = rowCount-1;
-				while (newRow > row) {
+				/*
+				for (let newRow = rowCount-1; newRow > row; newRow--) {
 					if (setTableRowCursor(element, newRow)) {
 						break;
 					}
-					newRow--;
-				}*/
+				}
+				*/
 				// TODO
 				break;
 
@@ -1676,7 +1668,7 @@ function tableViewCellKeyDownEvent(element, event) {
 }
 
 function setTableRowCursorByID(tableID, row) {
-	var table = document.getElementById(tableID);
+	const table = document.getElementById(tableID);
 	if (table) {
 		if (!setTableRowCursor(table, row)) {
 			const focusStyle = getTableFocusedItemStyle(table);
@@ -1695,7 +1687,7 @@ function setTableRowCursorByID(tableID, row) {
 
 function setTableRowCursor(element, row) {
 	const tableRowID = element.id + "-" + row;
-	var tableRow = document.getElementById(tableRowID);
+	const tableRow = document.getElementById(tableRowID);
 	if (!tableRow || tableRow.getAttribute("data-disabled")) {
 		return false;
 	}
@@ -1760,26 +1752,22 @@ function tableViewRowKeyDownEvent(element, event) {
 						moveTableRowCursor(element, row, -1)
 						break;
 		
-					case "Home":
-						var newRow = 0;
-						while (newRow < row) {
+					case "Home": 						
+						for (let newRow = 0; newRow < row; newRow++) {
 							if (setTableRowCursor(element, newRow)) {
 								break;
 							}
-							newRow++;
 						}
 						break;
-		
-					case "End":
-						var newRow = rowCount-1;
-						while (newRow > row) {
+
+					case "End":	
+						for (let newRow = rowCount-1; newRow > row; newRow--) {
 							if (setTableRowCursor(element, newRow)) {
 								break;
 							}
-							newRow--;
 						}
 						break;
-		
+					
 					case "PageUp":
 						// TODO
 						break;
@@ -1809,7 +1797,7 @@ function tableViewRowKeyDownEvent(element, event) {
 				const rows = element.getAttribute("data-rows");
 				if (rows) {
 					const rowCount = parseInt(rows);
-					row = 0;
+					let row = 0;
 					while (row < rowCount) {
 						if (setTableRowCursor(element, row)) {
 							break;
@@ -1879,7 +1867,7 @@ function tableRowClickEvent(element, event) {
 }
 
 function imageLoaded(element, event) {
-	var message = "imageViewLoaded{session=" + sessionID + ",id=" + element.id +
+	const message = "imageViewLoaded{session=" + sessionID + ",id=" + element.id +
 		",natural-width=" + element.naturalWidth +
 		",natural-height=" + element.naturalHeight +
 		",current-src=\"" + element.currentSrc +  "\"}";
@@ -1888,16 +1876,38 @@ function imageLoaded(element, event) {
 }
 
 function imageError(element, event) {
-	var message = "imageViewError{session=" + sessionID + ",id=" + element.id + "}";
+	const message = "imageViewError{session=" + sessionID + ",id=" + element.id + "}";
 	sendMessage(message);
 }
 
+let timers = new Map();
+
+function startTimer(ms, timerID) {
+	let data = {
+		id: setInterval(timerFunc, ms, timerID),
+		ms: ms,
+	};
+	timers.set(timerID, data);
+}
+
+function timerFunc(timerID) {
+	sendMessage("timer{session=" + sessionID + ",timerID=" + timerID + "}");
+}
+
+function stopTimer(timerID) {
+	let timer = timers.get(timerID);
+	if (timer) {
+		clearInterval(timer.id);
+		timers.delete(timerID);
+	}
+}
+
 function canvasTextMetrics(answerID, elementId, font, text) {
-	var w = 0;
-	var ascent = 0;
-	var descent = 0;
-	var left = 0;
-	var right = 0;
+	let w = 0;
+	let ascent = 0;
+	let descent = 0;
+	let left = 0;
+	let right = 0;
 
 	const canvas = document.getElementById(elementId);
 	if (canvas) {
@@ -1909,7 +1919,7 @@ function canvasTextMetrics(answerID, elementId, font, text) {
 			ctx.font = font;
 			ctx.textBaseline = 'alphabetic';
 			ctx.textAlign = 'start';
-			var metrics = ctx.measureText(text)
+			const metrics = ctx.measureText(text)
 			w = metrics.width;
 			ascent = metrics.actualBoundingBoxAscent;
 			descent = metrics.actualBoundingBoxDescent;
@@ -1933,8 +1943,26 @@ function getPropertyValue(answerID, elementId, name) {
 	sendMessage('answer{answerID=' + answerID + ', value=""}')
 }
 
+function setStyles(styles) {
+	document.querySelector('style').textContent = styles
+}
+
 function appendStyles(styles) {
 	document.querySelector('style').textContent += styles
+}
+
+function appendAnimationCSS(css) {
+	let styles = document.getElementById('ruiAnimations');
+	if (styles) {
+		styles.textContent += css;
+	}
+}
+
+function setAnimationCSS(css) {
+	let styles = document.getElementById('ruiAnimations');
+	if (styles) {
+		styles.textContent = css;
+	}
 }
 
 function getCanvasContext(elementId) {
@@ -1977,16 +2005,16 @@ function showTooltip(element, tooltip) {
 	layer.style.left = "0px";
 	layer.style.right = "0px";
 
-	var tooltipBox = document.getElementById("ruiTooltipText");
+	const tooltipBox = document.getElementById("ruiTooltipText");
 	if (tooltipBox) {
 		tooltipBox.innerHTML = tooltip;
 	}
 
-	var left = element.offsetLeft;
-	var top = element.offsetTop;
-	var width = element.offsetWidth;
-	var height = element.offsetHeight;
-	var parent = element.offsetParent;
+	let left = element.offsetLeft;
+	let top = element.offsetTop;
+	let width = element.offsetWidth;
+	let height = element.offsetHeight;
+	let parent = element.offsetParent;
 
 	while (parent) {
 		left += parent.offsetLeft;
@@ -2022,7 +2050,7 @@ function showTooltip(element, tooltip) {
 	}
 
 	const bottomOff = height - (top + element.offsetHeight);
-	var arrow = document.getElementById("ruiTooltipTopArrow");
+	let arrow = document.getElementById("ruiTooltipTopArrow");
 
 	if (bottomOff < arrow.offsetHeight + tooltipBox.offsetHeight) {
 		if (arrow) {

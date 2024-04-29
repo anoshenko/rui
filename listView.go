@@ -11,20 +11,25 @@ const (
 	// The "list-item-clicked" event occurs when the user clicks on an item in the list.
 	// The main listener format: func(ListView, int), where the second argument is the item index.
 	ListItemClickedEvent = "list-item-clicked"
+
 	// ListItemSelectedEvent is the constant for "list-item-selected" property tag.
 	// The "list-item-selected" event occurs when a list item becomes selected.
 	// The main listener format: func(ListView, int), where the second argument is the item index.
 	ListItemSelectedEvent = "list-item-selected"
+
 	// ListItemCheckedEvent is the constant for "list-item-checked" property tag.
 	// The "list-item-checked" event occurs when a list item checkbox becomes checked/unchecked.
 	// The main listener format: func(ListView, []int), where the second argument is the array of checked item indexes.
 	ListItemCheckedEvent = "list-item-checked"
+
 	// ListItemStyle is the constant for "list-item-style" property tag.
 	// The "list-item-style" string property defines the style of an unselected item
 	ListItemStyle = "list-item-style"
+
 	// CurrentStyle is the constant for "current-style" property tag.
 	// The "current-style" string property defines the style of the selected item when the ListView is focused.
 	CurrentStyle = "current-style"
+
 	// CurrentInactiveStyle is the constant for "current-inactive-style" property tag.
 	// The "current-inactive-style" string property defines the style of the selected item when the ListView is unfocused.
 	CurrentInactiveStyle = "current-inactive-style"
@@ -589,7 +594,7 @@ func (listView *listViewData) getItemFrames() []Frame {
 	return listView.itemFrame
 }
 
-func (listView *listViewData) itemAlign(self View, buffer *strings.Builder) {
+func (listView *listViewData) itemAlign(buffer *strings.Builder) {
 	values := enumProperties[ItemHorizontalAlign].cssValues
 	if hAlign := GetListItemHorizontalAlign(listView); hAlign >= 0 && hAlign < len(values) {
 		buffer.WriteString(" justify-items: ")
@@ -605,7 +610,7 @@ func (listView *listViewData) itemAlign(self View, buffer *strings.Builder) {
 	}
 }
 
-func (listView *listViewData) itemSize(self View, buffer *strings.Builder) {
+func (listView *listViewData) itemSize(buffer *strings.Builder) {
 	if itemWidth := GetListItemWidth(listView); itemWidth.Type != Auto {
 		buffer.WriteString(` min-width: `)
 		buffer.WriteString(itemWidth.cssString("", listView.Session()))
@@ -619,14 +624,14 @@ func (listView *listViewData) itemSize(self View, buffer *strings.Builder) {
 	}
 }
 
-func (listView *listViewData) getDivs(self View, checkbox, hCheckboxAlign, vCheckboxAlign int) (string, string, string) {
+func (listView *listViewData) getDivs(checkbox, hCheckboxAlign, vCheckboxAlign int) (string, string, string) {
 	session := listView.Session()
 
 	contentBuilder := allocStringBuilder()
 	defer freeStringBuilder(contentBuilder)
 
 	contentBuilder.WriteString(`<div style="display: grid;`)
-	listView.itemAlign(self, contentBuilder)
+	listView.itemAlign(contentBuilder)
 
 	onDivBuilder := allocStringBuilder()
 	defer freeStringBuilder(onDivBuilder)
@@ -681,7 +686,7 @@ func (listView *listViewData) getDivs(self View, checkbox, hCheckboxAlign, vChec
 	return onDivBuilder.String(), offDivBuilder.String(), contentBuilder.String()
 }
 
-func (listView *listViewData) checkboxItemDiv(self View, checkbox, hCheckboxAlign, vCheckboxAlign int) string {
+func (listView *listViewData) checkboxItemDiv(checkbox, hCheckboxAlign, vCheckboxAlign int) string {
 	itemStyleBuilder := allocStringBuilder()
 	defer freeStringBuilder(itemStyleBuilder)
 
@@ -760,15 +765,15 @@ func (listView *listViewData) currentInactiveStyle() string {
 	return listView.itemStyle(CurrentInactiveStyle, "ruiListItemSelected")
 }
 
-func (listView *listViewData) checkboxSubviews(self View, buffer *strings.Builder, checkbox int) {
+func (listView *listViewData) checkboxSubviews(buffer *strings.Builder, checkbox int) {
 	count := listView.adapter.ListSize()
 	listViewID := listView.htmlID()
 
 	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
 	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView)
 
-	itemDiv := listView.checkboxItemDiv(self, checkbox, hCheckboxAlign, vCheckboxAlign)
-	onDiv, offDiv, contentDiv := listView.getDivs(self, checkbox, hCheckboxAlign, vCheckboxAlign)
+	itemDiv := listView.checkboxItemDiv(checkbox, hCheckboxAlign, vCheckboxAlign)
+	onDiv, offDiv, contentDiv := listView.getDivs(checkbox, hCheckboxAlign, vCheckboxAlign)
 
 	current := GetCurrent(listView)
 	checkedItems := GetListViewCheckedItems(listView)
@@ -784,7 +789,7 @@ func (listView *listViewData) checkboxSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(listView.currentInactiveStyle())
 		}
 		buffer.WriteString(`" onclick="listItemClickEvent(this, event)" data-left="0" data-top="0" data-width="0" data-height="0" style="display: grid; justify-items: stretch; align-items: stretch;`)
-		listView.itemSize(self, buffer)
+		listView.itemSize(buffer)
 		if !listView.adapter.IsListItemEnabled(i) {
 			buffer.WriteString(`" data-disabled="1`)
 		}
@@ -815,7 +820,7 @@ func (listView *listViewData) checkboxSubviews(self View, buffer *strings.Builde
 	}
 }
 
-func (listView *listViewData) noneCheckboxSubviews(self View, buffer *strings.Builder) {
+func (listView *listViewData) noneCheckboxSubviews(buffer *strings.Builder) {
 	count := listView.adapter.ListSize()
 	listViewID := listView.htmlID()
 
@@ -824,8 +829,8 @@ func (listView *listViewData) noneCheckboxSubviews(self View, buffer *strings.Bu
 
 	itemStyleBuilder.WriteString(`data-left="0" data-top="0" data-width="0" data-height="0" style="max-width: 100%; max-height: 100%; display: grid;`)
 
-	listView.itemAlign(self, itemStyleBuilder)
-	listView.itemSize(self, itemStyleBuilder)
+	listView.itemAlign(itemStyleBuilder)
+	listView.itemSize(itemStyleBuilder)
 
 	itemStyleBuilder.WriteString(`" onclick="listItemClickEvent(this, event)"`)
 	itemStyle := itemStyleBuilder.String()
@@ -865,12 +870,12 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 	checkbox := GetListViewCheckbox(listView)
 	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
 	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView)
-	onDiv, offDiv, contentDiv := listView.getDivs(listView, checkbox, hCheckboxAlign, vCheckboxAlign)
+	onDiv, offDiv, contentDiv := listView.getDivs(checkbox, hCheckboxAlign, vCheckboxAlign)
 
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(listView.checkboxItemDiv(listView, checkbox, hCheckboxAlign, vCheckboxAlign))
+	buffer.WriteString(listView.checkboxItemDiv(checkbox, hCheckboxAlign, vCheckboxAlign))
 	if checked {
 		buffer.WriteString(onDiv)
 	} else {
@@ -1061,9 +1066,9 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	checkbox := GetListViewCheckbox(listView)
 	if checkbox == NoneCheckbox {
-		listView.noneCheckboxSubviews(self, buffer)
+		listView.noneCheckboxSubviews(buffer)
 	} else {
-		listView.checkboxSubviews(self, buffer, checkbox)
+		listView.checkboxSubviews(buffer, checkbox)
 	}
 
 	buffer.WriteString(`</div>`)

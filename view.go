@@ -35,24 +35,33 @@ type View interface {
 
 	// Session returns the current Session interface
 	Session() Session
+
 	// Parent returns the parent view
 	Parent() View
+
 	// Tag returns the tag of View interface
 	Tag() string
+
 	// ID returns the id of the view
 	ID() string
+
 	// Focusable returns true if the view receives the focus
 	Focusable() bool
+
 	// Frame returns the location and size of the view in pixels
 	Frame() Frame
+
 	// Scroll returns the location size of the scrollable view in pixels
 	Scroll() Frame
+
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
 	SetAnimated(tag string, value any, animation Animation) bool
+
 	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag string, listener func(View, string))
+
 	// HasFocus returns 'true' if the view has focus
 	HasFocus() bool
 
@@ -65,7 +74,6 @@ type View interface {
 	setParentID(parentID string)
 	htmlSubviews(self View, buffer *strings.Builder)
 	htmlProperties(self View, buffer *strings.Builder)
-	htmlDisabledProperties(self View, buffer *strings.Builder)
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
 
@@ -93,6 +101,7 @@ type viewData struct {
 	noResizeEvent    bool
 	created          bool
 	hasFocus         bool
+	hasHtmlDisabled  bool
 	//animation map[string]AnimationEndListener
 }
 
@@ -135,6 +144,7 @@ func (view *viewData) init(session Session) {
 	view.singleTransition = map[string]Animation{}
 	view.noResizeEvent = false
 	view.created = false
+	view.hasHtmlDisabled = false
 }
 
 func (view *viewData) Session() Session {
@@ -302,7 +312,6 @@ func (view *viewData) propertyChangedEvent(tag string) {
 	if listener, ok := view.changeListener[tag]; ok {
 		listener(view, tag)
 	}
-
 }
 
 func (view *viewData) Set(tag string, value any) bool {
@@ -404,7 +413,35 @@ func viewPropertyChanged(view *viewData, tag string) {
 
 	switch tag {
 	case Disabled:
-		updateInnerHTML(view.parentHTMLID(), session)
+		tabIndex := GetTabIndex(view, htmlID)
+		enabledClass := view.htmlClass(false)
+		disabledClass := view.htmlClass(true)
+		session.startUpdateScript(htmlID)
+		if IsDisabled(view) {
+			session.updateProperty(htmlID, "data-disabled", "1")
+			if view.hasHtmlDisabled {
+				session.updateProperty(htmlID, "disabled", true)
+			}
+			if tabIndex >= 0 {
+				session.updateProperty(htmlID, "tabindex", -1)
+			}
+			if enabledClass != disabledClass {
+				session.updateProperty(htmlID, "class", disabledClass)
+			}
+		} else {
+			session.updateProperty(htmlID, "data-disabled", "0")
+			if view.hasHtmlDisabled {
+				session.removeProperty(htmlID, "disabled")
+			}
+			if tabIndex >= 0 {
+				session.updateProperty(htmlID, "tabindex", tabIndex)
+			}
+			if enabledClass != disabledClass {
+				session.updateProperty(htmlID, "class", enabledClass)
+			}
+		}
+		session.finishUpdateScript(htmlID)
+		updateInnerHTML(htmlID, session)
 		return
 
 	case Visibility:
@@ -613,6 +650,8 @@ func viewPropertyChanged(view *viewData, tag string) {
 	case ZIndex, Order, TabSize:
 		if i, ok := intProperty(view, tag, session, 0); ok {
 			session.updateCSSProperty(htmlID, tag, strconv.Itoa(i))
+		} else {
+			session.updateCSSProperty(htmlID, tag, "")
 		}
 		return
 
@@ -660,8 +699,11 @@ func viewPropertyChanged(view *viewData, tag string) {
 	}
 
 	if cssTag, ok := sizeProperties[tag]; ok {
-		size, _ := sizeProperty(view, tag, session)
-		session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
+		if size, ok := sizeProperty(view, tag, session); ok {
+			session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
+		} else {
+			session.updateCSSProperty(htmlID, cssTag, "")
+		}
 		return
 	}
 
@@ -682,8 +724,11 @@ func viewPropertyChanged(view *viewData, tag string) {
 	}
 
 	if valuesData, ok := enumProperties[tag]; ok && valuesData.cssTag != "" {
-		n, _ := enumProperty(view, tag, session, 0)
-		session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
+		if n, ok := enumProperty(view, tag, session, 0); ok {
+			session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
+		} else {
+			session.updateCSSProperty(htmlID, valuesData.cssTag, "")
+		}
 		return
 	}
 
@@ -691,6 +736,8 @@ func viewPropertyChanged(view *viewData, tag string) {
 		if tag == floatTag {
 			if f, ok := floatTextProperty(view, floatTag, session, 0); ok {
 				session.updateCSSProperty(htmlID, floatTag, f)
+			} else {
+				session.updateCSSProperty(htmlID, floatTag, "")
 			}
 			return
 		}
@@ -759,17 +806,19 @@ func (view *viewData) cssStyle(self View, builder cssBuilder) {
 
 func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	view.created = true
+
+	if IsDisabled(self) {
+		buffer.WriteString(` data-disabled="1"`)
+		if view.hasHtmlDisabled {
+			buffer.WriteString(`  disabled`)
+		}
+	} else {
+		buffer.WriteString(` data-disabled="0"`)
+	}
+
 	if view.frame.Left != 0 || view.frame.Top != 0 || view.frame.Width != 0 || view.frame.Height != 0 {
 		buffer.WriteString(fmt.Sprintf(` data-left="%g" data-top="%g" data-width="%g" data-height="%g"`,
 			view.frame.Left, view.frame.Top, view.frame.Width, view.frame.Height))
-	}
-}
-
-func (view *viewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
-		buffer.WriteString(` data-disabled="1"`)
-	} else {
-		buffer.WriteString(` data-disabled="0"`)
 	}
 }
 
@@ -800,8 +849,6 @@ func viewHTML(view View, buffer *strings.Builder) {
 
 	buffer.WriteRune(' ')
 	view.htmlProperties(view, buffer)
-	buffer.WriteRune(' ')
-	view.htmlDisabledProperties(view, buffer)
 
 	if view.isNoResizeEvent() {
 		buffer.WriteString(` data-noresize="1" `)
@@ -810,12 +857,10 @@ func viewHTML(view View, buffer *strings.Builder) {
 	}
 
 	if !disabled {
-		if value, ok := intProperty(view, TabIndex, view.Session(), -1); ok {
+		if tabIndex := GetTabIndex(view); tabIndex >= 0 {
 			buffer.WriteString(`tabindex="`)
-			buffer.WriteString(strconv.Itoa(value))
+			buffer.WriteString(strconv.Itoa(tabIndex))
 			buffer.WriteString(`" `)
-		} else if view.Focusable() {
-			buffer.WriteString(`tabindex="0" `)
 		}
 	}
 

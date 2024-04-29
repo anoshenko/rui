@@ -188,10 +188,6 @@ func (customView *CustomViewData) htmlProperties(self View, buffer *strings.Buil
 	customView.superView.htmlProperties(customView.superView, buffer)
 }
 
-func (customView *CustomViewData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	customView.superView.htmlDisabledProperties(customView.superView, buffer)
-}
-
 func (customView *CustomViewData) cssStyle(self View, builder cssBuilder) {
 	customView.superView.cssStyle(customView.superView, builder)
 }

@@ -8,9 +8,11 @@ const (
 	// VideoWidth is the constant for the "video-width" property tag of VideoPlayer.
 	// The "video-width" float property defines the width of the video's display area in pixels.
 	VideoWidth = "video-width"
+
 	// VideoHeight is the constant for the "video-height" property tag of VideoPlayer.
 	// The "video-height" float property defines the height of the video's display area in pixels.
 	VideoHeight = "video-height"
+
 	// Poster is the constant for the "poster" property tag of VideoPlayer.
 	// The "poster" property defines an URL for an image to be shown while the video is downloading.
 	// If this attribute isn't specified, nothing is displayed until the first frame is available,

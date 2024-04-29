@@ -34,6 +34,7 @@ func newColorPicker(session Session) View {
 func (picker *colorPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "ColorPicker"
+	picker.hasHtmlDisabled = true
 	picker.colorChangedListeners = []func(ColorPicker, Color, Color){}
 	picker.properties[Padding] = Px(0)
 }
@@ -151,13 +152,6 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
-}
-
-func (picker *colorPickerData) htmlDisabledProperties(self View, buffer *strings.Builder) {
-	if IsDisabled(self) {
-		buffer.WriteString(` disabled`)
-	}
-	picker.viewData.htmlDisabledProperties(self, buffer)
 }
 
 func (picker *colorPickerData) handleCommand(self View, command string, data DataObject) bool {

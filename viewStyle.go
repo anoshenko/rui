@@ -13,8 +13,10 @@ type ViewStyle interface {
 
 	// Transition returns the transition animation of the property. Returns nil is there is no transition animation.
 	Transition(tag string) Animation
+
 	// Transitions returns the map of transition animations. The result is always non-nil.
 	Transitions() map[string]Animation
+
 	// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
 	// removes the transition animation of the property if "animation" argument  is nil.
 	// The "tag" argument is the property name.
@@ -573,6 +575,9 @@ func supportedPropertyValue(value any) bool {
 	case []ViewShadow:
 	case []View:
 	case []any:
+	case []BackgroundElement:
+	case []BackgroundGradientPoint:
+	case []BackgroundGradientAngle:
 	case map[string]Animation:
 	default:
 		return false
@@ -692,6 +697,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			for _, shadow := range value {
 				buffer.WriteString(indent2)
 				shadow.writeString(buffer, indent)
+				buffer.WriteRune(',')
 			}
 			buffer.WriteRune('\n')
 			buffer.WriteString(indent)
@@ -701,7 +707,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 	case []View:
 		switch len(value) {
 		case 0:
-			buffer.WriteString("[]\n")
+			buffer.WriteString("[]")
 
 		case 1:
 			writeViewStyle(value[0].Tag(), value[0], buffer, indent)
@@ -739,6 +745,47 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			}
 			buffer.WriteString(" ]")
 		}
+
+	case []BackgroundElement:
+		switch len(value) {
+		case 0:
+			buffer.WriteString("[]\n")
+
+		case 1:
+			value[0].writeString(buffer, indent)
+
+		default:
+			buffer.WriteString("[\n")
+			indent2 := indent + "\t"
+			for _, element := range value {
+				buffer.WriteString(indent2)
+				element.writeString(buffer, indent2)
+				buffer.WriteString(",\n")
+			}
+
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
+
+	case []BackgroundGradientPoint:
+		buffer.WriteRune('"')
+		for i, point := range value {
+			if i > 0 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString(point.String())
+		}
+		buffer.WriteRune('"')
+
+	case []BackgroundGradientAngle:
+		buffer.WriteRune('"')
+		for i, point := range value {
+			if i > 0 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString(point.String())
+		}
+		buffer.WriteRune('"')
 
 	case map[string]Animation:
 		switch count := len(value); count {

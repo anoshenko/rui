@@ -2465,9 +2465,10 @@ The SizeUnit value of type SizeInFraction can be either integer or fractional.
 The "grid-row-gap" and "grid-column-gap" SizeUnit properties (GridRowGap and GridColumnGap constants) 
 allow you to set the distance between the rows and columns of the container, respectively. The default is 0px.
 
-### "cell-vertical-align" property
+### "cell-vertical-align" and "cell-vertical-self-align" properties
 
-The "cell-vertical-align" property (constant CellVerticalAlign) of type int sets the vertical alignment of children within the cell they are occupying. Valid values:
+The "cell-vertical-align" int property (constant CellVerticalAlign) sets the default vertical alignment of children 
+within the cell they are occupying. Valid values:
 
 | Value | Constant     | Name      | Alignment           |
 |:-----:|--------------|-----------|---------------------|
@@ -2478,9 +2479,13 @@ The "cell-vertical-align" property (constant CellVerticalAlign) of type int sets
 
 The default value is StretchAlign (3)
 
-### "cell-horizontal-align" property
+The "cell-vertical-self-align" int property (constant CellVerticalAlign) sets the vertical alignment of children 
+within the cell they are occupying. This property should be set not for the grid, but for the children.
 
-The "cell-horizontal-align" property (constant CellHorizontalAlign) of type int sets the horizontal alignment of children within the occupied cell. Valid values:
+### "cell-horizontal-align" and "cell-horizontal-self-align" properties
+
+The "cell-horizontal-align" int property (constant CellHorizontalSelfAlign) sets the horizontal alignment 
+of children within the occupied cell. Valid values:
 
 | Value | Constant     | Name      | Alignment          | 
 |:-----:|--------------|-----------|--------------------|
@@ -2490,6 +2495,9 @@ The "cell-horizontal-align" property (constant CellHorizontalAlign) of type int 
 | 3     | StretchAlign | "stretch" | Full width stretch |
 
 The default value is StretchAlign (3)
+
+The "cell-horizontal-self-align" int property (constant CellVerticalSelfAlign) sets the horizontal alignment of children 
+within the cell they are occupying. This property should be set not for the grid, but for the children.
 
 ## ColumnLayout
 

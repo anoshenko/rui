@@ -17,12 +17,18 @@ type wasmApp struct {
 	params            AppParams
 	createContentFunc func(Session) SessionContent
 	session           Session
-	bridge            webBridge
+	bridge            bridge
 	close             chan DataObject
 }
 
 func (app *wasmApp) Finish() {
 	app.session.close()
+}
+
+func (app *wasmApp) Params() AppParams {
+	params := app.params
+	params.SocketAutoClose = 0
+	return params
 }
 
 func debugLog(text string) {
@@ -44,17 +50,10 @@ func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 			case "session-close":
 				app.close <- obj
 
-			case "answer":
-				app.session.handleAnswer(obj)
-
-			case "imageLoaded":
-				app.session.imageManager().imageLoaded(obj, app.session)
-
-			case "imageError":
-				app.session.imageManager().imageLoadError(obj, app.session)
-
 			default:
-				app.session.handleEvent(command, obj)
+				if !app.session.handleAnswer(command, obj) {
+					app.session.handleEvent(command, obj)
+				}
 			}
 		}
 	}
