@@ -64,7 +64,7 @@ func (edit *editViewData) init(session Session) {
 }
 
 func (edit *editViewData) String() string {
-	return getViewString(edit)
+	return getViewString(edit, nil)
 }
 
 func (edit *editViewData) Focusable() bool {

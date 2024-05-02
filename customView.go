@@ -13,8 +13,9 @@ type CustomView interface {
 
 // CustomViewData defines a data of a basic custom view
 type CustomViewData struct {
-	tag       string
-	superView View
+	tag           string
+	superView     View
+	defaultParams Params
 }
 
 // InitCustomView initializes fields of CustomView by default values
@@ -37,6 +38,12 @@ func (customView *CustomViewData) SuperView() View {
 
 func (customView *CustomViewData) setSuperView(view View) {
 	customView.superView = view
+	customView.defaultParams = Params{}
+	for _, tag := range view.AllTags() {
+		if value := view.getRaw(tag); value != nil {
+			customView.defaultParams[tag] = value
+		}
+	}
 }
 
 func (customView *CustomViewData) setTag(tag string) {
@@ -252,9 +259,22 @@ func (customView *CustomViewData) ViewIndex(view View) int {
 	return -1
 }
 
+func (customView *CustomViewData) exscludeTags() []string {
+	if customView.superView != nil {
+		exsclude := []string{}
+		for tag, value := range customView.defaultParams {
+			if value == customView.superView.getRaw(tag) {
+				exsclude = append(exsclude, tag)
+			}
+		}
+		return exsclude
+	}
+	return nil
+}
+
 func (customView *CustomViewData) String() string {
 	if customView.superView != nil {
-		return getViewString(customView)
+		return getViewString(customView, customView.exscludeTags())
 	}
 	return customView.tag + " { }"
 }

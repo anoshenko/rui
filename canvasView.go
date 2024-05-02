@@ -37,7 +37,7 @@ func (canvasView *canvasViewData) init(session Session) {
 }
 
 func (canvasView *canvasViewData) String() string {
-	return getViewString(canvasView)
+	return getViewString(canvasView, nil)
 }
 
 func (canvasView *canvasViewData) normalizeTag(tag string) string {

@@ -45,7 +45,7 @@ func (picker *datePickerData) init(session Session) {
 }
 
 func (picker *datePickerData) String() string {
-	return getViewString(picker)
+	return getViewString(picker, nil)
 }
 
 func (picker *datePickerData) Focusable() bool {

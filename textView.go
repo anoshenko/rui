@@ -33,7 +33,7 @@ func (textView *textViewData) init(session Session) {
 }
 
 func (textView *textViewData) String() string {
-	return getViewString(textView)
+	return getViewString(textView, nil)
 }
 
 func (textView *textViewData) Get(tag string) any {

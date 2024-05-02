@@ -47,7 +47,7 @@ func (player *videoPlayerData) init(session Session) {
 }
 
 func (player *videoPlayerData) String() string {
-	return getViewString(player)
+	return getViewString(player, nil)
 }
 
 func (player *videoPlayerData) htmlTag() string {

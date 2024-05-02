@@ -99,7 +99,7 @@ func (tabsLayout *tabsLayoutData) init(session Session) {
 }
 
 func (tabsLayout *tabsLayoutData) String() string {
-	return getViewString(tabsLayout)
+	return getViewString(tabsLayout, nil)
 }
 
 func (tabsLayout *tabsLayoutData) currentItem(defaultValue int) int {

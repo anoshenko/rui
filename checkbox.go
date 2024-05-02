@@ -43,7 +43,7 @@ func (button *checkboxData) init(session Session) {
 }
 
 func (button *checkboxData) String() string {
-	return getViewString(button)
+	return getViewString(button, nil)
 }
 
 func (button *checkboxData) Focusable() bool {

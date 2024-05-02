@@ -40,7 +40,7 @@ func (picker *colorPickerData) init(session Session) {
 }
 
 func (picker *colorPickerData) String() string {
-	return getViewString(picker)
+	return getViewString(picker, nil)
 }
 
 func (picker *colorPickerData) normalizeTag(tag string) string {

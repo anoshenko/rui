@@ -71,7 +71,7 @@ func (imageView *imageViewData) init(session Session) {
 }
 
 func (imageView *imageViewData) String() string {
-	return getViewString(imageView)
+	return getViewString(imageView, nil)
 }
 
 func (imageView *imageViewData) normalizeTag(tag string) string {

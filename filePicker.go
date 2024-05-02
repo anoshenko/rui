@@ -90,7 +90,7 @@ func (picker *filePickerData) init(session Session) {
 }
 
 func (picker *filePickerData) String() string {
-	return getViewString(picker)
+	return getViewString(picker, nil)
 }
 
 func (picker *filePickerData) Focusable() bool {

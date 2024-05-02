@@ -76,6 +76,7 @@ type View interface {
 	htmlProperties(self View, buffer *strings.Builder)
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
+	exscludeTags() []string
 
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index string, x, y, width, height float64)
@@ -999,5 +1000,9 @@ func (view *viewData) HasFocus() bool {
 }
 
 func (view *viewData) String() string {
-	return getViewString(view)
+	return getViewString(view, nil)
+}
+
+func (view *viewData) exscludeTags() []string {
+	return nil
 }

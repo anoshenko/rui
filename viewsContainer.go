@@ -38,7 +38,7 @@ func (container *viewsContainerData) init(session Session) {
 }
 
 func (container *viewsContainerData) String() string {
-	return getViewString(container)
+	return getViewString(container, nil)
 }
 
 func (container *viewsContainerData) setParentID(parentID string) {

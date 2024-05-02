@@ -72,7 +72,7 @@ func (gridLayout *gridLayoutData) init(session Session) {
 }
 
 func (gridLayout *gridLayoutData) String() string {
-	return getViewString(gridLayout)
+	return getViewString(gridLayout, nil)
 }
 
 func (style *viewStyle) setGridCellSize(tag string, value any) bool {

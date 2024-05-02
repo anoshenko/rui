@@ -81,7 +81,7 @@ func (ColumnLayout *columnLayoutData) init(session Session) {
 }
 
 func (columnLayout *columnLayoutData) String() string {
-	return getViewString(columnLayout)
+	return getViewString(columnLayout, nil)
 }
 
 func (columnLayout *columnLayoutData) normalizeTag(tag string) string {

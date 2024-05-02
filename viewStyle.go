@@ -710,14 +710,14 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			buffer.WriteString("[]")
 
 		case 1:
-			writeViewStyle(value[0].Tag(), value[0], buffer, indent)
+			writeViewStyle(value[0].Tag(), value[0], buffer, indent, value[0].exscludeTags())
 
 		default:
 			buffer.WriteString("[\n")
 			indent2 := indent + "\t"
 			for _, v := range value {
 				buffer.WriteString(indent2)
-				writeViewStyle(v.Tag(), v, buffer, indent2)
+				writeViewStyle(v.Tag(), v, buffer, indent2, v.exscludeTags())
 				buffer.WriteString(",\n")
 			}
 
@@ -819,12 +819,18 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 	}
 }
 
-func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent string) {
+func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent string, excludeTags []string) {
 	buffer.WriteString(name)
 	buffer.WriteString(" {\n")
 	indent += "\t"
 
 	writeProperty := func(tag string, value any) {
+		for _, exclude := range excludeTags {
+			if exclude == tag {
+				return
+			}
+		}
+
 		if supportedPropertyValue(value) {
 			buffer.WriteString(indent)
 			buffer.WriteString(tag)
@@ -896,10 +902,10 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 	buffer.WriteString("}")
 }
 
-func getViewString(view View) string {
+func getViewString(view View, excludeTags []string) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
-	writeViewStyle(view.Tag(), view, buffer, "")
+	writeViewStyle(view.Tag(), view, buffer, "", excludeTags)
 	return buffer.String()
 
 }

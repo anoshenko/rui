@@ -72,7 +72,7 @@ func (picker *numberPickerData) init(session Session) {
 }
 
 func (picker *numberPickerData) String() string {
-	return getViewString(picker)
+	return getViewString(picker, nil)
 }
 
 func (picker *numberPickerData) Focusable() bool {

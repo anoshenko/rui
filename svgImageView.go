@@ -36,7 +36,7 @@ func (imageView *svgImageViewData) init(session Session) {
 }
 
 func (imageView *svgImageViewData) String() string {
-	return getViewString(imageView)
+	return getViewString(imageView, nil)
 }
 
 func (imageView *svgImageViewData) normalizeTag(tag string) string {

@@ -270,7 +270,7 @@ func (table *tableViewData) init(session Session) {
 }
 
 func (table *tableViewData) String() string {
-	return getViewString(table)
+	return getViewString(table, nil)
 }
 
 func (table *tableViewData) normalizeTag(tag string) string {

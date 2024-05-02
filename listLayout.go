@@ -56,7 +56,7 @@ func (listLayout *listLayoutData) init(session Session) {
 }
 
 func (listLayout *listLayoutData) String() string {
-	return getViewString(listLayout)
+	return getViewString(listLayout, nil)
 }
 
 func (listLayout *listLayoutData) normalizeTag(tag string) string {

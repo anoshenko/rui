@@ -45,7 +45,7 @@ func (picker *timePickerData) init(session Session) {
 }
 
 func (picker *timePickerData) String() string {
-	return getViewString(picker)
+	return getViewString(picker, nil)
 }
 
 func (picker *timePickerData) Focusable() bool {

@@ -27,7 +27,7 @@ func (player *audioPlayerData) init(session Session) {
 }
 
 func (player *audioPlayerData) String() string {
-	return getViewString(player)
+	return getViewString(player, nil)
 }
 
 func (player *audioPlayerData) htmlTag() string {

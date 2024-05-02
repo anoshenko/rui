@@ -211,7 +211,7 @@ func (player *mediaPlayerData) init(session Session) {
 }
 
 func (player *mediaPlayerData) String() string {
-	return getViewString(player)
+	return getViewString(player, nil)
 }
 
 func (player *mediaPlayerData) Focusable() bool {

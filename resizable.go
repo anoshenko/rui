@@ -63,7 +63,7 @@ func (resizable *resizableData) init(session Session) {
 }
 
 func (resizable *resizableData) String() string {
-	return getViewString(resizable)
+	return getViewString(resizable, nil)
 }
 
 func (resizable *resizableData) Views() []View {

@@ -82,7 +82,7 @@ func (layout *stackLayoutData) init(session Session) {
 }
 
 func (layout *stackLayoutData) String() string {
-	return getViewString(layout)
+	return getViewString(layout, nil)
 }
 
 func (layout *stackLayoutData) pushFinished(view View, tag string) {

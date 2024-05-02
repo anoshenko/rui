@@ -97,7 +97,7 @@ func (listView *listViewData) init(session Session) {
 }
 
 func (listView *listViewData) String() string {
-	return getViewString(listView)
+	return getViewString(listView, nil)
 }
 
 func (listView *listViewData) Views() []View {

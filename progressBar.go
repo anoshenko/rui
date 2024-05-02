@@ -37,7 +37,7 @@ func (progress *progressBarData) init(session Session) {
 }
 
 func (progress *progressBarData) String() string {
-	return getViewString(progress)
+	return getViewString(progress, nil)
 }
 
 func (progress *progressBarData) normalizeTag(tag string) string {
