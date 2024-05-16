@@ -208,11 +208,7 @@ func (edit *editViewData) set(tag string, value any) bool {
 			if text = GetText(edit); oldText != text {
 				edit.textChanged(text, oldText)
 				if edit.created {
-					if GetEditViewType(edit) == MultiLineText {
-						updateInnerHTML(edit.htmlID(), edit.Session())
-					} else {
-						edit.session.callFunc("setInputValue", edit.htmlID(), text)
-					}
+					edit.session.callFunc("setInputValue", edit.htmlID(), text)
 				}
 			}
 			return true
@@ -442,6 +438,9 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		if strings.ContainsRune(text, '"') {
 			text = strings.ReplaceAll(text, `"`, `&#34;`)
 		}
+		if strings.ContainsRune(text, '\n') {
+			text = strings.ReplaceAll(text, "\n", `\n`)
+		}
 		return text
 	}
 
@@ -458,18 +457,10 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteByte('"')
 	}
 
-	if editType != MultiLineText {
-		if text := GetText(edit); text != "" {
-			buffer.WriteString(` value="`)
-			buffer.WriteString(convertText(text))
-			buffer.WriteByte('"')
-		}
-	}
-}
-
-func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	if GetEditViewType(edit) == MultiLineText {
-		buffer.WriteString(GetText(edit))
+	if text := GetText(edit); text != "" {
+		buffer.WriteString(` value="`)
+		buffer.WriteString(convertText(text))
+		buffer.WriteByte('"')
 	}
 }
 

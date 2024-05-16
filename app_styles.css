@@ -41,12 +41,14 @@ div:focus {
 */
 
 input {
+  box-sizing: border-box;
   margin: 2px;
   padding: 1px;
   font-size: inherit;
 }
 
 select {
+  box-sizing: border-box;
   margin: 2px;
   font-size: inherit;
 }
@@ -56,6 +58,7 @@ button {
 }
 
 textarea {
+  box-sizing: border-box;
   margin: 2px;
   padding: 4px;
   overflow: auto;
