@@ -3079,6 +3079,14 @@ To change the color of the text input caret, use the Color property "caret-color
 The "caret-color" property can be set not only for EditView, but for any container. 
 In this case, the color of the caret changes for all child EditViews placed in this container.
 
+The "data-list" property (DataList constant) allows you to specify an array of recommended values.
+If you set the "data-list" property, the editor will have a drop-down menu with a list of these values.
+The value of this property must be an array of strings. For example
+
+	editor := rui.NewEditView(session, rui.Params{
+		rui.DataList: []string{"Text 1", "Text 2", "Text 3"},
+	})
+
 The following functions can be used to get the values of the properties of an EditView:
 
 	func GetText(view View, subviewID ...string) string
@@ -3090,6 +3098,7 @@ The following functions can be used to get the values of the properties of an Ed
 	func IsEditViewWrap(view View, subviewID ...string) bool
 	func IsSpellcheck(view View, subviewID ...string) bool
 	func GetCaretColor(view View, subviewID ...string) Color
+	func GetDataList(view View, subviewID ...string) []string
 
 The "edit-text-changed" event (EditTextChangedEvent constant) is used to track changes to the text. 
 The main event listener has the following format:
@@ -3161,6 +3170,29 @@ You can read the values of these properties using the functions:
 	func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64)
 	func GetNumberPickerStep(view View, subviewID ...string) float64
 
+The "data-list" property (DataList constant) allows you to specify an array of recommended values.
+If you set the "data-list" property in case
+* if "number-picker-type" is set to NumberEditor, then the editor will have a drop-down menu with a list of these values;
+* if "number-picker-type" is set to NumberSlider, then the slider will display labels corresponding to these values;
+
+The value of the "data-list" property must be an array of strings, integers, real numbers, or a combination of these. For example
+
+	editor1 := rui.NewNumberPicker(session, rui.Params{
+		rui.DataList: []string{"1", "2", "3"},
+	})
+
+	editor2 := rui.NewNumberPicker(session, rui.Params{
+		rui.DataList: []int{1, 2, 3},
+	})
+
+	editor3 := rui.NewNumberPicker(session, rui.Params{
+		rui.DataList: []any{"1", 2, 3.0},
+	})
+
+You can get the value of the "data-list" property using the function
+
+	func GetDataList(view View, subviewID ...string) []string
+
 The "number-changed" event (NumberChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
 
@@ -3216,6 +3248,16 @@ You can read the values of these properties using the functions:
 	func GetDatePickerMax(view View, subviewID ...string) (time.Time, bool)
 	func GetDatePickerStep(view View, subviewID ...string) int
 
+The "data-list" property (DataList constant) allows you to specify an array of recommended values.
+If you set the "data-list" property, the editor may have a drop-down menu with a list of these values. Some browsers may ignore this property, such as Safari for macOS.
+
+The value of this property must be an array of strings in the format "YYYY-MM-DD".
+For example
+
+	editor := rui.NewDatePicker(session, rui.Params{
+		rui.DataList: []string{"1990-09-02", "2010-05-24"},
+	})
+
 The "date-changed" event (DateChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:
 
@@ -3270,6 +3312,16 @@ You can read the values of these properties using the functions:
 	func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool)
 	func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool)
 	func GetTimePickerStep(view View, subviewID ...string) int
+
+The "data-list" property (DataList constant) allows you to specify an array of recommended values.
+If you set the "data-list" property, the editor may have a drop-down menu with a list of these values. Some browsers may ignore this property, such as Safari for macOS.
+
+The value of this property must be an array of strings in the format "HH:MM:SS" or "HH:MM".
+For example
+
+	editor := rui.NewTimePicker(session, rui.Params{
+		rui.DataList: []string{"1990-09-02", "2010-05-24"},
+	})
 
 The "time-changed" event (TimeChangedEvent constant) is used to track the change in the entered value. 
 The main event listener has the following format:

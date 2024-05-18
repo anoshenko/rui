@@ -16,6 +16,7 @@ type ColorPicker interface {
 
 type colorPickerData struct {
 	viewData
+	dataList
 	colorChangedListeners []func(ColorPicker, Color, Color)
 }
 
@@ -37,6 +38,7 @@ func (picker *colorPickerData) init(session Session) {
 	picker.hasHtmlDisabled = true
 	picker.colorChangedListeners = []func(ColorPicker, Color, Color){}
 	picker.properties[Padding] = Px(0)
+	picker.dataListInit()
 }
 
 func (picker *colorPickerData) String() string {
@@ -50,7 +52,7 @@ func (picker *colorPickerData) normalizeTag(tag string) string {
 		return ColorPickerValue
 	}
 
-	return tag
+	return picker.normalizeDataListTag(tag)
 }
 
 func (picker *colorPickerData) Remove(tag string) {
@@ -69,6 +71,11 @@ func (picker *colorPickerData) remove(tag string) {
 		oldColor := GetColorPickerValue(picker)
 		delete(picker.properties, ColorPickerValue)
 		picker.colorChanged(oldColor)
+
+	case DataList:
+		if len(picker.dataList.dataList) > 0 {
+			picker.setDataList(picker, []string{}, true)
+		}
 
 	default:
 		picker.viewData.remove(tag)
@@ -105,6 +112,9 @@ func (picker *colorPickerData) set(tag string, value any) bool {
 			return true
 		}
 
+	case DataList:
+		return picker.setDataList(picker, value, picker.created)
+
 	default:
 		return picker.viewData.set(tag, value)
 	}
@@ -132,6 +142,9 @@ func (picker *colorPickerData) get(tag string) any {
 	case ColorChangedEvent:
 		return picker.colorChangedListeners
 
+	case DataList:
+		return picker.dataList.dataList
+
 	default:
 		return picker.viewData.get(tag)
 	}
@@ -139,6 +152,10 @@ func (picker *colorPickerData) get(tag string) any {
 
 func (picker *colorPickerData) htmlTag() string {
 	return "input"
+}
+
+func (picker *colorPickerData) htmlSubviews(self View, buffer *strings.Builder) {
+	picker.dataListHtmlSubviews(self, buffer)
 }
 
 func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder) {
@@ -152,6 +169,8 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
+
+	picker.dataListHtmlProperies(picker, buffer)
 }
 
 func (picker *colorPickerData) handleCommand(self View, command string, data DataObject) bool {

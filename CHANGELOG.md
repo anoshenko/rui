@@ -1,3 +1,7 @@
+# v0.13.0
+* Added "data-list" property 
+* Bug fixing
+
 # v0.14.0
 * Added the ability to work without creating a WebSocket. Added NoSocket property to AppParams.
 * Added SocketAutoClose property to AppParams.

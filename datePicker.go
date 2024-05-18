@@ -22,6 +22,7 @@ type DatePicker interface {
 
 type datePickerData struct {
 	viewData
+	dataList
 	dateChangedListeners []func(DatePicker, time.Time, time.Time)
 }
 
@@ -42,6 +43,7 @@ func (picker *datePickerData) init(session Session) {
 	picker.tag = "DatePicker"
 	picker.hasHtmlDisabled = true
 	picker.dateChangedListeners = []func(DatePicker, time.Time, time.Time){}
+	picker.dataListInit()
 }
 
 func (picker *datePickerData) String() string {
@@ -106,6 +108,11 @@ func (picker *datePickerData) remove(tag string) {
 			}
 		} else {
 			return
+		}
+
+	case DataList:
+		if len(picker.dataList.dataList) > 0 {
+			picker.setDataList(picker, []string{}, true)
 		}
 
 	default:
@@ -247,6 +254,9 @@ func (picker *datePickerData) set(tag string, value any) bool {
 		picker.propertyChangedEvent(tag)
 		return true
 
+	case DataList:
+		return picker.setDataList(picker, value, picker.created)
+
 	default:
 		return picker.viewData.set(tag, value)
 	}
@@ -262,6 +272,9 @@ func (picker *datePickerData) get(tag string) any {
 	case DateChangedEvent:
 		return picker.dateChangedListeners
 
+	case DataList:
+		return picker.dataList.dataList
+
 	default:
 		return picker.viewData.get(tag)
 	}
@@ -269,6 +282,10 @@ func (picker *datePickerData) get(tag string) any {
 
 func (picker *datePickerData) htmlTag() string {
 	return "input"
+}
+
+func (picker *datePickerData) htmlSubviews(self View, buffer *strings.Builder) {
+	picker.dataListHtmlSubviews(self, buffer)
 }
 
 func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder) {
@@ -302,6 +319,8 @@ func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder)
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
+
+	picker.dataListHtmlProperies(picker, buffer)
 }
 
 func (picker *datePickerData) handleCommand(self View, command string, data DataObject) bool {

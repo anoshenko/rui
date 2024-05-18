@@ -147,26 +147,129 @@ func (list *dropDownListData) set(tag string, value any) bool {
 }
 
 func (list *dropDownListData) setItems(value any) bool {
+	items, ok := anyToStringArray(value)
+	if !ok {
+		notCompatibleType(Items, value)
+		return false
+	}
+
+	list.items = items
+	if list.created {
+		updateInnerHTML(list.htmlID(), list.session)
+	}
+
+	list.propertyChangedEvent(Items)
+	return true
+}
+
+func intArrayToStringArray[T int | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64](array []T) []string {
+	items := make([]string, len(array))
+	for i, val := range array {
+		items[i] = strconv.Itoa(int(val))
+	}
+	return items
+}
+
+func anyToStringArray(value any) ([]string, bool) {
+
 	switch value := value.(type) {
 	case string:
-		list.items = []string{value}
+		return []string{value}, true
 
 	case []string:
-		list.items = value
+		return value, true
 
 	case []DataValue:
-		list.items = make([]string, 0, len(value))
+		items := make([]string, 0, len(value))
 		for _, val := range value {
 			if !val.IsObject() {
-				list.items = append(list.items, val.Value())
+				items = append(items, val.Value())
 			}
 		}
+		return items, true
 
 	case []fmt.Stringer:
-		list.items = make([]string, len(value))
+		items := make([]string, len(value))
 		for i, str := range value {
-			list.items[i] = str.String()
+			items[i] = str.String()
 		}
+		return items, true
+
+	case []Color:
+		items := make([]string, len(value))
+		for i, str := range value {
+			items[i] = str.String()
+		}
+		return items, true
+
+	case []SizeUnit:
+		items := make([]string, len(value))
+		for i, str := range value {
+			items[i] = str.String()
+		}
+		return items, true
+
+	case []AngleUnit:
+		items := make([]string, len(value))
+		for i, str := range value {
+			items[i] = str.String()
+		}
+		return items, true
+
+	case []float32:
+		items := make([]string, len(value))
+		for i, val := range value {
+			items[i] = fmt.Sprintf("%g", float64(val))
+		}
+		return items, true
+
+	case []float64:
+		items := make([]string, len(value))
+		for i, val := range value {
+			items[i] = fmt.Sprintf("%g", val)
+		}
+		return items, true
+
+	case []int:
+		return intArrayToStringArray(value), true
+
+	case []uint:
+		return intArrayToStringArray(value), true
+
+	case []int8:
+		return intArrayToStringArray(value), true
+
+	case []uint8:
+		return intArrayToStringArray(value), true
+
+	case []int16:
+		return intArrayToStringArray(value), true
+
+	case []uint16:
+		return intArrayToStringArray(value), true
+
+	case []int32:
+		return intArrayToStringArray(value), true
+
+	case []uint32:
+		return intArrayToStringArray(value), true
+
+	case []int64:
+		return intArrayToStringArray(value), true
+
+	case []uint64:
+		return intArrayToStringArray(value), true
+
+	case []bool:
+		items := make([]string, len(value))
+		for i, val := range value {
+			if val {
+				items[i] = "true"
+			} else {
+				items[i] = "false"
+			}
+		}
+		return items, true
 
 	case []any:
 		items := make([]string, 0, len(value))
@@ -198,25 +301,15 @@ func (list *dropDownListData) setItems(value any) bool {
 				if n, ok := isInt(v); ok {
 					items = append(items, strconv.Itoa(n))
 				} else {
-					notCompatibleType(Items, value)
-					return false
+					return []string{}, false
 				}
 			}
 		}
 
-		list.items = items
-
-	default:
-		notCompatibleType(Items, value)
-		return false
+		return items, true
 	}
 
-	if list.created {
-		updateInnerHTML(list.htmlID(), list.session)
-	}
-
-	list.propertyChangedEvent(Items)
-	return true
+	return []string{}, false
 }
 
 func (list *dropDownListData) setDisabledItems(value any) bool {

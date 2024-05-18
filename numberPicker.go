@@ -49,6 +49,7 @@ type NumberPicker interface {
 
 type numberPickerData struct {
 	viewData
+	dataList
 	numberChangedListeners []func(NumberPicker, float64, float64)
 }
 
@@ -69,6 +70,7 @@ func (picker *numberPickerData) init(session Session) {
 	picker.tag = "NumberPicker"
 	picker.hasHtmlDisabled = true
 	picker.numberChangedListeners = []func(NumberPicker, float64, float64){}
+	picker.dataListInit()
 }
 
 func (picker *numberPickerData) String() string {
@@ -86,7 +88,7 @@ func (picker *numberPickerData) normalizeTag(tag string) string {
 		return "number-picker-" + tag
 	}
 
-	return tag
+	return picker.normalizeDataListTag(tag)
 }
 
 func (picker *numberPickerData) Remove(tag string) {
@@ -112,6 +114,11 @@ func (picker *numberPickerData) remove(tag string) {
 				listener(picker, 0, oldValue)
 			}
 			picker.propertyChangedEvent(tag)
+		}
+
+	case DataList:
+		if len(picker.dataList.dataList) > 0 {
+			picker.setDataList(picker, []string{}, true)
 		}
 
 	default:
@@ -160,6 +167,9 @@ func (picker *numberPickerData) set(tag string, value any) bool {
 			return true
 		}
 
+	case DataList:
+		return picker.setDataList(picker, value, picker.created)
+
 	default:
 		if picker.viewData.set(tag, value) {
 			picker.propertyChanged(tag)
@@ -206,6 +216,9 @@ func (picker *numberPickerData) get(tag string) any {
 	case NumberChangedEvent:
 		return picker.numberChangedListeners
 
+	case DataList:
+		return picker.dataList.dataList
+
 	default:
 		return picker.viewData.get(tag)
 	}
@@ -213,6 +226,10 @@ func (picker *numberPickerData) get(tag string) any {
 
 func (picker *numberPickerData) htmlTag() string {
 	return "input"
+}
+
+func (picker *numberPickerData) htmlSubviews(self View, buffer *strings.Builder) {
+	picker.dataListHtmlSubviews(self, buffer)
 }
 
 func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builder) {
@@ -251,6 +268,8 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
+
+	picker.dataListHtmlProperies(picker, buffer)
 }
 
 func (picker *numberPickerData) handleCommand(self View, command string, data DataObject) bool {

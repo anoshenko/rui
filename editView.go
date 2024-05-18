@@ -8,10 +8,13 @@ import (
 const (
 	// EditTextChangedEvent is the constant for the "edit-text-changed" property tag.
 	EditTextChangedEvent = "edit-text-changed"
+
 	// EditViewType is the constant for the "edit-view-type" property tag.
 	EditViewType = "edit-view-type"
+
 	// EditViewPattern is the constant for the "edit-view-pattern" property tag.
 	EditViewPattern = "edit-view-pattern"
+
 	// Spellcheck is the constant for the "spellcheck" property tag.
 	Spellcheck = "spellcheck"
 )
@@ -41,6 +44,7 @@ type EditView interface {
 
 type editViewData struct {
 	viewData
+	dataList
 	textChangeListeners []func(EditView, string, string)
 }
 
@@ -61,6 +65,7 @@ func (edit *editViewData) init(session Session) {
 	edit.hasHtmlDisabled = true
 	edit.textChangeListeners = []func(EditView, string, string){}
 	edit.tag = "EditView"
+	edit.dataListInit()
 }
 
 func (edit *editViewData) String() string {
@@ -87,7 +92,7 @@ func (edit *editViewData) normalizeTag(tag string) string {
 		return EditWrap
 	}
 
-	return tag
+	return edit.normalizeDataListTag(tag)
 }
 
 func (edit *editViewData) Remove(tag string) {
@@ -184,9 +189,13 @@ func (edit *editViewData) remove(tag string) {
 			}
 		}
 
+	case DataList:
+		if len(edit.dataList.dataList) > 0 {
+			edit.setDataList(edit, []string{}, true)
+		}
+
 	default:
 		edit.viewData.remove(tag)
-		return
 	}
 }
 
@@ -324,6 +333,9 @@ func (edit *editViewData) set(tag string, value any) bool {
 		}
 		return false
 
+	case DataList:
+		return edit.setDataList(edit, value, edit.created)
+
 	case EditTextChangedEvent:
 		listeners, ok := valueToEventWithOldListeners[EditView, string](value)
 		if !ok {
@@ -345,8 +357,12 @@ func (edit *editViewData) Get(tag string) any {
 }
 
 func (edit *editViewData) get(tag string) any {
-	if tag == EditTextChangedEvent {
+	switch tag {
+	case EditTextChangedEvent:
 		return edit.textChangeListeners
+
+	case DataList:
+		return edit.dataList.dataList
 	}
 	return edit.viewData.get(tag)
 }
@@ -381,6 +397,10 @@ func (edit *editViewData) htmlTag() string {
 		return "textarea"
 	}
 	return "input"
+}
+
+func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	edit.dataListHtmlSubviews(self, buffer)
 }
 
 func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
@@ -462,6 +482,8 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteString(convertText(text))
 		buffer.WriteByte('"')
 	}
+
+	edit.dataListHtmlProperies(edit, buffer)
 }
 
 func (edit *editViewData) handleCommand(self View, command string, data DataObject) bool {
