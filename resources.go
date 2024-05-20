@@ -46,17 +46,17 @@ var resources = resourceManager{
 
 func AddEmbedResources(fs *embed.FS) {
 	resources.embedFS = append(resources.embedFS, fs)
-	rootDirs := embedRootDirs(fs)
+	rootDirs := resources.embedRootDirs(fs)
 	for _, dir := range rootDirs {
 		switch dir {
 		case imageDir:
-			scanEmbedImagesDir(fs, dir, "")
+			resources.scanEmbedImagesDir(fs, dir, "")
 
 		case themeDir:
-			scanEmbedThemesDir(fs, dir)
+			resources.scanEmbedThemesDir(fs, dir)
 
 		case stringsDir:
-			scanEmbedStringsDir(fs, dir)
+			resources.scanEmbedStringsDir(fs, dir)
 
 		case viewDir, rawDir:
 			// do nothing
@@ -67,13 +67,13 @@ func AddEmbedResources(fs *embed.FS) {
 					if file.IsDir() {
 						switch file.Name() {
 						case imageDir:
-							scanEmbedImagesDir(fs, dir+"/"+imageDir, "")
+							resources.scanEmbedImagesDir(fs, dir+"/"+imageDir, "")
 
 						case themeDir:
-							scanEmbedThemesDir(fs, dir+"/"+themeDir)
+							resources.scanEmbedThemesDir(fs, dir+"/"+themeDir)
 
 						case stringsDir:
-							scanEmbedStringsDir(fs, dir+"/"+stringsDir)
+							resources.scanEmbedStringsDir(fs, dir+"/"+stringsDir)
 
 						case viewDir, rawDir:
 							// do nothing
@@ -85,7 +85,7 @@ func AddEmbedResources(fs *embed.FS) {
 	}
 }
 
-func embedRootDirs(fs *embed.FS) []string {
+func (resources *resourceManager) embedRootDirs(fs *embed.FS) []string {
 	result := []string{}
 	if files, err := fs.ReadDir("."); err == nil {
 		for _, file := range files {
@@ -97,34 +97,34 @@ func embedRootDirs(fs *embed.FS) []string {
 	return result
 }
 
-func scanEmbedThemesDir(fs *embed.FS, dir string) {
+func (resources *resourceManager) scanEmbedThemesDir(fs *embed.FS, dir string) {
 	if files, err := fs.ReadDir(dir); err == nil {
 		for _, file := range files {
 			name := file.Name()
 			path := dir + "/" + name
 			if file.IsDir() {
-				scanEmbedThemesDir(fs, path)
+				resources.scanEmbedThemesDir(fs, path)
 			} else if strings.ToLower(filepath.Ext(name)) == ".rui" {
 				if data, err := fs.ReadFile(path); err == nil {
-					registerThemeText(string(data))
+					resources.registerThemeText(string(data))
 				}
 			}
 		}
 	}
 }
 
-func scanEmbedImagesDir(fs *embed.FS, dir, prefix string) {
+func (resources *resourceManager) scanEmbedImagesDir(fs *embed.FS, dir, prefix string) {
 	if files, err := fs.ReadDir(dir); err == nil {
 		for _, file := range files {
 			name := file.Name()
 			path := dir + "/" + name
 			if file.IsDir() {
-				scanEmbedImagesDir(fs, path, prefix+name+"/")
+				resources.scanEmbedImagesDir(fs, path, prefix+name+"/")
 			} else {
 				ext := strings.ToLower(filepath.Ext(name))
 				switch ext {
 				case ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp", ".webp":
-					registerImage(fs, path, prefix+name)
+					resources.registerImage(fs, path, prefix+name)
 				}
 			}
 		}
@@ -136,7 +136,7 @@ func invalidImageFileFormat(filename string) {
 		`". Image file name format: name[@x-param].ext (examples: icon.png, icon@1.5x.png)`)
 }
 
-func registerImage(fs *embed.FS, path, filename string) {
+func (resources *resourceManager) registerImage(fs *embed.FS, path, filename string) {
 	resources.images[filename] = imagePath{fs: fs, path: path}
 
 	start := strings.LastIndex(filename, "@")
@@ -169,16 +169,16 @@ func registerImage(fs *embed.FS, path, filename string) {
 	}
 }
 
-func scanImagesDirectory(path, filePrefix string) {
+func (resources *resourceManager) scanImagesDirectory(path, filePrefix string) {
 	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			filename := file.Name()
 			if filename[0] != '.' {
 				newPath := path + `/` + filename
 				if !file.IsDir() {
-					registerImage(nil, newPath, filePrefix+filename)
+					resources.registerImage(nil, newPath, filePrefix+filename)
 				} else {
-					scanImagesDirectory(newPath, filePrefix+filename+"/")
+					resources.scanImagesDirectory(newPath, filePrefix+filename+"/")
 				}
 			}
 		}
@@ -187,17 +187,17 @@ func scanImagesDirectory(path, filePrefix string) {
 	}
 }
 
-func scanThemesDir(path string) {
+func (resources *resourceManager) scanThemesDir(path string) {
 	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			filename := file.Name()
 			if filename[0] != '.' {
 				newPath := path + `/` + filename
 				if file.IsDir() {
-					scanThemesDir(newPath)
+					resources.scanThemesDir(newPath)
 				} else if strings.ToLower(filepath.Ext(newPath)) == ".rui" {
 					if data, err := os.ReadFile(newPath); err == nil {
-						registerThemeText(string(data))
+						resources.registerThemeText(string(data))
 					} else {
 						ErrorLog(err.Error())
 					}
@@ -217,12 +217,21 @@ func SetResourcePath(path string) {
 		resources.path += "/"
 	}
 
-	scanImagesDirectory(resources.path+imageDir, "")
-	scanThemesDir(resources.path + themeDir)
-	scanStringsDir(resources.path + stringsDir)
+	resources.scanImagesDirectory(resources.path+imageDir, "")
+	resources.scanThemesDir(resources.path + themeDir)
+	resources.scanStringsDir(resources.path + stringsDir)
 }
 
-func registerThemeText(text string) bool {
+func (resources *resourceManager) scanDefaultResourcePath() {
+	if exe, err := os.Executable(); err == nil {
+		path := filepath.Dir(exe) + "/resources/"
+		resources.scanImagesDirectory(path+imageDir, "")
+		resources.scanThemesDir(path + themeDir)
+		resources.scanStringsDir(path + stringsDir)
+	}
+}
+
+func (resources *resourceManager) registerThemeText(text string) bool {
 	theme, ok := CreateThemeFromText(text)
 	if !ok {
 		return false
@@ -268,7 +277,7 @@ func serveResourceFile(filename string, w http.ResponseWriter, r *http.Request) 
 		if serveEmbed(fs, filename) {
 			return true
 		}
-		for _, dir := range embedRootDirs(fs) {
+		for _, dir := range resources.embedRootDirs(fs) {
 			if serveEmbed(fs, dir+"/"+filename) {
 				return true
 			}
@@ -314,9 +323,10 @@ func serveResourceFile(filename string, w http.ResponseWriter, r *http.Request) 
 	return false
 }
 
+// ReadRawResource returns the contents of the raw resource with the specified name
 func ReadRawResource(filename string) []byte {
 	for _, fs := range resources.embedFS {
-		rootDirs := embedRootDirs(fs)
+		rootDirs := resources.embedRootDirs(fs)
 		for _, dir := range rootDirs {
 			switch dir {
 			case imageDir, themeDir, viewDir:
@@ -351,11 +361,12 @@ func ReadRawResource(filename string) []byte {
 	return nil
 }
 
+// AllRawResources returns the list of all raw resouces
 func AllRawResources() []string {
 	result := []string{}
 
 	for _, fs := range resources.embedFS {
-		rootDirs := embedRootDirs(fs)
+		rootDirs := resources.embedRootDirs(fs)
 		for _, dir := range rootDirs {
 			switch dir {
 			case imageDir, themeDir, viewDir:
@@ -397,6 +408,7 @@ func AllRawResources() []string {
 	return result
 }
 
+// AllImageResources returns the list of all image resouces
 func AllImageResources() []string {
 	result := make([]string, 0, len(resources.images))
 	for image := range resources.images {

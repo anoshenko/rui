@@ -354,6 +354,8 @@ var apps = []*application{}
 
 // StartApp - create the new application and start it
 func StartApp(addr string, createContentFunc func(Session) SessionContent, params AppParams) {
+	resources.scanDefaultResourcePath()
+
 	app := new(application)
 	app.params = params
 	app.sessions = map[int]sessionInfo{}

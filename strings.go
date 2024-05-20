@@ -9,13 +9,13 @@ import (
 
 var stringResources = map[string]map[string]string{}
 
-func scanEmbedStringsDir(fs *embed.FS, dir string) {
+func (resources *resourceManager) scanEmbedStringsDir(fs *embed.FS, dir string) {
 	if files, err := fs.ReadDir(dir); err == nil {
 		for _, file := range files {
 			name := file.Name()
 			path := dir + "/" + name
 			if file.IsDir() {
-				scanEmbedStringsDir(fs, path)
+				resources.scanEmbedStringsDir(fs, path)
 			} else if strings.ToLower(filepath.Ext(name)) == ".rui" {
 				if data, err := fs.ReadFile(path); err == nil {
 					loadStringResources(string(data))
@@ -27,14 +27,14 @@ func scanEmbedStringsDir(fs *embed.FS, dir string) {
 	}
 }
 
-func scanStringsDir(path string) {
+func (resources *resourceManager) scanStringsDir(path string) {
 	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			filename := file.Name()
 			if filename[0] != '.' {
 				newPath := path + `/` + filename
 				if file.IsDir() {
-					scanStringsDir(newPath)
+					resources.scanStringsDir(newPath)
 				} else if strings.ToLower(filepath.Ext(newPath)) == ".rui" {
 					if data, err := os.ReadFile(newPath); err == nil {
 						loadStringResources(string(data))

@@ -114,7 +114,7 @@ func CreateViewFromResources(session Session, name string) View {
 	}
 
 	for _, fs := range resources.embedFS {
-		rootDirs := embedRootDirs(fs)
+		rootDirs := resources.embedRootDirs(fs)
 		for _, dir := range rootDirs {
 			switch dir {
 			case imageDir, themeDir, rawDir:
