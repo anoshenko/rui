@@ -170,7 +170,7 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
 
-	picker.dataListHtmlProperies(picker, buffer)
+	picker.dataListHtmlProperties(picker, buffer)
 }
 
 func (picker *colorPickerData) handleCommand(self View, command string, data DataObject) bool {

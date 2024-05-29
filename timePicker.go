@@ -308,7 +308,7 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
 
-	picker.dataListHtmlProperies(picker, buffer)
+	picker.dataListHtmlProperties(picker, buffer)
 }
 
 func (picker *timePickerData) handleCommand(self View, command string, data DataObject) bool {

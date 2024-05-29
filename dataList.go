@@ -88,7 +88,7 @@ func (list *dataList) dataListItemsHtml(buffer *strings.Builder) {
 	}
 }
 
-func (list *dataList) dataListHtmlProperies(view View, buffer *strings.Builder) {
+func (list *dataList) dataListHtmlProperties(view View, buffer *strings.Builder) {
 	if len(list.dataList) > 0 {
 		buffer.WriteString(` list="`)
 		buffer.WriteString(list.dataListID(view))

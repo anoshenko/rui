@@ -211,8 +211,8 @@ func (edit *editViewData) set(tag string, value any) bool {
 
 	switch tag {
 	case Text:
-		oldText := GetText(edit)
 		if text, ok := value.(string); ok {
+			oldText := GetText(edit)
 			edit.properties[Text] = text
 			if text = GetText(edit); oldText != text {
 				edit.textChanged(text, oldText)
@@ -225,8 +225,8 @@ func (edit *editViewData) set(tag string, value any) bool {
 		return false
 
 	case Hint:
-		oldText := GetHint(edit)
 		if text, ok := value.(string); ok {
+			oldText := GetHint(edit)
 			edit.properties[Hint] = text
 			if text = GetHint(edit); oldText != text {
 				if edit.created {
@@ -400,6 +400,11 @@ func (edit *editViewData) htmlTag() string {
 }
 
 func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	if GetEditViewType(edit) == MultiLineText {
+		if text := GetText(edit); text != "" {
+			buffer.WriteString(text)
+		}
+	}
 	edit.dataListHtmlSubviews(self, buffer)
 }
 
@@ -477,13 +482,15 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 		buffer.WriteByte('"')
 	}
 
-	if text := GetText(edit); text != "" {
-		buffer.WriteString(` value="`)
-		buffer.WriteString(convertText(text))
-		buffer.WriteByte('"')
+	if editType != MultiLineText {
+		if text := GetText(edit); text != "" {
+			buffer.WriteString(` value="`)
+			buffer.WriteString(convertText(text))
+			buffer.WriteByte('"')
+		}
 	}
 
-	edit.dataListHtmlProperies(edit, buffer)
+	edit.dataListHtmlProperties(edit, buffer)
 }
 
 func (edit *editViewData) handleCommand(self View, command string, data DataObject) bool {

@@ -269,7 +269,7 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 
-	picker.dataListHtmlProperies(picker, buffer)
+	picker.dataListHtmlProperties(picker, buffer)
 }
 
 func (picker *numberPickerData) handleCommand(self View, command string, data DataObject) bool {
