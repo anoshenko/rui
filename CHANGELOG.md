@@ -1,4 +1,9 @@
-# v0.13.0
+# v0.16.0
+* Can use ListAdapter as "content" property value of ListLayout
+* The IsListItemEnabled method of the ListAdapter interface has been made optional 
+* Bug fixing
+
+# v0.15.0
 * Added "data-list" property 
 * Bug fixing
 

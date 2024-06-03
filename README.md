@@ -2294,6 +2294,43 @@ ListLayout is a container that implements the ViewsContainer interface. To creat
 Items in this container are arranged as a list. The position of the children can be controlled. 
 For this, ListLayout has a number of properties
 
+### "content" property
+
+The "content" property (Content constant) defines an array of child Views.
+This property is inherited from ViewsContainer.
+Just like for ViewsContainer, this property can be assigned the following data types:
+
+* View (converts to []View containing one View);
+* []View;
+* string (converts to []View containing one TextView);
+* []string (converts to []View containing TextView);
+* []any - this array must contain only View and string.
+
+However, in addition to these data types, the "content" property of a ListLayout 
+can be assigned an implementation of the ListAdapter interface.
+
+ListAdapter is used to create child Views and is declared as
+
+	type ListAdapter interface {
+		ListSize() int
+		ListItem(index int, session Session) View
+	}
+
+Accordingly, the functions of this interface must return the number of elements and View of the i-th element.
+
+ListAdapter creates child Views when the "content" property is set.
+To recreate child elements, ListLayout has the UpdateContent() property.
+This method deletes all child Views and creates them again using the ListAdapter.
+
+Attention! When calling the UpdateContent() method, data from old Views is not transferred to newly created ones.
+You must do this manually.
+
+If the "content" property is not assigned to the ListAdapter, then the UpdateContent() method does nothing.
+
+You can also call the UpdateContent method using the global function
+
+	func UpdateContent(view View, subviewID ...string)
+
 ### "orientation" property
 
 The "orientation" int property (Orientation constant) specifies how the children will be positioned 
@@ -3573,8 +3610,12 @@ The main value of the "items" property is the ListAdapter interface:
 	type ListAdapter interface {
 		ListSize() int
 		ListItem(index int, session Session) View
-		IsListItemEnabled(index int) bool
 	}
+
+In addition to these two mandatory methods, a third optional one can be defined which specifies the status of the i-th element as allowed/disabled.
+This method is declared as
+
+		IsListItemEnabled(index int) bool
 
 Accordingly, the functions of this interface must return the number of elements, 
 the View of the i-th element and the status of the i-th element (allowed/denied).

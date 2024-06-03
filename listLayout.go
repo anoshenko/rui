@@ -30,10 +30,14 @@ const (
 // ListLayout - list-container of View
 type ListLayout interface {
 	ViewsContainer
+	// UpdateContent updates child Views if the "content" property value is set to ListAdapter,
+	// otherwise does nothing
+	UpdateContent()
 }
 
 type listLayoutData struct {
 	viewsContainerData
+	adapter ListAdapter
 }
 
 // NewListLayout create new ListLayout object and return it
@@ -94,11 +98,16 @@ func (listLayout *listLayoutData) Remove(tag string) {
 }
 
 func (listLayout *listLayoutData) remove(tag string) {
-	if tag == Gap {
+	switch tag {
+	case Gap:
 		listLayout.remove(ListRowGap)
 		listLayout.remove(ListColumnGap)
 		return
+
+	case Content:
+		listLayout.adapter = nil
 	}
+
 	listLayout.viewsContainerData.remove(tag)
 	if listLayout.created {
 		switch tag {
@@ -118,8 +127,18 @@ func (listLayout *listLayoutData) set(tag string, value any) bool {
 		return true
 	}
 
-	if tag == Gap {
+	switch tag {
+	case Gap:
 		return listLayout.set(ListRowGap, value) && listLayout.set(ListColumnGap, value)
+
+	case Content:
+		if adapter, ok := value.(ListAdapter); ok {
+			listLayout.adapter = adapter
+			listLayout.UpdateContent()
+			// TODO
+			return true
+		}
+		listLayout.adapter = nil
 	}
 
 	if listLayout.viewsContainerData.set(tag, value) {
@@ -140,6 +159,33 @@ func (listLayout *listLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			view.addToCSSStyle(map[string]string{`flex`: `0 0 auto`})
 			viewHTML(view, buffer)
 		}
+	}
+}
+
+func (listLayout *listLayoutData) UpdateContent() {
+	if adapter := listLayout.adapter; adapter != nil {
+		listLayout.views = []View{}
+
+		session := listLayout.session
+		htmlID := listLayout.htmlID()
+		isDisabled := IsDisabled(listLayout)
+
+		count := adapter.ListSize()
+		for i := 0; i < count; i++ {
+			if view := adapter.ListItem(i, session); view != nil {
+				view.setParentID(htmlID)
+				if isDisabled {
+					view.Set(Disabled, true)
+				}
+				listLayout.views = append(listLayout.views, view)
+			}
+		}
+
+		if listLayout.created {
+			updateInnerHTML(htmlID, session)
+		}
+
+		listLayout.propertyChangedEvent(Content)
 	}
 }
 
@@ -197,4 +243,23 @@ func GetListRowGap(view View, subviewID ...string) SizeUnit {
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListColumnGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ListColumnGap, false)
+}
+
+// UpdateContent updates child Views of ListLayout subview if the "content" property value is set to ListAdapter,
+// otherwise does nothing.
+// If the second argument (subviewID) is not specified or it is "" then the first argument (view) updates.
+func UpdateContent(view View, subviewID ...string) {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	if view != nil {
+		switch view := view.(type) {
+		case ListLayout:
+			view.UpdateContent()
+
+		case ListView:
+			view.ReloadListViewData()
+		}
+	}
 }

@@ -7,7 +7,10 @@ type ListAdapter interface {
 
 	// ListItem creates a View of a list item at the given index
 	ListItem(index int, session Session) View
+}
 
+// ListItemEnabled implements the optional method of ListAdapter interface
+type ListItemEnabled interface {
 	// IsListItemEnabled returns the status (enabled/disabled) of a list item at the given index
 	IsListItemEnabled(index int) bool
 }

@@ -198,7 +198,7 @@ func (container *viewsContainerData) set(tag string, value any) bool {
 
 	switch tag {
 	case Content:
-		// do nothing
+		return container.setContent(value)
 
 	case Disabled:
 		oldDisabled := IsDisabled(container)
@@ -215,11 +215,12 @@ func (container *viewsContainerData) set(tag string, value any) bool {
 			return true
 		}
 		return false
-
-	default:
-		return container.viewData.set(tag, value)
 	}
 
+	return container.viewData.set(tag, value)
+}
+
+func (container *viewsContainerData) setContent(value any) bool {
 	session := container.Session()
 	switch value := value.(type) {
 	case View:
@@ -249,7 +250,7 @@ func (container *viewsContainerData) set(tag string, value any) bool {
 				views = append(views, viewFromTextValue(v, session))
 
 			default:
-				notCompatibleType(tag, value)
+				notCompatibleType(Content, value)
 				return false
 			}
 		}
@@ -276,13 +277,17 @@ func (container *viewsContainerData) set(tag string, value any) bool {
 		container.views = views
 
 	default:
-		notCompatibleType(tag, value)
+		notCompatibleType(Content, value)
 		return false
 	}
 
 	htmlID := container.htmlID()
+	isDisabled := IsDisabled(container)
 	for _, view := range container.views {
 		view.setParentID(htmlID)
+		if isDisabled {
+			view.Set(Disabled, true)
+		}
 	}
 
 	if container.created {

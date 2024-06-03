@@ -790,8 +790,10 @@ func (listView *listViewData) checkboxSubviews(buffer *strings.Builder, checkbox
 		}
 		buffer.WriteString(`" onclick="listItemClickEvent(this, event)" data-left="0" data-top="0" data-width="0" data-height="0" style="display: grid; justify-items: stretch; align-items: stretch;`)
 		listView.itemSize(buffer)
-		if !listView.adapter.IsListItemEnabled(i) {
-			buffer.WriteString(`" data-disabled="1`)
+		if ext, ok := listView.adapter.(ListItemEnabled); ok {
+			if !ext.IsListItemEnabled(i) {
+				buffer.WriteString(`" data-disabled="1`)
+			}
 		}
 		buffer.WriteString(`">`)
 		buffer.WriteString(itemDiv)
@@ -849,8 +851,10 @@ func (listView *listViewData) noneCheckboxSubviews(buffer *strings.Builder) {
 		}
 		buffer.WriteString(`" `)
 		buffer.WriteString(itemStyle)
-		if !listView.adapter.IsListItemEnabled(i) {
-			buffer.WriteString(` data-disabled="1"`)
+		if ext, ok := listView.adapter.(ListItemEnabled); ok {
+			if !ext.IsListItemEnabled(i) {
+				buffer.WriteString(` data-disabled="1"`)
+			}
 		}
 		buffer.WriteString(`>`)
 
