@@ -221,6 +221,11 @@ var enumProperties = map[string]struct {
 		TextOverflow,
 		[]string{"clip", "ellipsis"},
 	},
+	TextWrap: {
+		[]string{"wrap", "nowrap", "balance"},
+		TextWrap,
+		[]string{"wrap", "nowrap", "balance"},
+	},
 	WritingMode: {
 		[]string{"horizontal-top-to-bottom", "horizontal-bottom-to-top", "vertical-right-to-left", "vertical-left-to-right"},
 		WritingMode,

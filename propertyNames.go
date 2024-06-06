@@ -363,6 +363,14 @@ const (
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	TextShadow = "text-shadow"
 
+	// TextWrap is the constant for the "text-wrap" property tag.
+	// The "text-wrap" int property controls how text inside a View is wrapped.
+	// Valid values ​​are:
+	// * TextWrapOn / 0 / "wrap" - text is wrapped across lines at appropriate characters (for example spaces, in languages like English that use space separators) to minimize overflow. This is the default value.
+	// * TextWrapOff / 1 / "nowrap" - text does not wrap across lines. It will overflow its containing element rather than breaking onto a new line.
+	// * TextWrapBalance / 2 / "balance" - text is wrapped in a way that best balances the number of characters on each line, enhancing layout quality and legibility. Because counting characters and balancing them across multiple lines is computationally expensive, this value is only supported for blocks of text spanning a limited number of lines (six or less for Chromium and ten or less for Firefox).
+	TextWrap = "text-wrap"
+
 	// TabSize is the constant for the "tab-size" property tag.
 	// The "tab-size" int property sets the width of tab characters (U+0009) in spaces.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.

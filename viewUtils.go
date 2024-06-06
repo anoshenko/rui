@@ -419,6 +419,15 @@ func GetTextAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, TextAlign, LeftAlign, true)
 }
 
+// GetTextAlign returns how text inside of the subview is wrapped. Returns one of next values:
+//
+//	TextWrapOn = 0, TextWrapOff = 1, TextWrapBalance = 3
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTextWrap(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, TextWrap, TextWrapOn, true)
+}
+
 // GetTextIndent returns a text indent of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTextIndent(view View, subviewID ...string) SizeUnit {

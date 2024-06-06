@@ -1551,6 +1551,25 @@ The table below shows the behavior of various values of the "white-space" proper
 The "tab-size" int property (TabSize constant) specifies the size of the tab character (U+0009) in spaces.
 The value of the "tab-size" property must be greater than 0. The default value is 8
 
+#### "text-wrap" property
+
+The "text-wrap" int property (TextWrap constant) controls how text inside a View is wrapped. Valid values ​​are:
+
+0 (TextWrapOn constant, "wrap" name) - text is wrapped across lines at appropriate characters 
+(for example spaces, in languages like English that use space separators) to minimize overflow. This is the default value.
+
+1 (TextWrapOff constant, "nowrap" name) - text does not wrap across lines. 
+It will overflow its containing element rather than breaking onto a new line.
+
+2 (TextWrapBalance constant, "balance" name) - text is wrapped in a way that best balances the number of characters on each line, 
+enhancing layout quality and legibility. 
+Because counting characters and balancing them across multiple lines is computationally expensive, 
+this value is only supported for blocks of text spanning a limited number of lines (six or less for Chromium and ten or less for Firefox).
+
+You can get the value of this property using the function
+
+	func GetTextWrap(view View, subviewID ...string) int
+
 #### "word-break" property
 
 The "word-break" int property (WordBreak constant) determines where the newline will be set if the text exceeds the block boundaries.

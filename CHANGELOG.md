@@ -2,6 +2,7 @@
 * Can use ListAdapter as "content" property value of ListLayout
 * The IsListItemEnabled method of the ListAdapter interface has been made optional 
 * Can use GridAdapter as "content" property value of GridLayout
+* Added "text-wrap" property and GetGetTextWrap function
 * Bug fixing
 
 # v0.15.0

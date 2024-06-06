@@ -395,4 +395,20 @@ const (
 	// ColumnFillAuto - value of the "column-fill" property:
 	// Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
 	ColumnFillAuto = 1
+
+	// TextWrapOn - value of the "text-wrap" property:
+	// text is wrapped across lines at appropriate characters (for example spaces,
+	// in languages like English that use space separators) to minimize overflow.
+	TextWrapOn = 0
+
+	// TextWrapOff - value of the "text-wrap" property: text does not wrap across lines.
+	// It will overflow its containing element rather than breaking onto a new line.
+	TextWrapOff = 1
+
+	// TextWrapBalance - value of the "text-wrap" property: text is wrapped in a way
+	// that best balances the number of characters on each line, enhancing layout quality
+	// and legibility. Because counting characters and balancing them across multiple lines
+	// is computationally expensive, this value is only supported for blocks of text
+	// spanning a limited number of lines (six or less for Chromium and ten or less for Firefox).
+	TextWrapBalance = 2
 )
