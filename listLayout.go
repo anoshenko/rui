@@ -245,7 +245,7 @@ func GetListColumnGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ListColumnGap, false)
 }
 
-// UpdateContent updates child Views of ListLayout subview if the "content" property value is set to ListAdapter,
+// UpdateContent updates child Views of ListLayout/GridLayout subview if the "content" property value is set to ListAdapter/GridAdapter,
 // otherwise does nothing.
 // If the second argument (subviewID) is not specified or it is "" then the first argument (view) updates.
 func UpdateContent(view View, subviewID ...string) {
@@ -255,6 +255,9 @@ func UpdateContent(view View, subviewID ...string) {
 
 	if view != nil {
 		switch view := view.(type) {
+		case GridLayout:
+			view.UpdateGridContent()
+
 		case ListLayout:
 			view.UpdateContent()
 

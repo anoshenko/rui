@@ -2410,6 +2410,51 @@ The container space of this container is split into cells in the form of a table
 All children are located in the cells of the table. A cell is addressed by row and column number. 
 Row and column numbers start at 0.
 
+### "content"
+
+The "content" property (Content constant) defines an array of child Views.
+This property is inherited from ViewsContainer.
+Just like for ViewsContainer, this property can be assigned the following data types:
+
+* View (converts to []View containing one View);
+* []View;
+* string (converts to []View containing one TextView);
+* []string (converts to []View containing TextView);
+* []any - this array must contain only View and string.
+
+However, in addition to these data types, the "content" property of a GridLayout 
+can be assigned an implementation of the GridAdapter interface.
+
+GridAdapter is used to create child Views and is declared as
+
+	type GridAdapter interface {
+		GridColumnCount() int
+		GridRowCount() int
+		GridCellContent(row, column int, session Session) View
+	}
+
+Accordingly, the functions of this interface must return the number of columns and rows and the View of the element at position (row, column).
+
+In addition to these three required methods, when implementing a GridAdapter, two more optional ones can be specified:
+
+	GridCellColumnSpan(row, column int) int
+	GridCellRowSpan(row, column int) int
+
+The first method sets how many columns the View occupies in (row, column) position and the second sets how many rows.
+
+GridAdapter creates child Views when the "content" property is set.
+To recreate child elements, GridLayout has the UpdateGridContent() method.
+This method deletes all child Views and creates them again using the GridAdapter.
+
+Attention! When calling the UpdateGridContent() method, data from old Views is not transferred to newly created ones.
+You must do this manually.
+
+If the "content" property is not set to a GridAdapter then the UpdateGridContent() method does nothing.
+
+You can also call the UpdateGridContent method using the global function
+
+	func UpdateContent(view View, subviewID ...string)
+
 ### "column" and "row" properties
 
 The location of the View inside the GridLayout is determined using the "column" and "row" properties.

@@ -43,13 +43,43 @@ const (
 	CellHorizontalSelfAlign = "cell-horizontal-self-align"
 )
 
+type GridAdapter interface {
+	// GridColumnCount returns the number of columns in the grid
+	GridColumnCount() int
+
+	// GridRowCount returns the number of rows in the grid
+	GridRowCount() int
+
+	// GridCellContent creates a View at the given cell
+	GridCellContent(row, column int, session Session) View
+}
+
+// GridCellColumnSpanAdapter implements the optional method of GridAdapter interface
+type GridCellColumnSpanAdapter interface {
+	// GridCellColumnSpan returns the number of columns that a cell spans.
+	// Values ​​less than 1 are ignored.
+	GridCellColumnSpan(row, column int) int
+}
+
+// GridCellColumnSpanAdapter implements the optional method of GridAdapter interface
+type GridCellRowSpanAdapter interface {
+	// GridCellRowSpan returns the number of rows that a cell spans
+	// Values ​​less than 1 are ignored.
+	GridCellRowSpan(row, column int) int
+}
+
 // GridLayout - grid-container of View
 type GridLayout interface {
 	ViewsContainer
+
+	// UpdateContent updates child Views if the "content" property value is set to GridAdapter,
+	// otherwise does nothing
+	UpdateGridContent()
 }
 
 type gridLayoutData struct {
 	viewsContainerData
+	adapter GridAdapter
 }
 
 // NewGridLayout create new GridLayout object and return it
@@ -69,6 +99,7 @@ func (gridLayout *gridLayoutData) init(session Session) {
 	gridLayout.viewsContainerData.init(session)
 	gridLayout.tag = "GridLayout"
 	gridLayout.systemClass = "ruiGridLayout"
+	gridLayout.adapter = nil
 }
 
 func (gridLayout *gridLayoutData) String() string {
@@ -257,14 +288,19 @@ func (gridLayout *gridLayoutData) Remove(tag string) {
 }
 
 func (gridLayout *gridLayoutData) remove(tag string) {
-	if tag == Gap {
+	switch tag {
+	case Gap:
 		gridLayout.remove(GridRowGap)
 		gridLayout.remove(GridColumnGap)
 		gridLayout.propertyChangedEvent(Gap)
 		return
+
+	case Content:
+		gridLayout.adapter = nil
 	}
 
 	gridLayout.viewsContainerData.remove(tag)
+
 	if gridLayout.created {
 		switch tag {
 		case CellWidth:
@@ -289,8 +325,17 @@ func (gridLayout *gridLayoutData) set(tag string, value any) bool {
 		return true
 	}
 
-	if tag == Gap {
+	switch tag {
+	case Gap:
 		return gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value)
+
+	case Content:
+		if adapter, ok := value.(GridAdapter); ok {
+			gridLayout.adapter = adapter
+			gridLayout.UpdateGridContent()
+			return true
+		}
+		gridLayout.adapter = nil
 	}
 
 	if gridLayout.viewsContainerData.set(tag, value) {
@@ -310,6 +355,70 @@ func (gridLayout *gridLayoutData) set(tag string, value any) bool {
 	}
 
 	return false
+}
+
+func (gridLayout *gridLayoutData) UpdateGridContent() {
+	if adapter := gridLayout.adapter; adapter != nil {
+		gridLayout.views = []View{}
+
+		session := gridLayout.session
+		htmlID := gridLayout.htmlID()
+		isDisabled := IsDisabled(gridLayout)
+
+		var columnSpan GridCellColumnSpanAdapter = nil
+		if span, ok := adapter.(GridCellColumnSpanAdapter); ok {
+			columnSpan = span
+		}
+
+		var rowSpan GridCellRowSpanAdapter = nil
+		if span, ok := adapter.(GridCellRowSpanAdapter); ok {
+			rowSpan = span
+		}
+
+		width := adapter.GridColumnCount()
+		height := adapter.GridRowCount()
+		for column := 0; column < width; column++ {
+			for row := 0; row < height; row++ {
+				if view := adapter.GridCellContent(row, column, session); view != nil {
+					view.setParentID(htmlID)
+
+					columnCount := 1
+					if columnSpan != nil {
+						columnCount = columnSpan.GridCellColumnSpan(row, column)
+					}
+
+					if columnCount > 1 {
+						view.Set(Column, Range{First: column, Last: column + columnCount - 1})
+					} else {
+						view.Set(Column, column)
+					}
+
+					rowCount := 1
+					if rowSpan != nil {
+						rowCount = rowSpan.GridCellRowSpan(row, column)
+					}
+
+					if rowCount > 1 {
+						view.Set(Row, Range{First: row, Last: row + rowCount - 1})
+					} else {
+						view.Set(Row, row)
+					}
+
+					if isDisabled {
+						view.Set(Disabled, true)
+					}
+
+					gridLayout.views = append(gridLayout.views, view)
+				}
+			}
+		}
+
+		if gridLayout.created {
+			updateInnerHTML(htmlID, session)
+		}
+
+		gridLayout.propertyChangedEvent(Content)
+	}
 }
 
 func gridCellSizes(properties Properties, tag string, session Session) []SizeUnit {
