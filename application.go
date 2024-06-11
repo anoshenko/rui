@@ -38,6 +38,8 @@ type AppParams struct {
 	// of the server's certificate, any intermediates, and the CA's certificate.
 	CertFile string
 
+	AutoCertDomain string
+
 	// KeyFile - path of a private key for the server must be provided
 	// if neither the Server's TLSConfig.Certificates nor TLSConfig.GetCertificate are populated.
 	KeyFile string

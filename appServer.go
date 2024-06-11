@@ -15,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/acme/autocert"
 )
 
 //go:embed app_socket.js
@@ -363,19 +365,18 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 	apps = append(apps, app)
 
 	redirectAddr := ""
+	https := params.AutoCertDomain != "" || (params.CertFile != "" && params.KeyFile != "")
+
 	if index := strings.IndexRune(addr, ':'); index >= 0 {
 		redirectAddr = addr[:index] + ":80"
 	} else {
 		redirectAddr = addr + ":80"
-		if params.CertFile != "" && params.KeyFile != "" {
+		if https {
 			addr += ":443"
 		} else {
 			addr += ":80"
 		}
 	}
-
-	app.server = &http.Server{Addr: addr}
-	http.Handle("/", app)
 
 	serverRun := func(err error) {
 		if err != nil {
@@ -387,7 +388,7 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 		}
 	}
 
-	if params.CertFile != "" && params.KeyFile != "" {
+	if https {
 		if params.Redirect80 {
 			redirectTLS := func(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "https://"+addr+r.RequestURI, http.StatusMovedPermanently)
@@ -397,8 +398,19 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 				serverRun(http.ListenAndServe(redirectAddr, http.HandlerFunc(redirectTLS)))
 			}()
 		}
-		serverRun(app.server.ListenAndServeTLS(params.CertFile, params.KeyFile))
+
+		if params.AutoCertDomain != "" {
+			mux := http.NewServeMux()
+			mux.Handle("/", app)
+			serverRun(http.Serve(autocert.NewListener(params.AutoCertDomain), mux))
+		} else {
+			app.server = &http.Server{Addr: addr}
+			http.Handle("/", app)
+			serverRun(app.server.ListenAndServeTLS(params.CertFile, params.KeyFile))
+		}
 	} else {
+		app.server = &http.Server{Addr: addr}
+		http.Handle("/", app)
 		serverRun(app.server.ListenAndServe())
 	}
 }
