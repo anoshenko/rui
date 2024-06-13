@@ -48,6 +48,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func createSocketBridge(w http.ResponseWriter, req *http.Request) *wsBridge {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		ErrorLog(err.Error())
