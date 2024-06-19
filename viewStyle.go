@@ -174,6 +174,16 @@ func (style *viewStyle) backgroundCSS(session Session) string {
 
 func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
+	if visibility, ok := enumProperty(style, Visibility, session, Visible); ok {
+		switch visibility {
+		case Invisible:
+			builder.add(`visibility`, `hidden`)
+
+		case Gone:
+			builder.add(`display`, `none`)
+		}
+	}
+
 	if margin, ok := boundsProperty(style, Margin, session); ok {
 		margin.cssValue(Margin, builder, session)
 	}
