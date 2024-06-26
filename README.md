@@ -164,6 +164,12 @@ In addition to "min", there are the following functions
 | "sub(<arg1>, <arg2>)"        | SubSize(arg0, arg1 any)              | calculates the subtraction of argument values            |
 | "mul(<arg1>, <arg2>)"        | MulSize(arg0, arg1 any)              | calculates the result of multiplying the argument values |
 | "div(<arg1>, <arg2>)"        | DivSize(arg0, arg1 any)              | calculates the result of dividing the argument values    |
+| "rem(<arg1>, <arg2>)"        | ModSize(arg0, arg1 any)              | calculates the remainder of a division operation with the same sign as the dividend   |
+| "mod(<arg1>, <arg2>)"        | ModSize(arg0, arg1 any)              | calculates the remainder of a division operation with the same sign as the divisor   |
+| "round(<arg1>, <arg2>)"      | RoundSize(arg0, arg1 any)            | rounds the first argument to the nearest integer multiple of the second argument, which may be either above or below the value.  |
+| "round-up(<arg1>, <arg2>)"   | RoundUpSize(arg0, arg1 any)          | rounds the first argument up to the nearest integer multiple of the second argument (if the value is negative, it will become "more positive") |
+| "round-down(<arg1>, <arg2>)" | RoundDownSize(arg0, arg1 any)        | rounds the first argument down to the nearest integer multiple of the second argument (if the value is negative, it will become "more negative") |
+| "round-to-zero(<arg1>, <arg2>)" | RoundToZeroSize(arg0, arg1 any)   | rounds the first argument to the nearest integer multiple of the second argument closer to/towards zero (a positive number will decrease, while a negative value will become "less negative") |
 | "clamp(<min>, <val>, <max>)" | ClampSize(min, val, max any)         | limits value to specified range                          |
 
 Additional explanations for the function "clamp(<min>, <val>, <max>)": the result is calculated as follows:
@@ -171,6 +177,17 @@ Additional explanations for the function "clamp(<min>, <val>, <max>)": the resul
 * if min ≤ val ≤ max then val;
 * if val < min then min;
 * if max < val then max;
+
+The arguments of all functions can be of the following type:
+
+* SizeUnit;
+* SizeFunc;
+* string being a SizeUnit constant or a text representation of SizeUnit or SizeFunc.
+
+In addition, the second argument of the functions mul, div, mod, rem, and all round can be a number
+(float32, float32, int, int8...int64, uint, uint8...unit64).
+
+Also, the second argument of the div, mod, rem, and all round functions cannot be a zero value.
 
 ### Color
 

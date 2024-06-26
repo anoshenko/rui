@@ -8,10 +8,12 @@ import (
 
 // SizeFunc describes a function that calculates the SizeUnit size.
 // Used as the value of the SizeUnit properties.
-// "min", "max", "clamp", "sum", "sub", "mul", and "div" functions are available.
+// "min", "max", "clamp", "sum", "sub", "mul", "div", mod,
+// "round", "round-up", "round-down" and "round-to-zero" functions are available.
 type SizeFunc interface {
 	fmt.Stringer
-	// Name() returns the function name: "min", "max", "clamp", "sum", "sub", "mul", or "div"
+	// Name() returns the function name: "min", "max", "clamp", "sum", "sub", "mul",
+	// "div", "mod", "rem", "round", "round-up", "round-down" or "round-to-zero"
 	Name() string
 	// Args() returns a list of function arguments
 	Args() []any
@@ -28,7 +30,9 @@ type sizeFuncData struct {
 func parseSizeFunc(text string) SizeFunc {
 	text = strings.Trim(text, " ")
 
-	for _, tag := range []string{"min", "max", "sum", "sub", "mul", "div", "clamp"} {
+	for _, tag := range []string{
+		"min", "max", "sum", "sub", "mul", "div", "mod", "rem", "clamp",
+		"round-up", "round-down", "round-to-zero", "round"} {
 		if strings.HasPrefix(text, tag) {
 			text = strings.Trim(strings.TrimPrefix(text, tag), " ")
 			last := len(text) - 1
@@ -59,7 +63,7 @@ func parseSizeFunc(text string) SizeFunc {
 
 				args = append(args, text[start:])
 				switch tag {
-				case "sub", "mul", "div":
+				case "sub", "mul", "div", "mod", "rem", "round-up", "round-down", "round-to-zero", "round":
 					if len(args) != 2 {
 						ErrorLogF(`"%s" function needs 2 arguments`, tag)
 						return nil
@@ -73,7 +77,9 @@ func parseSizeFunc(text string) SizeFunc {
 
 				data := new(sizeFuncData)
 				data.tag = tag
-				if data.parseArgs(args, tag == "mul" || tag == "div") {
+				if data.parseArgs(args, tag == "mul" || tag == "div" || tag == "mod" ||
+					tag == "rem" || tag == "round-up" || tag == "round-down" ||
+					tag == "round-to-zero" || tag == "round") {
 					return data
 				}
 			}
@@ -92,19 +98,25 @@ func (data *sizeFuncData) parseArgs(args []any, allowNumber bool) bool {
 	numberArg := func(index int, value float64) bool {
 		if allowNumber {
 			if index == 1 {
-				if value == 0 && data.tag == "div" {
-					ErrorLog(`Division by 0 in div function`)
-					return false
+				if value == 0 {
+					if data.tag == "div" || data.tag == "mod" {
+						ErrorLogF(`Division by 0 in "%s" function`, data.tag)
+						return false
+					}
+					if data.tag == "round" || data.tag == "round-up" ||
+						data.tag == "round-down" || data.tag == "round-to-zero" {
+						ErrorLogF(`The rounding interval is 0 in "%s" function`, data.tag)
+						return false
+					}
 				}
 				data.args = append(data.args, value)
 				return true
 			} else {
 				ErrorLogF(`Only the second %s function argument can be a number`, data.tag)
-				return false
 			}
+		} else {
+			ErrorLogF(`The %s function argument can't be a number`, data.tag)
 		}
-
-		ErrorLogF(`The %s function argument can't be a number`, data.tag)
 		return false
 	}
 
@@ -219,7 +231,7 @@ func (data *sizeFuncData) writeCSS(topFunc string, buffer *strings.Builder, sess
 		case "":
 			buffer.WriteString("calc(")
 
-		case "min", "max", "clamp":
+		case "min", "max", "clamp", "mod", "rem", "round", "round-up", "round-down", "round-to-zero":
 			bracket = false
 
 		default:
@@ -228,9 +240,21 @@ func (data *sizeFuncData) writeCSS(topFunc string, buffer *strings.Builder, sess
 	}
 
 	switch data.tag {
-	case "min", "max", "clamp":
+	case "min", "max", "clamp", "mod", "rem":
 		buffer.WriteString(data.tag)
 		buffer.WriteRune('(')
+
+	case "round":
+		buffer.WriteString("round(nearest, ")
+
+	case "round-up":
+		buffer.WriteString("round(up, ")
+
+	case "round-down":
+		buffer.WriteString("round(down, ")
+
+	case "round-to-zero":
+		buffer.WriteString("round(to-zero, ")
 
 	case "sum":
 		mathFunc(" + ")
@@ -287,7 +311,7 @@ func (data *sizeFuncData) writeCSS(topFunc string, buffer *strings.Builder, sess
 }
 
 // MaxSize creates a SizeUnit function that calculates the maximum argument.
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc
 func MaxSize(arg0, arg1 any, args ...any) SizeFunc {
 	data := new(sizeFuncData)
 	data.tag = "max"
@@ -298,7 +322,7 @@ func MaxSize(arg0, arg1 any, args ...any) SizeFunc {
 }
 
 // MinSize creates a SizeUnit function that calculates the minimum argument.
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
 func MinSize(arg0, arg1 any, args ...any) SizeFunc {
 	data := new(sizeFuncData)
 	data.tag = "min"
@@ -309,7 +333,7 @@ func MinSize(arg0, arg1 any, args ...any) SizeFunc {
 }
 
 // SumSize creates a SizeUnit function that calculates the sum of arguments.
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
 func SumSize(arg0, arg1 any, args ...any) SizeFunc {
 	data := new(sizeFuncData)
 	data.tag = "sum"
@@ -320,7 +344,7 @@ func SumSize(arg0, arg1 any, args ...any) SizeFunc {
 }
 
 // SumSize creates a SizeUnit function that calculates the result of subtracting the arguments (arg1 - arg2).
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
 func SubSize(arg0, arg1 any) SizeFunc {
 	data := new(sizeFuncData)
 	data.tag = "sub"
@@ -331,7 +355,7 @@ func SubSize(arg0, arg1 any) SizeFunc {
 }
 
 // MulSize creates a SizeUnit function that calculates the result of multiplying the arguments (arg1 * arg2).
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
 // The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
 // or a string which is a text representation of a number.
 func MulSize(arg0, arg1 any) SizeFunc {
@@ -344,7 +368,7 @@ func MulSize(arg0, arg1 any) SizeFunc {
 }
 
 // DivSize creates a SizeUnit function that calculates the result of dividing the arguments (arg1 / arg2).
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
 // The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
 // or a string which is a text representation of a number.
 func DivSize(arg0, arg1 any) SizeFunc {
@@ -356,13 +380,103 @@ func DivSize(arg0, arg1 any) SizeFunc {
 	return data
 }
 
+// RemSize creates a SizeUnit function that calculates the remainder of a division operation
+// with the same sign as the dividend (arg1 % arg2).
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
+// or a string which is a text representation of a number.
+func RemSize(arg0, arg1 any) SizeFunc {
+	data := new(sizeFuncData)
+	data.tag = "rem"
+	if !data.parseArgs([]any{arg0, arg1}, true) {
+		return nil
+	}
+	return data
+}
+
+// ModSize creates a SizeUnit function that calculates the remainder of a division operation
+// with the same sign as the divisor (arg1 % arg2).
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
+// or a string which is a text representation of a number.
+func ModSize(arg0, arg1 any) SizeFunc {
+	data := new(sizeFuncData)
+	data.tag = "mod"
+	if !data.parseArgs([]any{arg0, arg1}, true) {
+		return nil
+	}
+	return data
+}
+
+// RoundSize creates a SizeUnit function that calculates a rounded number.
+// The function rounds valueToRound (first argument) to the nearest integer multiple
+// of roundingInterval (second argument), which may be either above or below the value.
+// If the valueToRound is half way between the rounding targets above and below (neither is "nearest"), it will be rounded up.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
+// or a string which is a text representation of a number.
+func RoundSize(valueToRound, roundingInterval any) SizeFunc {
+	data := new(sizeFuncData)
+	data.tag = "round"
+	if !data.parseArgs([]any{valueToRound, roundingInterval}, true) {
+		return nil
+	}
+	return data
+}
+
+// RoundUpSize creates a SizeUnit function that calculates a rounded number.
+// The function rounds valueToRound (first argument) up to the nearest integer multiple
+// of roundingInterval (second argument) (if the value is negative, it will become "more positive").
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
+// or a string which is a text representation of a number.
+func RoundUpSize(valueToRound, roundingInterval any) SizeFunc {
+	data := new(sizeFuncData)
+	data.tag = "round-up"
+	if !data.parseArgs([]any{valueToRound, roundingInterval}, true) {
+		return nil
+	}
+	return data
+}
+
+// RoundDownSize creates a SizeUnit function that calculates a rounded number.
+// The function rounds valueToRound (first argument) down to the nearest integer multiple
+// of roundingInterval (second argument) (if the value is negative, it will become "more negative").
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
+// or a string which is a text representation of a number.
+func RoundDownSize(valueToRound, roundingInterval any) SizeFunc {
+	data := new(sizeFuncData)
+	data.tag = "round-down"
+	if !data.parseArgs([]any{valueToRound, roundingInterval}, true) {
+		return nil
+	}
+	return data
+}
+
+// RoundToZeroSize creates a SizeUnit function that calculates a rounded number.
+// The function rounds valueToRound (first argument) to the nearest integer multiple
+// of roundingInterval (second argument), which may be either above or below the value.
+// If the valueToRound is half way between the rounding targets above and below.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// The second argument can also be a number (float32, float32, int, int8...int64, uint, uint8...unit64)
+// or a string which is a text representation of a number.
+func RoundToZeroSize(valueToRound, roundingInterval any) SizeFunc {
+	data := new(sizeFuncData)
+	data.tag = "round-to-zero"
+	if !data.parseArgs([]any{valueToRound, roundingInterval}, true) {
+		return nil
+	}
+	return data
+}
+
 // ClampSize creates a SizeUnit function whose the result is calculated as follows:
 //
 //	min ≤ value ≤ max -> value;
 //	value < min -> min;
 //	max < value -> max;
 //
-// Valid argument types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
+// Valid arguments types are SizeUnit, SizeFunc and a string which is a text description of SizeUnit or SizeFunc.
 func ClampSize(min, value, max any) SizeFunc {
 	data := new(sizeFuncData)
 	data.tag = "clamp"

@@ -1,3 +1,7 @@
+# v0.17.0
+* Added "mod", "rem", "round", "round-up", "round-down", and "round-to-zero" SizeFunc functions
+* Added ModSize, RemSize, RoundSize, RoundUpSize, RoundDownSize, and RoundToZeroSize functions
+
 # v0.16.0
 * Can use ListAdapter as "content" property value of ListLayout
 * The IsListItemEnabled method of the ListAdapter interface has been made optional 
