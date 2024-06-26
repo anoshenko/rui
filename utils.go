@@ -6,35 +6,33 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 )
 
-var stringBuilders []*strings.Builder = make([]*strings.Builder, 4096)
-var stringBuilderCount = 0
+const stringBuilderCap = 4096
+
+var stringBuilderPool = sync.Pool{
+	New: func() any {
+		result := new(strings.Builder)
+		result.Grow(stringBuilderCap)
+		return result
+	},
+}
 
 func allocStringBuilder() *strings.Builder {
-	for stringBuilderCount > 0 {
-		stringBuilderCount--
-		result := stringBuilders[stringBuilderCount]
-		if result != nil {
-			stringBuilders[stringBuilderCount] = nil
-			result.Reset()
-			return result
-		}
+	if builder := stringBuilderPool.Get(); builder != nil {
+		return builder.(*strings.Builder)
 	}
 
 	result := new(strings.Builder)
-	result.Grow(4096)
+	result.Grow(stringBuilderCap)
 	return result
 }
 
 func freeStringBuilder(builder *strings.Builder) {
-	if builder != nil {
-		if stringBuilderCount == len(stringBuilders) {
-			stringBuilders = append(stringBuilders, builder)
-		} else {
-			stringBuilders[stringBuilderCount] = builder
-		}
-		stringBuilderCount++
+	if builder != nil && builder.Cap() == stringBuilderCap {
+		builder.Reset()
+		stringBuilderPool.Put(builder)
 	}
 }
 
