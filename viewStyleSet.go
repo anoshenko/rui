@@ -81,6 +81,108 @@ func (style *viewStyle) setBackground(value any) bool {
 	return false
 }
 
+func (style *viewStyle) setTransition(tag string, value any) bool {
+	setObject := func(obj DataObject) bool {
+		if obj != nil {
+			tag := strings.ToLower(tag)
+			switch tag {
+			case "", "_":
+				ErrorLog("Invalid transition property name")
+
+			default:
+				style.transitions[tag] = parseAnimation(obj)
+				return true
+			}
+		}
+		return false
+	}
+
+	switch value := value.(type) {
+	case Params:
+		result := true
+		for tag, val := range value {
+			tag = strings.ToLower(strings.Trim(tag, " \t"))
+			if tag == "" {
+				ErrorLog("Invalid transition property name")
+				result = false
+			} else if val == nil {
+				delete(style.transitions, tag)
+			} else if animation, ok := val.(Animation); ok {
+				style.transitions[tag] = animation
+			} else {
+				notCompatibleType(Transition, val)
+				result = false
+			}
+		}
+		return result
+
+	case DataObject:
+		return setObject(value)
+
+	case DataNode:
+		switch value.Type() {
+		case ObjectNode:
+			return setObject(value.Object())
+
+		case ArrayNode:
+			result := true
+			for i := 0; i < value.ArraySize(); i++ {
+				if obj := value.ArrayElement(i).Object(); obj != nil {
+					result = setObject(obj) && result
+				} else {
+					notCompatibleType(tag, value.ArrayElement(i))
+					result = false
+				}
+			}
+			return result
+		}
+	}
+
+	notCompatibleType(tag, value)
+	return false
+}
+
+func (style *viewStyle) setAnimation(tag string, value any) bool {
+	switch value := value.(type) {
+	case Animation:
+		style.properties[tag] = []Animation{value}
+		return true
+
+	case []Animation:
+		style.properties[tag] = value
+		return true
+
+	case DataObject:
+		if animation := parseAnimation(value); animation.hasAnimatedProperty() {
+			style.properties[tag] = []Animation{animation}
+			return true
+		}
+
+	case DataNode:
+		animations := []Animation{}
+		result := true
+		for i := 0; i < value.ArraySize(); i++ {
+			if obj := value.ArrayElement(i).Object(); obj != nil {
+				if anim := parseAnimation(obj); anim.hasAnimatedProperty() {
+					animations = append(animations, anim)
+				} else {
+					result = false
+				}
+			} else {
+				notCompatibleType(tag, value.ArrayElement(i))
+				result = false
+			}
+		}
+		if result && len(animations) > 0 {
+			style.properties[tag] = animations
+		}
+		return result
+	}
+
+	notCompatibleType(tag, value)
+	return false
+}
+
 func (style *viewStyle) Remove(tag string) {
 	style.remove(strings.ToLower(tag))
 }
@@ -293,7 +395,7 @@ func (style *viewStyle) set(tag string, value any) bool {
 		if n, ok := value.(int); ok && n >= 100 && n%100 == 0 {
 			n /= 100
 			if n > 0 && n <= 9 {
-				style.properties[TextWeight] = StartToEndOrientation
+				style.properties[TextWeight] = n
 				return true
 			}
 		}
@@ -333,101 +435,10 @@ func (style *viewStyle) set(tag string, value any) bool {
 		return style.setFilter(tag, value)
 
 	case Transition:
-		setObject := func(obj DataObject) bool {
-			if obj != nil {
-				tag := strings.ToLower(tag)
-				switch tag {
-				case "", "_":
-					ErrorLog("Invalid transition property name")
-
-				default:
-					style.transitions[tag] = parseAnimation(obj)
-					return true
-				}
-			}
-			return false
-		}
-
-		switch value := value.(type) {
-		case Params:
-			result := true
-			for tag, val := range value {
-				tag = strings.ToLower(strings.Trim(tag, " \t"))
-				if tag == "" {
-					ErrorLog("Invalid transition property name")
-					result = false
-				} else if val == nil {
-					delete(style.transitions, tag)
-				} else if animation, ok := val.(Animation); ok {
-					style.transitions[tag] = animation
-				} else {
-					notCompatibleType(Transition, val)
-					result = false
-				}
-			}
-			return result
-
-		case DataObject:
-			return setObject(value)
-
-		case DataNode:
-			switch value.Type() {
-			case ObjectNode:
-				return setObject(value.Object())
-
-			case ArrayNode:
-				result := true
-				for i := 0; i < value.ArraySize(); i++ {
-					if obj := value.ArrayElement(i).Object(); obj != nil {
-						result = setObject(obj) && result
-					} else {
-						notCompatibleType(tag, value.ArrayElement(i))
-						result = false
-					}
-				}
-				return result
-			}
-		}
-		notCompatibleType(tag, value)
-		return false
+		return style.setTransition(tag, value)
 
 	case AnimationTag:
-		switch value := value.(type) {
-		case Animation:
-			style.properties[tag] = []Animation{value}
-			return true
-
-		case []Animation:
-			style.properties[tag] = value
-			return true
-
-		case DataObject:
-			if animation := parseAnimation(value); animation.hasAnimatedProperty() {
-				style.properties[tag] = []Animation{animation}
-				return true
-			}
-
-		case DataNode:
-			animations := []Animation{}
-			result := true
-			for i := 0; i < value.ArraySize(); i++ {
-				if obj := value.ArrayElement(i).Object(); obj != nil {
-					if anim := parseAnimation(obj); anim.hasAnimatedProperty() {
-						animations = append(animations, anim)
-					} else {
-						result = false
-					}
-				} else {
-					notCompatibleType(tag, value.ArrayElement(i))
-					result = false
-				}
-			}
-			if result && len(animations) > 0 {
-				style.properties[tag] = animations
-			}
-			return result
-		}
-
+		return style.setAnimation(tag, value)
 	}
 
 	return style.propertyList.set(tag, value)
