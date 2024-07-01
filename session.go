@@ -143,7 +143,7 @@ type Session interface {
 	finishUpdateScript(htmlID string)
 	sendResponse()
 	addAnimationCSS(css string)
-	clearAnimation()
+	removeAnimation(keyframe string)
 	canvasStart(htmlID string)
 	callCanvasFunc(funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
@@ -464,14 +464,46 @@ func (session *sessionData) sendResponse() {
 }
 
 func (session *sessionData) addAnimationCSS(css string) {
+	session.animationCSS += css
 	if session.bridge != nil {
 		session.bridge.appendAnimationCSS(css)
 	}
 }
 
-func (session *sessionData) clearAnimation() {
-	if session.bridge != nil {
-		session.bridge.setAnimationCSS("")
+func (session *sessionData) removeAnimation(keyframe string) {
+	css := session.animationCSS
+	index := strings.Index(css, "@keyframes "+keyframe)
+	if index < 0 {
+		return
+	}
+
+	start := strings.IndexRune(css[index:], '{')
+	if start < 0 {
+		return
+	}
+
+	n := 1
+	end := -1
+	for i := start + index + 1; i < len(css); i++ {
+		if css[i] == '}' {
+			n--
+			if n == 0 {
+				end = i + 1
+				if end < len(css) && css[end] == '\n' {
+					end++
+				}
+				break
+			}
+		} else if css[i] == '{' {
+			n++
+		}
+	}
+
+	if end > index {
+		session.animationCSS = css[:index] + css[end:]
+		if session.bridge != nil {
+			session.bridge.setAnimationCSS(session.animationCSS)
+		}
 	}
 }
 

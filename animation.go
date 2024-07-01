@@ -120,6 +120,7 @@ type AnimatedProperty struct {
 type animationData struct {
 	propertyList
 	keyFramesName string
+	usageCounter  int
 }
 
 // Animation interface is used to set animation parameters. Used properties:
@@ -132,6 +133,8 @@ type Animation interface {
 	transitionCSS(buffer *strings.Builder, session Session)
 	hasAnimatedProperty() bool
 	animationName() string
+	used()
+	unused(session Session)
 }
 
 func parseAnimation(obj DataObject) Animation {
@@ -177,6 +180,17 @@ func (animation *animationData) hasAnimatedProperty() bool {
 
 func (animation *animationData) animationName() string {
 	return animation.keyFramesName
+}
+
+func (animation *animationData) used() {
+	animation.usageCounter++
+}
+
+func (animation *animationData) unused(session Session) {
+	animation.usageCounter--
+	if animation.usageCounter <= 0 && animation.keyFramesName != "" {
+		session.removeAnimation(animation.keyFramesName)
+	}
 }
 
 func (animation *animationData) normalizeTag(tag string) string {
@@ -387,7 +401,7 @@ func (animation *animationData) animationCSS(session Session) string {
 		}
 
 		animatedProps, ok := props.([]AnimatedProperty)
-		if !ok {
+		if !ok || len(animatedProps) == 0 {
 			ErrorLog("Invalid animated properties.")
 			return ""
 		}
@@ -549,6 +563,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 
 	var cssBuilder cssStyleBuilder
 
+	cssBuilder.init(0)
 	cssBuilder.startAnimation(name)
 
 	fromParams := Params{}
@@ -606,10 +621,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 	cssBuilder.endAnimationFrame()
 
 	cssBuilder.endAnimation()
-
-	style := cssBuilder.finish()
-	session.animationCSS += style
-	session.addAnimationCSS(style)
+	session.addAnimationCSS(cssBuilder.finish())
 
 	return name
 }

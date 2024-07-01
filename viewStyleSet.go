@@ -143,18 +143,26 @@ func (style *viewStyle) setTransition(tag string, value any) bool {
 }
 
 func (style *viewStyle) setAnimation(tag string, value any) bool {
+
+	set := func(animations []Animation) {
+		style.properties[tag] = animations
+		for _, animation := range animations {
+			animation.used()
+		}
+	}
+
 	switch value := value.(type) {
 	case Animation:
-		style.properties[tag] = []Animation{value}
+		set([]Animation{value})
 		return true
 
 	case []Animation:
-		style.properties[tag] = value
+		set(value)
 		return true
 
 	case DataObject:
 		if animation := parseAnimation(value); animation.hasAnimatedProperty() {
-			style.properties[tag] = []Animation{animation}
+			set([]Animation{animation})
 			return true
 		}
 
@@ -174,7 +182,7 @@ func (style *viewStyle) setAnimation(tag string, value any) bool {
 			}
 		}
 		if result && len(animations) > 0 {
-			style.properties[tag] = animations
+			set(animations)
 		}
 		return result
 	}

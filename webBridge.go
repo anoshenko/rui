@@ -284,7 +284,6 @@ func (bridge *webBridge) removeProperty(htmlID, property string) {
 }
 
 func (bridge *webBridge) appendAnimationCSS(css string) {
-	//bridge.callFunc("appendAnimationCSS", css)
 	bridge.writeMessage(`{
 	let styles = document.getElementById('ruiAnimations');
 	if (styles) {
@@ -294,7 +293,6 @@ func (bridge *webBridge) appendAnimationCSS(css string) {
 }
 
 func (bridge *webBridge) setAnimationCSS(css string) {
-	//bridge.callFunc("setAnimationCSS", css)
 	bridge.writeMessage(`{
 	let styles = document.getElementById('ruiAnimations');
 	if (styles) {

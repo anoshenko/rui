@@ -150,9 +150,11 @@ func (builder *cssValueBuilder) addValues(key, separator string, values ...strin
 	}
 }
 
-func (builder *cssStyleBuilder) init() {
+func (builder *cssStyleBuilder) init(kbSize int) {
 	builder.buffer = allocStringBuilder()
-	builder.buffer.Grow(16 * 1024)
+	if kbSize > 0 {
+		builder.buffer.Grow(kbSize * 1024)
+	}
 }
 
 func (builder *cssStyleBuilder) finish() string {
@@ -168,7 +170,7 @@ func (builder *cssStyleBuilder) finish() string {
 
 func (builder *cssStyleBuilder) startMedia(rule string) {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	builder.buffer.WriteString(`@media screen`)
 	builder.buffer.WriteString(rule)
@@ -178,7 +180,7 @@ func (builder *cssStyleBuilder) startMedia(rule string) {
 
 func (builder *cssStyleBuilder) endMedia() {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	builder.buffer.WriteString(`}\n`)
 	builder.media = false
@@ -192,7 +194,7 @@ func (builder *cssStyleBuilder) startStyle(name string) {
 	}
 
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	if builder.media {
 		builder.buffer.WriteString(`\t`)
@@ -210,7 +212,7 @@ func (builder *cssStyleBuilder) startStyle(name string) {
 
 func (builder *cssStyleBuilder) endStyle() {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	if builder.media {
 		builder.buffer.WriteString(`\t`)
@@ -220,7 +222,7 @@ func (builder *cssStyleBuilder) endStyle() {
 
 func (builder *cssStyleBuilder) startAnimation(name string) {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 
 	builder.media = true
@@ -231,7 +233,7 @@ func (builder *cssStyleBuilder) startAnimation(name string) {
 
 func (builder *cssStyleBuilder) endAnimation() {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	builder.buffer.WriteString(`}\n`)
 	builder.media = false
@@ -239,7 +241,7 @@ func (builder *cssStyleBuilder) endAnimation() {
 
 func (builder *cssStyleBuilder) startAnimationFrame(name string) {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 
 	builder.buffer.WriteString(`\t`)
@@ -249,7 +251,7 @@ func (builder *cssStyleBuilder) startAnimationFrame(name string) {
 
 func (builder *cssStyleBuilder) endAnimationFrame() {
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	builder.buffer.WriteString(`\t}\n`)
 }
@@ -257,7 +259,7 @@ func (builder *cssStyleBuilder) endAnimationFrame() {
 func (builder *cssStyleBuilder) add(key, value string) {
 	if value != "" {
 		if builder.buffer == nil {
-			builder.init()
+			builder.init(0)
 		}
 		if builder.media {
 			builder.buffer.WriteString(`\t`)
@@ -276,7 +278,7 @@ func (builder *cssStyleBuilder) addValues(key, separator string, values ...strin
 	}
 
 	if builder.buffer == nil {
-		builder.init()
+		builder.init(0)
 	}
 	if builder.media {
 		builder.buffer.WriteString(`\t`)

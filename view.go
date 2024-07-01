@@ -341,6 +341,25 @@ func (view *viewData) set(tag string, value any) bool {
 		}
 		view.viewID = text
 
+	case AnimationTag:
+		oldAnimations := []Animation{}
+		if val, ok := view.properties[AnimationTag]; ok && val != nil {
+			if animation, ok := val.([]Animation); ok {
+				oldAnimations = animation
+			}
+		}
+
+		if !view.setAnimation(tag, value) {
+			return false
+		}
+
+		for _, animation := range oldAnimations {
+			animation.unused(view.session)
+		}
+		if view.created {
+			viewPropertyChanged(view, tag)
+		}
+
 	case TabIndex, "tab-index":
 		if !view.setIntProperty(tag, value) {
 			return false

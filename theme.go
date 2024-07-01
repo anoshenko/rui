@@ -589,7 +589,7 @@ func (theme *theme) cssText(session Session) string {
 	}
 
 	var builder cssStyleBuilder
-	builder.init()
+	builder.init(16)
 
 	styleList := func(styles map[string]ViewStyle) []string {
 		ruiStyles := []string{}
