@@ -299,10 +299,13 @@ type canvasData struct {
 }
 
 func newCanvas(view CanvasView) Canvas {
+	session := view.Session()
+	if !session.canvasStart(view.htmlID()) {
+		return nil
+	}
 	canvas := new(canvasData)
 	canvas.view = view
-	canvas.session = view.Session()
-	canvas.session.canvasStart(view.htmlID())
+	canvas.session = session
 	return canvas
 }
 

@@ -121,6 +121,10 @@ type animationData struct {
 	propertyList
 	keyFramesName string
 	usageCounter  int
+	view          View
+	listener      func(view View, animation Animation, event string)
+	oldListeners  map[string][]func(View, string)
+	oldAnimation  []Animation
 }
 
 // Animation interface is used to set animation parameters. Used properties:
@@ -128,6 +132,17 @@ type animationData struct {
 type Animation interface {
 	Properties
 	fmt.Stringer
+
+	// Start starts the animation for the view specified by the first argument.
+	// The second argument specifies the animation event listener (can be nil)
+	Start(view View, listener func(view View, animation Animation, event string)) bool
+	// Stop stops the animation
+	Stop()
+	// Pause pauses the animation
+	Pause()
+	// Resume resumes an animation that was stopped using the Pause method
+	Resume()
+
 	writeTransitionString(tag string, buffer *strings.Builder)
 	animationCSS(session Session) string
 	transitionCSS(buffer *strings.Builder, session Session)
@@ -163,19 +178,29 @@ func NewAnimation(params Params) Animation {
 	return animation
 }
 
-func (animation *animationData) hasAnimatedProperty() bool {
-	props := animation.getRaw(PropertyTag)
-	if props == nil {
+func (animation *animationData) animatedProperties() []AnimatedProperty {
+	value := animation.getRaw(PropertyTag)
+	if value == nil {
 		ErrorLog("There are no animated properties.")
-		return false
+		return nil
 	}
 
-	if _, ok := props.([]AnimatedProperty); !ok {
+	props, ok := value.([]AnimatedProperty)
+	if !ok {
 		ErrorLog("Invalid animated properties.")
-		return false
+		return nil
 	}
 
-	return true
+	if len(props) == 0 {
+		ErrorLog("There are no animated properties.")
+		return nil
+	}
+
+	return props
+}
+
+func (animation *animationData) hasAnimatedProperty() bool {
+	return animation.animatedProperties() != nil
 }
 
 func (animation *animationData) animationName() string {
@@ -394,19 +419,11 @@ func (animation *animationData) String() string {
 
 func (animation *animationData) animationCSS(session Session) string {
 	if animation.keyFramesName == "" {
-		props := animation.getRaw(PropertyTag)
-		if props == nil {
-			ErrorLog("There are no animated properties.")
+		if props := animation.animatedProperties(); props != nil {
+			animation.keyFramesName = session.registerAnimation(props)
+		} else {
 			return ""
 		}
-
-		animatedProps, ok := props.([]AnimatedProperty)
-		if !ok || len(animatedProps) == 0 {
-			ErrorLog("Invalid animated properties.")
-			return ""
-		}
-
-		animation.keyFramesName = session.registerAnimation(animatedProps)
 	}
 
 	buffer := allocStringBuilder()

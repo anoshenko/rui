@@ -144,7 +144,9 @@ type Session interface {
 	sendResponse()
 	addAnimationCSS(css string)
 	removeAnimation(keyframe string)
-	canvasStart(htmlID string)
+	htmlPropertyValue(htmlID, name string) string
+
+	canvasStart(htmlID string) bool
 	callCanvasFunc(funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
 	callCanvasVarFunc(v any, funcName string, args ...any)
@@ -152,7 +154,7 @@ type Session interface {
 	updateCanvasProperty(property string, value any)
 	canvasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
-	htmlPropertyValue(htmlID, name string) string
+
 	addToEventsQueue(data DataObject)
 	handleAnswer(command string, data DataObject) bool
 	handleRootSize(data DataObject)
@@ -427,20 +429,32 @@ func (session *sessionData) appendToInnerHTML(htmlID, html string) {
 }
 
 func (session *sessionData) updateCSSProperty(htmlID, property, value string) {
-	if !session.ignoreViewUpdates() && session.bridge != nil {
-		session.bridge.updateCSSProperty(htmlID, property, value)
+	if !session.ignoreViewUpdates() {
+		if session.bridge != nil {
+			session.bridge.updateCSSProperty(htmlID, property, value)
+		} else {
+			ErrorLog("No connection")
+		}
 	}
 }
 
 func (session *sessionData) updateProperty(htmlID, property string, value any) {
-	if !session.ignoreViewUpdates() && session.bridge != nil {
-		session.bridge.updateProperty(htmlID, property, value)
+	if !session.ignoreViewUpdates() {
+		if session.bridge != nil {
+			session.bridge.updateProperty(htmlID, property, value)
+		} else {
+			ErrorLog("No connection")
+		}
 	}
 }
 
 func (session *sessionData) removeProperty(htmlID, property string) {
-	if !session.ignoreViewUpdates() && session.bridge != nil {
-		session.bridge.removeProperty(htmlID, property)
+	if !session.ignoreViewUpdates() {
+		if session.bridge != nil {
+			session.bridge.removeProperty(htmlID, property)
+		} else {
+			ErrorLog("No connection")
+		}
 	}
 }
 
@@ -448,18 +462,23 @@ func (session *sessionData) startUpdateScript(htmlID string) bool {
 	if session.bridge != nil {
 		return session.bridge.startUpdateScript(htmlID)
 	}
+	ErrorLog("No connection")
 	return false
 }
 
 func (session *sessionData) finishUpdateScript(htmlID string) {
 	if session.bridge != nil {
 		session.bridge.finishUpdateScript(htmlID)
+	} else {
+		ErrorLog("No connection")
 	}
 }
 
 func (session *sessionData) sendResponse() {
 	if session.bridge != nil {
 		session.bridge.sendResponse()
+	} else {
+		ErrorLog("No connection")
 	}
 }
 
@@ -467,6 +486,8 @@ func (session *sessionData) addAnimationCSS(css string) {
 	session.animationCSS += css
 	if session.bridge != nil {
 		session.bridge.appendAnimationCSS(css)
+	} else {
+		ErrorLog("No connection")
 	}
 }
 
@@ -503,14 +524,20 @@ func (session *sessionData) removeAnimation(keyframe string) {
 		session.animationCSS = css[:index] + css[end:]
 		if session.bridge != nil {
 			session.bridge.setAnimationCSS(session.animationCSS)
+		} else {
+			ErrorLog("No connection")
 		}
 	}
 }
 
-func (session *sessionData) canvasStart(htmlID string) {
+func (session *sessionData) canvasStart(htmlID string) bool {
 	if session.bridge != nil {
 		session.bridge.canvasStart(htmlID)
+		return true
 	}
+
+	ErrorLog("No connection")
+	return false
 }
 
 func (session *sessionData) callCanvasFunc(funcName string, args ...any) {
@@ -587,6 +614,8 @@ func (session *sessionData) handleAnswer(command string, data DataObject) bool {
 
 	if session.bridge != nil {
 		session.bridge.sendResponse()
+	} else {
+		ErrorLog("No connection")
 	}
 	return true
 }

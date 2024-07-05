@@ -1,6 +1,7 @@
 # v0.17.0
 * Added "mod", "rem", "round", "round-up", "round-down", and "round-to-zero" SizeFunc functions
 * Added ModSize, RemSize, RoundSize, RoundUpSize, RoundDownSize, and RoundToZeroSize functions
+* Added Start, Stop, Pause, and Resume methods to Animation interface
 
 # v0.16.0
 * Can use ListAdapter as "content" property value of ListLayout
