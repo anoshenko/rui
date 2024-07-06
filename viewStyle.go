@@ -605,8 +605,8 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			} else {
 				for _, ch := range text {
 					if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-						ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == ':' ||
-						ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
+						ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == '.' ||
+						ch == ':' || ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
 					} else {
 						simple = false
 						break
