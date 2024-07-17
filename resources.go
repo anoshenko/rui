@@ -3,6 +3,7 @@ package rui
 import (
 	"embed"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -329,7 +330,7 @@ func ReadRawResource(filename string) []byte {
 		rootDirs := resources.embedRootDirs(fs)
 		for _, dir := range rootDirs {
 			switch dir {
-			case imageDir, themeDir, viewDir:
+			case imageDir, themeDir, viewDir, stringsDir:
 				// do nothing
 
 			case rawDir:
@@ -354,6 +355,44 @@ func ReadRawResource(filename string) []byte {
 	if exe, err := os.Executable(); err == nil {
 		if data, err := os.ReadFile(filepath.Dir(exe) + "/resources/" + rawDir + "/" + filename); err == nil {
 			return data
+		}
+	}
+
+	ErrorLogF(`The "%s" raw file don't found`, filename)
+	return nil
+}
+
+// OpenRawResource returns the contents of the raw resource with the specified name
+func OpenRawResource(filename string) fs.File {
+	for _, fs := range resources.embedFS {
+		rootDirs := resources.embedRootDirs(fs)
+		for _, dir := range rootDirs {
+			switch dir {
+			case imageDir, themeDir, viewDir, stringsDir:
+				// do nothing
+
+			case rawDir:
+				if file, err := fs.Open(dir + "/" + filename); err == nil {
+					return file
+				}
+
+			default:
+				if file, err := fs.Open(dir + "/" + rawDir + "/" + filename); err == nil {
+					return file
+				}
+			}
+		}
+	}
+
+	if resources.path != "" {
+		if file, err := os.Open(resources.path + rawDir + "/" + filename); err == nil {
+			return file
+		}
+	}
+
+	if exe, err := os.Executable(); err == nil {
+		if file, err := os.Open(filepath.Dir(exe) + "/resources/" + rawDir + "/" + filename); err == nil {
+			return file
 		}
 	}
 
