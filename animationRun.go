@@ -56,17 +56,22 @@ func (animation *animationData) finish() {
 			}
 		}
 
-		animation.view.Set(AnimationTag, animation.oldAnimation)
+		if animation.oldAnimation != nil {
+			animation.view.Set(AnimationTag, animation.oldAnimation)
+			animation.oldAnimation = nil
+		} else {
+			animation.view.Set(AnimationTag, "")
+		}
 
 		animation.oldListeners = map[string][]func(View, string){}
-		animation.oldAnimation = nil
+
 		animation.view = nil
 		animation.listener = nil
 	}
 }
 
 func (animation *animationData) Stop() {
-	animation.finish()
+	animation.onAnimationCancel(animation.view, "")
 }
 
 func (animation *animationData) Pause() {
@@ -89,10 +94,12 @@ func (animation *animationData) onAnimationStart(view View, _ string) {
 
 func (animation *animationData) onAnimationEnd(view View, _ string) {
 	if animation.view != nil {
-		if animation.listener != nil {
-			animation.listener(animation.view, animation, AnimationEndEvent)
-		}
+		animationView := animation.view
+		listener := animation.listener
 		animation.finish()
+		if listener != nil {
+			listener(animationView, animation, AnimationEndEvent)
+		}
 	}
 }
 
@@ -103,7 +110,12 @@ func (animation *animationData) onAnimationIteration(view View, _ string) {
 }
 
 func (animation *animationData) onAnimationCancel(view View, _ string) {
-	if animation.view != nil && animation.listener != nil {
-		animation.listener(animation.view, animation, AnimationCancelEvent)
+	if animation.view != nil {
+		animationView := animation.view
+		listener := animation.listener
+		animation.finish()
+		if listener != nil {
+			listener(animationView, animation, AnimationCancelEvent)
+		}
 	}
 }

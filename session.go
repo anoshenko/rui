@@ -521,7 +521,7 @@ func (session *sessionData) removeAnimation(keyframe string) {
 	}
 
 	if end > index {
-		session.animationCSS = css[:index] + css[end:]
+		session.animationCSS = strings.Trim(css[:index]+css[end:], "\n")
 		if session.bridge != nil {
 			session.bridge.setAnimationCSS(session.animationCSS)
 		} else {
