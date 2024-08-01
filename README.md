@@ -1219,6 +1219,10 @@ The textual representation of a conic gradient looks like this:
 
 #### Image
 
+The background image is created using the function
+
+	func NewBackgroundImage(params Params) BackgroundElement
+
 The image has the following parameters:
 
 * Source ("src") - Specifies the URL of the image
