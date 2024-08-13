@@ -386,6 +386,13 @@ func (style *viewStyle) set(tag string, value any) bool {
 		style.properties[Outline] = NewOutlineProperty(Params{tag: value})
 		return true
 
+	case TransformTag:
+		return style.setTransform(value)
+
+	case RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
+		TranslateX, TranslateY, TranslateZ:
+		return style.setTransformProperty(tag, value)
+
 	case Orientation:
 		if text, ok := value.(string); ok {
 			switch strings.ToLower(text) {

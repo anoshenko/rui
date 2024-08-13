@@ -629,7 +629,12 @@ func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit)
 	if view == nil {
 		return AutoSize(), AutoSize(), AutoSize()
 	}
-	return getTranslate(view, view.Session())
+
+	session := view.Session()
+	x, _ := sizeProperty(view, TranslateX, session)
+	y, _ := sizeProperty(view, TranslateY, session)
+	z, _ := sizeProperty(view, TranslateZ, session)
+	return x, y, z
 }
 
 // GetSkew returns a angles to use to distort the element along the abscissa (x-axis)
@@ -642,7 +647,8 @@ func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit) {
 	if view == nil {
 		return AngleUnit{Value: 0, Type: Radian}, AngleUnit{Value: 0, Type: Radian}
 	}
-	x, y, _ := getSkew(view, view.Session())
+	x, _ := angleProperty(view, SkewX, view.Session())
+	y, _ := angleProperty(view, SkewY, view.Session())
 	return x, y
 }
 

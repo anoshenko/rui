@@ -559,6 +559,13 @@ func (style *viewStyle) get(tag string) any {
 			result[tag] = animation
 		}
 		return result
+
+	case RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
+		TranslateX, TranslateY, TranslateZ:
+		if transform := style.transformProperty(); transform != nil {
+			return transform.Get(tag)
+		}
+		return nil
 	}
 
 	return style.propertyList.getRaw(tag)
@@ -889,8 +896,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 
 	finalTags := []string{
 		Perspective, PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible, OriginX, OriginY, OriginZ,
-		TranslateX, TranslateY, TranslateZ, ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ,
-		SkewX, SkewY, Clip, Filter, BackdropFilter, Summary, Content, Transition}
+		TransformTag, Clip, Filter, BackdropFilter, Summary, Content, Transition}
 	for _, tag := range finalTags {
 		removeTag(tag)
 	}

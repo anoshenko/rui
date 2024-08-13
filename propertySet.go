@@ -31,9 +31,6 @@ func isPropertyInList(tag string, list []string) bool {
 }
 
 var angleProperties = []string{
-	Rotate,
-	SkewX,
-	SkewY,
 	From,
 }
 
@@ -80,12 +77,6 @@ var intProperties = []string{
 
 var floatProperties = map[string]struct{ min, max float64 }{
 	Opacity:           {min: 0, max: 1},
-	ScaleX:            {min: -math.MaxFloat64, max: math.MaxFloat64},
-	ScaleY:            {min: -math.MaxFloat64, max: math.MaxFloat64},
-	ScaleZ:            {min: -math.MaxFloat64, max: math.MaxFloat64},
-	RotateX:           {min: 0, max: 1},
-	RotateY:           {min: 0, max: 1},
-	RotateZ:           {min: 0, max: 1},
 	NumberPickerMax:   {min: -math.MaxFloat64, max: math.MaxFloat64},
 	NumberPickerMin:   {min: -math.MaxFloat64, max: math.MaxFloat64},
 	NumberPickerStep:  {min: -math.MaxFloat64, max: math.MaxFloat64},
@@ -147,9 +138,6 @@ var sizeProperties = map[string]string{
 	OriginX:            OriginX,
 	OriginY:            OriginY,
 	OriginZ:            OriginZ,
-	TranslateX:         TranslateX,
-	TranslateY:         TranslateY,
-	TranslateZ:         TranslateZ,
 	Radius:             Radius,
 	RadiusX:            RadiusX,
 	RadiusY:            RadiusY,
