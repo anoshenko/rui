@@ -150,6 +150,7 @@ func (style *viewStyle) setTransform(value any) bool {
 	switch value := value.(type) {
 	case Transform:
 		style.properties[TransformTag] = value
+		return true
 
 	case DataObject:
 		return setObject(value)
