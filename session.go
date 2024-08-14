@@ -103,6 +103,8 @@ type Session interface {
 	ClientItem(key string) (string, bool)
 	// SetClientItem stores a key-value pair in the client-side storage
 	SetClientItem(key, value string)
+	// RemoveClientItem removes a key-value pair in the client-side storage
+	RemoveClientItem(key string)
 	// RemoveAllClientItems removes all key-value pair from the client-side storage
 	RemoveAllClientItems()
 
@@ -877,6 +879,11 @@ func (session *sessionData) ClientItem(key string) (string, bool) {
 func (session *sessionData) SetClientItem(key, value string) {
 	session.clientStorage[key] = value
 	session.bridge.callFunc("localStorageSet", key, value)
+}
+
+func (session *sessionData) RemoveClientItem(key string) {
+	delete(session.clientStorage, key)
+	session.bridge.callFunc("localStorageRemove", key)
 }
 
 func (session *sessionData) RemoveAllClientItems() {

@@ -4,6 +4,7 @@
 * Added Start, Stop, Pause, and Resume methods to Animation interface
 * Added "transform" property and Transform interface
 * Added OpenRawResource function
+* Added RemoveClientItem method to Session interface
 
 # v0.16.0
 * Can use ListAdapter as "content" property value of ListLayout

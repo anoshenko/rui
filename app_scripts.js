@@ -1982,7 +1982,15 @@ function getCanvasContext(elementId) {
 
 function localStorageSet(key, value) {
 	try {
-		localStorage.setItem(key, value)
+		localStorage.setItem(key, value);
+	} catch (err) {
+		sendMessage("storageError{session=" + sessionID + ", error=`" + err + "`}")
+	}
+}
+
+function localStorageRemove(key) {
+	try {
+		localStorage.removeItem(key);
 	} catch (err) {
 		sendMessage("storageError{session=" + sessionID + ", error=`" + err + "`}")
 	}
@@ -1990,7 +1998,7 @@ function localStorageSet(key, value) {
 
 function localStorageClear() {
 	try {
-		localStorage.setItem(key, value)
+		localStorage.clear();
 	} catch (err) {
 		sendMessage("storageError{session=" + sessionID + ", error=`" + err + "`}")
 	}
