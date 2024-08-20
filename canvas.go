@@ -263,6 +263,11 @@ type Canvas interface {
 	// and is stroked (outlined) according to the current strokeStyle and other context settings
 	FillAndStrokeEllipse(x, y, radiusX, radiusY, rotation float64)
 
+	// NewPath creates a new Path object
+	NewPath() Path
+	// NewPathFromSvg creates a new Path and initialize it by a string consisting of SVG path data
+	NewPathFromSvg(data string) Path
+
 	// FillPath draws a path that is filled according to the current FillStyle.
 	FillPath(path Path)
 	// StrokePath draws a path that is stroked (outlined) according to the current strokeStyle
@@ -346,8 +351,7 @@ func (canvas *canvasData) ClipRect(x, y, width, height float64) {
 }
 
 func (canvas *canvasData) ClipPath(path Path) {
-	path.create(canvas.session)
-	canvas.session.callCanvasFunc("clip")
+	canvas.session.callCanvasFunc("clip", path.obj())
 }
 
 func (canvas *canvasData) SetScale(x, y float64) {
@@ -779,19 +783,16 @@ func (canvas *canvasData) StrokeText(x, y float64, text string) {
 }
 
 func (canvas *canvasData) FillPath(path Path) {
-	path.create(canvas.session)
-	canvas.session.callCanvasFunc("fill")
+	canvas.session.callCanvasFunc("fill", path.obj())
 }
 
 func (canvas *canvasData) StrokePath(path Path) {
-	path.create(canvas.session)
-	canvas.session.callCanvasFunc("stroke")
+	canvas.session.callCanvasFunc("stroke", path.obj())
 }
 
 func (canvas *canvasData) FillAndStrokePath(path Path) {
-	path.create(canvas.session)
-	canvas.session.callCanvasFunc("fill")
-	canvas.session.callCanvasFunc("stroke")
+	canvas.session.callCanvasFunc("fill", path.obj())
+	canvas.session.callCanvasFunc("stroke", path.obj())
 }
 
 func (canvas *canvasData) DrawLine(x0, y0, x1, y1 float64) {

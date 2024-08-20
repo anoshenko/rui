@@ -313,7 +313,7 @@ func (session *sessionData) Language() string {
 		return session.language
 	}
 
-	if session.languages != nil && len(session.languages) > 0 {
+	if len(session.languages) > 0 {
 		return session.languages[0]
 	}
 

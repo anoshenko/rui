@@ -350,6 +350,20 @@ func (bridge *webBridge) createCanvasVar(funcName string, args ...any) any {
 	return result
 }
 
+func (bridge *webBridge) createPath2D(arg string) any {
+	bridge.canvasVarNumber++
+	result := canvasVar{name: fmt.Sprintf("v%d", bridge.canvasVarNumber)}
+	bridge.canvasBuffer.WriteString("\nlet ")
+	bridge.canvasBuffer.WriteString(result.name)
+	bridge.canvasBuffer.WriteString(` = new Path2D(`)
+	if arg != "" {
+		argText, _ := bridge.argToString(arg)
+		bridge.canvasBuffer.WriteString(argText)
+	}
+	bridge.canvasBuffer.WriteString(`);`)
+	return result
+}
+
 func (bridge *webBridge) callCanvasVarFunc(v any, funcName string, args ...any) {
 	varName, ok := v.(canvasVar)
 	if !ok {

@@ -24,6 +24,7 @@ type bridge interface {
 	callCanvasVarFunc(v any, funcName string, args ...any)
 	callCanvasImageFunc(url string, property string, funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
+	createPath2D(arg string) any
 	updateCanvasProperty(property string, value any)
 	canvasFinish()
 	canvasTextMetrics(htmlID, font, text string) TextMetrics
@@ -151,6 +152,7 @@ type Session interface {
 	canvasStart(htmlID string) bool
 	callCanvasFunc(funcName string, args ...any)
 	createCanvasVar(funcName string, args ...any) any
+	createPath(arg string) any
 	callCanvasVarFunc(v any, funcName string, args ...any)
 	callCanvasImageFunc(url string, property string, funcName string, args ...any)
 	updateCanvasProperty(property string, value any)
@@ -557,6 +559,13 @@ func (session *sessionData) updateCanvasProperty(property string, value any) {
 func (session *sessionData) createCanvasVar(funcName string, args ...any) any {
 	if session.bridge != nil {
 		return session.bridge.createCanvasVar(funcName, args...)
+	}
+	return nil
+}
+
+func (session *sessionData) createPath(arg string) any {
+	if session.bridge != nil {
+		return session.bridge.createPath2D(arg)
 	}
 	return nil
 }

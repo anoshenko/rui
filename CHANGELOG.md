@@ -5,6 +5,9 @@
 * Added "transform" property and Transform interface
 * Added OpenRawResource function
 * Added RemoveClientItem method to Session interface
+* Added NewPath and NewPathFromSvg methods to Canvas interface
+* Removed NewPath function
+* Removed Reset methods from Path interface
 
 # v0.16.0
 * Can use ListAdapter as "content" property value of ListLayout

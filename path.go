@@ -2,9 +2,6 @@ package rui
 
 // Path is a path interface
 type Path interface {
-	// Reset erases the Path
-	Reset()
-
 	// MoveTo begins a new sub-path at the point specified by the given (x, y) coordinates
 	MoveTo(x, y float64)
 
@@ -58,79 +55,76 @@ type Path interface {
 	// If the shape has already been closed or has only one point, this function does nothing.
 	Close()
 
-	create(session Session)
-}
-
-type pathElement struct {
-	funcName string
-	args     []any
+	//create(session Session)
+	obj() any
 }
 
 type pathData struct {
-	elements []pathElement
+	session Session
+	varName any
 }
 
 // NewPath creates a new empty Path
-func NewPath() Path {
+func (canvas *canvasData) NewPath() Path {
 	path := new(pathData)
-	path.Reset()
+	path.session = canvas.session
+	path.varName = canvas.session.createPath("")
 	return path
 }
 
-func (path *pathData) Reset() {
-	path.elements = []pathElement{
-		{funcName: "beginPath", args: []any{}},
-	}
+func (canvas *canvasData) NewPathFromSvg(data string) Path {
+	path := new(pathData)
+	path.session = canvas.session
+	path.varName = canvas.session.createPath(data)
+	return path
 }
 
 func (path *pathData) MoveTo(x, y float64) {
-	path.elements = append(path.elements, pathElement{funcName: "moveTo", args: []any{x, y}})
+	path.session.callCanvasVarFunc(path.varName, "moveTo", x, y)
 }
 
 func (path *pathData) LineTo(x, y float64) {
-	path.elements = append(path.elements, pathElement{funcName: "lineTo", args: []any{x, y}})
+	path.session.callCanvasVarFunc(path.varName, "lineTo", x, y)
 }
 
 func (path *pathData) ArcTo(x0, y0, x1, y1, radius float64) {
 	if radius > 0 {
-		path.elements = append(path.elements, pathElement{funcName: "arcTo", args: []any{x0, y0, x1, y1, radius}})
+		path.session.callCanvasVarFunc(path.varName, "arcTo", x0, y0, x1, y1, radius)
 	}
 }
 
 func (path *pathData) Arc(x, y, radius, startAngle, endAngle float64, clockwise bool) {
 	if radius > 0 {
 		if !clockwise {
-			path.elements = append(path.elements, pathElement{funcName: "arc", args: []any{x, y, radius, startAngle, endAngle, true}})
+			path.session.callCanvasVarFunc(path.varName, "arc", x, y, radius, startAngle, endAngle, true)
 		} else {
-			path.elements = append(path.elements, pathElement{funcName: "arc", args: []any{x, y, radius, startAngle, endAngle}})
+			path.session.callCanvasVarFunc(path.varName, "arc", x, y, radius, startAngle, endAngle)
 		}
 	}
 }
 
 func (path *pathData) BezierCurveTo(cp0x, cp0y, cp1x, cp1y, x, y float64) {
-	path.elements = append(path.elements, pathElement{funcName: "bezierCurveTo", args: []any{cp0x, cp0y, cp1x, cp1y, x, y}})
+	path.session.callCanvasVarFunc(path.varName, "bezierCurveTo", cp0x, cp0y, cp1x, cp1y, x, y)
 }
 
 func (path *pathData) QuadraticCurveTo(cpx, cpy, x, y float64) {
-	path.elements = append(path.elements, pathElement{funcName: "quadraticCurveTo", args: []any{cpx, cpy, x, y}})
+	path.session.callCanvasVarFunc(path.varName, "quadraticCurveTo", cpx, cpy, x, y)
 }
 
 func (path *pathData) Ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle float64, clockwise bool) {
 	if radiusX > 0 && radiusY > 0 {
 		if !clockwise {
-			path.elements = append(path.elements, pathElement{funcName: "ellipse", args: []any{x, y, radiusX, radiusY, rotation, startAngle, endAngle, true}})
+			path.session.callCanvasVarFunc(path.varName, "ellipse", x, y, radiusX, radiusY, rotation, startAngle, endAngle, true)
 		} else {
-			path.elements = append(path.elements, pathElement{funcName: "ellipse", args: []any{x, y, radiusX, radiusY, rotation, startAngle, endAngle}})
+			path.session.callCanvasVarFunc(path.varName, "ellipse", x, y, radiusX, radiusY, rotation, startAngle, endAngle)
 		}
 	}
 }
 
 func (path *pathData) Close() {
-	path.elements = append(path.elements, pathElement{funcName: "close", args: []any{}})
+	path.session.callCanvasVarFunc(path.varName, "close")
 }
 
-func (path *pathData) create(session Session) {
-	for _, element := range path.elements {
-		session.callCanvasFunc(element.funcName, element.args...)
-	}
+func (path *pathData) obj() any {
+	return path.varName
 }

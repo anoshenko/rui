@@ -454,11 +454,7 @@ func (clip *polygonClip) cssStyle(session Session) string {
 }
 
 func (clip *polygonClip) valid(session Session) bool {
-	if clip.points == nil || len(clip.points) == 0 {
-		return false
-	}
-
-	return true
+	return len(clip.points) > 0
 }
 
 func parseClipShape(obj DataObject) ClipShape {

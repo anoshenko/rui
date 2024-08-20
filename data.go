@@ -134,7 +134,7 @@ func (object *dataObject) PropertyObject(tag string) DataObject {
 }
 
 func (object *dataObject) setNode(node DataNode) {
-	if object.property == nil || len(object.property) == 0 {
+	if len(object.property) == 0 {
 		object.property = []DataNode{node}
 	} else {
 		tag := node.Tag()

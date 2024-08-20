@@ -4411,7 +4411,17 @@ rotation - the angle of rotation of the ellipse relative to the center in radian
 
 #### Path
 
-The Path interface allows you to describe a complex shape. Path is created using the NewPath () function.
+The Path interface allows you to describe a complex shape. Two Canvas methods are used to create a Path object:
+
+	NewPath() Path
+	NewPathFromSvg(data string) Path
+
+The NewPath() method creates an empty shape. Next, you must describe the shape using the methods of the Path interface
+
+The NewPathFromSvg(data string) Path method creates the shape described in the data parameter.
+The data parameter is a description of the shape in the format of a <path> svg image element. For example
+
+	path := canvas.NewPathFromSvg("m 305,77.362183 c 0,0 -3,8.648649 -13,21.621616 -10,12.972981 -17,18.378381 -17,18.378381 0,0 6,4.32433 17,18.37838 11,14.05406 13,21.62162 13,21.62162 0,0 7.83867,-14.92584 13,-21.62162 10,-12.97297 17,-18.37838 17,-18.37838 0,0 -7,-5.4054 -17,-18.378381 C 308,86.010832 305,77.362183 305,77.362183 Z")
 
 Once created, you must describe the shape. For this, the following interface functions can be used:
 

@@ -193,6 +193,17 @@ func (bridge *wasmBridge) createCanvasVar(funcName string, args ...any) any {
 	return result
 }
 
+func (bridge *wasmBridge) createPath2D(arg string) any {
+	if arg != "" {
+		result := bridge.canvas.Call("createPath2D", arg)
+		bridge.printFuncToLog("var "+result.String()+" = new Path2D", arg)
+		return result
+	}
+	result := bridge.canvas.Call("createPath2D")
+	bridge.printFuncToLog("var " + result.String() + " = new Path2D")
+	return result
+}
+
 func (bridge *wasmBridge) updateCanvasProperty(property string, value any) {
 	if !bridge.canvas.IsNull() {
 		if ProtocolInDebugLog {

@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package rui
 
 import (
@@ -39,6 +41,7 @@ Example for echo:
 		}
 	})
 */
+
 func NewHandler(urlPrefix string, createContentFunc func(Session) SessionContent, params AppParams) *httpHandler {
 	app := new(application)
 	app.params = params

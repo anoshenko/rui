@@ -66,7 +66,7 @@ func (container *viewsContainerData) Append(view View) {
 	if view != nil {
 		htmlID := container.htmlID()
 		view.setParentID(htmlID)
-		if container.views == nil || len(container.views) == 0 {
+		if len(container.views) == 0 {
 			container.views = []View{view}
 		} else {
 			container.views = append(container.views, view)

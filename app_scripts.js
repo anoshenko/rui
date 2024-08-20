@@ -2136,3 +2136,11 @@ function setCssVar(tag, value) {
 		root.style.setProperty(tag, value);
 	}
 }
+
+function createPath2D(svg) {
+	if (svg) {
+		return new Path2D(svg);
+	} else {
+		return new Path2D();
+	}
+}

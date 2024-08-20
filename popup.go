@@ -683,7 +683,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 	}
 
 	session := popup.Session()
-	if manager.popups == nil || len(manager.popups) == 0 {
+	if len(manager.popups) == 0 {
 		manager.popups = []Popup{popup}
 	} else {
 		manager.popups = append(manager.popups, popup)
