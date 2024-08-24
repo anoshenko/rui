@@ -4421,7 +4421,7 @@ The NewPath() method creates an empty shape. Next, you must describe the shape u
 The NewPathFromSvg(data string) Path method creates the shape described in the data parameter.
 The data parameter is a description of the shape in the format of a <path> svg image element. For example
 
-	path := canvas.NewPathFromSvg("m 305,77.362183 c 0,0 -3,8.648649 -13,21.621616 -10,12.972981 -17,18.378381 -17,18.378381 0,0 6,4.32433 17,18.37838 11,14.05406 13,21.62162 13,21.62162 0,0 7.83867,-14.92584 13,-21.62162 10,-12.97297 17,-18.37838 17,-18.37838 0,0 -7,-5.4054 -17,-18.378381 C 308,86.010832 305,77.362183 305,77.362183 Z")
+	path := canvas.NewPathFromSvg("M 30,0 C 30,0 27,8.6486 17,21.622 7,34.595 0,40 0,40 0,40 6,44.3243 17,58.378 28,72.432 30,80 30,80 30,80 37.8387,65.074 43,58.378 53,45.405 60,40 60,40 60,40 53,34.5946 43,21.622 33,8.649 30,0 30,0 Z")
 
 Once created, you must describe the shape. For this, the following interface functions can be used:
 

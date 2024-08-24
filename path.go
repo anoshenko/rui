@@ -122,7 +122,7 @@ func (path *pathData) Ellipse(x, y, radiusX, radiusY, rotation, startAngle, endA
 }
 
 func (path *pathData) Close() {
-	path.session.callCanvasVarFunc(path.varName, "close")
+	path.session.callCanvasVarFunc(path.varName, "closePath")
 }
 
 func (path *pathData) obj() any {
