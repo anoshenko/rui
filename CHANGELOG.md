@@ -3,7 +3,7 @@
 * Added ModSize, RemSize, RoundSize, RoundUpSize, RoundDownSize, and RoundToZeroSize functions
 * Added Start, Stop, Pause, and Resume methods to Animation interface
 * Added "transform" property and Transform interface
-* Added OpenRawResource function
+* Added OpenRawResource, GetCheckboxChangedListeners functions
 * Added RemoveClientItem method to Session interface
 * Added NewPath and NewPathFromSvg methods to Canvas interface
 * Removed NewPath function

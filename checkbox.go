@@ -355,3 +355,10 @@ func GetCheckboxVerticalAlign(view View, subviewID ...string) int {
 func GetCheckboxHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CheckboxHorizontalAlign, TopAlign, false)
 }
+
+// GetCheckboxChangedListeners returns the CheckboxChangedListener list of an Checkbox subview.
+// If there are no listeners then the empty list is returned
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetCheckboxChangedListeners(view View, subviewID ...string) []func(Checkbox, bool) {
+	return getEventListeners[Checkbox, bool](view, subviewID, CheckboxChangedEvent)
+}

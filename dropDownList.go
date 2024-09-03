@@ -375,7 +375,7 @@ func (list *dropDownListData) setDisabledItems(value any) bool {
 		list.disabledItems = disabledItems
 
 	case []DataValue:
-		disabledItems := make([]string, 0, len(value))
+		disabledItems := make([]any, 0, len(value))
 		for _, val := range value {
 			if !val.IsObject() {
 				disabledItems = append(disabledItems, val.Value())
