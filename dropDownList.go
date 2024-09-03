@@ -21,6 +21,7 @@ type dropDownListData struct {
 	viewData
 	items            []string
 	disabledItems    []any
+	itemSeparators   []any
 	dropDownListener []func(DropDownList, int, int)
 }
 
@@ -42,6 +43,7 @@ func (list *dropDownListData) init(session Session) {
 	list.hasHtmlDisabled = true
 	list.items = []string{}
 	list.disabledItems = []any{}
+	list.itemSeparators = []any{}
 	list.dropDownListener = []func(DropDownList, int, int){}
 }
 
@@ -77,6 +79,15 @@ func (list *dropDownListData) remove(tag string) {
 			list.propertyChangedEvent(tag)
 		}
 
+	case ItemSeparators, "separators":
+		if len(list.itemSeparators) > 0 {
+			list.itemSeparators = []any{}
+			if list.created {
+				updateInnerHTML(list.htmlID(), list.session)
+			}
+			list.propertyChangedEvent(ItemSeparators)
+		}
+
 	case DropDownEvent:
 		if len(list.dropDownListener) > 0 {
 			list.dropDownListener = []func(DropDownList, int, int){}
@@ -95,7 +106,6 @@ func (list *dropDownListData) remove(tag string) {
 
 	default:
 		list.viewData.remove(tag)
-		return
 	}
 }
 
@@ -114,7 +124,30 @@ func (list *dropDownListData) set(tag string, value any) bool {
 		return list.setItems(value)
 
 	case DisabledItems:
-		return list.setDisabledItems(value)
+		items, ok := list.parseIndicesArray(value)
+		if !ok {
+			notCompatibleType(tag, value)
+			return false
+		}
+		list.disabledItems = items
+		if list.created {
+			updateInnerHTML(list.htmlID(), list.session)
+		}
+		list.propertyChangedEvent(tag)
+		return true
+
+	case ItemSeparators, "separators":
+		items, ok := list.parseIndicesArray(value)
+		if !ok {
+			notCompatibleType(ItemSeparators, value)
+			return false
+		}
+		list.itemSeparators = items
+		if list.created {
+			updateInnerHTML(list.htmlID(), list.session)
+		}
+		list.propertyChangedEvent(ItemSeparators)
+		return true
 
 	case DropDownEvent:
 		listeners, ok := valueToEventWithOldListeners[DropDownList, int](value)
@@ -312,89 +345,75 @@ func anyToStringArray(value any) ([]string, bool) {
 	return []string{}, false
 }
 
-func (list *dropDownListData) setDisabledItems(value any) bool {
+func (list *dropDownListData) parseIndicesArray(value any) ([]any, bool) {
 	switch value := value.(type) {
 	case []int:
-		list.disabledItems = make([]any, len(value))
+		items := make([]any, len(value))
 		for i, n := range value {
-			list.disabledItems[i] = n
+			items[i] = n
 		}
+		return items, true
 
 	case []any:
-		disabledItems := make([]any, len(value))
+		items := make([]any, len(value))
 		for i, val := range value {
 			if val == nil {
-				notCompatibleType(DisabledItems, value)
-				return false
+				return nil, false
 			}
 
 			switch val := val.(type) {
 			case string:
 				if isConstantName(val) {
-					disabledItems[i] = val
+					items[i] = val
 				} else {
 					n, err := strconv.Atoi(val)
 					if err != nil {
-						notCompatibleType(DisabledItems, value)
-						return false
+						return nil, false
 					}
-					disabledItems[i] = n
+					items[i] = n
 				}
 			default:
 				if n, ok := isInt(val); ok {
-					disabledItems[i] = n
+					items[i] = n
 				} else {
-					notCompatibleType(DisabledItems, value)
-					return false
+					return nil, false
 				}
 			}
 
 		}
-		list.disabledItems = disabledItems
+		return items, true
 
 	case string:
 		values := strings.Split(value, ",")
-		disabledItems := make([]any, len(values))
+		items := make([]any, len(values))
 		for i, str := range values {
 			str = strings.Trim(str, " ")
 			if str == "" {
-				notCompatibleType(DisabledItems, value)
-				return false
+				return nil, false
 			}
 			if isConstantName(str) {
-				disabledItems[i] = str
+				items[i] = str
 			} else {
 				n, err := strconv.Atoi(str)
 				if err != nil {
-					notCompatibleType(DisabledItems, value)
-					return false
+					return nil, false
 				}
-				disabledItems[i] = n
+				items[i] = n
 			}
 		}
-		list.disabledItems = disabledItems
+		return items, true
 
 	case []DataValue:
-		disabledItems := make([]any, 0, len(value))
+		items := make([]any, 0, len(value))
 		for _, val := range value {
 			if !val.IsObject() {
-				disabledItems = append(disabledItems, val.Value())
+				items = append(items, val.Value())
 			}
 		}
-		return list.setDisabledItems(disabledItems)
-
-	default:
-		notCompatibleType(DisabledItems, value)
-		return false
+		return list.parseIndicesArray(items)
 	}
 
-	if list.created {
-		updateInnerHTML(list.htmlID(), list.session)
-	}
-
-	list.propertyChangedEvent(Items)
-	return true
-
+	return nil, false
 }
 
 func (list *dropDownListData) Get(tag string) any {
@@ -408,6 +427,9 @@ func (list *dropDownListData) get(tag string) any {
 
 	case DisabledItems:
 		return list.disabledItems
+
+	case ItemSeparators:
+		return list.itemSeparators
 
 	case Current:
 		result, _ := intProperty(list, Current, list.session, 0)
@@ -433,6 +455,7 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 		current := GetCurrent(list)
 		notTranslate := GetNotTranslate(list)
 		disabledItems := GetDropDownDisabledItems(list)
+		separators := GetDropDownItemSeparators(list)
 		for i, item := range list.items {
 			disabled := false
 			for _, index := range disabledItems {
@@ -455,6 +478,12 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 
 			buffer.WriteString(item)
 			buffer.WriteString("</option>")
+			for _, index := range separators {
+				if i == index {
+					buffer.WriteString("<hr>")
+					break
+				}
+			}
 		}
 	}
 }
@@ -512,15 +541,9 @@ func GetDropDownItems(view View, subviewID ...string) []string {
 	return []string{}
 }
 
-// GetDropDownDisabledItems return the list of DropDownList disabled item indexes.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDropDownDisabledItems(view View, subviewID ...string) []int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
+func getIndicesArray(view View, tag string) []int {
 	if view != nil {
-		if value := view.Get(DisabledItems); value != nil {
+		if value := view.Get(tag); value != nil {
 			if values, ok := value.([]any); ok {
 				count := len(values)
 				if count > 0 {
@@ -546,4 +569,24 @@ func GetDropDownDisabledItems(view View, subviewID ...string) []int {
 		}
 	}
 	return []int{}
+}
+
+// GetDropDownDisabledItems return an array of disabled(non selectable) items indices of DropDownList.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDropDownDisabledItems(view View, subviewID ...string) []int {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	return getIndicesArray(view, DisabledItems)
+}
+
+// GetDropDownItemSeparators return an array of indices of DropDownList items after which a separator should be added.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDropDownItemSeparators(view View, subviewID ...string) []int {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	return getIndicesArray(view, ItemSeparators)
 }

@@ -5,6 +5,7 @@
 * Added "transform" property and Transform interface
 * Added OpenRawResource, GetCheckboxChangedListeners functions
 * Added RemoveClientItem method to Session interface
+* Added "item-separators" property to DropDownList and GetDropDownItemSeparators function
 * Added NewPath and NewPathFromSvg methods to Canvas interface
 * Removed NewPath function
 * Removed Reset methods from Path interface

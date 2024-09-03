@@ -3620,6 +3620,13 @@ You can read the value of the "disabled-items" property using the function
 
 	func GetDropDownDisabledItems(view View, subviewID ...string) []int
 
+You can add separators between list items. To do this, use the "item-separators" property (the ItemSeparators constant).
+This property is assigned an array of item indices after which separators must be added.
+The "item-separators" property can be assigned the same data types as the "disabled-items" property.
+You can read the value of the "item-separators" property using the function
+
+	func GetDropDownItemSeparators(view View, subviewID ...string) []int
+
 The selected value is determined by the int property "current" (Current constant). The default is 0.
 You can read the value of this property using the function
 

@@ -457,7 +457,12 @@ const (
 	Items = "items"
 
 	// DisabledItems is the constant for the "disabled-items" property tag.
+	// The "disabled-items" []int property specifies an array of disabled(non selectable) items indices of DropDownList.
 	DisabledItems = "disabled-items"
+
+	// ItemSeparators is the constant for the "item-separators" property tag.
+	// The "item-separators" []int property specifies an array of indices of DropDownList items after which a separator should be added.
+	ItemSeparators = "item-separators"
 
 	// Current is the constant for the "current" property tag.
 	Current = "current"

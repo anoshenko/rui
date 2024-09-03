@@ -3643,6 +3643,13 @@ float32, float64, int, int8…int64, uint, uint8…uint64.
 
 	func GetDropDownDisabledItems(view View, subviewID ...string) []int
 
+Между пунктами списка можно добавлять разделителями. Для этого используется свойство "item-separators" (константа ItemSeparators).
+Данному свойству присваивается массив индексов пунктов после которых необходимо добавить разделители. 
+Свойству "item-separators" могут присваиваться теже типы данных что и свойству "disabled-items".
+Прочитать значение свойства "item-separators" можно с помощью функции
+
+	func GetDropDownItemSeparators(view View, subviewID ...string) []int
+
 Выбранное значение определяется int свойством "current" (константа Current). Значение по умолчанию 0.
 Прочитать значение данного свойства можно с помощью функции
 
