@@ -322,6 +322,11 @@ func (listView *listViewData) set(tag string, value any) bool {
 			return false
 		}
 
+	case AccentColor:
+		if !listView.setColorProperty(AccentColor, value) {
+			return false
+		}
+
 	default:
 		return listView.viewData.set(tag, value)
 	}
@@ -672,12 +677,17 @@ func (listView *listViewData) getDivs(checkbox, hCheckboxAlign, vCheckboxAlign i
 
 	offDivBuilder.WriteString(onDivBuilder.String())
 
+	accentColor := Color(0)
+	if color := GetAccentColor(listView, ""); color != 0 {
+		accentColor = color
+	}
+
 	if checkbox == SingleCheckbox {
 		offDivBuilder.WriteString(session.radiobuttonOffImage())
-		onDivBuilder.WriteString(session.radiobuttonOnImage())
+		onDivBuilder.WriteString(session.radiobuttonOnImage(accentColor))
 	} else {
-		offDivBuilder.WriteString(session.checkboxOffImage())
-		onDivBuilder.WriteString(session.checkboxOnImage())
+		offDivBuilder.WriteString(session.checkboxOffImage(accentColor))
+		onDivBuilder.WriteString(session.checkboxOnImage(accentColor))
 	}
 
 	onDivBuilder.WriteString("</div>")

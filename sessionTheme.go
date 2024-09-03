@@ -203,7 +203,7 @@ func (session *sessionData) SetCustomTheme(name string) bool {
 
 const checkImage = `<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m4 8 3 4 5-8" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/></svg>`
 
-func (session *sessionData) checkboxImage(checked bool) string {
+func (session *sessionData) checkboxImage(checked bool, accentColor Color) string {
 
 	var borderColor, backgroundColor Color
 	var ok bool
@@ -217,7 +217,9 @@ func (session *sessionData) checkboxImage(checked bool) string {
 	}
 
 	if checked {
-		if backgroundColor, ok = session.Color("ruiHighlightColor"); !ok {
+		if accentColor != 0 {
+			backgroundColor = accentColor
+		} else if backgroundColor, ok = session.Color("ruiHighlightColor"); !ok {
 			backgroundColor = 0xFF1A74E8
 		}
 	} else if backgroundColor, ok = session.Color("ruiBackgroundColor"); !ok {
@@ -244,16 +246,22 @@ func (session *sessionData) checkboxImage(checked bool) string {
 	return buffer.String()
 }
 
-func (session *sessionData) checkboxOffImage() string {
+func (session *sessionData) checkboxOffImage(accentColor Color) string {
+	if accentColor != 0 {
+		return session.checkboxImage(false, accentColor)
+	}
 	if session.checkboxOff == "" {
-		session.checkboxOff = session.checkboxImage(false)
+		session.checkboxOff = session.checkboxImage(false, accentColor)
 	}
 	return session.checkboxOff
 }
 
-func (session *sessionData) checkboxOnImage() string {
+func (session *sessionData) checkboxOnImage(accentColor Color) string {
+	if accentColor != 0 {
+		return session.checkboxImage(true, accentColor)
+	}
 	if session.checkboxOn == "" {
-		session.checkboxOn = session.checkboxImage(true)
+		session.checkboxOn = session.checkboxImage(true, accentColor)
 	}
 	return session.checkboxOn
 }
@@ -285,12 +293,14 @@ func (session *sessionData) radiobuttonOffImage() string {
 	return session.radiobuttonOff
 }
 
-func (session *sessionData) radiobuttonOnImage() string {
+func (session *sessionData) radiobuttonOnImage(accentColor Color) string {
 	if session.radiobuttonOn == "" {
 		var borderColor, backgroundColor Color
 		var ok bool
 
-		if borderColor, ok = session.Color("ruiHighlightColor"); !ok {
+		if accentColor != 0 {
+			borderColor = accentColor
+		} else if borderColor, ok = session.Color("ruiHighlightColor"); !ok {
 			borderColor = 0xFF1A74E8
 		}
 

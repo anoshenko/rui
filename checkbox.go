@@ -112,6 +112,14 @@ func (button *checkboxData) set(tag string, value any) bool {
 	case CellVerticalAlign, CellHorizontalAlign, CellWidth, CellHeight:
 		return false
 
+	case AccentColor:
+		if !button.setColorProperty(AccentColor, value) {
+			return false
+		}
+		if button.created {
+			updateInnerHTML(button.htmlID(), button.session)
+		}
+
 	default:
 		return button.viewsContainerData.set(tag, value)
 	}
@@ -278,10 +286,16 @@ func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) 
 	}
 
 	buffer.WriteString(`">`)
+
+	accentColor := Color(0)
+	if color := GetAccentColor(button, ""); color != 0 {
+		accentColor = color
+	}
+
 	if checked {
-		buffer.WriteString(button.Session().checkboxOnImage())
+		buffer.WriteString(button.Session().checkboxOnImage(accentColor))
 	} else {
-		buffer.WriteString(button.Session().checkboxOffImage())
+		buffer.WriteString(button.Session().checkboxOffImage(accentColor))
 	}
 	buffer.WriteString(`</div>`)
 

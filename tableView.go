@@ -588,7 +588,7 @@ func (table *tableViewData) propertyChanged(tag string) {
 			CellBorder, HeadHeight, HeadStyle, FootHeight, FootStyle,
 			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
 			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
-			TableRowSelectedEvent, AllowSelection:
+			TableRowSelectedEvent, AllowSelection, AccentColor:
 			table.ReloadTableData()
 
 		case Current:
@@ -1350,10 +1350,14 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 		buffer.WriteString(fmt.Sprintf("%g", value))
 
 	case bool:
+		accentColor := Color(0)
+		if color := GetAccentColor(table, ""); color != 0 {
+			accentColor = color
+		}
 		if value {
-			buffer.WriteString(table.Session().checkboxOnImage())
+			buffer.WriteString(table.Session().checkboxOnImage(accentColor))
 		} else {
-			buffer.WriteString(table.Session().checkboxOffImage())
+			buffer.WriteString(table.Session().checkboxOffImage(accentColor))
 		}
 
 	default:

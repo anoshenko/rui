@@ -125,10 +125,10 @@ type Session interface {
 	registerAnimation(props []AnimatedProperty) string
 
 	resolveConstants(value string) (string, bool)
-	checkboxOffImage() string
-	checkboxOnImage() string
+	checkboxOffImage(accentColor Color) string
+	checkboxOnImage(accentColor Color) string
 	radiobuttonOffImage() string
-	radiobuttonOnImage() string
+	radiobuttonOnImage(accentColor Color) string
 
 	viewByHTMLID(id string) View
 	nextViewID() string
