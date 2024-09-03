@@ -136,8 +136,8 @@ theme {
 			margin = 2px,
 		},
 		ruiCheckbox:focus {
-			margin = 0,
-			border = _{style = solid, color = @ruiHighlightColor, width = 2px },
+			outline = _{style = solid, color = @ruiHighlightColor, width = 2px },
+			outline-offset = -1px,
 		},
 		ruiListItem {
 			radius = 4px,
