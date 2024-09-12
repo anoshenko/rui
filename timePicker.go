@@ -6,16 +6,33 @@ import (
 	"time"
 )
 
+// Constants for [TimePicker] specific properties and events.
 const (
+	// TimeChangedEvent is the constant for "time-changed" property tag.
+	// The "time-changed" event occur when current time of the [TimePicker] has been changed.
+	// The main listener format: func(picker TimePicker, newTime, oldTime time.Time).
 	TimeChangedEvent = "time-changed"
-	TimePickerMin    = "time-picker-min"
-	TimePickerMax    = "time-picker-max"
-	TimePickerStep   = "time-picker-step"
-	TimePickerValue  = "time-picker-value"
-	timeFormat       = "15:04:05"
+
+	// TimePickerMin is the constant for "time-picker-min" property tag.
+	// The "time-picker-min" define the minimum value of the time.
+	TimePickerMin = "time-picker-min"
+
+	// TimePickerMax is the constant for "time-picker-max" property tag.
+	// The "time-picker-max" define the maximum value of the time.
+	TimePickerMax = "time-picker-max"
+
+	// TimePickerStep is the constant for "time-picker-step" property tag.
+	// The "time-picker-step" define time step in seconds.
+	TimePickerStep = "time-picker-step"
+
+	// TimePickerValue is the constant for "time-picker-value" property tag.
+	// The "time-picker-value" define current value of the TimePicker.
+	TimePickerValue = "time-picker-value"
+
+	timeFormat = "15:04:05"
 )
 
-// TimePicker - TimePicker view
+// TimePicker represents a TimePicker view
 type TimePicker interface {
 	View
 }

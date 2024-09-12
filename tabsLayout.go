@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants for [TabsLayout] specific properties and events
 const (
 	// CurrentTabChangedEvent is the constant for "current-tab-changed" property tag.
 	// The "current-tab-changed" event occurs when the new tab becomes active.
@@ -46,6 +47,12 @@ const (
 	// The default value is "ruiCurrentTab" or "ruiCurrentVerticalTab".
 	CurrentTabStyle = "current-tab-style"
 
+	inactiveTabStyle = "data-inactiveTabStyle"
+	activeTabStyle   = "data-activeTabStyle"
+)
+
+// Constants that are the values of the "tabs" property of a [TabsLayout]
+const (
 	// TopTabs - tabs of TabsLayout are on the top
 	TopTabs = 0
 	// BottomTabs - tabs of TabsLayout are on the bottom
@@ -60,12 +67,9 @@ const (
 	RightListTabs = 5
 	// HiddenTabs - tabs of TabsLayout are hidden
 	HiddenTabs = 6
-
-	inactiveTabStyle = "data-inactiveTabStyle"
-	activeTabStyle   = "data-activeTabStyle"
 )
 
-// TabsLayout - multi-tab container of View
+// TabsLayout represents a TabsLayout view
 type TabsLayout interface {
 	ViewsContainer
 	ListAdapter

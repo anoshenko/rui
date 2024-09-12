@@ -1,5 +1,6 @@
 package rui
 
+// Constants for various specific properties of a views
 const (
 	// Visible - default value of the view Visibility property: View is visible
 	Visible = 0

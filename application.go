@@ -14,10 +14,14 @@ var appStyles string
 //go:embed defaultTheme.rui
 var defaultThemeText string
 
-// Application - app interface
+// Application represent generic application interface, see also [Session]
 type Application interface {
+	// Finish finishes the application
 	Finish()
+
+	// Params returns application parameters set by StartApp function
 	Params() AppParams
+
 	removeSession(id int)
 }
 

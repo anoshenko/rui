@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants for [RadiusProperty] specific properties
 const (
 	// Radius is the SizeUnit view property that determines the corners rounding radius
 	// of an element's outer border edge.
@@ -95,10 +96,13 @@ const (
 	BottomRightY = "bottom-right-y"
 )
 
+// RadiusProperty is a description of the [View] (shape) elliptical corner radius.
 type RadiusProperty interface {
 	Properties
 	stringWriter
 	fmt.Stringer
+
+	// BoxRadius returns x and y radius of the corners of the element
 	BoxRadius(session Session) BoxRadius
 }
 

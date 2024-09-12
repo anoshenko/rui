@@ -1,6 +1,6 @@
 package rui
 
-// Button - button view
+// Button represent a Button view
 type Button interface {
 	CustomView
 }

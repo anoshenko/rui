@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants for [ColumnLayout] specific properties and events
 const (
 	// ColumnCount is the constant for the "column-count" property tag.
 	// The "column-count" int property specifies number of columns into which the content is break
@@ -52,7 +53,7 @@ const (
 	ColumnSpanAll = "column-span-all"
 )
 
-// ColumnLayout - grid-container of View
+// ColumnLayout represent a ColumnLayout view
 type ColumnLayout interface {
 	ViewsContainer
 }

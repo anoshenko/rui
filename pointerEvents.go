@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// Constants for [View] specific pointer events properties
 const (
 	// PointerDown is the constant for "pointer-down" property tag.
 	// The "pointer-down" event is fired when a pointer becomes active. For mouse, it is fired when
@@ -49,6 +50,7 @@ const (
 	PointerOver = "pointer-over"
 )
 
+// PointerEvent represent a stylus events. Also inherit [MouseEvent] attributes
 type PointerEvent struct {
 	MouseEvent
 

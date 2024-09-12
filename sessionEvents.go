@@ -4,31 +4,42 @@ import "time"
 
 // SessionStartListener is the listener interface of a session start event
 type SessionStartListener interface {
+	// OnStart is a function that is called by the library after the creation of the root view of the application
 	OnStart(session Session)
 }
 
 // SessionFinishListener is the listener interface of a session start event
 type SessionFinishListener interface {
+	// OnFinish is a function that is called by the library when the user closes the application page in the browser
 	OnFinish(session Session)
 }
 
 // SessionResumeListener is the listener interface of a session resume event
 type SessionResumeListener interface {
+	// OnResume is a function that is called by the library when the application page in the client's browser becomes
+	// active and is also called immediately after OnStart
 	OnResume(session Session)
 }
 
 // SessionPauseListener is the listener interface of a session pause event
 type SessionPauseListener interface {
+	// OnPause is a function that is called by the library when the application page in the client's browser becomes
+	// inactive and is also called when the user switches to a different browser tab/window, minimizes the browser,
+	// or switches to another application
 	OnPause(session Session)
 }
 
 // SessionPauseListener is the listener interface of a session disconnect event
 type SessionDisconnectListener interface {
+	// OnDisconnect is a function that is called by the library if the server loses connection with the client and
+	// this happens when the connection is broken
 	OnDisconnect(session Session)
 }
 
 // SessionPauseListener is the listener interface of a session reconnect event
 type SessionReconnectListener interface {
+	// OnReconnect is a function that is called by the library after the server reconnects with the client
+	// and this happens when the connection is restored
 	OnReconnect(session Session)
 }
 

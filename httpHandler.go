@@ -22,26 +22,24 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-/*
-NewHandler is used to embed the rui application in third-party web frameworks (net/http, gin, echo...).
-Example for echo:
-
-	e := echo.New()
-	e.Any(`/ui/*`, func()echo.HandlerFunc{
-		rui.AddEmbedResources(&resources)
-
-		h := rui.NewHandler("/ui", CreateSessionContent, rui.AppParams{
-			Title: `Awesome app`,
-			Icon: `favicon.png`,
-		})
-
-		return func(c echo.Context) error {
-			h.ServeHTTP(c.Response(), c.Request())
-			return nil
-		}
-	})
-*/
-
+// NewHandler is used to embed the rui application in third-party web frameworks (net/http, gin, echo...).
+//
+// Example for echo:
+//
+//	e := echo.New()
+//	e.Any(`/ui/*`, func()echo.HandlerFunc{
+//		rui.AddEmbedResources(&resources)
+//
+//		h := rui.NewHandler("/ui", CreateSessionContent, rui.AppParams{
+//			Title: `Awesome app`,
+//			Icon: `favicon.png`,
+//		})
+//
+//		return func(c echo.Context) error {
+//			h.ServeHTTP(c.Response(), c.Request())
+//			return nil
+//		}
+//	})
 func NewHandler(urlPrefix string, createContentFunc func(Session) SessionContent, params AppParams) *httpHandler {
 	app := new(application)
 	app.params = params

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Constants which related to media player properties and events
 const (
 	// Controls is the constant for the "autoplay" controls tag.
 	// If the "controls" bool property is "true", the browser will offer controls to allow the user
@@ -156,6 +157,7 @@ const (
 	PlayerErrorSourceNotSupported = 4
 )
 
+// MediaPlayer is a common interface for media player views like [AudioPlayer] and [VideoPlayer].
 type MediaPlayer interface {
 	View
 
@@ -200,8 +202,12 @@ type mediaPlayerData struct {
 	viewData
 }
 
+// MediaSource represent one media file source
 type MediaSource struct {
-	Url      string
+	// Url of the source
+	Url string
+
+	// MimeType of the source
 	MimeType string
 }
 

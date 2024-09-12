@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants which represent [StackLayout] animation type during pushing or popping views
 const (
 	// DefaultAnimation - default animation of StackLayout push
 	DefaultAnimation = 0
@@ -19,7 +20,7 @@ const (
 	BottomUpAnimation = 4
 )
 
-// StackLayout - list-container of View
+// StackLayout represents a StackLayout view
 type StackLayout interface {
 	ViewsContainer
 

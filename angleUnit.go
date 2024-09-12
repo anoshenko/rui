@@ -11,6 +11,7 @@ import (
 // Can take the following values: Radian, Degree, Gradian, and Turn
 type AngleUnitType uint8
 
+// Constants which represent values or the [AngleUnitType]
 const (
 	// Radian - angle in radians
 	Radian AngleUnitType = 0
@@ -24,9 +25,12 @@ const (
 	Turn AngleUnitType = 4
 )
 
-// AngleUnit describe a size (Value field) and size unit (Type field).
+// AngleUnit used to represent an angular values
 type AngleUnit struct {
-	Type  AngleUnitType
+	// Type of the angle value
+	Type AngleUnitType
+
+	// Value of the angle in Type units
 	Value float64
 }
 

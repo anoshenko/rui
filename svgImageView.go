@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// SvgImageView - image View
+// SvgImageView represents an SvgImageView view
 type SvgImageView interface {
 	View
 }

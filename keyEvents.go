@@ -2,6 +2,7 @@ package rui
 
 import "strings"
 
+// Constants which represent [View] specific keyboard events properties
 const (
 	// KeyDown is the constant for "key-down-event" property tag.
 	// The "key-down-event" event is fired when a key is pressed.
@@ -20,9 +21,15 @@ const (
 	KeyUpEvent = "key-up-event"
 )
 
+// ControlKeyMask represent ORed state of keyboard's control keys like [AltKey], [CtrlKey], [ShiftKey] and [MetaKey]
 type ControlKeyMask int
+
+// KeyCode is a string representation the a physical key being pressed.
+// The value is not affected by the current keyboard layout or modifier state,
+// so a particular key will always have the same value.
 type KeyCode string
 
+// Constants for specific keyboard keys.
 const (
 	// AltKey is the mask of the "alt" key
 	AltKey ControlKeyMask = 1
@@ -33,114 +40,326 @@ const (
 	// MetaKey is the mask of the "meta" key
 	MetaKey ControlKeyMask = 8
 
-	KeyA              KeyCode = "KeyA"
-	KeyB              KeyCode = "KeyB"
-	KeyC              KeyCode = "KeyC"
-	KeyD              KeyCode = "KeyD"
-	KeyE              KeyCode = "KeyE"
-	KeyF              KeyCode = "KeyF"
-	KeyG              KeyCode = "KeyG"
-	KeyH              KeyCode = "KeyH"
-	KeyI              KeyCode = "KeyI"
-	KeyJ              KeyCode = "KeyJ"
-	KeyK              KeyCode = "KeyK"
-	KeyL              KeyCode = "KeyL"
-	KeyM              KeyCode = "KeyM"
-	KeyN              KeyCode = "KeyN"
-	KeyO              KeyCode = "KeyO"
-	KeyP              KeyCode = "KeyP"
-	KeyQ              KeyCode = "KeyQ"
-	KeyR              KeyCode = "KeyR"
-	KeyS              KeyCode = "KeyS"
-	KeyT              KeyCode = "KeyT"
-	KeyU              KeyCode = "KeyU"
-	KeyV              KeyCode = "KeyV"
-	KeyW              KeyCode = "KeyW"
-	KeyX              KeyCode = "KeyX"
-	KeyY              KeyCode = "KeyY"
-	KeyZ              KeyCode = "KeyZ"
-	Digit0Key         KeyCode = "Digit0"
-	Digit1Key         KeyCode = "Digit1"
-	Digit2Key         KeyCode = "Digit2"
-	Digit3Key         KeyCode = "Digit3"
-	Digit4Key         KeyCode = "Digit4"
-	Digit5Key         KeyCode = "Digit5"
-	Digit6Key         KeyCode = "Digit6"
-	Digit7Key         KeyCode = "Digit7"
-	Digit8Key         KeyCode = "Digit8"
-	Digit9Key         KeyCode = "Digit9"
-	SpaceKey          KeyCode = "Space"
-	MinusKey          KeyCode = "Minus"
-	EqualKey          KeyCode = "Equal"
-	IntlBackslashKey  KeyCode = "IntlBackslash"
-	BracketLeftKey    KeyCode = "BracketLeft"
-	BracketRightKey   KeyCode = "BracketRight"
-	SemicolonKey      KeyCode = "Semicolon"
-	CommaKey          KeyCode = "Comma"
-	PeriodKey         KeyCode = "Period"
-	QuoteKey          KeyCode = "Quote"
-	BackquoteKey      KeyCode = "Backquote"
-	SlashKey          KeyCode = "Slash"
-	EscapeKey         KeyCode = "Escape"
-	EnterKey          KeyCode = "Enter"
-	TabKey            KeyCode = "Tab"
-	CapsLockKey       KeyCode = "CapsLock"
-	DeleteKey         KeyCode = "Delete"
-	InsertKey         KeyCode = "Insert"
-	HelpKey           KeyCode = "Help"
-	BackspaceKey      KeyCode = "Backspace"
-	PrintScreenKey    KeyCode = "PrintScreen"
-	ScrollLockKey     KeyCode = "ScrollLock"
-	PauseKey          KeyCode = "Pause"
-	ContextMenuKey    KeyCode = "ContextMenu"
-	ArrowLeftKey      KeyCode = "ArrowLeft"
-	ArrowRightKey     KeyCode = "ArrowRight"
-	ArrowUpKey        KeyCode = "ArrowUp"
-	ArrowDownKey      KeyCode = "ArrowDown"
-	HomeKey           KeyCode = "Home"
-	EndKey            KeyCode = "End"
-	PageUpKey         KeyCode = "PageUp"
-	PageDownKey       KeyCode = "PageDown"
-	F1Key             KeyCode = "F1"
-	F2Key             KeyCode = "F2"
-	F3Key             KeyCode = "F3"
-	F4Key             KeyCode = "F4"
-	F5Key             KeyCode = "F5"
-	F6Key             KeyCode = "F6"
-	F7Key             KeyCode = "F7"
-	F8Key             KeyCode = "F8"
-	F9Key             KeyCode = "F9"
-	F10Key            KeyCode = "F10"
-	F11Key            KeyCode = "F11"
-	F12Key            KeyCode = "F12"
-	F13Key            KeyCode = "F13"
-	NumLockKey        KeyCode = "NumLock"
-	NumpadKey0        KeyCode = "Numpad0"
-	NumpadKey1        KeyCode = "Numpad1"
-	NumpadKey2        KeyCode = "Numpad2"
-	NumpadKey3        KeyCode = "Numpad3"
-	NumpadKey4        KeyCode = "Numpad4"
-	NumpadKey5        KeyCode = "Numpad5"
-	NumpadKey6        KeyCode = "Numpad6"
-	NumpadKey7        KeyCode = "Numpad7"
-	NumpadKey8        KeyCode = "Numpad8"
-	NumpadKey9        KeyCode = "Numpad9"
-	NumpadDecimalKey  KeyCode = "NumpadDecimal"
-	NumpadEnterKey    KeyCode = "NumpadEnter"
-	NumpadAddKey      KeyCode = "NumpadAdd"
+	// KeyA reresent "A" key on the keyboard
+	KeyA KeyCode = "KeyA"
+
+	// KeyB reresent "B" key on the keyboard
+	KeyB KeyCode = "KeyB"
+
+	// KeyC reresent "C" key on the keyboard
+	KeyC KeyCode = "KeyC"
+
+	// KeyD reresent "D" key on the keyboard
+	KeyD KeyCode = "KeyD"
+
+	// KeyE reresent "E" key on the keyboard
+	KeyE KeyCode = "KeyE"
+
+	// KeyF reresent "F" key on the keyboard
+	KeyF KeyCode = "KeyF"
+
+	// KeyG reresent "G" key on the keyboard
+	KeyG KeyCode = "KeyG"
+
+	// KeyH reresent "H" key on the keyboard
+	KeyH KeyCode = "KeyH"
+
+	// KeyI reresent "I" key on the keyboard
+	KeyI KeyCode = "KeyI"
+
+	// KeyJ reresent "J" key on the keyboard
+	KeyJ KeyCode = "KeyJ"
+
+	// KeyK reresent "K" key on the keyboard
+	KeyK KeyCode = "KeyK"
+
+	// KeyL reresent "L" key on the keyboard
+	KeyL KeyCode = "KeyL"
+
+	// KeyM reresent "M" key on the keyboard
+	KeyM KeyCode = "KeyM"
+
+	// KeyN reresent "N" key on the keyboard
+	KeyN KeyCode = "KeyN"
+
+	// KeyO reresent "O" key on the keyboard
+	KeyO KeyCode = "KeyO"
+
+	// KeyP reresent "P" key on the keyboard
+	KeyP KeyCode = "KeyP"
+
+	// KeyQ reresent "Q" key on the keyboard
+	KeyQ KeyCode = "KeyQ"
+
+	// KeyR reresent "R" key on the keyboard
+	KeyR KeyCode = "KeyR"
+
+	// KeyS reresent "S" key on the keyboard
+	KeyS KeyCode = "KeyS"
+
+	// KeyT reresent "T" key on the keyboard
+	KeyT KeyCode = "KeyT"
+
+	// KeyU reresent "U" key on the keyboard
+	KeyU KeyCode = "KeyU"
+
+	// KeyV reresent "V" key on the keyboard
+	KeyV KeyCode = "KeyV"
+
+	// KeyW reresent "W" key on the keyboard
+	KeyW KeyCode = "KeyW"
+
+	// KeyX reresent "X" key on the keyboard
+	KeyX KeyCode = "KeyX"
+
+	// KeyY reresent "Y" key on the keyboard
+	KeyY KeyCode = "KeyY"
+
+	// KeyZ reresent "Z" key on the keyboard
+	KeyZ KeyCode = "KeyZ"
+
+	// Digit0Key reresent "Digit0" key on the keyboard
+	Digit0Key KeyCode = "Digit0"
+
+	// Digit1Key reresent "Digit1" key on the keyboard
+	Digit1Key KeyCode = "Digit1"
+
+	// Digit2Key reresent "Digit2" key on the keyboard
+	Digit2Key KeyCode = "Digit2"
+
+	// Digit3Key reresent "Digit3" key on the keyboard
+	Digit3Key KeyCode = "Digit3"
+
+	// Digit4Key reresent "Digit4" key on the keyboard
+	Digit4Key KeyCode = "Digit4"
+
+	// Digit5Key reresent "Digit5" key on the keyboard
+	Digit5Key KeyCode = "Digit5"
+
+	// Digit6Key reresent "Digit6" key on the keyboard
+	Digit6Key KeyCode = "Digit6"
+
+	// Digit7Key reresent "Digit7" key on the keyboard
+	Digit7Key KeyCode = "Digit7"
+
+	// Digit8Key reresent "Digit8" key on the keyboard
+	Digit8Key KeyCode = "Digit8"
+
+	// Digit9Key reresent "Digit9" key on the keyboard
+	Digit9Key KeyCode = "Digit9"
+
+	// SpaceKey reresent "Space" key on the keyboard
+	SpaceKey KeyCode = "Space"
+
+	// MinusKey reresent "Minus" key on the keyboard
+	MinusKey KeyCode = "Minus"
+
+	// EqualKey reresent "Equal" key on the keyboard
+	EqualKey KeyCode = "Equal"
+
+	// IntlBackslashKey reresent "IntlBackslash" key on the keyboard
+	IntlBackslashKey KeyCode = "IntlBackslash"
+
+	// BracketLeftKey reresent "BracketLeft" key on the keyboard
+	BracketLeftKey KeyCode = "BracketLeft"
+
+	// BracketRightKey reresent "BracketRight" key on the keyboard
+	BracketRightKey KeyCode = "BracketRight"
+
+	// SemicolonKey reresent "Semicolon" key on the keyboard
+	SemicolonKey KeyCode = "Semicolon"
+
+	// CommaKey reresent "Comma" key on the keyboard
+	CommaKey KeyCode = "Comma"
+
+	// PeriodKey reresent "Period" key on the keyboard
+	PeriodKey KeyCode = "Period"
+
+	// QuoteKey reresent "Quote" key on the keyboard
+	QuoteKey KeyCode = "Quote"
+
+	// BackquoteKey reresent "Backquote" key on the keyboard
+	BackquoteKey KeyCode = "Backquote"
+
+	// SlashKey reresent "Slash" key on the keyboard
+	SlashKey KeyCode = "Slash"
+
+	// EscapeKey reresent "Escape" key on the keyboard
+	EscapeKey KeyCode = "Escape"
+
+	// EnterKey reresent "Enter" key on the keyboard
+	EnterKey KeyCode = "Enter"
+
+	// TabKey reresent "Tab" key on the keyboard
+	TabKey KeyCode = "Tab"
+
+	// CapsLockKey reresent "CapsLock" key on the keyboard
+	CapsLockKey KeyCode = "CapsLock"
+
+	// DeleteKey reresent "Delete" key on the keyboard
+	DeleteKey KeyCode = "Delete"
+
+	// InsertKey reresent "Insert" key on the keyboard
+	InsertKey KeyCode = "Insert"
+
+	// HelpKey reresent "Help" key on the keyboard
+	HelpKey KeyCode = "Help"
+
+	// BackspaceKey reresent "Backspace" key on the keyboard
+	BackspaceKey KeyCode = "Backspace"
+
+	// PrintScreenKey reresent "PrintScreen" key on the keyboard
+	PrintScreenKey KeyCode = "PrintScreen"
+
+	// ScrollLockKey reresent "ScrollLock" key on the keyboard
+	ScrollLockKey KeyCode = "ScrollLock"
+
+	// PauseKey reresent "Pause" key on the keyboard
+	PauseKey KeyCode = "Pause"
+
+	// ContextMenuKey reresent "ContextMenu" key on the keyboard
+	ContextMenuKey KeyCode = "ContextMenu"
+
+	// ArrowLeftKey reresent "ArrowLeft" key on the keyboard
+	ArrowLeftKey KeyCode = "ArrowLeft"
+
+	// ArrowRightKey reresent "ArrowRight" key on the keyboard
+	ArrowRightKey KeyCode = "ArrowRight"
+
+	// ArrowUpKey reresent "ArrowUp" key on the keyboard
+	ArrowUpKey KeyCode = "ArrowUp"
+
+	// ArrowDownKey reresent "ArrowDown" key on the keyboard
+	ArrowDownKey KeyCode = "ArrowDown"
+
+	// HomeKey reresent "Home" key on the keyboard
+	HomeKey KeyCode = "Home"
+
+	// EndKey reresent "End" key on the keyboard
+	EndKey KeyCode = "End"
+
+	// PageUpKey reresent "PageUp" key on the keyboard
+	PageUpKey KeyCode = "PageUp"
+
+	// PageDownKey reresent "PageDown" key on the keyboard
+	PageDownKey KeyCode = "PageDown"
+
+	// F1Key reresent "F1" key on the keyboard
+	F1Key KeyCode = "F1"
+
+	// F2Key reresent "F2" key on the keyboard
+	F2Key KeyCode = "F2"
+
+	// F3Key reresent "F3" key on the keyboard
+	F3Key KeyCode = "F3"
+
+	// F4Key reresent "F4" key on the keyboard
+	F4Key KeyCode = "F4"
+
+	// F5Key reresent "F5" key on the keyboard
+	F5Key KeyCode = "F5"
+
+	// F6Key reresent "F6" key on the keyboard
+	F6Key KeyCode = "F6"
+
+	// F7Key reresent "F7" key on the keyboard
+	F7Key KeyCode = "F7"
+
+	// F8Key reresent "F8" key on the keyboard
+	F8Key KeyCode = "F8"
+
+	// F9Key reresent "F9" key on the keyboard
+	F9Key KeyCode = "F9"
+
+	// F10Key reresent "F10" key on the keyboard
+	F10Key KeyCode = "F10"
+
+	// F11Key reresent "F11" key on the keyboard
+	F11Key KeyCode = "F11"
+
+	// F12Key reresent "F12" key on the keyboard
+	F12Key KeyCode = "F12"
+
+	// F13Key reresent "F13" key on the keyboard
+	F13Key KeyCode = "F13"
+
+	// NumLockKey reresent "NumLock" key on the keyboard
+	NumLockKey KeyCode = "NumLock"
+
+	// NumpadKey0 reresent "Numpad0" key on the keyboard
+	NumpadKey0 KeyCode = "Numpad0"
+
+	// NumpadKey1 reresent "Numpad1" key on the keyboard
+	NumpadKey1 KeyCode = "Numpad1"
+
+	// NumpadKey2 reresent "Numpad2" key on the keyboard
+	NumpadKey2 KeyCode = "Numpad2"
+
+	// NumpadKey3 reresent "Numpad3" key on the keyboard
+	NumpadKey3 KeyCode = "Numpad3"
+
+	// NumpadKey4 reresent "Numpad4" key on the keyboard
+	NumpadKey4 KeyCode = "Numpad4"
+
+	// NumpadKey5 reresent "Numpad5" key on the keyboard
+	NumpadKey5 KeyCode = "Numpad5"
+
+	// NumpadKey6 reresent "Numpad6" key on the keyboard
+	NumpadKey6 KeyCode = "Numpad6"
+
+	// NumpadKey7 reresent "Numpad7" key on the keyboard
+	NumpadKey7 KeyCode = "Numpad7"
+
+	// NumpadKey8 reresent "Numpad8" key on the keyboard
+	NumpadKey8 KeyCode = "Numpad8"
+
+	// NumpadKey9 reresent "Numpad9" key on the keyboard
+	NumpadKey9 KeyCode = "Numpad9"
+
+	// NumpadDecimalKey reresent "NumpadDecimal" key on the keyboard
+	NumpadDecimalKey KeyCode = "NumpadDecimal"
+
+	// NumpadEnterKey reresent "NumpadEnter" key on the keyboard
+	NumpadEnterKey KeyCode = "NumpadEnter"
+
+	// NumpadAddKey reresent "NumpadAdd" key on the keyboard
+	NumpadAddKey KeyCode = "NumpadAdd"
+
+	// NumpadSubtractKey reresent "NumpadSubtract" key on the keyboard
 	NumpadSubtractKey KeyCode = "NumpadSubtract"
+
+	// NumpadMultiplyKey reresent "NumpadMultiply" key on the keyboard
 	NumpadMultiplyKey KeyCode = "NumpadMultiply"
-	NumpadDivideKey   KeyCode = "NumpadDivide"
-	ShiftLeftKey      KeyCode = "ShiftLeft"
-	ShiftRightKey     KeyCode = "ShiftRight"
-	ControlLeftKey    KeyCode = "ControlLeft"
-	ControlRightKey   KeyCode = "ControlRight"
-	AltLeftKey        KeyCode = "AltLeft"
-	AltRightKey       KeyCode = "AltRight"
-	MetaLeftKey       KeyCode = "MetaLeft"
-	MetaRightKey      KeyCode = "MetaRight"
+
+	// NumpadDivideKey reresent "NumpadDivide" key on the keyboard
+	NumpadDivideKey KeyCode = "NumpadDivide"
+
+	// ShiftLeftKey reresent "ShiftLeft" key on the keyboard
+	ShiftLeftKey KeyCode = "ShiftLeft"
+
+	// ShiftRightKey reresent "ShiftRight" key on the keyboard
+	ShiftRightKey KeyCode = "ShiftRight"
+
+	// ControlLeftKey reresent "ControlLeft" key on the keyboard
+	ControlLeftKey KeyCode = "ControlLeft"
+
+	// ControlRightKey reresent "ControlRight" key on the keyboard
+	ControlRightKey KeyCode = "ControlRight"
+
+	// AltLeftKey reresent "AltLeft" key on the keyboard
+	AltLeftKey KeyCode = "AltLeft"
+
+	// AltRightKey reresent "AltRight" key on the keyboard
+	AltRightKey KeyCode = "AltRight"
+
+	// MetaLeftKey reresent "MetaLeft" key on the keyboard
+	MetaLeftKey KeyCode = "MetaLeft"
+
+	// MetaRightKey reresent "MetaRight" key on the keyboard
+	MetaRightKey KeyCode = "MetaRight"
 )
 
+// KeyEvent represent a keyboard event
 type KeyEvent struct {
 	// TimeStamp is the time at which the event was created (in milliseconds).
 	// This value is time since epoch—but in reality, browsers' definitions vary.

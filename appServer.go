@@ -415,6 +415,7 @@ func StartApp(addr string, createContentFunc func(Session) SessionContent, param
 	}
 }
 
+// FinishApp finishes application
 func FinishApp() {
 	for _, app := range apps {
 		app.Finish()
@@ -422,6 +423,8 @@ func FinishApp() {
 	apps = []*application{}
 }
 
+// OpenBrowser open browser with specific URL locally. Useful for applications which run on local machine
+// or for debug purposes.
 func OpenBrowser(url string) bool {
 	var err error
 

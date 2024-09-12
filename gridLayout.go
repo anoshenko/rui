@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants related to [GridLayout] specific properties and events
 const (
 	// CellVerticalAlign is the constant for the "cell-vertical-align" property tag.
 	// The "cell-vertical-align" int property sets the default vertical alignment
@@ -43,6 +44,8 @@ const (
 	CellHorizontalSelfAlign = "cell-horizontal-self-align"
 )
 
+// GridAdapter is an interface to define [GridLayout] content. [GridLayout] will query interface functions to populate
+// its content
 type GridAdapter interface {
 	// GridColumnCount returns the number of columns in the grid
 	GridColumnCount() int
@@ -54,21 +57,21 @@ type GridAdapter interface {
 	GridCellContent(row, column int, session Session) View
 }
 
-// GridCellColumnSpanAdapter implements the optional method of GridAdapter interface
+// GridCellColumnSpanAdapter implements the optional method of the [GridAdapter] interface
 type GridCellColumnSpanAdapter interface {
 	// GridCellColumnSpan returns the number of columns that a cell spans.
 	// Values ​​less than 1 are ignored.
 	GridCellColumnSpan(row, column int) int
 }
 
-// GridCellColumnSpanAdapter implements the optional method of GridAdapter interface
+// GridCellColumnSpanAdapter implements the optional method of the [GridAdapter] interface
 type GridCellRowSpanAdapter interface {
 	// GridCellRowSpan returns the number of rows that a cell spans
 	// Values ​​less than 1 are ignored.
 	GridCellRowSpan(row, column int) int
 }
 
-// GridLayout - grid-container of View
+// GridLayout represents a GridLayout view
 type GridLayout interface {
 	ViewsContainer
 

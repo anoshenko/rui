@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Constants which related to view's animation
 const (
 	// AnimationTag is the constant for the "animation" property tag.
 	// The "animation" property sets and starts animations.
@@ -168,6 +169,7 @@ func parseAnimation(obj DataObject) Animation {
 	return animation
 }
 
+// NewAnimation creates a new animation object and return its interface
 func NewAnimation(params Params) Animation {
 	animation := new(animationData)
 	animation.init()

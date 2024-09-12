@@ -2,6 +2,7 @@ package rui
 
 import "strings"
 
+// Constants for [DetailsView] specific properties and events
 const (
 	// Summary is the constant for the "summary" property tag.
 	// The contents of the "summary" property are used as the label for the disclosure widget.
@@ -12,7 +13,7 @@ const (
 	Expanded = "expanded"
 )
 
-// DetailsView - collapsible container of View
+// DetailsView represent a DetailsView view, which is a collapsible container of views
 type DetailsView interface {
 	ViewsContainer
 }

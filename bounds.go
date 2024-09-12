@@ -5,11 +5,13 @@ import (
 	"strings"
 )
 
-// BorderProperty is the interface of a bounds property data
+// BorderProperty is an interface of a bounds property data
 type BoundsProperty interface {
 	Properties
 	fmt.Stringer
 	stringWriter
+
+	// Bounds returns top, right, bottom and left size of the bounds
 	Bounds(session Session) Bounds
 }
 

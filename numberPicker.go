@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants related to [NumberPicker] specific properties and events
 const (
 	// NumberChangedEvent is the constant for the "" property tag.
 	// The "number-changed" property sets listener(s) that track the change in the entered value.
@@ -34,6 +35,7 @@ const (
 	NumberPickerValue = "number-picker-value"
 )
 
+// Constants which describe values of the "number-picker-type" property of a [NumberPicker]
 const (
 	// NumberEditor - type of NumberPicker. NumberPicker is presented by editor
 	NumberEditor = 0
@@ -42,7 +44,7 @@ const (
 	NumberSlider = 1
 )
 
-// NumberPicker - NumberPicker view
+// NumberPicker represents a NumberPicker view
 type NumberPicker interface {
 	View
 }

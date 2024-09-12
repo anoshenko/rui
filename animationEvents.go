@@ -2,6 +2,7 @@ package rui
 
 import "strings"
 
+// Constants which describe values for view's animation events properties
 const (
 	// TransitionRunEvent is the constant for "transition-run-event" property tag.
 	// The "transition-run-event" is fired when a transition is first created,

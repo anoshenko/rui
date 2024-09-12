@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants which represent [View] specific touch events properties
 const (
 	// TouchStart is the constant for "touch-start" property tag.
 	// The "touch-start" event is fired when one or more touch points are placed on the touch surface.

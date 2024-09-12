@@ -10,6 +10,8 @@ const DrawFunction = "draw-function"
 // CanvasView interface of a custom draw view
 type CanvasView interface {
 	View
+
+	// Redraw forces CanvasView to redraw its content
 	Redraw()
 }
 

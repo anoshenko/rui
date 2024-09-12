@@ -36,6 +36,7 @@ func freeStringBuilder(builder *strings.Builder) {
 	}
 }
 
+// GetLocalIP return IP address of the machine interface
 func GetLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {

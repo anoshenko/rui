@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants related to view's border description
 const (
 	// NoneLine constant specifies that there is no border
 	NoneLine = 0
@@ -50,7 +51,10 @@ type BorderProperty interface {
 	Properties
 	fmt.Stringer
 	stringWriter
+
+	// ViewBorders returns top, right, bottom and left borders information all together
 	ViewBorders(session Session) ViewBorders
+
 	delete(tag string)
 	cssStyle(builder cssBuilder, session Session)
 	cssWidth(builder cssBuilder, session Session)
@@ -703,8 +707,13 @@ func (border *borderProperty) cssColorValue(session Session) string {
 
 // ViewBorder describes parameters of a view border
 type ViewBorder struct {
+	// Style of the border line
 	Style int
+
+	// Color of the border line
 	Color Color
+
+	// Width of the border line
 	Width SizeUnit
 }
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants which represent [ListView] specific properties and events
 const (
 	// ListItemClickedEvent is the constant for "list-item-clicked" property tag.
 	// The "list-item-clicked" event occurs when the user clicks on an item in the list.
@@ -35,12 +36,17 @@ const (
 	CurrentInactiveStyle = "current-inactive-style"
 )
 
+// Constants which represent values of the "orientation" property of the [ListView]. These are aliases for values used in
+// [ListLayout] "orientation" property like TopDownOrientation and StartToEndOrientation
 const (
 	// VerticalOrientation is the vertical ListView orientation
 	VerticalOrientation = 0
 	// HorizontalOrientation is the horizontal ListView orientation
 	HorizontalOrientation = 1
+)
 
+// Constants which represent values of a "checkbox" property of [ListView]
+const (
 	// NoneCheckbox is value of "checkbox" property: no checkbox
 	NoneCheckbox = 0
 	// SingleCheckbox is value of "checkbox" property: only one item can be checked
@@ -49,7 +55,7 @@ const (
 	MultipleCheckbox = 2
 )
 
-// ListView - the list view interface
+// ListView represents a ListView view
 type ListView interface {
 	View
 	ParentView

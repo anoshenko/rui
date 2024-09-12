@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants for [Resizable] specific properties and events
 const (
 	// Side is the constant for the "side" property tag.
 	// The "side" int property determines which side of the container is used to resize.
@@ -15,7 +16,10 @@ const (
 	// ResizeBorderWidth is the constant for the "resize-border-width" property tag.
 	// The "ResizeBorderWidth" SizeUnit property determines the width of the resizing border
 	ResizeBorderWidth = "resize-border-width"
+)
 
+// Constants for values of [Resizable] "side" property. These constants can be ORed if needed.
+const (
 	// TopSide is value of the "side" property: the top side is used to resize
 	TopSide = 1
 
@@ -32,7 +36,7 @@ const (
 	AllSides = TopSide | RightSide | BottomSide | LeftSide
 )
 
-// Resizable - grid-container of View
+// Resizable represents a Resizable view
 type Resizable interface {
 	View
 	ParentView

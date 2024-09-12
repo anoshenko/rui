@@ -13,6 +13,7 @@ import (
 // SizeInDIP, SizeInPt, SizeInInch, SizeInMM, SizeInFraction
 type SizeUnitType uint8
 
+// Constants which represent values of a [SizeUnitType]
 const (
 	// Auto is the SizeUnit type: default value.
 	Auto SizeUnitType = 0
@@ -44,8 +45,14 @@ const (
 
 // SizeUnit describe a size (Value field) and size unit (Type field).
 type SizeUnit struct {
-	Type     SizeUnitType
-	Value    float64
+	// Type or dimension of the value
+	Type SizeUnitType
+
+	// Value of the size in Type units
+	Value float64
+
+	// Function representation of a size unit.
+	// When setting this value type should be set to SizeFunction
 	Function SizeFunc
 }
 

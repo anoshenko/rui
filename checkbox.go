@@ -9,7 +9,7 @@ import (
 // The main listener format: func(Checkbox, bool), where the second argument is the checkbox state.
 const CheckboxChangedEvent = "checkbox-event"
 
-// Checkbox - checkbox view
+// Checkbox represent a Checkbox view
 type Checkbox interface {
 	ViewsContainer
 }

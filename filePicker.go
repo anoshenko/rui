@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Constants for [FilePicker] specific properties and events
 const (
 	// FileSelectedEvent is the constant for "file-selected-event" property tag.
 	// The "file-selected-event" is fired when user selects file(s) in the FilePicker.
@@ -31,7 +32,7 @@ type FileInfo struct {
 	MimeType string
 }
 
-// FilePicker - the control view for the files selecting
+// FilePicker represents the FilePicker view
 type FilePicker interface {
 	View
 	// Files returns the list of selected files.

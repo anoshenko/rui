@@ -2,6 +2,7 @@ package rui
 
 import "sort"
 
+// A set of predefined colors used in the library
 const (
 	// Black color constant
 	Black Color = 0xff000000
@@ -449,8 +450,12 @@ var colorConstants = map[string]Color{
 	"yellowgreen":          0xff9acd32,
 }
 
+// NamedColor make a relation between color and its name
 type NamedColor struct {
-	Name  string
+	// Name of a color
+	Name string
+
+	// Color value
 	Color Color
 }
 

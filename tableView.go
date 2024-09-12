@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants for [TableView] specific properties and events
 const (
 	// TableVerticalAlign is the constant for the "table-vertical-align" property tag.
 	// The "table-vertical-align" int property sets the vertical alignment of the content inside a table cell.
@@ -201,26 +202,35 @@ const (
 	// This property can be assigned or by an implementation of TableAllowCellSelection
 	// or TableAllowRowSelection interface.
 	AllowSelection = "allow-selection"
+)
 
-	// NoneSelection is the value of "selection-mode" property: the selection is forbidden.
+// Constants which represent values of "selection-mode" property of a [TableView]
+const (
+	// NoneSelection the selection is forbidden.
 	NoneSelection = 0
-	// CellSelection is the value of "selection-mode" property: the selection of a single cell only is enabled.
+	// CellSelection the selection of a single cell only is enabled.
 	CellSelection = 1
-	// RowSelection is the value of "selection-mode" property: the selection of a table row only is enabled.
+	// RowSelection the selection of a table row only is enabled.
 	RowSelection = 2
 )
 
-// CellIndex defines coordinates of the TableView cell
+// CellIndex defines coordinates of the [TableView] cell
 type CellIndex struct {
 	Row, Column int
 }
 
-// TableView - text View
+// TableView represents a TableView view
 type TableView interface {
 	View
 	ParentView
+
+	// ReloadTableData forces the table view to reload all data and redraw the entire table
 	ReloadTableData()
+
+	// ReloadCell forces the table view to reload the data for a specific cell and redraw it
 	ReloadCell(row, column int)
+
+	// CellFrame returns the frame of a specific cell, describing its position and size within the table view
 	CellFrame(row, column int) Frame
 
 	content() TableAdapter

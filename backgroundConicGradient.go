@@ -28,6 +28,7 @@ func NewBackgroundConicGradient(params Params) BackgroundElement {
 	return result
 }
 
+// String convert internal representation of [BackgroundGradientAngle] into a string.
 func (point *BackgroundGradientAngle) String() string {
 	result := "black"
 	if point.Color != nil {

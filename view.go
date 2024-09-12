@@ -28,7 +28,7 @@ func (frame Frame) Bottom() float64 {
 	return frame.Top + frame.Height
 }
 
-// View - base view interface
+// View represents a base view interface
 type View interface {
 	ViewStyle
 	fmt.Stringer

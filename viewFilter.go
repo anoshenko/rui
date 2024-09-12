@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants for [ViewFilter] specific properties and events
 const (
 	// Blur is the constant for the "blur" property tag of the ViewFilter interface.
 	// The "blur" float64 property applies a Gaussian blur. The value of radius defines the value

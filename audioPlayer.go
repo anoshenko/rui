@@ -1,5 +1,6 @@
 package rui
 
+// AudioPlayer is a type of a [View] which can play audio files
 type AudioPlayer interface {
 	MediaPlayer
 }

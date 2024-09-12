@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants for [ViewShadow] specific properties
 const (
 	// ColorTag is the name of the color property of the shadow.
 	ColorTag = "color"

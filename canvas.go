@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants related to canvas view operations
 const (
 	// MiterJoin - Connected segments are joined by extending their outside edges
 	// to connect at a single point, with the effect of filling an additional
@@ -91,7 +92,7 @@ type TextMetrics struct {
 	Right float64
 }
 
-// Canvas is a drawing interface
+// Canvas is a drawing interface used by the [CanvasView]
 type Canvas interface {
 	// View return the view for the drawing
 	View() CanvasView

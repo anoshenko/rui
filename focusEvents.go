@@ -2,6 +2,7 @@ package rui
 
 import "strings"
 
+// Constants which represent [View] specific focus events properties
 const (
 	// FocusEvent is the constant for "focus-event" property tag.
 	// The "focus-event" event occurs when the View takes input focus.

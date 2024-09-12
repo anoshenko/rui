@@ -7,25 +7,49 @@ import (
 
 // DataValue interface of a data node value
 type DataValue interface {
+	// IsObject returns "true" if data value is an object
 	IsObject() bool
+
+	// Object returns data value as a data object
 	Object() DataObject
+
+	// Value returns value as a string
 	Value() string
 }
 
 // DataObject interface of a data object
 type DataObject interface {
 	DataValue
+
+	// Tag returns data object tag
 	Tag() string
+
+	// PropertyCount returns properties count
 	PropertyCount() int
+
+	// Property returns a data node corresponding to a property with specific index
 	Property(index int) DataNode
+
+	// PropertyByTag returns a data node corresponding to a property tag
 	PropertyByTag(tag string) DataNode
+
+	// PropertyValue returns a string value of a property with a specific tag
 	PropertyValue(tag string) (string, bool)
+
+	// PropertyObject returns an object value of a property with a specific tag
 	PropertyObject(tag string) DataObject
+
+	// SetPropertyValue sets a string value of a property with a specific tag
 	SetPropertyValue(tag, value string)
+
+	// SetPropertyObject sets an object value of a property with a specific tag
 	SetPropertyObject(tag string, object DataObject)
+
+	// ToParams create a params(map) representation of a data object
 	ToParams() Params
 }
 
+// Constants which are used to describe a node type, see [DataNode]
 const (
 	// TextNode - node is the pair "tag - text value". Syntax: <tag> = <text>
 	TextNode = 0
@@ -37,13 +61,28 @@ const (
 
 // DataNode interface of a data node
 type DataNode interface {
+	// Tag returns a tag name
 	Tag() string
+
+	// Type returns a node type. Possible values are TextNode, ObjectNode and ArrayNode
 	Type() int
+
+	// Text returns node text
 	Text() string
+
+	// Object returns node as object if that node type is an object
 	Object() DataObject
+
+	// ArraySize returns array size if that node type is an array
 	ArraySize() int
+
+	// ArrayElement returns a value of an array if that node type is an array
 	ArrayElement(index int) DataValue
+
+	// ArrayElements returns an array of objects if that node is an array
 	ArrayElements() []DataValue
+
+	// ArrayAsParams returns an array of a params(map) if that node is an array
 	ArrayAsParams() []Params
 }
 

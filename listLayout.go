@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// Constants which represent values of the "orientation" property of the [ListLayout]
 const (
 	// TopDownOrientation - subviews are arranged from top to bottom. Synonym of VerticalOrientation
 	TopDownOrientation = 0
@@ -16,7 +17,10 @@ const (
 
 	// EndToStartOrientation - subviews are arranged from right to left
 	EndToStartOrientation = 3
+)
 
+// Constants which represent values of the "list-wrap" property of the [ListLayout]
+const (
 	// ListWrapOff - subviews are scrolled and "true" if a new row/column starts
 	ListWrapOff = 0
 
@@ -27,7 +31,7 @@ const (
 	ListWrapReverse = 2
 )
 
-// ListLayout - list-container of View
+// ListLayout represents a ListLayout view
 type ListLayout interface {
 	ViewsContainer
 	// UpdateContent updates child Views if the "content" property value is set to ListAdapter,

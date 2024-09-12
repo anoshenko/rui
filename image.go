@@ -4,6 +4,7 @@ import (
 	"strconv"
 )
 
+// Constants which represent return values of the LoadingStatus function of an [Image] view
 const (
 	// ImageLoading is the image loading status: in the process of loading
 	ImageLoading = 0

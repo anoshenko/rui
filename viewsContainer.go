@@ -2,12 +2,13 @@ package rui
 
 import "strings"
 
+// ParentView describe a view which can have a child views
 type ParentView interface {
 	// Views return a list of child views
 	Views() []View
 }
 
-// ViewsContainer - mutable list-container of Views
+// ViewsContainer represent a mutable list-container of views
 type ViewsContainer interface {
 	View
 	ParentView

@@ -5,10 +5,13 @@ import (
 	"strings"
 )
 
+// OutlineProperty defines a view's outside border
 type OutlineProperty interface {
 	Properties
 	stringWriter
 	fmt.Stringer
+
+	// ViewOutline returns style color and line width of an outline
 	ViewOutline(session Session) ViewOutline
 }
 
@@ -98,8 +101,13 @@ func (outline *outlinePropertyData) ViewOutline(session Session) ViewOutline {
 
 // ViewOutline describes parameters of a view border
 type ViewOutline struct {
+	// Style of the outline line
 	Style int
+
+	// Color of the outline line
 	Color Color
+
+	// Width of the outline line
 	Width SizeUnit
 }
 

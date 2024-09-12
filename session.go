@@ -36,6 +36,8 @@ type bridge interface {
 
 // SessionContent is the interface of a session content
 type SessionContent interface {
+
+	// CreateRootView will be called by the library to create a root view of the application
 	CreateRootView(session Session) View
 }
 

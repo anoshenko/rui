@@ -2,7 +2,7 @@ package rui
 
 import "strings"
 
-// AbsoluteLayout - list-container of View
+// AbsoluteLayout represent an AbsoluteLayout view where child views can be arbitrary positioned
 type AbsoluteLayout interface {
 	ViewsContainer
 }

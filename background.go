@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants related to view's background description
 const (
 	// NoRepeat is value of the Repeat property of an background image:
 	// The image is not repeated (and hence the background image painting area
@@ -61,13 +62,18 @@ const (
 	ContentBoxClip = 2
 )
 
-// BackgroundElement describes the background element.
+// BackgroundElement describes the background element
 type BackgroundElement interface {
 	Properties
 	fmt.Stringer
 	stringWriter
 	cssStyle(session Session) string
+
+	// Tag returns type of the background element.
+	// Possible values are: "image", "conic-gradient", "linear-gradient" and "radial-gradient"
 	Tag() string
+
+	// Clone creates a new copy of BackgroundElement
 	Clone() BackgroundElement
 }
 

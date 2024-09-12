@@ -10,7 +10,10 @@ type ColumnSeparatorProperty interface {
 	Properties
 	fmt.Stringer
 	stringWriter
+
+	// ViewBorder returns column separator description in a form of ViewBorder
 	ViewBorder(session Session) ViewBorder
+
 	cssValue(session Session) string
 }
 

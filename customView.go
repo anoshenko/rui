@@ -5,8 +5,13 @@ import "strings"
 // CustomView defines a custom view interface
 type CustomView interface {
 	ViewsContainer
+
+	// CreateSuperView must be implemented to create a base view from which custom control has been built
 	CreateSuperView(session Session) View
+
+	// SuperView must be implemented to return a base view from which custom control has been built
 	SuperView() View
+
 	setSuperView(view View)
 	setTag(tag string)
 }
@@ -71,10 +76,14 @@ func (customView *CustomViewData) Set(tag string, value any) bool {
 	return customView.superView.Set(tag, value)
 }
 
+// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
+// Return "true" if the value has been set, in the opposite case "false" are returned and
+// a description of the error is written to the log
 func (customView *CustomViewData) SetAnimated(tag string, value any, animation Animation) bool {
 	return customView.superView.SetAnimated(tag, value, animation)
 }
 
+// SetChangeListener set the function to track the change of the View property
 func (customView *CustomViewData) SetChangeListener(tag string, listener func(View, string)) {
 	customView.superView.SetChangeListener(tag, listener)
 }
@@ -151,10 +160,12 @@ func (customView *CustomViewData) Frame() Frame {
 	return customView.superView.Frame()
 }
 
+// Scroll returns a location and size of a scrollable view in pixels
 func (customView *CustomViewData) Scroll() Frame {
 	return customView.superView.Scroll()
 }
 
+// HasFocus returns "true" if the view has focus
 func (customView *CustomViewData) HasFocus() bool {
 	return customView.superView.HasFocus()
 }
@@ -272,6 +283,7 @@ func (customView *CustomViewData) exscludeTags() []string {
 	return nil
 }
 
+// String convert internal representation of a [CustomViewData] into a string.
 func (customView *CustomViewData) String() string {
 	if customView.superView != nil {
 		return getViewString(customView, customView.exscludeTags())
@@ -285,6 +297,7 @@ func (customView *CustomViewData) setScroll(x, y, width, height float64) {
 	}
 }
 
+// Transition returns the transition animation of the property(tag). Returns nil is there is no transition animation.
 func (customView *CustomViewData) Transition(tag string) Animation {
 	if customView.superView != nil {
 		return customView.superView.Transition(tag)
@@ -292,6 +305,7 @@ func (customView *CustomViewData) Transition(tag string) Animation {
 	return nil
 }
 
+// Transitions returns a map of transition animations. The result is always non-nil.
 func (customView *CustomViewData) Transitions() map[string]Animation {
 	if customView.superView != nil {
 		return customView.superView.Transitions()
@@ -299,6 +313,9 @@ func (customView *CustomViewData) Transitions() map[string]Animation {
 	return map[string]Animation{}
 }
 
+// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
+// removes the transition animation of the property if "animation" argument  is nil.
+// The "tag" argument is the property name.
 func (customView *CustomViewData) SetTransition(tag string, animation Animation) {
 	if customView.superView != nil {
 		customView.superView.SetTransition(tag, animation)

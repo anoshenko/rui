@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants which represent [ImageView] specific properties and events
 const (
 	// LoadedEvent is the constant for the "loaded-event" property tag.
 	// The "loaded-event" event occurs event occurs when the image has been loaded.
@@ -33,7 +34,7 @@ const (
 	ScaleDownFit = 4
 )
 
-// ImageView - image View
+// ImageView represents an ImageView view
 type ImageView interface {
 	View
 	// NaturalSize returns the intrinsic, density-corrected size (width, height) of the image in pixels.

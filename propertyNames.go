@@ -1,5 +1,6 @@
 package rui
 
+// Constants for various properties and events of Views'.
 const (
 	// ID is the constant for the "id" property tag.
 	// The "id" property is an optional textual identifier for the View.
@@ -717,5 +718,8 @@ const (
 	// * A positive value means View should be focusable in sequential keyboard navigation, with its order defined by the value of the number.
 	TabIndex = "tabindex"
 
+	// Tooltip is the constant for "tooltip" property tag.
+	// The "tooltip" string property specifies the tooltip text. Tooltip pops up when hovering the mouse cursor over the view.
+	// HTML tags are supported when formatting tooltip text.
 	Tooltip = "tooltip"
 )

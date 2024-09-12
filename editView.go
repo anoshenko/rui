@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants for [EditView] specific properties and events
 const (
 	// EditTextChangedEvent is the constant for the "edit-text-changed" property tag.
 	EditTextChangedEvent = "edit-text-changed"
@@ -19,6 +20,7 @@ const (
 	Spellcheck = "spellcheck"
 )
 
+// Constants for the values of an [EditView] "edit-view-type" property
 const (
 	// SingleLineText - single-line text type of EditView
 	SingleLineText = 0
@@ -36,9 +38,11 @@ const (
 	MultiLineText = 6
 )
 
-// EditView - grid-container of View
+// EditView represent an EditView view
 type EditView interface {
 	View
+
+	// AppendText appends text to the current text of an EditView view
 	AppendText(text string)
 }
 

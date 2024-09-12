@@ -11,7 +11,7 @@ import (
 // The main listener format: func(DropDownList, int), where the second argument is the item index.
 const DropDownEvent = "drop-down-event"
 
-// DropDownList - the interface of a drop-down list view
+// DropDownList represent a DropDownList view
 type DropDownList interface {
 	View
 	getItems() []string

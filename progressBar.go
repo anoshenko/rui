@@ -5,12 +5,18 @@ import (
 	"strings"
 )
 
+// Constants for [ProgressBar] specific properties and events
 const (
-	ProgressBarMax   = "progress-max"
+	// ProgressBarMax is the constant for "progress-max" property tag.
+	// The "progress-max" define maximum value of the ProgressBar, default is 1.
+	ProgressBarMax = "progress-max"
+
+	// ProgressBarValue is the constant for "progress-value" property tag.
+	// The "progress-value" define current value of the ProgressBar, default is 0.
 	ProgressBarValue = "progress-value"
 )
 
-// ProgressBar - ProgressBar view
+// ProgressBar represents a ProgressBar view
 type ProgressBar interface {
 	View
 }

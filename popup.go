@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// Constants for [Popup] specific properties and events
 const (
 	// Title is the constant for the "title" property tag.
 	// The "title" property is defined the Popup/Tabs title
@@ -78,7 +79,10 @@ const (
 	// LeftArrow is value of the popup "arrow" property:
 	// Arrow on the left side of the pop-up window
 	LeftArrow = 4
+)
 
+// Constants which are used as a values of [PopupButtonType] variables
+const (
 	// NormalButton is the constant of the popup button type: the normal button
 	NormalButton PopupButtonType = 0
 	// DefaultButton is the constant of the popup button type: button that fires when the "Enter" key is pressed
@@ -87,21 +91,35 @@ const (
 	CancelButton PopupButtonType = 2
 )
 
+// PopupButtonType represent popup button type
 type PopupButtonType int
 
 // PopupButton describes a button that will be placed at the bottom of the window.
 type PopupButton struct {
-	Title   string
-	Type    PopupButtonType
+	// Title of the button
+	Title string
+
+	// Type of the button
+	Type PopupButtonType
+
+	// OnClick is the handler function that gets called when the button is pressed
 	OnClick func(Popup)
 }
 
-// Popup interface
+// Popup represents a Popup view
 type Popup interface {
+	// View returns a content view of the popup
 	View() View
+
+	// Session returns current client session
 	Session() Session
+
+	// Show displays a popup
 	Show()
+
+	// Dismiss closes a popup
 	Dismiss()
+
 	onDismiss()
 	html(buffer *strings.Builder)
 	viewByHTMLID(id string) View

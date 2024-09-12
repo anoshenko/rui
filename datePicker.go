@@ -6,16 +6,33 @@ import (
 	"time"
 )
 
+// Constants for [DatePicker] specific properties and events.
 const (
+	// DateChangedEvent is the constant for "date-changed" property tag.
+	// The "date-changed" event occur when [DatePicker] value has been changed.
+	// The main listener format: func(picker DatePicker, newDate, oldDate time.Time).
 	DateChangedEvent = "date-changed"
-	DatePickerMin    = "date-picker-min"
-	DatePickerMax    = "date-picker-max"
-	DatePickerStep   = "date-picker-step"
-	DatePickerValue  = "date-picker-value"
-	dateFormat       = "2006-01-02"
+
+	// DatePickerMin is the constant for "date-picker-min" property tag.
+	// The "date-picker-min" define minimum date value.
+	DatePickerMin = "date-picker-min"
+
+	// DatePickerMax is the constant for "date-picker-max" property tag.
+	// The "date-picker-max" define maximum date value.
+	DatePickerMax = "date-picker-max"
+
+	// DatePickerStep is the constant for "date-picker-step" property tag.
+	// The "date-picker-step" define date step value in days.
+	DatePickerStep = "date-picker-step"
+
+	// DatePickerValue is the constant for "date-picker-value" property tag.
+	// The "date-picker-value" define current date value.
+	DatePickerValue = "date-picker-value"
+
+	dateFormat = "2006-01-02"
 )
 
-// DatePicker - DatePicker view
+// DatePicker represent a DatePicker view
 type DatePicker interface {
 	View
 }

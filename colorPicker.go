@@ -4,12 +4,19 @@ import (
 	"strings"
 )
 
+// Constants for [ColorPicker] specific properties and events.
 const (
+	// ColorChangedEvent is the constant for "color-changed" property tag.
+	// The "color-changed" event occurs when [ColorPicker] value has been changed.
+	// The main listener format: func(picker ColorPicker, newColor, oldColor Color).
 	ColorChangedEvent = "color-changed"
-	ColorPickerValue  = "color-picker-value"
+
+	// ColorPickerValue is the constant for "color-picker-value" property tag.
+	// The "color-picker-value" define current color picker value.
+	ColorPickerValue = "color-picker-value"
 )
 
-// ColorPicker - ColorPicker view
+// ColorPicker represent a ColorPicker view
 type ColorPicker interface {
 	View
 }

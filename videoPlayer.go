@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// Constants for [VideoPlayer] specific properties and events
 const (
 	// VideoWidth is the constant for the "video-width" property tag of VideoPlayer.
 	// The "video-width" float property defines the width of the video's display area in pixels.
@@ -20,6 +21,7 @@ const (
 	Poster = "poster"
 )
 
+// VideoPlayer is a type of a [View] which can play video files
 type VideoPlayer interface {
 	MediaPlayer
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Constants for [Transform] specific properties
 const (
 	// Perspective is the name of the SizeUnit property that determines the distance between the z = 0 plane
 	// and the user in order to give a 3D-positioned element some perspective. Each 3D element
@@ -115,6 +116,7 @@ type transformData struct {
 	propertyList
 }
 
+// NewTransform creates a new transform property data and return its interface
 func NewTransform(params Params) Transform {
 	transform := new(transformData)
 	transform.properties = map[string]any{}

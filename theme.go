@@ -7,18 +7,34 @@ import (
 	"strings"
 )
 
+// Constants used as a values for [MediaStyleParams] member Orientation
 const (
-	DefaultMedia   = 0
-	PortraitMedia  = 1
+	// DefaultMedia means that style appliance will not be related to client's window orientation
+	DefaultMedia = 0
+
+	// PortraitMedia means that style apply on clients with portrait window orientation
+	PortraitMedia = 1
+
+	// PortraitMedia means that style apply on clients with landscape window orientation
 	LandscapeMedia = 2
 )
 
+// MediaStyleParams define rules when particular style will be applied
 type MediaStyleParams struct {
+	// Orientation for which particular style will be applied
 	Orientation int
-	MinWidth    int
-	MaxWidth    int
-	MinHeight   int
-	MaxHeight   int
+
+	// MinWidth for which particular style will be applied
+	MinWidth int
+
+	// MaxWidth for which particular style will be applied
+	MaxWidth int
+
+	// MinHeight for which particular style will be applied
+	MinHeight int
+
+	// MaxHeight for which particular style will be applied
+	MaxHeight int
 }
 
 type mediaStyle struct {
@@ -38,31 +54,65 @@ type theme struct {
 	mediaStyles    []mediaStyle
 }
 
+// Theme interface to describe application's theme
 type Theme interface {
 	fmt.Stringer
+
+	// Name returns a name of the theme
 	Name() string
+
+	// Constant returns normal and touch theme constant value with specific tag
 	Constant(tag string) (string, string)
+
+	// SetConstant sets a value for a constant
 	SetConstant(tag string, value, touchUIValue string)
+
 	// ConstantTags returns the list of all available constants
 	ConstantTags() []string
+
+	// Color returns normal and dark theme color constant value with specific tag
 	Color(tag string) (string, string)
+
+	// SetColor sets normal and dark theme color constant value with specific tag
 	SetColor(tag, color, darkUIColor string)
+
 	// ColorTags returns the list of all available color constants
 	ColorTags() []string
+
+	// Image returns normal and dark theme image constant value with specific tag
 	Image(tag string) (string, string)
+
+	// SetImage sets normal and dark theme image constant value with specific tag
 	SetImage(tag, image, darkUIImage string)
+
 	// ImageConstantTags returns the list of all available image constants
 	ImageConstantTags() []string
+
+	// Style returns view style by its tag
 	Style(tag string) ViewStyle
+
+	// SetStyle sets style for a tag
 	SetStyle(tag string, style ViewStyle)
+
+	// RemoveStyle removes style with provided tag
 	RemoveStyle(tag string)
+
+	// MediaStyle returns media style which correspond to provided media style parameters
 	MediaStyle(tag string, params MediaStyleParams) ViewStyle
+
+	// SetMediaStyle sets media style with provided media style parameters and a tag
 	SetMediaStyle(tag string, params MediaStyleParams, style ViewStyle)
+
+	// StyleTags returns all tags which describe a style
 	StyleTags() []string
+
+	// MediaStyles returns all media style settings which correspond to a style tag
 	MediaStyles(tag string) []struct {
 		Selectors string
 		Params    MediaStyleParams
 	}
+
+	// Append theme to a list of themes
 	Append(anotherTheme Theme)
 
 	constant(tag string, touchUI bool) string
@@ -196,6 +246,7 @@ func parseMediaRule(text string) (mediaStyle, bool) {
 
 var defaultTheme = NewTheme("")
 
+// NewTheme creates a new theme with specific name and return its interface.
 func NewTheme(name string) Theme {
 	result := new(theme)
 	result.init()
@@ -203,6 +254,7 @@ func NewTheme(name string) Theme {
 	return result
 }
 
+// CreateThemeFromText creates a new theme from text and return its interface on success.
 func CreateThemeFromText(text string) (Theme, bool) {
 	result := new(theme)
 	result.init()

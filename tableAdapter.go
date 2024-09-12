@@ -1,6 +1,6 @@
 package rui
 
-// TableAdapter describes the TableView content
+// TableAdapter describes the [TableView] content
 type TableAdapter interface {
 	// RowCount returns number of rows in the table
 	RowCount() int
@@ -21,44 +21,49 @@ type TableAdapter interface {
 	Cell(row, column int) any
 }
 
-// TableColumnStyle describes the style of TableView columns.
-// To set column styles, you must either implement the TableColumnStyle interface in the table adapter
+// TableColumnStyle describes the style of [TableView] columns.
+// To set column styles, you must either implement the [TableColumnStyle] interface in the table adapter
 // or assign its separate implementation to the "column-style" property.
 type TableColumnStyle interface {
+	// ColumnStyle returns a map of properties which describe the style of the column
 	ColumnStyle(column int) Params
 }
 
-// TableRowStyle describes the style of TableView rows.
-// To set row styles, you must either implement the TableRowStyle interface in the table adapter
+// TableRowStyle describes the style of [TableView] rows.
+// To set row styles, you must either implement the [TableRowStyle] interface in the table adapter
 // or assign its separate implementation to the "row-style" property.
 type TableRowStyle interface {
+	// RowStyle returns a map of properties which describe the style of the row
 	RowStyle(row int) Params
 }
 
-// TableCellStyle describes the style of TableView cells.
-// To set row cells, you must either implement the TableCellStyle interface in the table adapter
+// TableCellStyle describes the style of [TableView] cells.
+// To set row cells, you must either implement the [TableCellStyle] interface in the table adapter
 // or assign its separate implementation to the "cell-style" property.
 type TableCellStyle interface {
+	// CellStyle returns a map of properties which describe the style of the cell
 	CellStyle(row, column int) Params
 }
 
-// TableAllowCellSelection determines whether TableView cell selection is allowed.
+// TableAllowCellSelection determines whether [TableView] cell selection is allowed.
 // It is only used if the "selection-mode" property is set to CellSelection (1).
 // To set cell selection allowing, you must either implement the TableAllowCellSelection interface
 // in the table adapter or assign its separate implementation to the "allow-selection" property.
 type TableAllowCellSelection interface {
+	// AllowCellSelection returns "true" if we allow the user to select particular cell at specific rows and columns
 	AllowCellSelection(row, column int) bool
 }
 
-// TableAllowRowSelection determines whether TableView row selection is allowed.
+// TableAllowRowSelection determines whether [TableView] row selection is allowed.
 // It is only used if the "selection-mode" property is set to RowSelection (2).
 // To set row selection allowing, you must either implement the TableAllowRowSelection interface
 // in the table adapter or assign its separate implementation to the "allow-selection" property.
 type TableAllowRowSelection interface {
+	// AllowRowSelection returns "true" if we allow the user to select particular row in the table
 	AllowRowSelection(row int) bool
 }
 
-// SimpleTableAdapter is implementation of TableAdapter where the content
+// SimpleTableAdapter is implementation of [TableAdapter] where the content
 // defines as [][]any.
 // When you assign [][]any value to the "content" property, it is converted to SimpleTableAdapter
 type SimpleTableAdapter interface {
@@ -71,7 +76,7 @@ type simpleTableAdapter struct {
 	columnCount int
 }
 
-// TextTableAdapter is implementation of TableAdapter where the content
+// TextTableAdapter is implementation of [TableAdapter] where the content
 // defines as [][]string.
 // When you assign [][]string value to the "content" property, it is converted to TextTableAdapter
 type TextTableAdapter interface {

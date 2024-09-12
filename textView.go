@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// TextView - text View
+// TextView represents a TextView view
 type TextView interface {
 	View
 }

@@ -694,6 +694,8 @@ func GetAvoidBreak(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, AvoidBreak, true)
 }
 
+// GetNotTranslate returns value of "not-translate" property of the subview. If the second argument (subviewID) is not
+// specified or is an empty string then a value from the first argument (view) is returned.
 func GetNotTranslate(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, NotTranslate, true)
 }

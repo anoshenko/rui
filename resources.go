@@ -45,6 +45,7 @@ var resources = resourceManager{
 	imageSrcSets: map[string][]scaledImage{},
 }
 
+// AddEmbedResources adds embedded resources to the list of application resources
 func AddEmbedResources(fs *embed.FS) {
 	resources.embedFS = append(resources.embedFS, fs)
 	rootDirs := resources.embedRootDirs(fs)
@@ -457,6 +458,7 @@ func AllImageResources() []string {
 	return result
 }
 
+// AddTheme adds theme to application
 func AddTheme(theme Theme) {
 	if theme != nil {
 		name := theme.Name()

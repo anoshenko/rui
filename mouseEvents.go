@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Constants related to [View] mouse events properties
 const (
 	// ClickEvent is the constant for "click-event" property tag.
 	// The "click-event" event occurs when the user clicks on the View.
@@ -112,6 +113,7 @@ const (
 	MouseMask5 = 16
 )
 
+// MouseEvent represent a mouse event
 type MouseEvent struct {
 	// TimeStamp is the time at which the event was created (in milliseconds).
 	// This value is time since epoch—but in reality, browsers' definitions vary.

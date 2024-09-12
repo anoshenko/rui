@@ -2,6 +2,7 @@ package rui
 
 import "strings"
 
+// Constants related to view's background gradient description
 const (
 
 	// ToTopGradient is value of the Direction property of a linear gradient. The value is equivalent to the 0deg angle
@@ -224,6 +225,7 @@ func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
 	return 0, false
 }
 
+// String convert internal representation of [BackgroundGradientPoint] into a string.
 func (point *BackgroundGradientPoint) String() string {
 	result := "black"
 	if point.Color != nil {
