@@ -5,19 +5,33 @@ import "strings"
 // Constants which represent [View] specific focus events properties
 const (
 	// FocusEvent is the constant for "focus-event" property tag.
-	// The "focus-event" event occurs when the View takes input focus.
-	// The main listener format:
-	//   func(View).
-	// The additional listener format:
-	//   func().
+	//
+	// Used by `View`.
+	// Occur when the view takes input focus.
+	//
+	// General listener format:
+	// `func(View)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event.
+	//
+	// Allowed listener formats:
+	// `func()`.
 	FocusEvent = "focus-event"
 
 	// LostFocusEvent is the constant for "lost-focus-event" property tag.
-	// The "lost-focus-event" event occurs when the View lost input focus.
-	// The main listener format:
-	//   func(View).
-	// The additional listener format:
-	//   func().
+	//
+	// Used by `View`.
+	// Occur when the View lost input focus.
+	//
+	// General listener format:
+	// `func(view rui.View)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event.
+	//
+	// Allowed listener formats:
+	// `func()`.
 	LostFocusEvent = "lost-focus-event"
 )
 

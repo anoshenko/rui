@@ -152,9 +152,12 @@ func (popup *popupMenuData) IsListItemEnabled(index int) bool {
 	return true
 }
 
-// PopupMenuResult is the constant for the "popup-menu-result" property tag.
-// The "popup-menu-result" property sets the function (format: func(int)) to be called when
-// a menu item of popup menu is selected.
+// PopupMenuResult is the constant for "popup-menu-result" property tag.
+//
+// Used by `Popup`.
+// Set the function to be called when the menu item of popup menu is selected.
+//
+// Supported types: `func(index int)`.
 const PopupMenuResult = "popup-menu-result"
 
 // ShowMenu displays the menu. Menu items are set using the Items property.

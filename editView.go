@@ -7,16 +7,63 @@ import (
 
 // Constants for [EditView] specific properties and events
 const (
-	// EditTextChangedEvent is the constant for the "edit-text-changed" property tag.
+	// EditTextChangedEvent is the constant for "edit-text-changed" property tag.
+	//
+	// Used by `EditView`.
+	// Occur when edit view text has been changed.
+	//
+	// General listener format:
+	// `func(editView rui.EditView, newText, oldText string)`.
+	//
+	// where:
+	// editView - Interface of an edit view which generated this event,
+	// newText - New edit view text,
+	// oldText - Previous edit view text.
+	//
+	// Allowed listener formats:
+	// `func(editView rui.EditView, newText string)`,
+	// `func(newText, oldText string)`,
+	// `func(newText string)`,
+	// `func(editView rui.EditView)`,
+	// `func()`.
 	EditTextChangedEvent = "edit-text-changed"
 
-	// EditViewType is the constant for the "edit-view-type" property tag.
+	// EditViewType is the constant for "edit-view-type" property tag.
+	//
+	// Used by `EditView`.
+	// Type of the text input. Default value is "text".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`SingleLineText`) or "text" - One-line text editor.
+	// `1`(`PasswordText`) or "password" - Password editor. The text is hidden by asterisks.
+	// `2`(`EmailText`) or "email" - Single e-mail editor.
+	// `3`(`EmailsText`) or "emails" - Multiple e-mail editor.
+	// `4`(`URLText`) or "url" - Internet address input editor.
+	// `5`(`PhoneText`) or "phone" - Phone number editor.
+	// `6`(`MultiLineText`) or "multiline" - Multi-line text editor.
 	EditViewType = "edit-view-type"
 
-	// EditViewPattern is the constant for the "edit-view-pattern" property tag.
+	// EditViewPattern is the constant for "edit-view-pattern" property tag.
+	//
+	// Used by `EditView`.
+	// Regular expression to limit editing of a text.
+	//
+	// Supported types: `string`.
 	EditViewPattern = "edit-view-pattern"
 
-	// Spellcheck is the constant for the "spellcheck" property tag.
+	// Spellcheck is the constant for "spellcheck" property tag.
+	//
+	// Used by `EditView`.
+	// Enable or disable spell checker. Available in `SingleLineText` and `MultiLineText` types of edit view. Default value is 
+	// `false`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Enable spell checker for text.
+	// `false` or `0` or "false", "no", "off", "0" - Disable spell checker for text.
 	Spellcheck = "spellcheck"
 )
 
@@ -24,16 +71,22 @@ const (
 const (
 	// SingleLineText - single-line text type of EditView
 	SingleLineText = 0
+
 	// PasswordText - password type of EditView
 	PasswordText = 1
+
 	// EmailText - e-mail type of EditView. Allows to enter one email
 	EmailText = 2
+
 	// EmailsText - e-mail type of EditView. Allows to enter multiple emails separated by comma
 	EmailsText = 3
+
 	// URLText - url type of EditView. Allows to enter one url
 	URLText = 4
+
 	// PhoneText - telephone type of EditView. Allows to enter one phone number
 	PhoneText = 5
+
 	// MultiLineText - multi-line text type of EditView
 	MultiLineText = 6
 )

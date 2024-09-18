@@ -7,49 +7,112 @@ import (
 
 // Constants for [ColumnLayout] specific properties and events
 const (
-	// ColumnCount is the constant for the "column-count" property tag.
-	// The "column-count" int property specifies number of columns into which the content is break
-	// Values less than zero are not valid. if the "column-count" property value is 0 then
-	// the number of columns is calculated based on the "column-width" property
+	// ColumnCount is the constant for "column-count" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Specifies number of columns into which the content is break. Values less than zero are not valid. If this property 
+	// value is 0 then the number of columns is calculated based on the "column-width" property.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0` or "0" - Use "column-width" to control how many columns will be created.
+	// >= `0` or >= "0" - Тhe number of columns into which the content is divided.
 	ColumnCount = "column-count"
 
-	// ColumnWidth is the constant for the "column-width" property tag.
-	// The "column-width" SizeUnit property specifies the width of each column.
+	// ColumnWidth is the constant for "column-width" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Specifies the width of each column.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ColumnWidth = "column-width"
 
-	// ColumnGap is the constant for the "column-gap" property tag.
-	// The "column-width" SizeUnit property sets the size of the gap (gutter) between columns.
+	// ColumnGap is the constant for "column-gap" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Set the size of the gap (gutter) between columns.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ColumnGap = "column-gap"
 
-	// ColumnSeparator is the constant for the "column-separator" property tag.
-	// The "column-separator" property specifies the line drawn between columns in a multi-column layout.
+	// ColumnSeparator is the constant for "column-separator" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Specifies the line drawn between columns in a multi-column layout.
+	//
+	// Supported types: `ColumnSeparatorProperty`, `ViewBorder`.
+	//
+	// Internal type is `ColumnSeparatorProperty`, other types converted to it during assignment.
+	// See `ColumnSeparatorProperty` and `ViewBorder` description for more details.
 	ColumnSeparator = "column-separator"
 
-	// ColumnSeparatorStyle is the constant for the "column-separator-style" property tag.
-	// The "column-separator-style" int property sets the style of the line drawn between
-	// columns in a multi-column layout.
-	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+	// ColumnSeparatorStyle is the constant for "column-separator-style" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Controls the style of the line drawn between columns in a multi-column layout.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The separator will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a separator.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a separator.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a separator.
+	// `4`(`DoubleLine`) or "double" - Double line as a separator.
 	ColumnSeparatorStyle = "column-separator-style"
 
-	// ColumnSeparatorWidth is the constant for the "column-separator-width" property tag.
-	// The "column-separator-width" SizeUnit property sets the width of the line drawn between
-	// columns in a multi-column layout.
+	// ColumnSeparatorWidth is the constant for "column-separator-width" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Set the width of the line drawn between columns in a multi-column layout.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ColumnSeparatorWidth = "column-separator-width"
 
-	// ColumnSeparatorColor is the constant for the "column-separator-color" property tag.
-	// The "column-separator-color" Color property sets the color of the line drawn between
-	// columns in a multi-column layout.
+	// ColumnSeparatorColor is the constant for "column-separator-color" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Set the color of the line drawn between columns in a multi-column layout.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	ColumnSeparatorColor = "column-separator-color"
 
-	// ColumnFill is the constant for the "column-fill" property tag.
-	// The "column-fill" int property controls how an ColumnLayout's contents are balanced when broken into columns.
-	// Valid values are
-	// * ColumnFillBalance (0) - Content is equally divided between columns (default value);
-	// * ColumnFillAuto (1) - Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
+	// ColumnFill is the constant for "column-fill" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Controls how a `ColumnLayout`'s content is balanced when broken into columns. Default value is "balance".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`ColumnFillBalance`) or "balance" - Content is equally divided between columns.
+	// `1`(`ColumnFillAuto`) or "auto" - Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
 	ColumnFill = "column-fill"
 
-	// ColumnSpanAll is the constant for the "column-span-all" property tag.
-	// The "column-span-all" bool property makes it possible for a view to span across all columns when its value is set to true.
+	// ColumnSpanAll is the constant for "column-span-all" property tag.
+	//
+	// Used by `ColumnLayout`.
+	// Property used in views placed inside the column layout container. Makes it possible for a view to span across all 
+	// columns. Default value is `false`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - View will span across all columns.
+	// `false` or `0` or "false", "no", "off", "0" - View will be a part of a column.
 	ColumnSpanAll = "column-span-all"
 )
 

@@ -1,14 +1,21 @@
 package rui
 
 // ScrollEvent is the constant for "scroll-event" property tag.
-// The "scroll-event" is fired when the content of the view is scrolled.
-// The main listener format:
 //
-//	func(View, Frame).
+// Used by `View`.
+// Is fired when the content of the view is scrolled.
 //
-// The additional listener formats:
+// General listener format:
+// `func(view rui.View, frame rui.Frame)`.
 //
-//	func(Frame), func(View), and func().
+// where:
+// view - Interface of a view which generated this event,
+// frame - New offset and size of the view's visible area.
+//
+// Allowed listener formats:
+// `func(frame rui.Frame)`,
+// `func(view rui.View)`,
+// `func()`.
 const ScrollEvent = "scroll-event"
 
 func (view *viewData) onScroll(self View, x, y, width, height float64) {

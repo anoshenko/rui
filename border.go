@@ -9,40 +9,168 @@ import (
 const (
 	// NoneLine constant specifies that there is no border
 	NoneLine = 0
+
 	// SolidLine constant specifies the border/line as a solid line
 	SolidLine = 1
+
 	// DashedLine constant specifies the border/line as a dashed line
 	DashedLine = 2
+
 	// DottedLine constant specifies the border/line as a dotted line
 	DottedLine = 3
+
 	// DoubleLine constant specifies the border/line as a double solid line
 	DoubleLine = 4
+
 	// DoubleLine constant specifies the border/line as a double solid line
 	WavyLine = 5
 
 	// LeftStyle is the constant for "left-style" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Left border line style.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	LeftStyle = "left-style"
-	// RightStyle is the constant for "-right-style" property tag.
+
+	// RightStyle is the constant for "right-style" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Right border line style.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	RightStyle = "right-style"
+
 	// TopStyle is the constant for "top-style" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Top border line style.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	TopStyle = "top-style"
+
 	// BottomStyle is the constant for "bottom-style" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Bottom border line style.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	BottomStyle = "bottom-style"
+
 	// LeftWidth is the constant for "left-width" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Left border line width.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	LeftWidth = "left-width"
-	// RightWidth is the constant for "-right-width" property tag.
+
+	// RightWidth is the constant for "right-width" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Right border line width.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RightWidth = "right-width"
+
 	// TopWidth is the constant for "top-width" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Top border line width.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopWidth = "top-width"
+
 	// BottomWidth is the constant for "bottom-width" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Bottom border line width.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomWidth = "bottom-width"
+
 	// LeftColor is the constant for "left-color" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Left border line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	LeftColor = "left-color"
-	// RightColor is the constant for "-right-color" property tag.
+
+	// RightColor is the constant for "right-color" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Right border line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	RightColor = "right-color"
+
 	// TopColor is the constant for "top-color" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Top border line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	TopColor = "top-color"
+
 	// BottomColor is the constant for "bottom-color" property tag.
+	//
+	// Used by `BorderProperty`.
+	// Bottom border line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	BottomColor = "bottom-color"
 )
 

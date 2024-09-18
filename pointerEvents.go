@@ -7,46 +7,115 @@ import (
 // Constants for [View] specific pointer events properties
 const (
 	// PointerDown is the constant for "pointer-down" property tag.
-	// The "pointer-down" event is fired when a pointer becomes active. For mouse, it is fired when
-	// the device transitions from no buttons depressed to at least one button depressed.
-	// For touch, it is fired when physical contact is made with the digitizer.
-	// For pen, it is fired when the stylus makes physical contact with the digitizer.
-	// The main listener format: func(View, PointerEvent).
-	// The additional listener formats: func(PointerEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Fired when a pointer becomes active. For mouse, it is fired when the device transitions from no buttons depressed to at 
+	// least one button depressed. For touch, it is fired when physical contact is made with the digitizer. For pen, it is 
+	// fired when the stylus makes physical contact with the digitizer.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.PointerEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Pointer event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.PointerEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	PointerDown = "pointer-down"
 
 	// PointerUp is the constant for "pointer-up" property tag.
-	// The "pointer-up" event is fired when a pointer is no longer active.
-	// The main listener format: func(View, PointerEvent).
-	// The additional listener formats: func(PointerEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired when a pointer is no longer active.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.PointerEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Pointer event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.PointerEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	PointerUp = "pointer-up"
 
 	// PointerMove is the constant for "pointer-move" property tag.
-	// The "pointer-move" event is fired when a pointer changes coordinates.
-	// The main listener format: func(View, PointerEvent).
-	// The additional listener formats: func(PointerEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired when a pointer changes coordinates.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.PointerEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Pointer event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.PointerEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	PointerMove = "pointer-move"
 
 	// PointerCancel is the constant for "pointer-cancel" property tag.
-	// The "pointer-cancel" event is fired if the pointer will no longer be able to generate events
-	// (for example the related device is deactivated).
-	// The main listener format: func(View, PointerEvent).
-	// The additional listener formats: func(PointerEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired if the pointer will no longer be able to generate events (for example the related device is deactivated).
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.PointerEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Pointer event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.PointerEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	PointerCancel = "pointer-cancel"
 
 	// PointerOut is the constant for "pointer-out" property tag.
-	// The "pointer-out" event is fired for several reasons including: pointing device is moved out
-	// of the hit test boundaries of an element; firing the pointerup event for a device
-	// that does not support hover (see "pointer-up"); after firing the pointercancel event (see "pointer-cancel");
-	// when a pen stylus leaves the hover range detectable by the digitizer.
-	// The main listener format: func(View, PointerEvent).
-	// The additional listener formats: func(PointerEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired for several reasons including: pointing device is moved out of the hit test boundaries of an element; firing 
+	// the "pointer-up" event for a device that does not support hover (see "pointer-up"); after firing the "pointer-cancel" 
+	// event (see "pointer-cancel"); when a pen stylus leaves the hover range detectable by the digitizer.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.PointerEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Pointer event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.PointerEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	PointerOut = "pointer-out"
 
 	// PointerOver is the constant for "pointer-over" property tag.
-	// The "pointer-over" event is fired when a pointing device is moved into an view's hit test boundaries.
-	// The main listener format: func(View, PointerEvent).
-	// The additional listener formats: func(PointerEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired when a pointing device is moved into an view's hit test boundaries.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.PointerEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Pointer event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.PointerEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	PointerOver = "pointer-over"
 )
 

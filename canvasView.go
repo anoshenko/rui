@@ -2,9 +2,12 @@ package rui
 
 import "strings"
 
-// DrawFunction is the constant for the "draw-function" property tag.
-// The "draw-function" property sets the draw function of CanvasView.
-// The function should have the following format: func(Canvas)
+// DrawFunction is the constant for "draw-function" property tag.
+//
+// Used by `CanvasView`.
+// Property sets the draw function of `CanvasView`.
+//
+// Supported types: `func(Canvas)`.
 const DrawFunction = "draw-function"
 
 // CanvasView interface of a custom draw view

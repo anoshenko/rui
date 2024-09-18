@@ -9,30 +9,78 @@ import (
 // Constants which represent [ListView] specific properties and events
 const (
 	// ListItemClickedEvent is the constant for "list-item-clicked" property tag.
-	// The "list-item-clicked" event occurs when the user clicks on an item in the list.
-	// The main listener format: func(ListView, int), where the second argument is the item index.
+	//
+	// Used by `ListView`.
+	// Occur when the user clicks on an item in the list.
+	//
+	// General listener format:
+	// `func(list rui.ListView, item int)`.
+	//
+	// where:
+	// list - Interface of a list which generated this event,
+	// item - An index of an item clicked.
+	//
+	// Allowed listener formats:
+	// `func(item int)`,
+	// `func(list rui.ListView)`,
+	// `func()`.
 	ListItemClickedEvent = "list-item-clicked"
 
 	// ListItemSelectedEvent is the constant for "list-item-selected" property tag.
-	// The "list-item-selected" event occurs when a list item becomes selected.
-	// The main listener format: func(ListView, int), where the second argument is the item index.
+	//
+	// Used by `ListView`.
+	// Occur when a list item becomes selected.
+	//
+	// General listener format:
+	// `func(list rui.ListView, item int)`.
+	//
+	// where:
+	// list - Interface of a list which generated this event,
+	// item - An index of an item selected.
+	//
+	// Allowed listener formats:
 	ListItemSelectedEvent = "list-item-selected"
 
 	// ListItemCheckedEvent is the constant for "list-item-checked" property tag.
-	// The "list-item-checked" event occurs when a list item checkbox becomes checked/unchecked.
-	// The main listener format: func(ListView, []int), where the second argument is the array of checked item indexes.
+	//
+	// Used by `ListView`.
+	// Occur when a list item checkbox becomes checked or unchecked.
+	//
+	// General listener format:
+	// `func(list rui.ListView, checkedItems []int)`.
+	//
+	// where:
+	// list - Interface of a list which generated this event,
+	// checkedItems - Array of indices of marked elements.
+	//
+	// Allowed listener formats:
+	// `func(checkedItems []int)`,
+	// `func(list rui.ListView)`,
+	// `func()`.
 	ListItemCheckedEvent = "list-item-checked"
 
 	// ListItemStyle is the constant for "list-item-style" property tag.
-	// The "list-item-style" string property defines the style of an unselected item
+	//
+	// Used by `ListView`.
+	// Defines the style of an unselected item.
+	//
+	// Supported types: `string`.
 	ListItemStyle = "list-item-style"
 
 	// CurrentStyle is the constant for "current-style" property tag.
-	// The "current-style" string property defines the style of the selected item when the ListView is focused.
+	//
+	// Used by `ListView`.
+	// Defines the style of the selected item when the `ListView` is focused.
+	//
+	// Supported types: `string`.
 	CurrentStyle = "current-style"
 
 	// CurrentInactiveStyle is the constant for "current-inactive-style" property tag.
-	// The "current-inactive-style" string property defines the style of the selected item when the ListView is unfocused.
+	//
+	// Used by `ListView`.
+	// Defines the style of the selected item when the `ListView` is unfocused.
+	//
+	// Supported types: `string`.
 	CurrentInactiveStyle = "current-inactive-style"
 )
 
@@ -41,6 +89,7 @@ const (
 const (
 	// VerticalOrientation is the vertical ListView orientation
 	VerticalOrientation = 0
+
 	// HorizontalOrientation is the horizontal ListView orientation
 	HorizontalOrientation = 1
 )
@@ -49,8 +98,10 @@ const (
 const (
 	// NoneCheckbox is value of "checkbox" property: no checkbox
 	NoneCheckbox = 0
+
 	// SingleCheckbox is value of "checkbox" property: only one item can be checked
 	SingleCheckbox = 1
+
 	// MultipleCheckbox is value of "checkbox" property: several items can be checked
 	MultipleCheckbox = 2
 )

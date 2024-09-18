@@ -7,24 +7,99 @@ import (
 
 // Constants for [ViewShadow] specific properties
 const (
-	// ColorTag is the name of the color property of the shadow.
+	// ColorTag is the constant for "color" property tag.
+	//
+	// Used by `ColumnSeparatorProperty`, `BorderProperty`, `OutlineProperty`, `ViewShadow`.
+	//
+	// Usage in `ColumnSeparatorProperty`:
+	// Line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
+	//
+	// Usage in `BorderProperty`:
+	// Border line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
+	//
+	// Usage in `OutlineProperty`:
+	// Outline line color.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
+	//
+	// Usage in `ViewShadow`:
+	// Color property of the shadow.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	ColorTag = "color"
-	// Inset is the name of bool property of the shadow. If it is set to "false" (default) then the shadow
-	// is assumed to be a drop shadow (as if the box were raised above the content).
-	// If it is set to  "true" then the shadow to one inside the frame (as if the content was depressed inside the box).
-	// Inset shadows are drawn inside the border (even transparent ones), above the background, but below content.
+
+	// Inset is the constant for "inset" property tag.
+	//
+	// Used by `ViewShadow`.
+	// Controls whether to draw shadow inside the frame or outside. Inset shadows are drawn inside the border(even transparent 
+	// ones), above the background, but below content.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Drop shadow inside the frame(as if the content was depressed inside the box).
+	// `false` or `0` or "false", "no", "off", "0" - Shadow is assumed to be a drop shadow(as if the box were raised above the content).
 	Inset = "inset"
-	// XOffset is the name of the SizeUnit property of the shadow that determines the shadow horizontal offset.
-	// Negative values place the shadow to the left of the element.
+
+	// XOffset is the constant for "x-offset" property tag.
+	//
+	// Used by `ViewShadow`.
+	// Determines the shadow horizontal offset. Negative values place the shadow to the left of the element.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	XOffset = "x-offset"
-	// YOffset is the name of the SizeUnit property of the shadow that determines the shadow vertical offset.
-	// Negative values place the shadow above the element.
+
+	// YOffset is the constant for "y-offset" property tag.
+	//
+	// Used by `ViewShadow`.
+	// Determines the shadow vertical offset. Negative values place the shadow above the element.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	YOffset = "y-offset"
-	// BlurRadius is the name of the SizeUnit property of the shadow that determines the radius of the blur effect.
-	// The larger this value, the bigger the blur, so the shadow becomes bigger and lighter. Negative values are not allowed.
+
+	// BlurRadius is the constant for "blur" property tag.
+	//
+	// Used by `ViewShadow`.
+	// Determines the radius of the blur effect. The larger this value, the bigger the blur, so the shadow becomes bigger and 
+	// lighter. Negative values are not allowed.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BlurRadius = "blur"
-	// SpreadRadius is the name of the SizeUnit property of the shadow. Positive values will cause the shadow to expand
-	// and grow bigger, negative values will cause the shadow to shrink.
+
+	// SpreadRadius is the constant for "spread-radius" property tag.
+	//
+	// Used by `ViewShadow`.
+	// Positive values will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	SpreadRadius = "spread-radius"
 )
 

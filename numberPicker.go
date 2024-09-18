@@ -8,30 +8,76 @@ import (
 
 // Constants related to [NumberPicker] specific properties and events
 const (
-	// NumberChangedEvent is the constant for the "" property tag.
-	// The "number-changed" property sets listener(s) that track the change in the entered value.
+	// NumberChangedEvent is the constant for "number-changed" property tag.
+	//
+	// Used by `NumberPicker`.
+	// Set listener(s) that track the change in the entered value.
+	//
+	// General listener format:
+	// `func(picker rui.NumberPicker, newValue, oldValue float64)`.
+	//
+	// where:
+	// picker - Interface of a number picker which generated this event,
+	// newValue - New value,
+	// oldValue - Old Value.
+	//
+	// Allowed listener formats:
+	// `func(picker rui.NumberPicker, newValue float64)`,
+	// `func(newValue, oldValue float64)`,
+	// `func(newValue float64)`,
+	// `func()`.
 	NumberChangedEvent = "number-changed"
 
-	// NumberPickerType is the constant for the "number-picker-type" property tag.
-	// The "number-picker-type" int property sets the mode of NumberPicker. It can take the following values:
-	// * NumberEditor (0) - NumberPicker is presented by editor. Default value;
-	// * NumberSlider (1) - NumberPicker is presented by slider.                     |
+	// NumberPickerType is the constant for "number-picker-type" property tag.
+	//
+	// Used by `NumberPicker`.
+	// Sets the visual representation.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NumberEditor`) or "editor" - Displayed as an editor.
+	// `1`(`NumberSlider`) or "slider" - Displayed as a slider.
 	NumberPickerType = "number-picker-type"
 
-	// NumberPickerMin is the constant for the "number-picker-min" property tag.
-	// The "number-picker-min" int property sets the minimum value of NumberPicker. The default value is 0.
+	// NumberPickerMin is the constant for "number-picker-min" property tag.
+	//
+	// Used by `NumberPicker`.
+	// Set the minimum value. The default value is 0.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	NumberPickerMin = "number-picker-min"
 
-	// NumberPickerMax is the constant for the "number-picker-max" property tag.
-	// The "number-picker-max" int property sets the maximum value of NumberPicker. The default value is 1.
+	// NumberPickerMax is the constant for "number-picker-max" property tag.
+	//
+	// Used by `NumberPicker`.
+	// Set the maximum value. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	NumberPickerMax = "number-picker-max"
 
-	// NumberPickerStep is the constant for the "number-picker-step" property tag.
-	// The "number-picker-step" int property sets the value change step of NumberPicker
+	// NumberPickerStep is the constant for "number-picker-step" property tag.
+	//
+	// Used by `NumberPicker`.
+	// Set the value change step.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	NumberPickerStep = "number-picker-step"
 
-	// NumberPickerValue is the constant for the "number-picker-value" property tag.
-	// The "number-picker-value" int property sets the current value of NumberPicker. The default value is 0.
+	// NumberPickerValue is the constant for "number-picker-value" property tag.
+	//
+	// Used by `NumberPicker`.
+	// Current value. The default value is 0.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	NumberPickerValue = "number-picker-value"
 )
 

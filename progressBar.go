@@ -8,11 +8,23 @@ import (
 // Constants for [ProgressBar] specific properties and events
 const (
 	// ProgressBarMax is the constant for "progress-max" property tag.
-	// The "progress-max" define maximum value of the ProgressBar, default is 1.
+	//
+	// Used by `ProgressBar`.
+	// Maximum value, default is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	ProgressBarMax = "progress-max"
 
 	// ProgressBarValue is the constant for "progress-value" property tag.
-	// The "progress-value" define current value of the ProgressBar, default is 0.
+	//
+	// Used by `ProgressBar`.
+	// Current value, default is 0.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	ProgressBarValue = "progress-value"
 )
 

@@ -1,14 +1,21 @@
 package rui
 
 // ResizeEvent is the constant for "resize-event" property tag.
-// The "resize-event" is fired when the view changes its size.
-// The main listener format:
 //
-//	func(View, Frame).
+// Used by `View`.
+// Is fired when the view changes its size.
 //
-// The additional listener formats:
+// General listener format:
+// `func(view rui.View, frame rui.Frame)`.
 //
-//	func(Frame), func(View), and func().
+// where:
+// view - Interface of a view which generated this event,
+// frame - New offset and size of the view's visible area.
+//
+// Allowed listener formats:
+// `func(frame rui.Frame)`,
+// `func(view rui.View)`,
+// `func()`.
 const ResizeEvent = "resize-event"
 
 func (view *viewData) onResize(self View, x, y, width, height float64) {

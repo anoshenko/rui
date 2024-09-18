@@ -5,8 +5,21 @@ import (
 )
 
 // CheckboxChangedEvent is the constant for "checkbox-event" property tag.
-// The "checkbox-event" event occurs when the checkbox becomes checked/unchecked.
-// The main listener format: func(Checkbox, bool), where the second argument is the checkbox state.
+//
+// Used by `Checkbox`.
+// Event occurs when the checkbox becomes checked/unchecked.
+//
+// General listener format:
+// `func(checkbox rui.Checkbox, checked bool)`.
+//
+// where:
+// checkbox - Interface of a checkbox which generated this event,
+// checked - Checkbox state.
+//
+// Allowed listener formats:
+// `func(checkbox rui.Checkbox)`,
+// `func(checked bool)`,
+// `func()`.
 const CheckboxChangedEvent = "checkbox-event"
 
 // Checkbox represent a Checkbox view

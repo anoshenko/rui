@@ -8,199 +8,521 @@ import (
 
 // Constants for [TableView] specific properties and events
 const (
-	// TableVerticalAlign is the constant for the "table-vertical-align" property tag.
-	// The "table-vertical-align" int property sets the vertical alignment of the content inside a table cell.
-	// Valid values are TopAlign (0), BottomAlign (1), CenterAlign (2), and BaselineAlign (3, 4)
+	// TableVerticalAlign is the constant for "table-vertical-align" property tag.
+	//
+	// Used by `TableView`.
+	// Set the vertical alignment of the content inside a table cell.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`TopAlign`) or "top" - Top alignment.
+	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
+	// `2`(`CenterAlign`) or "center" - Center alignment.
+	// `3`(`StretchAlign`) or "stretch" - Work as baseline alignment, see below.
+	// `4`(`BaselineAlign`) or "baseline" - Baseline alignment.
 	TableVerticalAlign = "table-vertical-align"
 
-	// HeadHeight is the constant for the "head-height" property tag.
-	// The "head-height" int property sets the number of rows in the table header.
-	// The default value is 0 (no header)
+	// HeadHeight is the constant for "head-height" property tag.
+	//
+	// Used by `TableView`.
+	// Sets the number of rows in the table header. The default value is `0` (no header).
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0` or "0" - No header.
+	// > `0` or > "0" - Number of rows act as a header.
 	HeadHeight = "head-height"
 
-	// HeadStyle is the constant for the "head-style" property tag.
-	// The "head-style" string property sets the header style name
+	// HeadStyle is the constant for "head-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the header style name or description of style properties.
+	//
+	// Supported types: `string`, `Params`.
+	//
+	// Internal type is either `string` or `Params`.
+	//
+	// Conversion rules:
+	// `string` - must contain style name defined in resources.
+	// `Params` - must contain style properties.
 	HeadStyle = "head-style"
 
-	// FootHeight is the constant for the "foot-height" property tag.
-	// The "foot-height" int property sets the number of rows in the table footer.
-	// The default value is 0 (no footer)
+	// FootHeight is the constant for "foot-height" property tag.
+	//
+	// Used by `TableView`.
+	// Sets the number of rows in the table footer. The default value is `0` (no footer).
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0` or "0" - No footer.
+	// > `0` or > "0" - Number of rows act as a footer.
 	FootHeight = "foot-height"
 
-	// FootStyle is the constant for the "foot-style" property tag.
-	// The "foot-style" string property sets the footer style name
+	// FootStyle is the constant for "foot-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the footer style name or description of style properties.
+	//
+	// Supported types: `string`, `Params`.
+	//
+	// Internal type is either `string` or `Params`.
+	//
+	// Conversion rules:
+	// `string` - must contain style name defined in resources.
+	// `Params` - must contain style properties.
 	FootStyle = "foot-style"
 
-	// RowSpan is the constant for the "row-span" property tag.
-	// The "row-span" int property sets the number of table row to span.
-	// Used only when specifying cell parameters in the implementation of TableCellStyle
+	// RowSpan is the constant for "row-span" property tag.
+	//
+	// Used by `TableView`.
+	// Set the number of table row to span. Used only when specifying cell parameters in the implementation of 
+	// `TableCellStyle`.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0` or "0" - No merging will be applied.
+	// > `0` or > "0" - Number of rows including current one to be merged together.
 	RowSpan = "row-span"
 
-	// ColumnSpan is the constant for the "column-span" property tag.
-	// The "column-span" int property sets the number of table column to span.
-	// Used only when specifying cell parameters in the implementation of TableCellStyle
+	// ColumnSpan is the constant for "column-span" property tag.
+	//
+	// Used by `TableView`.
+	// Sets the number of table column cells to be merged together. Used only when specifying cell parameters in the 
+	// implementation of `TableCellStyle`.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0` or "0" - No merging will be applied.
+	// > `0` or > "0" - Number of columns including current one to be merged together.
 	ColumnSpan = "column-span"
 
-	// RowStyle is the constant for the "row-style" property tag.
-	// The "row-style" property sets the adapter which specifies styles of each table row.
-	// This property can be assigned or by an implementation of TableRowStyle interface, or by an array of Params.
+	// RowStyle is the constant for "row-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the adapter which specifies styles of each table row.
+	//
+	// Supported types: `TableRowStyle`, `[]Params`.
+	//
+	// Internal type is `TableRowStyle`, other types converted to it during assignment.
+	// See `TableRowStyle` description for more details.
 	RowStyle = "row-style"
 
-	// ColumnStyle is the constant for the "column-style" property tag.
-	// The "column-style" property sets the adapter which specifies styles of each table column.
-	// This property can be assigned or by an implementation of TableColumnStyle interface, or by an array of Params.
+	// ColumnStyle is the constant for "column-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the adapter which specifies styles of each table column.
+	//
+	// Supported types: `TableColumnStyle`, `[]Params`.
+	//
+	// Internal type is `TableColumnStyle`, other types converted to it during assignment.
+	// See `TableColumnStyle` description for more details.
 	ColumnStyle = "column-style"
 
-	// CellStyle is the constant for the "cell-style" property tag.
-	// The "cell-style" property sets the adapter which specifies styles of each table cell.
-	// This property can be assigned only by an implementation of TableCellStyle interface.
+	// CellStyle is the constant for "cell-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the adapter which specifies styles of each table cell. This property can be assigned only by an implementation of 
+	// `TableCellStyle` interface.
+	//
+	// Supported types: `TableCellStyle`.
 	CellStyle = "cell-style"
 
-	// CellPadding is the constant for the "cell-padding" property tag.
-	// The "cell-padding" Bounds property sets the padding area on all four sides of a table call at once.
-	// An element's padding area is the space between its content and its border.
+	// CellPadding is the constant for "cell-padding" property tag.
+	//
+	// Used by `TableView`.
+	// Sets the padding area on all four sides of a table cell at once. An element's padding area is the space between its 
+	// content and its border.
+	//
+	// Supported types: `BoundsProperty`, `Bounds`, `SizeUnit`, `float32`, `float64`, `int`.
+	//
+	// Internal type is `BoundsProperty`, other types converted to it during assignment.
+	// See `BoundsProperty`, `Bounds` and `SizeUnit` description for more details.
 	CellPadding = "cell-padding"
 
-	// CellPaddingLeft is the constant for the "cell-padding-left" property tag.
-	// The "cell-padding-left" SizeUnit property sets the width of the padding area to the left of a cell content.
-	// An element's padding area is the space between its content and its border.
+	// CellPaddingLeft is the constant for "cell-padding-left" property tag.
+	//
+	// Used by `TableView`.
+	// Set the width of the padding area to the left of a cell content. An element's padding area is the space between its 
+	// content and its border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellPaddingLeft = "cell-padding-left"
 
-	// CellPaddingRight is the constant for the "cell-padding-right" property tag.
-	// The "cell-padding-right" SizeUnit property sets the width of the padding area to the left of a cell content.
-	// An element's padding area is the space between its content and its border.
+	// CellPaddingRight is the constant for "cell-padding-right" property tag.
+	//
+	// Used by `TableView`.
+	// Set the width of the padding area to the left of a cell content. An element's padding area is the space between its 
+	// content and its border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellPaddingRight = "cell-padding-right"
 
-	// CellPaddingTop is the constant for the "cell-padding-top" property tag.
-	// The "cell-padding-top" SizeUnit property sets the height of the padding area to the top of a cell content.
-	// An element's padding area is the space between its content and its border.
+	// CellPaddingTop is the constant for "cell-padding-top" property tag.
+	//
+	// Used by `TableView`.
+	// Set the height of the padding area to the top of a cell content. An element's padding area is the space between its 
+	// content and its border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellPaddingTop = "cell-padding-top"
 
-	// CellPaddingBottom is the constant for the "cell-padding-bottom" property tag.
-	// The "cell-padding-bottom" SizeUnit property sets the height of the padding area to the bottom of a cell content.
+	// CellPaddingBottom is the constant for "cell-padding-bottom" property tag.
+	//
+	// Used by `TableView`.
+	// Set the height of the padding area to the bottom of a cell content.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellPaddingBottom = "cell-padding-bottom"
 
-	// CellBorder is the constant for the "cell-border" property tag.
-	// The "cell-border" property sets a table cell's border. It sets the values of a border width, style, and color.
-	// This property can be assigned a value of BorderProperty type, or ViewBorder type, or BorderProperty text representation.
+	// CellBorder is the constant for "cell-border" property tag.
+	//
+	// Used by `TableView`.
+	// Set a table cell's border. It sets the values of a border width, style, and color. Can also be used when setting 
+	// parameters in properties "row-style", "column-style", "foot-style" and "head-style".
+	//
+	// Supported types: `BorderProperty`, `ViewBorder`, `ViewBorders`.
+	//
+	// Internal type is `BorderProperty`, other types converted to it during assignment.
+	// See `BorderProperty`, `ViewBorder` and `ViewBorders` description for more details.
 	CellBorder = "cell-border"
 
-	// CellBorderLeft is the constant for the "cell-border-left" property tag.
-	// The "cell-border-left" property sets a view's left border. It sets the values of a border width, style, and color.
-	// This property can be assigned a value of BorderProperty type, or ViewBorder type, or BorderProperty text representation.
+	// CellBorderLeft is the constant for "cell-border-left" property tag.
+	//
+	// Used by `TableView`.
+	// Set a view's left border. It sets the values of a border width, style, and color. This property can be assigned a value 
+	// of `BorderProperty`, `ViewBorder` types or `BorderProperty` text representation.
+	//
+	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	//
+	// Internal type is `BorderProperty`, other types converted to it during assignment.
+	// See `ViewBorder` and `BorderProperty` description for more details.
 	CellBorderLeft = "cell-border-left"
 
-	// CellBorderRight is the constant for the "cell-border-right" property tag.
-	// The "cell-border-right" property sets a view's right border. It sets the values of a border width, style, and color.
-	// This property can be assigned a value of BorderProperty type, or ViewBorder type, or BorderProperty text representation.
+	// CellBorderRight is the constant for "cell-border-right" property tag.
+	//
+	// Used by `TableView`.
+	// Set a view's right border. It sets the values of a border width, style, and color. This property can be assigned a 
+	// value of `BorderProperty`, `ViewBorder` types or `BorderProperty` text representation.
+	//
+	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	//
+	// Internal type is `BorderProperty`, other types converted to it during assignment.
+	// See `ViewBorder` and `BorderProperty` description for more details.
 	CellBorderRight = "cell-border-right"
 
-	// CellBorderTop is the constant for the "cell-border-top" property tag.
-	// The "cell-border-top" property sets a view's top border. It sets the values of a border width, style, and color.
-	// This property can be assigned a value of BorderProperty type, or ViewBorder type, or BorderProperty text representation.
+	// CellBorderTop is the constant for "cell-border-top" property tag.
+	//
+	// Used by `TableView`.
+	// Set a view's top border. It sets the values of a border width, style, and color. This property can be assigned a value 
+	// of `BorderProperty`, `ViewBorder` types or `BorderProperty` text representation.
+	//
+	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	//
+	// Internal type is `BorderProperty`, other types converted to it during assignment.
+	// See `ViewBorder` and `BorderProperty` description for more details.
 	CellBorderTop = "cell-border-top"
 
-	// CellBorderBottom is the constant for the "cell-border-bottom" property tag.
-	// The "cell-border-bottom" property sets a view's bottom border. It sets the values of a border width, style, and color.
-	// This property can be assigned a value of BorderProperty type, or ViewBorder type, or BorderProperty text representation.
+	// CellBorderBottom is the constant for "cell-border-bottom" property tag.
+	//
+	// Used by `TableView`.
+	// Set a view's bottom border. It sets the values of a border width, style, and color.
+	//
+	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	//
+	// Internal type is `BorderProperty`, other types converted to it during assignment.
+	// See `ViewBorder` and `BorderProperty` description for more details.
 	CellBorderBottom = "cell-border-bottom"
 
-	// CellBorderStyle is the constant for the "cell-border-style" property tag.
-	// The "cell-border-style" int property sets the line style for all four sides of a table cell's border.
-	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+	// CellBorderStyle is the constant for "cell-border-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line style for all four sides of a table cell's border. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	CellBorderStyle = "cell-border-style"
 
-	// CellBorderLeftStyle is the constant for the "cell-border-left-style" property tag.
-	// The "cell-border-left-style" int property sets the line style of a table cell's left border.
-	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+	// CellBorderLeftStyle is the constant for "cell-border-left-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line style of a table cell's left border. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	CellBorderLeftStyle = "cell-border-left-style"
 
-	// CellBorderRightStyle is the constant for the "cell-border-right-style" property tag.
-	// The "cell-border-right-style" int property sets the line style of a table cell's right border.
-	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+	// CellBorderRightStyle is the constant for "cell-border-right-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line style of a table cell's right border. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	CellBorderRightStyle = "cell-border-right-style"
 
-	// CellBorderTopStyle is the constant for the "cell-border-top-style" property tag.
-	// The "cell-border-top-style" int property sets the line style of a table cell's top border.
-	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+	// CellBorderTopStyle is the constant for "cell-border-top-style" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line style of a table cell's top border. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	CellBorderTopStyle = "cell-border-top-style"
 
-	// CellBorderBottomStyle is the constant for the "cell-border-bottom-style" property tag.
-	// The "cell-border-bottom-style" int property sets the line style of a table cell's bottom border.
-	// Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+	// CellBorderBottomStyle is the constant for "cell-border-bottom-style" property tag.
+	//
+	// Used by `TableView`.
+	// Sets the line style of a table cell's bottom border. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneLine`) or "none" - The border will not be drawn.
+	// `1`(`SolidLine`) or "solid" - Solid line as a border.
+	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
+	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
+	// `4`(`DoubleLine`) or "double" - Double line as a border.
 	CellBorderBottomStyle = "cell-border-bottom-style"
 
-	// CellBorderWidth is the constant for the "cell-border-width" property tag.
-	// The "cell-border-width" property sets the line width for all four sides of a table cell's border.
+	// CellBorderWidth is the constant for "cell-border-width" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line width for all four sides of a table cell's border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellBorderWidth = "cell-border-width"
 
-	// CellBorderLeftWidth is the constant for the "cell-border-left-width" property tag.
-	// The "cell-border-left-width" SizeUnit property sets the line width of a table cell's left border.
+	// CellBorderLeftWidth is the constant for "cell-border-left-width" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line width of a table cell's left border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellBorderLeftWidth = "cell-border-left-width"
 
-	// CellBorderRightWidth is the constant for the "cell-border-right-width" property tag.
-	// The "cell-border-right-width" SizeUnit property sets the line width of a table cell's right border.
+	// CellBorderRightWidth is the constant for "cell-border-right-width" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line width of a table cell's right border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellBorderRightWidth = "cell-border-right-width"
 
-	// CellBorderTopWidth is the constant for the "cell-border-top-width" property tag.
-	// The "cell-border-top-width" SizeUnit property sets the line width of a table cell's top border.
+	// CellBorderTopWidth is the constant for "cell-border-top-width" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line width of a table cell's top border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellBorderTopWidth = "cell-border-top-width"
 
-	// CellBorderBottomWidth is the constant for the "cell-border-bottom-width" property tag.
-	// The "cell-border-bottom-width" SizeUnit property sets the line width of a table cell's bottom border.
+	// CellBorderBottomWidth is the constant for "cell-border-bottom-width" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line width of a table cell's bottom border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	CellBorderBottomWidth = "cell-border-bottom-width"
 
-	// CellBorderColor is the constant for the "cell-border-color" property tag.
-	// The "cell-border-color" property sets the line color for all four sides of a table cell's border.
+	// CellBorderColor is the constant for "cell-border-color" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line color for all four sides of a table cell's border.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	CellBorderColor = "cell-border-color"
 
-	// CellBorderLeftColor is the constant for the "cell-border-left-color" property tag.
-	// The "cell-border-left-color" property sets the line color of a table cell's left border.
+	// CellBorderLeftColor is the constant for "cell-border-left-color" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line color of a table cell's left border.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	CellBorderLeftColor = "cell-border-left-color"
 
-	// CellBorderRightColor is the constant for the "cell-border-right-color" property tag.
-	// The "cell-border-right-color" property sets the line color of a table cell's right border.
+	// CellBorderRightColor is the constant for "cell-border-right-color" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line color of a table cell's right border.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	CellBorderRightColor = "cell-border-right-color"
 
-	// CellBorderTopColor is the constant for the "cell-border-top-color" property tag.
-	// The "cell-border-top-color" property sets the line color of a table cell's top border.
+	// CellBorderTopColor is the constant for "cell-border-top-color" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line color of a table cell's top border.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	CellBorderTopColor = "cell-border-top-color"
 
-	// CellBorderBottomColor is the constant for the "cell-border-bottom-color" property tag.
-	// The "cell-border-bottom-color" property sets the line color of a table cell's bottom border.
+	// CellBorderBottomColor is the constant for "cell-border-bottom-color" property tag.
+	//
+	// Used by `TableView`.
+	// Set the line color of a table cell's bottom border.
+	//
+	// Supported types: `Color`, `string`.
+	//
+	// Internal type is `Color`, other types converted to it during assignment.
+	// See `Color` description for more details.
 	CellBorderBottomColor = "cell-border-bottom-color"
 
-	// SelectionMode is the constant for the "selection-mode" property tag.
-	// The "selection-mode" int property sets the mode of the table elements selection.
-	// Valid values are NoneSelection (0), CellSelection (1), and RowSelection (2)
+	// SelectionMode is the constant for "selection-mode" property tag.
+	//
+	// Used by `TableView`.
+	// Sets the mode of the table elements selection. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneSelection`) or "none" - Table elements are not selectable. The table cannot receive input focus.
+	// `1`(`CellSelection`) or "cell" - One table cell can be selected(highlighted). The cell is selected interactively using the mouse or keyboard(using the cursor keys).
+	// `2`(`RowSelection`) or "row" - The entire table row can be selected (highlighted). The row is selected interactively using the mouse or keyboard (using the cursor keys).
 	SelectionMode = "selection-mode"
 
 	// TableCellClickedEvent is the constant for "table-cell-clicked" property tag.
-	// The "table-cell-clicked" event occurs when the user clicks on a table cell.
-	// The main listener format: func(TableView, int, int), where the second argument is the row number,
-	// and third argument is the column number.
+	//
+	// Used by `TableView`.
+	// Occur when the user clicks on a table cell.
+	//
+	// General listener format:
+	// `func(table rui.TableView, row, col int)`.
+	//
+	// where:
+	// table - Interface of a table view which generated this event,
+	// row - Row of the clicked cell,
+	// col - Column of the clicked cell.
+	//
+	// Allowed listener formats:
+	// `func(row, col int)`.
 	TableCellClickedEvent = "table-cell-clicked"
 
 	// TableCellSelectedEvent is the constant for "table-cell-selected" property tag.
-	// The "table-cell-selected" event occurs when a table cell becomes selected.
-	// The main listener format: func(TableView, int, int), where the second argument is the row number,
-	// and third argument is the column number.
+	//
+	// Used by `TableView`.
+	// Occur when a table cell becomes selected.
+	//
+	// General listener format:
+	// `func(table rui.TableView, row, col int)`.
+	//
+	// where:
+	// table - Interface of a table view which generated this event,
+	// row - Row of the selected cell,
+	// col - Column of the selected cell.
+	//
+	// Allowed listener formats:
+	// `func(row, col int)`.
 	TableCellSelectedEvent = "table-cell-selected"
 
 	// TableRowClickedEvent is the constant for "table-row-clicked" property tag.
-	// The "table-row-clicked" event occurs when the user clicks on a table row.
-	// The main listener format: func(TableView, int), where the second argument is the row number.
+	//
+	// Used by `TableView`.
+	// Occur when the user clicks on a table row.
+	//
+	// General listener format:
+	// `func(table rui.TableView, row int)`.
+	//
+	// where:
+	// table - Interface of a table view which generated this event,
+	// row - Clicked row.
+	//
+	// Allowed listener formats:
+	// `func(row int)`.
 	TableRowClickedEvent = "table-row-clicked"
 
 	// TableRowSelectedEvent is the constant for "table-row-selected" property tag.
-	// The "table-row-selected" event occurs when a table row becomes selected.
-	// The main listener format: func(TableView, int), where the second argument is the row number.
+	//
+	// Used by `TableView`.
+	// Occur when a table row becomes selected.
+	//
+	// General listener format:
+	// `func(table rui.TableView, row int)`.
+	//
+	// where:
+	// table - Interface of a table view which generated this event,
+	// row - Selected row.
+	//
+	// Allowed listener formats:
+	// `func(row int)`.
 	TableRowSelectedEvent = "table-row-selected"
 
-	// AllowSelection is the constant for the "allow-selection" property tag.
-	// The "allow-selection" property sets the adapter which specifies styles of each table row.
-	// This property can be assigned or by an implementation of TableAllowCellSelection
-	// or TableAllowRowSelection interface.
+	// AllowSelection is the constant for "allow-selection" property tag.
+	//
+	// Used by `TableView`.
+	// Set the adapter which specifies whether cell/row selection is allowed. This property can be assigned by an 
+	// implementation of `TableAllowCellSelection` or `TableAllowRowSelection` interface.
+	//
+	// Supported types: `TableAllowCellSelection`, `TableAllowRowSelection`.
+	//
+	// Internal type is either `TableAllowCellSelection`, `TableAllowRowSelection`, see their description for more details.
 	AllowSelection = "allow-selection"
 )
 

@@ -7,67 +7,124 @@ import (
 
 // Constants for [ViewFilter] specific properties and events
 const (
-	// Blur is the constant for the "blur" property tag of the ViewFilter interface.
-	// The "blur" float64 property applies a Gaussian blur. The value of radius defines the value
-	// of the standard deviation to the Gaussian function, or how many pixels on the screen blend
-	// into each other, so a larger value will create more blur. The lacuna value for interpolation is 0.
-	// The parameter is specified as a length in pixels.
+	// Blur is the constant for "blur" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Applies a Gaussian blur. The value of radius defines the value of the standard deviation to the Gaussian function, or 
+	// how many pixels on the screen blend into each other, so a larger value will create more blur. The lacuna value for 
+	// interpolation is 0. The parameter is specified as a length in pixels.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Blur = "blur"
 
-	// Brightness is the constant for the "brightness" property tag of the ViewFilter interface.
-	// The "brightness" float64 property applies a linear multiplier to input image, making it appear more
-	// or less bright. A value of 0% will create an image that is completely black.
-	// A value of 100% leaves the input unchanged. Other values are linear multipliers on the effect.
-	// Values of an amount over 100% are allowed, providing brighter results.
+	// Brightness is the constant for "brightness" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Applies a linear multiplier to input image, making it appear more or less bright. A value of 0% will create an image 
+	// that is completely black. A value of 100% leaves the input unchanged. Other values are linear multipliers on the 
+	// effect. Values of an amount over 100% are allowed, providing brighter results.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Brightness = "brightness"
 
-	// Contrast is the constant for the "contrast" property tag of the ViewFilter interface.
-	// The "contrast" float64 property adjusts the contrast of the input.
-	// A value of 0% will create an image that is completely black. A value of 100% leaves the input unchanged.
-	// Values of amount over 100% are allowed, providing results with less contrast.
+	// Contrast is the constant for "contrast" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Adjusts the contrast of the input. A value of 0% will create an image that is completely black. A value of 100% leaves 
+	// the input unchanged. Values of amount over 100% are allowed, providing results with less contrast.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Contrast = "contrast"
 
-	// DropShadow is the constant for the "drop-shadow" property tag of the ViewFilter interface.
-	// The "drop-shadow" property applies a drop shadow effect to the input image.
-	// A drop shadow is effectively a blurred, offset version of the input image's alpha mask
-	// drawn in a particular color, composited below the image.
-	// Shadow parameters are set using the ViewShadow interface
+	// DropShadow is the constant for "drop-shadow" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Applies a drop shadow effect to the input image. A drop shadow is effectively a blurred, offset version of the input 
+	// image's alpha mask drawn in a particular color, composited below the image. Shadow parameters are set using the 
+	// `ViewShadow` interface.
+	//
+	// Supported types: `[]ViewShadow`, `ViewShadow`, `string`.
+	//
+	// Internal type is `[]ViewShadow`, other types converted to it during assignment.
+	// See `ViewShadow` description for more details.
+	//
+	// Conversion rules:
+	// `[]ViewShadow` - stored as is, no conversion performed.
+	// `ViewShadow` - converted to `[]ViewShadow`.
+	// `string` - string representation of `ViewShadow`. Example: "_{blur = 1em, color = black, spread-radius = 0.5em}".
 	DropShadow = "drop-shadow"
 
-	// Grayscale is the constant for the "grayscale" property tag of the ViewFilter interface.
-	// The "grayscale" float64 property converts the input image to grayscale.
-	// The value of ‘amount’ defines the proportion of the conversion.
-	// A value of 100% is completely grayscale. A value of 0% leaves the input unchanged.
-	// Values between 0% and 100% are linear multipliers on the effect.
+	// Grayscale is the constant for "grayscale" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Converts the input image to grayscale. The value of ‘amount’ defines the proportion of the conversion. A value of 100% 
+	// is completely grayscale. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on 
+	// the effect.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Grayscale = "grayscale"
 
-	// HueRotate is the constant for the "hue-rotate" property tag of the ViewFilter interface.
-	// The "hue-rotate" AngleUnit property applies a hue rotation on the input image.
-	// The value of ‘angle’ defines the number of degrees around the color circle the input samples will be adjusted.
-	// A value of 0deg leaves the input unchanged. If the ‘angle’ parameter is missing, a value of 0deg is used.
-	// Though there is no maximum value, the effect of values above 360deg wraps around.
+	// HueRotate is the constant for "hue-rotate" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Applies a hue rotation on the input image. The value of ‘angle’ defines the number of degrees around the color circle 
+	// the input samples will be adjusted. A value of 0deg leaves the input unchanged. If the ‘angle’ parameter is missing, a 
+	// value of 0deg is used. Though there is no maximum value, the effect of values above 360deg wraps around.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	HueRotate = "hue-rotate"
 
-	// Invert is the constant for the "invert" property tag of the ViewFilter interface.
-	// The "invert" float64 property inverts the samples in the input image.
-	// The value of ‘amount’ defines the proportion of the conversion.
-	// A value of 100% is completely inverted. A value of 0% leaves the input unchanged.
-	// Values between 0% and 100% are linear multipliers on the effect.
+	// Invert is the constant for "invert" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Inverts the samples in the input image. The value of ‘amount’ defines the proportion of the conversion. A value of 100% 
+	// is completely inverted. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on 
+	// the effect.
+	//
+	// Supported types: `float64`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Invert = "invert"
 
-	// Saturate is the constant for the "saturate" property tag of the ViewFilter interface.
-	// The "saturate" float64 property saturates the input image.
-	// The value of ‘amount’ defines the proportion of the conversion.
-	// A value of 0% is completely un-saturated. A value of 100% leaves the input unchanged.
-	// Other values are linear multipliers on the effect.
-	// Values of amount over 100% are allowed, providing super-saturated results.
+	// Saturate is the constant for "saturate" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Saturates the input image. The value of ‘amount’ defines the proportion of the conversion. A value of 0% is completely 
+	// un-saturated. A value of 100% leaves the input unchanged. Other values are linear multipliers on the effect. Values of 
+	// amount over 100% are allowed, providing super-saturated results.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Saturate = "saturate"
 
-	// Sepia is the constant for the "sepia" property tag of the ViewFilter interface.
-	// The "sepia" float64 property converts the input image to sepia.
-	// The value of ‘amount’ defines the proportion of the conversion.
-	// A value of 100% is completely sepia. A value of 0% leaves the input unchanged.
-	// Values between 0% and 100% are linear multipliers on the effect.
+	// Sepia is the constant for "sepia" property tag.
+	//
+	// Used by `ViewFilter`.
+	// Converts the input image to sepia. The value of ‘amount’ defines the proportion of the conversion. A value of 100% is 
+	// completely sepia. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on the 
+	// effect.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	Sepia = "sepia"
 
 	//Opacity = "opacity"

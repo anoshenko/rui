@@ -9,24 +9,86 @@ import (
 // Constants for [TimePicker] specific properties and events.
 const (
 	// TimeChangedEvent is the constant for "time-changed" property tag.
-	// The "time-changed" event occur when current time of the [TimePicker] has been changed.
-	// The main listener format: func(picker TimePicker, newTime, oldTime time.Time).
+	//
+	// Used by `TimePicker`.
+	// Occur when current time of the time picker has been changed.
+	//
+	// General listener format:
+	// `func(picker rui.TimePicker, newTime, oldTime time.Time)`.
+	//
+	// where:
+	// picker - Interface of a time picker which generated this event,
+	// newTime - New time value,
+	// oldTime - Old time value.
+	//
+	// Allowed listener formats:
+	// `func(picker rui.TimePicker, newTime time.Time)`,
+	// `func(newTime, oldTime time.Time)`,
+	// `func(newTime time.Time)`,
+	// `func(picker rui.TimePicker)`,
+	// `func()`.
 	TimeChangedEvent = "time-changed"
 
 	// TimePickerMin is the constant for "time-picker-min" property tag.
-	// The "time-picker-min" define the minimum value of the time.
+	//
+	// Used by `TimePicker`.
+	// The minimum value of the time.
+	//
+	// Supported types: `time.Time`, `string`.
+	//
+	// Internal type is `time.Time`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - values of this type parsed and converted to `time.Time`. The following formats are supported:
+	// "HH:MM:SS" - "08:15:00".
+	// "HH:MM:SS PM" - "08:15:00 AM".
+	// "HH:MM" - "08:15".
+	// "HH:MM PM" - "08:15 AM".
 	TimePickerMin = "time-picker-min"
 
 	// TimePickerMax is the constant for "time-picker-max" property tag.
-	// The "time-picker-max" define the maximum value of the time.
+	//
+	// Used by `TimePicker`.
+	// The maximum value of the time.
+	//
+	// Supported types: `time.Time`, `string`.
+	//
+	// Internal type is `time.Time`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - values of this type parsed and converted to `time.Time`. The following formats are supported:
+	// "HH:MM:SS" - "08:15:00".
+	// "HH:MM:SS PM" - "08:15:00 AM".
+	// "HH:MM" - "08:15".
+	// "HH:MM PM" - "08:15 AM".
 	TimePickerMax = "time-picker-max"
 
 	// TimePickerStep is the constant for "time-picker-step" property tag.
-	// The "time-picker-step" define time step in seconds.
+	//
+	// Used by `TimePicker`.
+	// Time step in seconds.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// >= `0` or >= "0" - Step value in seconds used to increment or decrement time.
 	TimePickerStep = "time-picker-step"
 
 	// TimePickerValue is the constant for "time-picker-value" property tag.
-	// The "time-picker-value" define current value of the TimePicker.
+	//
+	// Used by `TimePicker`.
+	// Current value.
+	//
+	// Supported types: `time.Time`, `string`.
+	//
+	// Internal type is `time.Time`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - values of this type parsed and converted to `time.Time`. The following formats are supported:
+	// "HH:MM:SS" - "08:15:00".
+	// "HH:MM:SS PM" - "08:15:00 AM".
+	// "HH:MM" - "08:15".
+	// "HH:MM PM" - "08:15 AM".
 	TimePickerValue = "time-picker-value"
 
 	timeFormat = "15:04:05"

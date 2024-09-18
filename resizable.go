@@ -8,13 +8,31 @@ import (
 
 // Constants for [Resizable] specific properties and events
 const (
-	// Side is the constant for the "side" property tag.
-	// The "side" int property determines which side of the container is used to resize.
-	// The value of property is or-combination of TopSide (1), RightSide (2), BottomSide (4), and LeftSide (8)
+	// Side is the constant for "side" property tag.
+	//
+	// Used by `Resizable`.
+	// Determines which side of the container is used to resize. The value of property is an or-combination of values listed. 
+	// Default value is "all".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `1`(`TopSide`) or "top" - Top frame side.
+	// `2`(`RightSide`) or "right" - Right frame side.
+	// `4`(`BottomSide`) or "bottom" - Bottom frame side.
+	// `8`(`LeftSide`) or "left" - Left frame side.
+	// `15`(`AllSides`) or "all" - All frame sides.
 	Side = "side"
 
-	// ResizeBorderWidth is the constant for the "resize-border-width" property tag.
-	// The "ResizeBorderWidth" SizeUnit property determines the width of the resizing border
+	// ResizeBorderWidth is the constant for "resize-border-width" property tag.
+	//
+	// Used by `Resizable`.
+	// Specifies the width of the resizing border.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ResizeBorderWidth = "resize-border-width"
 )
 

@@ -4,12 +4,27 @@ import "strings"
 
 // Constants for [DetailsView] specific properties and events
 const (
-	// Summary is the constant for the "summary" property tag.
-	// The contents of the "summary" property are used as the label for the disclosure widget.
+	// Summary is the constant for "summary" property tag.
+	//
+	// Used by `DetailsView`.
+	// The content of this property is used as the label for the disclosure widget.
+	//
+	// Supported types: `string`, `View`.
+	//
+	// `string` - Summary as a text.
+	// `View` - Summary as a view, in this case it can be quite complex if needed.
 	Summary = "summary"
-	// Expanded is the constant for the "expanded" property tag.
-	// If the "expanded" boolean property is "true", then the content of view is visible.
-	// If the value is "false" then the content is collapsed.
+
+	// Expanded is the constant for "expanded" property tag.
+	//
+	// Used by `DetailsView`.
+	// Controls the content expanded state of the details view. Default value is `false`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Content is visible.
+	// `false` or `0` or "false", "no", "off", "0" - Content is collapsed(hidden).
 	Expanded = "expanded"
 )
 

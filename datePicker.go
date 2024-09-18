@@ -9,24 +9,104 @@ import (
 // Constants for [DatePicker] specific properties and events.
 const (
 	// DateChangedEvent is the constant for "date-changed" property tag.
-	// The "date-changed" event occur when [DatePicker] value has been changed.
-	// The main listener format: func(picker DatePicker, newDate, oldDate time.Time).
+	//
+	// Used by `DatePicker`.
+	// Occur when date picker value has been changed.
+	//
+	// General listener format:
+	// `func(picker rui.DatePicker, newDate, oldDate time.Time)`.
+	//
+	// where:
+	// picker - Interface of a date picker which generated this event,
+	// newDate - New date value,
+	// oldDate - Old date value.
+	//
+	// Allowed listener formats:
+	// `func(picker rui.DatePicker, newDate time.Time)`,
+	// `func(newDate, oldDate time.Time)`,
+	// `func(newDate time.Time)`,
+	// `func(picker rui.DatePicker)`,
+	// `func()`.
 	DateChangedEvent = "date-changed"
 
 	// DatePickerMin is the constant for "date-picker-min" property tag.
-	// The "date-picker-min" define minimum date value.
+	//
+	// Used by `DatePicker`.
+	// Minimum date value.
+	//
+	// Supported types: `time.Time`, `string`.
+	//
+	// Internal type is `time.Time`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - values of this type parsed and converted to `time.Time`. The following formats are supported:
+	// "YYYYMMDD" - "20240102".
+	// "Mon-DD-YYYY" - "Jan-02-24".
+	// "Mon-DD-YY" - "Jan-02-2024".
+	// "DD-Mon-YYYY" - "02-Jan-2024".
+	// "YYYY-MM-DD" - "2024-01-02".
+	// "Month DD, YYYY" - "January 02, 2024".
+	// "DD Month YYYY" - "02 January 2024".
+	// "MM/DD/YYYY" - "01/02/2024".
+	// "MM/DD/YY" - "01/02/24".
+	// "MMDDYY" - "010224".
 	DatePickerMin = "date-picker-min"
 
 	// DatePickerMax is the constant for "date-picker-max" property tag.
-	// The "date-picker-max" define maximum date value.
+	//
+	// Used by `DatePicker`.
+	// Maximum date value.
+	//
+	// Supported types: `time.Time`, `string`.
+	//
+	// Internal type is `time.Time`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - values of this type parsed and converted to `time.Time`. The following formats are supported:
+	// "YYYYMMDD" - "20240102".
+	// "Mon-DD-YYYY" - "Jan-02-24".
+	// "Mon-DD-YY" - "Jan-02-2024".
+	// "DD-Mon-YYYY" - "02-Jan-2024".
+	// "YYYY-MM-DD" - "2024-01-02".
+	// "Month DD, YYYY" - "January 02, 2024".
+	// "DD Month YYYY" - "02 January 2024".
+	// "MM/DD/YYYY" - "01/02/2024".
+	// "MM/DD/YY" - "01/02/24".
+	// "MMDDYY" - "010224".
 	DatePickerMax = "date-picker-max"
 
 	// DatePickerStep is the constant for "date-picker-step" property tag.
-	// The "date-picker-step" define date step value in days.
+	//
+	// Used by `DatePicker`.
+	// Date change step in days.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// >= `0` or >= "0" - Step value in days used to increment or decrement date.
 	DatePickerStep = "date-picker-step"
 
 	// DatePickerValue is the constant for "date-picker-value" property tag.
-	// The "date-picker-value" define current date value.
+	//
+	// Used by `DatePicker`.
+	// Current value.
+	//
+	// Supported types: `time.Time`, `string`.
+	//
+	// Internal type is `time.Time`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - values of this type parsed and converted to `time.Time`. The following formats are supported:
+	// "YYYYMMDD" - "20240102".
+	// "Mon-DD-YYYY" - "Jan-02-24".
+	// "Mon-DD-YY" - "Jan-02-2024".
+	// "DD-Mon-YYYY" - "02-Jan-2024".
+	// "YYYY-MM-DD" - "2024-01-02".
+	// "Month DD, YYYY" - "January 02, 2024".
+	// "DD Month YYYY" - "02 January 2024".
+	// "MM/DD/YYYY" - "01/02/2024".
+	// "MM/DD/YY" - "01/02/24".
+	// "MMDDYY" - "010224".
 	DatePickerValue = "date-picker-value"
 
 	dateFormat = "2006-01-02"

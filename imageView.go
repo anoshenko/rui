@@ -7,28 +7,55 @@ import (
 
 // Constants which represent [ImageView] specific properties and events
 const (
-	// LoadedEvent is the constant for the "loaded-event" property tag.
-	// The "loaded-event" event occurs event occurs when the image has been loaded.
+	// LoadedEvent is the constant for "loaded-event" property tag.
+	//
+	// Used by `ImageView`.
+	// Occur when the image has been loaded.
+	//
+	// General listener format:
+	// `func(image rui.ImageView)`.
+	//
+	// where:
+	// image - Interface of an image view which generated this event.
+	//
+	// Allowed listener formats:
+	// `func()`.
 	LoadedEvent = "loaded-event"
-	// ErrorEvent is the constant for the "error-event" property tag.
-	// The "error-event" event occurs event occurs when the image loading failed.
+
+	// ErrorEvent is the constant for "error-event" property tag.
+	//
+	// Used by `ImageView`.
+	// Occur when the image loading has been failed.
+	//
+	// General listener format:
+	// `func(image rui.ImageView)`.
+	//
+	// where:
+	// image - Interface of an image view which generated this event.
+	//
+	// Allowed listener formats:
+	// `func()`.
 	ErrorEvent = "error-event"
 
 	// NoneFit - value of the "object-fit" property of an ImageView. The replaced content is not resized
 	NoneFit = 0
+
 	// ContainFit - value of the "object-fit" property of an ImageView. The replaced content
 	// is scaled to maintain its aspect ratio while fitting within the element’s content box.
 	// The entire object is made to fill the box, while preserving its aspect ratio, so the object
 	// will be "letterboxed" if its aspect ratio does not match the aspect ratio of the box.
 	ContainFit = 1
+
 	// CoverFit - value of the "object-fit" property of an ImageView. The replaced content
 	// is sized to maintain its aspect ratio while filling the element’s entire content box.
 	// If the object's aspect ratio does not match the aspect ratio of its box, then the object will be clipped to fit.
 	CoverFit = 2
+
 	// FillFit - value of the "object-fit" property of an ImageView. The replaced content is sized
 	// to fill the element’s content box. The entire object will completely fill the box.
 	// If the object's aspect ratio does not match the aspect ratio of its box, then the object will be stretched to fit.
 	FillFit = 3
+
 	// ScaleDownFit - value of the "object-fit" property of an ImageView. The content is sized as
 	// if NoneFit or ContainFit were specified, whichever would result in a smaller concrete object size.
 	ScaleDownFit = 4

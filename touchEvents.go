@@ -8,28 +8,76 @@ import (
 // Constants which represent [View] specific touch events properties
 const (
 	// TouchStart is the constant for "touch-start" property tag.
-	// The "touch-start" event is fired when one or more touch points are placed on the touch surface.
-	// The main listener format: func(View, TouchEvent).
-	// The additional listener formats: func(TouchEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired when one or more touch points are placed on the touch surface.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Touch event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.TouchEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	TouchStart = "touch-start"
 
 	// TouchEnd is the constant for "touch-end" property tag.
-	// The "touch-end" event fires when one or more touch points are removed from the touch surface.
-	// The main listener format: func(View, TouchEvent).
-	// The additional listener formats: func(TouchEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Fired when one or more touch points are removed from the touch surface.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Touch event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.TouchEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	TouchEnd = "touch-end"
 
 	// TouchMove is the constant for "touch-move" property tag.
-	// The "touch-move" event is fired when one or more touch points are moved along the touch surface.
-	// The main listener format: func(View, TouchEvent).
-	// The additional listener formats: func(TouchEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired when one or more touch points are moved along the touch surface.
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Touch event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.TouchEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	TouchMove = "touch-move"
 
 	// TouchCancel is the constant for "touch-cancel" property tag.
-	// The "touch-cancel" event is fired when one or more touch points have been disrupted
-	// in an implementation-specific manner (for example, too many touch points are created).
-	// The main listener format: func(View, TouchEvent).
-	// The additional listener formats: func(TouchEvent), func(View), and func().
+	//
+	// Used by `View`.
+	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many 
+	// touch points are created).
+	//
+	// General listener format:
+	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	// where:
+	// view - Interface of a view which generated this event,
+	// event - Touch event.
+	//
+	// Allowed listener formats:
+	// `func(event rui.TouchEvent)`,
+	// `func(view rui.View)`,
+	// `func()`.
 	TouchCancel = "touch-cancel"
 )
 
@@ -42,22 +90,26 @@ type Touch struct {
 
 	// X provides the horizontal coordinate within the view's viewport.
 	X float64
+
 	// Y provides the vertical coordinate within the view's viewport.
 	Y float64
 
 	// ClientX provides the horizontal coordinate within the application's viewport at which the event occurred.
 	ClientX float64
+
 	// ClientY provides the vertical coordinate within the application's viewport at which the event occurred.
 	ClientY float64
 
 	// ScreenX provides the horizontal coordinate (offset) of the touch pointer in global (screen) coordinates.
 	ScreenX float64
+
 	// ScreenY provides the vertical coordinate (offset) of the touch pointer in global (screen) coordinates.
 	ScreenY float64
 
 	// RadiusX is the X radius of the ellipse that most closely circumscribes the area of contact with the screen.
 	// The value is in pixels of the same scale as screenX.
 	RadiusX float64
+
 	// RadiusY is the Y radius of the ellipse that most closely circumscribes the area of contact with the screen.
 	// The value is in pixels of the same scale as screenX.
 	RadiusY float64

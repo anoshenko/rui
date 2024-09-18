@@ -7,92 +7,384 @@ import (
 
 // Constants for [RadiusProperty] specific properties
 const (
-	// Radius is the SizeUnit view property that determines the corners rounding radius
-	// of an element's outer border edge.
+	// Radius is the constant for "radius" property tag.
+	//
+	// Used by `View`, `BackgroundElement`, `ClipShape`.
+	//
+	// Usage in `View`:
+	// Specifies the corners rounding radius of an element's outer border edge.
+	//
+	// Supported types: `RadiusProperty`, `SizeUnit`, `SizeFunc`, `BoxRadius`, `string`, `float`, `int`.
+	//
+	// Internal type is either `RadiusProperty` or `SizeUnit`, other types converted to them during assignment.
+	// See `RadiusProperty`, `SizeUnit`, `SizeFunc` and `BoxRadius` description for more details.
+	//
+	// Conversion rules:
+	// `RadiusProperty` - stored as is, no conversion performed.
+	// `SizeUnit` - stored as is and set all corners to have the same value.
+	// `BoxRadius` - a new `RadiusProperty` will be created and all corresponding elliptical radius values will be set.
+	// `string` - if one value will be provided then it will be set as a radius for all corners. If two values will be provided divided by (`/`) then x and y radius will be set for all corners. Examples: "1em", "1em/0.5em", "2/4". Values which doesn't have size prefix will use size in pixels by default.
+	// `float` - values of this type will set radius for all corners in pixels.
+	// `int` - values of this type will set radius for all corners in pixels.
+	//
+	// Usage in `BackgroundElement`:
+	// Same as "radial-gradient-radius".
+	//
+	// Usage in `ClipShape`:
+	// Specifies the radius of the corners or the radius of the cropping area.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	Radius = "radius"
-	// RadiusX is the SizeUnit view property that determines the x-axis corners elliptic rounding
-	// radius of an element's outer border edge.
+
+	// RadiusX is the constant for "radius-x" property tag.
+	//
+	// Used by `View`, `ClipShape`.
+	//
+	// Usage in `View`:
+	// Specifies the x-axis corners elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `ClipShape`:
+	// Specifies the x-axis corners elliptic rounding radius of the elliptic clip shape.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusX = "radius-x"
-	// RadiusY is the SizeUnit view property that determines the y-axis corners elliptic rounding
-	// radius of an element's outer border edge.
+
+	// RadiusY is the constant for "radius-y" property tag.
+	//
+	// Used by `View`, `ClipShape`.
+	//
+	// Usage in `View`:
+	// Specifies the y-axis corners elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `ClipShape`:
+	// Specifies the y-axis corners elliptic rounding radius of of the elliptic clip shape.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusY = "radius-y"
-	// RadiusTopLeft is the SizeUnit view property that determines the top-left corner rounding radius
-	// of an element's outer border edge.
+
+	// RadiusTopLeft is the constant for "radius-top-left" property tag.
+	//
+	// Used by `View`.
+	// Specifies the top-left corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusTopLeft = "radius-top-left"
-	// RadiusTopLeftX is the SizeUnit view property that determines the x-axis top-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusTopLeftX is the constant for "radius-top-left-x" property tag.
+	//
+	// Used by `View`.
+	// Specifies the x-axis top-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusTopLeftX = "radius-top-left-x"
-	// RadiusTopLeftY is the SizeUnit view property that determines the y-axis top-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusTopLeftY is the constant for "radius-top-left-y" property tag.
+	//
+	// Used by `View`.
+	// Specifies the y-axis top-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusTopLeftY = "radius-top-left-y"
-	// RadiusTopRight is the SizeUnit view property that determines the top-right corner rounding radius
-	// of an element's outer border edge.
+
+	// RadiusTopRight is the constant for "radius-top-right" property tag.
+	//
+	// Used by `View`.
+	// Specifies the top-right corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusTopRight = "radius-top-right"
-	// RadiusTopRightX is the SizeUnit view property that determines the x-axis top-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusTopRightX is the constant for "radius-top-right-x" property tag.
+	//
+	// Used by `View`.
+	// Specifies the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusTopRightX = "radius-top-right-x"
-	// RadiusTopRightY is the SizeUnit view property that determines the y-axis top-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusTopRightY is the constant for "radius-top-right-y" property tag.
+	//
+	// Used by `View`.
+	// Specifies the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusTopRightY = "radius-top-right-y"
-	// RadiusBottomLeft is the SizeUnit view property that determines the bottom-left corner rounding radius
-	// of an element's outer border edge.
+
+	// RadiusBottomLeft is the constant for "radius-bottom-left" property tag.
+	//
+	// Used by `View`.
+	// Specifies the bottom-left corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusBottomLeft = "radius-bottom-left"
-	// RadiusBottomLeftX is the SizeUnit view property that determines the x-axis bottom-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusBottomLeftX is the constant for "radius-bottom-left-x" property tag.
+	//
+	// Used by `View`.
+	// Specifies the x-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusBottomLeftX = "radius-bottom-left-x"
-	// RadiusBottomLeftY is the SizeUnit view property that determines the y-axis bottom-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusBottomLeftY is the constant for "radius-bottom-left-y" property tag.
+	//
+	// Used by `View`.
+	// Specifies the y-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusBottomLeftY = "radius-bottom-left-y"
-	// RadiusBottomRight is the SizeUnit view property that determines the bottom-right corner rounding radius
-	// of an element's outer border edge.
+
+	// RadiusBottomRight is the constant for "radius-bottom-right" property tag.
+	//
+	// Used by `View`.
+	// Specifies the bottom-right corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusBottomRight = "radius-bottom-right"
-	// RadiusBottomRightX is the SizeUnit view property that determines the x-axis bottom-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusBottomRightX is the constant for "radius-bottom-right-x" property tag.
+	//
+	// Used by `View`.
+	// Specifies the x-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusBottomRightX = "radius-bottom-right-x"
-	// RadiusBottomRightY is the SizeUnit view property that determines the y-axis bottom-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// RadiusBottomRightY is the constant for "radius-bottom-right-y" property tag.
+	//
+	// Used by `View`.
+	// Specifies the y-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	RadiusBottomRightY = "radius-bottom-right-y"
-	// X is the SizeUnit property of the ShadowProperty that determines the x-axis corners elliptic rounding
-	// radius of an element's outer border edge.
+
+	// X is the constant for "x" property tag.
+	//
+	// Used by `ClipShape`, `RadiusProperty`.
+	//
+	// Usage in `ClipShape`:
+	// Specifies x-axis position of the clip shape.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `RadiusProperty`:
+	// Determines the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	X = "x"
-	// Y is the SizeUnit property of the ShadowProperty that determines the y-axis corners elliptic rounding
-	// radius of an element's outer border edge.
+
+	// Y is the constant for "y" property tag.
+	//
+	// Used by `ClipShape`, `RadiusProperty`.
+	//
+	// Usage in `ClipShape`:
+	// Specifies y-axis position of the clip shape.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `RadiusProperty`:
+	// Determines the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	Y = "y"
-	// TopLeft is the SizeUnit property of the ShadowProperty that determines the top-left corner rounding radius
-	// of an element's outer border edge.
+
+	// TopLeft is the constant for "top-left" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the top-left corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopLeft = "top-left"
-	// TopLeftX is the SizeUnit property of the ShadowProperty that determines the x-axis top-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// TopLeftX is the constant for "top-left-x" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the x-axis top-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopLeftX = "top-left-x"
-	// TopLeftY is the SizeUnit property of the ShadowProperty that determines the y-axis top-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// TopLeftY is the constant for "top-left-y" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the y-axis top-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopLeftY = "top-left-y"
-	// TopRight is the SizeUnit property of the ShadowProperty that determines the top-right corner rounding radius
-	// of an element's outer border edge.
+
+	// TopRight is the constant for "top-right" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the top-right corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopRight = "top-right"
-	// TopRightX is the SizeUnit property of the ShadowProperty that determines the x-axis top-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// TopRightX is the constant for "top-right-x" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopRightX = "top-right-x"
-	// TopRightY is the SizeUnit property of the ShadowProperty that determines the y-axis top-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// TopRightY is the constant for "top-right-y" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TopRightY = "top-right-y"
-	// BottomLeft is the SizeUnit property of the ShadowProperty that determines the bottom-left corner rounding radius
-	// of an element's outer border edge.
+
+	// BottomLeft is the constant for "bottom-left" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the bottom-left corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomLeft = "bottom-left"
-	// BottomLeftX is the SizeUnit property of the ShadowProperty that determines the x-axis bottom-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// BottomLeftX is the constant for "bottom-left-x" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the x-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomLeftX = "bottom-left-x"
-	// BottomLeftY is the SizeUnit property of the ShadowProperty that determines the y-axis bottom-left corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// BottomLeftY is the constant for "bottom-left-y" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the y-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomLeftY = "bottom-left-y"
-	// BottomRight is the SizeUnit property of the ShadowProperty that determines the bottom-right corner rounding radius
-	// of an element's outer border edge.
+
+	// BottomRight is the constant for "bottom-right" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the bottom-right corner rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomRight = "bottom-right"
-	// BottomRightX is the SizeUnit property of the ShadowProperty that determines the x-axis bottom-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// BottomRightX is the constant for "bottom-right-x" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the x-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomRightX = "bottom-right-x"
-	// BottomRightY is the SizeUnit property of the ShadowProperty that determines the y-axis bottom-right corner elliptic
-	// rounding radius of an element's outer border edge.
+
+	// BottomRightY is the constant for "bottom-right-y" property tag.
+	//
+	// Used by `RadiusProperty`.
+	// Determines the y-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	BottomRightY = "bottom-right-y"
 )
 

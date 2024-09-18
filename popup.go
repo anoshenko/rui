@@ -6,59 +6,152 @@ import (
 
 // Constants for [Popup] specific properties and events
 const (
-	// Title is the constant for the "title" property tag.
-	// The "title" property is defined the Popup/Tabs title
+	// Title is the constant for "title" property tag.
+	//
+	// Used by `Popup`, `TabsLayout`.
+	//
+	// Usage in `Popup`:
+	// Define the title.
+	//
+	// Supported types: `string`.
+	//
+	// Usage in `TabsLayout`:
+	// Set the title of the tab. The property is set for the child view of `TabsLayout`.
+	//
+	// Supported types: `string`.
 	Title = "title"
 
-	// TitleStyle is the constant for the "title-style" property tag.
-	// The "title-style" string property is used to set the title style of the Popup.
+	// TitleStyle is the constant for "title-style" property tag.
+	//
+	// Used by `Popup`.
+	// Set popup title style. Default title style is "ruiPopupTitle".
+	//
+	// Supported types: `string`.
 	TitleStyle = "title-style"
 
-	// CloseButton is the constant for the "close-button" property tag.
-	// The "close-button" bool property allow to add the close button to the Popup.
-	// Setting this property to "true" adds a window close button to the title bar (the default value is "false").
+	// CloseButton is the constant for "close-button" property tag.
+	//
+	// Used by `Popup`.
+	// Controls whether a close button can be added to the popup. Default value is `false`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Close button will be added to a title bar of a window.
+	// `false` or `0` or "false", "no", "off", "0" - Popup without a close button.
 	CloseButton = "close-button"
 
-	// OutsideClose is the constant for the "outside-close" property tag.
-	// The "outside-close" is a bool property. If it is set to "true",
-	// then clicking outside the popup window automatically calls the Dismiss() method.
+	// OutsideClose is the constant for "outside-close" property tag.
+	//
+	// Used by `Popup`.
+	// Controls whether popup can be closed by clicking outside of the window. Default value is `false`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Clicking outside the popup window will automatically call the `Dismiss()` method.
+	// `false` or `0` or "false", "no", "off", "0" - Clicking outside the popup window has no effect.
 	OutsideClose = "outside-close"
 
-	// Buttons is the constant for the "buttons" property tag.
-	// Using the "buttons" property you can add buttons that will be placed at the bottom of the Popup.
-	// The "buttons" property can be assigned the following data types: PopupButton and []PopupButton
+	// Buttons is the constant for "buttons" property tag.
+	//
+	// Used by `Popup`.
+	// Buttons that will be placed at the bottom of the popup.
+	//
+	// Supported types: `PopupButton`, `[]PopupButton`.
+	//
+	// Internal type is `[]PopupButton`, other types converted to it during assignment.
+	// See `PopupButton` description for more details.
 	Buttons = "buttons"
 
-	// ButtonsAlign is the constant for the "buttons-align" property tag.
-	// The "buttons-align" int property is used for set the horizontal alignment of Popup buttons.
-	// Valid values: LeftAlign (0), RightAlign (1), CenterAlign (2), and StretchAlign (3)
+	// ButtonsAlign is the constant for "buttons-align" property tag.
+	//
+	// Used by `Popup`.
+	// Set the horizontal alignment of popup buttons.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`LeftAlign`) or "left" - Left alignment.
+	// `1`(`RightAlign`) or "right" - Right alignment.
+	// `2`(`CenterAlign`) or "center" - Center alignment.
+	// `3`(`StretchAlign`) or "stretch" - Width alignment.
 	ButtonsAlign = "buttons-align"
 
-	// DismissEvent is the constant for the "dismiss-event" property tag.
-	// The "dismiss-event" event is used to track the closing of the Popup.
-	// It occurs after the Popup disappears from the screen.
-	// The main listener for this event has the following format: func(Popup)
+	// DismissEvent is the constant for "dismiss-event" property tag.
+	//
+	// Used by `Popup`.
+	// Used to track the closing state of the `Popup`. It occurs after the `Popup` disappears from the screen.
+	//
+	// General listener format:
+	// `func(popup rui.Popup)`.
+	//
+	// where:
+	// popup - Interface of a popup which generated this event.
+	//
+	// Allowed listener formats:
+	// `func()`.
 	DismissEvent = "dismiss-event"
 
-	// Arrow is the constant for the "arrow" property tag.
-	// Using the "popup-arrow" int property you can add ...
+	// Arrow is the constant for "arrow" property tag.
+	//
+	// Used by `Popup`.
+	// Add an arrow to popup. Default value is "none".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`NoneArrow`) or "none" - No arrow.
+	// `1`(`TopArrow`) or "top" - Arrow at the top side of the pop-up window.
+	// `2`(`RightArrow`) or "right" - Arrow on the right side of the pop-up window.
+	// `3`(`BottomArrow`) or "bottom" - Arrow at the bottom of the pop-up window.
+	// `4`(`LeftArrow`) or "left" - Arrow on the left side of the pop-up window.
 	Arrow = "arrow"
 
-	// ArrowAlign is the constant for the "arrow-align" property tag.
-	// The "arrow-align" int property is used for set the horizontal alignment of the Popup arrow.
-	// Valid values: LeftAlign (0), RightAlign (1), TopAlign (0), BottomAlign (1), CenterAlign (2)
+	// ArrowAlign is the constant for "arrow-align" property tag.
+	//
+	// Used by `Popup`.
+	// Set the horizontal alignment of the popup arrow. Default value is "center".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`TopAlign`/`LeftAlign`) or "top" - Top/left alignment.
+	// `1`(`BottomAlign`/`RightAlign`) or "bottom" - Bottom/right alignment.
+	// `2`(`CenterAlign`) or "center" - Center alignment.
 	ArrowAlign = "arrow-align"
 
-	// ArrowSize is the constant for the "arrow-size" property tag.
-	// The "arrow-size" SizeUnit property is used for set the size (length) of the Popup arrow.
+	// ArrowSize is the constant for "arrow-size" property tag.
+	//
+	// Used by `Popup`.
+	// Set the size(length) of the popup arrow. Default value is 16px defined by @ruiArrowSize constant.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ArrowSize = "arrow-size"
 
-	// ArrowWidth is the constant for the "arrow-width" property tag.
-	// The "arrow-width" SizeUnit property is used for set the width of the Popup arrow.
+	// ArrowWidth is the constant for "arrow-width" property tag.
+	//
+	// Used by `Popup`.
+	// Set the width of the popup arrow. Default value is 16px defined by @ruiArrowWidth constant.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ArrowWidth = "arrow-width"
 
-	// ArrowOffset is the constant for the "arrow-offset" property tag.
-	// The "arrow-offset" SizeUnit property is used for set the offset of the Popup arrow.
+	// ArrowOffset is the constant for "arrow-offset" property tag.
+	//
+	// Used by `Popup`.
+	// Set the offset of the popup arrow.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	ArrowOffset = "arrow-offset"
 
 	// NoneArrow is value of the popup "arrow" property: no arrow
@@ -85,8 +178,10 @@ const (
 const (
 	// NormalButton is the constant of the popup button type: the normal button
 	NormalButton PopupButtonType = 0
+
 	// DefaultButton is the constant of the popup button type: button that fires when the "Enter" key is pressed
 	DefaultButton PopupButtonType = 1
+
 	// CancelButton is the constant of the popup button type: button that fires when the "Escape" key is pressed
 	CancelButton PopupButtonType = 2
 )

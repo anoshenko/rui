@@ -8,94 +8,381 @@ import (
 
 // Constants for [Transform] specific properties
 const (
-	// Perspective is the name of the SizeUnit property that determines the distance between the z = 0 plane
-	// and the user in order to give a 3D-positioned element some perspective. Each 3D element
-	// with z > 0 becomes larger; each 3D-element with z < 0 becomes smaller.
-	// The default value is 0 (no 3D effects).
+	// Perspective is the constant for "perspective" property tag.
+	//
+	// Used by `View`.
+	// Distance between the z-plane and the user in order to give a 3D-positioned element some perspective. Each 3D element 
+	// with z > 0 becomes larger, each 3D-element with z < 0 becomes smaller. The default value is 0 (no 3D effects).
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	Perspective = "perspective"
 
-	// PerspectiveOriginX is the name of the SizeUnit property that determines the x-coordinate of the position
-	// at which the viewer is looking. It is used as the vanishing point by the Perspective property.
-	// The default value is 50%.
+	// PerspectiveOriginX is the constant for "perspective-origin-x" property tag.
+	//
+	// Used by `View`.
+	// x-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective" 
+	// property. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	PerspectiveOriginX = "perspective-origin-x"
 
-	// PerspectiveOriginY is the name of the SizeUnit property that determines the y-coordinate of the position
-	// at which the viewer is looking. It is used as the vanishing point by the Perspective property.
-	// The default value is 50%.
+	// PerspectiveOriginY is the constant for "perspective-origin-y" property tag.
+	//
+	// Used by `View`.
+	// y-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective" 
+	// property. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	PerspectiveOriginY = "perspective-origin-y"
 
-	// BackfaceVisible is the name of the bool property that sets whether the back face of an element is
-	// visible when turned towards the user. Values:
-	// true - the back face is visible when turned towards the user (default value);
-	// false - the back face is hidden, effectively making the element invisible when turned away from the user.
+	// BackfaceVisible is the constant for "backface-visibility" property tag.
+	//
+	// Used by `View`.
+	// Controls whether the back face of a view is visible when turned towards the user. Default value is `true`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Back face is visible when turned towards the user.
+	// `false` or `0` or "false", "no", "off", "0" - Back face is hidden, effectively making the view invisible when turned away from the user.
 	BackfaceVisible = "backface-visibility"
 
-	// OriginX is the name of the SizeUnit property that determines the x-coordinate of the point around which
-	// a view transformation is applied.
-	// The default value is 50%.
+	// OriginX is the constant for "origin-x" property tag.
+	//
+	// Used by `View`.
+	// x-coordinate of the point around which a view transformation is applied. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	OriginX = "origin-x"
 
-	// OriginY is the name of the SizeUnit property that determines the y-coordinate of the point around which
-	// a view transformation is applied.
-	// The default value is 50%.
+	// OriginY is the constant for "origin-y" property tag.
+	//
+	// Used by `View`.
+	// y-coordinate of the point around which a view transformation is applied. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	OriginY = "origin-y"
 
-	// OriginZ is the name of the SizeUnit property that determines the z-coordinate of the point around which
-	// a view transformation is applied.
-	// The default value is 50%.
+	// OriginZ is the constant for "origin-z" property tag.
+	//
+	// Used by `View`.
+	// z-coordinate of the point around which a view transformation is applied. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	OriginZ = "origin-z"
 
-	// TransformTag is the name of the Transform property that specify the x-, y-, and z-axis translation values,
-	// the x-, y-, and z-axis scaling values, the angle to use to distort the element along the abscissa and ordinate,
-	// the angle of the view rotation
+	// TransformTag is the constant for "transform" property tag.
+	//
+	// Used by `View`.
+	// Specify translation, scale and rotation over x, y and z axes as well as a distorsion of a view along x and y axes.
+	//
+	// Supported types: `Transform`, `string`.
+	//
+	// See `Transform` description for more details.
+	//
+	// Conversion rules:
+	// `Transform` - stored as is, no conversion performed.
+	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
 	TransformTag = "transform"
 
-	// TranslateX is the name of the SizeUnit property that specify the x-axis translation value
-	// of a 2D/3D translation
+	// TranslateX is the constant for "translate-x" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// x-axis translation value of a 2D/3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `Transform`:
+	// x-axis translation value of a 2D/3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TranslateX = "translate-x"
 
-	// TranslateY is the name of the SizeUnit property that specify the y-axis translation value
-	// of a 2D/3D translation
+	// TranslateY is the constant for "translate-y" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// y-axis translation value of a 2D/3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `Transform`:
+	// x-axis translation value of a 2D/3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TranslateY = "translate-y"
 
-	// TranslateZ is the name of the SizeUnit property that specify the z-axis translation value
-	// of a 3D translation
+	// TranslateZ is the constant for "translate-z" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// z-axis translation value of a 3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	//
+	// Usage in `Transform`:
+	// z-axis translation value of a 3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
 	TranslateZ = "translate-z"
 
-	// ScaleX is the name of the float property that specify the x-axis scaling value of a 2D/3D scale
-	// The default value is 1.
+	// ScaleX is the constant for "scale-x" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	//
+	// Usage in `Transform`:
+	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	ScaleX = "scale-x"
 
-	// ScaleY is the name of the float property that specify the y-axis scaling value of a 2D/3D scale
-	// The default value is 1.
+	// ScaleY is the constant for "scale-y" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	//
+	// Usage in `Transform`:
+	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	ScaleY = "scale-y"
 
-	// ScaleZ is the name of the float property that specify the z-axis scaling value of a 3D scale
-	// The default value is 1.
+	// ScaleZ is the constant for "scale-z" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	//
+	// Usage in `Transform`:
+	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	ScaleZ = "scale-z"
 
-	// Rotate is the name of the AngleUnit property that determines the angle of the view rotation.
-	// A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise one.
+	// Rotate is the constant for "rotate" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// Angle of the view rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	//
+	// Usage in `Transform`:
+	// Angle of the view rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	Rotate = "rotate"
 
-	// RotateX is the name of the float property that determines the x-coordinate of the vector denoting
-	// the axis of rotation which could between 0 and 1.
+	// RotateX is the constant for "rotate-x" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// x-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	//
+	// Usage in `Transform`:
+	// x-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	RotateX = "rotate-x"
 
-	// RotateY is the name of the float property that determines the y-coordinate of the vector denoting
-	// the axis of rotation which could between 0 and 1.
+	// RotateY is the constant for "rotate-y" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// y-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	//
+	// Usage in `Transform`:
+	// y-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	RotateY = "rotate-y"
 
-	// RotateZ is the name of the float property that determines the z-coordinate of the vector denoting
-	// the axis of rotation which could between 0 and 1.
+	// RotateZ is the constant for "rotate-z" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// z-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	//
+	// Usage in `Transform`:
+	// z-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	RotateZ = "rotate-z"
 
-	// SkewX is the name of the AngleUnit property that representing the angle to use to distort
-	// the element along the abscissa. The default value is 0.
+	// SkewX is the constant for "skew-x" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// Angle to use to distort the element along the abscissa. The default value is 0.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	//
+	// Usage in `Transform`:
+	// Angle to use to distort the element along the abscissa. The default value is 0.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	SkewX = "skew-x"
 
-	// SkewY is the name of the AngleUnit property that representing the angle to use to distort
-	// the element along the ordinate. The default value is 0.
+	// SkewY is the constant for "skew-y" property tag.
+	//
+	// Used by `View`, `Transform`.
+	//
+	// Usage in `View`:
+	// Angle to use to distort the element along the ordinate. The default value is 0.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	//
+	// Usage in `Transform`:
+	// Angle to use to distort the element along the ordinate. The default value is 0.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	SkewY = "skew-y"
 )
 

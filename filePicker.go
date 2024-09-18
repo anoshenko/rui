@@ -10,13 +10,47 @@ import (
 // Constants for [FilePicker] specific properties and events
 const (
 	// FileSelectedEvent is the constant for "file-selected-event" property tag.
-	// The "file-selected-event" is fired when user selects file(s) in the FilePicker.
+	//
+	// Used by `FilePicker`.
+	// Fired when user selects file(s).
+	//
+	// General listener format:
+	// `func(picker rui.FilePicker, files []rui.FileInfo)`.
+	//
+	// where:
+	// picker - Interface of a file picker which generated this event,
+	// files - Array of description of selected files.
+	//
+	// Allowed listener formats:
+	// `func(picker rui.FilePicker)`,
+	// `func(files []rui.FileInfo)`,
+	// `func()`.
 	FileSelectedEvent = "file-selected-event"
+
 	// Accept is the constant for "accept" property tag.
-	// The "accept" property of the FilePicker sets the list of allowed file extensions or MIME types.
+	//
+	// Used by `FilePicker`.
+	// Set the list of allowed file extensions or MIME types.
+	//
+	// Supported types: `string`, `[]string`.
+	//
+	// Internal type is `string`, other types converted to it during assignment.
+	//
+	// Conversion rules:
+	// `string` - may contain single value of multiple separated by comma(`,`).
+	// `[]string` - an array of acceptable file extensions or MIME types.
 	Accept = "accept"
+
 	// Multiple is the constant for "multiple" property tag.
-	// The "multiple" bool property of the FilePicker sets whether multiple files can be selected
+	//
+	// Used by `FilePicker`.
+	// Controls whether multiple files can be selected.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Several files can be selected.
+	// `false` or `0` or "false", "no", "off", "0" - Only one file can be selected.
 	Multiple = "multiple"
 )
 
@@ -24,10 +58,13 @@ const (
 type FileInfo struct {
 	// Name - the file's name.
 	Name string
+
 	// LastModified specifying the date and time at which the file was last modified
 	LastModified time.Time
+
 	// Size - the size of the file in bytes.
 	Size int64
+
 	// MimeType - the file's MIME type.
 	MimeType string
 }

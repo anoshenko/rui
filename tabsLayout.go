@@ -8,43 +8,105 @@ import (
 // Constants for [TabsLayout] specific properties and events
 const (
 	// CurrentTabChangedEvent is the constant for "current-tab-changed" property tag.
-	// The "current-tab-changed" event occurs when the new tab becomes active.
-	// The main listener format: func(TabsLayout, int, int), where
-	// the second argument is the index of the new active tab,
-	// the third argument is the index of the old active tab.
+	//
+	// Used by `TabsLayout`.
+	// Occur when the new tab becomes active.
+	//
+	// General listener format:
+	// `func(tabsLayout rui.TabsLayout, newTab, oldTab int)`.
+	//
+	// where:
+	// tabsLayout - Interface of a tabs layout which generated this event,
+	// newTab - Index of a new active tab,
+	// oldTab - Index of an old active tab.
+	//
+	// Allowed listener formats:
+	// `func(tabsLayout rui.TabsLayout, newTab int)`,
+	// `func(newTab, oldTab int)`,
+	// `func(newTab int)`,
+	// `func()`.
 	CurrentTabChangedEvent = "current-tab-changed"
 
 	// Icon is the constant for "icon" property tag.
-	// The string "icon" property defines the icon name that is displayed in the tab.
+	//
+	// Used by `TabsLayout`.
+	// Defines the icon name that is displayed in the tab. The property is set for the child view of `TabsLayout`.
+	//
+	// Supported types: `string`.
 	Icon = "icon"
 
 	// TabCloseButton is the constant for "tab-close-button" property tag.
-	// The "tab-close-button" is the bool property. If it is "true" then a close button is displayed within the tab.
+	//
+	// Used by `TabsLayout`.
+	// Controls whether to add close button to a tab(s). This property can be set separately for each child view or for tabs 
+	// layout itself. Property set for child view takes precedence over the value set for tabs layout. Default value is 
+	// `false`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Tab(s) has close button.
+	// `false` or `0` or "false", "no", "off", "0" - No close button in tab(s).
 	TabCloseButton = "tab-close-button"
 
 	// TabCloseEvent is the constant for "tab-close-event" property tag.
-	// The "tab-close-event" occurs when when the user clicks on the tab close button.
-	// The main listener format: func(TabsLayout, int), where the second argument is the index of the tab.
+	//
+	// Used by `TabsLayout`.
+	// Occurs when the user clicks on the tab close button.
+	//
+	// General listener format:
+	// `func(tabsLayout rui.TabsLayout, tab int)`.
+	//
+	// where:
+	// tabsLayout - Interface of a tabs layout which generated this event,
+	// tab - Index of the tab.
+	//
+	// Allowed listener formats:
+	// `func(tab int)`,
+	// `func(tabsLayout rui.TabsLayout)`,
+	// `func()`.
 	TabCloseEvent = "tab-close-event"
 
-	// Tabs is the constant for the "tabs" property tag.
-	// The "tabs" is the int property that sets where the tabs are located.
-	// Valid values: TopTabs (0), BottomTabs (1), LeftTabs (2), RightTabs (3), LeftListTabs (4), RightListTabs (5), and HiddenTabs (6).
+	// Tabs is the constant for "tabs" property tag.
+	//
+	// Used by `TabsLayout`.
+	// Sets where the tabs are located. Default value is "top".
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`TopTabs`) or "top" - Tabs on the top.
+	// `1`(`BottomTabs`) or "bottom" - Tabs on the bottom.
+	// `2`(`LeftTabs`) or "left" - Tabs on the left. Each tab is rotated 90° counterclockwise.
+	// `3`(`RightTabs`) or "right" - Tabs located on the right. Each tab is rotated 90° clockwise.
+	// `4`(`LeftListTabs`) or "left-list" - Tabs on the left. The tabs are displayed as a list.
+	// `5`(`RightListTabs`) or "right-list" - Tabs on the right. The tabs are displayed as a list.
+	// `6`(`HiddenTabs`) or "hidden" - Tabs are hidden.
 	Tabs = "tabs"
 
-	// TabBarStyle is the constant for the "tab-bar-style" property tag.
-	// The "tab-bar-style" is the string property that sets the style for the display of the tab bar.
-	// The default value is "ruiTabBar".
+	// TabBarStyle is the constant for "tab-bar-style" property tag.
+	//
+	// Used by `TabsLayout`.
+	// Set the style for the display of the tab bar. The default value is "ruiTabBar".
+	//
+	// Supported types: `string`.
 	TabBarStyle = "tab-bar-style"
 
-	// TabStyle is the constant for the "tab-style" property tag.
-	// The "tab-style" is the string property that sets the style for the display of the tab.
-	// The default value is "ruiTab" or "ruiVerticalTab".
+	// TabStyle is the constant for "tab-style" property tag.
+	//
+	// Used by `TabsLayout`.
+	// Set the style for the display of the tab. The default value is "ruiTab" or "ruiVerticalTab".
+	//
+	// Supported types: `string`.
 	TabStyle = "tab-style"
 
-	// CurrentTabStyle is the constant for the "current-tab-style" property tag.
-	// The "current-tab-style" is the string property that sets the style for the display of the current (selected) tab.
-	// The default value is "ruiCurrentTab" or "ruiCurrentVerticalTab".
+	// CurrentTabStyle is the constant for "current-tab-style" property tag.
+	//
+	// Used by `TabsLayout`.
+	// Set the style for the display of the current(selected) tab. The default value is "ruiCurrentTab" or 
+	// "ruiCurrentVerticalTab".
+	//
+	// Supported types: `string`.
 	CurrentTabStyle = "current-tab-style"
 
 	inactiveTabStyle = "data-inactiveTabStyle"
