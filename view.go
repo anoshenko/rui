@@ -54,6 +54,11 @@ type View interface {
 	// Scroll returns the location size of the scrollable view in pixels
 	Scroll() Frame
 
+	// SetParams sets properties with name "tag" of the "rootView" subview. Result:
+	// * true - all properties were set successful,
+	// * false - error (incompatible type or invalid format of a string value, see AppLog).
+	SetParams(params Params) bool
+
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
@@ -421,6 +426,24 @@ func (view *viewData) set(tag string, value any) bool {
 
 	view.propertyChangedEvent(tag)
 	return true
+}
+
+func (view *viewData) SetParams(params Params) bool {
+	if params == nil {
+		errorLog("Argument of function SetParams is nil")
+		return false
+	}
+
+	session := view.Session()
+	session.startUpdateScript(view.htmlID())
+	result := true
+	for _, tag := range params.AllTags() {
+		if value, ok := params[tag]; ok {
+			result = view.Set(tag, value) && result
+		}
+	}
+	session.finishUpdateScript(view.htmlID())
+	return result
 }
 
 func viewPropertyChanged(view *viewData, tag string) {

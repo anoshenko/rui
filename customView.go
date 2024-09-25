@@ -83,6 +83,10 @@ func (customView *CustomViewData) SetAnimated(tag string, value any, animation A
 	return customView.superView.SetAnimated(tag, value, animation)
 }
 
+func (customView *CustomViewData) SetParams(params Params) bool {
+	return customView.superView.SetParams(params)
+}
+
 // SetChangeListener set the function to track the change of the View property
 func (customView *CustomViewData) SetChangeListener(tag string, listener func(View, string)) {
 	customView.superView.SetChangeListener(tag, listener)

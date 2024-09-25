@@ -38,8 +38,8 @@ const (
 	// TabCloseButton is the constant for "tab-close-button" property tag.
 	//
 	// Used by `TabsLayout`.
-	// Controls whether to add close button to a tab(s). This property can be set separately for each child view or for tabs 
-	// layout itself. Property set for child view takes precedence over the value set for tabs layout. Default value is 
+	// Controls whether to add close button to a tab(s). This property can be set separately for each child view or for tabs
+	// layout itself. Property set for child view takes precedence over the value set for tabs layout. Default value is
 	// `false`.
 	//
 	// Supported types: `bool`, `int`, `string`.
@@ -103,7 +103,7 @@ const (
 	// CurrentTabStyle is the constant for "current-tab-style" property tag.
 	//
 	// Used by `TabsLayout`.
-	// Set the style for the display of the current(selected) tab. The default value is "ruiCurrentTab" or 
+	// Set the style for the display of the current(selected) tab. The default value is "ruiCurrentTab" or
 	// "ruiCurrentVerticalTab".
 	//
 	// Supported types: `string`.
@@ -925,24 +925,24 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		buffer.WriteString(`-page`)
 		buffer.WriteString(strconv.Itoa(n))
 
+		if current != n {
+			buffer.WriteString(`" style="display: grid; align-items: stretch; justify-items: stretch; visibility: hidden; `)
+		} else {
+			buffer.WriteString(`" style="display: grid; align-items: stretch; justify-items: stretch; `)
+		}
+
 		switch location {
 		case LeftTabs, LeftListTabs:
-			buffer.WriteString(`" style="position: relative; grid-row-start: 1; grid-row-end: 2; grid-column-start: 2; grid-column-end: 3;`)
+			buffer.WriteString(`grid-row-start: 1; grid-row-end: 2; grid-column-start: 2; grid-column-end: 3;">`)
 
 		case TopTabs:
-			buffer.WriteString(`" style="position: relative; grid-row-start: 2; grid-row-end: 3; grid-column-start: 1; grid-column-end: 2;`)
+			buffer.WriteString(`grid-row-start: 2; grid-row-end: 3; grid-column-start: 1; grid-column-end: 2;">`)
 
 		default:
-			buffer.WriteString(`" style="position: relative; grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;`)
+			buffer.WriteString(`grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;">`)
 		}
 
-		if current != n {
-			buffer.WriteString(` display: none;`)
-		}
-		buffer.WriteString(`">`)
-
-		view.addToCSSStyle(map[string]string{`position`: `absolute`, `left`: `0`, `right`: `0`, `top`: `0`, `bottom`: `0`})
-		viewHTML(tabsLayout.views[n], buffer)
+		viewHTML(view, buffer)
 		buffer.WriteString(`</div>`)
 	}
 }

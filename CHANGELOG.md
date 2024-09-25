@@ -1,3 +1,6 @@
+# v0.18.0
+Added SetParams method to View interface
+
 # v0.17.0
 * Added "mod", "rem", "round", "round-up", "round-down", and "round-to-zero" SizeFunc functions
 * Added ModSize, RemSize, RoundSize, RoundUpSize, RoundDownSize, and RoundToZeroSize functions

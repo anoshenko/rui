@@ -251,22 +251,22 @@ function activateTab(layoutId, tabNumber) {
 	if (element) {
 		const currentNumber = element.getAttribute("data-current");
 		if (currentNumber != tabNumber) {
-			function setTab(number, styleProperty, display) {
+			function setTab(number, styleProperty, visibility) {
 				const tab = document.getElementById(layoutId + '-' + number);
 				if (tab) {	
 					tab.className = element.getAttribute(styleProperty);
 					const page = document.getElementById(tab.getAttribute("data-view"));
 					if (page) {
-						page.style.display = display;
+						page.style.visibility = visibility
 					}
 					return
 				}
 				const page = document.getElementById(layoutId + "-page" + number);
 				if (page) {
-					page.style.display = display;
+					page.style.visibility = visibility
 				}
 			}
-			setTab(currentNumber, "data-inactiveTabStyle", "none")
+			setTab(currentNumber, "data-inactiveTabStyle", "hidden")
 			setTab(tabNumber, "data-activeTabStyle", "");
 			element.setAttribute("data-current", tabNumber);
 			scanElementsSize()
