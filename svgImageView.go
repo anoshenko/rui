@@ -105,6 +105,34 @@ func (imageView *svgImageViewData) htmlTag() string {
 	return "div"
 }
 
+func (imageView *svgImageViewData) writeSvg(data []byte, buffer *strings.Builder) {
+	text := string(data)
+	index := strings.Index(text, "<svg")
+	if index > 0 {
+		text = text[index:]
+	}
+
+	index = strings.Index(text, "\n")
+	for index >= 0 {
+		if index > 0 && text[index-1] == '\r' {
+			buffer.WriteString(text[:index-1])
+		} else {
+			buffer.WriteString(text[:index])
+		}
+
+		end := len(text)
+		index++
+		for index < end && (text[index] == ' ' || text[index] == '\t' || text[index] == '\r' || text[index] == '\n') {
+			index++
+		}
+
+		text = text[index:]
+		index = strings.Index(text, "\n")
+	}
+
+	buffer.WriteString(text)
+}
+
 func (imageView *svgImageViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value := imageView.getRaw(Content); value != nil {
 		if content, ok := value.(string); ok && content != "" {
@@ -117,13 +145,13 @@ func (imageView *svgImageViewData) htmlSubviews(self View, buffer *strings.Build
 			if image, ok := resources.images[content]; ok {
 				if image.fs != nil {
 					if data, err := image.fs.ReadFile(image.path); err == nil {
-						buffer.WriteString(string(data))
+						imageView.writeSvg(data, buffer)
 						return
 					} else {
 						DebugLog(err.Error())
 					}
 				} else if data, err := os.ReadFile(image.path); err == nil {
-					buffer.WriteString(string(data))
+					imageView.writeSvg(data, buffer)
 					return
 				} else {
 					DebugLog(err.Error())
@@ -135,7 +163,7 @@ func (imageView *svgImageViewData) htmlSubviews(self View, buffer *strings.Build
 				if err == nil {
 					defer resp.Body.Close()
 					if body, err := io.ReadAll(resp.Body); err == nil {
-						buffer.WriteString(string(body))
+						imageView.writeSvg(body, buffer)
 						return
 					}
 				}
