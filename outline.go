@@ -19,6 +19,12 @@ type outlinePropertyData struct {
 	propertyList
 }
 
+// NewOutlineProperty creates the new OutlineProperty.
+// The following properties can be used:
+//
+// "color" (ColorTag). Determines the line color (Color);
+//
+// "width" (Width). Determines the line thickness (SizeUnit).
 func NewOutlineProperty(params Params) OutlineProperty {
 	outline := new(outlinePropertyData)
 	outline.properties = map[string]any{}

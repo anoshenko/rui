@@ -57,7 +57,14 @@ func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 	return nil
 }
 
-// NewColumnSeparator creates the new ColumnSeparatorProperty
+// NewColumnSeparator creates the new ColumnSeparatorProperty.
+// The following properties can be used:
+//
+// "style" (Style). Determines the line style (int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
+//
+// "color" (ColorTag). Determines the line color (Color);
+//
+// "width" (Width). Determines the line thickness (SizeUnit).
 func NewColumnSeparator(params Params) ColumnSeparatorProperty {
 	separator := new(columnSeparatorProperty)
 	separator.properties = map[string]any{}

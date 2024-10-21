@@ -19,7 +19,8 @@ type boundsPropertyData struct {
 	propertyList
 }
 
-// NewBoundsProperty creates the new BoundsProperty object
+// NewBoundsProperty creates the new BoundsProperty object.
+// The following SizeUnit properties can be used: "left" (Left), "right" (Right), "top" (Top), and "bottom" (Bottom).
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
 	bounds.properties = map[string]any{}

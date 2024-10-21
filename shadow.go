@@ -47,7 +47,7 @@ const (
 	// Inset is the constant for "inset" property tag.
 	//
 	// Used by `ViewShadow`.
-	// Controls whether to draw shadow inside the frame or outside. Inset shadows are drawn inside the border(even transparent 
+	// Controls whether to draw shadow inside the frame or outside. Inset shadows are drawn inside the border(even transparent
 	// ones), above the background, but below content.
 	//
 	// Supported types: `bool`, `int`, `string`.
@@ -82,7 +82,7 @@ const (
 	// BlurRadius is the constant for "blur" property tag.
 	//
 	// Used by `ViewShadow`.
-	// Determines the radius of the blur effect. The larger this value, the bigger the blur, so the shadow becomes bigger and 
+	// Determines the radius of the blur effect. The larger this value, the bigger the blur, so the shadow becomes bigger and
 	// lighter. Negative values are not allowed.
 	//
 	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
@@ -118,10 +118,14 @@ type viewShadowData struct {
 }
 
 // NewViewShadow create the new shadow for a view. Arguments:
-// offsetX, offsetY - x and y offset of the shadow
-// blurRadius - the blur radius of the shadow
-// spreadRadius - the spread radius of the shadow
-// color - the color of the shadow
+//
+// offsetX, offsetY is x and y offset of the shadow;
+//
+// blurRadius is the blur radius of the shadow;
+//
+// spreadRadius is the spread radius of the shadow;
+//
+// color is the color of the shadow.
 func NewViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Color) ViewShadow {
 	return NewShadowWithParams(Params{
 		XOffset:      offsetX,
@@ -133,10 +137,14 @@ func NewViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Co
 }
 
 // NewInsetViewShadow create the new inset shadow for a view. Arguments:
-// offsetX, offsetY - x and y offset of the shadow
-// blurRadius - the blur radius of the shadow
-// spreadRadius - the spread radius of the shadow
-// color - the color of the shadow
+//
+// offsetX, offsetY is x and y offset of the shadow;
+//
+// blurRadius is the blur radius of the shadow;
+//
+// spreadRadius is the spread radius of the shadow;
+//
+// color is the color of the shadow.
 func NewInsetViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Color) ViewShadow {
 	return NewShadowWithParams(Params{
 		XOffset:      offsetX,
@@ -149,9 +157,12 @@ func NewInsetViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, col
 }
 
 // NewTextShadow create the new text shadow. Arguments:
-// offsetX, offsetY - x and y offset of the shadow
-// blurRadius - the blur radius of the shadow
-// color - the color of the shadow
+//
+// offsetX, offsetY is the x- and y-offset of the shadow;
+//
+// blurRadius is the blur radius of the shadow;
+//
+// color is the color of the shadow.
 func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShadow {
 	return NewShadowWithParams(Params{
 		XOffset:    offsetX,
@@ -162,6 +173,19 @@ func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShado
 }
 
 // NewShadowWithParams create the new shadow for a view.
+// The following properties can be used:
+//
+// "color" (ColorTag). Determines the color of the shadow (Color);
+//
+// "x-offset" (XOffset). Determines the shadow horizontal offset (SizeUnit);
+//
+// "y-offset" (YOffset). Determines the shadow vertical offset (SizeUnit);
+//
+// "blur" (BlurRadius). Determines the radius of the blur effect (SizeUnit);
+//
+// "spread-radius" (SpreadRadius). Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
+//
+// "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
 func NewShadowWithParams(params Params) ViewShadow {
 	shadow := new(viewShadowData)
 	shadow.propertyList.init()
