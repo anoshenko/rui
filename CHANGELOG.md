@@ -1,3 +1,7 @@
+# v0.18.0
+* Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
+* Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.
+
 # v0.17.3
 Added SetParams method to View interface
 

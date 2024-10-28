@@ -6,39 +6,54 @@ import (
 	"strings"
 )
 
+// LineJoin is the type for setting the shape used to join two line segments where they meet.
+type LineJoin int
+
+// LineCap is the type for setting the shape used to draw the end points of lines.
+type LineCap int
+
 // Constants related to canvas view operations
 const (
 	// MiterJoin - Connected segments are joined by extending their outside edges
 	// to connect at a single point, with the effect of filling an additional
 	// lozenge-shaped area. This setting is affected by the miterLimit property
-	MiterJoin = 0
+	MiterJoin LineJoin = 0
+
 	// RoundJoin - rounds off the corners of a shape by filling an additional sector
 	// of disc centered at the common endpoint of connected segments.
 	// The radius for these rounded corners is equal to the line width.
-	RoundJoin = 1
+	RoundJoin LineJoin = 1
+
 	// BevelJoin - Fills an additional triangular area between the common endpoint
 	// of connected segments, and the separate outside rectangular corners of each segment.
-	BevelJoin = 2
+	BevelJoin LineJoin = 2
 
 	// ButtCap - the ends of lines are squared off at the endpoints. Default value.
-	ButtCap = 0
+	ButtCap LineCap = 0
+
 	// RoundCap - the ends of lines are rounded.
-	RoundCap = 1
+	RoundCap LineCap = 1
+
 	// SquareCap - the ends of lines are squared off by adding a box with an equal width
 	// and half the height of the line's thickness.
-	SquareCap = 2
+	SquareCap LineCap = 2
 
 	// AlphabeticBaseline - the text baseline is the normal alphabetic baseline. Default value.
 	AlphabeticBaseline = 0
+
 	// TopBaseline - the text baseline is the top of the em square.
 	TopBaseline = 1
+
 	// MiddleBaseline - the text baseline is the middle of the em square.
 	MiddleBaseline = 2
+
 	// BottomBaseline - the text baseline is the bottom of the bounding box.
 	// This differs from the ideographic baseline in that the ideographic baseline doesn't consider descenders.
 	BottomBaseline = 3
+
 	// HangingBaseline - the text baseline is the hanging baseline. (Used by Tibetan and other Indic scripts.)
 	HangingBaseline = 4
+
 	// IdeographicBaseline - the text baseline is the ideographic baseline; this is
 	// the bottom of the body of the characters, if the main body of characters protrudes
 	// beneath the alphabetic baseline. (Used by Chinese, Japanese, and Korean scripts.)
@@ -47,6 +62,7 @@ const (
 	// StartAlign - the text is aligned at the normal start of the line (left-aligned
 	// for left-to-right locales, right-aligned for right-to-left locales).
 	StartAlign = 3
+
 	// EndAlign - the text is aligned at the normal end of the line (right-aligned
 	// for left-to-right locales, left-aligned for right-to-left locales).
 	EndAlign = 4
@@ -195,11 +211,11 @@ type Canvas interface {
 
 	// SetLineJoin sets the shape used to join two line segments where they meet.
 	// Valid values: MiterJoin (0), RoundJoin (1), BevelJoin (2). All other values are ignored.
-	SetLineJoin(join int)
+	SetLineJoin(join LineJoin)
 
 	// SetLineJoin sets the shape used to draw the end points of lines.
 	// Valid values: ButtCap (0), RoundCap (1), SquareCap (2). All other values are ignored.
-	SetLineCap(cap int)
+	SetLineCap(cap LineCap)
 
 	// SetLineDash sets the line dash pattern used when stroking lines.
 	// dash - an array of values that specify alternating lengths of lines and gaps which describe the pattern.
@@ -228,25 +244,31 @@ type Canvas interface {
 	//   blur - the amount of blur applied to shadows. Must be non-negative;
 	//   color - the color of shadows.
 	SetShadow(offsetX, offsetY, blur float64, color Color)
+
 	// ResetShadow sets shadow parameters to default values (invisible shadow)
 	ResetShadow()
 
 	// ClearRect erases the pixels in a rectangular area by setting them to transparent black
 	ClearRect(x, y, width, height float64)
+
 	// FillRect draws a rectangle that is filled according to the current FillStyle.
 	FillRect(x, y, width, height float64)
+
 	// StrokeRect draws a rectangle that is stroked (outlined) according to the current strokeStyle
 	// and other context settings
 	StrokeRect(x, y, width, height float64)
+
 	// FillAndStrokeRect draws a rectangle that is filled according to the current FillStyle and
 	// is stroked (outlined) according to the current strokeStyle and other context settings
 	FillAndStrokeRect(x, y, width, height float64)
 
 	// FillRoundedRect draws a rounded rectangle that is filled according to the current FillStyle.
 	FillRoundedRect(x, y, width, height, r float64)
+
 	// StrokeRoundedRect draws a rounded rectangle that is stroked (outlined) according
 	// to the current strokeStyle and other context settings
 	StrokeRoundedRect(x, y, width, height, r float64)
+
 	// FillAndStrokeRoundedRect draws a rounded rectangle that is filled according to the current FillStyle
 	// and is stroked (outlined) according to the current strokeStyle and other context settings
 	FillAndStrokeRoundedRect(x, y, width, height, r float64)
@@ -257,23 +279,28 @@ type Canvas interface {
 	//   radiusY - the ellipse's minor-axis radius. Must be non-negative;
 	//   rotation - the rotation of the ellipse, expressed in radians.
 	FillEllipse(x, y, radiusX, radiusY, rotation float64)
+
 	// StrokeRoundedRect draws a ellipse that is stroked (outlined) according
 	// to the current strokeStyle and other context settings
 	StrokeEllipse(x, y, radiusX, radiusY, rotation float64)
+
 	// FillAndStrokeEllipse draws a ellipse that is filled according to the current FillStyle
 	// and is stroked (outlined) according to the current strokeStyle and other context settings
 	FillAndStrokeEllipse(x, y, radiusX, radiusY, rotation float64)
 
 	// NewPath creates a new Path object
 	NewPath() Path
+
 	// NewPathFromSvg creates a new Path and initialize it by a string consisting of SVG path data
 	NewPathFromSvg(data string) Path
 
 	// FillPath draws a path that is filled according to the current FillStyle.
 	FillPath(path Path)
+
 	// StrokePath draws a path that is stroked (outlined) according to the current strokeStyle
 	// and other context settings
 	StrokePath(path Path)
+
 	// FillAndStrokeRect draws a path that is filled according to the current FillStyle and
 	// is stroked (outlined) according to the current strokeStyle and other context settings
 	FillAndStrokePath(path Path)
@@ -284,14 +311,17 @@ type Canvas interface {
 	// FillText draws a text string at the specified coordinates, filling the string's characters
 	// with the current FillStyle
 	FillText(x, y float64, text string)
+
 	// StrokeText strokes — that is, draws the outlines of — the characters of a text string
 	// at the specified coordinates
 	StrokeText(x, y float64, text string)
 
 	// DrawImage draws the image at the (x, y) position
 	DrawImage(x, y float64, image Image)
+
 	// DrawImageInRect draws the image in the rectangle (x, y, width, height), scaling in height and width if necessary
 	DrawImageInRect(x, y, width, height float64, image Image)
+
 	// DrawImageFragment draws the fragment (described by srcX, srcY, srcWidth, srcHeight) of image
 	// in the rectangle (dstX, dstY, dstWidth, dstHeight), scaling in height and width if necessary
 	DrawImageFragment(srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight float64, image Image)
@@ -467,7 +497,7 @@ func (canvas *canvasData) SetLineWidth(width float64) {
 	}
 }
 
-func (canvas *canvasData) SetLineJoin(join int) {
+func (canvas *canvasData) SetLineJoin(join LineJoin) {
 	switch join {
 	case MiterJoin:
 		canvas.session.updateCanvasProperty("lineJoin", "miter")
@@ -480,7 +510,7 @@ func (canvas *canvasData) SetLineJoin(join int) {
 	}
 }
 
-func (canvas *canvasData) SetLineCap(cap int) {
+func (canvas *canvasData) SetLineCap(cap LineCap) {
 	switch cap {
 	case ButtCap:
 		canvas.session.updateCanvasProperty("lineCap", "butt")
