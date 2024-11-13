@@ -55,7 +55,7 @@ type StackLayout interface {
 
 type stackLayoutData struct {
 	viewsContainerData
-	peek              int
+	peek, prevPeek    int
 	pushView, popView View
 	animationType     int
 	onPushFinished    func()
@@ -71,7 +71,8 @@ func NewStackLayout(session Session, params Params) StackLayout {
 }
 
 func newStackLayout(session Session) View {
-	return NewStackLayout(session, nil)
+	//return NewStackLayout(session, nil)
+	return new(stackLayoutData)
 }
 
 // Init initialize fields of ViewsContainer by default values
@@ -80,10 +81,9 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
 	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
-}
-
-func (layout *stackLayoutData) String() string {
-	return getViewString(layout, nil)
+	layout.getFunc = layout.get
+	layout.set = layout.setFunc
+	layout.remove = layout.removeFunc
 }
 
 func (layout *stackLayoutData) pushFinished(view View, tag string) {
@@ -97,7 +97,7 @@ func (layout *stackLayoutData) pushFinished(view View, tag string) {
 				layout.peek = 0
 			}
 			updateInnerHTML(layout.htmlID(), layout.session)
-			layout.propertyChangedEvent(Current)
+			layout.currentChanged()
 		}
 
 		if layout.onPushFinished != nil {
@@ -121,97 +121,91 @@ func (layout *stackLayoutData) popFinished(view View, tag string) {
 	}
 }
 
-func (layout *stackLayoutData) Set(tag string, value any) bool {
-	return layout.set(strings.ToLower(tag), value)
-}
-
-func (layout *stackLayoutData) set(tag string, value any) bool {
-	if value == nil {
-		layout.remove(tag)
-		return true
-	}
-
+func (layout *stackLayoutData) setFunc(view View, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
 		listeners, ok := valueToEventListeners[View, string](value)
 		if ok && listeners != nil {
 			listeners = append(listeners, layout.pushFinished)
 			listeners = append(listeners, layout.popFinished)
-			layout.properties[TransitionEndEvent] = listeners
-			layout.propertyChangedEvent(TransitionEndEvent)
+			view.setRaw(TransitionEndEvent, listeners)
+			return []PropertyName{tag}
 		}
-		return ok
+		return nil
 
 	case Current:
-		setCurrent := func(index int) {
-			if index != layout.peek {
-				if layout.peek < len(layout.views) {
-					layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.peek), "visibility", "hidden")
-				}
-
-				layout.peek = index
-				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(index), "visibility", "visible")
-				layout.propertyChangedEvent(Current)
-			}
-		}
+		newCurrent := 0
 		switch value := value.(type) {
 		case string:
 			text, ok := layout.session.resolveConstants(value)
 			if !ok {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 			n, err := strconv.Atoi(strings.Trim(text, " \t"))
 			if err != nil {
 				invalidPropertyValue(tag, value)
 				ErrorLog(err.Error())
-				return false
+				return nil
 			}
-			setCurrent(n)
+			newCurrent = n
 
 		default:
 			n, ok := isInt(value)
 			if !ok {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			} else if n < 0 || n >= len(layout.views) {
 				ErrorLogF(`The view index "%d" of "%s" property is out of range`, n, tag)
-				return false
+				return nil
 			}
-			setCurrent(n)
+			newCurrent = n
 		}
-		return true
+
+		layout.prevPeek = layout.peek
+		if newCurrent == layout.peek {
+			return []PropertyName{}
+		}
+
+		layout.peek = newCurrent
+		return []PropertyName{tag}
 	}
-	return layout.viewsContainerData.set(tag, value)
+	return layout.viewsContainerData.setFunc(view, tag, value)
 }
 
-func (layout *stackLayoutData) Remove(tag string) {
-	layout.remove(strings.ToLower(tag))
+func (layout *stackLayoutData) propertyChanged(view View, tag PropertyName) {
+	switch tag {
+	case Current:
+		if layout.prevPeek != layout.peek {
+			if layout.prevPeek < len(layout.views) {
+				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.prevPeek), "visibility", "hidden")
+			}
+			layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.prevPeek), "visibility", "visible")
+			layout.prevPeek = layout.peek
+		}
+	default:
+		viewsContainerPropertyChanged(view, tag)
+	}
 }
 
-func (layout *stackLayoutData) remove(tag string) {
+func (layout *stackLayoutData) removeFunc(view View, tag PropertyName) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
-		layout.propertyChangedEvent(TransitionEndEvent)
+		view.setRaw(TransitionEndEvent, []func(View, string){layout.pushFinished, layout.popFinished})
+		return []PropertyName{tag}
 
 	case Current:
-		layout.set(Current, 0)
-
-	default:
-		layout.viewsContainerData.remove(tag)
+		view.setRaw(Current, 0)
+		return []PropertyName{tag}
 	}
+	return layout.viewsContainerData.removeFunc(view, tag)
 }
 
-func (layout *stackLayoutData) Get(tag string) any {
-	return layout.get(strings.ToLower(tag))
-}
-
-func (layout *stackLayoutData) get(tag string) any {
+func (layout *stackLayoutData) get(view View, tag PropertyName) any {
 	if tag == Current {
 		return layout.peek
 	}
-	return layout.viewsContainerData.get(tag)
+	return layout.viewsContainerData.get(view, tag)
 }
 
 func (layout *stackLayoutData) Peek() View {
@@ -233,7 +227,7 @@ func (layout *stackLayoutData) MoveToFront(view View) bool {
 
 				layout.peek = i
 				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible")
-				layout.propertyChangedEvent(Current)
+				layout.currentChanged()
 			}
 			return true
 		}
@@ -241,6 +235,12 @@ func (layout *stackLayoutData) MoveToFront(view View) bool {
 
 	ErrorLog(`MoveToFront() fail. Subview not found."`)
 	return false
+}
+
+func (layout *stackLayoutData) currentChanged() {
+	if listener, ok := layout.changeListener[Current]; ok {
+		listener(layout, Current)
+	}
 }
 
 func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
@@ -254,7 +254,7 @@ func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
 
 				layout.peek = i
 				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible")
-				layout.propertyChangedEvent(Current)
+				layout.currentChanged()
 			}
 			return true
 		}
@@ -268,7 +268,7 @@ func (layout *stackLayoutData) Append(view View) {
 	if view != nil {
 		layout.peek = len(layout.views)
 		layout.viewsContainerData.Append(view)
-		layout.propertyChangedEvent(Current)
+		layout.currentChanged()
 	} else {
 		ErrorLog("StackLayout.Append(nil, ....) is forbidden")
 	}
@@ -283,7 +283,7 @@ func (layout *stackLayoutData) Insert(view View, index int) {
 			layout.peek = count
 		}
 		layout.viewsContainerData.Insert(view, index)
-		layout.propertyChangedEvent(Current)
+		layout.currentChanged()
 	} else {
 		ErrorLog("StackLayout.Insert(nil, ....) is forbidden")
 	}
@@ -297,7 +297,7 @@ func (layout *stackLayoutData) RemoveView(index int) View {
 	if layout.peek > 0 {
 		layout.peek--
 	}
-	defer layout.propertyChangedEvent(Current)
+	defer layout.currentChanged()
 	return layout.viewsContainerData.RemoveView(index)
 }
 
@@ -352,7 +352,10 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 
 	layout.views = append(layout.views, view)
 	view.setParentID(htmlID)
-	layout.propertyChangedEvent(Content)
+
+	if listener, ok := layout.changeListener[Content]; ok {
+		listener(layout, Content)
+	}
 }
 
 func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool {

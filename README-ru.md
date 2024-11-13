@@ -425,7 +425,7 @@ View имеет ряд свойств, таких как высота, шири�
 (View реализует данный интерфейс):
 
 	type Properties interface {
-		Get(tag string) any
+		Get(tag PropertyName) any
 		Set(tag string, value any) bool
 		Remove(tag string)
 		Clear()

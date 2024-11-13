@@ -16,7 +16,7 @@ package rui
 // `func(frame rui.Frame)`,
 // `func(view rui.View)`,
 // `func()`.
-const ResizeEvent = "resize-event"
+const ResizeEvent PropertyName = "resize-event"
 
 func (view *viewData) onResize(self View, x, y, width, height float64) {
 	view.frame.Left = x
@@ -31,21 +31,20 @@ func (view *viewData) onResize(self View, x, y, width, height float64) {
 func (view *viewData) onItemResize(self View, index string, x, y, width, height float64) {
 }
 
-func (view *viewData) setFrameListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, Frame](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
+/*
+func setFrameListener(properties Properties, tag PropertyName, value any) bool {
+	if listeners, ok := valueToEventListeners[View, Frame](value); ok {
+		if len(listeners) == 0 {
+			properties.setRaw(tag, nil)
+		} else {
+			properties.setRaw(tag, listeners)
+		}
+		return true
 	}
-
-	if listeners == nil {
-		delete(view.properties, tag)
-	} else {
-		view.properties[tag] = listeners
-	}
-	view.propertyChangedEvent(tag)
-	return true
+	notCompatibleType(tag, value)
+	return false
 }
+*/
 
 func (view *viewData) setNoResizeEvent() {
 	view.noResizeEvent = true

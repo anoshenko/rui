@@ -20,7 +20,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.KeyEvent)`,
 	// `func()`.
-	KeyDownEvent = "key-down-event"
+	KeyDownEvent PropertyName = "key-down-event"
 
 	// KeyUpEvent is the constant for "key-up-event" property tag.
 	//
@@ -38,7 +38,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.KeyEvent)`,
 	// `func()`.
-	KeyUpEvent = "key-up-event"
+	KeyUpEvent PropertyName = "key-up-event"
 )
 
 // ControlKeyMask represent ORed state of keyboard's control keys like [AltKey], [CtrlKey], [ShiftKey] and [MetaKey]
@@ -429,342 +429,21 @@ func (event *KeyEvent) init(data DataObject) {
 	event.MetaKey = getBool("metaKey")
 }
 
-func valueToEventListeners[V View, E any](value any) ([]func(V, E), bool) {
-	if value == nil {
-		return nil, true
+/*
+func setKeyListener(properties Properties, tag PropertyName, value any) bool {
+	if listeners, ok := valueToEventListeners[View, KeyEvent](value); ok {
+		if len(listeners) == 0 {
+			properties.setRaw(tag, nil)
+		} else {
+			properties.setRaw(tag, listeners)
+		}
+		return true
 	}
-
-	switch value := value.(type) {
-	case func(V, E):
-		return []func(V, E){value}, true
-
-	case func(E):
-		fn := func(_ V, event E) {
-			value(event)
-		}
-		return []func(V, E){fn}, true
-
-	case func(V):
-		fn := func(view V, _ E) {
-			value(view)
-		}
-		return []func(V, E){fn}, true
-
-	case func():
-		fn := func(V, E) {
-			value()
-		}
-		return []func(V, E){fn}, true
-
-	case []func(V, E):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ V, event E) {
-				v(event)
-			}
-		}
-		return listeners, true
-
-	case []func(V):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(view V, _ E) {
-				v(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(V, E) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(V, E):
-				listeners[i] = v
-
-			case func(E):
-				listeners[i] = func(_ V, event E) {
-					v(event)
-				}
-
-			case func(V):
-				listeners[i] = func(view V, _ E) {
-					v(view)
-				}
-
-			case func():
-				listeners[i] = func(V, E) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
+	notCompatibleType(tag, value)
+	return false
 }
 
-func valueToEventWithOldListeners[V View, E any](value any) ([]func(V, E, E), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(V, E, E):
-		return []func(V, E, E){value}, true
-
-	case func(V, E):
-		fn := func(v V, val, _ E) {
-			value(v, val)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func(E, E):
-		fn := func(_ V, val, old E) {
-			value(val, old)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func(E):
-		fn := func(_ V, val, _ E) {
-			value(val)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func(V):
-		fn := func(v V, _, _ E) {
-			value(v)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func():
-		fn := func(V, E, E) {
-			value()
-		}
-		return []func(V, E, E){fn}, true
-
-	case []func(V, E, E):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(V, E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(view V, val, _ E) {
-				fn(view, val)
-			}
-		}
-		return listeners, true
-
-	case []func(E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ V, val, _ E) {
-				fn(val)
-			}
-		}
-		return listeners, true
-
-	case []func(E, E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ V, val, old E) {
-				fn(val, old)
-			}
-		}
-		return listeners, true
-
-	case []func(V):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(view V, _, _ E) {
-				fn(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(V, E, E) {
-				fn()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch fn := v.(type) {
-			case func(V, E, E):
-				listeners[i] = fn
-
-			case func(V, E):
-				listeners[i] = func(view V, val, _ E) {
-					fn(view, val)
-				}
-
-			case func(E, E):
-				listeners[i] = func(_ V, val, old E) {
-					fn(val, old)
-				}
-
-			case func(E):
-				listeners[i] = func(_ V, val, _ E) {
-					fn(val)
-				}
-
-			case func(V):
-				listeners[i] = func(view V, _, _ E) {
-					fn(view)
-				}
-
-			case func():
-				listeners[i] = func(V, E, E) {
-					fn()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
-func (view *viewData) setKeyListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, KeyEvent](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
-	}
-
-	if listeners == nil {
-		view.removeKeyListener(tag)
-	} else {
-		switch tag {
-		case KeyDownEvent:
-			view.properties[tag] = listeners
-			if view.created {
-				view.session.updateProperty(view.htmlID(), "onkeydown", "keyDownEvent(this, event)")
-			}
-
-		case KeyUpEvent:
-			view.properties[tag] = listeners
-			if view.created {
-				view.session.updateProperty(view.htmlID(), "onkeyup", "keyUpEvent(this, event)")
-			}
-
-		default:
-			return false
-		}
-	}
-
-	return true
-}
-
-func (view *viewData) removeKeyListener(tag string) {
+func (view *viewData) removeKeyListener(tag PropertyName) {
 	delete(view.properties, tag)
 	if view.created {
 		switch tag {
@@ -778,34 +457,7 @@ func (view *viewData) removeKeyListener(tag string) {
 		}
 	}
 }
-
-func getEventWithOldListeners[V View, E any](view View, subviewID []string, tag string) []func(V, E, E) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(V, E, E)); ok {
-				return result
-			}
-		}
-	}
-	return []func(V, E, E){}
-}
-
-func getEventListeners[V View, E any](view View, subviewID []string, tag string) []func(V, E) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(V, E)); ok {
-				return result
-			}
-		}
-	}
-	return []func(V, E){}
-}
+*/
 
 func keyEventsHtml(view View, buffer *strings.Builder) {
 	if len(getEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 {
@@ -821,7 +473,7 @@ func keyEventsHtml(view View, buffer *strings.Builder) {
 	}
 }
 
-func handleKeyEvents(view View, tag string, data DataObject) {
+func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 	var event KeyEvent
 	event.init(data)
 	listeners := getEventListeners[View, KeyEvent](view, nil, tag)

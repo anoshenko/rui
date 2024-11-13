@@ -27,7 +27,7 @@ const (
 	// `func(newTime time.Time)`,
 	// `func(picker rui.TimePicker)`,
 	// `func()`.
-	TimeChangedEvent = "time-changed"
+	TimeChangedEvent PropertyName = "time-changed"
 
 	// TimePickerMin is the constant for "time-picker-min" property tag.
 	//
@@ -44,7 +44,7 @@ const (
 	// "HH:MM:SS PM" - "08:15:00 AM".
 	// "HH:MM" - "08:15".
 	// "HH:MM PM" - "08:15 AM".
-	TimePickerMin = "time-picker-min"
+	TimePickerMin PropertyName = "time-picker-min"
 
 	// TimePickerMax is the constant for "time-picker-max" property tag.
 	//
@@ -61,7 +61,7 @@ const (
 	// "HH:MM:SS PM" - "08:15:00 AM".
 	// "HH:MM" - "08:15".
 	// "HH:MM PM" - "08:15 AM".
-	TimePickerMax = "time-picker-max"
+	TimePickerMax PropertyName = "time-picker-max"
 
 	// TimePickerStep is the constant for "time-picker-step" property tag.
 	//
@@ -72,7 +72,7 @@ const (
 	//
 	// Values:
 	// >= `0` or >= "0" - Step value in seconds used to increment or decrement time.
-	TimePickerStep = "time-picker-step"
+	TimePickerStep PropertyName = "time-picker-step"
 
 	// TimePickerValue is the constant for "time-picker-value" property tag.
 	//
@@ -89,7 +89,7 @@ const (
 	// "HH:MM:SS PM" - "08:15:00 AM".
 	// "HH:MM" - "08:15".
 	// "HH:MM PM" - "08:15 AM".
-	TimePickerValue = "time-picker-value"
+	TimePickerValue PropertyName = "time-picker-value"
 
 	timeFormat = "15:04:05"
 )
@@ -101,8 +101,6 @@ type TimePicker interface {
 
 type timePickerData struct {
 	viewData
-	dataList
-	timeChangedListeners []func(TimePicker, time.Time, time.Time)
 }
 
 // NewTimePicker create new TimePicker object and return it
@@ -114,236 +112,154 @@ func NewTimePicker(session Session, params Params) TimePicker {
 }
 
 func newTimePicker(session Session) View {
-	return NewTimePicker(session, nil)
+	return new(timePickerData)
 }
 
 func (picker *timePickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "TimePicker"
 	picker.hasHtmlDisabled = true
-	picker.timeChangedListeners = []func(TimePicker, time.Time, time.Time){}
-	picker.dataListInit()
-}
-
-func (picker *timePickerData) String() string {
-	return getViewString(picker, nil)
+	picker.normalize = normalizeTimePickerTag
+	picker.set = timePickerSet
+	picker.changed = timePickerPropertyChanged
 }
 
 func (picker *timePickerData) Focusable() bool {
 	return true
 }
 
-func (picker *timePickerData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeTimePickerTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case Type, Min, Max, Step, Value:
 		return "time-picker-" + tag
 	}
 
-	return tag
+	return normalizeDataListTag(tag)
 }
 
-func (picker *timePickerData) Remove(tag string) {
-	picker.remove(picker.normalizeTag(tag))
-}
+func stringToTime(value string) (time.Time, bool) {
+	lowText := strings.ToUpper(value)
+	pm := strings.HasSuffix(lowText, "PM") || strings.HasSuffix(lowText, "AM")
 
-func (picker *timePickerData) remove(tag string) {
-	switch tag {
-	case TimeChangedEvent:
-		if len(picker.timeChangedListeners) > 0 {
-			picker.timeChangedListeners = []func(TimePicker, time.Time, time.Time){}
-			picker.propertyChangedEvent(tag)
-		}
-		return
-
-	case TimePickerMin:
-		delete(picker.properties, TimePickerMin)
-		if picker.created {
-			picker.session.removeProperty(picker.htmlID(), Min)
-		}
-
-	case TimePickerMax:
-		delete(picker.properties, TimePickerMax)
-		if picker.created {
-			picker.session.removeProperty(picker.htmlID(), Max)
-		}
-
-	case TimePickerStep:
-		delete(picker.properties, TimePickerStep)
-		if picker.created {
-			picker.session.removeProperty(picker.htmlID(), Step)
-		}
-
-	case TimePickerValue:
-		if _, ok := picker.properties[TimePickerValue]; ok {
-			oldTime := GetTimePickerValue(picker)
-			delete(picker.properties, TimePickerValue)
-			time := GetTimePickerValue(picker)
-			if picker.created {
-				picker.session.callFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
-			}
-			for _, listener := range picker.timeChangedListeners {
-				listener(picker, time, oldTime)
-			}
+	var format string
+	switch len(strings.Split(value, ":")) {
+	case 2:
+		if pm {
+			format = "3:04 PM"
 		} else {
-			return
-		}
-
-	case DataList:
-		if len(picker.dataList.dataList) > 0 {
-			picker.setDataList(picker, []string{}, true)
+			format = "15:04"
 		}
 
 	default:
-		picker.viewData.remove(tag)
-		return
-	}
-	picker.propertyChangedEvent(tag)
-}
-
-func (picker *timePickerData) Set(tag string, value any) bool {
-	return picker.set(picker.normalizeTag(tag), value)
-}
-
-func (picker *timePickerData) set(tag string, value any) bool {
-	if value == nil {
-		picker.remove(tag)
-		return true
+		if pm {
+			format = "03:04:05 PM"
+		} else {
+			format = "15:04:05"
+		}
 	}
 
-	setTimeValue := func(tag string) (time.Time, bool) {
+	result, err := time.Parse(format, value)
+	if err != nil {
+		ErrorLog(err.Error())
+		return time.Now(), false
+	}
+	return result, true
+}
+
+func timePickerSet(view View, tag PropertyName, value any) []PropertyName {
+
+	setTimeValue := func(tag PropertyName) []PropertyName {
 		switch value := value.(type) {
 		case time.Time:
-			picker.properties[tag] = value
-			return value, true
+			view.setRaw(tag, value)
+			return []PropertyName{tag}
 
 		case string:
-			if text, ok := picker.Session().resolveConstants(value); ok {
-				lowText := strings.ToLower(text)
-				pm := strings.HasSuffix(lowText, "pm") || strings.HasSuffix(lowText, "am")
+			if isConstantName(value) {
+				view.setRaw(tag, value)
+				return []PropertyName{tag}
+			}
 
-				var format string
-				switch len(strings.Split(text, ":")) {
-				case 2:
-					if pm {
-						format = "3:04 PM"
-					} else {
-						format = "15:04"
-					}
-
-				default:
-					if pm {
-						format = "03:04:05 PM"
-					} else {
-						format = "15:04:05"
-					}
-				}
-
-				if time, err := time.Parse(format, text); err == nil {
-					picker.properties[tag] = value
-					return time, true
-				} else {
-					ErrorLog(err.Error())
-				}
-				return time.Now(), false
+			if time, ok := stringToTime(value); ok {
+				view.setRaw(tag, time)
+				return []PropertyName{tag}
 			}
 		}
 
 		notCompatibleType(tag, value)
-		return time.Now(), false
+		return nil
 	}
 
 	switch tag {
 	case TimePickerMin:
-		old, oldOK := getTimeProperty(picker, TimePickerMin, Min)
-		if time, ok := setTimeValue(TimePickerMin); ok {
-			if !oldOK || time != old {
-				if picker.created {
-					picker.session.updateProperty(picker.htmlID(), Min, time.Format(timeFormat))
-				}
-				picker.propertyChangedEvent(tag)
-			}
-			return true
+		return setTimeValue(TimePickerMin)
+
+	case TimePickerMax:
+		return setTimeValue(TimePickerMax)
+
+	case TimePickerStep:
+		return setIntProperty(view, TimePickerStep, value)
+
+	case TimePickerValue:
+		view.setRaw("old-time", GetTimePickerValue(view))
+		return setTimeValue(tag)
+
+	case TimeChangedEvent:
+		return setEventWithOldListener[TimePicker, time.Time](view, tag, value)
+
+	case DataList:
+		return setDataList(view, value, timeFormat)
+	}
+
+	return viewSet(view, tag, value)
+}
+
+func timePickerPropertyChanged(view View, tag PropertyName) {
+
+	session := view.Session()
+
+	switch tag {
+
+	case TimePickerMin:
+		if time, ok := GetTimePickerMin(view); ok {
+			session.updateProperty(view.htmlID(), "min", time.Format(timeFormat))
+		} else {
+			session.removeProperty(view.htmlID(), "min")
 		}
 
 	case TimePickerMax:
-		old, oldOK := getTimeProperty(picker, TimePickerMax, Max)
-		if time, ok := setTimeValue(TimePickerMax); ok {
-			if !oldOK || time != old {
-				if picker.created {
-					picker.session.updateProperty(picker.htmlID(), Max, time.Format(timeFormat))
-				}
-				picker.propertyChangedEvent(tag)
-			}
-			return true
+		if time, ok := GetTimePickerMax(view); ok {
+			session.updateProperty(view.htmlID(), "max", time.Format(timeFormat))
+		} else {
+			session.removeProperty(view.htmlID(), "max")
 		}
 
 	case TimePickerStep:
-		oldStep := GetTimePickerStep(picker)
-		if picker.setIntProperty(TimePickerStep, value) {
-			if step := GetTimePickerStep(picker); oldStep != step {
-				if picker.created {
-					if step > 0 {
-						picker.session.updateProperty(picker.htmlID(), Step, strconv.Itoa(step))
-					} else {
-						picker.session.removeProperty(picker.htmlID(), Step)
-					}
-				}
-				picker.propertyChangedEvent(tag)
-			}
-			return true
+		if step := GetTimePickerStep(view); step > 0 {
+			session.updateProperty(view.htmlID(), "step", strconv.Itoa(step))
+		} else {
+			session.removeProperty(view.htmlID(), "step")
 		}
 
 	case TimePickerValue:
-		oldTime := GetTimePickerValue(picker)
-		if time, ok := setTimeValue(TimePickerValue); ok {
-			if time != oldTime {
-				if picker.created {
-					picker.session.callFunc("setInputValue", picker.htmlID(), time.Format(timeFormat))
+		value := GetTimePickerValue(view)
+		session.callFunc("setInputValue", view.htmlID(), value.Format(timeFormat))
+
+		if listeners := GetTimeChangedListeners(view); len(listeners) > 0 {
+			oldTime := time.Now()
+			if val := view.getRaw("old-time"); val != nil {
+				if time, ok := val.(time.Time); ok {
+					oldTime = time
 				}
-				for _, listener := range picker.timeChangedListeners {
-					listener(picker, time, oldTime)
-				}
-				picker.propertyChangedEvent(tag)
 			}
-			return true
+			for _, listener := range listeners {
+				listener(view, value, oldTime)
+			}
 		}
 
-	case TimeChangedEvent:
-		listeners, ok := valueToEventWithOldListeners[TimePicker, time.Time](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(TimePicker, time.Time, time.Time){}
-		}
-		picker.timeChangedListeners = listeners
-		picker.propertyChangedEvent(tag)
-		return true
-
-	case DataList:
-		return picker.setDataList(picker, value, picker.created)
-
 	default:
-		return picker.viewData.set(tag, value)
-	}
-	return false
-}
-
-func (picker *timePickerData) Get(tag string) any {
-	return picker.get(picker.normalizeTag(tag))
-}
-
-func (picker *timePickerData) get(tag string) any {
-	switch tag {
-	case TimeChangedEvent:
-		return picker.timeChangedListeners
-
-	case DataList:
-		return picker.dataList.dataList
-
-	default:
-		return picker.viewData.get(tag)
+		viewPropertyChanged(view, tag)
 	}
 }
 
@@ -352,7 +268,13 @@ func (picker *timePickerData) htmlTag() string {
 }
 
 func (picker *timePickerData) htmlSubviews(self View, buffer *strings.Builder) {
-	picker.dataListHtmlSubviews(self, buffer)
+	dataListHtmlSubviews(self, buffer, func(text string, session Session) string {
+		text, _ = session.resolveConstants(text)
+		if time, ok := stringToTime(text); ok {
+			return time.Format(timeFormat)
+		}
+		return text
+	})
 }
 
 func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder) {
@@ -387,10 +309,10 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
 
-	picker.dataListHtmlProperties(picker, buffer)
+	dataListHtmlProperties(picker, buffer)
 }
 
-func (picker *timePickerData) handleCommand(self View, command string, data DataObject) bool {
+func (picker *timePickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
@@ -398,9 +320,13 @@ func (picker *timePickerData) handleCommand(self View, command string, data Data
 				oldValue := GetTimePickerValue(picker)
 				picker.properties[TimePickerValue] = value
 				if value != oldValue {
-					for _, listener := range picker.timeChangedListeners {
+					for _, listener := range GetTimeChangedListeners(picker) {
 						listener(picker, value, oldValue)
 					}
+					if listener, ok := picker.changeListener[TimePickerValue]; ok {
+						listener(picker, TimePickerValue)
+					}
+
 				}
 			}
 		}
@@ -410,7 +336,7 @@ func (picker *timePickerData) handleCommand(self View, command string, data Data
 	return picker.viewData.handleCommand(self, command, data)
 }
 
-func getTimeProperty(view View, mainTag, shortTag string) (time.Time, bool) {
+func getTimeProperty(view View, mainTag, shortTag PropertyName) (time.Time, bool) {
 	valueToTime := func(value any) (time.Time, bool) {
 		if value != nil {
 			switch value := value.(type) {
@@ -419,7 +345,7 @@ func getTimeProperty(view View, mainTag, shortTag string) (time.Time, bool) {
 
 			case string:
 				if text, ok := view.Session().resolveConstants(value); ok {
-					if result, err := time.Parse(timeFormat, text); err == nil {
+					if result, ok := stringToTime(text); ok {
 						return result, true
 					}
 				}
@@ -433,9 +359,11 @@ func getTimeProperty(view View, mainTag, shortTag string) (time.Time, bool) {
 			return result, true
 		}
 
-		if value := valueFromStyle(view, shortTag); value != nil {
-			if result, ok := valueToTime(value); ok {
-				return result, true
+		for _, tag := range []PropertyName{mainTag, shortTag} {
+			if value := valueFromStyle(view, tag); value != nil {
+				if result, ok := valueToTime(value); ok {
+					return result, true
+				}
 			}
 		}
 	}

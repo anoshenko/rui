@@ -429,7 +429,7 @@ View has a number of properties like height, width, color, text parameters, etc.
 The Properties interface is used to read and write the property value (View implements this interface):
 
 	type Properties interface {
-		Get(tag string) any
+		Get(tag PropertyName) any
 		Set(tag string, value any) bool
 		Remove(tag string)
 		Clear()

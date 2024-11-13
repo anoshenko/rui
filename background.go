@@ -78,7 +78,7 @@ type BackgroundElement interface {
 }
 
 type backgroundElement struct {
-	propertyList
+	dataProperty
 }
 
 type backgroundImage struct {
@@ -91,24 +91,16 @@ func createBackground(obj DataObject) BackgroundElement {
 
 	switch obj.Tag() {
 	case "image":
-		image := new(backgroundImage)
-		image.properties = map[string]any{}
-		result = image
+		result = NewBackgroundImage(nil)
 
 	case "linear-gradient":
-		gradient := new(backgroundLinearGradient)
-		gradient.properties = map[string]any{}
-		result = gradient
+		result = NewBackgroundLinearGradient(nil)
 
 	case "radial-gradient":
-		gradient := new(backgroundRadialGradient)
-		gradient.properties = map[string]any{}
-		result = gradient
+		result = NewBackgroundRadialGradient(nil)
 
 	case "conic-gradient":
-		gradient := new(backgroundConicGradient)
-		gradient.properties = map[string]any{}
-		result = gradient
+		result = NewBackgroundConicGradient(nil)
 
 	default:
 		return nil
@@ -118,7 +110,7 @@ func createBackground(obj DataObject) BackgroundElement {
 	for i := 0; i < count; i++ {
 		if node := obj.Property(i); node.Type() == TextNode {
 			if value := node.Text(); value != "" {
-				result.Set(node.Tag(), value)
+				result.Set(PropertyName(node.Tag()), value)
 			}
 		}
 	}
@@ -129,11 +121,19 @@ func createBackground(obj DataObject) BackgroundElement {
 // NewBackgroundImage creates the new background image
 func NewBackgroundImage(params Params) BackgroundElement {
 	result := new(backgroundImage)
-	result.properties = map[string]any{}
+	result.init()
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
 	return result
+}
+
+func (image *backgroundImage) init() {
+	image.backgroundElement.init()
+	image.normalize = normalizeBackgroundImageTag
+	image.supportedProperties = []PropertyName{
+		Attachment, Width, Height, Repeat, ImageHorizontalAlign, ImageVerticalAlign, backgroundFit, Source,
+	}
 }
 
 func (image *backgroundImage) Tag() string {
@@ -148,8 +148,8 @@ func (image *backgroundImage) Clone() BackgroundElement {
 	return result
 }
 
-func (image *backgroundImage) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeBackgroundImageTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case "source":
 		tag = Source
@@ -165,21 +165,6 @@ func (image *backgroundImage) normalizeTag(tag string) string {
 	}
 
 	return tag
-}
-
-func (image *backgroundImage) Set(tag string, value any) bool {
-	tag = image.normalizeTag(tag)
-	switch tag {
-	case Attachment, Width, Height, Repeat, ImageHorizontalAlign, ImageVerticalAlign,
-		backgroundFit, Source:
-		return image.backgroundElement.Set(tag, value)
-	}
-
-	return false
-}
-
-func (image *backgroundImage) Get(tag string) any {
-	return image.backgroundElement.Get(image.normalizeTag(tag))
 }
 
 func (image *backgroundImage) cssStyle(session Session) string {
@@ -252,7 +237,7 @@ func (image *backgroundImage) cssStyle(session Session) string {
 }
 
 func (image *backgroundImage) writeString(buffer *strings.Builder, indent string) {
-	image.writeToBuffer(buffer, indent, image.Tag(), []string{
+	image.writeToBuffer(buffer, indent, image.Tag(), []PropertyName{
 		Source,
 		Width,
 		Height,
@@ -266,4 +251,77 @@ func (image *backgroundImage) writeString(buffer *strings.Builder, indent string
 
 func (image *backgroundImage) String() string {
 	return runStringWriter(image)
+}
+
+func setBackgroundProperty(properties Properties, value any) []PropertyName {
+	background := []BackgroundElement{}
+
+	error := func() []PropertyName {
+		notCompatibleType(Background, value)
+		return nil
+	}
+
+	switch value := value.(type) {
+	case BackgroundElement:
+		background = []BackgroundElement{value}
+
+	case []BackgroundElement:
+		background = value
+
+	case []DataValue:
+		for _, el := range value {
+			if el.IsObject() {
+				if element := createBackground(el.Object()); element != nil {
+					background = append(background, element)
+				} else {
+					return error()
+				}
+			} else if obj := ParseDataText(el.Value()); obj != nil {
+				if element := createBackground(obj); element != nil {
+					background = append(background, element)
+				} else {
+					return error()
+				}
+			} else {
+				return error()
+			}
+		}
+
+	case DataObject:
+		if element := createBackground(value); element != nil {
+			background = []BackgroundElement{element}
+		} else {
+			return error()
+		}
+
+	case []DataObject:
+		for _, obj := range value {
+			if element := createBackground(obj); element != nil {
+				background = append(background, element)
+			} else {
+				return error()
+			}
+		}
+
+	case string:
+		if obj := ParseDataText(value); obj != nil {
+			if element := createBackground(obj); element != nil {
+				background = []BackgroundElement{element}
+			} else {
+				return error()
+			}
+		} else {
+			return error()
+		}
+	}
+
+	if len(background) > 0 {
+		properties.setRaw(Background, background)
+	} else if properties.getRaw(Background) != nil {
+		properties.setRaw(Background, nil)
+	} else {
+		return []PropertyName{}
+	}
+
+	return []PropertyName{Background}
 }

@@ -2,7 +2,6 @@ package rui
 
 import (
 	"strconv"
-	"strings"
 )
 
 // Constants which represent [View] specific touch events properties
@@ -23,7 +22,7 @@ const (
 	// `func(event rui.TouchEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	TouchStart = "touch-start"
+	TouchStart PropertyName = "touch-start"
 
 	// TouchEnd is the constant for "touch-end" property tag.
 	//
@@ -41,7 +40,7 @@ const (
 	// `func(event rui.TouchEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	TouchEnd = "touch-end"
+	TouchEnd PropertyName = "touch-end"
 
 	// TouchMove is the constant for "touch-move" property tag.
 	//
@@ -59,12 +58,12 @@ const (
 	// `func(event rui.TouchEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	TouchMove = "touch-move"
+	TouchMove PropertyName = "touch-move"
 
 	// TouchCancel is the constant for "touch-cancel" property tag.
 	//
 	// Used by `View`.
-	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many 
+	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many
 	// touch points are created).
 	//
 	// General listener format:
@@ -78,7 +77,7 @@ const (
 	// `func(event rui.TouchEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	TouchCancel = "touch-cancel"
+	TouchCancel PropertyName = "touch-cancel"
 )
 
 // Touch contains parameters of a single touch of a touch event
@@ -143,54 +142,44 @@ type TouchEvent struct {
 	MetaKey bool
 }
 
-var touchEvents = map[string]struct{ jsEvent, jsFunc string }{
-	TouchStart:  {jsEvent: "ontouchstart", jsFunc: "touchStartEvent"},
-	TouchEnd:    {jsEvent: "ontouchend", jsFunc: "touchEndEvent"},
-	TouchMove:   {jsEvent: "ontouchmove", jsFunc: "touchMoveEvent"},
-	TouchCancel: {jsEvent: "ontouchcancel", jsFunc: "touchCancelEvent"},
-}
-
-func (view *viewData) setTouchListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, TouchEvent](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
-	}
-
-	if listeners == nil {
-		view.removeTouchListener(tag)
-	} else if js, ok := touchEvents[tag]; ok {
-		view.properties[tag] = listeners
-		if view.created {
-			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
+/*
+func setTouchListener(properties Properties, tag PropertyName, value any) bool {
+	if listeners, ok := valueToEventListeners[View, TouchEvent](value); ok {
+		if len(listeners) == 0 {
+			properties.setRaw(tag, nil)
+		} else {
+			properties.setRaw(tag, listeners)
 		}
-	} else {
-		return false
+		return true
 	}
-	return true
+	notCompatibleType(tag, value)
+	return false
 }
 
-func (view *viewData) removeTouchListener(tag string) {
+func (view *viewData) removeTouchListener(tag PropertyName) {
 	delete(view.properties, tag)
 	if view.created {
-		if js, ok := touchEvents[tag]; ok {
+		if js, ok := eventJsFunc[tag]; ok {
 			view.session.removeProperty(view.htmlID(), js.jsEvent)
 		}
 	}
 }
 
 func touchEventsHtml(view View, buffer *strings.Builder) {
-	for tag, js := range touchEvents {
+	for _, tag := range []PropertyName{TouchStart, TouchEnd, TouchMove, TouchCancel} {
 		if value := view.getRaw(tag); value != nil {
-			if listeners, ok := value.([]func(View, TouchEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
+			if js, ok := eventJsFunc[tag]; ok {
+				if listeners, ok := value.([]func(View, TouchEvent)); ok && len(listeners) > 0 {
+					buffer.WriteString(js.jsEvent)
+					buffer.WriteString(`="`)
+					buffer.WriteString(js.jsFunc)
+					buffer.WriteString(`(this, event)" `)
+				}
 			}
 		}
 	}
 }
+*/
 
 func (event *TouchEvent) init(data DataObject) {
 
@@ -225,7 +214,7 @@ func (event *TouchEvent) init(data DataObject) {
 	event.MetaKey = dataBoolProperty(data, "metaKey")
 }
 
-func handleTouchEvents(view View, tag string, data DataObject) {
+func handleTouchEvents(view View, tag PropertyName, data DataObject) {
 	listeners := getEventListeners[View, TouchEvent](view, nil, tag)
 	if len(listeners) == 0 {
 		return

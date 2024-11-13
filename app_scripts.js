@@ -215,6 +215,14 @@ function appendToInnerHTML(elementId, content) {
 	}
 }
 
+function appendToInputValue(elementId, content) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.value += content;
+		scanElementsSize();
+	}
+}
+
 function setDisabled(elementId, disabled) {
 	const element = document.getElementById(elementId);
 	if (element) {

@@ -37,6 +37,7 @@ type ListLayout interface {
 	// UpdateContent updates child Views if the "content" property value is set to ListAdapter,
 	// otherwise does nothing
 	UpdateContent()
+	setAdapter(ListAdapter)
 }
 
 type listLayoutData struct {
@@ -53,7 +54,8 @@ func NewListLayout(session Session, params Params) ListLayout {
 }
 
 func newListLayout(session Session) View {
-	return NewListLayout(session, nil)
+	//return NewListLayout(session, nil)
+	return new(listLayoutData)
 }
 
 // Init initialize fields of ViewsAlignContainer by default values
@@ -61,14 +63,16 @@ func (listLayout *listLayoutData) init(session Session) {
 	listLayout.viewsContainerData.init(session)
 	listLayout.tag = "ListLayout"
 	listLayout.systemClass = "ruiListLayout"
+	listLayout.normalize = normalizeListLayoutTag
+	listLayout.getFunc = listLayout.get
+	listLayout.set = listLayout.setFunc
+	listLayout.remove = listLayout.removeFunc
+	listLayout.changed = listLayoutPropertyChanged
+
 }
 
-func (listLayout *listLayoutData) String() string {
-	return getViewString(listLayout, nil)
-}
-
-func (listLayout *listLayoutData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeListLayoutTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case "wrap":
 		tag = ListWrap
@@ -82,79 +86,78 @@ func (listLayout *listLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (listLayout *listLayoutData) Get(tag string) any {
-	return listLayout.get(listLayout.normalizeTag(tag))
-}
-
-func (listLayout *listLayoutData) get(tag string) any {
-	if tag == Gap {
+func (listLayout *listLayoutData) get(self View, tag PropertyName) any {
+	switch tag {
+	case Gap:
 		if rowGap := GetListRowGap(listLayout); rowGap.Equal(GetListColumnGap(listLayout)) {
 			return rowGap
 		}
 		return AutoSize()
-	}
-
-	return listLayout.viewsContainerData.get(tag)
-}
-
-func (listLayout *listLayoutData) Remove(tag string) {
-	listLayout.remove(listLayout.normalizeTag(tag))
-}
-
-func (listLayout *listLayoutData) remove(tag string) {
-	switch tag {
-	case Gap:
-		listLayout.remove(ListRowGap)
-		listLayout.remove(ListColumnGap)
-		return
 
 	case Content:
-		listLayout.adapter = nil
-	}
-
-	listLayout.viewsContainerData.remove(tag)
-	if listLayout.created {
-		switch tag {
-		case Orientation, ListWrap, HorizontalAlign, VerticalAlign:
-			updateCSSStyle(listLayout.htmlID(), listLayout.session)
+		if listLayout.adapter != nil {
+			return listLayout.adapter
 		}
 	}
+
+	return listLayout.viewsContainerData.get(listLayout, tag)
 }
 
-func (listLayout *listLayoutData) Set(tag string, value any) bool {
-	return listLayout.set(listLayout.normalizeTag(tag), value)
-}
-
-func (listLayout *listLayoutData) set(tag string, value any) bool {
-	if value == nil {
-		listLayout.remove(tag)
-		return true
-	}
-
+func (listLayout *listLayoutData) removeFunc(self View, tag PropertyName) []PropertyName {
 	switch tag {
 	case Gap:
-		return listLayout.set(ListRowGap, value) && listLayout.set(ListColumnGap, value)
+		result := []PropertyName{}
+		for _, tag := range []PropertyName{ListRowGap, ListColumnGap} {
+			if listLayout.getRaw(tag) != nil {
+				listLayout.setRaw(tag, nil)
+				result = append(result, tag)
+			}
+		}
+		return result
+
+	case Content:
+		listLayout.viewsContainerData.removeFunc(listLayout, Content)
+		listLayout.adapter = nil
+		return []PropertyName{Content}
+	}
+
+	return listLayout.viewsContainerData.removeFunc(listLayout, tag)
+}
+
+func (listLayout *listLayoutData) setFunc(self View, tag PropertyName, value any) []PropertyName {
+	switch tag {
+	case Gap:
+		result := listLayout.setFunc(listLayout, ListRowGap, value)
+		if result != nil {
+			if gap := listLayout.getRaw(ListRowGap); gap != nil {
+				listLayout.setRaw(ListColumnGap, gap)
+				result = append(result, ListColumnGap)
+			}
+		}
+		return result
 
 	case Content:
 		if adapter, ok := value.(ListAdapter); ok {
 			listLayout.adapter = adapter
-			listLayout.UpdateContent()
-			// TODO
-			return true
+			listLayout.createContent()
+		} else if listLayout.setContent(value) {
+			listLayout.adapter = nil
+		} else {
+			return nil
 		}
-		listLayout.adapter = nil
+		return []PropertyName{Content}
 	}
+	return listLayout.viewsContainerData.setFunc(listLayout, tag, value)
+}
 
-	if listLayout.viewsContainerData.set(tag, value) {
-		if listLayout.created {
-			switch tag {
-			case Orientation, ListWrap, HorizontalAlign, VerticalAlign:
-				updateCSSStyle(listLayout.htmlID(), listLayout.session)
-			}
-		}
-		return true
+func listLayoutPropertyChanged(view View, tag PropertyName) {
+	switch tag {
+	case Orientation, ListWrap, HorizontalAlign, VerticalAlign:
+		updateCSSStyle(view.htmlID(), view.Session())
+
+	default:
+		viewsContainerPropertyChanged(view, tag)
 	}
-	return false
 }
 
 func (listLayout *listLayoutData) htmlSubviews(self View, buffer *strings.Builder) {
@@ -166,7 +169,14 @@ func (listLayout *listLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	}
 }
 
-func (listLayout *listLayoutData) UpdateContent() {
+func (listLayout *listLayoutData) setAdapter(adapter ListAdapter) {
+	listLayout.adapter = adapter
+	if adapter != nil {
+		listLayout.createContent()
+	}
+}
+
+func (listLayout *listLayoutData) createContent() bool {
 	if adapter := listLayout.adapter; adapter != nil {
 		listLayout.views = []View{}
 
@@ -185,11 +195,20 @@ func (listLayout *listLayoutData) UpdateContent() {
 			}
 		}
 
+		return true
+	}
+	return false
+}
+
+func (listLayout *listLayoutData) UpdateContent() {
+	if listLayout.createContent() {
 		if listLayout.created {
-			updateInnerHTML(htmlID, session)
+			updateInnerHTML(listLayout.htmlID(), listLayout.session)
 		}
 
-		listLayout.propertyChangedEvent(Content)
+		if listener, ok := listLayout.changeListener[Content]; ok {
+			listener(listLayout, Content)
+		}
 	}
 }
 

@@ -1,17 +1,19 @@
 package rui
 
-import "strings"
-
-func (cell *tableCellView) Set(tag string, value any) bool {
-	return cell.set(strings.ToLower(tag), value)
+func newTableCellView(session Session) *tableCellView {
+	view := new(tableCellView)
+	view.init(session)
+	return view
 }
 
-func (cell *tableCellView) set(tag string, value any) bool {
-	switch tag {
-	case VerticalAlign:
-		tag = TableVerticalAlign
+func (cell *tableCellView) init(session Session) {
+	cell.viewData.init(session)
+	cell.normalize = func(tag PropertyName) PropertyName {
+		if tag == VerticalAlign {
+			return TableVerticalAlign
+		}
+		return tag
 	}
-	return cell.viewData.set(tag, value)
 }
 
 func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
@@ -31,8 +33,10 @@ func GetTableContent(view View, subviewID ...string) TableAdapter {
 	}
 
 	if view != nil {
-		if tableView, ok := view.(TableView); ok {
-			return tableView.content()
+		if content := view.getRaw(Content); content != nil {
+			if adapter, ok := content.(TableAdapter); ok {
+				return adapter
+			}
 		}
 	}
 
@@ -47,8 +51,12 @@ func GetTableRowStyle(view View, subviewID ...string) TableRowStyle {
 	}
 
 	if view != nil {
-		if tableView, ok := view.(TableView); ok {
-			return tableView.getRowStyle()
+		for _, tag := range []PropertyName{RowStyle, Content} {
+			if value := view.getRaw(tag); value != nil {
+				if style, ok := value.(TableRowStyle); ok {
+					return style
+				}
+			}
 		}
 	}
 
@@ -63,8 +71,12 @@ func GetTableColumnStyle(view View, subviewID ...string) TableColumnStyle {
 	}
 
 	if view != nil {
-		if tableView, ok := view.(TableView); ok {
-			return tableView.getColumnStyle()
+		for _, tag := range []PropertyName{ColumnStyle, Content} {
+			if value := view.getRaw(tag); value != nil {
+				if style, ok := value.(TableColumnStyle); ok {
+					return style
+				}
+			}
 		}
 	}
 
@@ -79,9 +91,14 @@ func GetTableCellStyle(view View, subviewID ...string) TableCellStyle {
 	}
 
 	if view != nil {
-		if tableView, ok := view.(TableView); ok {
-			return tableView.getCellStyle()
+		for _, tag := range []PropertyName{CellStyle, Content} {
+			if value := view.getRaw(tag); value != nil {
+				if style, ok := value.(TableCellStyle); ok {
+					return style
+				}
+			}
 		}
+		return nil
 	}
 
 	return nil
@@ -125,9 +142,7 @@ func GetTableCurrent(view View, subviewID ...string) CellIndex {
 
 	if view != nil {
 		if selectionMode := GetTableSelectionMode(view); selectionMode != NoneSelection {
-			if tableView, ok := view.(TableView); ok {
-				return tableView.getCurrent()
-			}
+			return tableViewCurrent(view)
 		}
 	}
 	return CellIndex{Row: -1, Column: -1}
@@ -137,34 +152,14 @@ func GetTableCurrent(view View, subviewID ...string) CellIndex {
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableCellClickedListeners(view View, subviewID ...string) []func(TableView, int, int) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if value := view.Get(TableCellClickedEvent); value != nil {
-			if result, ok := value.([]func(TableView, int, int)); ok {
-				return result
-			}
-		}
-	}
-	return []func(TableView, int, int){}
+	return getEventWithOldListeners[TableView, int](view, subviewID, TableCellClickedEvent)
 }
 
 // GetTableCellSelectedListeners returns listeners of event which occurs when a table cell becomes selected.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableCellSelectedListeners(view View, subviewID ...string) []func(TableView, int, int) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if value := view.Get(TableCellSelectedEvent); value != nil {
-			if result, ok := value.([]func(TableView, int, int)); ok {
-				return result
-			}
-		}
-	}
-	return []func(TableView, int, int){}
+	return getEventWithOldListeners[TableView, int](view, subviewID, TableCellSelectedEvent)
 }
 
 // GetTableRowClickedListeners returns listeners of event which occurs when the user clicks on a table row.

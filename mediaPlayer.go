@@ -14,7 +14,7 @@ const (
 	// Used by `AudioPlayer`, `VideoPlayer`.
 	//
 	// Usage in `AudioPlayer`:
-	// Controls whether the browser need to provide controls to allow user to control audio playback, volume, seeking and 
+	// Controls whether the browser need to provide controls to allow user to control audio playback, volume, seeking and
 	// pause/resume playback. Default value is `false`.
 	//
 	// Supported types: `bool`, `int`, `string`.
@@ -24,7 +24,7 @@ const (
 	// `false` or `0` or "false", "no", "off", "0" - No controls will be visible to the end user.
 	//
 	// Usage in `VideoPlayer`:
-	// Whether the browser need to provide controls to allow user to control video playback, volume, seeking and pause/resume 
+	// Whether the browser need to provide controls to allow user to control video playback, volume, seeking and pause/resume
 	// playback. Default value is `false`.
 	//
 	// Supported types: `bool`, `int`, `string`.
@@ -32,7 +32,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - The browser will offer controls to allow the user to control video playback, volume, seeking and pause/resume playback.
 	// `false` or `0` or "false", "no", "off", "0" - No controls will be visible to the end user.
-	Controls = "controls"
+	Controls PropertyName = "controls"
 
 	// Loop is the constant for "loop" property tag.
 	//
@@ -55,7 +55,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - The video player will automatically seek back to the start upon reaching the end of the video.
 	// `false` or `0` or "false", "no", "off", "0" - Video player will stop playing when the end of the media file has been reached.
-	Loop = "loop"
+	Loop PropertyName = "loop"
 
 	// Muted is the constant for "muted" property tag.
 	//
@@ -78,14 +78,14 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Video will be muted.
 	// `false` or `0` or "false", "no", "off", "0" - Video playing normally.
-	Muted = "muted"
+	Muted PropertyName = "muted"
 
 	// Preload is the constant for "preload" property tag.
 	//
 	// Used by `AudioPlayer`, `VideoPlayer`.
 	//
 	// Usage in `AudioPlayer`:
-	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user 
+	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user
 	// experience. Default value is different for each browser.
 	//
 	// Supported types: `int`, `string`.
@@ -96,7 +96,7 @@ const (
 	// `2`(`PreloadAuto`) or "auto" - The entire media file can be downloaded even if the user doesn't have to use it.
 	//
 	// Usage in `VideoPlayer`:
-	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user 
+	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user
 	// experience. Default value is different for each browser.
 	//
 	// Supported types: `int`, `string`.
@@ -105,7 +105,7 @@ const (
 	// `0`(`PreloadNone`) or "none" - Media file must not be pre-loaded.
 	// `1`(`PreloadMetadata`) or "metadata" - Only metadata is preloaded.
 	// `2`(`PreloadAuto`) or "auto" - The entire media file can be downloaded even if the user doesn't have to use it.
-	Preload = "preload"
+	Preload PropertyName = "preload"
 
 	// AbortEvent is the constant for "abort-event" property tag.
 	//
@@ -134,14 +134,14 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	AbortEvent = "abort-event"
+	AbortEvent PropertyName = "abort-event"
 
 	// CanPlayEvent is the constant for "can-play-event" property tag.
 	//
 	// Used by `AudioPlayer`, `VideoPlayer`.
 	//
 	// Usage in `AudioPlayer`:
-	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to 
+	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to
 	// its end without having to stop for further buffering of content.
 	//
 	// General listener format:
@@ -154,7 +154,7 @@ const (
 	// `func()`.
 	//
 	// Usage in `VideoPlayer`:
-	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to 
+	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to
 	// its end without having to stop for further buffering of content.
 	//
 	// General listener format:
@@ -165,7 +165,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	CanPlayEvent = "can-play-event"
+	CanPlayEvent PropertyName = "can-play-event"
 
 	// CanPlayThroughEvent is the constant for "can-play-through-event" property tag.
 	//
@@ -194,7 +194,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	CanPlayThroughEvent = "can-play-through-event"
+	CanPlayThroughEvent PropertyName = "can-play-through-event"
 
 	// CompleteEvent is the constant for "complete-event" property tag.
 	//
@@ -223,7 +223,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	CompleteEvent = "complete-event"
+	CompleteEvent PropertyName = "complete-event"
 
 	// DurationChangedEvent is the constant for "duration-changed-event" property tag.
 	//
@@ -258,14 +258,14 @@ const (
 	// `func(player rui.MediaPlayer)`,
 	// `func(duration float64)`,
 	// `func()`.
-	DurationChangedEvent = "duration-changed-event"
+	DurationChangedEvent PropertyName = "duration-changed-event"
 
 	// EmptiedEvent is the constant for "emptied-event" property tag.
 	//
 	// Used by `AudioPlayer`, `VideoPlayer`.
 	//
 	// Usage in `AudioPlayer`:
-	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or 
+	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or
 	// partially loaded), and the HTMLMediaElement.load method is called to reload it.
 	//
 	// General listener format:
@@ -278,7 +278,7 @@ const (
 	// `func()`.
 	//
 	// Usage in `VideoPlayer`:
-	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or 
+	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or
 	// partially loaded), and the HTMLMediaElement.load method is called to reload it.
 	//
 	// General listener format:
@@ -289,7 +289,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	EmptiedEvent = "emptied-event"
+	EmptiedEvent PropertyName = "emptied-event"
 
 	// EndedEvent is the constant for "ended-event" property tag.
 	//
@@ -318,7 +318,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	EndedEvent = "ended-event"
+	EndedEvent PropertyName = "ended-event"
 
 	// LoadedDataEvent is the constant for "loaded-data-event" property tag.
 	//
@@ -347,7 +347,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	LoadedDataEvent = "loaded-data-event"
+	LoadedDataEvent PropertyName = "loaded-data-event"
 
 	// LoadedMetadataEvent is the constant for "loaded-metadata-event" property tag.
 	//
@@ -376,7 +376,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	LoadedMetadataEvent = "loaded-metadata-event"
+	LoadedMetadataEvent PropertyName = "loaded-metadata-event"
 
 	// LoadStartEvent is the constant for "load-start-event" property tag.
 	//
@@ -405,7 +405,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	LoadStartEvent = "load-start-event"
+	LoadStartEvent PropertyName = "load-start-event"
 
 	// PauseEvent is the constant for "pause-event" property tag.
 	//
@@ -434,7 +434,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	PauseEvent = "pause-event"
+	PauseEvent PropertyName = "pause-event"
 
 	// PlayEvent is the constant for "play-event" property tag.
 	//
@@ -463,7 +463,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	PlayEvent = "play-event"
+	PlayEvent PropertyName = "play-event"
 
 	// PlayingEvent is the constant for "playing-event" property tag.
 	//
@@ -492,7 +492,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	PlayingEvent = "playing-event"
+	PlayingEvent PropertyName = "playing-event"
 
 	// ProgressEvent is the constant for "progress-event" property tag.
 	//
@@ -521,7 +521,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	ProgressEvent = "progress-event"
+	ProgressEvent PropertyName = "progress-event"
 
 	// RateChangedEvent is the constant for "rate-changed-event" property tag.
 	//
@@ -556,7 +556,7 @@ const (
 	// `func(player rui.MediaPlayer)`,
 	// `func(rate float64)`,
 	// `func()`.
-	RateChangedEvent = "rate-changed-event"
+	RateChangedEvent PropertyName = "rate-changed-event"
 
 	// SeekedEvent is the constant for "seeked-event" property tag.
 	//
@@ -585,7 +585,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	SeekedEvent = "seeked-event"
+	SeekedEvent PropertyName = "seeked-event"
 
 	// SeekingEvent is the constant for "seeking-event" property tag.
 	//
@@ -614,7 +614,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	SeekingEvent = "seeking-event"
+	SeekingEvent PropertyName = "seeking-event"
 
 	// StalledEvent is the constant for "stalled-event" property tag.
 	//
@@ -643,7 +643,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	StalledEvent = "stalled-event"
+	StalledEvent PropertyName = "stalled-event"
 
 	// SuspendEvent is the constant for "suspend-event" property tag.
 	//
@@ -672,7 +672,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	SuspendEvent = "suspend-event"
+	SuspendEvent PropertyName = "suspend-event"
 
 	// TimeUpdateEvent is the constant for "time-update-event" property tag.
 	//
@@ -707,7 +707,7 @@ const (
 	// `func(player rui.MediaPlayer)`,
 	// `func(time float64)`,
 	// `func()`.
-	TimeUpdateEvent = "time-update-event"
+	TimeUpdateEvent PropertyName = "time-update-event"
 
 	// VolumeChangedEvent is the constant for "volume-changed-event" property tag.
 	//
@@ -742,7 +742,7 @@ const (
 	// `func(player rui.MediaPlayer)`,
 	// `func(volume float64)`,
 	// `func()`.
-	VolumeChangedEvent = "volume-changed-event"
+	VolumeChangedEvent PropertyName = "volume-changed-event"
 
 	// WaitingEvent is the constant for "waiting-event" property tag.
 	//
@@ -771,7 +771,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	WaitingEvent = "waiting-event"
+	WaitingEvent PropertyName = "waiting-event"
 
 	// PlayerErrorEvent is the constant for "player-error-event" property tag.
 	//
@@ -820,7 +820,7 @@ const (
 	// `func(code int, message string)`,
 	// `func(player rui.MediaPlayer)`,
 	// `func()`.
-	PlayerErrorEvent = "player-error-event"
+	PlayerErrorEvent PropertyName = "player-error-event"
 
 	// PreloadNone - value of the view "preload" property: indicates that the audio/video should not be preloaded.
 	PreloadNone = 0
@@ -907,119 +907,70 @@ type MediaSource struct {
 func (player *mediaPlayerData) init(session Session) {
 	player.viewData.init(session)
 	player.tag = "MediaPlayer"
-}
-
-func (player *mediaPlayerData) String() string {
-	return getViewString(player, nil)
+	player.set = mediaPlayerSet
+	player.changed = mediaPlayerPropertyChanged
 }
 
 func (player *mediaPlayerData) Focusable() bool {
 	return true
 }
 
-func (player *mediaPlayerData) Remove(tag string) {
-	player.remove(strings.ToLower(tag))
-}
-
-func (player *mediaPlayerData) remove(tag string) {
-	player.viewData.remove(tag)
-	player.propertyChanged(tag)
-}
-
-func (player *mediaPlayerData) Set(tag string, value any) bool {
-	return player.set(strings.ToLower(tag), value)
-}
-
-func (player *mediaPlayerData) set(tag string, value any) bool {
-	if value == nil {
-		player.remove(tag)
-		return true
-	}
-
+func mediaPlayerSet(view View, tag PropertyName, value any) []PropertyName {
 	switch tag {
-	case Controls, Loop, Muted, Preload:
-		if player.viewData.set(tag, value) {
-			player.propertyChanged(tag)
-			return true
-		}
 
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent, LoadStartEvent,
 		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent,
 		ProgressEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
-		if listeners, ok := valueToNoParamListeners[MediaPlayer](value); ok {
-			if listeners == nil {
-				delete(player.properties, tag)
-			} else {
-				player.properties[tag] = listeners
-			}
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
-		}
-		notCompatibleType(tag, value)
+
+		return setNoParamEventListener[MediaPlayer](view, tag, value)
 
 	case DurationChangedEvent, RateChangedEvent, TimeUpdateEvent, VolumeChangedEvent:
-		if listeners, ok := valueToEventListeners[MediaPlayer, float64](value); ok {
-			if listeners == nil {
-				delete(player.properties, tag)
-			} else {
-				player.properties[tag] = listeners
-			}
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
-		}
-		notCompatibleType(tag, value)
+
+		return setViewEventListener[MediaPlayer, float64](view, tag, value)
 
 	case PlayerErrorEvent:
 		if listeners, ok := valueToPlayerErrorListeners(value); ok {
-			if listeners == nil {
-				delete(player.properties, tag)
+			if len(listeners) > 0 {
+				view.setRaw(tag, listeners)
+			} else if view.getRaw(tag) != nil {
+				view.setRaw(tag, nil)
 			} else {
-				player.properties[tag] = listeners
+				return []PropertyName{}
 			}
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
+			return []PropertyName{tag}
 		}
 		notCompatibleType(tag, value)
+		return nil
 
 	case Source:
-		if player.setSource(value) {
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
-		}
-
-	default:
-		return player.viewData.set(tag, value)
+		return setMediaPlayerSource(view, value)
 	}
 
-	return false
+	return viewSet(view, tag, value)
 }
 
-func (player *mediaPlayerData) setSource(value any) bool {
+func setMediaPlayerSource(properties Properties, value any) []PropertyName {
 	switch value := value.(type) {
 	case string:
 		src := MediaSource{Url: value, MimeType: ""}
-		player.properties[Source] = []MediaSource{src}
+		properties.setRaw(Source, []MediaSource{src})
 
 	case MediaSource:
-		player.properties[Source] = []MediaSource{value}
+		properties.setRaw(Source, []MediaSource{value})
 
 	case []MediaSource:
-		player.properties[Source] = value
+		properties.setRaw(Source, value)
 
 	case DataObject:
 		url, ok := value.PropertyValue("src")
 		if !ok || url == "" {
 			invalidPropertyValue(Source, value)
-			return false
+			return nil
 		}
 
 		mimeType, _ := value.PropertyValue("mime-type")
 		src := MediaSource{Url: url, MimeType: mimeType}
-		player.properties[Source] = []MediaSource{src}
+		properties.setRaw(Source, []MediaSource{src})
 
 	case []DataValue:
 		src := []MediaSource{}
@@ -1031,7 +982,7 @@ func (player *mediaPlayerData) setSource(value any) bool {
 					src = append(src, MediaSource{Url: url, MimeType: mimeType})
 				} else {
 					invalidPropertyValue(Source, value)
-					return false
+					return nil
 				}
 			} else {
 				src = append(src, MediaSource{Url: val.Value(), MimeType: ""})
@@ -1040,16 +991,16 @@ func (player *mediaPlayerData) setSource(value any) bool {
 
 		if len(src) == 0 {
 			invalidPropertyValue(Source, value)
-			return false
+			return nil
 		}
-		player.properties[Source] = src
+		properties.setRaw(Source, src)
 
 	default:
 		notCompatibleType(Source, value)
-		return false
+		return nil
 	}
 
-	return true
+	return []PropertyName{Source}
 }
 
 func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), bool) {
@@ -1177,109 +1128,106 @@ func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), b
 	return nil, false
 }
 
-func playerEvents() []struct{ tag, cssTag string } {
-	return []struct{ tag, cssTag string }{
-		{AbortEvent, "onabort"},
-		{CanPlayEvent, "oncanplay"},
-		{CanPlayThroughEvent, "oncanplaythrough"},
-		{CompleteEvent, "oncomplete"},
-		{EmptiedEvent, "onemptied"},
-		{EndedEvent, "ended"},
-		{LoadedDataEvent, "onloadeddata"},
-		{LoadedMetadataEvent, "onloadedmetadata"},
-		{LoadStartEvent, "onloadstart"},
-		{PauseEvent, "onpause"},
-		{PlayEvent, "onplay"},
-		{PlayingEvent, "onplaying"},
-		{ProgressEvent, "onprogress"},
-		{SeekedEvent, "onseeked"},
-		{SeekingEvent, "onseeking"},
-		{StalledEvent, "onstalled"},
-		{SuspendEvent, "onsuspend"},
-		{WaitingEvent, "onwaiting"},
+func mediaPlayerEvents() map[PropertyName]string {
+	return map[PropertyName]string{
+		AbortEvent:          "onabort",
+		CanPlayEvent:        "oncanplay",
+		CanPlayThroughEvent: "oncanplaythrough",
+		CompleteEvent:       "oncomplete",
+		EmptiedEvent:        "onemptied",
+		EndedEvent:          "ended",
+		LoadedDataEvent:     "onloadeddata",
+		LoadedMetadataEvent: "onloadedmetadata",
+		LoadStartEvent:      "onloadstart",
+		PauseEvent:          "onpause",
+		PlayEvent:           "onplay",
+		PlayingEvent:        "onplaying",
+		ProgressEvent:       "onprogress",
+		SeekedEvent:         "onseeked",
+		SeekingEvent:        "onseeking",
+		StalledEvent:        "onstalled",
+		SuspendEvent:        "onsuspend",
+		WaitingEvent:        "onwaiting",
 	}
 }
 
-func (player *mediaPlayerData) propertyChanged(tag string) {
-	if player.created {
-		switch tag {
-		case Controls, Loop:
-			value, _ := boolProperty(player, tag, player.session)
-			if value {
-				player.session.updateProperty(player.htmlID(), tag, value)
-			} else {
-				player.session.removeProperty(player.htmlID(), tag)
-			}
+func mediaPlayerPropertyChanged(view View, tag PropertyName) {
+	session := view.Session()
 
-		case Muted:
-			value, _ := boolProperty(player, tag, player.session)
-			player.session.callFunc("setMediaMuted", player.htmlID(), value)
-
-		case Preload:
-			value, _ := enumProperty(player, tag, player.session, 0)
-			values := enumProperties[Preload].values
-			player.session.updateProperty(player.htmlID(), tag, values[value])
-
-		case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
-			EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
-			LoadStartEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
-
-			for _, event := range playerEvents() {
-				if event.tag == tag {
-					if value := player.getRaw(event.tag); value != nil {
-						switch value := value.(type) {
-						case []func(MediaPlayer):
-							if len(value) > 0 {
-								fn := fmt.Sprintf(`playerEvent(this, "%s")`, event.tag)
-								player.session.updateProperty(player.htmlID(), event.cssTag, fn)
-								return
-							}
-						}
-					}
-					player.session.updateProperty(player.htmlID(), tag, "")
-					break
-				}
-
-			}
-		case TimeUpdateEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "ontimeupdate", "playerTimeUpdatedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "ontimeupdate", "")
-			}
-
-		case VolumeChangedEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "onvolumechange", "playerVolumeChangedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "onvolumechange", "")
-			}
-
-		case DurationChangedEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "ondurationchange", "playerDurationChangedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "ondurationchange", "")
-			}
-
-		case RateChangedEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "onratechange", "playerRateChangedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "onratechange", "")
-			}
-
-		case PlayerErrorEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "onerror", "playerErrorEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "onerror", "")
-			}
-
-		case Source:
-			updateInnerHTML(player.htmlID(), player.session)
+	switch tag {
+	case Controls, Loop:
+		value, _ := boolProperty(view, tag, session)
+		if value {
+			session.updateProperty(view.htmlID(), string(tag), value)
+		} else {
+			session.removeProperty(view.htmlID(), string(tag))
 		}
+
+	case Muted:
+		value, _ := boolProperty(view, Muted, session)
+		session.callFunc("setMediaMuted", view.htmlID(), value)
+
+	case Preload:
+		value, _ := enumProperty(view, Preload, session, 0)
+		values := enumProperties[Preload].values
+		session.updateProperty(view.htmlID(), string(Preload), values[value])
+
+	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
+		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
+		LoadStartEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
+
+		if cssTag, ok := mediaPlayerEvents()[tag]; ok {
+			fn := ""
+			if value := view.getRaw(tag); value != nil {
+				if listeners, ok := value.([]func(MediaPlayer)); ok && len(listeners) > 0 {
+					fn = fmt.Sprintf(`viewEvent(this, "%s")`, string(tag))
+				}
+			}
+			session.updateProperty(view.htmlID(), cssTag, fn)
+		}
+
+	case TimeUpdateEvent:
+		if value := view.getRaw(tag); value != nil {
+			session.updateProperty(view.htmlID(), "ontimeupdate", "viewTimeUpdatedEvent(this)")
+		} else {
+			session.updateProperty(view.htmlID(), "ontimeupdate", "")
+		}
+
+	case VolumeChangedEvent:
+		if value := view.getRaw(tag); value != nil {
+			session.updateProperty(view.htmlID(), "onvolumechange", "viewVolumeChangedEvent(this)")
+		} else {
+			session.updateProperty(view.htmlID(), "onvolumechange", "")
+		}
+
+	case DurationChangedEvent:
+		if value := view.getRaw(tag); value != nil {
+			session.updateProperty(view.htmlID(), "ondurationchange", "viewDurationChangedEvent(this)")
+		} else {
+			session.updateProperty(view.htmlID(), "ondurationchange", "")
+		}
+
+	case RateChangedEvent:
+		if value := view.getRaw(tag); value != nil {
+			session.updateProperty(view.htmlID(), "onratechange", "viewRateChangedEvent(this)")
+		} else {
+			session.updateProperty(view.htmlID(), "onratechange", "")
+		}
+
+	case PlayerErrorEvent:
+		if value := view.getRaw(tag); value != nil {
+			session.updateProperty(view.htmlID(), "onerror", "viewErrorEvent(this)")
+		} else {
+			session.updateProperty(view.htmlID(), "onerror", "")
+		}
+
+	case Source:
+		updateInnerHTML(view.htmlID(), session)
+
+	default:
+		viewPropertyChanged(view, tag)
 	}
+
 }
 
 func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) {
@@ -1305,10 +1253,10 @@ func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) 
 
 func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder) {
 	player.viewData.htmlProperties(self, buffer)
-	for _, tag := range []string{Controls, Loop, Muted, Preload} {
+	for _, tag := range []PropertyName{Controls, Loop, Muted, Preload} {
 		if value, _ := boolProperty(player, tag, player.session); value {
 			buffer.WriteRune(' ')
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 		}
 	}
 
@@ -1319,17 +1267,14 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 		buffer.WriteRune('"')
 	}
 
-	for _, event := range playerEvents() {
-		if value := player.getRaw(event.tag); value != nil {
-			switch value := value.(type) {
-			case []func(MediaPlayer):
-				if len(value) > 0 {
-					buffer.WriteString(` `)
-					buffer.WriteString(event.cssTag)
-					buffer.WriteString(`="playerEvent(this, '`)
-					buffer.WriteString(event.tag)
-					buffer.WriteString(`')"`)
-				}
+	for tag, cssTag := range mediaPlayerEvents() {
+		if value := player.getRaw(tag); value != nil {
+			if listeners, ok := value.([]func(MediaPlayer)); ok && len(listeners) > 0 {
+				buffer.WriteString(` `)
+				buffer.WriteString(cssTag)
+				buffer.WriteString(`="playerEvent(this, '`)
+				buffer.WriteString(string(tag))
+				buffer.WriteString(`')"`)
 			}
 		}
 	}
@@ -1355,7 +1300,7 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 	}
 }
 
-func (player *mediaPlayerData) handleCommand(self View, command string, data DataObject) bool {
+func (player *mediaPlayerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, LoadStartEvent,
 		EmptiedEvent, EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent,

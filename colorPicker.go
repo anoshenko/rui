@@ -25,7 +25,7 @@ const (
 	// `func(newColor rui.Color)`,
 	// `func(picker rui.ColorPicker)`,
 	// `func()`.
-	ColorChangedEvent = "color-changed"
+	ColorChangedEvent PropertyName = "color-changed"
 
 	// ColorPickerValue is the constant for "color-picker-value" property tag.
 	//
@@ -36,7 +36,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	ColorPickerValue = "color-picker-value"
+	ColorPickerValue PropertyName = "color-picker-value"
 )
 
 // ColorPicker represent a ColorPicker view
@@ -46,8 +46,6 @@ type ColorPicker interface {
 
 type colorPickerData struct {
 	viewData
-	dataList
-	colorChangedListeners []func(ColorPicker, Color, Color)
 }
 
 // NewColorPicker create new ColorPicker object and return it
@@ -59,125 +57,69 @@ func NewColorPicker(session Session, params Params) ColorPicker {
 }
 
 func newColorPicker(session Session) View {
-	return NewColorPicker(session, nil)
+	return new(colorPickerData)
 }
 
 func (picker *colorPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "ColorPicker"
 	picker.hasHtmlDisabled = true
-	picker.colorChangedListeners = []func(ColorPicker, Color, Color){}
 	picker.properties[Padding] = Px(0)
-	picker.dataListInit()
+	picker.normalize = normalizeColorPickerTag
+	picker.set = colorPickerSet
+	picker.changed = colorPickerPropertyChanged
 }
 
-func (picker *colorPickerData) String() string {
-	return getViewString(picker, nil)
-}
-
-func (picker *colorPickerData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeColorPickerTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case Value, ColorTag:
 		return ColorPickerValue
 	}
 
-	return picker.normalizeDataListTag(tag)
+	return normalizeDataListTag(tag)
 }
 
-func (picker *colorPickerData) Remove(tag string) {
-	picker.remove(picker.normalizeTag(tag))
-}
-
-func (picker *colorPickerData) remove(tag string) {
+func colorPickerSet(view View, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case ColorChangedEvent:
-		if len(picker.colorChangedListeners) > 0 {
-			picker.colorChangedListeners = []func(ColorPicker, Color, Color){}
-			picker.propertyChangedEvent(tag)
-		}
+		return setEventWithOldListener[ColorPicker, Color](view, tag, value)
 
 	case ColorPickerValue:
-		oldColor := GetColorPickerValue(picker)
-		delete(picker.properties, ColorPickerValue)
-		picker.colorChanged(oldColor)
+		oldColor := GetColorPickerValue(view)
+		result := setColorProperty(view, ColorPickerValue, value)
+		if result != nil {
+			view.setRaw("old-color", oldColor)
+		}
+		return result
 
 	case DataList:
-		if len(picker.dataList.dataList) > 0 {
-			picker.setDataList(picker, []string{}, true)
-		}
-
-	default:
-		picker.viewData.remove(tag)
-	}
-}
-
-func (picker *colorPickerData) Set(tag string, value any) bool {
-	return picker.set(picker.normalizeTag(tag), value)
-}
-
-func (picker *colorPickerData) set(tag string, value any) bool {
-	if value == nil {
-		picker.remove(tag)
-		return true
+		return setDataList(view, value, "")
 	}
 
+	return viewSet(view, tag, value)
+}
+
+func colorPickerPropertyChanged(view View, tag PropertyName) {
 	switch tag {
-	case ColorChangedEvent:
-		listeners, ok := valueToEventWithOldListeners[ColorPicker, Color](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(ColorPicker, Color, Color){}
-		}
-		picker.colorChangedListeners = listeners
-		picker.propertyChangedEvent(tag)
-		return true
-
 	case ColorPickerValue:
-		oldColor := GetColorPickerValue(picker)
-		if picker.setColorProperty(ColorPickerValue, value) {
-			picker.colorChanged(oldColor)
-			return true
-		}
+		color := GetColorPickerValue(view)
+		view.Session().callFunc("setInputValue", view.htmlID(), color.rgbString())
 
-	case DataList:
-		return picker.setDataList(picker, value, picker.created)
+		if listeners := GetColorChangedListeners(view); len(listeners) > 0 {
+			oldColor := Color(0)
+			if value := view.getRaw("old-color"); value != nil {
+				oldColor = value.(Color)
+			}
+			for _, listener := range listeners {
+				listener(view, color, oldColor)
+			}
+		}
 
 	default:
-		return picker.viewData.set(tag, value)
+		viewPropertyChanged(view, tag)
 	}
-	return false
-}
 
-func (picker *colorPickerData) colorChanged(oldColor Color) {
-	if newColor := GetColorPickerValue(picker); oldColor != newColor {
-		if picker.created {
-			picker.session.callFunc("setInputValue", picker.htmlID(), newColor.rgbString())
-		}
-		for _, listener := range picker.colorChangedListeners {
-			listener(picker, newColor, oldColor)
-		}
-		picker.propertyChangedEvent(ColorTag)
-	}
-}
-
-func (picker *colorPickerData) Get(tag string) any {
-	return picker.get(picker.normalizeTag(tag))
-}
-
-func (picker *colorPickerData) get(tag string) any {
-	switch tag {
-	case ColorChangedEvent:
-		return picker.colorChangedListeners
-
-	case DataList:
-		return picker.dataList.dataList
-
-	default:
-		return picker.viewData.get(tag)
-	}
 }
 
 func (picker *colorPickerData) htmlTag() string {
@@ -185,7 +127,10 @@ func (picker *colorPickerData) htmlTag() string {
 }
 
 func (picker *colorPickerData) htmlSubviews(self View, buffer *strings.Builder) {
-	picker.dataListHtmlSubviews(self, buffer)
+	dataListHtmlSubviews(self, buffer, func(text string, session Session) string {
+		text, _ = session.resolveConstants(text)
+		return text
+	})
 }
 
 func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder) {
@@ -200,19 +145,22 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}
 
-	picker.dataListHtmlProperties(picker, buffer)
+	dataListHtmlProperties(picker, buffer)
 }
 
-func (picker *colorPickerData) handleCommand(self View, command string, data DataObject) bool {
+func (picker *colorPickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
-			oldColor := GetColorPickerValue(picker)
 			if color, ok := StringToColor(text); ok {
+				oldColor := GetColorPickerValue(picker)
 				picker.properties[ColorPickerValue] = color
 				if color != oldColor {
-					for _, listener := range picker.colorChangedListeners {
+					for _, listener := range GetColorChangedListeners(picker) {
 						listener(picker, color, oldColor)
+					}
+					if listener, ok := picker.changeListener[ColorPickerValue]; ok {
+						listener(picker, ColorPickerValue)
 					}
 				}
 			}
@@ -233,7 +181,7 @@ func GetColorPickerValue(view View, subviewID ...string) Color {
 		if value, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
 			return value
 		}
-		for _, tag := range []string{ColorPickerValue, Value, ColorTag} {
+		for _, tag := range []PropertyName{ColorPickerValue, Value, ColorTag} {
 			if value := valueFromStyle(view, tag); value != nil {
 				if result, ok := valueToColor(value, view.Session()); ok {
 					return result

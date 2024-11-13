@@ -42,7 +42,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	ColorTag = "color"
+	ColorTag PropertyName = "color"
 
 	// Inset is the constant for "inset" property tag.
 	//
@@ -55,7 +55,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Drop shadow inside the frame(as if the content was depressed inside the box).
 	// `false` or `0` or "false", "no", "off", "0" - Shadow is assumed to be a drop shadow(as if the box were raised above the content).
-	Inset = "inset"
+	Inset PropertyName = "inset"
 
 	// XOffset is the constant for "x-offset" property tag.
 	//
@@ -66,7 +66,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	XOffset = "x-offset"
+	XOffset PropertyName = "x-offset"
 
 	// YOffset is the constant for "y-offset" property tag.
 	//
@@ -77,7 +77,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	YOffset = "y-offset"
+	YOffset PropertyName = "y-offset"
 
 	// BlurRadius is the constant for "blur" property tag.
 	//
@@ -89,7 +89,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BlurRadius = "blur"
+	BlurRadius PropertyName = "blur"
 
 	// SpreadRadius is the constant for "spread-radius" property tag.
 	//
@@ -100,7 +100,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	SpreadRadius = "spread-radius"
+	SpreadRadius PropertyName = "spread-radius"
 )
 
 // ViewShadow contains attributes of the view shadow
@@ -114,7 +114,7 @@ type ViewShadow interface {
 }
 
 type viewShadowData struct {
-	propertyList
+	dataProperty
 }
 
 // NewViewShadow create the new shadow for a view. Arguments:
@@ -188,11 +188,12 @@ func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShado
 // "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
 func NewShadowWithParams(params Params) ViewShadow {
 	shadow := new(viewShadowData)
-	shadow.propertyList.init()
+	shadow.init()
+
 	if params != nil {
-		for _, tag := range []string{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius} {
+		for _, tag := range []PropertyName{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius} {
 			if value, ok := params[tag]; ok && value != nil {
-				shadow.Set(tag, value)
+				shadow.set(shadow, tag, value)
 			}
 		}
 	}
@@ -202,33 +203,14 @@ func NewShadowWithParams(params Params) ViewShadow {
 // parseViewShadow parse DataObject and create ViewShadow object
 func parseViewShadow(object DataObject) ViewShadow {
 	shadow := new(viewShadowData)
-	shadow.propertyList.init()
+	shadow.init()
 	parseProperties(shadow, object)
 	return shadow
 }
 
-func (shadow *viewShadowData) Remove(tag string) {
-	delete(shadow.properties, strings.ToLower(tag))
-}
-
-func (shadow *viewShadowData) Set(tag string, value any) bool {
-	if value == nil {
-		shadow.Remove(tag)
-		return true
-	}
-
-	tag = strings.ToLower(tag)
-	switch tag {
-	case ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius:
-		return shadow.propertyList.Set(tag, value)
-	}
-
-	ErrorLogF(`"%s" property is not supported by Shadow`, tag)
-	return false
-}
-
-func (shadow *viewShadowData) Get(tag string) any {
-	return shadow.propertyList.Get(strings.ToLower(tag))
+func (shadow *viewShadowData) init() {
+	shadow.dataProperty.init()
+	shadow.supportedProperties = []PropertyName{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius}
 }
 
 func (shadow *viewShadowData) cssStyle(buffer *strings.Builder, session Session, lead string) bool {
@@ -316,7 +298,7 @@ func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
@@ -325,29 +307,29 @@ func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string
 	buffer.WriteString(" }")
 }
 
-func (properties *propertyList) setShadow(tag string, value any) bool {
+func setShadowProperty(properties Properties, tag PropertyName, value any) bool {
 
 	if value == nil {
-		delete(properties.properties, tag)
+		properties.setRaw(tag, nil)
 		return true
 	}
 
 	switch value := value.(type) {
 	case ViewShadow:
-		properties.properties[tag] = []ViewShadow{value}
+		properties.setRaw(tag, []ViewShadow{value})
 
 	case []ViewShadow:
 		if len(value) == 0 {
-			delete(properties.properties, tag)
+			properties.setRaw(tag, nil)
 		} else {
-			properties.properties[tag] = value
+			properties.setRaw(tag, value)
 		}
 
 	case DataValue:
 		if !value.IsObject() {
 			return false
 		}
-		properties.properties[tag] = []ViewShadow{parseViewShadow(value.Object())}
+		properties.setRaw(tag, []ViewShadow{parseViewShadow(value.Object())})
 
 	case []DataValue:
 		shadows := []ViewShadow{}
@@ -359,7 +341,7 @@ func (properties *propertyList) setShadow(tag string, value any) bool {
 		if len(shadows) == 0 {
 			return false
 		}
-		properties.properties[tag] = shadows
+		properties.setRaw(tag, shadows)
 
 	case string:
 		obj := NewDataObject(value)
@@ -367,7 +349,7 @@ func (properties *propertyList) setShadow(tag string, value any) bool {
 			notCompatibleType(tag, value)
 			return false
 		}
-		properties.properties[tag] = []ViewShadow{parseViewShadow(obj)}
+		properties.setRaw(tag, []ViewShadow{parseViewShadow(obj)})
 
 	default:
 		notCompatibleType(tag, value)
@@ -377,7 +359,7 @@ func (properties *propertyList) setShadow(tag string, value any) bool {
 	return true
 }
 
-func getShadows(properties Properties, tag string) []ViewShadow {
+func getShadows(properties Properties, tag PropertyName) []ViewShadow {
 	if value := properties.Get(tag); value != nil {
 		switch value := value.(type) {
 		case []ViewShadow:
@@ -390,7 +372,7 @@ func getShadows(properties Properties, tag string) []ViewShadow {
 	return []ViewShadow{}
 }
 
-func shadowCSS(properties Properties, tag string, session Session) string {
+func shadowCSS(properties Properties, tag PropertyName, session Session) string {
 	shadows := getShadows(properties, tag)
 	if len(shadows) == 0 {
 		return ""

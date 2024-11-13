@@ -3,7 +3,7 @@ package rui
 // Get returns a value of the property with name "tag" of the "rootView" subview with "viewID" id value.
 // The type of return value depends on the property.
 // If the subview don't exists or the property is not set then nil is returned.
-func Get(rootView View, viewID, tag string) any {
+func Get(rootView View, viewID string, tag PropertyName) any {
 	var view View
 	if viewID != "" {
 		view = ViewByID(rootView, viewID)
@@ -19,7 +19,7 @@ func Get(rootView View, viewID, tag string) any {
 // Set sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
 // true - success,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
-func Set(rootView View, viewID, tag string, value any) bool {
+func Set(rootView View, viewID string, tag PropertyName, value any) bool {
 	var view View
 	if viewID != "" {
 		view = ViewByID(rootView, viewID)
@@ -34,7 +34,7 @@ func Set(rootView View, viewID, tag string, value any) bool {
 
 // SetChangeListener sets a listener for changing a subview property value.
 // If the second argument (subviewID) is not specified or it is "" then a listener for the first argument (view) is set
-func SetChangeListener(view View, viewID, tag string, listener func(View, string)) {
+func SetChangeListener(view View, viewID string, tag PropertyName, listener func(View, PropertyName)) {
 	if viewID != "" {
 		view = ViewByID(view, viewID)
 	}
@@ -294,7 +294,7 @@ func GetBorder(view View, subviewID ...string) ViewBorders {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
-		if border := getBorder(view, Border); border != nil {
+		if border := getBorderProperty(view, Border); border != nil {
 			return border.ViewBorders(view.Session())
 		}
 	}
@@ -320,7 +320,7 @@ func GetOutline(view View, subviewID ...string) ViewOutline {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view != nil {
-		if outline := getOutline(view); outline != nil {
+		if outline := getOutlineProperty(view); outline != nil {
 			return outline.ViewOutline(view.Session())
 		}
 	}
@@ -706,9 +706,9 @@ func GetNotTranslate(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, NotTranslate, true)
 }
 
-func valueFromStyle(view View, tag string) any {
+func valueFromStyle(view View, tag PropertyName) any {
 	session := view.Session()
-	getValue := func(styleTag string) any {
+	getValue := func(styleTag PropertyName) any {
 		if style, ok := stringProperty(view, styleTag, session); ok {
 			if style, ok := session.resolveConstants(style); ok {
 				return session.styleProperty(style, tag)
@@ -725,7 +725,7 @@ func valueFromStyle(view View, tag string) any {
 	return getValue(Style)
 }
 
-func sizeStyledProperty(view View, subviewID []string, tag string, inherit bool) SizeUnit {
+func sizeStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) SizeUnit {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -749,7 +749,7 @@ func sizeStyledProperty(view View, subviewID []string, tag string, inherit bool)
 	return AutoSize()
 }
 
-func enumStyledProperty(view View, subviewID []string, tag string, defaultValue int, inherit bool) int {
+func enumStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue int, inherit bool) int {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -773,7 +773,7 @@ func enumStyledProperty(view View, subviewID []string, tag string, defaultValue 
 	return defaultValue
 }
 
-func boolStyledProperty(view View, subviewID []string, tag string, inherit bool) bool {
+func boolStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) bool {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -798,7 +798,7 @@ func boolStyledProperty(view View, subviewID []string, tag string, inherit bool)
 	return false
 }
 
-func intStyledProperty(view View, subviewID []string, tag string, defaultValue int) int {
+func intStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue int) int {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -815,7 +815,7 @@ func intStyledProperty(view View, subviewID []string, tag string, defaultValue i
 	return defaultValue
 }
 
-func floatStyledProperty(view View, subviewID []string, tag string, defaultValue float64) float64 {
+func floatStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue float64) float64 {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -831,7 +831,7 @@ func floatStyledProperty(view View, subviewID []string, tag string, defaultValue
 	return defaultValue
 }
 
-func colorStyledProperty(view View, subviewID []string, tag string, inherit bool) Color {
+func colorStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) Color {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}

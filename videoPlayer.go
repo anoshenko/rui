@@ -15,7 +15,7 @@ const (
 	//
 	// Values:
 	// Internal type is `float`, other types converted to it during assignment.
-	VideoWidth = "video-width"
+	VideoWidth PropertyName = "video-width"
 
 	// VideoHeight is the constant for "video-height" property tag.
 	//
@@ -25,16 +25,16 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	VideoHeight = "video-height"
+	VideoHeight PropertyName = "video-height"
 
 	// Poster is the constant for "poster" property tag.
 	//
 	// Used by `VideoPlayer`.
-	// Defines an URL for an image to be shown while the video is downloading. If this attribute isn't specified, nothing is 
+	// Defines an URL for an image to be shown while the video is downloading. If this attribute isn't specified, nothing is
 	// displayed until the first frame is available, then the first frame is shown as the poster frame.
 	//
 	// Supported types: `string`.
-	Poster = "poster"
+	Poster PropertyName = "poster"
 )
 
 // VideoPlayer is a type of a [View] which can play video files
@@ -50,90 +50,54 @@ type videoPlayerData struct {
 func NewVideoPlayer(session Session, params Params) VideoPlayer {
 	view := new(videoPlayerData)
 	view.init(session)
-	view.tag = "VideoPlayer"
 	setInitParams(view, params)
 	return view
 }
 
 func newVideoPlayer(session Session) View {
-	return NewVideoPlayer(session, nil)
+	return new(videoPlayerData) // NewVideoPlayer(session, nil)
 }
 
 func (player *videoPlayerData) init(session Session) {
 	player.mediaPlayerData.init(session)
 	player.tag = "VideoPlayer"
-}
-
-func (player *videoPlayerData) String() string {
-	return getViewString(player, nil)
+	player.changed = videoPlayerPropertyChanged
 }
 
 func (player *videoPlayerData) htmlTag() string {
 	return "video"
 }
 
-func (player *videoPlayerData) Remove(tag string) {
-	player.remove(strings.ToLower(tag))
-}
+func videoPlayerPropertyChanged(view View, tag PropertyName) {
 
-func (player *videoPlayerData) remove(tag string) {
+	session := view.Session()
+	updateSize := func(cssTag string) {
+		if size, ok := floatTextProperty(view, tag, session, 0); ok {
+			if size != "0" {
+				session.updateProperty(view.htmlID(), cssTag, size)
+			} else {
+				session.removeProperty(view.htmlID(), cssTag)
+			}
+		}
+	}
+
 	switch tag {
-
 	case VideoWidth:
-		delete(player.properties, tag)
-		player.session.removeProperty(player.htmlID(), "width")
+		updateSize("width")
 
 	case VideoHeight:
-		delete(player.properties, tag)
-		player.session.removeProperty(player.htmlID(), "height")
+		updateSize("height")
 
 	case Poster:
-		delete(player.properties, tag)
-		player.session.removeProperty(player.htmlID(), Poster)
+		if url, ok := stringProperty(view, Poster, session); ok {
+			session.updateProperty(view.htmlID(), string(Poster), url)
+		} else {
+			session.removeProperty(view.htmlID(), string(Poster))
+		}
 
 	default:
-		player.mediaPlayerData.remove(tag)
+		mediaPlayerPropertyChanged(view, tag)
 	}
-}
-
-func (player *videoPlayerData) Set(tag string, value any) bool {
-	return player.set(strings.ToLower(tag), value)
-}
-
-func (player *videoPlayerData) set(tag string, value any) bool {
-	if value == nil {
-		player.remove(tag)
-		return true
-	}
-
-	if player.mediaPlayerData.set(tag, value) {
-		session := player.Session()
-		updateSize := func(cssTag string) {
-			if size, ok := floatTextProperty(player, tag, session, 0); ok {
-				if size != "0" {
-					session.updateProperty(player.htmlID(), cssTag, size)
-				} else {
-					session.removeProperty(player.htmlID(), cssTag)
-				}
-			}
-		}
-
-		switch tag {
-		case VideoWidth:
-			updateSize("width")
-
-		case VideoHeight:
-			updateSize("height")
-
-		case Poster:
-			if url, ok := stringProperty(player, Poster, session); ok {
-				session.updateProperty(player.htmlID(), Poster, url)
-			}
-		}
-		return true
-	}
-
-	return false
 }
 
 func (player *videoPlayerData) htmlProperties(self View, buffer *strings.Builder) {

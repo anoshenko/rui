@@ -27,7 +27,7 @@ const (
 	// Set popup title style. Default title style is "ruiPopupTitle".
 	//
 	// Supported types: `string`.
-	TitleStyle = "title-style"
+	TitleStyle PropertyName = "title-style"
 
 	// CloseButton is the constant for "close-button" property tag.
 	//
@@ -39,7 +39,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Close button will be added to a title bar of a window.
 	// `false` or `0` or "false", "no", "off", "0" - Popup without a close button.
-	CloseButton = "close-button"
+	CloseButton PropertyName = "close-button"
 
 	// OutsideClose is the constant for "outside-close" property tag.
 	//
@@ -51,7 +51,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Clicking outside the popup window will automatically call the `Dismiss()` method.
 	// `false` or `0` or "false", "no", "off", "0" - Clicking outside the popup window has no effect.
-	OutsideClose = "outside-close"
+	OutsideClose PropertyName = "outside-close"
 
 	// Buttons is the constant for "buttons" property tag.
 	//
@@ -62,7 +62,7 @@ const (
 	//
 	// Internal type is `[]PopupButton`, other types converted to it during assignment.
 	// See `PopupButton` description for more details.
-	Buttons = "buttons"
+	Buttons PropertyName = "buttons"
 
 	// ButtonsAlign is the constant for "buttons-align" property tag.
 	//
@@ -76,7 +76,7 @@ const (
 	// `1`(`RightAlign`) or "right" - Right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
 	// `3`(`StretchAlign`) or "stretch" - Width alignment.
-	ButtonsAlign = "buttons-align"
+	ButtonsAlign PropertyName = "buttons-align"
 
 	// DismissEvent is the constant for "dismiss-event" property tag.
 	//
@@ -91,7 +91,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	DismissEvent = "dismiss-event"
+	DismissEvent PropertyName = "dismiss-event"
 
 	// Arrow is the constant for "arrow" property tag.
 	//
@@ -106,7 +106,7 @@ const (
 	// `2`(`RightArrow`) or "right" - Arrow on the right side of the pop-up window.
 	// `3`(`BottomArrow`) or "bottom" - Arrow at the bottom of the pop-up window.
 	// `4`(`LeftArrow`) or "left" - Arrow on the left side of the pop-up window.
-	Arrow = "arrow"
+	Arrow PropertyName = "arrow"
 
 	// ArrowAlign is the constant for "arrow-align" property tag.
 	//
@@ -119,7 +119,7 @@ const (
 	// `0`(`TopAlign`/`LeftAlign`) or "top" - Top/left alignment.
 	// `1`(`BottomAlign`/`RightAlign`) or "bottom" - Bottom/right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
-	ArrowAlign = "arrow-align"
+	ArrowAlign PropertyName = "arrow-align"
 
 	// ArrowSize is the constant for "arrow-size" property tag.
 	//
@@ -130,7 +130,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ArrowSize = "arrow-size"
+	ArrowSize PropertyName = "arrow-size"
 
 	// ArrowWidth is the constant for "arrow-width" property tag.
 	//
@@ -141,7 +141,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ArrowWidth = "arrow-width"
+	ArrowWidth PropertyName = "arrow-width"
 
 	// ArrowOffset is the constant for "arrow-offset" property tag.
 	//
@@ -152,7 +152,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ArrowOffset = "arrow-offset"
+	ArrowOffset PropertyName = "arrow-offset"
 
 	// NoneArrow is value of the popup "arrow" property: no arrow
 	NoneArrow = 0

@@ -85,6 +85,7 @@ func CreateViewFromObject(session Session, object DataObject) View {
 			defer session.setIgnoreViewUpdates(false)
 		}
 		view := creator(session)
+		view.init(session)
 		if customView, ok := view.(CustomView); ok {
 			if !InitCustomView(customView, tag, session, nil) {
 				return nil

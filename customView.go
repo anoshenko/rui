@@ -36,6 +36,9 @@ func InitCustomView(customView CustomView, tag string, session Session, params P
 	return true
 }
 
+func (customView *CustomViewData) init(session Session) {
+}
+
 // SuperView returns a super view
 func (customView *CustomViewData) SuperView() View {
 	return customView.superView
@@ -57,29 +60,36 @@ func (customView *CustomViewData) setTag(tag string) {
 
 // Get returns a value of the property with name defined by the argument.
 // The type of return value depends on the property. If the property is not set then nil is returned.
-func (customView *CustomViewData) Get(tag string) any {
+func (customView *CustomViewData) Get(tag PropertyName) any {
 	return customView.superView.Get(tag)
 }
 
-func (customView *CustomViewData) getRaw(tag string) any {
+func (customView *CustomViewData) getRaw(tag PropertyName) any {
 	return customView.superView.getRaw(tag)
 }
 
-func (customView *CustomViewData) setRaw(tag string, value any) {
+func (customView *CustomViewData) setRaw(tag PropertyName, value any) {
 	customView.superView.setRaw(tag, value)
+}
+
+func (customView *CustomViewData) setContent(value any) bool {
+	if container, ok := customView.superView.(ViewsContainer); ok {
+		return container.setContent(value)
+	}
+	return false
 }
 
 // Set sets the value (second argument) of the property with name defined by the first argument.
 // Return "true" if the value has been set, in the opposite case "false" are returned and
 // a description of the error is written to the log
-func (customView *CustomViewData) Set(tag string, value any) bool {
+func (customView *CustomViewData) Set(tag PropertyName, value any) bool {
 	return customView.superView.Set(tag, value)
 }
 
 // SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 // Return "true" if the value has been set, in the opposite case "false" are returned and
 // a description of the error is written to the log
-func (customView *CustomViewData) SetAnimated(tag string, value any, animation Animation) bool {
+func (customView *CustomViewData) SetAnimated(tag PropertyName, value any, animation Animation) bool {
 	return customView.superView.SetAnimated(tag, value, animation)
 }
 
@@ -88,18 +98,22 @@ func (customView *CustomViewData) SetParams(params Params) bool {
 }
 
 // SetChangeListener set the function to track the change of the View property
-func (customView *CustomViewData) SetChangeListener(tag string, listener func(View, string)) {
+func (customView *CustomViewData) SetChangeListener(tag PropertyName, listener func(View, PropertyName)) {
 	customView.superView.SetChangeListener(tag, listener)
 }
 
 // Remove removes the property with name defined by the argument
-func (customView *CustomViewData) Remove(tag string) {
+func (customView *CustomViewData) Remove(tag PropertyName) {
 	customView.superView.Remove(tag)
 }
 
 // AllTags returns an array of the set properties
-func (customView *CustomViewData) AllTags() []string {
+func (customView *CustomViewData) AllTags() []PropertyName {
 	return customView.superView.AllTags()
+}
+
+func (customView *CustomViewData) empty() bool {
+	return customView.superView.empty()
 }
 
 // Clear removes all properties
@@ -182,7 +196,7 @@ func (customView *CustomViewData) onItemResize(self View, index string, x, y, wi
 	customView.superView.onItemResize(customView.superView, index, x, y, width, height)
 }
 
-func (customView *CustomViewData) handleCommand(self View, command string, data DataObject) bool {
+func (customView *CustomViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	return customView.superView.handleCommand(customView.superView, command, data)
 }
 
@@ -208,6 +222,10 @@ func (customView *CustomViewData) htmlSubviews(self View, buffer *strings.Builde
 
 func (customView *CustomViewData) htmlProperties(self View, buffer *strings.Builder) {
 	customView.superView.htmlProperties(customView.superView, buffer)
+}
+
+func (customView *CustomViewData) htmlDisabledProperty() bool {
+	return customView.superView.htmlDisabledProperty()
 }
 
 func (customView *CustomViewData) cssStyle(self View, builder cssBuilder) {
@@ -274,9 +292,9 @@ func (customView *CustomViewData) ViewIndex(view View) int {
 	return -1
 }
 
-func (customView *CustomViewData) exscludeTags() []string {
+func (customView *CustomViewData) exscludeTags() []PropertyName {
 	if customView.superView != nil {
-		exsclude := []string{}
+		exsclude := []PropertyName{}
 		for tag, value := range customView.defaultParams {
 			if value == customView.superView.getRaw(tag) {
 				exsclude = append(exsclude, tag)
@@ -290,7 +308,10 @@ func (customView *CustomViewData) exscludeTags() []string {
 // String convert internal representation of a [CustomViewData] into a string.
 func (customView *CustomViewData) String() string {
 	if customView.superView != nil {
-		return getViewString(customView, customView.exscludeTags())
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+		writeViewStyle(customView.tag, customView, buffer, "", customView.exscludeTags())
+		return buffer.String()
 	}
 	return customView.tag + " { }"
 }
@@ -302,7 +323,7 @@ func (customView *CustomViewData) setScroll(x, y, width, height float64) {
 }
 
 // Transition returns the transition animation of the property(tag). Returns nil is there is no transition animation.
-func (customView *CustomViewData) Transition(tag string) Animation {
+func (customView *CustomViewData) Transition(tag PropertyName) Animation {
 	if customView.superView != nil {
 		return customView.superView.Transition(tag)
 	}
@@ -310,17 +331,17 @@ func (customView *CustomViewData) Transition(tag string) Animation {
 }
 
 // Transitions returns a map of transition animations. The result is always non-nil.
-func (customView *CustomViewData) Transitions() map[string]Animation {
+func (customView *CustomViewData) Transitions() map[PropertyName]Animation {
 	if customView.superView != nil {
 		return customView.superView.Transitions()
 	}
-	return map[string]Animation{}
+	return map[PropertyName]Animation{}
 }
 
 // SetTransition sets the transition animation for the property if "animation" argument is not nil, and
 // removes the transition animation of the property if "animation" argument  is nil.
 // The "tag" argument is the property name.
-func (customView *CustomViewData) SetTransition(tag string, animation Animation) {
+func (customView *CustomViewData) SetTransition(tag PropertyName, animation Animation) {
 	if customView.superView != nil {
 		customView.superView.SetTransition(tag, animation)
 	}

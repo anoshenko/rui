@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var colorProperties = []string{
+var colorProperties = []PropertyName{
 	ColorTag,
 	BackgroundColor,
 	TextColor,
@@ -21,7 +21,7 @@ var colorProperties = []string{
 	ColorPickerValue,
 }
 
-func isPropertyInList(tag string, list []string) bool {
+func isPropertyInList(tag PropertyName, list []PropertyName) bool {
 	for _, prop := range list {
 		if prop == tag {
 			return true
@@ -30,11 +30,11 @@ func isPropertyInList(tag string, list []string) bool {
 	return false
 }
 
-var angleProperties = []string{
+var angleProperties = []PropertyName{
 	From,
 }
 
-var boolProperties = []string{
+var boolProperties = []PropertyName{
 	Disabled,
 	Focusable,
 	Inset,
@@ -63,7 +63,7 @@ var boolProperties = []string{
 	ColumnSpanAll,
 }
 
-var intProperties = []string{
+var intProperties = []PropertyName{
 	ZIndex,
 	TabSize,
 	HeadHeight,
@@ -73,9 +73,10 @@ var intProperties = []string{
 	ColumnCount,
 	Order,
 	TabIndex,
+	MaxLength,
 }
 
-var floatProperties = map[string]struct{ min, max float64 }{
+var floatProperties = map[PropertyName]struct{ min, max float64 }{
 	Opacity:           {min: 0, max: 1},
 	NumberPickerMax:   {min: -math.MaxFloat64, max: math.MaxFloat64},
 	NumberPickerMin:   {min: -math.MaxFloat64, max: math.MaxFloat64},
@@ -87,79 +88,79 @@ var floatProperties = map[string]struct{ min, max float64 }{
 	VideoHeight:       {min: 0, max: 10000},
 }
 
-var sizeProperties = map[string]string{
-	Width:              Width,
-	Height:             Height,
-	MinWidth:           MinWidth,
-	MinHeight:          MinHeight,
-	MaxWidth:           MaxWidth,
-	MaxHeight:          MaxHeight,
-	Left:               Left,
-	Right:              Right,
-	Top:                Top,
-	Bottom:             Bottom,
+var sizeProperties = map[PropertyName]string{
+	Width:              string(Width),
+	Height:             string(Height),
+	MinWidth:           string(MinWidth),
+	MinHeight:          string(MinHeight),
+	MaxWidth:           string(MaxWidth),
+	MaxHeight:          string(MaxHeight),
+	Left:               string(Left),
+	Right:              string(Right),
+	Top:                string(Top),
+	Bottom:             string(Bottom),
 	TextSize:           "font-size",
-	TextIndent:         TextIndent,
-	LetterSpacing:      LetterSpacing,
-	WordSpacing:        WordSpacing,
-	LineHeight:         LineHeight,
+	TextIndent:         string(TextIndent),
+	LetterSpacing:      string(LetterSpacing),
+	WordSpacing:        string(WordSpacing),
+	LineHeight:         string(LineHeight),
 	TextLineThickness:  "text-decoration-thickness",
 	ListRowGap:         "row-gap",
 	ListColumnGap:      "column-gap",
-	GridRowGap:         GridRowGap,
-	GridColumnGap:      GridColumnGap,
-	ColumnWidth:        ColumnWidth,
-	ColumnGap:          ColumnGap,
-	Gap:                Gap,
-	Margin:             Margin,
-	MarginLeft:         MarginLeft,
-	MarginRight:        MarginRight,
-	MarginTop:          MarginTop,
-	MarginBottom:       MarginBottom,
-	Padding:            Padding,
-	PaddingLeft:        PaddingLeft,
-	PaddingRight:       PaddingRight,
-	PaddingTop:         PaddingTop,
-	PaddingBottom:      PaddingBottom,
-	BorderWidth:        BorderWidth,
-	BorderLeftWidth:    BorderLeftWidth,
-	BorderRightWidth:   BorderRightWidth,
-	BorderTopWidth:     BorderTopWidth,
-	BorderBottomWidth:  BorderBottomWidth,
-	OutlineWidth:       OutlineWidth,
-	OutlineOffset:      OutlineOffset,
-	XOffset:            XOffset,
-	YOffset:            YOffset,
-	BlurRadius:         BlurRadius,
-	SpreadRadius:       SpreadRadius,
-	Perspective:        Perspective,
-	PerspectiveOriginX: PerspectiveOriginX,
-	PerspectiveOriginY: PerspectiveOriginY,
-	OriginX:            OriginX,
-	OriginY:            OriginY,
-	OriginZ:            OriginZ,
-	Radius:             Radius,
-	RadiusX:            RadiusX,
-	RadiusY:            RadiusY,
-	RadiusTopLeft:      RadiusTopLeft,
-	RadiusTopLeftX:     RadiusTopLeftX,
-	RadiusTopLeftY:     RadiusTopLeftY,
-	RadiusTopRight:     RadiusTopRight,
-	RadiusTopRightX:    RadiusTopRightX,
-	RadiusTopRightY:    RadiusTopRightY,
-	RadiusBottomLeft:   RadiusBottomLeft,
-	RadiusBottomLeftX:  RadiusBottomLeftX,
-	RadiusBottomLeftY:  RadiusBottomLeftY,
-	RadiusBottomRight:  RadiusBottomRight,
-	RadiusBottomRightX: RadiusBottomRightX,
-	RadiusBottomRightY: RadiusBottomRightY,
-	ItemWidth:          ItemWidth,
-	ItemHeight:         ItemHeight,
-	CenterX:            CenterX,
-	CenterY:            CenterX,
+	GridRowGap:         string(GridRowGap),
+	GridColumnGap:      string(GridColumnGap),
+	ColumnWidth:        string(ColumnWidth),
+	ColumnGap:          string(ColumnGap),
+	Gap:                string(Gap),
+	Margin:             string(Margin),
+	MarginLeft:         string(MarginLeft),
+	MarginRight:        string(MarginRight),
+	MarginTop:          string(MarginTop),
+	MarginBottom:       string(MarginBottom),
+	Padding:            string(Padding),
+	PaddingLeft:        string(PaddingLeft),
+	PaddingRight:       string(PaddingRight),
+	PaddingTop:         string(PaddingTop),
+	PaddingBottom:      string(PaddingBottom),
+	BorderWidth:        string(BorderWidth),
+	BorderLeftWidth:    string(BorderLeftWidth),
+	BorderRightWidth:   string(BorderRightWidth),
+	BorderTopWidth:     string(BorderTopWidth),
+	BorderBottomWidth:  string(BorderBottomWidth),
+	OutlineWidth:       string(OutlineWidth),
+	OutlineOffset:      string(OutlineOffset),
+	XOffset:            string(XOffset),
+	YOffset:            string(YOffset),
+	BlurRadius:         string(BlurRadius),
+	SpreadRadius:       string(SpreadRadius),
+	Perspective:        string(Perspective),
+	PerspectiveOriginX: string(PerspectiveOriginX),
+	PerspectiveOriginY: string(PerspectiveOriginY),
+	OriginX:            string(OriginX),
+	OriginY:            string(OriginY),
+	OriginZ:            string(OriginZ),
+	Radius:             string(Radius),
+	RadiusX:            string(RadiusX),
+	RadiusY:            string(RadiusY),
+	RadiusTopLeft:      string(RadiusTopLeft),
+	RadiusTopLeftX:     string(RadiusTopLeftX),
+	RadiusTopLeftY:     string(RadiusTopLeftY),
+	RadiusTopRight:     string(RadiusTopRight),
+	RadiusTopRightX:    string(RadiusTopRightX),
+	RadiusTopRightY:    string(RadiusTopRightY),
+	RadiusBottomLeft:   string(RadiusBottomLeft),
+	RadiusBottomLeftX:  string(RadiusBottomLeftX),
+	RadiusBottomLeftY:  string(RadiusBottomLeftY),
+	RadiusBottomRight:  string(RadiusBottomRight),
+	RadiusBottomRightX: string(RadiusBottomRightX),
+	RadiusBottomRightY: string(RadiusBottomRightY),
+	ItemWidth:          string(ItemWidth),
+	ItemHeight:         string(ItemHeight),
+	CenterX:            string(CenterX),
+	CenterY:            string(CenterX),
 }
 
-var enumProperties = map[string]struct {
+var enumProperties = map[PropertyName]struct {
 	values    []string
 	cssTag    string
 	cssValues []string
@@ -176,17 +177,17 @@ var enumProperties = map[string]struct {
 	},
 	Overflow: {
 		[]string{"hidden", "visible", "scroll", "auto"},
-		Overflow,
+		string(Overflow),
 		[]string{"hidden", "visible", "scroll", "auto"},
 	},
 	TextAlign: {
 		[]string{"left", "right", "center", "justify"},
-		TextAlign,
+		string(TextAlign),
 		[]string{"left", "right", "center", "justify"},
 	},
 	TextTransform: {
 		[]string{"none", "capitalize", "lowercase", "uppercase"},
-		TextTransform,
+		string(TextTransform),
 		[]string{"none", "capitalize", "lowercase", "uppercase"},
 	},
 	TextWeight: {
@@ -196,27 +197,27 @@ var enumProperties = map[string]struct {
 	},
 	WhiteSpace: {
 		[]string{"normal", "nowrap", "pre", "pre-wrap", "pre-line", "break-spaces"},
-		WhiteSpace,
+		string(WhiteSpace),
 		[]string{"normal", "nowrap", "pre", "pre-wrap", "pre-line", "break-spaces"},
 	},
 	WordBreak: {
 		[]string{"normal", "break-all", "keep-all", "break-word"},
-		WordBreak,
+		string(WordBreak),
 		[]string{"normal", "break-all", "keep-all", "break-word"},
 	},
 	TextOverflow: {
 		[]string{"clip", "ellipsis"},
-		TextOverflow,
+		string(TextOverflow),
 		[]string{"clip", "ellipsis"},
 	},
 	TextWrap: {
 		[]string{"wrap", "nowrap", "balance"},
-		TextWrap,
+		string(TextWrap),
 		[]string{"wrap", "nowrap", "balance"},
 	},
 	WritingMode: {
 		[]string{"horizontal-top-to-bottom", "horizontal-bottom-to-top", "vertical-right-to-left", "vertical-left-to-right"},
-		WritingMode,
+		string(WritingMode),
 		[]string{"horizontal-tb", "horizontal-bt", "vertical-rl", "vertical-lr"},
 	},
 	TextDirection: {
@@ -236,7 +237,7 @@ var enumProperties = map[string]struct {
 	},
 	BorderStyle: {
 		[]string{"none", "solid", "dashed", "dotted", "double"},
-		BorderStyle,
+		string(BorderStyle),
 		[]string{"none", "solid", "dashed", "dotted", "double"},
 	},
 	TopStyle: {
@@ -261,7 +262,7 @@ var enumProperties = map[string]struct {
 	},
 	OutlineStyle: {
 		[]string{"none", "solid", "dashed", "dotted", "double"},
-		OutlineStyle,
+		string(OutlineStyle),
 		[]string{"none", "solid", "dashed", "dotted", "double"},
 	},
 	Tabs: {
@@ -336,7 +337,7 @@ var enumProperties = map[string]struct {
 	},
 	GridAutoFlow: {
 		[]string{"row", "column", "row-dense", "column-dense"},
-		GridAutoFlow,
+		string(GridAutoFlow),
 		[]string{"row", "column", "row dense", "column dense"},
 	},
 	ImageVerticalAlign: {
@@ -376,7 +377,7 @@ var enumProperties = map[string]struct {
 	},
 	Cursor: {
 		[]string{"auto", "default", "none", "context-menu", "help", "pointer", "progress", "wait", "cell", "crosshair", "text", "vertical-text", "alias", "copy", "move", "no-drop", "not-allowed", "e-resize", "n-resize", "ne-resize", "nw-resize", "s-resize", "se-resize", "sw-resize", "w-resize", "ew-resize", "ns-resize", "nesw-resize", "nwse-resize", "col-resize", "row-resize", "all-scroll", "zoom-in", "zoom-out", "grab", "grabbing"},
-		Cursor,
+		string(Cursor),
 		[]string{"auto", "default", "none", "context-menu", "help", "pointer", "progress", "wait", "cell", "crosshair", "text", "vertical-text", "alias", "copy", "move", "no-drop", "not-allowed", "e-resize", "n-resize", "ne-resize", "nw-resize", "s-resize", "se-resize", "sw-resize", "w-resize", "ew-resize", "ns-resize", "nesw-resize", "nwse-resize", "col-resize", "row-resize", "all-scroll", "zoom-in", "zoom-out", "grab", "grabbing"},
 	},
 	Fit: {
@@ -456,27 +457,27 @@ var enumProperties = map[string]struct {
 	},
 	MixBlendMode: {
 		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
-		MixBlendMode,
+		string(MixBlendMode),
 		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
 	},
 	BackgroundBlendMode: {
 		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
-		BackgroundBlendMode,
+		string(BackgroundBlendMode),
 		[]string{"normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"},
 	},
 	ColumnFill: {
 		[]string{"balance", "auto"},
-		ColumnFill,
+		string(ColumnFill),
 		[]string{"balance", "auto"},
 	},
 }
 
-func notCompatibleType(tag string, value any) {
-	ErrorLogF(`"%T" type not compatible with "%s" property`, value, tag)
+func notCompatibleType(tag PropertyName, value any) {
+	ErrorLogF(`"%T" type not compatible with "%s" property`, value, string(tag))
 }
 
-func invalidPropertyValue(tag string, value any) {
-	ErrorLogF(`Invalid value "%v" of "%s" property`, value, tag)
+func invalidPropertyValue(tag PropertyName, value any) {
+	ErrorLogF(`Invalid value "%v" of "%s" property`, value, string(tag))
 }
 
 func isConstantName(text string) bool {
@@ -537,26 +538,48 @@ func isInt(value any) (int, bool) {
 	return n, true
 }
 
-func (properties *propertyList) setSimpleProperty(tag string, value any) bool {
+func setSimpleProperty(properties Properties, tag PropertyName, value any) bool {
 	if value == nil {
-		delete(properties.properties, tag)
+		properties.setRaw(tag, nil)
 		return true
 	} else if text, ok := value.(string); ok {
 		text = strings.Trim(text, " \t\n\r")
 		if text == "" {
-			delete(properties.properties, tag)
+			properties.setRaw(tag, nil)
 			return true
 		}
 		if isConstantName(text) {
-			properties.properties[tag] = text
+			properties.setRaw(tag, text)
 			return true
 		}
 	}
 	return false
 }
 
-func (properties *propertyList) setSizeProperty(tag string, value any) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setStringPropertyValue(properties Properties, tag PropertyName, text any) []PropertyName {
+	if text != "" {
+		properties.setRaw(tag, text)
+	} else if properties.getRaw(tag) != nil {
+		properties.setRaw(tag, nil)
+	} else {
+		return []PropertyName{}
+	}
+	return []PropertyName{tag}
+}
+
+func setArrayPropertyValue[T any](properties Properties, tag PropertyName, value []T) []PropertyName {
+	if len(value) > 0 {
+		properties.setRaw(tag, value)
+	} else if properties.getRaw(tag) != nil {
+		properties.setRaw(tag, nil)
+	} else {
+		return []PropertyName{}
+	}
+	return []PropertyName{tag}
+}
+
+func setSizeProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		var size SizeUnit
 		switch value := value.(type) {
 		case string:
@@ -566,7 +589,7 @@ func (properties *propertyList) setSizeProperty(tag string, value any) bool {
 				size.Function = fn
 			} else if size, ok = StringToSizeUnit(value); !ok {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 		case SizeUnit:
 			size = value
@@ -589,29 +612,29 @@ func (properties *propertyList) setSizeProperty(tag string, value any) bool {
 				size.Value = float64(n)
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
 
 		if size.Type == Auto {
-			delete(properties.properties, tag)
+			properties.setRaw(tag, nil)
 		} else {
-			properties.properties[tag] = size
+			properties.setRaw(tag, size)
 		}
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) setAngleProperty(tag string, value any) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setAngleProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		var angle AngleUnit
 		switch value := value.(type) {
 		case string:
 			var ok bool
 			if angle, ok = StringToAngleUnit(value); !ok {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 		case AngleUnit:
 			angle = value
@@ -627,24 +650,24 @@ func (properties *propertyList) setAngleProperty(tag string, value any) bool {
 				angle = Rad(float64(n))
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
-		properties.properties[tag] = angle
+		properties.setRaw(tag, angle)
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) setColorProperty(tag string, value any) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setColorProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		var result Color
 		switch value := value.(type) {
 		case string:
 			var err error
 			if result, err = stringToColor(value); err != nil {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 		case Color:
 			result = value
@@ -654,105 +677,101 @@ func (properties *propertyList) setColorProperty(tag string, value any) bool {
 				result = Color(color)
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
 
-		if result == 0 {
-			delete(properties.properties, tag)
-		} else {
-			properties.properties[tag] = result
-		}
+		properties.setRaw(tag, result)
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) setEnumProperty(tag string, value any, values []string) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setEnumProperty(properties Properties, tag PropertyName, value any, values []string) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		var n int
 		if text, ok := value.(string); ok {
 			if n, ok = enumStringToInt(text, values, false); !ok {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 		} else if i, ok := isInt(value); ok {
 			if i < 0 || i >= len(values) {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 			n = i
 		} else {
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
 
-		properties.properties[tag] = n
+		properties.setRaw(tag, n)
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) setBoolProperty(tag string, value any) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setBoolProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		if text, ok := value.(string); ok {
 			switch strings.ToLower(strings.Trim(text, " \t")) {
 			case "true", "yes", "on", "1":
-				properties.properties[tag] = true
+				properties.setRaw(tag, true)
 
 			case "false", "no", "off", "0":
-				properties.properties[tag] = false
+				properties.setRaw(tag, false)
 
 			default:
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 		} else if n, ok := isInt(value); ok {
 			switch n {
 			case 1:
-				properties.properties[tag] = true
+				properties.setRaw(tag, true)
 
 			case 0:
-				properties.properties[tag] = false
+				properties.setRaw(tag, false)
 
 			default:
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 		} else if b, ok := value.(bool); ok {
-			properties.properties[tag] = b
+			properties.setRaw(tag, b)
 		} else {
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) setIntProperty(tag string, value any) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setIntProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		if text, ok := value.(string); ok {
 			n, err := strconv.Atoi(strings.Trim(text, " \t"))
 			if err != nil {
 				invalidPropertyValue(tag, value)
 				ErrorLog(err.Error())
-				return false
+				return nil
 			}
-			properties.properties[tag] = n
+			properties.setRaw(tag, n)
 		} else if n, ok := isInt(value); ok {
-			properties.properties[tag] = n
+			properties.setRaw(tag, n)
 		} else {
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) setFloatProperty(tag string, value any, min, max float64) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setFloatProperty(properties Properties, tag PropertyName, value any, min, max float64) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		f := float64(0)
 		switch value := value.(type) {
 		case string:
@@ -760,14 +779,14 @@ func (properties *propertyList) setFloatProperty(tag string, value any, min, max
 			if f, err = strconv.ParseFloat(strings.Trim(value, " \t"), 64); err != nil {
 				invalidPropertyValue(tag, value)
 				ErrorLog(err.Error())
-				return false
+				return nil
 			}
 			if f < min || f > max {
 				ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
-				return false
+				return nil
 			}
-			properties.properties[tag] = value
-			return true
+			properties.setRaw(tag, value)
+			return nil
 
 		case float32:
 			f = float64(value)
@@ -780,64 +799,84 @@ func (properties *propertyList) setFloatProperty(tag string, value any, min, max
 				f = float64(n)
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
 
 		if f >= min && f <= max {
-			properties.properties[tag] = f
+			properties.setRaw(tag, f)
 		} else {
 			ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
-			return false
+			return nil
 		}
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) Set(tag string, value any) bool {
-	return properties.set(strings.ToLower(tag), value)
-}
-
-func (properties *propertyList) set(tag string, value any) bool {
-	if value == nil {
-		delete(properties.properties, tag)
-		return true
-	}
-
+func propertiesSet(properties Properties, tag PropertyName, value any) []PropertyName {
 	if _, ok := sizeProperties[tag]; ok {
-		return properties.setSizeProperty(tag, value)
+		return setSizeProperty(properties, tag, value)
 	}
 
 	if valuesData, ok := enumProperties[tag]; ok {
-		return properties.setEnumProperty(tag, value, valuesData.values)
+		return setEnumProperty(properties, tag, value, valuesData.values)
 	}
 
 	if limits, ok := floatProperties[tag]; ok {
-		return properties.setFloatProperty(tag, value, limits.min, limits.max)
+		return setFloatProperty(properties, tag, value, limits.min, limits.max)
 	}
 
 	if isPropertyInList(tag, colorProperties) {
-		return properties.setColorProperty(tag, value)
+		return setColorProperty(properties, tag, value)
 	}
 
 	if isPropertyInList(tag, angleProperties) {
-		return properties.setAngleProperty(tag, value)
+		return setAngleProperty(properties, tag, value)
 	}
 
 	if isPropertyInList(tag, boolProperties) {
-		return properties.setBoolProperty(tag, value)
+		return setBoolProperty(properties, tag, value)
 	}
 
 	if isPropertyInList(tag, intProperties) {
-		return properties.setIntProperty(tag, value)
+		return setIntProperty(properties, tag, value)
 	}
 
 	if text, ok := value.(string); ok {
-		properties.properties[tag] = text
-		return true
+		properties.setRaw(tag, text)
+		return []PropertyName{tag}
 	}
 
 	notCompatibleType(tag, value)
+	return nil
+}
+
+/*
+func (properties *propertyList) Set(tag PropertyName, value any) bool {
+	tag = properties.normalize(tag)
+	if value == nil {
+		properties.remove(properties, tag)
+		return true
+	}
+
+	return properties.set(properties, tag, value) != nil
+}
+*/
+
+func (data *dataProperty) Set(tag PropertyName, value any) bool {
+	if value == nil {
+		data.Remove(tag)
+		return true
+	}
+
+	tag = data.normalize(tag)
+	for _, supported := range data.supportedProperties {
+		if tag == supported {
+			return data.set(data, tag, value) != nil
+		}
+	}
+
+	ErrorLogF(`"%s" property is not supported`, string(tag))
 	return false
 }

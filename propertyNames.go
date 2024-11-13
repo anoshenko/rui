@@ -1,5 +1,7 @@
 package rui
 
+type PropertyName string
+
 // Constants for various properties and events of Views'.
 const (
 	// ID is the constant for "id" property tag.
@@ -15,7 +17,7 @@ const (
 	// Specifies the animation identifier. Used only for animation script.
 	//
 	// Supported types: `string`.
-	ID = "id"
+	ID PropertyName = "id"
 
 	// Style is the constant for "style" property tag.
 	//
@@ -62,7 +64,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as an outline.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as an outline.
 	// `4`(`DoubleLine`) or "double" - Double line as an outline.
-	Style = "style"
+	Style PropertyName = "style"
 
 	// StyleDisabled is the constant for "style-disabled" property tag.
 	//
@@ -70,7 +72,7 @@ const (
 	// Sets the name of the style that is applied to the view when the "disabled" property is set to true.
 	//
 	// Supported types: `string`.
-	StyleDisabled = "style-disabled"
+	StyleDisabled PropertyName = "style-disabled"
 
 	// Disabled is the constant for "disabled" property tag.
 	//
@@ -82,7 +84,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - View can't receive focus and "style-disabled" style will be used by the view.
 	// `false` or `0` or "false", "no", "off", "0" - View can receive focus and "style" style will be used by the view.
-	Disabled = "disabled"
+	Disabled PropertyName = "disabled"
 
 	// Focusable is the constant for "focusable" property tag.
 	//
@@ -94,7 +96,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - View can have a focus.
 	// `false` or `0` or "false", "no", "off", "0" - View can't have a focus.
-	Focusable = "focusable"
+	Focusable PropertyName = "focusable"
 
 	// Semantics is the constant for "semantics" property tag.
 	//
@@ -126,7 +128,7 @@ const (
 	// `17`(`H6Semantics`) or "h6" - Heading level 6 semantics.
 	// `18`(`BlockquoteSemantics`) or "blockquote" - Blockquote semantics.
 	// `19`(`CodeSemantics`) or "code" - Code semantics.
-	Semantics = "semantics"
+	Semantics PropertyName = "semantics"
 
 	// Visibility is the constant for "visibility" property tag.
 	//
@@ -139,7 +141,7 @@ const (
 	// `0`(`Visible`) or "visible" - The view is visible.
 	// `1`(`Invisible`) or "invisible" - The view is invisible but takes up space.
 	// `2`(`Gone`) or "gone" - The view is invisible and does not take up space.
-	Visibility = "visibility"
+	Visibility PropertyName = "visibility"
 
 	// ZIndex is the constant for "z-index" property tag.
 	//
@@ -150,8 +152,8 @@ const (
 	//
 	// Values:
 	// < `0` or < "0" - Views with lower value will be behind views with higher value.
-	// >= `0` or >= "0" - Views with higher value will be on top of views with lower value.
-	ZIndex = "z-index"
+	// >PropertyName = `0` or >PropertyName = "0" - Views with higher value will be on top of views with lower value.
+	ZIndex PropertyName = "z-index"
 
 	// Opacity is the constant for "opacity" property tag.
 	//
@@ -172,7 +174,7 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	Opacity = "opacity"
+	Opacity PropertyName = "opacity"
 
 	// Overflow is the constant for "overflow" property tag.
 	//
@@ -187,7 +189,7 @@ const (
 	// `1`(`OverflowVisible`) or "visible" - The overflow is not clipped. The content renders outside the element's box.
 	// `2`(`OverflowScroll`) or "scroll" - The overflow is clipped, and a scrollbar is added to see the rest of the content.
 	// `3`(`OverflowAuto`) or "auto" - Similar to `OverflowScroll`, but it adds scrollbars only when necessary.
-	Overflow = "overflow"
+	Overflow PropertyName = "overflow"
 
 	// Row is the constant for "row" property tag.
 	//
@@ -201,7 +203,7 @@ const (
 	// Conversion rules:
 	// `int` - set single value(index).
 	// `string` - can contain single integer value(index) or a range of integer values(indices), examples: "0", "0:3".
-	Row = "row"
+	Row PropertyName = "row"
 
 	// Column is the constant for "column" property tag.
 	//
@@ -215,7 +217,7 @@ const (
 	// Conversion rules:
 	// `int` - set single value(index).
 	// `string` - can contain single integer value(index) or a range of integer values(indices), examples: "0", "0:3".
-	Column = "column"
+	Column PropertyName = "column"
 
 	// Left is the constant for "left" property tag.
 	//
@@ -244,7 +246,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Left = "left"
+	Left PropertyName = "left"
 
 	// Right is the constant for "right" property tag.
 	//
@@ -273,7 +275,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Right = "right"
+	Right PropertyName = "right"
 
 	// Top is the constant for "top" property tag.
 	//
@@ -302,7 +304,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Top = "top"
+	Top PropertyName = "top"
 
 	// Bottom is the constant for "bottom" property tag.
 	//
@@ -331,7 +333,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Bottom = "bottom"
+	Bottom PropertyName = "bottom"
 
 	// Width is the constant for "width" property tag.
 	//
@@ -368,7 +370,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Width = "width"
+	Width PropertyName = "width"
 
 	// Height is the constant for "height" property tag.
 	//
@@ -379,7 +381,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Height = "height"
+	Height PropertyName = "height"
 
 	// MinWidth is the constant for "min-width" property tag.
 	//
@@ -390,7 +392,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MinWidth = "min-width"
+	MinWidth PropertyName = "min-width"
 
 	// MinHeight is the constant for "min-height" property tag.
 	//
@@ -401,7 +403,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MinHeight = "min-height"
+	MinHeight PropertyName = "min-height"
 
 	// MaxWidth is the constant for "max-width" property tag.
 	//
@@ -412,7 +414,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MaxWidth = "max-width"
+	MaxWidth PropertyName = "max-width"
 
 	// MaxHeight is the constant for "max-height" property tag.
 	//
@@ -423,7 +425,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MaxHeight = "max-height"
+	MaxHeight PropertyName = "max-height"
 
 	// Margin is the constant for "margin" property tag.
 	//
@@ -442,7 +444,7 @@ const (
 	// `float` - new `SizeUnit` will be created and the same value(in pixels) will be used for all borders.
 	// `int` - new `SizeUnit` will be created and the same value(in pixels) will be used for all borders.
 	// `string` - can contain one or four `SizeUnit` separated with comma(`,`). In case one value will be provided a new `SizeUnit` will be created and the same value will be used for all borders. If four values will be provided then they will be set respectively for top, right, bottom and left border.
-	Margin = "margin"
+	Margin PropertyName = "margin"
 
 	// MarginLeft is the constant for "margin-left" property tag.
 	//
@@ -454,7 +456,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MarginLeft = "margin-left"
+	MarginLeft PropertyName = "margin-left"
 
 	// MarginRight is the constant for "margin-right" property tag.
 	//
@@ -466,7 +468,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MarginRight = "margin-right"
+	MarginRight PropertyName = "margin-right"
 
 	// MarginTop is the constant for "margin-top" property tag.
 	//
@@ -478,7 +480,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MarginTop = "margin-top"
+	MarginTop PropertyName = "margin-top"
 
 	// MarginBottom is the constant for "margin-bottom" property tag.
 	//
@@ -490,7 +492,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	MarginBottom = "margin-bottom"
+	MarginBottom PropertyName = "margin-bottom"
 
 	// Padding is the constant for "padding" property tag.
 	//
@@ -510,7 +512,7 @@ const (
 	// `float` - new `SizeUnit` will be created and the same value(in pixels) will be used for all borders.
 	// `int` - new `SizeUnit` will be created and the same value(in pixels) will be used for all borders.
 	// `string` - can contain one or four `SizeUnit` separated with comma(`,`). In case one value will be provided a new `SizeUnit` will be created and the same value will be used for all borders. If four values will be provided then they will be set respectively for top, right, bottom and left border.
-	Padding = "padding"
+	Padding PropertyName = "padding"
 
 	// PaddingLeft is the constant for "padding-left" property tag.
 	//
@@ -521,7 +523,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	PaddingLeft = "padding-left"
+	PaddingLeft PropertyName = "padding-left"
 
 	// PaddingRight is the constant for "padding-right" property tag.
 	//
@@ -532,7 +534,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	PaddingRight = "padding-right"
+	PaddingRight PropertyName = "padding-right"
 
 	// PaddingTop is the constant for "padding-top" property tag.
 	//
@@ -543,7 +545,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	PaddingTop = "padding-top"
+	PaddingTop PropertyName = "padding-top"
 
 	// PaddingBottom is the constant for "padding-bottom" property tag.
 	//
@@ -554,7 +556,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	PaddingBottom = "padding-bottom"
+	PaddingBottom PropertyName = "padding-bottom"
 
 	// AccentColor is the constant for "accent-color" property tag.
 	//
@@ -565,7 +567,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	AccentColor = "accent-color"
+	AccentColor PropertyName = "accent-color"
 
 	// BackgroundColor is the constant for "background-color" property tag.
 	//
@@ -576,7 +578,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	BackgroundColor = "background-color"
+	BackgroundColor PropertyName = "background-color"
 
 	// Background is the constant for "background" property tag.
 	//
@@ -590,7 +592,7 @@ const (
 	//
 	// Conversion rules:
 	// `string` - must contain text representation of background element(s) like in resource files.
-	Background = "background"
+	Background PropertyName = "background"
 
 	// Cursor is the constant for "cursor" property tag.
 	//
@@ -636,7 +638,7 @@ const (
 	// `33` or "zoom-out" - Zoom out cursor.
 	// `34` or "grab" - Grab cursor.
 	// `35` or "grabbing" - Grabbing cursor.
-	Cursor = "cursor"
+	Cursor PropertyName = "cursor"
 
 	// Border is the constant for "border" property tag.
 	//
@@ -651,7 +653,7 @@ const (
 	// Conversion rules:
 	// `ViewBorder` - style, width and color applied to all borders and stored in internal implementation of `BorderProperty`.
 	// `ViewBorders` - style, width and color of each border like top, right, bottom and left applied to related borders, stored in internal implementation of `BorderProperty`.
-	Border = "border"
+	Border PropertyName = "border"
 
 	// BorderLeft is the constant for "border-left" property tag.
 	//
@@ -662,7 +664,7 @@ const (
 	//
 	// Internal type is `BorderProperty`, other types converted to it during assignment.
 	// See `ViewBorder`, `BorderProperty` description for more details.
-	BorderLeft = "border-left"
+	BorderLeft PropertyName = "border-left"
 
 	// BorderRight is the constant for "border-right" property tag.
 	//
@@ -673,7 +675,7 @@ const (
 	//
 	// Internal type is `BorderProperty`, other types converted to it during assignment.
 	// See `ViewBorder`, `BorderProperty` description for more details.
-	BorderRight = "border-right"
+	BorderRight PropertyName = "border-right"
 
 	// BorderTop is the constant for "border-top" property tag.
 	//
@@ -684,7 +686,7 @@ const (
 	//
 	// Internal type is `BorderProperty`, other types converted to it during assignment.
 	// See `ViewBorder`, `BorderProperty` description for more details.
-	BorderTop = "border-top"
+	BorderTop PropertyName = "border-top"
 
 	// BorderBottom is the constant for "border-bottom" property tag.
 	//
@@ -695,7 +697,7 @@ const (
 	//
 	// Internal type is `BorderProperty`, other types converted to it during assignment.
 	// See `ViewBorder`, `BorderProperty` description for more details.
-	BorderBottom = "border-bottom"
+	BorderBottom PropertyName = "border-bottom"
 
 	// BorderStyle is the constant for "border-style" property tag.
 	//
@@ -710,7 +712,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
 	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	BorderStyle = "border-style"
+	BorderStyle PropertyName = "border-style"
 
 	// BorderLeftStyle is the constant for "border-left-style" property tag.
 	//
@@ -725,7 +727,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
 	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	BorderLeftStyle = "border-left-style"
+	BorderLeftStyle PropertyName = "border-left-style"
 
 	// BorderRightStyle is the constant for "border-right-style" property tag.
 	//
@@ -740,7 +742,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
 	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	BorderRightStyle = "border-right-style"
+	BorderRightStyle PropertyName = "border-right-style"
 
 	// BorderTopStyle is the constant for "border-top-style" property tag.
 	//
@@ -755,7 +757,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
 	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	BorderTopStyle = "border-top-style"
+	BorderTopStyle PropertyName = "border-top-style"
 
 	// BorderBottomStyle is the constant for "border-bottom-style" property tag.
 	//
@@ -770,7 +772,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
 	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	BorderBottomStyle = "border-bottom-style"
+	BorderBottomStyle PropertyName = "border-bottom-style"
 
 	// BorderWidth is the constant for "border-width" property tag.
 	//
@@ -781,7 +783,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BorderWidth = "border-width"
+	BorderWidth PropertyName = "border-width"
 
 	// BorderLeftWidth is the constant for "border-left-width" property tag.
 	//
@@ -792,7 +794,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BorderLeftWidth = "border-left-width"
+	BorderLeftWidth PropertyName = "border-left-width"
 
 	// BorderRightWidth is the constant for "border-right-width" property tag.
 	//
@@ -803,7 +805,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BorderRightWidth = "border-right-width"
+	BorderRightWidth PropertyName = "border-right-width"
 
 	// BorderTopWidth is the constant for "border-top-width" property tag.
 	//
@@ -814,7 +816,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BorderTopWidth = "border-top-width"
+	BorderTopWidth PropertyName = "border-top-width"
 
 	// BorderBottomWidth is the constant for "border-bottom-width" property tag.
 	//
@@ -825,7 +827,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BorderBottomWidth = "border-bottom-width"
+	BorderBottomWidth PropertyName = "border-bottom-width"
 
 	// BorderColor is the constant for "border-color" property tag.
 	//
@@ -836,7 +838,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	BorderColor = "border-color"
+	BorderColor PropertyName = "border-color"
 
 	// BorderLeftColor is the constant for "border-left-color" property tag.
 	//
@@ -847,7 +849,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	BorderLeftColor = "border-left-color"
+	BorderLeftColor PropertyName = "border-left-color"
 
 	// BorderRightColor is the constant for "border-right-color" property tag.
 	//
@@ -858,7 +860,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	BorderRightColor = "border-right-color"
+	BorderRightColor PropertyName = "border-right-color"
 
 	// BorderTopColor is the constant for "border-top-color" property tag.
 	//
@@ -869,7 +871,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	BorderTopColor = "border-top-color"
+	BorderTopColor PropertyName = "border-top-color"
 
 	// BorderBottomColor is the constant for "border-bottom-color" property tag.
 	//
@@ -880,7 +882,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	BorderBottomColor = "border-bottom-color"
+	BorderBottomColor PropertyName = "border-bottom-color"
 
 	// Outline is the constant for "outline" property tag.
 	//
@@ -891,7 +893,7 @@ const (
 	//
 	// Internal type is `OutlineProperty`, other types converted to it during assignment.
 	// See `OutlineProperty`, `ViewOutline` and `ViewBorder` description for more details.
-	Outline = "outline"
+	Outline PropertyName = "outline"
 
 	// OutlineStyle is the constant for "outline-style" property tag.
 	//
@@ -906,7 +908,7 @@ const (
 	// `2`(`DashedLine`) or "dashed" - Dashed line as an outline.
 	// `3`(`DottedLine`) or "dotted" - Dotted line as an outline.
 	// `4`(`DoubleLine`) or "double" - Double line as an outline.
-	OutlineStyle = "outline-style"
+	OutlineStyle PropertyName = "outline-style"
 
 	// OutlineColor is the constant for "outline-color" property tag.
 	//
@@ -917,7 +919,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	OutlineColor = "outline-color"
+	OutlineColor PropertyName = "outline-color"
 
 	// OutlineWidth is the constant for "outline-width" property tag.
 	//
@@ -928,7 +930,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	OutlineWidth = "outline-width"
+	OutlineWidth PropertyName = "outline-width"
 
 	// OutlineOffset is the constant for "outline-offset" property tag.
 	//
@@ -939,7 +941,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	OutlineOffset = "outline-offset"
+	OutlineOffset PropertyName = "outline-offset"
 
 	// Shadow is the constant for "shadow" property tag.
 	//
@@ -956,7 +958,7 @@ const (
 	// `[]ViewShadow` - stored as is. no conversion performed.
 	// `ViewShadow` - converted to `[]ViewShadow` during assignment.
 	// `string` - must contain a string representation of `ViewShadow`
-	Shadow = "shadow"
+	Shadow PropertyName = "shadow"
 
 	// FontName is the constant for "font-name" property tag.
 	//
@@ -966,7 +968,7 @@ const (
 	// then the value of the parent view is used.
 	//
 	// Supported types: `string`.
-	FontName = "font-name"
+	FontName PropertyName = "font-name"
 
 	// TextColor is the constant for "text-color" property tag.
 	//
@@ -978,7 +980,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	TextColor = "text-color"
+	TextColor PropertyName = "text-color"
 
 	// TextSize is the constant for "text-size" property tag.
 	//
@@ -990,7 +992,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TextSize = "text-size"
+	TextSize PropertyName = "text-size"
 
 	// Italic is the constant for "italic" property tag.
 	//
@@ -1003,7 +1005,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Text is displayed in italics.
 	// `false` or `0` or "false", "no", "off", "0" - Normal text.
-	Italic = "italic"
+	Italic PropertyName = "italic"
 
 	// SmallCaps is the constant for "small-caps" property tag.
 	//
@@ -1016,7 +1018,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Text displayed using small caps.
 	// `false` or `0` or "false", "no", "off", "0" - Normal text display.
-	SmallCaps = "small-caps"
+	SmallCaps PropertyName = "small-caps"
 
 	// Strikethrough is the constant for "strikethrough" property tag.
 	//
@@ -1029,7 +1031,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Draw line over the text.
 	// `false` or `0` or "false", "no", "off", "0" - Normal text display.
-	Strikethrough = "strikethrough"
+	Strikethrough PropertyName = "strikethrough"
 
 	// Overline is the constant for "overline" property tag.
 	//
@@ -1042,7 +1044,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Overline text.
 	// `false` or `0` or "false", "no", "off", "0" - No overline.
-	Overline = "overline"
+	Overline PropertyName = "overline"
 
 	// Underline is the constant for "underline" property tag.
 	//
@@ -1055,7 +1057,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Draw line below the text.
 	// `false` or `0` or "false", "no", "off", "0" - Normal text display.
-	Underline = "underline"
+	Underline PropertyName = "underline"
 
 	// TextLineThickness is the constant for "text-line-thickness" property tag.
 	//
@@ -1067,7 +1069,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TextLineThickness = "text-line-thickness"
+	TextLineThickness PropertyName = "text-line-thickness"
 
 	// TextLineStyle is the constant for "text-line-style" property tag.
 	//
@@ -1083,7 +1085,7 @@ const (
 	// `3`(`DottedLine`) or "dotted" - Dotted line as a text line.
 	// `4`(`DoubleLine`) or "double" - Double line as a text line.
 	// `5`(`WavyLine`) or "wavy" - Wavy line as a text line.
-	TextLineStyle = "text-line-style"
+	TextLineStyle PropertyName = "text-line-style"
 
 	// TextLineColor is the constant for "text-line-color" property tag.
 	//
@@ -1095,7 +1097,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	TextLineColor = "text-line-color"
+	TextLineColor PropertyName = "text-line-color"
 
 	// TextWeight is the constant for "text-weight" property tag.
 	//
@@ -1114,7 +1116,7 @@ const (
 	// `7`(`BoldFont`) or "bold" - Bold font.
 	// `8`(`ExtraBoldFont`) or "extra-bold" - Extra bold font.
 	// `9`(`BlackFont`) or "black" - Black font.
-	TextWeight = "text-weight"
+	TextWeight PropertyName = "text-weight"
 
 	// TextAlign is the constant for "text-align" property tag.
 	//
@@ -1142,7 +1144,7 @@ const (
 	// `1`(`RightAlign`) or "right" - Right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
 	// `3`(`JustifyAlign`) or "justify" - Justify alignment.
-	TextAlign = "text-align"
+	TextAlign PropertyName = "text-align"
 
 	// TextIndent is the constant for "text-indent" property tag.
 	//
@@ -1154,7 +1156,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TextIndent = "text-indent"
+	TextIndent PropertyName = "text-indent"
 
 	// TextShadow is the constant for "text-shadow" property tag.
 	//
@@ -1170,7 +1172,7 @@ const (
 	// `[]ViewShadow` - stored as is. no conversion performed.
 	// `ViewShadow` - converted to `[]ViewShadow` during assignment.
 	// `string` - must contain a string representation of `ViewShadow`
-	TextShadow = "text-shadow"
+	TextShadow PropertyName = "text-shadow"
 
 	// TextWrap is the constant for "text-wrap" property tag.
 	//
@@ -1183,7 +1185,7 @@ const (
 	// `0`(`TextWrapOn`) or "wrap" - Text is wrapped across lines at appropriate characters (for example spaces, in languages like English that use space separators) to minimize overflow.
 	// `1`(`TextWrapOff`) or "nowrap" - Text does not wrap across lines. It will overflow its containing element rather than breaking onto a new line.
 	// `2`(`TextWrapBalance`) or "balance" - Text is wrapped in a way that best balances the number of characters on each line, enhancing layout quality and legibility. Because counting characters and balancing them across multiple lines is computationally expensive, this value is only supported for blocks of text spanning a limited number of lines (six or less for Chromium and ten or less for Firefox).
-	TextWrap = "text-wrap"
+	TextWrap PropertyName = "text-wrap"
 
 	// TabSize is the constant for "tab-size" property tag.
 	//
@@ -1195,7 +1197,7 @@ const (
 	//
 	// Values:
 	// > `0` or > "0" - Number of spaces in tab character.
-	TabSize = "tab-size"
+	TabSize PropertyName = "tab-size"
 
 	// LetterSpacing is the constant for "letter-spacing" property tag.
 	//
@@ -1209,7 +1211,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	LetterSpacing = "letter-spacing"
+	LetterSpacing PropertyName = "letter-spacing"
 
 	// WordSpacing is the constant for "word-spacing" property tag.
 	//
@@ -1221,7 +1223,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	WordSpacing = "word-spacing"
+	WordSpacing PropertyName = "word-spacing"
 
 	// LineHeight is the constant for "line-height" property tag.
 	//
@@ -1233,7 +1235,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	LineHeight = "line-height"
+	LineHeight PropertyName = "line-height"
 
 	// WhiteSpace is the constant for "white-space" property tag.
 	//
@@ -1250,7 +1252,7 @@ const (
 	// `3`(`WhiteSpacePreWrap`) or "pre-wrap" - Sequences of spaces are saved as they are indicated in the source. Lines are wrapped only where newlines are specified in the source and there, where "br" elements are specified in the source, and optionally to fill inline boxes.
 	// `4`(`WhiteSpacePreLine`) or "pre-line" - Sequences of spaces are concatenated into one space. Lines are split on newlines, on "br" elements, and optionally to fill inline boxes.
 	// `5`(`WhiteSpaceBreakSpaces`) or "break-spaces" - The behavior is identical to `WhiteSpacePreWrap` with the following differences:<br/> 1. Sequences of spaces are preserved as specified in the source, including spaces at the end of lines.<br/> 2. Lines are wrapped on any spaces, including in the middle of a sequence of spaces.<br/> 3. Spaces take up space and do not hang at the ends of lines, which means they affect the internal dimensions (min-content and max-content).
-	WhiteSpace = "white-space"
+	WhiteSpace PropertyName = "white-space"
 
 	// WordBreak is the constant for "word-break" property tag.
 	//
@@ -1265,7 +1267,7 @@ const (
 	// `1`(`WordBreakAll`) or "break-all" - If the block boundaries are exceeded, a line break will be inserted between any two characters(except for Chinese/Japanese/Korean text).
 	// `2`(`WordBreakKeepAll`) or "keep-all" - Line break will not be used in Chinese/Japanese/ Korean text. For text in other languages, the default behavior(normal) will be applied.
 	// `3`(`WordBreakWord`) or "break-word" - When the block boundaries are exceeded, the remaining whole words can be broken in an arbitrary place, if a more suitable place for line break is not found.
-	WordBreak = "word-break"
+	WordBreak PropertyName = "word-break"
 
 	// TextTransform is the constant for "text-transform" property tag.
 	//
@@ -1281,7 +1283,7 @@ const (
 	// `1`(`CapitalizeTextTransform`) or "capitalize" - Every word starts with a capital letter.
 	// `2`(`LowerCaseTextTransform`) or "lowercase" - All characters are lowercase.
 	// `3`(`UpperCaseTextTransform`) or "uppercase" - All characters are uppercase.
-	TextTransform = "text-transform"
+	TextTransform PropertyName = "text-transform"
 
 	// TextDirection is the constant for "text-direction" property tag.
 	//
@@ -1308,7 +1310,7 @@ const (
 	// `0`(`SystemTextDirection`) or "system" - Use the system text direction.
 	// `1`(`LeftToRightDirection`) or "left-to-right" - For languages written from left to right (like English and most other languages).
 	// `2`(`RightToLeftDirection`) or "right-to-left" - For languages written from right to left (like Hebrew or Arabic).
-	TextDirection = "text-direction"
+	TextDirection PropertyName = "text-direction"
 
 	// WritingMode is the constant for "writing-mode" property tag.
 	//
@@ -1324,7 +1326,7 @@ const (
 	// `1`(`HorizontalBottomToTop`) or "horizontal-bottom-to-top" - Horizontal lines are displayed from bottom to top.
 	// `2`(`VerticalRightToLeft`) or "vertical-right-to-left" - Vertical lines are output from right to left.
 	// `3`(`VerticalLeftToRight`) or "vertical-left-to-right" - Vertical lines are output from left to right.
-	WritingMode = "writing-mode"
+	WritingMode PropertyName = "writing-mode"
 
 	// VerticalTextOrientation is the constant for "vertical-text-orientation" property tag.
 	//
@@ -1337,7 +1339,7 @@ const (
 	// Values:
 	// `0`(`MixedTextOrientation`) or "mixed" - Symbols rotated 90° clockwise.
 	// `1`(`UprightTextOrientation`) or "upright" - Symbols are arranged normally(vertically).
-	VerticalTextOrientation = "vertical-text-orientation"
+	VerticalTextOrientation PropertyName = "vertical-text-orientation"
 
 	// TextOverflow is the constant for "text-overflow" property tag.
 	//
@@ -1349,7 +1351,7 @@ const (
 	// Values:
 	// `0`(`TextOverflowClip`) or "clip" - Text is clipped at the border.
 	// `1`(`TextOverflowEllipsis`) or "ellipsis" - At the end of the visible part of the text "…" is displayed.
-	TextOverflow = "text-overflow"
+	TextOverflow PropertyName = "text-overflow"
 
 	// Hint is the constant for "hint" property tag.
 	//
@@ -1357,7 +1359,7 @@ const (
 	// Sets a hint to the user of what can be entered in the control.
 	//
 	// Supported types: `string`.
-	Hint = "hint"
+	Hint PropertyName = "hint"
 
 	// MaxLength is the constant for "max-length" property tag.
 	//
@@ -1367,8 +1369,8 @@ const (
 	// Supported types: `int`, `string`.
 	//
 	// Values:
-	// >= `0` or >= "0" - Maximum number of characters.
-	MaxLength = "max-length"
+	// >PropertyName = `0` or >PropertyName = "0" - Maximum number of characters.
+	MaxLength PropertyName = "max-length"
 
 	// ReadOnly is the constant for "readonly" property tag.
 	//
@@ -1380,7 +1382,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - User not able to modify the value.
 	// `false` or `0` or "false", "no", "off", "0" - Value can be modified.
-	ReadOnly = "readonly"
+	ReadOnly PropertyName = "readonly"
 
 	// Content is the constant for "content" property tag.
 	//
@@ -1490,7 +1492,7 @@ const (
 	// `string` - if the string is a text representation of the `View`, then the corresponding view is created, otherwise a `TextView` is created, to which the given string is passed as a text. Then a `[]View` is created containing the resulting view.
 	// `[]string` - each element of an array is converted to `View` as described above.
 	// `[]any` - this array must contain only `View` and a `string`. Each `string` element is converted to a view as described above. If array contains invalid values, the "content" property will not be set, and the `Set` function will return `false` and an error message will be written to the log.
-	Content = "content"
+	Content PropertyName = "content"
 
 	// Items is the constant for "items" property tag.
 	//
@@ -1533,7 +1535,7 @@ const (
 	// Supported types: `ListAdapter`, `[]string`.
 	//
 	// Internal type is `ListAdapter` internal implementation, other types converted to it during assignment.
-	Items = "items"
+	Items PropertyName = "items"
 
 	// DisabledItems is the constant for "disabled-items" property tag.
 	//
@@ -1548,7 +1550,7 @@ const (
 	// `string` - Single index value or multiple index values separated by comma(`,`).
 	// `[]string` - Array of indices in text format.
 	// `[]any` - Array of strings or integer values.
-	DisabledItems = "disabled-items"
+	DisabledItems PropertyName = "disabled-items"
 
 	// ItemSeparators is the constant for "item-separators" property tag.
 	//
@@ -1563,7 +1565,7 @@ const (
 	// `string` - Single index value or multiple index values separated by comma(`,`).
 	// `[]string` - Array of indices in text format.
 	// `[]any` - Array of strings or integer values.
-	ItemSeparators = "item-separators"
+	ItemSeparators PropertyName = "item-separators"
 
 	// Current is the constant for "current" property tag.
 	//
@@ -1576,7 +1578,7 @@ const (
 	//
 	// Values:
 	// `-1` or "-1" - No item has been selected.
-	// >= `0` or >= "0" - Index of selected item.
+	// >PropertyName = `0` or >PropertyName = "0" - Index of selected item.
 	//
 	// Usage in `ListView`:
 	// Set or get index of selected item.
@@ -1585,7 +1587,7 @@ const (
 	//
 	// Values:
 	// `-1` or "-1" - No item has been selected.
-	// >= `0` or >= "0" - Index of selected item.
+	// >PropertyName = `0` or >PropertyName = "0" - Index of selected item.
 	//
 	// Usage in `StackLayout`:
 	// Set or Index of current(visible) view.
@@ -1594,7 +1596,7 @@ const (
 	//
 	// Values:
 	// `-1` or "-1" - No visible view.
-	// >= `0` or >= "0" - Index of visible view.
+	// >PropertyName = `0` or >PropertyName = "0" - Index of visible view.
 	//
 	// Usage in `TableView`:
 	// Sets the coordinates of the selected cell/row.
@@ -1615,8 +1617,8 @@ const (
 	//
 	// Values:
 	// `-1` or "-1" - No visible tab.
-	// >= `0` or >= "0" - Index of visible tab.
-	Current = "current"
+	// >PropertyName = `0` or >PropertyName = "0" - Index of visible tab.
+	Current PropertyName = "current"
 
 	// Type is the constant for "type" property tag.
 	//
@@ -1627,13 +1629,13 @@ const (
 	//
 	// Usage in `NumberPicker`:
 	// Same as "number-picker-type".
-	Type = "type"
+	Type PropertyName = "type"
 
 	// Pattern is the constant for "pattern" property tag.
 	//
 	// Used by `EditView`.
 	// Same as "edit-view-pattern".
-	Pattern = "pattern"
+	Pattern PropertyName = "pattern"
 
 	// GridAutoFlow is the constant for "grid-auto-flow" property tag.
 	//
@@ -1647,7 +1649,7 @@ const (
 	// `1`(`ColumnAutoFlow`) or "column" - Views are placed by filling each column in turn, adding new columns as necessary.
 	// `2`(`RowDenseAutoFlow`) or "row-dense" - Views are placed by filling each row, adding new rows as necessary. "dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later. This may cause views to appear out-of-order, when doing so would fill in holes left by larger views.
 	// `3`(`ColumnDenseAutoFlow`) or "column-dense" - Views are placed by filling each column, adding new columns as necessary. "dense" packing algorithm attempts to fill in holes earlier in the grid, if smaller items come up later. This may cause views to appear out-of-order, when doing so would fill in holes left by larger views.
-	GridAutoFlow = "grid-auto-flow"
+	GridAutoFlow PropertyName = "grid-auto-flow"
 
 	// CellWidth is the constant for "cell-width" property tag.
 	//
@@ -1668,7 +1670,7 @@ const (
 	// `[]string` - each element must be a textual representation of a `SizeUnit` (or a `SizeUnit` constant). Each column of the grid layout has width which is specified in an array.
 	// If the number of elements in an array is less than the number of columns used, then the missing elements are set to have `Auto` size.
 	// The values can use `SizeUnit` type `SizeInFraction`. This type means 1 part. The part is calculated as follows: the size of all cells that are not of type `SizeInFraction` is subtracted from the size of the container, and then the remaining size is divided by the number of parts. The `SizeUnit` value of type `SizeInFraction` can be either integer or fractional.
-	CellWidth = "cell-width"
+	CellWidth PropertyName = "cell-width"
 
 	// CellHeight is the constant for "cell-height" property tag.
 	//
@@ -1689,7 +1691,7 @@ const (
 	// `[]string` - each element must be a textual representation of a `SizeUnit` (or a `SizeUnit` constant). Each row of the grid layout has height which is specified in an array.
 	// If the number of elements in an array is less than the number of rows used, then the missing elements are set to have `Auto` size.
 	// The values can use `SizeUnit` type `SizeInFraction`. This type means 1 part. The part is calculated as follows: the size of all cells that are not of type `SizeInFraction` is subtracted from the size of the container, and then the remaining size is divided by the number of parts. The `SizeUnit` value of type `SizeInFraction` can be either integer or fractional.
-	CellHeight = "cell-height"
+	CellHeight PropertyName = "cell-height"
 
 	// GridRowGap is the constant for "grid-row-gap" property tag.
 	//
@@ -1700,7 +1702,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	GridRowGap = "grid-row-gap"
+	GridRowGap PropertyName = "grid-row-gap"
 
 	// GridColumnGap is the constant for "grid-column-gap" property tag.
 	//
@@ -1711,7 +1713,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	GridColumnGap = "grid-column-gap"
+	GridColumnGap PropertyName = "grid-column-gap"
 
 	// Source is the constant for "src" property tag.
 	//
@@ -1740,7 +1742,7 @@ const (
 	// Supported types: `string`, `MediaSource`, `[]MediaSource`.
 	//
 	// Internal type is `[]MediaSource`, other types converted to it during assignment.
-	Source = "src"
+	Source PropertyName = "src"
 
 	// SrcSet is the constant for "srcset" property tag.
 	//
@@ -1749,7 +1751,7 @@ const (
 	// to use under given screen density. This property is only used if building an application for js/wasm platform.
 	//
 	// Supported types: `string`.
-	SrcSet = "srcset"
+	SrcSet PropertyName = "srcset"
 
 	// Fit is the constant for "fit" property tag.
 	//
@@ -1776,8 +1778,8 @@ const (
 	// `0`(`NoneFit`) or "none" - The image is not resized.
 	// `1`(`ContainFit`) or "contain" - The image is scaled to maintain its aspect ratio while fitting within the element’s content box. The entire object is made to fill the box, while preserving its aspect ratio, so the object will be "letterboxed" if its aspect ratio does not match the aspect ratio of the box.
 	// `2`(`CoverFit`) or "cover" - The image is sized to maintain its aspect ratio while filling the element’s entire content box. If the object's aspect ratio does not match the aspect ratio of its box, then the object will be clipped to fit.
-	Fit           = "fit"
-	backgroundFit = "background-fit"
+	Fit           PropertyName = "fit"
+	backgroundFit PropertyName = "background-fit"
 
 	// Repeat is the constant for "repeat" property tag.
 	//
@@ -1794,7 +1796,7 @@ const (
 	// `3`(`RepeatY`) or "repeat-y" - Image repeat only vertically.
 	// `4`(`RepeatRound`) or "round" - Image is repeated so that an integer number of images fit into the background area. If this fails, then the background images are scaled.
 	// `5`(`RepeatSpace`) or "space" - Image is repeated as many times as necessary to fill the background area. If this fails, an empty space is added between the pictures.
-	Repeat = "repeat"
+	Repeat PropertyName = "repeat"
 
 	// Attachment is the constant for "attachment" property tag.
 	//
@@ -1808,7 +1810,7 @@ const (
 	// `0`(`ScrollAttachment`) or "scroll" - The background image will scroll with the page.
 	// `1`(`FixedAttachment`) or "fixed" - The background image will not scroll with the page.
 	// `2`(`LocalAttachment`) or "local" - The background image will scroll with the element's contents.
-	Attachment = "attachment"
+	Attachment PropertyName = "attachment"
 
 	// BackgroundClip is the constant for "background-clip" property tag.
 	//
@@ -1821,7 +1823,7 @@ const (
 	// `0`(`BorderBoxClip`) or "border-box" - The background extends to the outer edge of the border(but below the border in z-order).
 	// `1`(`PaddingBoxClip`) or "padding-box" - The background extends to the outer edge of the padding. No background is drawn below the border.
 	// `2`(`ContentBoxClip`) or "content-box" - The background is painted inside(clipped) of the content box.
-	BackgroundClip = "background-clip"
+	BackgroundClip PropertyName = "background-clip"
 
 	// Gradient is the constant for "gradient" property tag.
 	//
@@ -1839,7 +1841,7 @@ const (
 	// `[]GradientPoint` - converted to `[]BackgroundGradientPoint`. Used to set gradient stop points for linear and radial gradients. Since `GradientPoint` contains values from `0` to `1.0` they will be converted to precent values.
 	// `[]Color` - converted to `[]BackgroundGradientPoint`. Used for setting gradient stop points which are uniformly distributed across gradient diretion.
 	// `string` - string representation of stop points or color values. Format: "color1 pos1,color2 pos2"... . Position of stop points can be described either in `SizeUnit` or `AngleUnit` string representations. Examples: "white 0deg, black 90deg, gray 360deg", "white 0%, black 100%".
-	Gradient = "gradient"
+	Gradient PropertyName = "gradient"
 
 	// Direction is the constant for "direction" property tag.
 	//
@@ -1860,7 +1862,7 @@ const (
 	// `5`(`ToLeftBottomGradient`) or "to-left-bottom" - From the upper right corner to the lower left.
 	// `6`(`ToLeftGradient`) or "to-left" - From right to left.
 	// `7`(`ToLeftTopGradient`) or "to-left-top" - From the bottom right corner to the top left.
-	Direction = "direction"
+	Direction PropertyName = "direction"
 
 	// Repeating is the constant for "repeating" property tag.
 	//
@@ -1872,7 +1874,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Gradient will repeat after the last key point.
 	// `false` or `0` or "false", "no", "off", "0" - No repetition of gradient stop points. Value of the last point used will be extrapolated.
-	Repeating = "repeating"
+	Repeating PropertyName = "repeating"
 
 	// From is the constant for "from" property tag.
 	//
@@ -1883,7 +1885,7 @@ const (
 	//
 	// Internal type is `AngleUnit`, other types converted to it during assignment.
 	// See `AngleUnit` description for more details.
-	From = "from"
+	From PropertyName = "from"
 
 	// RadialGradientRadius is the constant for "radial-gradient-radius" property tag.
 	//
@@ -1894,7 +1896,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadialGradientRadius = "radial-gradient-radius"
+	RadialGradientRadius PropertyName = "radial-gradient-radius"
 
 	// RadialGradientShape is the constant for "radial-gradient-shape" property tag.
 	//
@@ -1906,13 +1908,13 @@ const (
 	// Values:
 	// `0`(`EllipseGradient`) or "ellipse" - The shape is an axis-aligned ellipse.
 	// `1`(`CircleGradient`) or "circle" - The shape is a circle with a constant radius.
-	RadialGradientShape = "radial-gradient-shape"
+	RadialGradientShape PropertyName = "radial-gradient-shape"
 
 	// Shape is the constant for "shape" property tag.
 	//
 	// Used by `BackgroundElement`.
 	// Same as "radial-gradient-shape".
-	Shape = "shape"
+	Shape PropertyName = "shape"
 
 	// CenterX is the constant for "center-x" property tag.
 	//
@@ -1923,7 +1925,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	CenterX = "center-x"
+	CenterX PropertyName = "center-x"
 
 	// CenterY is the constant for "center-y" property tag.
 	//
@@ -1934,7 +1936,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	CenterY = "center-y"
+	CenterY PropertyName = "center-y"
 
 	// AltText is the constant for "alt-text" property tag.
 	//
@@ -1942,9 +1944,9 @@ const (
 	// Set a description of the image.
 	//
 	// Supported types: `string`.
-	AltText = "alt-text"
+	AltText PropertyName = "alt-text"
 
-	altTag = "alt"
+	altTag PropertyName = "alt"
 
 	// AvoidBreak is the constant for "avoid-break" property tag.
 	//
@@ -1956,7 +1958,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Avoid any break from being inserted within the principal box.
 	// `false` or `0` or "false", "no", "off", "0" - Allow, but does not force, any break to be inserted within the principal box.
-	AvoidBreak = "avoid-break"
+	AvoidBreak PropertyName = "avoid-break"
 
 	// ItemWidth is the constant for "item-width" property tag.
 	//
@@ -1967,7 +1969,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ItemWidth = "item-width"
+	ItemWidth PropertyName = "item-width"
 
 	// ItemHeight is the constant for "item-height" property tag.
 	//
@@ -1978,7 +1980,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ItemHeight = "item-height"
+	ItemHeight PropertyName = "item-height"
 
 	// ListWrap is the constant for "list-wrap" property tag.
 	//
@@ -2003,7 +2005,7 @@ const (
 	// `0`(`ListWrapOff`) or "off" - The column or row of elements continues and goes beyond the bounds of the visible area.
 	// `1`(`ListWrapOn`) or "on" - Starts a new column or row of elements as necessary. The new column is positioned towards the end.
 	// `2`(`ListWrapReverse`) or "reverse" - Starts a new column or row of elements as necessary. The new column is positioned towards the beginning.
-	ListWrap = "list-wrap"
+	ListWrap PropertyName = "list-wrap"
 
 	// EditWrap is the constant for "edit-wrap" property tag.
 	//
@@ -2015,7 +2017,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Text wrapped to the next line.
 	// `false` or `0` or "false", "no", "off", "0" - Do not wrap text. Horizontal scrolling will appear if necessary.
-	EditWrap = "edit-wrap"
+	EditWrap PropertyName = "edit-wrap"
 
 	// CaretColor is the constant for "caret-color" property tag.
 	//
@@ -2038,7 +2040,7 @@ const (
 	//
 	// Internal type is `Color`, other types converted to it during assignment.
 	// See `Color` description for more details.
-	CaretColor = "caret-color"
+	CaretColor PropertyName = "caret-color"
 
 	// Min is the constant for "min" property tag.
 	//
@@ -2052,7 +2054,7 @@ const (
 	//
 	// Usage in `TimePicker`:
 	// Same as "time-picker-min".
-	Min = "min"
+	Min PropertyName = "min"
 
 	// Max is the constant for "max" property tag.
 	//
@@ -2069,7 +2071,7 @@ const (
 	//
 	// Usage in `TimePicker`:
 	// Same as "time-picker-max".
-	Max = "max"
+	Max PropertyName = "max"
 
 	// Step is the constant for "step" property tag.
 	//
@@ -2083,7 +2085,7 @@ const (
 	//
 	// Usage in `TimePicker`:
 	// Same as "time-picker-step".
-	Step = "step"
+	Step PropertyName = "step"
 
 	// Value is the constant for "value" property tag.
 	//
@@ -2100,7 +2102,7 @@ const (
 	//
 	// Usage in `TimePicker`:
 	// Same as "time-picker-value".
-	Value = "value"
+	Value PropertyName = "value"
 
 	// Orientation is the constant for "orientation" property tag.
 	//
@@ -2138,7 +2140,7 @@ const (
 	// `1`(`StartToEndOrientation`) or "start-to-end" - Child elements are laid out in a row from beginning to end.
 	// `2`(`BottomUpOrientation`) or "bottom-up" - Child elements are arranged in a column from bottom to top.
 	// `3`(`EndToStartOrientation`) or "end-to-start" - Child elements are laid out in a line from end to beginning.
-	Orientation = "orientation"
+	Orientation PropertyName = "orientation"
 
 	// Gap is the constant for "gap" property tag.
 	//
@@ -2175,7 +2177,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Gap = "gap"
+	Gap PropertyName = "gap"
 
 	// ListRowGap is the constant for "list-row-gap" property tag.
 	//
@@ -2196,7 +2198,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ListRowGap = "list-row-gap"
+	ListRowGap PropertyName = "list-row-gap"
 
 	// ListColumnGap is the constant for "list-column-gap" property tag.
 	//
@@ -2217,7 +2219,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	ListColumnGap = "list-column-gap"
+	ListColumnGap PropertyName = "list-column-gap"
 
 	// Text is the constant for "text" property tag.
 	//
@@ -2232,7 +2234,7 @@ const (
 	// Text to display.
 	//
 	// Supported types: `string`.
-	Text = "text"
+	Text PropertyName = "text"
 
 	// VerticalAlign is the constant for "vertical-align" property tag.
 	//
@@ -2291,7 +2293,7 @@ const (
 	// `0`(`TopAlign`) or "top" - Top alignment.
 	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
-	VerticalAlign = "vertical-align"
+	VerticalAlign PropertyName = "vertical-align"
 
 	// HorizontalAlign is the constant for "horizontal-align" property tag.
 	//
@@ -2350,7 +2352,7 @@ const (
 	// `0`(`LeftAlign`) or "left" - Left alignment.
 	// `1`(`RightAlign`) or "right" - Right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
-	HorizontalAlign = "horizontal-align"
+	HorizontalAlign PropertyName = "horizontal-align"
 
 	// ImageVerticalAlign is the constant for "image-vertical-align" property tag.
 	//
@@ -2363,7 +2365,7 @@ const (
 	// `0`(`TopAlign`) or "top" - Top alignment.
 	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
-	ImageVerticalAlign = "image-vertical-align"
+	ImageVerticalAlign PropertyName = "image-vertical-align"
 
 	// ImageHorizontalAlign is the constant for "image-horizontal-align" property tag.
 	//
@@ -2376,7 +2378,7 @@ const (
 	// `0`(`LeftAlign`) or "left" - Left alignment.
 	// `1`(`RightAlign`) or "right" - Right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
-	ImageHorizontalAlign = "image-horizontal-align"
+	ImageHorizontalAlign PropertyName = "image-horizontal-align"
 
 	// Checked is the constant for "checked" property tag.
 	//
@@ -2402,7 +2404,7 @@ const (
 	// `[]int` - contains indices of selected list items. Stored as is.
 	// `int` - contains index of one selected list item, converted to `[]int`.
 	// `string` - contains one or several indices of selected list items separated by comma(`,`).
-	Checked = "checked"
+	Checked PropertyName = "checked"
 
 	// ItemVerticalAlign is the constant for "item-vertical-align" property tag.
 	//
@@ -2416,7 +2418,7 @@ const (
 	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
 	// `3`(`StretchAlign`) or "stretch" - Height alignment.
-	ItemVerticalAlign = "item-vertical-align"
+	ItemVerticalAlign PropertyName = "item-vertical-align"
 
 	// ItemHorizontalAlign is the constant for "item-horizontal-align" property tag.
 	//
@@ -2430,7 +2432,7 @@ const (
 	// `1`(`RightAlign`) or "right" - Right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
 	// `3`(`StretchAlign`) or "stretch" - Height alignment.
-	ItemHorizontalAlign = "item-horizontal-align"
+	ItemHorizontalAlign PropertyName = "item-horizontal-align"
 
 	// ItemCheckbox is the constant for "checkbox" property tag.
 	//
@@ -2443,7 +2445,7 @@ const (
 	// `0`(`NoneCheckbox`) or "none" - There is no checkbox.
 	// `1`(`SingleCheckbox`) or "single" - A checkbox that allows you to mark only one item, example: ◉.
 	// `2`(`MultipleCheckbox`) or "multiple" - A checkbox that allows you to mark several items, example: ☑.
-	ItemCheckbox = "checkbox"
+	ItemCheckbox PropertyName = "checkbox"
 
 	// CheckboxHorizontalAlign is the constant for "checkbox-horizontal-align" property tag.
 	//
@@ -2468,7 +2470,7 @@ const (
 	// `0`(`LeftAlign`) or "left" - Checkbox on the left edge, content on the right.
 	// `1`(`RightAlign`) or "right" - Checkbox on the right edge, content on the left.
 	// `2`(`CenterAlign`) or "center" - Center horizontally. Content below or above.
-	CheckboxHorizontalAlign = "checkbox-horizontal-align"
+	CheckboxHorizontalAlign PropertyName = "checkbox-horizontal-align"
 
 	// CheckboxVerticalAlign is the constant for "checkbox-vertical-align" property tag.
 	//
@@ -2493,7 +2495,7 @@ const (
 	// `0`(`TopAlign`) or "top" - Top alignment.
 	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
-	CheckboxVerticalAlign = "checkbox-vertical-align"
+	CheckboxVerticalAlign PropertyName = "checkbox-vertical-align"
 
 	// NotTranslate is the constant for "not-translate" property tag.
 	//
@@ -2528,7 +2530,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - No need to lookup for text translation in resources.
 	// `false` or `0` or "false", "no", "off", "0" - Lookup for text translation.
-	NotTranslate = "not-translate"
+	NotTranslate PropertyName = "not-translate"
 
 	// Filter is the constant for "filter" property tag.
 	//
@@ -2538,7 +2540,7 @@ const (
 	// Supported types: `ViewFilter`.
 	//
 	// See `ViewFilter` description for more details.
-	Filter = "filter"
+	Filter PropertyName = "filter"
 
 	// BackdropFilter is the constant for "backdrop-filter" property tag.
 	//
@@ -2549,7 +2551,7 @@ const (
 	// Supported types: `ViewFilter`.
 	//
 	// See `ViewFilter` description for more details.
-	BackdropFilter = "backdrop-filter"
+	BackdropFilter PropertyName = "backdrop-filter"
 
 	// Clip is the constant for "clip" property tag.
 	//
@@ -2560,7 +2562,7 @@ const (
 	//
 	// Internal type is `ClipShape`, other types converted to it during assignment.
 	// See `ClipShape` description for more details.
-	Clip = "clip"
+	Clip PropertyName = "clip"
 
 	// Points is the constant for "points" property tag.
 	//
@@ -2568,7 +2570,7 @@ const (
 	// Points which describe polygon clip area. Values are in a sequence of pair like: x1, y1, x2, y2 ...
 	//
 	// Supported types: `[]SizeUnit`, `string`.
-	Points = "points"
+	Points PropertyName = "points"
 
 	// ShapeOutside is the constant for "shape-outside" property tag.
 	//
@@ -2581,7 +2583,7 @@ const (
 	//
 	// Internal type is `ClipShape`, other types converted to it during assignment.
 	// See `ClipShape` description for more details.
-	ShapeOutside = "shape-outside"
+	ShapeOutside PropertyName = "shape-outside"
 
 	// Float is the constant for "float" property tag.
 	//
@@ -2594,7 +2596,7 @@ const (
 	// `0`(`NoneFloat`) or "none" - Text and other views inside the container will not wrap around this view.
 	// `1`(`LeftFloat`) or "left" - Text and other views inside the container will wrap around this view on the right side.
 	// `2`(`RightFloat`) or "right" - Text and other views inside the container will wrap around this view on the left side.
-	Float = "float"
+	Float PropertyName = "float"
 
 	// UserData is the constant for "user-data" property tag.
 	//
@@ -2602,7 +2604,7 @@ const (
 	// Can contain any user data.
 	//
 	// Supported types: `any`.
-	UserData = "user-data"
+	UserData PropertyName = "user-data"
 
 	// Resize is the constant for "resize" property tag.
 	//
@@ -2616,7 +2618,7 @@ const (
 	// `1`(`BothResize`) or "both" - The View displays a mechanism for allowing the user to resize it, which may be resized both horizontally and vertically.
 	// `2`(`HorizontalResize`) or "horizontal" - The View displays a mechanism for allowing the user to resize it in the horizontal direction.
 	// `3`(`VerticalResize`) or "vertical" - The View displays a mechanism for allowing the user to resize it in the vertical direction.
-	Resize = "resize"
+	Resize PropertyName = "resize"
 
 	// UserSelect is the constant for "user-select" property tag.
 	//
@@ -2629,7 +2631,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - User can select the text.
 	// `false` or `0` or "false", "no", "off", "0" - Text is not selectable.
-	UserSelect = "user-select"
+	UserSelect PropertyName = "user-select"
 
 	// Order is the constant for "Order" property tag.
 	//
@@ -2643,7 +2645,7 @@ const (
 	//
 	// Values:
 	// < `0` or < "0" - Views with lower value will be at the beginning.
-	// >= `0` or >= "0" - Views with higher value will be at the end.
+	// >PropertyName = `0` or >PropertyName = "0" - Views with higher value will be at the end.
 	//
 	// Usage in `ListLayout`:
 	// Used in child views to specify visual order of the view inside the `ListLayout`. Items in a container are sorted by
@@ -2653,7 +2655,7 @@ const (
 	//
 	// Values:
 	// < `0` or < "0" - Views with lower value will be at the beginning.
-	// >= `0` or >= "0" - Views with higher value will be at the end.
+	// >PropertyName = `0` or >PropertyName = "0" - Views with higher value will be at the end.
 	//
 	// Usage in `ListView`:
 	// Used in child views to specify visual order of the view inside the `ListLayout`. Items in a container are sorted by
@@ -2663,7 +2665,7 @@ const (
 	//
 	// Values:
 	// < `0` or < "0" - Views with lower value will be at the beginning.
-	// >= `0` or >= "0" - Views with higher value will be at the end.
+	// >PropertyName = `0` or >PropertyName = "0" - Views with higher value will be at the end.
 	//
 	// Usage in `View`:
 	// Set the order to layout an item in a `ListLayout` or `GridLayout` container. Items in a container are sorted by
@@ -2673,8 +2675,8 @@ const (
 	//
 	// Values:
 	// < `0` or < "0" - Views with lower value will be at the beginning.
-	// >= `0` or >= "0" - Views with higher value will be at the end.
-	Order = "Order"
+	// >PropertyName = `0` or >PropertyName = "0" - Views with higher value will be at the end.
+	Order PropertyName = "Order"
 
 	// BackgroundBlendMode is the constant for "background-blend-mode" property tag.
 	//
@@ -2700,7 +2702,7 @@ const (
 	// `13`(`BlendSaturation`) or "saturation" - The final color has the saturation of the top color, while using the hue and luminosity of the bottom color. A pure gray backdrop, having no saturation, will have no effect.
 	// `14`(`BlendColor`) or "color" - The final color has the hue and saturation of the top color, while using the luminosity of the bottom color. The effect preserves gray levels and can be used to colorize the foreground.
 	// `15`(`BlendLuminosity`) or "luminosity" - The final color has the luminosity of the top color, while using the hue and saturation of the bottom color. This blend mode is equivalent to `BlendColor`, but with the layers swapped.
-	BackgroundBlendMode = "background-blend-mode"
+	BackgroundBlendMode PropertyName = "background-blend-mode"
 
 	// MixBlendMode is the constant for "mix-blend-mode" property tag.
 	//
@@ -2726,7 +2728,7 @@ const (
 	// `13`(`BlendSaturation`) or "saturation" - The final color has the saturation of the top color, while using the hue and luminosity of the bottom color. A pure gray backdrop, having no saturation, will have no effect.
 	// `14`(`BlendColor`) or "color" - The final color has the hue and saturation of the top color, while using the luminosity of the bottom color. The effect preserves gray levels and can be used to colorize the foreground.
 	// `15`(`BlendLuminosity`) or "luminosity" - The final color has the luminosity of the top color, while using the hue and saturation of the bottom color. This blend mode is equivalent to `BlendColor`, but with the layers swapped.
-	MixBlendMode = "mix-blend-mode"
+	MixBlendMode PropertyName = "mix-blend-mode"
 
 	// TabIndex is the constant for "tabindex" property tag.
 	//
@@ -2740,7 +2742,7 @@ const (
 	// < `0` or < "0" - View can be selected with the mouse or touch, but does not participate in sequential navigation.
 	// `0` or "0" - View can be selected and reached using sequential navigation, the order of navigation is determined by the browser(usually in order of addition).
 	// > `0` or > "0" - View will be reached(and selected) using sequential navigation, and navigation is performed by ascending "tabindex" value.
-	TabIndex = "tabindex"
+	TabIndex PropertyName = "tabindex"
 
 	// Tooltip is the constant for "tooltip" property tag.
 	//
@@ -2749,5 +2751,5 @@ const (
 	// formatting tooltip text.
 	//
 	// Supported types: `string`.
-	Tooltip = "tooltip"
+	Tooltip PropertyName = "tooltip"
 )

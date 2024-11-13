@@ -20,7 +20,8 @@ func NewAbsoluteLayout(session Session, params Params) AbsoluteLayout {
 }
 
 func newAbsoluteLayout(session Session) View {
-	return NewAbsoluteLayout(session, nil)
+	//return NewAbsoluteLayout(session, nil)
+	return new(absoluteLayoutData)
 }
 
 // Init initialize fields of ViewsContainer by default values

@@ -24,7 +24,7 @@ const (
 	//
 	// Usage in `SvgImageView`:
 	// Same as "vertical-align".
-	CellVerticalAlign = "cell-vertical-align"
+	CellVerticalAlign PropertyName = "cell-vertical-align"
 
 	// CellHorizontalAlign is the constant for "cell-horizontal-align" property tag.
 	//
@@ -43,12 +43,12 @@ const (
 	//
 	// Usage in `SvgImageView`:
 	// Same as "horizontal-align".
-	CellHorizontalAlign = "cell-horizontal-align"
+	CellHorizontalAlign PropertyName = "cell-horizontal-align"
 
 	// CellVerticalSelfAlign is the constant for "cell-vertical-self-align" property tag.
 	//
 	// Used by `GridLayout`.
-	// Sets the vertical alignment of `GridLayout` children within the cell they are occupying. The property is set for the 
+	// Sets the vertical alignment of `GridLayout` children within the cell they are occupying. The property is set for the
 	// child view of `GridLayout`.
 	//
 	// Supported types: `int`, `string`.
@@ -58,12 +58,12 @@ const (
 	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
 	// `3`(`StretchAlign`) or "stretch" - Full height stretch.
-	CellVerticalSelfAlign = "cell-vertical-self-align"
+	CellVerticalSelfAlign PropertyName = "cell-vertical-self-align"
 
 	// CellHorizontalSelfAlign is the constant for "cell-horizontal-self-align" property tag.
 	//
 	// Used by `GridLayout`.
-	// Sets the horizontal alignment of `GridLayout` children within the occupied cell. The property is set for the child view 
+	// Sets the horizontal alignment of `GridLayout` children within the occupied cell. The property is set for the child view
 	// of `GridLayout`.
 	//
 	// Supported types: `int`, `string`.
@@ -73,7 +73,7 @@ const (
 	// `1`(`RightAlign`) or "right" - Right alignment.
 	// `2`(`CenterAlign`) or "center" - Center alignment.
 	// `3`(`StretchAlign`) or "stretch" - Full width stretch.
-	CellHorizontalSelfAlign = "cell-horizontal-self-align"
+	CellHorizontalSelfAlign PropertyName = "cell-horizontal-self-align"
 )
 
 // GridAdapter is an interface to define [GridLayout] content. [GridLayout] will query interface functions to populate
@@ -126,7 +126,8 @@ func NewGridLayout(session Session, params Params) GridLayout {
 }
 
 func newGridLayout(session Session) View {
-	return NewGridLayout(session, nil)
+	//return NewGridLayout(session, nil)
+	return new(gridLayoutData)
 }
 
 // Init initialize fields of GridLayout by default values
@@ -135,13 +136,14 @@ func (gridLayout *gridLayoutData) init(session Session) {
 	gridLayout.tag = "GridLayout"
 	gridLayout.systemClass = "ruiGridLayout"
 	gridLayout.adapter = nil
+	gridLayout.normalize = normalizeGridLayoutTag
+	gridLayout.getFunc = gridLayout.get
+	gridLayout.set = gridLayout.setFunc
+	gridLayout.remove = gridLayout.removeFunc
+
 }
 
-func (gridLayout *gridLayoutData) String() string {
-	return getViewString(gridLayout, nil)
-}
-
-func (style *viewStyle) setGridCellSize(tag string, value any) bool {
+func setGridCellSize(properties Properties, tag PropertyName, value any) []PropertyName {
 	setValues := func(values []string) bool {
 		count := len(values)
 		if count > 1 {
@@ -159,11 +161,11 @@ func (style *viewStyle) setGridCellSize(tag string, value any) bool {
 					return false
 				}
 			}
-			style.properties[tag] = sizes
+			properties.setRaw(tag, sizes)
 		} else if isConstantName(values[0]) {
-			style.properties[tag] = values[0]
+			properties.setRaw(tag, values[0])
 		} else if size, err := stringToSizeUnit(values[0]); err == nil {
-			style.properties[tag] = size
+			properties.setRaw(tag, size)
 		} else {
 			invalidPropertyValue(tag, value)
 			return false
@@ -175,41 +177,41 @@ func (style *viewStyle) setGridCellSize(tag string, value any) bool {
 	case CellWidth, CellHeight:
 		switch value := value.(type) {
 		case SizeUnit, []SizeUnit:
-			style.properties[tag] = value
+			properties.setRaw(tag, value)
 
 		case string:
 			if !setValues(strings.Split(value, ",")) {
-				return false
+				return nil
 			}
 
 		case []string:
 			if !setValues(value) {
-				return false
+				return nil
 			}
 
 		case []DataValue:
 			count := len(value)
 			if count == 0 {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 			values := make([]string, count)
 			for i, val := range value {
 				if val.IsObject() {
 					invalidPropertyValue(tag, value)
-					return false
+					return nil
 				}
 				values[i] = val.Value()
 			}
 			if !setValues(values) {
-				return false
+				return nil
 			}
 
 		case []any:
 			count := len(value)
 			if count == 0 {
 				invalidPropertyValue(tag, value)
-				return false
+				return nil
 			}
 			sizes := make([]any, count)
 			for i, val := range value {
@@ -224,29 +226,29 @@ func (style *viewStyle) setGridCellSize(tag string, value any) bool {
 						sizes[i] = size
 					} else {
 						invalidPropertyValue(tag, value)
-						return false
+						return nil
 					}
 
 				default:
 					invalidPropertyValue(tag, value)
-					return false
+					return nil
 				}
 			}
-			style.properties[tag] = sizes
+			properties.setRaw(tag, sizes)
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
 
-		return true
+		return []PropertyName{tag}
 	}
 
-	return false
+	return nil
 }
 
-func (style *viewStyle) gridCellSizesCSS(tag string, session Session) string {
-	switch cellSize := gridCellSizes(style, tag, session); len(cellSize) {
+func gridCellSizesCSS(properties Properties, tag PropertyName, session Session) string {
+	switch cellSize := gridCellSizes(properties, tag, session); len(cellSize) {
 	case 0:
 
 	case 1:
@@ -283,8 +285,8 @@ func (style *viewStyle) gridCellSizesCSS(tag string, session Session) string {
 	return ""
 }
 
-func (gridLayout *gridLayoutData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeGridLayoutTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case VerticalAlign:
 		return CellVerticalAlign
@@ -301,162 +303,167 @@ func (gridLayout *gridLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gridLayout *gridLayoutData) Get(tag string) any {
-	return gridLayout.get(gridLayout.normalizeTag(tag))
-}
-
-func (gridLayout *gridLayoutData) get(tag string) any {
-	if tag == Gap {
+func (gridLayout *gridLayoutData) get(self View, tag PropertyName) any {
+	switch tag {
+	case Gap:
 		rowGap := GetGridRowGap(gridLayout)
 		columnGap := GetGridColumnGap(gridLayout)
 		if rowGap.Equal(columnGap) {
 			return rowGap
 		}
 		return AutoSize()
-	}
-
-	return gridLayout.viewsContainerData.get(tag)
-}
-
-func (gridLayout *gridLayoutData) Remove(tag string) {
-	gridLayout.remove(gridLayout.normalizeTag(tag))
-}
-
-func (gridLayout *gridLayoutData) remove(tag string) {
-	switch tag {
-	case Gap:
-		gridLayout.remove(GridRowGap)
-		gridLayout.remove(GridColumnGap)
-		gridLayout.propertyChangedEvent(Gap)
-		return
 
 	case Content:
-		gridLayout.adapter = nil
-	}
-
-	gridLayout.viewsContainerData.remove(tag)
-
-	if gridLayout.created {
-		switch tag {
-		case CellWidth:
-			gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
-				gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session))
-
-		case CellHeight:
-			gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
-				gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session))
-
+		if gridLayout.adapter != nil {
+			return gridLayout.adapter
 		}
 	}
+
+	return gridLayout.viewsContainerData.get(gridLayout, tag)
 }
 
-func (gridLayout *gridLayoutData) Set(tag string, value any) bool {
-	return gridLayout.set(gridLayout.normalizeTag(tag), value)
-}
-
-func (gridLayout *gridLayoutData) set(tag string, value any) bool {
-	if value == nil {
-		gridLayout.remove(tag)
-		return true
-	}
-
+func (gridLayout *gridLayoutData) removeFunc(self View, tag PropertyName) []PropertyName {
 	switch tag {
 	case Gap:
-		return gridLayout.set(GridRowGap, value) && gridLayout.set(GridColumnGap, value)
+		result := []PropertyName{}
+		for _, tag := range []PropertyName{GridRowGap, GridColumnGap} {
+			if gridLayout.getRaw(tag) != nil {
+				gridLayout.setRaw(tag, nil)
+				result = append(result, tag)
+			}
+		}
+		return result
+
+	case Content:
+		if len(gridLayout.views) > 0 || gridLayout.adapter != nil {
+			gridLayout.views = []View{}
+			gridLayout.adapter = nil
+			return []PropertyName{Content}
+		}
+		return []PropertyName{}
+	}
+
+	return gridLayout.viewsContainerData.removeFunc(gridLayout, tag)
+}
+
+func (gridLayout *gridLayoutData) setFunc(self View, tag PropertyName, value any) []PropertyName {
+	switch tag {
+	case Gap:
+		result := gridLayout.setFunc(gridLayout, GridRowGap, value)
+		if result != nil {
+			if gap := gridLayout.getRaw(GridRowGap); gap != nil {
+				gridLayout.setRaw(GridColumnGap, gap)
+				result = append(result, GridColumnGap)
+			}
+		}
+		return result
 
 	case Content:
 		if adapter, ok := value.(GridAdapter); ok {
 			gridLayout.adapter = adapter
-			gridLayout.UpdateGridContent()
-			return true
+			gridLayout.createGridContent()
+		} else if gridLayout.setContent(value) {
+			gridLayout.adapter = nil
+		} else {
+			return nil
 		}
-		gridLayout.adapter = nil
+		return []PropertyName{Content}
 	}
 
-	if gridLayout.viewsContainerData.set(tag, value) {
-		if gridLayout.created {
-			switch tag {
-			case CellWidth:
-				gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
-					gridLayout.gridCellSizesCSS(CellWidth, gridLayout.session))
+	return gridLayout.viewsContainerData.setFunc(gridLayout, tag, value)
+}
 
-			case CellHeight:
-				gridLayout.session.updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
-					gridLayout.gridCellSizesCSS(CellHeight, gridLayout.session))
+func gridLayoutPropertyChanged(view View, tag PropertyName) {
+	switch tag {
+	case CellWidth:
+		view.Session().updateCSSProperty(view.htmlID(), `grid-template-columns`,
+			gridCellSizesCSS(view, CellWidth, view.Session()))
 
+	case CellHeight:
+		view.Session().updateCSSProperty(view.htmlID(), `grid-template-rows`,
+			gridCellSizesCSS(view, CellHeight, view.Session()))
+
+	default:
+		viewsContainerPropertyChanged(view, tag)
+	}
+}
+
+func (gridLayout *gridLayoutData) createGridContent() bool {
+	if gridLayout.adapter == nil {
+		return false
+	}
+
+	adapter := gridLayout.adapter
+	gridLayout.views = []View{}
+
+	session := gridLayout.session
+	htmlID := gridLayout.htmlID()
+	isDisabled := IsDisabled(gridLayout)
+
+	var columnSpan GridCellColumnSpanAdapter = nil
+	if span, ok := adapter.(GridCellColumnSpanAdapter); ok {
+		columnSpan = span
+	}
+
+	var rowSpan GridCellRowSpanAdapter = nil
+	if span, ok := adapter.(GridCellRowSpanAdapter); ok {
+		rowSpan = span
+	}
+
+	width := adapter.GridColumnCount()
+	height := adapter.GridRowCount()
+	for column := 0; column < width; column++ {
+		for row := 0; row < height; row++ {
+			if view := adapter.GridCellContent(row, column, session); view != nil {
+				view.setParentID(htmlID)
+
+				columnCount := 1
+				if columnSpan != nil {
+					columnCount = columnSpan.GridCellColumnSpan(row, column)
+				}
+
+				if columnCount > 1 {
+					view.Set(Column, Range{First: column, Last: column + columnCount - 1})
+				} else {
+					view.Set(Column, column)
+				}
+
+				rowCount := 1
+				if rowSpan != nil {
+					rowCount = rowSpan.GridCellRowSpan(row, column)
+				}
+
+				if rowCount > 1 {
+					view.Set(Row, Range{First: row, Last: row + rowCount - 1})
+				} else {
+					view.Set(Row, row)
+				}
+
+				if isDisabled {
+					view.Set(Disabled, true)
+				}
+
+				gridLayout.views = append(gridLayout.views, view)
 			}
 		}
-		return true
 	}
 
-	return false
+	return true
 }
 
 func (gridLayout *gridLayoutData) UpdateGridContent() {
-	if adapter := gridLayout.adapter; adapter != nil {
-		gridLayout.views = []View{}
-
-		session := gridLayout.session
-		htmlID := gridLayout.htmlID()
-		isDisabled := IsDisabled(gridLayout)
-
-		var columnSpan GridCellColumnSpanAdapter = nil
-		if span, ok := adapter.(GridCellColumnSpanAdapter); ok {
-			columnSpan = span
-		}
-
-		var rowSpan GridCellRowSpanAdapter = nil
-		if span, ok := adapter.(GridCellRowSpanAdapter); ok {
-			rowSpan = span
-		}
-
-		width := adapter.GridColumnCount()
-		height := adapter.GridRowCount()
-		for column := 0; column < width; column++ {
-			for row := 0; row < height; row++ {
-				if view := adapter.GridCellContent(row, column, session); view != nil {
-					view.setParentID(htmlID)
-
-					columnCount := 1
-					if columnSpan != nil {
-						columnCount = columnSpan.GridCellColumnSpan(row, column)
-					}
-
-					if columnCount > 1 {
-						view.Set(Column, Range{First: column, Last: column + columnCount - 1})
-					} else {
-						view.Set(Column, column)
-					}
-
-					rowCount := 1
-					if rowSpan != nil {
-						rowCount = rowSpan.GridCellRowSpan(row, column)
-					}
-
-					if rowCount > 1 {
-						view.Set(Row, Range{First: row, Last: row + rowCount - 1})
-					} else {
-						view.Set(Row, row)
-					}
-
-					if isDisabled {
-						view.Set(Disabled, true)
-					}
-
-					gridLayout.views = append(gridLayout.views, view)
-				}
-			}
-		}
-
+	if gridLayout.createGridContent() {
 		if gridLayout.created {
-			updateInnerHTML(htmlID, session)
+			updateInnerHTML(gridLayout.htmlID(), gridLayout.session)
 		}
 
-		gridLayout.propertyChangedEvent(Content)
+		if listener, ok := gridLayout.changeListener[Content]; ok {
+			listener(gridLayout, Content)
+		}
 	}
 }
 
-func gridCellSizes(properties Properties, tag string, session Session) []SizeUnit {
+func gridCellSizes(properties Properties, tag PropertyName, session Session) []SizeUnit {
 	if value := properties.Get(tag); value != nil {
 		switch value := value.(type) {
 		case []SizeUnit:

@@ -8,87 +8,6 @@ import (
 
 // Constants for [Transform] specific properties
 const (
-	// Perspective is the constant for "perspective" property tag.
-	//
-	// Used by `View`.
-	// Distance between the z-plane and the user in order to give a 3D-positioned element some perspective. Each 3D element 
-	// with z > 0 becomes larger, each 3D-element with z < 0 becomes smaller. The default value is 0 (no 3D effects).
-	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
-	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	Perspective = "perspective"
-
-	// PerspectiveOriginX is the constant for "perspective-origin-x" property tag.
-	//
-	// Used by `View`.
-	// x-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective" 
-	// property. The default value is 50%.
-	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
-	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	PerspectiveOriginX = "perspective-origin-x"
-
-	// PerspectiveOriginY is the constant for "perspective-origin-y" property tag.
-	//
-	// Used by `View`.
-	// y-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective" 
-	// property. The default value is 50%.
-	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
-	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	PerspectiveOriginY = "perspective-origin-y"
-
-	// BackfaceVisible is the constant for "backface-visibility" property tag.
-	//
-	// Used by `View`.
-	// Controls whether the back face of a view is visible when turned towards the user. Default value is `true`.
-	//
-	// Supported types: `bool`, `int`, `string`.
-	//
-	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Back face is visible when turned towards the user.
-	// `false` or `0` or "false", "no", "off", "0" - Back face is hidden, effectively making the view invisible when turned away from the user.
-	BackfaceVisible = "backface-visibility"
-
-	// OriginX is the constant for "origin-x" property tag.
-	//
-	// Used by `View`.
-	// x-coordinate of the point around which a view transformation is applied. The default value is 50%.
-	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
-	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	OriginX = "origin-x"
-
-	// OriginY is the constant for "origin-y" property tag.
-	//
-	// Used by `View`.
-	// y-coordinate of the point around which a view transformation is applied. The default value is 50%.
-	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
-	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	OriginY = "origin-y"
-
-	// OriginZ is the constant for "origin-z" property tag.
-	//
-	// Used by `View`.
-	// z-coordinate of the point around which a view transformation is applied. The default value is 50%.
-	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
-	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	OriginZ = "origin-z"
-
 	// TransformTag is the constant for "transform" property tag.
 	//
 	// Used by `View`.
@@ -101,7 +20,88 @@ const (
 	// Conversion rules:
 	// `Transform` - stored as is, no conversion performed.
 	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
-	TransformTag = "transform"
+	TransformTag PropertyName = "transform"
+
+	// Perspective is the constant for "perspective" property tag.
+	//
+	// Used by `View`.
+	// Distance between the z-plane and the user in order to give a 3D-positioned element some perspective. Each 3D element
+	// with z > 0 becomes larger, each 3D-element with z < 0 becomes smaller. The default value is 0 (no 3D effects).
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	Perspective PropertyName = "perspective"
+
+	// PerspectiveOriginX is the constant for "perspective-origin-x" property tag.
+	//
+	// Used by `View`.
+	// x-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective"
+	// property. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	PerspectiveOriginX PropertyName = "perspective-origin-x"
+
+	// PerspectiveOriginY is the constant for "perspective-origin-y" property tag.
+	//
+	// Used by `View`.
+	// y-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective"
+	// property. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	PerspectiveOriginY PropertyName = "perspective-origin-y"
+
+	// BackfaceVisible is the constant for "backface-visibility" property tag.
+	//
+	// Used by `View`.
+	// Controls whether the back face of a view is visible when turned towards the user. Default value is `true`.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - Back face is visible when turned towards the user.
+	// `false` or `0` or "false", "no", "off", "0" - Back face is hidden, effectively making the view invisible when turned away from the user.
+	BackfaceVisible PropertyName = "backface-visibility"
+
+	// OriginX is the constant for "origin-x" property tag.
+	//
+	// Used by `View`.
+	// x-coordinate of the point around which a view transformation is applied. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	OriginX PropertyName = "origin-x"
+
+	// OriginY is the constant for "origin-y" property tag.
+	//
+	// Used by `View`.
+	// y-coordinate of the point around which a view transformation is applied. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	OriginY PropertyName = "origin-y"
+
+	// OriginZ is the constant for "origin-z" property tag.
+	//
+	// Used by `View`.
+	// z-coordinate of the point around which a view transformation is applied. The default value is 50%.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	OriginZ PropertyName = "origin-z"
 
 	// TranslateX is the constant for "translate-x" property tag.
 	//
@@ -122,7 +122,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TranslateX = "translate-x"
+	TranslateX PropertyName = "translate-x"
 
 	// TranslateY is the constant for "translate-y" property tag.
 	//
@@ -143,7 +143,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TranslateY = "translate-y"
+	TranslateY PropertyName = "translate-y"
 
 	// TranslateZ is the constant for "translate-z" property tag.
 	//
@@ -164,14 +164,14 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TranslateZ = "translate-z"
+	TranslateZ PropertyName = "translate-z"
 
 	// ScaleX is the constant for "scale-x" property tag.
 	//
 	// Used by `View`, `Transform`.
 	//
 	// Usage in `View`:
-	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
 	// Supported types: `float`, `int`, `string`.
@@ -179,20 +179,20 @@ const (
 	// Internal type is `float`, other types converted to it during assignment.
 	//
 	// Usage in `Transform`:
-	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	ScaleX = "scale-x"
+	ScaleX PropertyName = "scale-x"
 
 	// ScaleY is the constant for "scale-y" property tag.
 	//
 	// Used by `View`, `Transform`.
 	//
 	// Usage in `View`:
-	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
 	// Supported types: `float`, `int`, `string`.
@@ -200,20 +200,20 @@ const (
 	// Internal type is `float`, other types converted to it during assignment.
 	//
 	// Usage in `Transform`:
-	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	ScaleY = "scale-y"
+	ScaleY PropertyName = "scale-y"
 
 	// ScaleZ is the constant for "scale-z" property tag.
 	//
 	// Used by `View`, `Transform`.
 	//
 	// Usage in `View`:
-	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
 	// Supported types: `float`, `int`, `string`.
@@ -221,13 +221,13 @@ const (
 	// Internal type is `float`, other types converted to it during assignment.
 	//
 	// Usage in `Transform`:
-	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original 
+	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	ScaleZ = "scale-z"
+	ScaleZ PropertyName = "scale-z"
 
 	// Rotate is the constant for "rotate" property tag.
 	//
@@ -260,7 +260,7 @@ const (
 	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
 	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
 	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
-	Rotate = "rotate"
+	Rotate PropertyName = "rotate"
 
 	// RotateX is the constant for "rotate-x" property tag.
 	//
@@ -279,7 +279,7 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	RotateX = "rotate-x"
+	RotateX PropertyName = "rotate-x"
 
 	// RotateY is the constant for "rotate-y" property tag.
 	//
@@ -298,7 +298,7 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	RotateY = "rotate-y"
+	RotateY PropertyName = "rotate-y"
 
 	// RotateZ is the constant for "rotate-z" property tag.
 	//
@@ -317,7 +317,7 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	RotateZ = "rotate-z"
+	RotateZ PropertyName = "rotate-z"
 
 	// SkewX is the constant for "skew-x" property tag.
 	//
@@ -350,7 +350,7 @@ const (
 	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
 	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
 	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
-	SkewX = "skew-x"
+	SkewX PropertyName = "skew-x"
 
 	// SkewY is the constant for "skew-y" property tag.
 	//
@@ -383,44 +383,97 @@ const (
 	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
 	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
 	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
-	SkewY = "skew-y"
+	SkewY PropertyName = "skew-y"
 )
 
 // Transform interface specifies view transformation parameters: the x-, y-, and z-axis translation values,
 // the x-, y-, and z-axis scaling values, the angle to use to distort the element along the abscissa and ordinate,
 // the angle of the view rotation.
-// Valid property tags: TranslateX ("translate-x"), TranslateY ("translate-y"), TranslateZ ("translate-z"),
+// Valid property tags: Perspective ("perspective"),  TranslateX ("translate-x"), TranslateY ("translate-y"), TranslateZ ("translate-z"),
 // ScaleX ("scale-x"), ScaleY ("scale-y"), ScaleZ ("scale-z"), Rotate ("rotate"), RotateX ("rotate-x"),
 // RotateY ("rotate-y"), RotateZ ("rotate-z"), SkewX ("skew-x"), and SkewY ("skew-y")
 type Transform interface {
 	Properties
 	fmt.Stringer
 	stringWriter
-	transformCSS(session Session, transform3D bool) string
+	transformCSS(session Session) string
 }
 
 type transformData struct {
-	propertyList
+	dataProperty
 }
 
 // NewTransform creates a new transform property data and return its interface
 func NewTransform(params Params) Transform {
 	transform := new(transformData)
-	transform.properties = map[string]any{}
+	transform.init()
+
 	for tag, value := range params {
 		transform.Set(tag, value)
 	}
 	return transform
 }
 
-func (style *viewStyle) setTransform(value any) bool {
+func (transform *transformData) init() {
+	transform.dataProperty.init()
+	transform.set = transformSet
+	transform.supportedProperties = []PropertyName{
+		RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
+		Perspective, TranslateX, TranslateY, TranslateZ,
+	}
+}
+
+func (transform *transformData) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	transform.writeString(buffer, "")
+	return buffer.String()
+}
+
+func (transform *transformData) writeString(buffer *strings.Builder, indent string) {
+	buffer.WriteString("_{ ")
+	comma := false
+	for _, tag := range transform.supportedProperties {
+		if value, ok := transform.properties[tag]; ok {
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(string(tag))
+			buffer.WriteString(" = ")
+			writePropertyValue(buffer, tag, value, indent)
+			comma = true
+		}
+	}
+	buffer.WriteString(" }")
+}
+
+func transformSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	switch tag {
+
+	case RotateX, RotateY, RotateZ:
+		return setFloatProperty(properties, tag, value, 0, 1)
+
+	case Rotate, SkewX, SkewY:
+		return setAngleProperty(properties, tag, value)
+
+	case ScaleX, ScaleY, ScaleZ:
+		return setFloatProperty(properties, tag, value, -math.MaxFloat64, math.MaxFloat64)
+
+	case Perspective, TranslateX, TranslateY, TranslateZ:
+		return setSizeProperty(properties, tag, value)
+	}
+
+	return nil
+}
+
+func setTransformProperty(properties Properties, value any) bool {
 
 	setObject := func(obj DataObject) bool {
 		transform := NewTransform(nil)
 		ok := true
 		for i := 0; i < obj.PropertyCount(); i++ {
 			if prop := obj.Property(i); prop.Type() == TextNode {
-				if !transform.Set(prop.Tag(), prop.Text()) {
+				if !transform.Set(PropertyName(prop.Tag()), prop.Text()) {
 					ok = false
 				}
 			} else {
@@ -428,17 +481,17 @@ func (style *viewStyle) setTransform(value any) bool {
 			}
 		}
 
-		if !ok && len(transform.AllTags()) == 0 {
+		if !ok && transform.empty() {
 			return false
 		}
 
-		style.properties[TransformTag] = transform
+		properties.setRaw(TransformTag, transform)
 		return true
 	}
 
 	switch value := value.(type) {
 	case Transform:
-		style.properties[TransformTag] = value
+		properties.setRaw(TransformTag, value)
 		return true
 
 	case DataObject:
@@ -462,8 +515,8 @@ func (style *viewStyle) setTransform(value any) bool {
 	return false
 }
 
-func (style *viewStyle) transformProperty() Transform {
-	if val, ok := style.properties[TransformTag]; ok {
+func getTransformProperty(properties Properties) Transform {
+	if val := properties.getRaw(TransformTag); val != nil {
 		if transform, ok := val.(Transform); ok {
 			return transform
 		}
@@ -471,80 +524,26 @@ func (style *viewStyle) transformProperty() Transform {
 	return nil
 }
 
-func (style *viewStyle) setTransformProperty(tag string, value any) bool {
+func setTransformPropertyElement(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
-	case RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ, TranslateX, TranslateY, TranslateZ:
-		if transform := style.transformProperty(); transform != nil {
-			return transform.Set(tag, value)
-		}
-
-		transform := NewTransform(nil)
-		if !transform.Set(tag, value) {
-			return false
-		}
-
-		style.properties[TransformTag] = transform
-		return true
-	}
-
-	ErrorLogF(`"Transform" interface does not support the "%s" property`, tag)
-	return false
-}
-
-func (transform *transformData) String() string {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-	transform.writeString(buffer, "")
-	return buffer.String()
-}
-
-func (transform *transformData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range []string{SkewX, SkewY, TranslateX, TranslateY, TranslateZ,
-		ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ} {
-		if value, ok := transform.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
+	case Perspective, RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ, TranslateX, TranslateY, TranslateZ:
+		if transform := getTransformProperty(properties); transform != nil {
+			if result := transformSet(transform, tag, value); result != nil {
+				result = append(result, TransformTag)
 			}
-			buffer.WriteString(tag)
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
+		} else {
+			transform := NewTransform(nil)
+			if result := transformSet(transform, tag, value); result != nil {
+				properties.setRaw(TransformTag, transform)
+				result = append(result, TransformTag)
+			}
 		}
-	}
-	buffer.WriteString(" }")
-}
 
-func (transform *transformData) Set(tag string, value any) bool {
-	return transform.set(strings.ToLower(tag), value)
-}
-
-func (transform *transformData) set(tag string, value any) bool {
-	if value == nil {
-		_, exist := transform.properties[tag]
-		if exist {
-			delete(transform.properties, tag)
-		}
-		return exist
+	default:
+		ErrorLogF(`"Transform" interface does not support the "%s" property`, tag)
 	}
 
-	switch tag {
-
-	case RotateX, RotateY, RotateZ:
-		return transform.setFloatProperty(tag, value, 0, 1)
-
-	case Rotate, SkewX, SkewY:
-		return transform.setAngleProperty(tag, value)
-
-	case ScaleX, ScaleY, ScaleZ:
-		return transform.setFloatProperty(tag, value, -math.MaxFloat64, math.MaxFloat64)
-
-	case TranslateX, TranslateY, TranslateZ:
-		return transform.setSizeProperty(tag, value)
-	}
-
-	return false
+	return nil
 }
 
 func getTransform3D(style Properties, session Session) bool {
@@ -578,10 +577,16 @@ func (transform *transformData) getTranslate(session Session) (SizeUnit, SizeUni
 	return x, y, z
 }
 
-func (transform *transformData) transformCSS(session Session, transform3D bool) string {
+func (transform *transformData) transformCSS(session Session) string {
 
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
+
+	if perspective, ok := sizeProperty(transform, Perspective, session); ok && perspective.Type != Auto && perspective.Value != 0 {
+		buffer.WriteString(`perspective(`)
+		buffer.WriteString(perspective.cssString("0", session))
+		buffer.WriteString(") ")
+	}
 
 	skewX, skewY, skewOK := transform.getSkew(session)
 	if skewOK {
@@ -589,50 +594,58 @@ func (transform *transformData) transformCSS(session Session, transform3D bool) 
 		buffer.WriteString(skewX.cssString())
 		buffer.WriteRune(',')
 		buffer.WriteString(skewY.cssString())
-		buffer.WriteRune(')')
+		buffer.WriteString(") ")
 	}
 
 	x, y, z := transform.getTranslate(session)
+	if z.Type != Auto && z.Value != 0 {
+
+		buffer.WriteString(`translate3d(`)
+		buffer.WriteString(x.cssString("0", session))
+		buffer.WriteRune(',')
+		buffer.WriteString(y.cssString("0", session))
+		buffer.WriteRune(',')
+		buffer.WriteString(z.cssString("0", session))
+		buffer.WriteString(") ")
+
+	} else if (x.Type != Auto && x.Value != 0) || (y.Type != Auto && y.Value != 0) {
+
+		buffer.WriteString(`translate(`)
+		buffer.WriteString(x.cssString("0", session))
+		buffer.WriteRune(',')
+		buffer.WriteString(y.cssString("0", session))
+		buffer.WriteString(") ")
+	}
 
 	scaleX, okScaleX := floatTextProperty(transform, ScaleX, session, 1)
 	scaleY, okScaleY := floatTextProperty(transform, ScaleY, session, 1)
+	scaleZ, okScaleZ := floatTextProperty(transform, ScaleZ, session, 1)
+	if okScaleZ {
 
-	if transform3D {
-		if x.Type != Auto || y.Type != Auto || z.Type != Auto {
-			if buffer.Len() > 0 {
-				buffer.WriteRune(' ')
-			}
-			buffer.WriteString(`translate3d(`)
-			buffer.WriteString(x.cssString("0", session))
-			buffer.WriteRune(',')
-			buffer.WriteString(y.cssString("0", session))
-			buffer.WriteRune(',')
-			buffer.WriteString(z.cssString("0", session))
-			buffer.WriteRune(')')
-		}
+		buffer.WriteString(`scale3d(`)
+		buffer.WriteString(scaleX)
+		buffer.WriteRune(',')
+		buffer.WriteString(scaleY)
+		buffer.WriteRune(',')
+		buffer.WriteString(scaleZ)
+		buffer.WriteString(") ")
 
-		scaleZ, okScaleZ := floatTextProperty(transform, ScaleZ, session, 1)
-		if okScaleX || okScaleY || okScaleZ {
-			if buffer.Len() > 0 {
-				buffer.WriteRune(' ')
-			}
-			buffer.WriteString(`scale3d(`)
-			buffer.WriteString(scaleX)
-			buffer.WriteRune(',')
-			buffer.WriteString(scaleY)
-			buffer.WriteRune(',')
-			buffer.WriteString(scaleZ)
-			buffer.WriteRune(')')
-		}
+	} else if okScaleX || okScaleY {
 
-		if angle, ok := angleProperty(transform, Rotate, session); ok {
-			rotateX, _ := floatTextProperty(transform, RotateX, session, 1)
-			rotateY, _ := floatTextProperty(transform, RotateY, session, 1)
-			rotateZ, _ := floatTextProperty(transform, RotateZ, session, 1)
+		buffer.WriteString(`scale(`)
+		buffer.WriteString(scaleX)
+		buffer.WriteRune(',')
+		buffer.WriteString(scaleY)
+		buffer.WriteString(") ")
+	}
 
-			if buffer.Len() > 0 {
-				buffer.WriteRune(' ')
-			}
+	if angle, ok := angleProperty(transform, Rotate, session); ok {
+		rotateX, xOK := floatTextProperty(transform, RotateX, session, 1)
+		rotateY, yOK := floatTextProperty(transform, RotateY, session, 1)
+		rotateZ, zOK := floatTextProperty(transform, RotateZ, session, 1)
+
+		if xOK || yOK || zOK {
+
 			buffer.WriteString(`rotate3d(`)
 			buffer.WriteString(rotateX)
 			buffer.WriteRune(',')
@@ -641,90 +654,56 @@ func (transform *transformData) transformCSS(session Session, transform3D bool) 
 			buffer.WriteString(rotateZ)
 			buffer.WriteRune(',')
 			buffer.WriteString(angle.cssString())
-			buffer.WriteRune(')')
-		}
+			buffer.WriteString(") ")
 
-	} else {
+		} else {
 
-		if x.Type != Auto || y.Type != Auto {
-			if buffer.Len() > 0 {
-				buffer.WriteRune(' ')
-			}
-			buffer.WriteString(`translate(`)
-			buffer.WriteString(x.cssString("0", session))
-			buffer.WriteRune(',')
-			buffer.WriteString(y.cssString("0", session))
-			buffer.WriteRune(')')
-		}
-
-		if okScaleX || okScaleY {
-			if buffer.Len() > 0 {
-				buffer.WriteRune(' ')
-			}
-			buffer.WriteString(`scale(`)
-			buffer.WriteString(scaleX)
-			buffer.WriteRune(',')
-			buffer.WriteString(scaleY)
-			buffer.WriteRune(')')
-		}
-
-		if angle, ok := angleProperty(transform, Rotate, session); ok {
-			if buffer.Len() > 0 {
-				buffer.WriteRune(' ')
-			}
 			buffer.WriteString(`rotate(`)
 			buffer.WriteString(angle.cssString())
-			buffer.WriteRune(')')
+			buffer.WriteString(") ")
 		}
 	}
 
-	return buffer.String()
+	length := buffer.Len()
+	if length == 0 {
+		return ""
+	}
+	result := buffer.String()
+	return result[:length-1]
 }
 
 func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Session) {
-	transform3D := getTransform3D(style, session)
-	if transform3D {
-		if perspective, ok := sizeProperty(style, Perspective, session); ok && perspective.Type != Auto && perspective.Value != 0 {
-			builder.add(`perspective`, perspective.cssString("0", session))
-		}
+	x, y := getPerspectiveOrigin(style, session)
+	if x.Type != Auto || y.Type != Auto {
+		builder.addValues(`perspective-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
+	}
 
-		x, y := getPerspectiveOrigin(style, session)
-		if x.Type != Auto || y.Type != Auto {
-			builder.addValues(`perspective-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
-		}
-
-		if backfaceVisible, ok := boolProperty(style, BackfaceVisible, session); ok {
-			if backfaceVisible {
-				builder.add(`backface-visibility`, `visible`)
-			} else {
-				builder.add(`backface-visibility`, `hidden`)
-			}
-		}
-
-		x, y, z := getOrigin(style, session)
-		if x.Type != Auto || y.Type != Auto || z.Type != Auto {
-			builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session), z.cssString("0", session))
-		}
-	} else {
-		x, y, _ := getOrigin(style, session)
-		if x.Type != Auto || y.Type != Auto {
-			builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
+	if backfaceVisible, ok := boolProperty(style, BackfaceVisible, session); ok {
+		if backfaceVisible {
+			builder.add(`backface-visibility`, `visible`)
+		} else {
+			builder.add(`backface-visibility`, `hidden`)
 		}
 	}
 
-	if transform := style.transformProperty(); transform != nil {
-		builder.add(`transform`, transform.transformCSS(session, transform3D))
+	x, y, z := getOrigin(style, session)
+	if z.Type != Auto && z.Value != 0 {
+		builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session), z.cssString("0", session))
+	} else if x.Type != Auto || y.Type != Auto {
+		builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
+	}
+
+	if transform := getTransformProperty(style); transform != nil {
+		builder.add(`transform`, transform.transformCSS(session))
 	}
 }
 
-func (view *viewData) updateTransformProperty(tag string) bool {
+/*
+func (view *viewData) updateTransformProperty(tag PropertyName) bool {
 	htmlID := view.htmlID()
 	session := view.session
 
 	switch tag {
-	case Perspective:
-		updateCSSStyle(htmlID, session)
-
 	case PerspectiveOriginX, PerspectiveOriginY:
 		if getTransform3D(view, session) {
 			x, y := GetPerspectiveOrigin(view)
@@ -738,31 +717,27 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 	case BackfaceVisible:
 		if getTransform3D(view, session) {
 			if GetBackfaceVisible(view) {
-				session.updateCSSProperty(htmlID, BackfaceVisible, "visible")
+				session.updateCSSProperty(htmlID, string(BackfaceVisible), "visible")
 			} else {
-				session.updateCSSProperty(htmlID, BackfaceVisible, "hidden")
+				session.updateCSSProperty(htmlID, string(BackfaceVisible), "hidden")
 			}
 		}
 
 	case OriginX, OriginY, OriginZ:
 		x, y, z := getOrigin(view, session)
 		value := ""
-		if getTransform3D(view, session) {
-			if x.Type != Auto || y.Type != Auto || z.Type != Auto {
-				value = x.cssString("50%", session) + " " + y.cssString("50%", session) + " " + z.cssString("50%", session)
-			}
-		} else {
-			if x.Type != Auto || y.Type != Auto {
-				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
-			}
+
+		if z.Type != Auto {
+			value = x.cssString("50%", session) + " " + y.cssString("50%", session) + " " + z.cssString("50%", session)
+		} else if x.Type != Auto || y.Type != Auto {
+			value = x.cssString("50%", session) + " " + y.cssString("50%", session)
 		}
 		session.updateCSSProperty(htmlID, "transform-origin", value)
 
 	case TransformTag, SkewX, SkewY, TranslateX, TranslateY, TranslateZ,
 		ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ:
-		if transform := view.transformProperty(); transform != nil {
-			transform3D := getTransform3D(view, session)
-			session.updateCSSProperty(htmlID, "transform", transform.transformCSS(session, transform3D))
+		if transform := getTransformProperty(view); transform != nil {
+			session.updateCSSProperty(htmlID, "transform", transform.transformCSS(session))
 		} else {
 			session.updateCSSProperty(htmlID, "transform", "")
 		}
@@ -773,3 +748,4 @@ func (view *viewData) updateTransformProperty(tag string) bool {
 
 	return true
 }
+*/

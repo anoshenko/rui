@@ -18,6 +18,7 @@ func NewButton(session Session, params Params) Button {
 
 func newButton(session Session) View {
 	return NewButton(session, nil)
+	//return new(buttonData)
 }
 
 func (button *buttonData) CreateSuperView(session Session) View {

@@ -16,26 +16,33 @@ type BoundsProperty interface {
 }
 
 type boundsPropertyData struct {
-	propertyList
+	dataProperty
 }
 
 // NewBoundsProperty creates the new BoundsProperty object.
 // The following SizeUnit properties can be used: "left" (Left), "right" (Right), "top" (Top), and "bottom" (Bottom).
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
-	bounds.properties = map[string]any{}
+	bounds.init()
+
 	if params != nil {
-		for _, tag := range []string{Top, Right, Bottom, Left} {
-			if value, ok := params[tag]; ok {
-				bounds.Set(tag, value)
+		for _, tag := range bounds.supportedProperties {
+			if value, ok := params[tag]; ok && value != nil {
+				bounds.set(bounds, tag, value)
 			}
 		}
 	}
 	return bounds
 }
 
-func (bounds *boundsPropertyData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func (bounds *boundsPropertyData) init() {
+	bounds.dataProperty.init()
+	bounds.normalize = normalizeBoundsTag
+	bounds.supportedProperties = []PropertyName{Top, Right, Bottom, Left}
+}
+
+func normalizeBoundsTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case MarginTop, PaddingTop, CellPaddingTop,
 		"top-margin", "top-padding", "top-cell-padding":
@@ -64,50 +71,18 @@ func (bounds *boundsPropertyData) String() string {
 func (bounds *boundsPropertyData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("_{ ")
 	comma := false
-	for _, tag := range []string{Top, Right, Bottom, Left} {
+	for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
 		if value, ok := bounds.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
 		}
 	}
 	buffer.WriteString(" }")
-}
-
-func (bounds *boundsPropertyData) Remove(tag string) {
-	bounds.propertyList.Remove(bounds.normalizeTag(tag))
-}
-
-func (bounds *boundsPropertyData) Set(tag string, value any) bool {
-	if value == nil {
-		bounds.Remove(tag)
-		return true
-	}
-
-	tag = bounds.normalizeTag(tag)
-
-	switch tag {
-	case Top, Right, Bottom, Left:
-		return bounds.setSizeProperty(tag, value)
-
-	default:
-		ErrorLogF(`"%s" property is not compatible with the BoundsProperty`, tag)
-	}
-
-	return false
-}
-
-func (bounds *boundsPropertyData) Get(tag string) any {
-	tag = bounds.normalizeTag(tag)
-	if value, ok := bounds.properties[tag]; ok {
-		return value
-	}
-
-	return nil
 }
 
 func (bounds *boundsPropertyData) Bounds(session Session) Bounds {
@@ -141,7 +116,7 @@ func (bounds *Bounds) SetAll(value SizeUnit) {
 	bounds.Left = value
 }
 
-func (bounds *Bounds) setFromProperties(tag, topTag, rightTag, bottomTag, leftTag string, properties Properties, session Session) {
+func (bounds *Bounds) setFromProperties(tag, topTag, rightTag, bottomTag, leftTag PropertyName, properties Properties, session Session) {
 	bounds.Top = AutoSize()
 	if size, ok := sizeProperty(properties, tag, session); ok {
 		bounds.Top = size
@@ -216,11 +191,11 @@ func (bounds *Bounds) String() string {
 		bounds.Bottom.String() + "," + bounds.Left.String()
 }
 
-func (bounds *Bounds) cssValue(tag string, builder cssBuilder, session Session) {
+func (bounds *Bounds) cssValue(tag PropertyName, builder cssBuilder, session Session) {
 	if bounds.allFieldsEqual() {
-		builder.add(tag, bounds.Top.cssString("0", session))
+		builder.add(string(tag), bounds.Top.cssString("0", session))
 	} else {
-		builder.addValues(tag, " ",
+		builder.addValues(string(tag), " ",
 			bounds.Top.cssString("0", session),
 			bounds.Right.cssString("0", session),
 			bounds.Bottom.cssString("0", session),
@@ -234,8 +209,8 @@ func (bounds *Bounds) cssString(session Session) string {
 	return builder.finish()
 }
 
-func (properties *propertyList) setBounds(tag string, value any) bool {
-	if !properties.setSimpleProperty(tag, value) {
+func setBoundsProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if !setSimpleProperty(properties, tag, value) {
 		switch value := value.(type) {
 		case string:
 			if strings.Contains(value, ",") {
@@ -247,88 +222,119 @@ func (properties *propertyList) setBounds(tag string, value any) bool {
 
 				case 4:
 					bounds := NewBoundsProperty(nil)
-					for i, tag := range []string{Top, Right, Bottom, Left} {
+					for i, tag := range []PropertyName{Top, Right, Bottom, Left} {
 						if !bounds.Set(tag, values[i]) {
-							notCompatibleType(tag, value)
-							return false
+							return nil
 						}
 					}
-					properties.properties[tag] = bounds
-					return true
+					properties.setRaw(tag, bounds)
+					return []PropertyName{tag}
 
 				default:
 					notCompatibleType(tag, value)
-					return false
+					return nil
 				}
 			}
-			return properties.setSizeProperty(tag, value)
+			return setSizeProperty(properties, tag, value)
 
 		case SizeUnit:
-			properties.properties[tag] = value
+			properties.setRaw(tag, value)
 
 		case float32:
-			properties.properties[tag] = Px(float64(value))
+			properties.setRaw(tag, Px(float64(value)))
 
 		case float64:
-			properties.properties[tag] = Px(value)
+			properties.setRaw(tag, Px(value))
 
 		case Bounds:
 			bounds := NewBoundsProperty(nil)
 			if value.Top.Type != Auto {
-				bounds.Set(Top, value.Top)
+				bounds.setRaw(Top, value.Top)
 			}
 			if value.Right.Type != Auto {
-				bounds.Set(Right, value.Right)
+				bounds.setRaw(Right, value.Right)
 			}
 			if value.Bottom.Type != Auto {
-				bounds.Set(Bottom, value.Bottom)
+				bounds.setRaw(Bottom, value.Bottom)
 			}
 			if value.Left.Type != Auto {
-				bounds.Set(Left, value.Left)
+				bounds.setRaw(Left, value.Left)
 			}
-			properties.properties[tag] = bounds
+			properties.setRaw(tag, bounds)
 
 		case BoundsProperty:
-			properties.properties[tag] = value
+			properties.setRaw(tag, value)
 
 		case DataObject:
 			bounds := NewBoundsProperty(nil)
-			for _, tag := range []string{Top, Right, Bottom, Left} {
-				if text, ok := value.PropertyValue(tag); ok {
+			for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
+				if text, ok := value.PropertyValue(string(tag)); ok {
 					if !bounds.Set(tag, text) {
 						notCompatibleType(tag, value)
-						return false
+						return nil
 					}
 				}
 			}
-			properties.properties[tag] = bounds
+			properties.setRaw(tag, bounds)
 
 		default:
 			if n, ok := isInt(value); ok {
-				properties.properties[tag] = Px(float64(n))
+				properties.setRaw(tag, Px(float64(n)))
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
 	}
 
-	return true
+	return []PropertyName{tag}
 }
 
-func (properties *propertyList) boundsProperty(tag string) BoundsProperty {
-	if value, ok := properties.properties[tag]; ok {
+func removeBoundsPropertySide(properties Properties, mainTag, sideTag PropertyName) []PropertyName {
+	if bounds := getBoundsProperty(properties, mainTag); bounds != nil {
+		if bounds.getRaw(sideTag) != nil {
+			bounds.Remove(sideTag)
+			if bounds.empty() {
+				bounds = nil
+			}
+			properties.setRaw(mainTag, bounds)
+			return []PropertyName{mainTag, sideTag}
+		}
+	}
+	return []PropertyName{}
+}
+
+func setBoundsPropertySide(properties Properties, mainTag, sideTag PropertyName, value any) []PropertyName {
+	if value == nil {
+		return removeBoundsPropertySide(properties, mainTag, sideTag)
+	}
+
+	bounds := getBoundsProperty(properties, mainTag)
+	if bounds == nil {
+		bounds = NewBoundsProperty(nil)
+	}
+	if bounds.Set(sideTag, value) {
+		properties.setRaw(mainTag, bounds)
+		return []PropertyName{mainTag, sideTag}
+	}
+
+	notCompatibleType(sideTag, value)
+	return nil
+}
+
+func getBoundsProperty(properties Properties, tag PropertyName) BoundsProperty {
+	if value := properties.getRaw(tag); value != nil {
 		switch value := value.(type) {
 		case string:
 			bounds := NewBoundsProperty(nil)
-			for _, t := range []string{Top, Right, Bottom, Left} {
+			for _, t := range []PropertyName{Top, Right, Bottom, Left} {
 				bounds.Set(t, value)
 			}
 			return bounds
 
 		case SizeUnit:
 			bounds := NewBoundsProperty(nil)
-			for _, t := range []string{Top, Right, Bottom, Left} {
+			for _, t := range []PropertyName{Top, Right, Bottom, Left} {
 				bounds.Set(t, value)
 			}
 			return bounds
@@ -345,29 +351,10 @@ func (properties *propertyList) boundsProperty(tag string) BoundsProperty {
 		}
 	}
 
-	return NewBoundsProperty(nil)
+	return nil
 }
 
-func (properties *propertyList) removeBoundsSide(mainTag, sideTag string) {
-	bounds := properties.boundsProperty(mainTag)
-	if bounds.Get(sideTag) != nil {
-		bounds.Remove(sideTag)
-		properties.properties[mainTag] = bounds
-	}
-}
-
-func (properties *propertyList) setBoundsSide(mainTag, sideTag string, value any) bool {
-	bounds := properties.boundsProperty(mainTag)
-	if bounds.Set(sideTag, value) {
-		properties.properties[mainTag] = bounds
-		return true
-	}
-
-	notCompatibleType(sideTag, value)
-	return false
-}
-
-func boundsProperty(properties Properties, tag string, session Session) (Bounds, bool) {
+func getBounds(properties Properties, tag PropertyName, session Session) (Bounds, bool) {
 	if value := properties.Get(tag); value != nil {
 		switch value := value.(type) {
 		case string:

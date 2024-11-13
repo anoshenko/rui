@@ -16,7 +16,7 @@ package rui
 // `func(frame rui.Frame)`,
 // `func(view rui.View)`,
 // `func()`.
-const ScrollEvent = "scroll-event"
+const ScrollEvent PropertyName = "scroll-event"
 
 func (view *viewData) onScroll(self View, x, y, width, height float64) {
 	view.scroll.Left = x

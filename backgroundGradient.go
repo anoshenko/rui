@@ -72,7 +72,7 @@ type backgroundRadialGradient struct {
 // NewBackgroundLinearGradient creates the new background linear gradient
 func NewBackgroundLinearGradient(params Params) BackgroundElement {
 	result := new(backgroundLinearGradient)
-	result.properties = map[string]any{}
+	result.init()
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
@@ -82,14 +82,14 @@ func NewBackgroundLinearGradient(params Params) BackgroundElement {
 // NewBackgroundRadialGradient creates the new background radial gradient
 func NewBackgroundRadialGradient(params Params) BackgroundElement {
 	result := new(backgroundRadialGradient)
-	result.properties = map[string]any{}
+	result.init()
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
 	return result
 }
 
-func (gradient *backgroundGradient) parseGradientText(value string) []BackgroundGradientPoint {
+func parseGradientText(value string) []BackgroundGradientPoint {
 	elements := strings.Split(value, ",")
 	count := len(elements)
 	if count < 2 {
@@ -107,31 +107,31 @@ func (gradient *backgroundGradient) parseGradientText(value string) []Background
 	return points
 }
 
-func (gradient *backgroundGradient) Set(tag string, value any) bool {
+func backgroundGradientSet(properties Properties, tag PropertyName, value any) []PropertyName {
 
-	switch tag = strings.ToLower(tag); tag {
+	switch tag {
 	case Repeating:
-		return gradient.setBoolProperty(tag, value)
+		return setBoolProperty(properties, tag, value)
 
 	case Gradient:
 		switch value := value.(type) {
 		case string:
 			if value != "" {
 				if strings.Contains(value, " ") || strings.Contains(value, ",") {
-					if points := gradient.parseGradientText(value); len(points) >= 2 {
-						gradient.properties[Gradient] = points
-						return true
+					if points := parseGradientText(value); len(points) >= 2 {
+						properties.setRaw(Gradient, points)
+						return []PropertyName{tag}
 					}
 				} else if value[0] == '@' {
-					gradient.properties[Gradient] = value
-					return true
+					properties.setRaw(Gradient, value)
+					return []PropertyName{tag}
 				}
 			}
 
 		case []BackgroundGradientPoint:
 			if len(value) >= 2 {
-				gradient.properties[Gradient] = value
-				return true
+				properties.setRaw(Gradient, value)
+				return []PropertyName{tag}
 			}
 
 		case []Color:
@@ -141,8 +141,8 @@ func (gradient *backgroundGradient) Set(tag string, value any) bool {
 				for i, color := range value {
 					points[i].Color = color
 				}
-				gradient.properties[Gradient] = points
-				return true
+				properties.setRaw(Gradient, points)
+				return []PropertyName{tag}
 			}
 
 		case []GradientPoint:
@@ -153,17 +153,17 @@ func (gradient *backgroundGradient) Set(tag string, value any) bool {
 					points[i].Color = point.Color
 					points[i].Pos = Percent(point.Offset * 100)
 				}
-				gradient.properties[Gradient] = points
-				return true
+				properties.setRaw(Gradient, points)
+				return []PropertyName{tag}
 			}
 		}
 
 		ErrorLogF("Invalid gradient %v", value)
-		return false
+		return nil
 	}
 
 	ErrorLogF("Property %s is not supported by a background gradient", tag)
-	return false
+	return nil
 }
 
 func (point *BackgroundGradientPoint) setValue(text string) bool {
@@ -266,7 +266,7 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 	case string:
 		if value != "" && value[0] == '@' {
 			if text, ok := session.Constant(value[1:]); ok {
-				points = gradient.parseGradientText(text)
+				points = parseGradientText(text)
 			}
 		}
 
@@ -312,6 +312,13 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 	return false
 }
 
+func (gradient *backgroundLinearGradient) init() {
+	gradient.backgroundElement.init()
+	gradient.set = backgroundLinearGradientSet
+	gradient.supportedProperties = append(gradient.supportedProperties, Direction)
+
+}
+
 func (gradient *backgroundLinearGradient) Tag() string {
 	return "linear-gradient"
 }
@@ -324,26 +331,26 @@ func (image *backgroundLinearGradient) Clone() BackgroundElement {
 	return result
 }
 
-func (gradient *backgroundLinearGradient) Set(tag string, value any) bool {
-	if strings.ToLower(tag) == Direction {
+func backgroundLinearGradientSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	if tag == Direction {
 		switch value := value.(type) {
 		case AngleUnit:
-			gradient.properties[Direction] = value
-			return true
+			properties.setRaw(Direction, value)
+			return []PropertyName{tag}
 
 		case string:
-			if gradient.setSimpleProperty(tag, value) {
-				return true
+			if setSimpleProperty(properties, tag, value) {
+				return []PropertyName{tag}
 			}
 			if angle, ok := StringToAngleUnit(value); ok {
-				gradient.properties[Direction] = angle
-				return true
+				properties.setRaw(Direction, angle)
+				return []PropertyName{tag}
 			}
 		}
-		return gradient.setEnumProperty(tag, value, enumProperties[Direction].values)
+		return setEnumProperty(properties, tag, value, enumProperties[Direction].values)
 	}
 
-	return gradient.backgroundGradient.Set(tag, value)
+	return backgroundGradientSet(properties, tag, value)
 }
 
 func (gradient *backgroundLinearGradient) cssStyle(session Session) string {
@@ -400,7 +407,7 @@ func (gradient *backgroundLinearGradient) cssStyle(session Session) string {
 }
 
 func (gradient *backgroundLinearGradient) writeString(buffer *strings.Builder, indent string) {
-	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []string{
+	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []PropertyName{
 		Gradient,
 		Repeating,
 		Direction,
@@ -409,6 +416,15 @@ func (gradient *backgroundLinearGradient) writeString(buffer *strings.Builder, i
 
 func (gradient *backgroundLinearGradient) String() string {
 	return runStringWriter(gradient)
+}
+
+func (gradient *backgroundRadialGradient) init() {
+	gradient.backgroundElement.init()
+	gradient.normalize = normalizeRadialGradientTag
+	gradient.set = backgroundRadialGradientSet
+	gradient.supportedProperties = append(gradient.supportedProperties, []PropertyName{
+		RadialGradientRadius, RadialGradientShape, CenterX, CenterY,
+	}...)
 }
 
 func (gradient *backgroundRadialGradient) Tag() string {
@@ -423,8 +439,8 @@ func (image *backgroundRadialGradient) Clone() BackgroundElement {
 	return result
 }
 
-func (gradient *backgroundRadialGradient) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeRadialGradientTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case Radius:
 		tag = RadialGradientRadius
@@ -442,83 +458,75 @@ func (gradient *backgroundRadialGradient) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gradient *backgroundRadialGradient) Set(tag string, value any) bool {
-	tag = gradient.normalizeTag(tag)
+func backgroundRadialGradientSet(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case RadialGradientRadius:
 		switch value := value.(type) {
 		case []SizeUnit:
 			switch len(value) {
 			case 0:
-				delete(gradient.properties, RadialGradientRadius)
-				return true
+				properties.setRaw(RadialGradientRadius, nil)
 
 			case 1:
 				if value[0].Type == Auto {
-					delete(gradient.properties, RadialGradientRadius)
+					properties.setRaw(RadialGradientRadius, nil)
 				} else {
-					gradient.properties[RadialGradientRadius] = value[0]
+					properties.setRaw(RadialGradientRadius, value[0])
 				}
-				return true
 
 			default:
-				gradient.properties[RadialGradientRadius] = value
-				return true
+				properties.setRaw(RadialGradientRadius, value)
 			}
+			return []PropertyName{tag}
 
 		case []any:
 			switch len(value) {
 			case 0:
-				delete(gradient.properties, RadialGradientRadius)
-				return true
+				properties.setRaw(RadialGradientRadius, nil)
+				return []PropertyName{tag}
 
 			case 1:
-				return gradient.Set(RadialGradientRadius, value[0])
+				return backgroundRadialGradientSet(properties, RadialGradientRadius, value[0])
 
 			default:
-				gradient.properties[RadialGradientRadius] = value
-				return true
+				properties.setRaw(RadialGradientRadius, value)
+				return []PropertyName{tag}
 			}
 
 		case string:
-			if gradient.setSimpleProperty(RadialGradientRadius, value) {
-				return true
+			if setSimpleProperty(properties, RadialGradientRadius, value) {
+				return []PropertyName{tag}
 			}
 			if size, err := stringToSizeUnit(value); err == nil {
 				if size.Type == Auto {
-					delete(gradient.properties, RadialGradientRadius)
+					properties.setRaw(RadialGradientRadius, nil)
 				} else {
-					gradient.properties[RadialGradientRadius] = size
+					properties.setRaw(RadialGradientRadius, size)
 				}
-				return true
+				return []PropertyName{tag}
 			}
-			return gradient.setEnumProperty(RadialGradientRadius, value, enumProperties[RadialGradientRadius].values)
+			return setEnumProperty(properties, RadialGradientRadius, value, enumProperties[RadialGradientRadius].values)
 
 		case SizeUnit:
 			if value.Type == Auto {
-				delete(gradient.properties, RadialGradientRadius)
+				properties.setRaw(RadialGradientRadius, nil)
 			} else {
-				gradient.properties[RadialGradientRadius] = value
+				properties.setRaw(RadialGradientRadius, value)
 			}
-			return true
+			return []PropertyName{tag}
 
 		case int:
-			n := value
-			if n >= 0 && n < len(enumProperties[RadialGradientRadius].values) {
-				return gradient.propertyList.Set(RadialGradientRadius, value)
-			}
+			return setEnumProperty(properties, RadialGradientRadius, value, enumProperties[RadialGradientRadius].values)
 		}
+
 		ErrorLogF(`Invalid value of "%s" property: %v`, tag, value)
+		return nil
 
 	case RadialGradientShape, CenterX, CenterY:
-		return gradient.propertyList.Set(tag, value)
+		return propertiesSet(properties, tag, value)
 	}
 
-	return gradient.backgroundGradient.Set(tag, value)
-}
-
-func (gradient *backgroundRadialGradient) Get(tag string) any {
-	return gradient.backgroundGradient.Get(gradient.normalizeTag(tag))
+	return backgroundGradientSet(properties, tag, value)
 }
 
 func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
@@ -652,7 +660,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 	return buffer.String()
 }
 func (gradient *backgroundRadialGradient) writeString(buffer *strings.Builder, indent string) {
-	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []string{
+	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []PropertyName{
 		Gradient,
 		CenterX,
 		CenterY,

@@ -1,6 +1,6 @@
 package rui
 
-func (animation *animationData) Start(view View, listener func(view View, animation Animation, event string)) bool {
+func (animation *animationData) Start(view View, listener func(view View, animation Animation, event PropertyName)) bool {
 	if view == nil {
 		ErrorLog("nil View in animation.Start() function")
 		return false
@@ -19,12 +19,12 @@ func (animation *animationData) Start(view View, listener func(view View, animat
 		}
 	}
 
-	animation.oldListeners = map[string][]func(View, string){}
+	animation.oldListeners = map[PropertyName][]func(View, PropertyName){}
 
-	setListeners := func(event string, listener func(View, string)) {
-		var listeners []func(View, string) = nil
+	setListeners := func(event PropertyName, listener func(View, PropertyName)) {
+		var listeners []func(View, PropertyName) = nil
 		if value := view.Get(event); value != nil {
-			if oldListeners, ok := value.([]func(View, string)); ok && len(oldListeners) > 0 {
+			if oldListeners, ok := value.([]func(View, PropertyName)); ok && len(oldListeners) > 0 {
 				listeners = oldListeners
 			}
 		}
@@ -48,7 +48,7 @@ func (animation *animationData) Start(view View, listener func(view View, animat
 
 func (animation *animationData) finish() {
 	if animation.view != nil {
-		for _, event := range []string{AnimationStartEvent, AnimationEndEvent, AnimationCancelEvent, AnimationIterationEvent} {
+		for _, event := range []PropertyName{AnimationStartEvent, AnimationEndEvent, AnimationCancelEvent, AnimationIterationEvent} {
 			if listeners, ok := animation.oldListeners[event]; ok {
 				animation.view.Set(event, listeners)
 			} else {
@@ -63,7 +63,7 @@ func (animation *animationData) finish() {
 			animation.view.Set(AnimationTag, "")
 		}
 
-		animation.oldListeners = map[string][]func(View, string){}
+		animation.oldListeners = map[PropertyName][]func(View, PropertyName){}
 
 		animation.view = nil
 		animation.listener = nil
@@ -86,13 +86,13 @@ func (animation *animationData) Resume() {
 	}
 }
 
-func (animation *animationData) onAnimationStart(view View, _ string) {
+func (animation *animationData) onAnimationStart(view View, _ PropertyName) {
 	if animation.view != nil && animation.listener != nil {
 		animation.listener(animation.view, animation, AnimationStartEvent)
 	}
 }
 
-func (animation *animationData) onAnimationEnd(view View, _ string) {
+func (animation *animationData) onAnimationEnd(view View, _ PropertyName) {
 	if animation.view != nil {
 		animationView := animation.view
 		listener := animation.listener
@@ -112,13 +112,13 @@ func (animation *animationData) onAnimationEnd(view View, _ string) {
 	}
 }
 
-func (animation *animationData) onAnimationIteration(view View, _ string) {
+func (animation *animationData) onAnimationIteration(view View, _ PropertyName) {
 	if animation.view != nil && animation.listener != nil {
 		animation.listener(animation.view, animation, AnimationIterationEvent)
 	}
 }
 
-func (animation *animationData) onAnimationCancel(view View, _ string) {
+func (animation *animationData) onAnimationCancel(view View, _ PropertyName) {
 	if animation.view != nil {
 		animationView := animation.view
 		listener := animation.listener

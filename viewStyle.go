@@ -12,72 +12,31 @@ type ViewStyle interface {
 	Properties
 
 	// Transition returns the transition animation of the property. Returns nil is there is no transition animation.
-	Transition(tag string) Animation
+	Transition(tag PropertyName) Animation
 
 	// Transitions returns the map of transition animations. The result is always non-nil.
-	Transitions() map[string]Animation
+	Transitions() map[PropertyName]Animation
 
 	// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
 	// removes the transition animation of the property if "animation" argument  is nil.
 	// The "tag" argument is the property name.
-	SetTransition(tag string, animation Animation)
+	SetTransition(tag PropertyName, animation Animation)
 
 	cssViewStyle(buffer cssBuilder, session Session)
 }
 
 type viewStyle struct {
 	propertyList
-	transitions map[string]Animation
-}
-
-// Range defines range limits. The First and Last value are included in the range
-type Range struct {
-	First, Last int
+	//transitions map[PropertyName]Animation
 }
 
 type stringWriter interface {
 	writeString(buffer *strings.Builder, indent string)
 }
 
-// String returns a string representation of the Range struct
-func (r Range) String() string {
-	if r.First == r.Last {
-		return fmt.Sprintf("%d", r.First)
-	}
-	return fmt.Sprintf("%d:%d", r.First, r.Last)
-}
-
-func (r *Range) setValue(value string) bool {
-	var err error
-	if strings.Contains(value, ":") {
-		values := strings.Split(value, ":")
-		if len(values) != 2 {
-			ErrorLog("Invalid range value: " + value)
-			return false
-		}
-		if r.First, err = strconv.Atoi(strings.Trim(values[0], " \t\n\r")); err != nil {
-			ErrorLog(`Invalid first range value "` + value + `" (` + err.Error() + ")")
-			return false
-		}
-		if r.Last, err = strconv.Atoi(strings.Trim(values[1], " \t\n\r")); err != nil {
-			ErrorLog(`Invalid last range value "` + value + `" (` + err.Error() + ")")
-			return false
-		}
-		return true
-	}
-
-	if r.First, err = strconv.Atoi(value); err != nil {
-		ErrorLog(`Invalid range value "` + value + `" (` + err.Error() + ")")
-		return false
-	}
-	r.Last = r.First
-	return true
-}
-
 func (style *viewStyle) init() {
 	style.propertyList.init()
-	//style.shadows = []ViewShadow{}
-	style.transitions = map[string]Animation{}
+	style.normalize = normalizeViewStyleTag
 }
 
 // NewViewStyle create new ViewStyle object
@@ -90,19 +49,19 @@ func NewViewStyle(params Params) ViewStyle {
 	return style
 }
 
-func (style *viewStyle) cssTextDecoration(session Session) string {
+func textDecorationCSS(properties Properties, session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
 	noDecoration := false
-	if strikethrough, ok := boolProperty(style, Strikethrough, session); ok {
+	if strikethrough, ok := boolProperty(properties, Strikethrough, session); ok {
 		if strikethrough {
 			buffer.WriteString("line-through")
 		}
 		noDecoration = true
 	}
 
-	if overline, ok := boolProperty(style, Overline, session); ok {
+	if overline, ok := boolProperty(properties, Overline, session); ok {
 		if overline {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
@@ -112,7 +71,7 @@ func (style *viewStyle) cssTextDecoration(session Session) string {
 		noDecoration = true
 	}
 
-	if underline, ok := boolProperty(style, Underline, session); ok {
+	if underline, ok := boolProperty(properties, Underline, session); ok {
 		if underline {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
@@ -149,8 +108,8 @@ func split4Values(text string) []string {
 	return []string{}
 }
 
-func (style *viewStyle) backgroundCSS(session Session) string {
-	if value, ok := style.properties[Background]; ok {
+func backgroundCSS(properties Properties, session Session) string {
+	if value := properties.getRaw(Background); value != nil {
 		if backgrounds, ok := value.([]BackgroundElement); ok {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
@@ -184,15 +143,15 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	if margin, ok := boundsProperty(style, Margin, session); ok {
+	if margin, ok := getBounds(style, Margin, session); ok {
 		margin.cssValue(Margin, builder, session)
 	}
 
-	if padding, ok := boundsProperty(style, Padding, session); ok {
+	if padding, ok := getBounds(style, Padding, session); ok {
 		padding.cssValue(Padding, builder, session)
 	}
 
-	if border := getBorder(style, Border); border != nil {
+	if border := getBorderProperty(style, Border); border != nil {
 		border.cssStyle(builder, session)
 		border.cssWidth(builder, session)
 		border.cssColor(builder, session)
@@ -201,27 +160,27 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	radius := getRadius(style, session)
 	radius.cssValue(builder, session)
 
-	if outline := getOutline(style); outline != nil {
+	if outline := getOutlineProperty(style); outline != nil {
 		outline.ViewOutline(session).cssValue(builder, session)
 	}
 
-	for _, tag := range []string{ZIndex, Order} {
+	for _, tag := range []PropertyName{ZIndex, Order} {
 		if value, ok := intProperty(style, tag, session, 0); ok {
-			builder.add(tag, strconv.Itoa(value))
+			builder.add(string(tag), strconv.Itoa(value))
 		}
 	}
 
 	if opacity, ok := floatProperty(style, Opacity, session, 1.0); ok && opacity >= 0 && opacity <= 1 {
-		builder.add(Opacity, strconv.FormatFloat(opacity, 'f', 3, 32))
+		builder.add(string(Opacity), strconv.FormatFloat(opacity, 'f', 3, 32))
 	}
 
-	for _, tag := range []string{ColumnCount, TabSize} {
+	for _, tag := range []PropertyName{ColumnCount, TabSize} {
 		if value, ok := intProperty(style, tag, session, 0); ok && value > 0 {
-			builder.add(tag, strconv.Itoa(value))
+			builder.add(string(tag), strconv.Itoa(value))
 		}
 	}
 
-	for _, tag := range []string{
+	for _, tag := range []PropertyName{
 		Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight, Left, Right, Top, Bottom,
 		TextSize, TextIndent, LetterSpacing, WordSpacing, LineHeight, TextLineThickness,
 		ListRowGap, ListColumnGap, GridRowGap, GridColumnGap, ColumnGap, ColumnWidth, OutlineOffset} {
@@ -229,18 +188,22 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		if size, ok := sizeProperty(style, tag, session); ok && size.Type != Auto {
 			cssTag, ok := sizeProperties[tag]
 			if !ok {
-				cssTag = tag
+				cssTag = string(tag)
 			}
 			builder.add(cssTag, size.cssString("", session))
 		}
 	}
 
-	colorProperties := []struct{ property, cssTag string }{
-		{BackgroundColor, BackgroundColor},
+	type propertyCss struct {
+		property PropertyName
+		cssTag   string
+	}
+	colorProperties := []propertyCss{
+		{BackgroundColor, string(BackgroundColor)},
 		{TextColor, "color"},
 		{TextLineColor, "text-decoration-color"},
-		{CaretColor, CaretColor},
-		{AccentColor, AccentColor},
+		{CaretColor, string(CaretColor)},
+		{AccentColor, string(AccentColor)},
 	}
 	for _, p := range colorProperties {
 		if color, ok := colorProperty(style, p.property, session); ok && color != 0 {
@@ -249,10 +212,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	if value, ok := enumProperty(style, BackgroundClip, session, 0); ok {
-		builder.add(BackgroundClip, enumProperties[BackgroundClip].values[value])
+		builder.add(string(BackgroundClip), enumProperties[BackgroundClip].values[value])
 	}
 
-	if background := style.backgroundCSS(session); background != "" {
+	if background := backgroundCSS(style, session); background != "" {
 		builder.add("background", background)
 	}
 
@@ -261,7 +224,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	writingMode := 0
-	for _, tag := range []string{
+	for _, tag := range []PropertyName{
 		Overflow, TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
 		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
 		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize, MixBlendMode, BackgroundBlendMode} {
@@ -282,7 +245,11 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	for _, prop := range []struct{ tag, cssTag, off, on string }{
+	type boolPropertyCss struct {
+		tag             PropertyName
+		cssTag, off, on string
+	}
+	for _, prop := range []boolPropertyCss{
 		{tag: Italic, cssTag: "font-style", off: "normal", on: "italic"},
 		{tag: SmallCaps, cssTag: "font-variant", off: "normal", on: "small-caps"},
 	} {
@@ -295,7 +262,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	if text := style.cssTextDecoration(session); text != "" {
+	if text := textDecorationCSS(style, session); text != "" {
 		builder.add("text-decoration", text)
 	}
 
@@ -416,10 +383,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	if r, ok := rangeProperty(style, Column, session); ok {
 		builder.add("grid-column", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))
 	}
-	if text := style.gridCellSizesCSS(CellWidth, session); text != "" {
+	if text := gridCellSizesCSS(style, CellWidth, session); text != "" {
 		builder.add(`grid-template-columns`, text)
 	}
-	if text := style.gridCellSizesCSS(CellHeight, session); text != "" {
+	if text := gridCellSizesCSS(style, CellHeight, session); text != "" {
 		builder.add(`grid-template-rows`, text)
 	}
 
@@ -436,7 +403,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	if value := style.getRaw(Filter); value != nil {
 		if filter, ok := value.(ViewFilter); ok {
 			if text := filter.cssStyle(session); text != "" {
-				builder.add(Filter, text)
+				builder.add(string(Filter), text)
 			}
 		}
 	}
@@ -445,17 +412,17 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		if filter, ok := value.(ViewFilter); ok {
 			if text := filter.cssStyle(session); text != "" {
 				builder.add(`-webkit-backdrop-filter`, text)
-				builder.add(BackdropFilter, text)
+				builder.add(string(BackdropFilter), text)
 			}
 		}
 	}
 
-	if transition := style.transitionCSS(session); transition != "" {
+	if transition := transitionCSS(style, session); transition != "" {
 		builder.add(`transition`, transition)
 	}
 
-	if animation := style.animationCSS(session); animation != "" {
-		builder.add(AnimationTag, animation)
+	if animation := animationCSS(style, session); animation != "" {
+		builder.add(string(AnimationTag), animation)
 	}
 
 	if pause, ok := boolProperty(style, AnimationPaused, session); ok {
@@ -504,20 +471,48 @@ func valueToOrientation(value any, session Session) (int, bool) {
 	return 0, false
 }
 
-func (style *viewStyle) Get(tag string) any {
-	return style.get(strings.ToLower(tag))
+func normalizeViewStyleTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
+	switch tag {
+	case "top-margin":
+		return MarginTop
+
+	case "right-margin":
+		return MarginRight
+
+	case "bottom-margin":
+		return MarginBottom
+
+	case "left-margin":
+		return MarginLeft
+
+	case "top-padding":
+		return PaddingTop
+
+	case "right-padding":
+		return PaddingRight
+
+	case "bottom-padding":
+		return PaddingBottom
+
+	case "left-padding":
+		return PaddingLeft
+	}
+	return tag
 }
 
-func (style *viewStyle) get(tag string) any {
+func (style *viewStyle) Get(tag PropertyName) any {
+	return viewStyleGet(style, normalizeViewStyleTag(tag))
+}
+
+func viewStyleGet(style Properties, tag PropertyName) any {
 	switch tag {
-	case Border, CellBorder:
-		return getBorder(&style.propertyList, tag)
 
 	case BorderLeft, BorderRight, BorderTop, BorderBottom,
 		BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle,
 		BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor,
 		BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
-		if border := getBorder(style, Border); border != nil {
+		if border := getBorderProperty(style, Border); border != nil {
 			return border.Get(tag)
 		}
 		return nil
@@ -526,7 +521,7 @@ func (style *viewStyle) get(tag string) any {
 		CellBorderStyle, CellBorderLeftStyle, CellBorderRightStyle, CellBorderTopStyle, CellBorderBottomStyle,
 		CellBorderColor, CellBorderLeftColor, CellBorderRightColor, CellBorderTopColor, CellBorderBottomColor,
 		CellBorderWidth, CellBorderLeftWidth, CellBorderRightWidth, CellBorderTopWidth, CellBorderBottomWidth:
-		if border := getBorder(style, CellBorder); border != nil {
+		if border := getBorderProperty(style, CellBorder); border != nil {
 			return border.Get(tag)
 		}
 		return nil
@@ -537,46 +532,22 @@ func (style *viewStyle) get(tag string) any {
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
 		return getRadiusElement(style, tag)
 
-	case ColumnSeparator:
-		if val, ok := style.properties[ColumnSeparator]; ok {
-			return val.(ColumnSeparatorProperty)
-		}
-		return nil
-
 	case ColumnSeparatorStyle, ColumnSeparatorWidth, ColumnSeparatorColor:
-		if val, ok := style.properties[ColumnSeparator]; ok {
+		if val := style.getRaw(ColumnSeparator); val != nil {
 			separator := val.(ColumnSeparatorProperty)
 			return separator.Get(tag)
 		}
 		return nil
 
-	case Transition:
-		if len(style.transitions) == 0 {
-			return nil
-		}
-		result := map[string]Animation{}
-		for tag, animation := range style.transitions {
-			result[tag] = animation
-		}
-		return result
-
 	case RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
 		TranslateX, TranslateY, TranslateZ:
-		if transform := style.transformProperty(); transform != nil {
+		if transform := getTransformProperty(style); transform != nil {
 			return transform.Get(tag)
 		}
 		return nil
 	}
 
-	return style.propertyList.getRaw(tag)
-}
-
-func (style *viewStyle) AllTags() []string {
-	result := style.propertyList.AllTags()
-	if len(style.transitions) > 0 {
-		result = append(result, Transition)
-	}
-	return result
+	return style.getRaw(tag)
 }
 
 func supportedPropertyValue(value any) bool {
@@ -595,14 +566,14 @@ func supportedPropertyValue(value any) bool {
 	case []BackgroundElement:
 	case []BackgroundGradientPoint:
 	case []BackgroundGradientAngle:
-	case map[string]Animation:
+	case map[PropertyName]Animation:
 	default:
 		return false
 	}
 	return true
 }
 
-func writePropertyValue(buffer *strings.Builder, tag string, value any, indent string) {
+func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, indent string) {
 
 	writeString := func(text string) {
 		simple := (tag != Text && tag != Title && tag != Summary)
@@ -804,7 +775,7 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 		}
 		buffer.WriteRune('"')
 
-	case map[string]Animation:
+	case map[PropertyName]Animation:
 		switch count := len(value); count {
 		case 0:
 			buffer.WriteString("[]")
@@ -816,11 +787,13 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 			}
 
 		default:
-			tags := make([]string, 0, len(value))
+			tags := make([]PropertyName, 0, len(value))
 			for tag := range value {
 				tags = append(tags, tag)
 			}
-			sort.Strings(tags)
+			sort.Slice(tags, func(i, j int) bool {
+				return tags[i] < tags[j]
+			})
 			buffer.WriteString("[\n")
 			indent2 := indent + "\t"
 			for _, tag := range tags {
@@ -836,12 +809,12 @@ func writePropertyValue(buffer *strings.Builder, tag string, value any, indent s
 	}
 }
 
-func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent string, excludeTags []string) {
+func writeViewStyle(name string, view Properties, buffer *strings.Builder, indent string, excludeTags []PropertyName) {
 	buffer.WriteString(name)
 	buffer.WriteString(" {\n")
 	indent += "\t"
 
-	writeProperty := func(tag string, value any) {
+	writeProperty := func(tag PropertyName, value any) {
 		for _, exclude := range excludeTags {
 			if exclude == tag {
 				return
@@ -850,7 +823,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 
 		if supportedPropertyValue(value) {
 			buffer.WriteString(indent)
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			buffer.WriteString(",\n")
@@ -858,7 +831,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 	}
 
 	tags := view.AllTags()
-	removeTag := func(tag string) {
+	removeTag := func(tag PropertyName) {
 		for i, t := range tags {
 			if t == tag {
 				if i == 0 {
@@ -873,7 +846,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		}
 	}
 
-	tagOrder := []string{
+	tagOrder := []PropertyName{
 		ID, Row, Column, Top, Right, Bottom, Left, Semantics, Cursor, Visibility,
 		Opacity, ZIndex, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
 		Margin, Padding, BackgroundClip, BackgroundColor, Background, Border, Radius, Outline, Shadow,
@@ -894,7 +867,7 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 		}
 	}
 
-	finalTags := []string{
+	finalTags := []PropertyName{
 		Perspective, PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible, OriginX, OriginY, OriginZ,
 		TransformTag, Clip, Filter, BackdropFilter, Summary, Content, Transition}
 	for _, tag := range finalTags {
@@ -916,14 +889,6 @@ func writeViewStyle(name string, view ViewStyle, buffer *strings.Builder, indent
 	indent = indent[:len(indent)-1]
 	buffer.WriteString(indent)
 	buffer.WriteString("}")
-}
-
-func getViewString(view View, excludeTags []string) string {
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-	writeViewStyle(view.Tag(), view, buffer, "", excludeTags)
-	return buffer.String()
-
 }
 
 func runStringWriter(writer stringWriter) string {

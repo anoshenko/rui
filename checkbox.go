@@ -20,7 +20,7 @@ import (
 // `func(checkbox rui.Checkbox)`,
 // `func(checked bool)`,
 // `func()`.
-const CheckboxChangedEvent = "checkbox-event"
+const CheckboxChangedEvent PropertyName = "checkbox-event"
 
 // Checkbox represent a Checkbox view
 type Checkbox interface {
@@ -29,171 +29,132 @@ type Checkbox interface {
 
 type checkboxData struct {
 	viewsContainerData
-	checkedListeners []func(Checkbox, bool)
 }
 
 // NewCheckbox create new Checkbox object and return it
 func NewCheckbox(session Session, params Params) Checkbox {
 	view := new(checkboxData)
 	view.init(session)
-	setInitParams(view, Params{
-		ClickEvent:   checkboxClickListener,
-		KeyDownEvent: checkboxKeyListener,
-	})
 	setInitParams(view, params)
 	return view
 }
 
 func newCheckbox(session Session) View {
-	return NewCheckbox(session, nil)
+	return new(checkboxData)
 }
 
 func (button *checkboxData) init(session Session) {
 	button.viewsContainerData.init(session)
 	button.tag = "Checkbox"
 	button.systemClass = "ruiGridLayout ruiCheckbox"
-	button.checkedListeners = []func(Checkbox, bool){}
-}
+	button.set = button.setFunc
+	button.remove = button.removeFunc
+	button.changed = checkboxPropertyChanged
 
-func (button *checkboxData) String() string {
-	return getViewString(button, nil)
+	button.setRaw(ClickEvent, checkboxClickListener)
+	button.setRaw(KeyDownEvent, checkboxKeyListener)
 }
 
 func (button *checkboxData) Focusable() bool {
 	return true
 }
 
-func (button *checkboxData) Get(tag string) any {
-	switch strings.ToLower(tag) {
-	case CheckboxChangedEvent:
-		return button.checkedListeners
-	}
-
-	return button.viewsContainerData.Get(tag)
-}
-
-func (button *checkboxData) Set(tag string, value any) bool {
-	return button.set(tag, value)
-}
-
-func (button *checkboxData) set(tag string, value any) bool {
+func checkboxPropertyChanged(view View, tag PropertyName) {
 	switch tag {
-	case CheckboxChangedEvent:
-		if !button.setChangedListener(value) {
-			notCompatibleType(tag, value)
-			return false
-		}
 
 	case Checked:
-		oldChecked := button.checked()
-		if !button.setBoolProperty(Checked, value) {
-			return false
-		}
-		if button.created {
-			checked := button.checked()
-			if checked != oldChecked {
-				button.changedCheckboxState(checked)
+		session := view.Session()
+		checked := IsCheckboxChecked(view)
+		if listeners := GetCheckboxChangedListeners(view); len(listeners) > 0 {
+			if checkbox, ok := view.(Checkbox); ok {
+				for _, listener := range listeners {
+					listener(checkbox, checked)
+				}
 			}
 		}
 
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		checkboxHtml(view, buffer, checked)
+		session.updateInnerHTML(view.htmlID()+"checkbox", buffer.String())
+
 	case CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		if !button.setEnumProperty(tag, value, enumProperties[tag].values) {
-			return false
-		}
-		if button.created {
-			htmlID := button.htmlID()
-			updateCSSStyle(htmlID, button.session)
-			updateInnerHTML(htmlID, button.session)
-		}
+		htmlID := view.htmlID()
+		session := view.Session()
+		updateCSSStyle(htmlID, session)
+		updateInnerHTML(htmlID, session)
 
 	case VerticalAlign:
-		if !button.setEnumProperty(tag, value, enumProperties[tag].values) {
-			return false
-		}
-		if button.created {
-			button.session.updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign())
-		}
+		view.Session().updateCSSProperty(view.htmlID()+"content", "align-items", checkboxVerticalAlignCSS(view))
 
 	case HorizontalAlign:
-		if !button.setEnumProperty(tag, value, enumProperties[tag].values) {
-			return false
-		}
-		if button.created {
-			button.session.updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign())
-		}
-
-	case CellVerticalAlign, CellHorizontalAlign, CellWidth, CellHeight:
-		return false
+		view.Session().updateCSSProperty(view.htmlID()+"content", "justify-items", checkboxHorizontalAlignCSS(view))
 
 	case AccentColor:
-		if !button.setColorProperty(AccentColor, value) {
-			return false
-		}
-		if button.created {
-			updateInnerHTML(button.htmlID(), button.session)
-		}
+		updateInnerHTML(view.htmlID(), view.Session())
 
 	default:
-		return button.viewsContainerData.set(tag, value)
+		viewsContainerPropertyChanged(view, tag)
 	}
-
-	button.propertyChangedEvent(tag)
-	return true
 }
 
-func (button *checkboxData) Remove(tag string) {
-	button.remove(strings.ToLower(tag))
-}
-
-func (button *checkboxData) remove(tag string) {
+func (button *checkboxData) setFunc(view View, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case ClickEvent:
-		if !button.viewsContainerData.set(ClickEvent, checkboxClickListener) {
-			delete(button.properties, tag)
+		if button.viewsContainerData.setFunc(view, ClickEvent, value) != nil {
+			if value := view.getRaw(ClickEvent); value != nil {
+				if listeners, ok := value.([]func(View, MouseEvent)); ok {
+					listeners = append(listeners, checkboxClickListener)
+					view.setRaw(ClickEvent, listeners)
+					return []PropertyName{ClickEvent}
+				}
+			}
+
+			return button.viewsContainerData.setFunc(view, ClickEvent, checkboxClickListener)
 		}
+		return nil
 
 	case KeyDownEvent:
-		if !button.viewsContainerData.set(KeyDownEvent, checkboxKeyListener) {
-			delete(button.properties, tag)
+		if button.viewsContainerData.setFunc(view, KeyDownEvent, value) != nil {
+			if value := view.getRaw(KeyDownEvent); value != nil {
+				if listeners, ok := value.([]func(View, KeyEvent)); ok {
+					listeners = append(listeners, checkboxKeyListener)
+					view.setRaw(KeyDownEvent, listeners)
+					return []PropertyName{KeyDownEvent}
+				}
+			}
+
+			return button.viewsContainerData.setFunc(view, KeyDownEvent, checkboxKeyListener)
 		}
+		return nil
 
 	case CheckboxChangedEvent:
-		if len(button.checkedListeners) > 0 {
-			button.checkedListeners = []func(Checkbox, bool){}
-		}
+		return setViewEventListener[Checkbox, bool](view, tag, value)
 
 	case Checked:
-		oldChecked := button.checked()
-		delete(button.properties, tag)
-		if button.created && oldChecked {
-			button.changedCheckboxState(false)
-		}
+		return setBoolProperty(view, Checked, value)
 
-	case CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		delete(button.properties, tag)
-		if button.created {
-			htmlID := button.htmlID()
-			updateCSSStyle(htmlID, button.session)
-			updateInnerHTML(htmlID, button.session)
-		}
-
-	case VerticalAlign:
-		delete(button.properties, tag)
-		if button.created {
-			button.session.updateCSSProperty(button.htmlID()+"content", "align-items", button.cssVerticalAlign())
-		}
-
-	case HorizontalAlign:
-		delete(button.properties, tag)
-		if button.created {
-			button.session.updateCSSProperty(button.htmlID()+"content", "justify-items", button.cssHorizontalAlign())
-		}
-
-	default:
-		button.viewsContainerData.remove(tag)
-		return
+	case CellVerticalAlign, CellHorizontalAlign, CellWidth, CellHeight:
+		ErrorLogF(`"%s" property is not compatible with the BoundsProperty`, string(tag))
+		return nil
 	}
-	button.propertyChangedEvent(tag)
+
+	return button.viewsContainerData.setFunc(view, tag, value)
+}
+
+func (button *checkboxData) removeFunc(view View, tag PropertyName) []PropertyName {
+	switch tag {
+	case ClickEvent:
+		button.setRaw(ClickEvent, checkboxClickListener)
+		return []PropertyName{ClickEvent}
+
+	case KeyDownEvent:
+		button.setRaw(KeyDownEvent, checkboxKeyListener)
+		return []PropertyName{ClickEvent}
+	}
+
+	return button.viewsContainerData.removeFunc(view, tag)
 }
 
 func (button *checkboxData) checked() bool {
@@ -201,8 +162,9 @@ func (button *checkboxData) checked() bool {
 	return checked
 }
 
+/*
 func (button *checkboxData) changedCheckboxState(state bool) {
-	for _, listener := range button.checkedListeners {
+	for _, listener := range GetCheckboxChangedListeners(button) {
 		listener(button, state)
 	}
 
@@ -212,8 +174,9 @@ func (button *checkboxData) changedCheckboxState(state bool) {
 	button.htmlCheckbox(buffer, state)
 	button.Session().updateInnerHTML(button.htmlID()+"checkbox", buffer.String())
 }
+*/
 
-func checkboxClickListener(view View) {
+func checkboxClickListener(view View, _ MouseEvent) {
 	view.Set(Checked, !IsCheckboxChecked(view))
 	BlurView(view)
 }
@@ -223,17 +186,6 @@ func checkboxKeyListener(view View, event KeyEvent) {
 	case "Enter", "Space":
 		view.Set(Checked, !IsCheckboxChecked(view))
 	}
-}
-
-func (button *checkboxData) setChangedListener(value any) bool {
-	listeners, ok := valueToEventListeners[Checkbox, bool](value)
-	if !ok {
-		return false
-	} else if listeners == nil {
-		listeners = []func(Checkbox, bool){}
-	}
-	button.checkedListeners = listeners
-	return true
 }
 
 func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
@@ -265,7 +217,8 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 	button.viewsContainerData.cssStyle(self, builder)
 }
 
-func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) (int, int) {
+func checkboxHtml(button View, buffer *strings.Builder, checked bool) (int, int) {
+	//func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) (int, int) {
 	vAlign := GetCheckboxVerticalAlign(button)
 	hAlign := GetCheckboxHorizontalAlign(button)
 
@@ -317,7 +270,7 @@ func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) 
 
 func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 
-	vCheckboxAlign, hCheckboxAlign := button.htmlCheckbox(buffer, IsCheckboxChecked(button))
+	vCheckboxAlign, hCheckboxAlign := checkboxHtml(button, buffer, IsCheckboxChecked(button))
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(button.htmlID())
@@ -335,11 +288,11 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	buffer.WriteString(" align-items: ")
-	buffer.WriteString(button.cssVerticalAlign())
+	buffer.WriteString(checkboxVerticalAlignCSS(button))
 	buffer.WriteRune(';')
 
 	buffer.WriteString(" justify-items: ")
-	buffer.WriteString(button.cssHorizontalAlign())
+	buffer.WriteString(checkboxHorizontalAlignCSS(button))
 	buffer.WriteRune(';')
 
 	buffer.WriteString(`">`)
@@ -347,8 +300,8 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 	buffer.WriteString(`</div>`)
 }
 
-func (button *checkboxData) cssHorizontalAlign() string {
-	align := GetHorizontalAlign(button)
+func checkboxHorizontalAlignCSS(view View) string {
+	align := GetHorizontalAlign(view)
 	values := enumProperties[CellHorizontalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]
@@ -356,8 +309,8 @@ func (button *checkboxData) cssHorizontalAlign() string {
 	return values[0]
 }
 
-func (button *checkboxData) cssVerticalAlign() string {
-	align := GetVerticalAlign(button)
+func checkboxVerticalAlignCSS(view View) string {
+	align := GetVerticalAlign(view)
 	values := enumProperties[CellVerticalAlign].cssValues
 	if align >= 0 && align < len(values) {
 		return values[align]

@@ -3,15 +3,15 @@ package rui
 import "sort"
 
 // Params defines a type of a parameters list
-type Params map[string]any
+type Params map[PropertyName]any
 
 // Get returns a value of the property with name defined by the argument. The type of return value depends
 // on the property. If the property is not set then nil is returned.
-func (params Params) Get(tag string) any {
+func (params Params) Get(tag PropertyName) any {
 	return params.getRaw(tag)
 }
 
-func (params Params) getRaw(tag string) any {
+func (params Params) getRaw(tag PropertyName) any {
 	if value, ok := params[tag]; ok {
 		return value
 	}
@@ -20,12 +20,12 @@ func (params Params) getRaw(tag string) any {
 
 // Set sets the value (second argument) of the property with name defined by the first argument.
 // Return "true" if the value has been set, in the opposite case "false" is returned and a description of an error is written to the log
-func (params Params) Set(tag string, value any) bool {
+func (params Params) Set(tag PropertyName, value any) bool {
 	params.setRaw(tag, value)
 	return true
 }
 
-func (params Params) setRaw(tag string, value any) {
+func (params Params) setRaw(tag PropertyName, value any) {
 	if value != nil {
 		params[tag] = value
 	} else {
@@ -34,7 +34,7 @@ func (params Params) setRaw(tag string, value any) {
 }
 
 // Remove removes the property with name defined by the argument from a map.
-func (params Params) Remove(tag string) {
+func (params Params) Remove(tag PropertyName) {
 	delete(params, tag)
 }
 
@@ -46,11 +46,17 @@ func (params Params) Clear() {
 }
 
 // AllTags returns a sorted slice of all properties.
-func (params Params) AllTags() []string {
-	tags := make([]string, 0, len(params))
+func (params Params) AllTags() []PropertyName {
+	tags := make([]PropertyName, 0, len(params))
 	for t := range params {
 		tags = append(tags, t)
 	}
-	sort.Strings(tags)
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i] < tags[j]
+	})
 	return tags
+}
+
+func (params Params) empty() bool {
+	return len(params) == 0
 }

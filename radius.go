@@ -37,7 +37,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Radius = "radius"
+	Radius PropertyName = "radius"
 
 	// RadiusX is the constant for "radius-x" property tag.
 	//
@@ -58,7 +58,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusX = "radius-x"
+	RadiusX PropertyName = "radius-x"
 
 	// RadiusY is the constant for "radius-y" property tag.
 	//
@@ -79,7 +79,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusY = "radius-y"
+	RadiusY PropertyName = "radius-y"
 
 	// RadiusTopLeft is the constant for "radius-top-left" property tag.
 	//
@@ -90,7 +90,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusTopLeft = "radius-top-left"
+	RadiusTopLeft PropertyName = "radius-top-left"
 
 	// RadiusTopLeftX is the constant for "radius-top-left-x" property tag.
 	//
@@ -101,7 +101,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusTopLeftX = "radius-top-left-x"
+	RadiusTopLeftX PropertyName = "radius-top-left-x"
 
 	// RadiusTopLeftY is the constant for "radius-top-left-y" property tag.
 	//
@@ -112,7 +112,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusTopLeftY = "radius-top-left-y"
+	RadiusTopLeftY PropertyName = "radius-top-left-y"
 
 	// RadiusTopRight is the constant for "radius-top-right" property tag.
 	//
@@ -123,7 +123,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusTopRight = "radius-top-right"
+	RadiusTopRight PropertyName = "radius-top-right"
 
 	// RadiusTopRightX is the constant for "radius-top-right-x" property tag.
 	//
@@ -134,7 +134,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusTopRightX = "radius-top-right-x"
+	RadiusTopRightX PropertyName = "radius-top-right-x"
 
 	// RadiusTopRightY is the constant for "radius-top-right-y" property tag.
 	//
@@ -145,7 +145,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusTopRightY = "radius-top-right-y"
+	RadiusTopRightY PropertyName = "radius-top-right-y"
 
 	// RadiusBottomLeft is the constant for "radius-bottom-left" property tag.
 	//
@@ -156,7 +156,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusBottomLeft = "radius-bottom-left"
+	RadiusBottomLeft PropertyName = "radius-bottom-left"
 
 	// RadiusBottomLeftX is the constant for "radius-bottom-left-x" property tag.
 	//
@@ -167,7 +167,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusBottomLeftX = "radius-bottom-left-x"
+	RadiusBottomLeftX PropertyName = "radius-bottom-left-x"
 
 	// RadiusBottomLeftY is the constant for "radius-bottom-left-y" property tag.
 	//
@@ -178,7 +178,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusBottomLeftY = "radius-bottom-left-y"
+	RadiusBottomLeftY PropertyName = "radius-bottom-left-y"
 
 	// RadiusBottomRight is the constant for "radius-bottom-right" property tag.
 	//
@@ -189,7 +189,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusBottomRight = "radius-bottom-right"
+	RadiusBottomRight PropertyName = "radius-bottom-right"
 
 	// RadiusBottomRightX is the constant for "radius-bottom-right-x" property tag.
 	//
@@ -200,7 +200,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusBottomRightX = "radius-bottom-right-x"
+	RadiusBottomRightX PropertyName = "radius-bottom-right-x"
 
 	// RadiusBottomRightY is the constant for "radius-bottom-right-y" property tag.
 	//
@@ -211,7 +211,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	RadiusBottomRightY = "radius-bottom-right-y"
+	RadiusBottomRightY PropertyName = "radius-bottom-right-y"
 
 	// X is the constant for "x" property tag.
 	//
@@ -232,7 +232,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	X = "x"
+	X PropertyName = "x"
 
 	// Y is the constant for "y" property tag.
 	//
@@ -253,7 +253,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	Y = "y"
+	Y PropertyName = "y"
 
 	// TopLeft is the constant for "top-left" property tag.
 	//
@@ -264,7 +264,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TopLeft = "top-left"
+	TopLeft PropertyName = "top-left"
 
 	// TopLeftX is the constant for "top-left-x" property tag.
 	//
@@ -275,7 +275,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TopLeftX = "top-left-x"
+	TopLeftX PropertyName = "top-left-x"
 
 	// TopLeftY is the constant for "top-left-y" property tag.
 	//
@@ -286,7 +286,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TopLeftY = "top-left-y"
+	TopLeftY PropertyName = "top-left-y"
 
 	// TopRight is the constant for "top-right" property tag.
 	//
@@ -297,7 +297,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TopRight = "top-right"
+	TopRight PropertyName = "top-right"
 
 	// TopRightX is the constant for "top-right-x" property tag.
 	//
@@ -308,7 +308,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TopRightX = "top-right-x"
+	TopRightX PropertyName = "top-right-x"
 
 	// TopRightY is the constant for "top-right-y" property tag.
 	//
@@ -319,7 +319,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	TopRightY = "top-right-y"
+	TopRightY PropertyName = "top-right-y"
 
 	// BottomLeft is the constant for "bottom-left" property tag.
 	//
@@ -330,7 +330,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BottomLeft = "bottom-left"
+	BottomLeft PropertyName = "bottom-left"
 
 	// BottomLeftX is the constant for "bottom-left-x" property tag.
 	//
@@ -341,7 +341,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BottomLeftX = "bottom-left-x"
+	BottomLeftX PropertyName = "bottom-left-x"
 
 	// BottomLeftY is the constant for "bottom-left-y" property tag.
 	//
@@ -352,7 +352,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BottomLeftY = "bottom-left-y"
+	BottomLeftY PropertyName = "bottom-left-y"
 
 	// BottomRight is the constant for "bottom-right" property tag.
 	//
@@ -363,7 +363,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BottomRight = "bottom-right"
+	BottomRight PropertyName = "bottom-right"
 
 	// BottomRightX is the constant for "bottom-right-x" property tag.
 	//
@@ -374,7 +374,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BottomRightX = "bottom-right-x"
+	BottomRightX PropertyName = "bottom-right-x"
 
 	// BottomRightY is the constant for "bottom-right-y" property tag.
 	//
@@ -385,7 +385,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	BottomRightY = "bottom-right-y"
+	BottomRightY PropertyName = "bottom-right-y"
 )
 
 // RadiusProperty is a description of the [View] (shape) elliptical corner radius.
@@ -399,38 +399,46 @@ type RadiusProperty interface {
 }
 
 type radiusPropertyData struct {
-	propertyList
+	dataProperty
 }
 
 // NewRadiusProperty creates the new RadiusProperty
 func NewRadiusProperty(params Params) RadiusProperty {
 	result := new(radiusPropertyData)
-	result.properties = map[string]any{}
+	result.dataProperty.init()
+	result.normalize = radiusPropertyNormalize
+	result.get = radiusPropertyGet
+	result.remove = radiusPropertyRemove
+	result.set = radiusPropertySet
+	result.supportedProperties = []PropertyName{
+		X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
+		TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY,
+	}
+
 	if params != nil {
-		for _, tag := range []string{X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
-			TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY} {
+		for _, tag := range result.supportedProperties {
 			if value, ok := params[tag]; ok {
-				result.Set(tag, value)
+				radiusPropertySet(result, tag, value)
 			}
 		}
 	}
 	return result
 }
 
-func (radius *radiusPropertyData) normalizeTag(tag string) string {
-	return strings.TrimPrefix(strings.ToLower(tag), "radius-")
+func radiusPropertyNormalize(tag PropertyName) PropertyName {
+	name := strings.TrimPrefix(strings.ToLower(string(tag)), "radius-")
+	return PropertyName(name)
 }
 
 func (radius *radiusPropertyData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("_{ ")
 	comma := false
-	for _, tag := range []string{X, Y, TopLeft, TopLeftX, TopLeftY, TopRight, TopRightX, TopRightY,
-		BottomLeft, BottomLeftX, BottomLeftY, BottomRight, BottomRightX, BottomRightY} {
+	for _, tag := range radius.supportedProperties {
 		if value, ok := radius.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
@@ -444,26 +452,54 @@ func (radius *radiusPropertyData) String() string {
 	return runStringWriter(radius)
 }
 
-func (radius *radiusPropertyData) delete(tags []string) {
-	for _, tag := range tags {
-		delete(radius.properties, tag)
+func radiusPropertyRemove(properties Properties, tag PropertyName) []PropertyName {
+	result := []PropertyName{}
+	removeTag := func(tag PropertyName) {
+		if properties.getRaw(tag) != nil {
+			properties.setRaw(tag, nil)
+			result = append(result, tag)
+		}
 	}
+
+	switch tag {
+	case X, Y:
+		if properties.getRaw(tag) == nil {
+			for _, prefix := range []PropertyName{TopLeft, TopRight, BottomLeft, BottomRight} {
+				removeTag(prefix + "-" + tag)
+			}
+		} else {
+			removeTag(tag)
+		}
+
+	case TopLeftX, TopLeftY, TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY:
+		removeTag(tag)
+
+	case TopLeft, TopRight, BottomLeft, BottomRight:
+		for _, tag := range []PropertyName{tag, tag + "-x", tag + "-y"} {
+			removeTag(tag)
+		}
+
+	default:
+		ErrorLogF(`"%s" property is not compatible with the RadiusProperty`, tag)
+	}
+
+	return result
 }
 
-func (radius *radiusPropertyData) deleteUnusedTags() {
-	for _, tag := range []string{X, Y} {
-		if _, ok := radius.properties[tag]; ok {
+func deleteRadiusUnusedTags(radius Properties, result []PropertyName) {
+
+	for _, tag := range []PropertyName{X, Y} {
+		if radius.getRaw(tag) != nil {
 			unused := true
-			for _, t := range []string{TopLeft, TopRight, BottomLeft, BottomRight} {
-				if _, ok := radius.properties[t+"-"+tag]; !ok {
-					if _, ok := radius.properties[t]; !ok {
-						unused = false
-						break
-					}
+			for _, t := range []PropertyName{TopLeft, TopRight, BottomLeft, BottomRight} {
+				if radius.getRaw(t+"-"+tag) == nil && radius.getRaw(t) == nil {
+					unused = false
+					break
 				}
 			}
 			if unused {
-				delete(radius.properties, tag)
+				radius.setRaw(tag, nil)
+				result = append(result, tag)
 			}
 		}
 	}
@@ -485,124 +521,122 @@ func (radius *radiusPropertyData) deleteUnusedTags() {
 		return false
 	}
 
-	for _, tag := range []string{TopLeft, TopRight, BottomLeft, BottomRight} {
+	for _, tag := range []PropertyName{TopLeft, TopRight, BottomLeft, BottomRight} {
 		tagX := tag + "-x"
 		tagY := tag + "-y"
-		valueX, okX := radius.properties[tagX]
-		valueY, okY := radius.properties[tagY]
+		valueX := radius.getRaw(tagX)
+		valueY := radius.getRaw(tagY)
 
-		if value, ok := radius.properties[tag]; ok {
-			if okX && okY {
-				delete(radius.properties, tag)
-			} else if okX && !okY {
+		if value := radius.getRaw(tag); value != nil {
+			if valueX != nil && valueY != nil {
+				radius.setRaw(tag, nil)
+				result = append(result, tag)
+			} else if valueX != nil && valueY == nil {
 				if equalValue(value, valueX) {
-					delete(radius.properties, tagX)
+					radius.setRaw(tagX, nil)
+					result = append(result, tagX)
 				} else {
-					radius.properties[tagY] = value
-					delete(radius.properties, tag)
+					radius.setRaw(tagY, value)
+					result = append(result, tagY)
+					radius.setRaw(tag, nil)
+					result = append(result, tag)
 				}
-			} else if !okX && okY {
+			} else if valueX == nil && valueY != nil {
 				if equalValue(value, valueY) {
-					delete(radius.properties, tagY)
+					radius.setRaw(tagY, nil)
+					result = append(result, tagY)
 				} else {
-					radius.properties[tagX] = value
-					delete(radius.properties, tag)
+					radius.setRaw(tagX, value)
+					result = append(result, tagX)
+					radius.setRaw(tag, nil)
+					result = append(result, tag)
 				}
 			}
-		} else if okX && okY && equalValue(valueX, valueY) {
-			radius.properties[tag] = valueX
-			delete(radius.properties, tagX)
-			delete(radius.properties, tagY)
+		} else if valueX != nil && valueY != nil && equalValue(valueX, valueY) {
+			radius.setRaw(tag, valueX)
+			result = append(result, tag)
+			radius.setRaw(tagX, nil)
+			result = append(result, tagX)
+			radius.setRaw(tagY, nil)
+			result = append(result, tagY)
 		}
 	}
 }
 
-func (radius *radiusPropertyData) Remove(tag string) {
-	tag = radius.normalizeTag(tag)
+func radiusPropertySet(radius Properties, tag PropertyName, value any) []PropertyName {
+	var result []PropertyName = nil
 
-	switch tag {
-	case X, Y:
-		if _, ok := radius.properties[tag]; ok {
-			radius.Set(tag, AutoSize())
-			delete(radius.properties, tag)
+	deleteTags := func(tags []PropertyName) {
+		for _, tag := range tags {
+			if radius.getRaw(tag) != nil {
+				radius.setRaw(tag, nil)
+				result = append(result, tag)
+			}
 		}
-
-	case TopLeftX, TopLeftY, TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY:
-		delete(radius.properties, tag)
-
-	case TopLeft, TopRight, BottomLeft, BottomRight:
-		radius.delete([]string{tag, tag + "-x", tag + "-y"})
-
-	default:
-		ErrorLogF(`"%s" property is not compatible with the RadiusProperty`, tag)
 	}
 
-}
-
-func (radius *radiusPropertyData) Set(tag string, value any) bool {
-	if value == nil {
-		radius.Remove(tag)
-		return true
-	}
-
-	tag = radius.normalizeTag(tag)
 	switch tag {
 	case X:
-		if radius.setSizeProperty(tag, value) {
-			radius.delete([]string{TopLeftX, TopRightX, BottomLeftX, BottomRightX})
-			for _, t := range []string{TopLeft, TopRight, BottomLeft, BottomRight} {
-				if val, ok := radius.properties[t]; ok {
-					if _, ok := radius.properties[t+"-y"]; !ok {
-						radius.properties[t+"-y"] = val
+		if result = setSizeProperty(radius, tag, value); result != nil {
+			deleteTags([]PropertyName{TopLeftX, TopRightX, BottomLeftX, BottomRightX})
+			for _, t := range []PropertyName{TopLeft, TopRight, BottomLeft, BottomRight} {
+				if val := radius.getRaw(t); val != nil {
+					t2 := t + "-y"
+					if radius.getRaw(t2) != nil {
+						radius.setRaw(t2, val)
+						result = append(result, t2)
 					}
-					delete(radius.properties, t)
+					radius.setRaw(t, nil)
+					result = append(result, t)
 				}
 			}
-			return true
 		}
 
 	case Y:
-		if radius.setSizeProperty(tag, value) {
-			radius.delete([]string{TopLeftY, TopRightY, BottomLeftY, BottomRightY})
-			for _, t := range []string{TopLeft, TopRight, BottomLeft, BottomRight} {
-				if val, ok := radius.properties[t]; ok {
-					if _, ok := radius.properties[t+"-x"]; !ok {
-						radius.properties[t+"-x"] = val
+		if result = setSizeProperty(radius, tag, value); result != nil {
+			deleteTags([]PropertyName{TopLeftY, TopRightY, BottomLeftY, BottomRightY})
+			for _, t := range []PropertyName{TopLeft, TopRight, BottomLeft, BottomRight} {
+				if val := radius.getRaw(t); val != nil {
+					t2 := t + "-x"
+					if radius.getRaw(t2) != nil {
+						radius.setRaw(t2, val)
+						result = append(result, t2)
 					}
-					delete(radius.properties, t)
+					radius.setRaw(t, nil)
+					result = append(result, t)
 				}
 			}
-			return true
 		}
 
 	case TopLeftX, TopLeftY, TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY:
-		if radius.setSizeProperty(tag, value) {
-			radius.deleteUnusedTags()
-			return true
+		if result = setSizeProperty(radius, tag, value); result != nil {
+			deleteRadiusUnusedTags(radius, result)
 		}
 
 	case TopLeft, TopRight, BottomLeft, BottomRight:
 		switch value := value.(type) {
 		case SizeUnit:
-			radius.properties[tag] = value
-			radius.delete([]string{tag + "-x", tag + "-y"})
-			radius.deleteUnusedTags()
-			return true
+			radius.setRaw(tag, value)
+			result = []PropertyName{tag}
+			deleteTags([]PropertyName{tag + "-x", tag + "-y"})
+			deleteRadiusUnusedTags(radius, result)
 
 		case string:
 			if strings.Contains(value, "/") {
 				if values := strings.Split(value, "/"); len(values) == 2 {
-					xOK := radius.Set(tag+"-x", value[0])
-					yOK := radius.Set(tag+"-y", value[1])
-					return xOK && yOK
+					if result = radiusPropertySet(radius, tag+"-x", value[0]); result != nil {
+						if resultY := radiusPropertySet(radius, tag+"-y", value[1]); resultY != nil {
+							result = append(result, resultY...)
+						}
+
+					}
 				} else {
 					notCompatibleType(tag, value)
 				}
 			} else {
-				if radius.setSizeProperty(tag, value) {
-					radius.delete([]string{tag + "-x", tag + "-y"})
-					radius.deleteUnusedTags()
-					return true
+				if result = setSizeProperty(radius, tag, value); result != nil {
+					deleteTags([]PropertyName{tag + "-x", tag + "-y"})
+					deleteRadiusUnusedTags(radius, result)
 				}
 			}
 		}
@@ -611,33 +645,32 @@ func (radius *radiusPropertyData) Set(tag string, value any) bool {
 		ErrorLogF(`"%s" property is not compatible with the RadiusProperty`, tag)
 	}
 
-	return false
+	return result
 }
 
-func (radius *radiusPropertyData) Get(tag string) any {
-	tag = radius.normalizeTag(tag)
-	if value, ok := radius.properties[tag]; ok {
+func radiusPropertyGet(properties Properties, tag PropertyName) any {
+	if value := properties.getRaw(tag); value != nil {
 		return value
 	}
 
 	switch tag {
 	case TopLeftX, TopLeftY, TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY:
 		tagLen := len(tag)
-		if value, ok := radius.properties[tag[:tagLen-2]]; ok {
+		if value := properties.getRaw(tag[:tagLen-2]); value != nil {
 			return value
 		}
-		if value, ok := radius.properties[tag[tagLen-1:]]; ok {
+		if value := properties.getRaw(tag[tagLen-1:]); value != nil {
 			return value
 		}
 	}
 
 	switch tag {
 	case TopLeftX, TopRightX, BottomLeftX, BottomRightX:
-		if value, ok := radius.properties[X]; ok {
+		if value := properties.getRaw(X); value != nil {
 			return value
 		}
 	case TopLeftY, TopRightY, BottomLeftY, BottomRightY:
-		if value, ok := radius.properties[Y]; ok {
+		if value := properties.getRaw(Y); value != nil {
 			return value
 		}
 	}
@@ -649,7 +682,7 @@ func (radius *radiusPropertyData) BoxRadius(session Session) BoxRadius {
 	x, _ := sizeProperty(radius, X, session)
 	y, _ := sizeProperty(radius, Y, session)
 
-	getRadius := func(tag string) (SizeUnit, SizeUnit) {
+	getRadius := func(tag PropertyName) (SizeUnit, SizeUnit) {
 		rx := x
 		ry := y
 		if r, ok := sizeProperty(radius, tag, session); ok {
@@ -866,21 +899,18 @@ func getRadiusProperty(style Properties) RadiusProperty {
 	return NewRadiusProperty(nil)
 }
 
-func (properties *propertyList) setRadius(value any) bool {
+func setRadiusProperty(properties Properties, value any) []PropertyName {
 
 	if value == nil {
-		delete(properties.properties, Radius)
-		return true
+		return propertiesRemove(properties, Radius)
 	}
 
 	switch value := value.(type) {
 	case RadiusProperty:
-		properties.properties[Radius] = value
-		return true
+		properties.setRaw(Radius, value)
 
 	case SizeUnit:
-		properties.properties[Radius] = value
-		return true
+		properties.setRaw(Radius, value)
 
 	case BoxRadius:
 		radius := NewRadiusProperty(nil)
@@ -913,78 +943,85 @@ func (properties *propertyList) setRadius(value any) bool {
 				radius.Set(BottomRightY, value.BottomRightY)
 			}
 		}
-		properties.properties[Radius] = radius
-		return true
+		properties.setRaw(Radius, radius)
 
 	case string:
 		if strings.Contains(value, "/") {
 			values := strings.Split(value, "/")
 			if len(values) == 2 {
-				okX := properties.setRadiusElement(RadiusX, values[0])
-				okY := properties.setRadiusElement(RadiusY, values[1])
-				return okX && okY
-			} else {
-				notCompatibleType(Radius, value)
+				if setRadiusPropertyElement(properties, RadiusX, values[0]) {
+					result := []PropertyName{Radius, RadiusX}
+					if setRadiusPropertyElement(properties, RadiusY, values[1]) {
+						result = append(result, RadiusY)
+					}
+					return result
+				}
 			}
+			notCompatibleType(Radius, value)
+			return nil
+
 		} else {
-			return properties.setSizeProperty(Radius, value)
+			return setSizeProperty(properties, Radius, value)
 		}
 
 	case DataObject:
 		radius := NewRadiusProperty(nil)
-		for _, tag := range []string{X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
+		for _, tag := range []PropertyName{X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
 			TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY} {
-			if value, ok := value.PropertyValue(tag); ok {
+			if value, ok := value.PropertyValue(string(tag)); ok {
 				radius.Set(tag, value)
 			}
 		}
-		properties.properties[Radius] = radius
-		return true
+		properties.setRaw(Radius, radius)
 
 	case float32:
-		return properties.setRadius(Px(float64(value)))
+		properties.setRaw(Radius, Px(float64(value)))
 
 	case float64:
-		return properties.setRadius(Px(value))
+		properties.setRaw(Radius, Px(value))
 
 	default:
 		if n, ok := isInt(value); ok {
-			return properties.setRadius(Px(float64(n)))
+			properties.setRaw(Radius, Px(float64(n)))
+		} else {
+			notCompatibleType(Radius, value)
+			return nil
 		}
-		notCompatibleType(Radius, value)
 	}
 
+	return []PropertyName{Radius}
+}
+
+func removeRadiusPropertyElement(properties Properties, tag PropertyName) bool {
+	if value := properties.getRaw(Radius); value != nil {
+		radius := getRadiusProperty(properties)
+		radius.Remove(tag)
+		if radius.empty() {
+			properties.setRaw(Radius, nil)
+		} else {
+			properties.setRaw(Radius, radius)
+		}
+		return true
+	}
 	return false
 }
 
-func (properties *propertyList) removeRadiusElement(tag string) {
-	if value, ok := properties.properties[Radius]; ok && value != nil {
-		radius := getRadiusProperty(properties)
-		radius.Remove(tag)
-		if len(radius.AllTags()) == 0 {
-			delete(properties.properties, Radius)
-		} else {
-			properties.properties[Radius] = radius
-		}
-	}
-}
-
-func (properties *propertyList) setRadiusElement(tag string, value any) bool {
+func setRadiusPropertyElement(properties Properties, tag PropertyName, value any) bool {
 	if value == nil {
-		properties.removeRadiusElement(tag)
+		removeRadiusPropertyElement(properties, tag)
 		return true
 	}
 
 	radius := getRadiusProperty(properties)
 	if radius.Set(tag, value) {
-		properties.properties[Radius] = radius
+		properties.setRaw(Radius, radius)
 		return true
 	}
 
 	return false
 }
 
-func getRadiusElement(style Properties, tag string) any {
+func getRadiusElement(style Properties, tag PropertyName) any {
 	value := style.Get(Radius)
 	if value != nil {
 		switch value := value.(type) {

@@ -15,7 +15,7 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	ProgressBarMax = "progress-max"
+	ProgressBarMax PropertyName = "progress-max"
 
 	// ProgressBarValue is the constant for "progress-value" property tag.
 	//
@@ -25,7 +25,7 @@ const (
 	// Supported types: `float`, `int`, `string`.
 	//
 	// Internal type is `float`, other types converted to it during assignment.
-	ProgressBarValue = "progress-value"
+	ProgressBarValue PropertyName = "progress-value"
 )
 
 // ProgressBar represents a ProgressBar view
@@ -46,20 +46,18 @@ func NewProgressBar(session Session, params Params) ProgressBar {
 }
 
 func newProgressBar(session Session) View {
-	return NewProgressBar(session, nil)
+	return new(progressBarData)
 }
 
 func (progress *progressBarData) init(session Session) {
 	progress.viewData.init(session)
 	progress.tag = "ProgressBar"
+	progress.normalize = normalizeProgressBarTag
+	progress.changed = progressBarPropertyChanged
 }
 
-func (progress *progressBarData) String() string {
-	return getViewString(progress, nil)
-}
-
-func (progress *progressBarData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeProgressBarTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case Max, "progress-bar-max", "progressbar-max":
 		return ProgressBarMax
@@ -70,43 +68,20 @@ func (progress *progressBarData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (progress *progressBarData) Remove(tag string) {
-	progress.remove(progress.normalizeTag(tag))
-}
+func progressBarPropertyChanged(view View, tag PropertyName) {
 
-func (progress *progressBarData) remove(tag string) {
-	progress.viewData.remove(tag)
-	progress.propertyChanged(tag)
-}
+	switch tag {
+	case ProgressBarMax:
+		view.Session().updateProperty(view.htmlID(), "max",
+			strconv.FormatFloat(GetProgressBarMax(view), 'f', -1, 32))
 
-func (progress *progressBarData) propertyChanged(tag string) {
-	if progress.created {
-		switch tag {
-		case ProgressBarMax:
-			progress.session.updateProperty(progress.htmlID(), Max,
-				strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 32))
+	case ProgressBarValue:
+		view.Session().updateProperty(view.htmlID(), "value",
+			strconv.FormatFloat(GetProgressBarValue(view), 'f', -1, 32))
 
-		case ProgressBarValue:
-			progress.session.updateProperty(progress.htmlID(), Value,
-				strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 32))
-		}
+	default:
+		viewPropertyChanged(view, tag)
 	}
-}
-
-func (progress *progressBarData) Set(tag string, value any) bool {
-	return progress.set(progress.normalizeTag(tag), value)
-}
-
-func (progress *progressBarData) set(tag string, value any) bool {
-	if progress.viewData.set(tag, value) {
-		progress.propertyChanged(tag)
-		return true
-	}
-	return false
-}
-
-func (progress *progressBarData) Get(tag string) any {
-	return progress.get(progress.normalizeTag(tag))
 }
 
 func (progress *progressBarData) htmlTag() string {

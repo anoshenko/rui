@@ -20,7 +20,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	LoadedEvent = "loaded-event"
+	LoadedEvent PropertyName = "loaded-event"
 
 	// ErrorEvent is the constant for "error-event" property tag.
 	//
@@ -35,7 +35,7 @@ const (
 	//
 	// Allowed listener formats:
 	// `func()`.
-	ErrorEvent = "error-event"
+	ErrorEvent PropertyName = "error-event"
 
 	// NoneFit - value of the "object-fit" property of an ImageView. The replaced content is not resized
 	NoneFit = 0
@@ -88,7 +88,7 @@ func NewImageView(session Session, params Params) ImageView {
 }
 
 func newImageView(session Session) View {
-	return NewImageView(session, nil)
+	return new(imageViewData)
 }
 
 // Init initialize fields of imageView by default values
@@ -96,14 +96,13 @@ func (imageView *imageViewData) init(session Session) {
 	imageView.viewData.init(session)
 	imageView.tag = "ImageView"
 	imageView.systemClass = "ruiImageView"
+	imageView.normalize = normalizeImageViewTag
+	imageView.set = imageViewSet
+	imageView.changed = imageViewPropertyChanged
 }
 
-func (imageView *imageViewData) String() string {
-	return getViewString(imageView, nil)
-}
-
-func (imageView *imageViewData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeImageViewTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case "source":
 		tag = Source
@@ -123,127 +122,58 @@ func (imageView *imageViewData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (imageView *imageViewData) Remove(tag string) {
-	imageView.remove(imageView.normalizeTag(tag))
-}
+func imageViewSet(view View, tag PropertyName, value any) []PropertyName {
 
-func (imageView *imageViewData) remove(tag string) {
-	imageView.viewData.remove(tag)
-	if imageView.created {
-		switch tag {
-		case Source:
-			imageView.session.updateProperty(imageView.htmlID(), "src", "")
-			imageView.session.removeProperty(imageView.htmlID(), "srcset")
-
-		case AltText:
-			updateInnerHTML(imageView.htmlID(), imageView.session)
-
-		case ImageVerticalAlign, ImageHorizontalAlign:
-			updateCSSStyle(imageView.htmlID(), imageView.session)
+	switch tag {
+	case Source, SrcSet, AltText:
+		if text, ok := value.(string); ok {
+			return setStringPropertyValue(view, tag, text)
 		}
+		notCompatibleType(tag, value)
+		return nil
+
+	case LoadedEvent, ErrorEvent:
+		return setNoParamEventListener[ImageView](view, tag, value)
 	}
+
+	return viewSet(view, tag, value)
 }
 
-func (imageView *imageViewData) Set(tag string, value any) bool {
-	return imageView.set(imageView.normalizeTag(tag), value)
-}
-
-func (imageView *imageViewData) set(tag string, value any) bool {
-	if value == nil {
-		imageView.remove(tag)
-		return true
-	}
+func imageViewPropertyChanged(view View, tag PropertyName) {
+	session := view.Session()
+	htmlID := view.htmlID()
 
 	switch tag {
 	case Source:
-		if text, ok := value.(string); ok {
-			imageView.properties[tag] = text
-			if imageView.created {
-				src, srcset := imageView.src(text)
-				imageView.session.updateProperty(imageView.htmlID(), "src", src)
-
-				if srcset != "" {
-					imageView.session.updateProperty(imageView.htmlID(), "srcset", srcset)
-				} else {
-					imageView.session.removeProperty(imageView.htmlID(), "srcset")
-				}
-			}
-			imageView.propertyChangedEvent(Source)
-			return true
+		src, srcset := imageViewSrc(view, GetImageViewSource(view))
+		session.updateProperty(htmlID, "src", src)
+		if srcset != "" {
+			session.updateProperty(htmlID, "srcset", srcset)
+		} else {
+			session.removeProperty(htmlID, "srcset")
 		}
-		notCompatibleType(Source, value)
 
 	case SrcSet:
-		if text, ok := value.(string); ok {
-			if text == "" {
-				delete(imageView.properties, tag)
-			} else {
-				imageView.properties[tag] = text
-			}
-			if imageView.created {
-				_, srcset := imageView.src(text)
-				if srcset != "" {
-					imageView.session.updateProperty(imageView.htmlID(), "srcset", srcset)
-				} else {
-					imageView.session.removeProperty(imageView.htmlID(), "srcset")
-				}
-			}
-			imageView.propertyChangedEvent(Source)
-			return true
+		_, srcset := imageViewSrc(view, GetImageViewSource(view))
+		if srcset != "" {
+			session.updateProperty(htmlID, "srcset", srcset)
+		} else {
+			session.removeProperty(htmlID, "srcset")
 		}
-		notCompatibleType(Source, value)
 
 	case AltText:
-		if text, ok := value.(string); ok {
-			imageView.properties[AltText] = text
-			if imageView.created {
-				updateInnerHTML(imageView.htmlID(), imageView.session)
-			}
-			imageView.propertyChangedEvent(Source)
-			return true
-		}
-		notCompatibleType(tag, value)
+		updateInnerHTML(htmlID, session)
 
-	case LoadedEvent, ErrorEvent:
-		if listeners, ok := valueToNoParamListeners[ImageView](value); ok {
-			if listeners == nil {
-				delete(imageView.properties, tag)
-			} else {
-				imageView.properties[tag] = listeners
-			}
-			return true
-		}
+	case ImageVerticalAlign, ImageHorizontalAlign:
+		updateCSSStyle(htmlID, session)
 
 	default:
-		if imageView.viewData.set(tag, value) {
-			if imageView.created {
-				switch tag {
-				case ImageVerticalAlign, ImageHorizontalAlign:
-					updateCSSStyle(imageView.htmlID(), imageView.session)
-				}
-			}
-			return true
-		}
+		viewPropertyChanged(view, tag)
 	}
-
-	return false
 }
 
-func (imageView *imageViewData) Get(tag string) any {
-	return imageView.viewData.get(imageView.normalizeTag(tag))
-}
-
-func (imageView *imageViewData) imageListeners(tag string) []func(ImageView) {
-	if value := imageView.getRaw(tag); value != nil {
-		if listeners, ok := value.([]func(ImageView)); ok {
-			return listeners
-		}
-	}
-	return []func(ImageView){}
-}
-
-func (imageView *imageViewData) srcSet(path string) string {
-	if value := imageView.getRaw(SrcSet); value != nil {
+func imageViewSrcSet(view View, path string) string {
+	if value := view.getRaw(SrcSet); value != nil {
 		if text, ok := value.(string); ok {
 			srcset := strings.Split(text, ",")
 			buffer := allocStringBuilder()
@@ -286,9 +216,9 @@ func (imageView *imageViewData) htmlTag() string {
 	return "img"
 }
 
-func (imageView *imageViewData) src(src string) (string, string) {
+func imageViewSrc(view View, src string) (string, string) {
 	if src != "" && src[0] == '@' {
-		if image, ok := imageView.Session().ImageConstant(src[1:]); ok {
+		if image, ok := view.Session().ImageConstant(src[1:]); ok {
 			src = image
 		} else {
 			src = ""
@@ -296,7 +226,7 @@ func (imageView *imageViewData) src(src string) (string, string) {
 	}
 
 	if src != "" {
-		return src, imageView.srcSet(src)
+		return src, imageViewSrcSet(view, src)
 	}
 	return "", ""
 }
@@ -306,7 +236,7 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 	imageView.viewData.htmlProperties(self, buffer)
 
 	if imageResource, ok := imageProperty(imageView, Source, imageView.Session()); ok && imageResource != "" {
-		if src, srcset := imageView.src(imageResource); src != "" {
+		if src, srcset := imageViewSrc(imageView, imageResource); src != "" {
 			buffer.WriteString(` src="`)
 			buffer.WriteString(src)
 			buffer.WriteString(`"`)
@@ -326,7 +256,7 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 
 	buffer.WriteString(` onload="imageLoaded(this, event)"`)
 
-	if len(imageView.imageListeners(ErrorEvent)) > 0 {
+	if len(getNoParamEventListeners[ImageView](imageView, nil, ErrorEvent)) > 0 {
 		buffer.WriteString(` onerror="imageError(this, event)"`)
 	}
 }
@@ -366,10 +296,10 @@ func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
 	}
 }
 
-func (imageView *imageViewData) handleCommand(self View, command string, data DataObject) bool {
+func (imageView *imageViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "imageViewError":
-		for _, listener := range imageView.imageListeners(ErrorEvent) {
+		for _, listener := range getNoParamEventListeners[ImageView](imageView, nil, ErrorEvent) {
 			listener(imageView)
 		}
 
@@ -378,7 +308,7 @@ func (imageView *imageViewData) handleCommand(self View, command string, data Da
 		imageView.naturalHeight = dataFloatProperty(data, "natural-height")
 		imageView.currentSrc, _ = data.PropertyValue("current-src")
 
-		for _, listener := range imageView.imageListeners(LoadedEvent) {
+		for _, listener := range getNoParamEventListeners[ImageView](imageView, nil, LoadedEvent) {
 			listener(imageView)
 		}
 

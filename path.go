@@ -55,7 +55,6 @@ type Path interface {
 	// If the shape has already been closed or has only one point, this function does nothing.
 	Close()
 
-	//create(session Session)
 	obj() any
 }
 

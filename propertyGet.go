@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func stringProperty(properties Properties, tag string, session Session) (string, bool) {
+func stringProperty(properties Properties, tag PropertyName, session Session) (string, bool) {
 	if value := properties.getRaw(tag); value != nil {
 		if text, ok := value.(string); ok {
 			return session.resolveConstants(text)
@@ -15,7 +15,7 @@ func stringProperty(properties Properties, tag string, session Session) (string,
 	return "", false
 }
 
-func imageProperty(properties Properties, tag string, session Session) (string, bool) {
+func imageProperty(properties Properties, tag PropertyName, session Session) (string, bool) {
 	if value := properties.getRaw(tag); value != nil {
 		if text, ok := value.(string); ok {
 			if text != "" && text[0] == '@' {
@@ -61,11 +61,11 @@ func valueToSizeUnit(value any, session Session) (SizeUnit, bool) {
 	return AutoSize(), false
 }
 
-func sizeProperty(properties Properties, tag string, session Session) (SizeUnit, bool) {
+func sizeProperty(properties Properties, tag PropertyName, session Session) (SizeUnit, bool) {
 	return valueToSizeUnit(properties.getRaw(tag), session)
 }
 
-func angleProperty(properties Properties, tag string, session Session) (AngleUnit, bool) {
+func angleProperty(properties Properties, tag PropertyName, session Session) (AngleUnit, bool) {
 	if value := properties.getRaw(tag); value != nil {
 		switch value := value.(type) {
 		case AngleUnit:
@@ -98,11 +98,11 @@ func valueToColor(value any, session Session) (Color, bool) {
 	return Color(0), false
 }
 
-func colorProperty(properties Properties, tag string, session Session) (Color, bool) {
+func colorProperty(properties Properties, tag PropertyName, session Session) (Color, bool) {
 	return valueToColor(properties.getRaw(tag), session)
 }
 
-func valueToEnum(value any, tag string, session Session, defaultValue int) (int, bool) {
+func valueToEnum(value any, tag PropertyName, session Session, defaultValue int) (int, bool) {
 	if value != nil {
 		values := enumProperties[tag].values
 		switch value := value.(type) {
@@ -165,7 +165,7 @@ func enumStringToInt(value string, enumValues []string, logError bool) (int, boo
 	return 0, false
 }
 
-func enumProperty(properties Properties, tag string, session Session, defaultValue int) (int, bool) {
+func enumProperty(properties Properties, tag PropertyName, session Session, defaultValue int) (int, bool) {
 	return valueToEnum(properties.getRaw(tag), tag, session, defaultValue)
 }
 
@@ -194,7 +194,7 @@ func valueToBool(value any, session Session) (bool, bool) {
 	return false, false
 }
 
-func boolProperty(properties Properties, tag string, session Session) (bool, bool) {
+func boolProperty(properties Properties, tag PropertyName, session Session) (bool, bool) {
 	return valueToBool(properties.getRaw(tag), session)
 }
 
@@ -224,7 +224,7 @@ func valueToInt(value any, session Session, defaultValue int) (int, bool) {
 	return defaultValue, false
 }
 
-func intProperty(properties Properties, tag string, session Session, defaultValue int) (int, bool) {
+func intProperty(properties Properties, tag PropertyName, session Session, defaultValue int) (int, bool) {
 	return valueToInt(properties.getRaw(tag), session, defaultValue)
 }
 
@@ -248,7 +248,7 @@ func valueToFloat(value any, session Session, defaultValue float64) (float64, bo
 	return defaultValue, false
 }
 
-func floatProperty(properties Properties, tag string, session Session, defaultValue float64) (float64, bool) {
+func floatProperty(properties Properties, tag PropertyName, session Session, defaultValue float64) (float64, bool) {
 	return valueToFloat(properties.getRaw(tag), session, defaultValue)
 }
 
@@ -272,7 +272,7 @@ func valueToFloatText(value any, session Session, defaultValue float64) (string,
 	return fmt.Sprintf("%g", defaultValue), false
 }
 
-func floatTextProperty(properties Properties, tag string, session Session, defaultValue float64) (string, bool) {
+func floatTextProperty(properties Properties, tag PropertyName, session Session, defaultValue float64) (string, bool) {
 	return valueToFloatText(properties.getRaw(tag), session, defaultValue)
 }
 
@@ -297,6 +297,6 @@ func valueToRange(value any, session Session) (Range, bool) {
 	return Range{}, false
 }
 
-func rangeProperty(properties Properties, tag string, session Session) (Range, bool) {
+func rangeProperty(properties Properties, tag PropertyName, session Session) (Range, bool) {
 	return valueToRange(properties.getRaw(tag), session)
 }

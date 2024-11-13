@@ -23,7 +23,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	ClickEvent = "click-event"
+	ClickEvent PropertyName = "click-event"
 
 	// DoubleClickEvent is the constant for "double-click-event" property tag.
 	//
@@ -41,7 +41,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	DoubleClickEvent = "double-click-event"
+	DoubleClickEvent PropertyName = "double-click-event"
 
 	// MouseDown is the constant for "mouse-down" property tag.
 	//
@@ -59,12 +59,12 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	MouseDown = "mouse-down"
+	MouseDown PropertyName = "mouse-down"
 
 	// MouseUp is the constant for "mouse-up" property tag.
 	//
 	// Used by `View`.
-	// Is fired at a View when a button on a pointing device (such as a mouse or trackpad) is released while the pointer is 
+	// Is fired at a View when a button on a pointing device (such as a mouse or trackpad) is released while the pointer is
 	// located inside it. "mouse-up" events are the counterpoint to "mouse-down" events.
 	//
 	// General listener format:
@@ -78,7 +78,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	MouseUp = "mouse-up"
+	MouseUp PropertyName = "mouse-up"
 
 	// MouseMove is the constant for "mouse-move" property tag.
 	//
@@ -96,13 +96,13 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	MouseMove = "mouse-move"
+	MouseMove PropertyName = "mouse-move"
 
 	// MouseOut is the constant for "mouse-out" property tag.
 	//
 	// Used by `View`.
-	// Is fired at a View when a pointing device (usually a mouse) is used to move the cursor so that it is no longer 
-	// contained within the view or one of its children. "mouse-out" is also delivered to a view if the cursor enters a child 
+	// Is fired at a View when a pointing device (usually a mouse) is used to move the cursor so that it is no longer
+	// contained within the view or one of its children. "mouse-out" is also delivered to a view if the cursor enters a child
 	// view, because the child view obscures the visible area of the view.
 	//
 	// General listener format:
@@ -116,12 +116,12 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	MouseOut = "mouse-out"
+	MouseOut PropertyName = "mouse-out"
 
 	// MouseOver is the constant for "mouse-over" property tag.
 	//
 	// Used by `View`.
-	// Is fired at a View when a pointing device (such as a mouse or trackpad) is used to move the cursor onto the view or one 
+	// Is fired at a View when a pointing device (such as a mouse or trackpad) is used to move the cursor onto the view or one
 	// of its child views.
 	//
 	// General listener format:
@@ -135,7 +135,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	MouseOver = "mouse-over"
+	MouseOver PropertyName = "mouse-over"
 
 	// ContextMenuEvent is the constant for "context-menu-event" property tag.
 	//
@@ -153,7 +153,7 @@ const (
 	// `func(view rui.View)`,
 	// `func(event rui.MouseEvent)`,
 	// `func()`.
-	ContextMenuEvent = "context-menu-event"
+	ContextMenuEvent PropertyName = "context-menu-event"
 
 	// PrimaryMouseButton is a number of the main pressed button, usually the left button or the un-initialized state
 	PrimaryMouseButton = 0
@@ -228,54 +228,39 @@ type MouseEvent struct {
 	MetaKey bool
 }
 
-var mouseEvents = map[string]struct{ jsEvent, jsFunc string }{
-	ClickEvent:       {jsEvent: "onclick", jsFunc: "clickEvent"},
-	DoubleClickEvent: {jsEvent: "ondblclick", jsFunc: "doubleClickEvent"},
-	MouseDown:        {jsEvent: "onmousedown", jsFunc: "mouseDownEvent"},
-	MouseUp:          {jsEvent: "onmouseup", jsFunc: "mouseUpEvent"},
-	MouseMove:        {jsEvent: "onmousemove", jsFunc: "mouseMoveEvent"},
-	MouseOut:         {jsEvent: "onmouseout", jsFunc: "mouseOutEvent"},
-	MouseOver:        {jsEvent: "onmouseover", jsFunc: "mouseOverEvent"},
-	ContextMenuEvent: {jsEvent: "oncontextmenu", jsFunc: "contextMenuEvent"},
-}
-
-func (view *viewData) setMouseListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, MouseEvent](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
-	}
-
-	if listeners == nil {
-		view.removeMouseListener(tag)
-	} else if js, ok := mouseEvents[tag]; ok {
-		view.properties[tag] = listeners
-		if view.created {
-			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
+/*
+func setMouseListener(properties Properties, tag PropertyName, value any) bool {
+	if listeners, ok := valueToEventListeners[View, MouseEvent](value); ok {
+		if len(listeners) == 0 {
+			properties.setRaw(tag, nil)
+		} else {
+			properties.setRaw(tag, listeners)
 		}
-	} else {
-		return false
+		return true
 	}
-	return true
+	notCompatibleType(tag, value)
+	return false
 }
 
-func (view *viewData) removeMouseListener(tag string) {
+func (view *viewData) removeMouseListener(tag PropertyName) {
 	delete(view.properties, tag)
 	if view.created {
-		if js, ok := mouseEvents[tag]; ok {
+		if js, ok := eventJsFunc[tag]; ok {
 			view.session.removeProperty(view.htmlID(), js.jsEvent)
 		}
 	}
 }
 
 func mouseEventsHtml(view View, buffer *strings.Builder, hasTooltip bool) {
-	for tag, js := range mouseEvents {
+	for _, tag := range []PropertyName{ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent} {
 		if value := view.getRaw(tag); value != nil {
-			if listeners, ok := value.([]func(View, MouseEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
+			if js, ok := eventJsFunc[tag]; ok {
+				if listeners, ok := value.([]func(View, MouseEvent)); ok && len(listeners) > 0 {
+					buffer.WriteString(js.jsEvent)
+					buffer.WriteString(`="`)
+					buffer.WriteString(js.jsFunc)
+					buffer.WriteString(`(this, event)" `)
+				}
 			}
 		}
 	}
@@ -285,6 +270,7 @@ func mouseEventsHtml(view View, buffer *strings.Builder, hasTooltip bool) {
 		buffer.WriteString(`onmouseleave="mouseLeaveEvent(this, event)" `)
 	}
 }
+*/
 
 func getTimeStamp(data DataObject) uint64 {
 	if value, ok := data.PropertyValue("timeStamp"); ok {
@@ -315,7 +301,7 @@ func (event *MouseEvent) init(data DataObject) {
 	event.MetaKey = dataBoolProperty(data, "metaKey")
 }
 
-func handleMouseEvents(view View, tag string, data DataObject) {
+func handleMouseEvents(view View, tag PropertyName, data DataObject) {
 	listeners := getEventListeners[View, MouseEvent](view, nil, tag)
 	if len(listeners) > 0 {
 		var event MouseEvent

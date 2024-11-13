@@ -1,16 +1,12 @@
 package rui
 
-import (
-	"strings"
-)
-
 // Constants for [View] specific pointer events properties
 const (
 	// PointerDown is the constant for "pointer-down" property tag.
 	//
 	// Used by `View`.
-	// Fired when a pointer becomes active. For mouse, it is fired when the device transitions from no buttons depressed to at 
-	// least one button depressed. For touch, it is fired when physical contact is made with the digitizer. For pen, it is 
+	// Fired when a pointer becomes active. For mouse, it is fired when the device transitions from no buttons depressed to at
+	// least one button depressed. For touch, it is fired when physical contact is made with the digitizer. For pen, it is
 	// fired when the stylus makes physical contact with the digitizer.
 	//
 	// General listener format:
@@ -24,7 +20,7 @@ const (
 	// `func(event rui.PointerEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	PointerDown = "pointer-down"
+	PointerDown PropertyName = "pointer-down"
 
 	// PointerUp is the constant for "pointer-up" property tag.
 	//
@@ -42,7 +38,7 @@ const (
 	// `func(event rui.PointerEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	PointerUp = "pointer-up"
+	PointerUp PropertyName = "pointer-up"
 
 	// PointerMove is the constant for "pointer-move" property tag.
 	//
@@ -60,7 +56,7 @@ const (
 	// `func(event rui.PointerEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	PointerMove = "pointer-move"
+	PointerMove PropertyName = "pointer-move"
 
 	// PointerCancel is the constant for "pointer-cancel" property tag.
 	//
@@ -78,13 +74,13 @@ const (
 	// `func(event rui.PointerEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	PointerCancel = "pointer-cancel"
+	PointerCancel PropertyName = "pointer-cancel"
 
 	// PointerOut is the constant for "pointer-out" property tag.
 	//
 	// Used by `View`.
-	// Is fired for several reasons including: pointing device is moved out of the hit test boundaries of an element; firing 
-	// the "pointer-up" event for a device that does not support hover (see "pointer-up"); after firing the "pointer-cancel" 
+	// Is fired for several reasons including: pointing device is moved out of the hit test boundaries of an element; firing
+	// the "pointer-up" event for a device that does not support hover (see "pointer-up"); after firing the "pointer-cancel"
 	// event (see "pointer-cancel"); when a pen stylus leaves the hover range detectable by the digitizer.
 	//
 	// General listener format:
@@ -98,7 +94,7 @@ const (
 	// `func(event rui.PointerEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	PointerOut = "pointer-out"
+	PointerOut PropertyName = "pointer-out"
 
 	// PointerOver is the constant for "pointer-over" property tag.
 	//
@@ -116,7 +112,7 @@ const (
 	// `func(event rui.PointerEvent)`,
 	// `func(view rui.View)`,
 	// `func()`.
-	PointerOver = "pointer-over"
+	PointerOver PropertyName = "pointer-over"
 )
 
 // PointerEvent represent a stylus events. Also inherit [MouseEvent] attributes
@@ -158,56 +154,44 @@ type PointerEvent struct {
 	IsPrimary bool
 }
 
-var pointerEvents = map[string]struct{ jsEvent, jsFunc string }{
-	PointerDown:   {jsEvent: "onpointerdown", jsFunc: "pointerDownEvent"},
-	PointerUp:     {jsEvent: "onpointerup", jsFunc: "pointerUpEvent"},
-	PointerMove:   {jsEvent: "onpointermove", jsFunc: "pointerMoveEvent"},
-	PointerCancel: {jsEvent: "onpointercancel", jsFunc: "pointerCancelEvent"},
-	PointerOut:    {jsEvent: "onpointerout", jsFunc: "pointerOutEvent"},
-	PointerOver:   {jsEvent: "onpointerover", jsFunc: "pointerOverEvent"},
-}
-
-func (view *viewData) setPointerListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, PointerEvent](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
-	}
-
-	if listeners == nil {
-		view.removePointerListener(tag)
-	} else if js, ok := pointerEvents[tag]; ok {
-		view.properties[tag] = listeners
-		if view.created {
-			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
+/*
+func setPointerListener(properties Properties, tag PropertyName, value any) bool {
+	if listeners, ok := valueToEventListeners[View, PointerEvent](value); ok {
+		if len(listeners) == 0 {
+			properties.setRaw(tag, nil)
+		} else {
+			properties.setRaw(tag, listeners)
 		}
-	} else {
-		return false
+		return true
 	}
-	return true
+	notCompatibleType(tag, value)
+	return false
 }
 
-func (view *viewData) removePointerListener(tag string) {
+func (view *viewData) removePointerListener(tag PropertyName) {
 	delete(view.properties, tag)
 	if view.created {
-		if js, ok := pointerEvents[tag]; ok {
+		if js, ok := eventJsFunc[tag]; ok {
 			view.session.removeProperty(view.htmlID(), js.jsEvent)
 		}
 	}
 }
 
 func pointerEventsHtml(view View, buffer *strings.Builder) {
-	for tag, js := range pointerEvents {
+	for _, tag := range []PropertyName{PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel} {
 		if value := view.getRaw(tag); value != nil {
-			if listeners, ok := value.([]func(View, PointerEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
+			if js, ok := eventJsFunc[tag]; ok {
+				if listeners, ok := value.([]func(View, PointerEvent)); ok && len(listeners) > 0 {
+					buffer.WriteString(js.jsEvent)
+					buffer.WriteString(`="`)
+					buffer.WriteString(js.jsFunc)
+					buffer.WriteString(`(this, event)" `)
+				}
 			}
 		}
 	}
 }
+*/
 
 func (event *PointerEvent) init(data DataObject) {
 	event.MouseEvent.init(data)
@@ -225,7 +209,7 @@ func (event *PointerEvent) init(data DataObject) {
 	event.IsPrimary = dataBoolProperty(data, "isPrimary")
 }
 
-func handlePointerEvents(view View, tag string, data DataObject) {
+func handlePointerEvents(view View, tag PropertyName, data DataObject) {
 	listeners := getEventListeners[View, PointerEvent](view, nil, tag)
 	if len(listeners) == 0 {
 		return

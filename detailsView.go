@@ -13,7 +13,7 @@ const (
 	//
 	// `string` - Summary as a text.
 	// `View` - Summary as a view, in this case it can be quite complex if needed.
-	Summary = "summary"
+	Summary PropertyName = "summary"
 
 	// Expanded is the constant for "expanded" property tag.
 	//
@@ -25,7 +25,7 @@ const (
 	// Values:
 	// `true` or `1` or "true", "yes", "on", "1" - Content is visible.
 	// `false` or `0` or "false", "no", "off", "0" - Content is collapsed(hidden).
-	Expanded = "expanded"
+	Expanded PropertyName = "expanded"
 )
 
 // DetailsView represent a DetailsView view, which is a collapsible container of views
@@ -46,19 +46,21 @@ func NewDetailsView(session Session, params Params) DetailsView {
 }
 
 func newDetailsView(session Session) View {
-	return NewDetailsView(session, nil)
+	return new(detailsViewData)
 }
 
 // Init initialize fields of DetailsView by default values
 func (detailsView *detailsViewData) init(session Session) {
 	detailsView.viewsContainerData.init(session)
 	detailsView.tag = "DetailsView"
+	detailsView.set = detailsView.setFunc
+	detailsView.changed = detailsViewPropertyChanged
 	//detailsView.systemClass = "ruiDetailsView"
 }
 
 func (detailsView *detailsViewData) Views() []View {
 	views := detailsView.viewsContainerData.Views()
-	if summary := detailsView.get(Summary); summary != nil {
+	if summary := detailsView.Get(Summary); summary != nil {
 		switch summary := summary.(type) {
 		case View:
 			return append([]View{summary}, views...)
@@ -67,94 +69,53 @@ func (detailsView *detailsViewData) Views() []View {
 	return views
 }
 
-func (detailsView *detailsViewData) Remove(tag string) {
-	detailsView.remove(strings.ToLower(tag))
-}
-
-func (detailsView *detailsViewData) remove(tag string) {
-	detailsView.viewsContainerData.remove(tag)
-	if detailsView.created {
-		switch tag {
-		case Summary:
-			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-
-		case Expanded:
-			detailsView.session.removeProperty(detailsView.htmlID(), "open")
-		}
-	}
-}
-
-func (detailsView *detailsViewData) Set(tag string, value any) bool {
-	return detailsView.set(strings.ToLower(tag), value)
-}
-
-func (detailsView *detailsViewData) set(tag string, value any) bool {
-	if value == nil {
-		detailsView.remove(tag)
-		return true
-	}
-
+func (detailsView *detailsViewData) setFunc(self View, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Summary:
 		switch value := value.(type) {
 		case string:
-			detailsView.properties[Summary] = value
+			detailsView.setRaw(Summary, value)
 
 		case View:
-			detailsView.properties[Summary] = value
+			detailsView.setRaw(Summary, value)
 			value.setParentID(detailsView.htmlID())
 
 		case DataObject:
 			if view := CreateViewFromObject(detailsView.Session(), value); view != nil {
-				detailsView.properties[Summary] = view
+				detailsView.setRaw(Summary, view)
 				view.setParentID(detailsView.htmlID())
 			} else {
-				return false
+				return nil
 			}
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
-		if detailsView.created {
-			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-		}
+		return []PropertyName{tag}
+	}
+
+	return detailsView.viewsContainerData.setFunc(detailsView, tag, value)
+}
+
+func detailsViewPropertyChanged(view View, tag PropertyName) {
+	switch tag {
+	case Summary:
+		updateInnerHTML(view.htmlID(), view.Session())
 
 	case Expanded:
-		if !detailsView.setBoolProperty(tag, value) {
-			notCompatibleType(tag, value)
-			return false
-		}
-		if detailsView.created {
-			if IsDetailsExpanded(detailsView) {
-				detailsView.session.updateProperty(detailsView.htmlID(), "open", "")
-			} else {
-				detailsView.session.removeProperty(detailsView.htmlID(), "open")
-			}
+		if IsDetailsExpanded(view) {
+			view.Session().updateProperty(view.htmlID(), "open", "")
+		} else {
+			view.Session().removeProperty(view.htmlID(), "open")
 		}
 
 	case NotTranslate:
-		if !detailsView.viewData.set(tag, value) {
-			return false
-		}
-		if detailsView.created {
-			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-		}
+		updateInnerHTML(view.htmlID(), view.Session())
 
 	default:
-		return detailsView.viewsContainerData.Set(tag, value)
+		viewsContainerPropertyChanged(view, tag)
 	}
-
-	detailsView.propertyChangedEvent(tag)
-	return true
-}
-
-func (detailsView *detailsViewData) Get(tag string) any {
-	return detailsView.get(strings.ToLower(tag))
-}
-
-func (detailsView *detailsViewData) get(tag string) any {
-	return detailsView.viewsContainerData.get(tag)
 }
 
 func (detailsView *detailsViewData) htmlTag() string {
@@ -190,11 +151,13 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 	detailsView.viewsContainerData.htmlSubviews(self, buffer)
 }
 
-func (detailsView *detailsViewData) handleCommand(self View, command string, data DataObject) bool {
+func (detailsView *detailsViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	if command == "details-open" {
 		if n, ok := dataIntProperty(data, "open"); ok {
 			detailsView.properties[Expanded] = (n != 0)
-			detailsView.propertyChangedEvent(Expanded)
+			if listener, ok := detailsView.changeListener[Current]; ok {
+				listener(detailsView, Current)
+			}
 		}
 		return true
 	}

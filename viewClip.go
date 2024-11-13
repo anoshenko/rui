@@ -15,19 +15,19 @@ type ClipShape interface {
 }
 
 type insetClip struct {
-	propertyList
+	dataProperty
 }
 
 type ellipseClip struct {
-	propertyList
+	dataProperty
 }
 
 type circleClip struct {
-	propertyList
+	dataProperty
 }
 
 type polygonClip struct {
-	points []any
+	dataProperty
 }
 
 // InsetClip creates a rectangle View clipping area.
@@ -39,12 +39,12 @@ type polygonClip struct {
 func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShape {
 	clip := new(insetClip)
 	clip.init()
-	clip.Set(Top, top)
-	clip.Set(Right, right)
-	clip.Set(Bottom, bottom)
-	clip.Set(Left, left)
+	clip.setRaw(Top, top)
+	clip.setRaw(Right, right)
+	clip.setRaw(Bottom, bottom)
+	clip.setRaw(Left, left)
 	if radius != nil {
-		clip.Set(Radius, radius)
+		clip.setRaw(Radius, radius)
 	}
 	return clip
 }
@@ -53,9 +53,9 @@ func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipSha
 func CircleClip(x, y, radius SizeUnit) ClipShape {
 	clip := new(circleClip)
 	clip.init()
-	clip.Set(X, x)
-	clip.Set(Y, y)
-	clip.Set(Radius, radius)
+	clip.setRaw(X, x)
+	clip.setRaw(Y, y)
+	clip.setRaw(Radius, radius)
 	return clip
 }
 
@@ -63,10 +63,10 @@ func CircleClip(x, y, radius SizeUnit) ClipShape {
 func EllipseClip(x, y, rx, ry SizeUnit) ClipShape {
 	clip := new(ellipseClip)
 	clip.init()
-	clip.Set(X, x)
-	clip.Set(Y, y)
-	clip.Set(RadiusX, rx)
-	clip.Set(RadiusY, ry)
+	clip.setRaw(X, x)
+	clip.setRaw(Y, y)
+	clip.setRaw(RadiusX, rx)
+	clip.setRaw(RadiusY, ry)
 	return clip
 }
 
@@ -75,8 +75,8 @@ func EllipseClip(x, y, rx, ry SizeUnit) ClipShape {
 // or the text representation of SizeUnit, or elements of SizeUnit type.
 func PolygonClip(points []any) ClipShape {
 	clip := new(polygonClip)
-	clip.points = []any{}
-	if clip.Set(Points, points) {
+	clip.init()
+	if polygonClipSet(clip, Points, points) != nil {
 		return clip
 	}
 	return nil
@@ -85,34 +85,45 @@ func PolygonClip(points []any) ClipShape {
 // PolygonPointsClip creates a polygon View clipping area.
 func PolygonPointsClip(points []SizeUnit) ClipShape {
 	clip := new(polygonClip)
-	clip.points = []any{}
-	if clip.Set(Points, points) {
+	clip.init()
+	if polygonClipSet(clip, Points, points) != nil {
 		return clip
 	}
 	return nil
 }
 
-func (clip *insetClip) Set(tag string, value any) bool {
-	switch strings.ToLower(tag) {
+func (clip *insetClip) init() {
+	clip.dataProperty.init()
+	clip.set = insetClipSet
+	clip.supportedProperties = []PropertyName{
+		Top, Right, Bottom, Left, Radius,
+		RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
+		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
+		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
+		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY,
+	}
+}
+
+func insetClipSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	switch tag {
 	case Top, Right, Bottom, Left:
-		if value == nil {
-			clip.Remove(tag)
-			return true
-		}
-		return clip.setSizeProperty(tag, value)
+		return setSizeProperty(properties, tag, value)
 
 	case Radius:
-		return clip.setRadius(value)
+		return setRadiusProperty(properties, value)
 
 	case RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
 		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
 		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
-		return clip.setRadiusElement(tag, value)
+		if setRadiusPropertyElement(properties, tag, value) {
+			return []PropertyName{tag, Radius}
+		}
+		return nil
 	}
 
 	ErrorLogF(`"%s" property is not supported by the inset clip shape`, tag)
-	return false
+	return nil
 }
 
 func (clip *insetClip) String() string {
@@ -122,12 +133,12 @@ func (clip *insetClip) String() string {
 func (clip *insetClip) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("inset { ")
 	comma := false
-	for _, tag := range []string{Top, Right, Bottom, Left, Radius} {
+	for _, tag := range []PropertyName{Top, Right, Bottom, Left, Radius} {
 		if value, ok := clip.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
@@ -143,7 +154,7 @@ func (clip *insetClip) cssStyle(session Session) string {
 	defer freeStringBuilder(buffer)
 
 	leadText := "inset("
-	for _, tag := range []string{Top, Right, Bottom, Left} {
+	for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
 		value, _ := sizeProperty(clip, tag, session)
 		buffer.WriteString(leadText)
 		buffer.WriteString(value.cssString("0px", session))
@@ -160,7 +171,7 @@ func (clip *insetClip) cssStyle(session Session) string {
 }
 
 func (clip *insetClip) valid(session Session) bool {
-	for _, tag := range []string{Top, Right, Bottom, Left, Radius, RadiusX, RadiusY} {
+	for _, tag := range []PropertyName{Top, Right, Bottom, Left, Radius, RadiusX, RadiusY} {
 		if value, ok := sizeProperty(clip, tag, session); ok && value.Type != Auto && value.Value != 0 {
 			return true
 		}
@@ -168,18 +179,20 @@ func (clip *insetClip) valid(session Session) bool {
 	return false
 }
 
-func (clip *circleClip) Set(tag string, value any) bool {
-	if value == nil {
-		clip.Remove(tag)
-	}
+func (clip *circleClip) init() {
+	clip.dataProperty.init()
+	clip.set = circleClipSet
+	clip.supportedProperties = []PropertyName{X, Y, Radius}
+}
 
-	switch strings.ToLower(tag) {
+func circleClipSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	switch tag {
 	case X, Y, Radius:
-		return clip.setSizeProperty(tag, value)
+		return setSizeProperty(properties, tag, value)
 	}
 
 	ErrorLogF(`"%s" property is not supported by the circle clip shape`, tag)
-	return false
+	return nil
 }
 
 func (clip *circleClip) String() string {
@@ -189,12 +202,12 @@ func (clip *circleClip) String() string {
 func (clip *circleClip) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("circle { ")
 	comma := false
-	for _, tag := range []string{Radius, X, Y} {
+	for _, tag := range []PropertyName{Radius, X, Y} {
 		if value, ok := clip.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
@@ -232,22 +245,27 @@ func (clip *circleClip) valid(session Session) bool {
 	return true
 }
 
-func (clip *ellipseClip) Set(tag string, value any) bool {
-	if value == nil {
-		clip.Remove(tag)
-	}
+func (clip *ellipseClip) init() {
+	clip.dataProperty.init()
+	clip.set = ellipseClipSet
+	clip.supportedProperties = []PropertyName{X, Y, Radius, RadiusX, RadiusY}
+}
 
-	switch strings.ToLower(tag) {
+func ellipseClipSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	switch tag {
 	case X, Y, RadiusX, RadiusY:
-		return clip.setSizeProperty(tag, value)
+		return setSizeProperty(properties, tag, value)
 
 	case Radius:
-		return clip.setSizeProperty(RadiusX, value) &&
-			clip.setSizeProperty(RadiusY, value)
+		if result := setSizeProperty(properties, RadiusX, value); result != nil {
+			properties.setRaw(RadiusY, properties.getRaw(RadiusX))
+			return append(result, RadiusY)
+		}
+		return nil
 	}
 
 	ErrorLogF(`"%s" property is not supported by the ellipse clip shape`, tag)
-	return false
+	return nil
 }
 
 func (clip *ellipseClip) String() string {
@@ -257,12 +275,12 @@ func (clip *ellipseClip) String() string {
 func (clip *ellipseClip) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("ellipse { ")
 	comma := false
-	for _, tag := range []string{RadiusX, RadiusY, X, Y} {
+	for _, tag := range []PropertyName{RadiusX, RadiusY, X, Y} {
 		if value, ok := clip.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
@@ -302,104 +320,91 @@ func (clip *ellipseClip) valid(session Session) bool {
 	return rx.Value != 0 && ry.Value != 0
 }
 
-func (clip *polygonClip) Get(tag string) any {
-	if Points == strings.ToLower(tag) {
-		return clip.points
-	}
-	return nil
+func (clip *polygonClip) init() {
+	clip.dataProperty.init()
+	clip.set = polygonClipSet
+	clip.supportedProperties = []PropertyName{Points}
 }
 
-func (clip *polygonClip) getRaw(tag string) any {
-	return clip.Get(tag)
-}
-
-func (clip *polygonClip) Set(tag string, value any) bool {
-	if Points == strings.ToLower(tag) {
+func polygonClipSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	if Points == tag {
 		switch value := value.(type) {
 		case []any:
-			result := true
-			clip.points = make([]any, len(value))
+			points := make([]any, len(value))
 			for i, val := range value {
 				switch val := val.(type) {
 				case string:
 					if isConstantName(val) {
-						clip.points[i] = val
+						points[i] = val
 					} else if size, ok := StringToSizeUnit(val); ok {
-						clip.points[i] = size
+						points[i] = size
 					} else {
 						notCompatibleType(tag, val)
-						result = false
+						return nil
 					}
 
 				case SizeUnit:
-					clip.points[i] = val
+					points[i] = val
 
 				default:
 					notCompatibleType(tag, val)
-					clip.points[i] = AutoSize()
-					result = false
+					points[i] = AutoSize()
+					return nil
 				}
 			}
-			return result
+			properties.setRaw(Points, points)
+			return []PropertyName{tag}
 
 		case []SizeUnit:
-			clip.points = make([]any, len(value))
+			points := make([]any, len(value))
 			for i, point := range value {
-				clip.points[i] = point
+				points[i] = point
 			}
-			return true
+			properties.setRaw(Points, points)
+			return []PropertyName{tag}
 
 		case string:
-			result := true
 			values := strings.Split(value, ",")
-			clip.points = make([]any, len(values))
+			points := make([]any, len(values))
 			for i, val := range values {
 				val = strings.Trim(val, " \t\n\r")
 				if isConstantName(val) {
-					clip.points[i] = val
+					points[i] = val
 				} else if size, ok := StringToSizeUnit(val); ok {
-					clip.points[i] = size
+					points[i] = size
 				} else {
 					notCompatibleType(tag, val)
-					result = false
+					return nil
 				}
 			}
-			return result
+			properties.setRaw(Points, points)
+			return []PropertyName{tag}
 		}
 	}
-	return false
-}
-
-func (clip *polygonClip) setRaw(tag string, value any) {
-	clip.Set(tag, value)
-}
-
-func (clip *polygonClip) Remove(tag string) {
-	if Points == strings.ToLower(tag) {
-		clip.points = []any{}
-	}
-}
-
-func (clip *polygonClip) Clear() {
-	clip.points = []any{}
-}
-
-func (clip *polygonClip) AllTags() []string {
-	return []string{Points}
+	return nil
 }
 
 func (clip *polygonClip) String() string {
 	return runStringWriter(clip)
 }
 
+func (clip *polygonClip) points() []any {
+	if value := clip.getRaw(Points); value != nil {
+		if points, ok := value.([]any); ok {
+			return points
+		}
+	}
+	return nil
+}
+
 func (clip *polygonClip) writeString(buffer *strings.Builder, indent string) {
 
 	buffer.WriteString("inset { ")
 
-	if clip.points != nil {
-		buffer.WriteString(Points)
+	if points := clip.points(); points != nil {
+		buffer.WriteString(string(Points))
 		buffer.WriteString(` = "`)
-		for i, value := range clip.points {
+		for i, value := range points {
 			if i > 0 {
 				buffer.WriteString(", ")
 			}
@@ -408,13 +413,13 @@ func (clip *polygonClip) writeString(buffer *strings.Builder, indent string) {
 
 		buffer.WriteString(`" `)
 	}
-
 	buffer.WriteRune('}')
 }
 
 func (clip *polygonClip) cssStyle(session Session) string {
 
-	count := len(clip.points)
+	points := clip.points()
+	count := len(points)
 	if count < 2 {
 		return ""
 	}
@@ -443,9 +448,9 @@ func (clip *polygonClip) cssStyle(session Session) string {
 	leadText := "polygon("
 	for i := 1; i < count; i += 2 {
 		buffer.WriteString(leadText)
-		writePoint(clip.points[i-1])
+		writePoint(points[i-1])
 		buffer.WriteRune(' ')
-		writePoint(clip.points[i])
+		writePoint(points[i])
 		leadText = ", "
 	}
 
@@ -454,42 +459,46 @@ func (clip *polygonClip) cssStyle(session Session) string {
 }
 
 func (clip *polygonClip) valid(session Session) bool {
-	return len(clip.points) > 0
+	return len(clip.points()) > 0
 }
 
 func parseClipShape(obj DataObject) ClipShape {
 	switch obj.Tag() {
 	case "inset":
 		clip := new(insetClip)
-		for _, tag := range []string{Top, Right, Bottom, Left, Radius, RadiusX, RadiusY} {
-			if value, ok := obj.PropertyValue(tag); ok {
-				clip.Set(tag, value)
+		clip.init()
+		for _, tag := range []PropertyName{Top, Right, Bottom, Left, Radius, RadiusX, RadiusY} {
+			if value, ok := obj.PropertyValue(string(tag)); ok {
+				insetClipSet(clip, tag, value)
 			}
 		}
 		return clip
 
 	case "circle":
 		clip := new(ellipseClip)
-		for _, tag := range []string{X, Y, Radius} {
-			if value, ok := obj.PropertyValue(tag); ok {
-				clip.Set(tag, value)
+		clip.init()
+		for _, tag := range []PropertyName{X, Y, Radius} {
+			if value, ok := obj.PropertyValue(string(tag)); ok {
+				circleClipSet(clip, tag, value)
 			}
 		}
 		return clip
 
 	case "ellipse":
 		clip := new(ellipseClip)
-		for _, tag := range []string{X, Y, RadiusX, RadiusY} {
-			if value, ok := obj.PropertyValue(tag); ok {
-				clip.Set(tag, value)
+		clip.init()
+		for _, tag := range []PropertyName{X, Y, RadiusX, RadiusY} {
+			if value, ok := obj.PropertyValue(string(tag)); ok {
+				ellipseClipSet(clip, tag, value)
 			}
 		}
 		return clip
 
 	case "polygon":
 		clip := new(ellipseClip)
-		if value, ok := obj.PropertyValue(Points); ok {
-			clip.Set(Points, value)
+		clip.init()
+		if value, ok := obj.PropertyValue(string(Points)); ok {
+			polygonClipSet(clip, Points, value)
 		}
 		return clip
 	}
@@ -497,45 +506,45 @@ func parseClipShape(obj DataObject) ClipShape {
 	return nil
 }
 
-func (style *viewStyle) setClipShape(tag string, value any) bool {
+func setClipShapeProperty(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch value := value.(type) {
 	case ClipShape:
-		style.properties[tag] = value
-		return true
+		properties.setRaw(tag, value)
+		return []PropertyName{tag}
 
 	case string:
 		if isConstantName(value) {
-			style.properties[tag] = value
-			return true
+			properties.setRaw(tag, value)
+			return []PropertyName{tag}
 		}
 
 		if obj := NewDataObject(value); obj == nil {
 			if clip := parseClipShape(obj); clip != nil {
-				style.properties[tag] = clip
-				return true
+				properties.setRaw(tag, clip)
+				return []PropertyName{tag}
 			}
 		}
 
 	case DataObject:
 		if clip := parseClipShape(value); clip != nil {
-			style.properties[tag] = clip
-			return true
+			properties.setRaw(tag, clip)
+			return []PropertyName{tag}
 		}
 
 	case DataValue:
 		if value.IsObject() {
 			if clip := parseClipShape(value.Object()); clip != nil {
-				style.properties[tag] = clip
-				return true
+				properties.setRaw(tag, clip)
+				return []PropertyName{tag}
 			}
 		}
 	}
 
 	notCompatibleType(tag, value)
-	return false
+	return nil
 }
 
-func getClipShape(prop Properties, tag string, session Session) ClipShape {
+func getClipShape(prop Properties, tag PropertyName, session Session) ClipShape {
 	if value := prop.getRaw(tag); value != nil {
 		switch value := value.(type) {
 		case ClipShape:
