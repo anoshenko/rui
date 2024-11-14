@@ -592,8 +592,8 @@ func (radius *radiusPropertyData) Set(tag string, value any) bool {
 		case string:
 			if strings.Contains(value, "/") {
 				if values := strings.Split(value, "/"); len(values) == 2 {
-					xOK := radius.Set(tag+"-x", value[0])
-					yOK := radius.Set(tag+"-y", value[1])
+					xOK := radius.Set(tag+"-x", values[0])
+					yOK := radius.Set(tag+"-y", values[1])
 					return xOK && yOK
 				} else {
 					notCompatibleType(tag, value)
