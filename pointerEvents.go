@@ -156,7 +156,7 @@ type PointerEvent struct {
 
 /*
 func setPointerListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToEventListeners[View, PointerEvent](value); ok {
+	if listeners, ok := valueToOneArgEventListeners[View, PointerEvent](value); ok {
 		if len(listeners) == 0 {
 			properties.setRaw(tag, nil)
 		} else {
@@ -210,7 +210,7 @@ func (event *PointerEvent) init(data DataObject) {
 }
 
 func handlePointerEvents(view View, tag PropertyName, data DataObject) {
-	listeners := getEventListeners[View, PointerEvent](view, nil, tag)
+	listeners := getOneArgEventListeners[View, PointerEvent](view, nil, tag)
 	if len(listeners) == 0 {
 		return
 	}
@@ -226,35 +226,35 @@ func handlePointerEvents(view View, tag PropertyName, data DataObject) {
 // GetPointerDownListeners returns the "pointer-down" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPointerDownListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getEventListeners[View, PointerEvent](view, subviewID, PointerDown)
+	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerDown)
 }
 
 // GetPointerUpListeners returns the "pointer-up" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPointerUpListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getEventListeners[View, PointerEvent](view, subviewID, PointerUp)
+	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerUp)
 }
 
 // GetPointerMoveListeners returns the "pointer-move" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPointerMoveListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getEventListeners[View, PointerEvent](view, subviewID, PointerMove)
+	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerMove)
 }
 
 // GetPointerCancelListeners returns the "pointer-cancel" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPointerCancelListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getEventListeners[View, PointerEvent](view, subviewID, PointerCancel)
+	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerCancel)
 }
 
 // GetPointerOverListeners returns the "pointer-over" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPointerOverListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getEventListeners[View, PointerEvent](view, subviewID, PointerOver)
+	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerOver)
 }
 
 // GetPointerOutListeners returns the "pointer-out" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPointerOutListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getEventListeners[View, PointerEvent](view, subviewID, PointerOut)
+	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerOut)
 }

@@ -157,7 +157,7 @@ const (
 
 /*
 func setTransitionListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToEventListeners[View, string](value); ok {
+	if listeners, ok := valueToOneArgEventListeners[View, string](value); ok {
 		if len(listeners) == 0 {
 			properties.setRaw(tag, nil)
 		} else {
@@ -206,7 +206,7 @@ func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) 
 			}
 		}
 
-		for _, listener := range getEventListeners[View, PropertyName](view, nil, tag) {
+		for _, listener := range getOneArgEventListeners[View, PropertyName](view, nil, tag) {
 			listener(view, property)
 		}
 	}
@@ -214,7 +214,7 @@ func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) 
 
 /*
 	func setAnimationListener(properties Properties, tag PropertyName, value any) bool {
-		if listeners, ok := valueToEventListeners[View, string](value); ok {
+		if listeners, ok := valueToOneArgEventListeners[View, string](value); ok {
 			if len(listeners) == 0 {
 				properties.setRaw(tag, nil)
 			} else {
@@ -252,7 +252,7 @@ func animationEventsHtml(view View, buffer *strings.Builder) {
 */
 
 func (view *viewData) handleAnimationEvents(tag PropertyName, data DataObject) {
-	if listeners := getEventListeners[View, string](view, nil, tag); len(listeners) > 0 {
+	if listeners := getOneArgEventListeners[View, string](view, nil, tag); len(listeners) > 0 {
 		id := ""
 		if name, ok := data.PropertyValue("name"); ok {
 			for _, animation := range GetAnimation(view) {
@@ -271,54 +271,54 @@ func (view *viewData) handleAnimationEvents(tag PropertyName, data DataObject) {
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTransitionRunListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, TransitionRunEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, TransitionRunEvent)
 }
 
 // GetTransitionStartListeners returns the "transition-start-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTransitionStartListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, TransitionStartEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, TransitionStartEvent)
 }
 
 // GetTransitionEndListeners returns the "transition-end-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTransitionEndListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, TransitionEndEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, TransitionEndEvent)
 }
 
 // GetTransitionCancelListeners returns the "transition-cancel-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTransitionCancelListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, TransitionCancelEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, TransitionCancelEvent)
 }
 
 // GetAnimationStartListeners returns the "animation-start-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetAnimationStartListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, AnimationStartEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, AnimationStartEvent)
 }
 
 // GetAnimationEndListeners returns the "animation-end-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetAnimationEndListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, AnimationEndEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, AnimationEndEvent)
 }
 
 // GetAnimationCancelListeners returns the "animation-cancel-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetAnimationCancelListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, AnimationCancelEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, AnimationCancelEvent)
 }
 
 // GetAnimationIterationListeners returns the "animation-iteration-event" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetAnimationIterationListeners(view View, subviewID ...string) []func(View, string) {
-	return getEventListeners[View, string](view, subviewID, AnimationIterationEvent)
+	return getOneArgEventListeners[View, string](view, subviewID, AnimationIterationEvent)
 }

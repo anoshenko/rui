@@ -593,8 +593,8 @@ func (table *tableViewData) init(session Session) {
 		table.current.Column = -1
 	*/
 	table.normalize = normalizeTableViewTag
-	table.set = tableViewSet
-	table.changed = tableViewPropertyChanged
+	table.set = table.setFunc
+	table.changed = table.propertyChanged
 }
 
 func normalizeTableViewTag(tag PropertyName) PropertyName {
@@ -618,7 +618,7 @@ func (table *tableViewData) Focusable() bool {
 	return GetTableSelectionMode(table) != NoneSelection
 }
 
-func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
+func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	setLineStyle := func() []PropertyName {
 		params := []Params{}
@@ -637,9 +637,9 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 		if len(params) > 0 {
 			style := new(simpleTableLineStyle)
 			style.params = params
-			view.setRaw(tag, style)
-		} else if view.getRaw(tag) != nil {
-			view.setRaw(tag, nil)
+			table.setRaw(tag, style)
+		} else if table.getRaw(tag) != nil {
+			table.setRaw(tag, nil)
 		} else {
 			return []PropertyName{}
 		}
@@ -650,13 +650,13 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 	case Content:
 		switch val := value.(type) {
 		case TableAdapter:
-			view.setRaw(Content, value)
+			table.setRaw(Content, value)
 
 		case [][]any:
-			view.setRaw(Content, NewSimpleTableAdapter(val))
+			table.setRaw(Content, NewSimpleTableAdapter(val))
 
 		case [][]string:
-			view.setRaw(Content, NewTextTableAdapter(val))
+			table.setRaw(Content, NewTextTableAdapter(val))
 
 		default:
 			notCompatibleType(tag, value)
@@ -665,14 +665,14 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 		return []PropertyName{tag}
 
 	case TableCellClickedEvent, TableCellSelectedEvent:
-		return setEventWithOldListener[TableView, int](view, tag, value)
+		return setTwoArgEventListener[TableView, int](table, tag, value)
 
 	case TableRowClickedEvent, TableRowSelectedEvent:
-		return setViewEventListener[TableView, int](view, tag, value)
+		return setOneArgEventListener[TableView, int](table, tag, value)
 
 	case CellStyle:
 		if style, ok := value.(TableCellStyle); ok {
-			view.setRaw(tag, style)
+			table.setRaw(tag, style)
 			return []PropertyName{tag}
 		}
 		notCompatibleType(tag, value)
@@ -680,14 +680,14 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 
 	case RowStyle:
 		if style, ok := value.(TableRowStyle); ok {
-			view.setRaw(tag, style)
+			table.setRaw(tag, style)
 			return []PropertyName{tag}
 		}
 		return setLineStyle()
 
 	case ColumnStyle:
 		if style, ok := value.(TableColumnStyle); ok {
-			view.setRaw(tag, style)
+			table.setRaw(tag, style)
 			return []PropertyName{tag}
 		}
 		return setLineStyle()
@@ -696,9 +696,9 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 		switch value := value.(type) {
 		case string:
 			if isConstantName(value) {
-				view.setRaw(tag, value)
+				table.setRaw(tag, value)
 			} else if n, err := strconv.Atoi(value); err == nil {
-				view.setRaw(tag, n)
+				table.setRaw(tag, n)
 			} else {
 				ErrorLog(err.Error())
 				notCompatibleType(tag, value)
@@ -707,7 +707,7 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 
 		default:
 			if n, ok := isInt(value); ok {
-				view.setRaw(tag, n)
+				table.setRaw(tag, n)
 			} else {
 				notCompatibleType(tag, value)
 				return nil
@@ -718,13 +718,13 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 	case HeadStyle, FootStyle:
 		switch value := value.(type) {
 		case string:
-			view.setRaw(tag, value)
+			table.setRaw(tag, value)
 
 		case Params:
 			if len(value) > 0 {
-				view.setRaw(tag, value)
-			} else if view.getRaw(tag) != nil {
-				view.setRaw(tag, nil)
+				table.setRaw(tag, value)
+			} else if table.getRaw(tag) != nil {
+				table.setRaw(tag, nil)
 			} else {
 				return []PropertyName{}
 			}
@@ -736,15 +736,15 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 					params[PropertyName(prop.Tag())] = prop.Text()
 				}
 			}
-			return tableViewSet(view, tag, params)
+			return table.setFunc(tag, params)
 
 		case DataNode:
 			switch value.Type() {
 			case ObjectNode:
-				return tableViewSet(view, tag, value.Object())
+				return table.setFunc(tag, value.Object())
 
 			case TextNode:
-				view.setRaw(tag, value.Text())
+				table.setRaw(tag, value.Text())
 
 			default:
 				notCompatibleType(tag, value)
@@ -760,10 +760,10 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 	case AllowSelection:
 		switch value.(type) {
 		case TableAllowCellSelection:
-			view.setRaw(tag, value)
+			table.setRaw(tag, value)
 
 		case TableAllowRowSelection:
-			view.setRaw(tag, value)
+			table.setRaw(tag, value)
 
 		default:
 			notCompatibleType(tag, value)
@@ -819,17 +819,17 @@ func tableViewSet(view View, tag PropertyName, value any) []PropertyName {
 				return nil
 			}
 		}
-		view.setRaw(Current, current)
+		table.setRaw(Current, current)
 		return []PropertyName{tag}
 	}
 
-	return viewSet(view, tag, value)
+	return table.viewData.setFunc(tag, value)
 }
 
-func tableViewPropertyChanged(view View, tag PropertyName) {
+func (table *tableViewData) propertyChanged(tag PropertyName) {
 
-	htmlID := view.htmlID()
-	session := view.Session()
+	htmlID := table.htmlID()
+	session := table.Session()
 
 	switch tag {
 	case Content, TableVerticalAlign, RowStyle, ColumnStyle, CellStyle, CellPadding,
@@ -837,20 +837,20 @@ func tableViewPropertyChanged(view View, tag PropertyName) {
 		CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
 		TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
 		TableRowSelectedEvent, AllowSelection, AccentColor:
-		ReloadTableViewData(view)
+		ReloadTableViewData(table)
 
 	case Current:
-		switch GetTableSelectionMode(view) {
+		switch GetTableSelectionMode(table) {
 		case CellSelection:
-			current := tableViewCurrent(view)
+			current := tableViewCurrent(table)
 			session.callFunc("setTableCellCursorByID", htmlID, current.Row, current.Column)
 
 		case RowSelection:
-			session.callFunc("setTableRowCursorByID", htmlID, tableViewCurrent(view).Row)
+			session.callFunc("setTableRowCursorByID", htmlID, tableViewCurrent(table).Row)
 		}
 
 	case Gap:
-		gap, ok := sizeProperty(view, Gap, session)
+		gap, ok := sizeProperty(table, Gap, session)
 		if !ok || gap.Type == Auto || gap.Value <= 0 {
 			session.updateCSSProperty(htmlID, "border-spacing", "0")
 			session.updateCSSProperty(htmlID, "border-collapse", "collapse")
@@ -860,43 +860,43 @@ func tableViewPropertyChanged(view View, tag PropertyName) {
 		}
 
 	case SelectionMode:
-		switch GetTableSelectionMode(view) {
+		switch GetTableSelectionMode(table) {
 		case CellSelection:
-			tabIndex, _ := intProperty(view, TabIndex, session, 0)
+			tabIndex, _ := intProperty(table, TabIndex, session, 0)
 			session.updateProperty(htmlID, "tabindex", tabIndex)
 			session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
 			session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
 			session.updateProperty(htmlID, "data-selection", "cell")
-			session.updateProperty(htmlID, "data-focusitemstyle", tableViewCurrentStyle(view))
-			session.updateProperty(htmlID, "data-bluritemstyle", tableViewCurrentInactiveStyle(view))
+			session.updateProperty(htmlID, "data-focusitemstyle", tableViewCurrentStyle(table))
+			session.updateProperty(htmlID, "data-bluritemstyle", tableViewCurrentInactiveStyle(table))
 
-			current := tableViewCurrent(view)
+			current := tableViewCurrent(table)
 			if current.Row >= 0 && current.Column >= 0 {
-				session.updateProperty(htmlID, "data-current", tableViewCellID(view, current.Row, current.Column))
+				session.updateProperty(htmlID, "data-current", tableViewCellID(table, current.Row, current.Column))
 			} else {
 				session.removeProperty(htmlID, "data-current")
 			}
 			session.updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)")
 
 		case RowSelection:
-			tabIndex, _ := intProperty(view, TabIndex, session, 0)
+			tabIndex, _ := intProperty(table, TabIndex, session, 0)
 			session.updateProperty(htmlID, "tabindex", tabIndex)
 			session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
 			session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
 			session.updateProperty(htmlID, "data-selection", "row")
-			session.updateProperty(htmlID, "data-focusitemstyle", tableViewCurrentStyle(view))
-			session.updateProperty(htmlID, "data-bluritemstyle", tableViewCurrentInactiveStyle(view))
+			session.updateProperty(htmlID, "data-focusitemstyle", tableViewCurrentStyle(table))
+			session.updateProperty(htmlID, "data-bluritemstyle", tableViewCurrentInactiveStyle(table))
 
-			current := tableViewCurrent(view)
+			current := tableViewCurrent(table)
 			if current.Row >= 0 {
-				session.updateProperty(htmlID, "data-current", tableViewRowID(view, current.Row))
+				session.updateProperty(htmlID, "data-current", tableViewRowID(table, current.Row))
 			} else {
 				session.removeProperty(htmlID, "data-current")
 			}
 			session.updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)")
 
 		default: // NoneSelection
-			if tabIndex, ok := intProperty(view, TabIndex, session, -1); !ok || tabIndex < 0 {
+			if tabIndex, ok := intProperty(table, TabIndex, session, -1); !ok || tabIndex < 0 {
 				session.removeProperty(htmlID, "tabindex")
 			}
 
@@ -907,7 +907,7 @@ func tableViewPropertyChanged(view View, tag PropertyName) {
 		updateInnerHTML(htmlID, session)
 
 	default:
-		viewPropertyChanged(view, tag)
+		table.viewData.propertyChanged(tag)
 	}
 }
 

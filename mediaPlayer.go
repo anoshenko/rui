@@ -907,46 +907,39 @@ type MediaSource struct {
 func (player *mediaPlayerData) init(session Session) {
 	player.viewData.init(session)
 	player.tag = "MediaPlayer"
-	player.set = mediaPlayerSet
-	player.changed = mediaPlayerPropertyChanged
+	player.set = player.setFunc
+	player.changed = player.propertyChanged
 }
 
 func (player *mediaPlayerData) Focusable() bool {
 	return true
 }
 
-func mediaPlayerSet(view View, tag PropertyName, value any) []PropertyName {
+func (player *mediaPlayerData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent, LoadStartEvent,
 		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent,
 		ProgressEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
 
-		return setNoParamEventListener[MediaPlayer](view, tag, value)
+		return setNoArgEventListener[MediaPlayer](player, tag, value)
 
 	case DurationChangedEvent, RateChangedEvent, TimeUpdateEvent, VolumeChangedEvent:
 
-		return setViewEventListener[MediaPlayer, float64](view, tag, value)
+		return setOneArgEventListener[MediaPlayer, float64](player, tag, value)
 
 	case PlayerErrorEvent:
 		if listeners, ok := valueToPlayerErrorListeners(value); ok {
-			if len(listeners) > 0 {
-				view.setRaw(tag, listeners)
-			} else if view.getRaw(tag) != nil {
-				view.setRaw(tag, nil)
-			} else {
-				return []PropertyName{}
-			}
-			return []PropertyName{tag}
+			return setArrayPropertyValue(player, tag, listeners)
 		}
 		notCompatibleType(tag, value)
 		return nil
 
 	case Source:
-		return setMediaPlayerSource(view, value)
+		return setMediaPlayerSource(player, value)
 	}
 
-	return viewSet(view, tag, value)
+	return player.viewData.setFunc(tag, value)
 }
 
 func setMediaPlayerSource(properties Properties, value any) []PropertyName {
@@ -1151,26 +1144,26 @@ func mediaPlayerEvents() map[PropertyName]string {
 	}
 }
 
-func mediaPlayerPropertyChanged(view View, tag PropertyName) {
-	session := view.Session()
+func (player *mediaPlayerData) propertyChanged(tag PropertyName) {
+	session := player.Session()
 
 	switch tag {
 	case Controls, Loop:
-		value, _ := boolProperty(view, tag, session)
+		value, _ := boolProperty(player, tag, session)
 		if value {
-			session.updateProperty(view.htmlID(), string(tag), value)
+			session.updateProperty(player.htmlID(), string(tag), value)
 		} else {
-			session.removeProperty(view.htmlID(), string(tag))
+			session.removeProperty(player.htmlID(), string(tag))
 		}
 
 	case Muted:
-		value, _ := boolProperty(view, Muted, session)
-		session.callFunc("setMediaMuted", view.htmlID(), value)
+		value, _ := boolProperty(player, Muted, session)
+		session.callFunc("setMediaMuted", player.htmlID(), value)
 
 	case Preload:
-		value, _ := enumProperty(view, Preload, session, 0)
+		value, _ := enumProperty(player, Preload, session, 0)
 		values := enumProperties[Preload].values
-		session.updateProperty(view.htmlID(), string(Preload), values[value])
+		session.updateProperty(player.htmlID(), string(Preload), values[value])
 
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
 		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
@@ -1178,54 +1171,54 @@ func mediaPlayerPropertyChanged(view View, tag PropertyName) {
 
 		if cssTag, ok := mediaPlayerEvents()[tag]; ok {
 			fn := ""
-			if value := view.getRaw(tag); value != nil {
+			if value := player.getRaw(tag); value != nil {
 				if listeners, ok := value.([]func(MediaPlayer)); ok && len(listeners) > 0 {
 					fn = fmt.Sprintf(`viewEvent(this, "%s")`, string(tag))
 				}
 			}
-			session.updateProperty(view.htmlID(), cssTag, fn)
+			session.updateProperty(player.htmlID(), cssTag, fn)
 		}
 
 	case TimeUpdateEvent:
-		if value := view.getRaw(tag); value != nil {
-			session.updateProperty(view.htmlID(), "ontimeupdate", "viewTimeUpdatedEvent(this)")
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "ontimeupdate", "viewTimeUpdatedEvent(this)")
 		} else {
-			session.updateProperty(view.htmlID(), "ontimeupdate", "")
+			session.updateProperty(player.htmlID(), "ontimeupdate", "")
 		}
 
 	case VolumeChangedEvent:
-		if value := view.getRaw(tag); value != nil {
-			session.updateProperty(view.htmlID(), "onvolumechange", "viewVolumeChangedEvent(this)")
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "onvolumechange", "viewVolumeChangedEvent(this)")
 		} else {
-			session.updateProperty(view.htmlID(), "onvolumechange", "")
+			session.updateProperty(player.htmlID(), "onvolumechange", "")
 		}
 
 	case DurationChangedEvent:
-		if value := view.getRaw(tag); value != nil {
-			session.updateProperty(view.htmlID(), "ondurationchange", "viewDurationChangedEvent(this)")
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "ondurationchange", "viewDurationChangedEvent(this)")
 		} else {
-			session.updateProperty(view.htmlID(), "ondurationchange", "")
+			session.updateProperty(player.htmlID(), "ondurationchange", "")
 		}
 
 	case RateChangedEvent:
-		if value := view.getRaw(tag); value != nil {
-			session.updateProperty(view.htmlID(), "onratechange", "viewRateChangedEvent(this)")
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "onratechange", "viewRateChangedEvent(this)")
 		} else {
-			session.updateProperty(view.htmlID(), "onratechange", "")
+			session.updateProperty(player.htmlID(), "onratechange", "")
 		}
 
 	case PlayerErrorEvent:
-		if value := view.getRaw(tag); value != nil {
-			session.updateProperty(view.htmlID(), "onerror", "viewErrorEvent(this)")
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "onerror", "viewErrorEvent(this)")
 		} else {
-			session.updateProperty(view.htmlID(), "onerror", "")
+			session.updateProperty(player.htmlID(), "onerror", "")
 		}
 
 	case Source:
-		updateInnerHTML(view.htmlID(), session)
+		updateInnerHTML(player.htmlID(), session)
 
 	default:
-		viewPropertyChanged(view, tag)
+		player.viewData.propertyChanged(tag)
 	}
 
 }

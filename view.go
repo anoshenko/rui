@@ -110,10 +110,10 @@ type viewData struct {
 	created          bool
 	hasFocus         bool
 	hasHtmlDisabled  bool
-	getFunc          func(view View, tag PropertyName) any
-	set              func(view View, tag PropertyName, value any) []PropertyName
-	remove           func(view View, tag PropertyName) []PropertyName
-	changed          func(view View, tag PropertyName)
+	get              func(tag PropertyName) any
+	set              func(tag PropertyName, value any) []PropertyName
+	remove           func(tag PropertyName) []PropertyName
+	changed          func(tag PropertyName)
 }
 
 func newView(session Session) View {
@@ -145,10 +145,11 @@ func setInitParams(view View, params Params) {
 
 func (view *viewData) init(session Session) {
 	view.viewStyle.init()
-	view.getFunc = viewGet
-	view.set = viewSet
+	view.get = view.getFunc
+	view.set = view.setFunc
+	view.remove = view.removeFunc
 	view.normalize = normalizeViewTag
-	view.changed = viewPropertyChanged
+	view.changed = view.propertyChanged
 	view.tag = "View"
 	view.session = session
 	view.changeListener = map[PropertyName]func(View, PropertyName){}
@@ -213,35 +214,11 @@ func (view *viewData) Focusable() bool {
 }
 
 func (view *viewData) Remove(tag PropertyName) {
-	tag = view.normalize(tag)
-	var changedTags []PropertyName = nil
-
-	switch tag {
-	case ID:
-		if view.viewID != "" {
-			view.viewID = ""
-			changedTags = []PropertyName{ID}
-		}
-
-	case AnimationTag:
-		if val := view.getRaw(AnimationTag); val != nil {
-			if animations, ok := val.([]Animation); ok {
-				for _, animation := range animations {
-					animation.unused(view.session)
-				}
-			}
-
-			view.setRaw(AnimationTag, nil)
-			changedTags = []PropertyName{AnimationTag}
-		}
-
-	default:
-		changedTags = view.remove(view, tag)
-	}
+	changedTags := view.removeFunc(view.normalize(tag))
 
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
-			view.changed(view, tag)
+			view.changed(tag)
 		}
 
 		for _, tag := range changedTags {
@@ -252,6 +229,15 @@ func (view *viewData) Remove(tag PropertyName) {
 	}
 }
 
+func (view *viewData) Get(tag PropertyName) any {
+	switch tag {
+	case ID:
+		return view.ID()
+	}
+	return view.get(view.normalize(tag))
+
+}
+
 func (view *viewData) Set(tag PropertyName, value any) bool {
 	if value == nil {
 		view.Remove(tag)
@@ -259,42 +245,11 @@ func (view *viewData) Set(tag PropertyName, value any) bool {
 	}
 
 	tag = view.normalize(tag)
-	var changedTags []PropertyName = nil
-
-	switch tag {
-	case ID:
-		text, ok := value.(string)
-		if !ok {
-			notCompatibleType(ID, value)
-			return false
-		}
-		view.viewID = text
-		changedTags = []PropertyName{ID}
-
-	case AnimationTag:
-		oldAnimations := []Animation{}
-		if val := view.getRaw(AnimationTag); val != nil {
-			if animation, ok := val.([]Animation); ok {
-				oldAnimations = animation
-			}
-		}
-
-		if !setAnimationProperty(view, tag, value) {
-			return false
-		}
-
-		for _, animation := range oldAnimations {
-			animation.unused(view.session)
-		}
-		changedTags = []PropertyName{AnimationTag}
-
-	default:
-		changedTags = viewSet(view, tag, value)
-	}
+	changedTags := view.set(tag, value)
 
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
-			view.changed(view, tag)
+			view.changed(tag)
 		}
 
 		for _, tag := range changedTags {
@@ -316,66 +271,77 @@ func normalizeViewTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-/*
-func (view *viewData) propertyChangedEvent(tag PropertyName) {
-	if listener, ok := view.changeListener[tag]; ok {
-		listener(view, tag)
+func (view *viewData) getFunc(tag PropertyName) any {
+	if tag == ID {
+		if id := view.ID(); id != "" {
+			return id
+		} else {
+			return nil
+		}
 	}
+	return viewStyleGet(view, tag)
+}
+
+func (view *viewData) removeFunc(tag PropertyName) []PropertyName {
+	var changedTags []PropertyName = nil
 
 	switch tag {
-	case BorderLeft, BorderRight, BorderTop, BorderBottom,
-		BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle,
-		BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor,
-		BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
-		tag = Border
+	case ID:
+		if view.viewID != "" {
+			view.viewID = ""
+			changedTags = []PropertyName{ID}
+		} else {
+			changedTags = []PropertyName{}
+		}
 
-	case CellBorderStyle, CellBorderColor, CellBorderWidth,
-		CellBorderLeft, CellBorderLeftStyle, CellBorderLeftColor, CellBorderLeftWidth,
-		CellBorderRight, CellBorderRightStyle, CellBorderRightColor, CellBorderRightWidth,
-		CellBorderTop, CellBorderTopStyle, CellBorderTopColor, CellBorderTopWidth,
-		CellBorderBottom, CellBorderBottomStyle, CellBorderBottomColor, CellBorderBottomWidth:
-		tag = CellBorder
+	case AnimationTag:
+		if val := view.getRaw(AnimationTag); val != nil {
+			if animations, ok := val.([]Animation); ok {
+				for _, animation := range animations {
+					animation.unused(view.session)
+				}
+			}
 
-	case OutlineColor, OutlineStyle, OutlineWidth:
-		tag = Outline
-
-	case RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
-		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
-		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
-		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
-		tag = Radius
-
-	case MarginTop, MarginRight, MarginBottom, MarginLeft,
-		"top-margin", "right-margin", "bottom-margin", "left-margin":
-		tag = Margin
-
-	case PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
-		"top-padding", "right-padding", "bottom-padding", "left-padding":
-		tag = Padding
-
-	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
-		tag = CellPadding
-
-	case ColumnSeparatorStyle, ColumnSeparatorWidth, ColumnSeparatorColor:
-		tag = ColumnSeparator
+			view.setRaw(AnimationTag, nil)
+			changedTags = []PropertyName{AnimationTag}
+		}
 
 	default:
-		return
+		changedTags = viewStyleRemove(view, tag)
 	}
 
-	if listener, ok := view.changeListener[tag]; ok {
-		listener(view, tag)
-	}
-}
-*/
-
-func viewRemove(properties Properties, tag PropertyName) []PropertyName {
-	return viewStyleRemove(properties, tag)
+	return changedTags
 }
 
-func viewSet(view View, tag PropertyName, value any) []PropertyName {
+func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	switch tag {
+
+	case ID:
+		if text, ok := value.(string); ok {
+			view.viewID = text
+			view.setRaw(ID, text)
+			return []PropertyName{ID}
+		}
+		notCompatibleType(ID, value)
+		return nil
+
+	case AnimationTag:
+		oldAnimations := []Animation{}
+		if val := view.getRaw(AnimationTag); val != nil {
+			if animation, ok := val.([]Animation); ok {
+				oldAnimations = animation
+			}
+		}
+
+		if !setAnimationProperty(view, tag, value) {
+			return nil
+		}
+
+		for _, animation := range oldAnimations {
+			animation.unused(view.session)
+		}
+		return []PropertyName{AnimationTag}
 
 	case TabIndex, "tab-index":
 		return setIntProperty(view, TabIndex, value)
@@ -393,29 +359,46 @@ func viewSet(view View, tag PropertyName, value any) []PropertyName {
 		return nil
 
 	case FocusEvent, LostFocusEvent:
-		return setNoParamEventListener[View](view, tag, value)
+		return setNoArgEventListener[View](view, tag, value)
 
 	case KeyDownEvent, KeyUpEvent:
-		return setViewEventListener[View, KeyEvent](view, tag, value)
+		return setOneArgEventListener[View, KeyEvent](view, tag, value)
 
 	case ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent:
-		return setViewEventListener[View, MouseEvent](view, tag, value)
+		return setOneArgEventListener[View, MouseEvent](view, tag, value)
 
 	case PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel:
-		return setViewEventListener[View, PointerEvent](view, tag, value)
+		return setOneArgEventListener[View, PointerEvent](view, tag, value)
 
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
-		return setViewEventListener[View, TouchEvent](view, tag, value)
+		return setOneArgEventListener[View, TouchEvent](view, tag, value)
 
-	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
-		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
-		return setViewEventListener[View, string](view, tag, value)
-		//return setTransitionListener(view, tag, value), tag
-		//return setAnimationListener(view, tag, value), tag
+	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
+		result := setOneArgEventListener[View, PropertyName](view, tag, value)
+		if result == nil {
+			result = setOneArgEventListener[View, string](view, tag, value)
+			if result != nil {
+				if listeners, ok := view.getRaw(tag).([]func(View, string)); ok {
+					newListeners := make([]func(View, PropertyName), len(listeners))
+					for i, listener := range listeners {
+						newListeners[i] = func(view View, name PropertyName) {
+							listener(view, string(name))
+						}
+					}
+					view.setRaw(tag, newListeners)
+					return result
+				}
+				view.setRaw(tag, nil)
+				return nil
+			}
+		}
+		return result
+
+	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		return setOneArgEventListener[View, string](view, tag, value)
 
 	case ResizeEvent, ScrollEvent:
-		return setViewEventListener[View, Frame](view, tag, value)
-		//return setFrameListener(view, tag, value), tag
+		return setOneArgEventListener[View, Frame](view, tag, value)
 	}
 
 	return viewStyleSet(view, tag, value)
@@ -439,12 +422,7 @@ func (view *viewData) SetParams(params Params) bool {
 	return result
 }
 
-func viewPropertyChanged(view View, tag PropertyName) {
-	/*
-		if view.updateTransformProperty(tag) {
-			return
-		}
-	*/
+func (view *viewData) propertyChanged(tag PropertyName) {
 
 	htmlID := view.htmlID()
 	session := view.Session()
@@ -645,9 +623,11 @@ func viewPropertyChanged(view View, tag PropertyName) {
 
 	case Strikethrough, Overline, Underline:
 		session.updateCSSProperty(htmlID, "text-decoration", textDecorationCSS(view, session))
-		for _, tag2 := range []PropertyName{TextLineColor, TextLineStyle, TextLineThickness} {
-			viewPropertyChanged(view, tag2)
-		}
+		/*
+			for _, tag2 := range []PropertyName{TextLineColor, TextLineStyle, TextLineThickness} {
+				view.propertyChanged(tag2)
+			}
+		*/
 
 	case Transition:
 		session.updateCSSProperty(htmlID, "transition", transitionCSS(view, session))
@@ -711,34 +691,19 @@ func viewPropertyChanged(view View, tag PropertyName) {
 		}
 
 	case PerspectiveOriginX, PerspectiveOriginY:
-		if getTransform3D(view, session) {
-			x, y := GetPerspectiveOrigin(view)
-			value := ""
-			if x.Type != Auto || y.Type != Auto {
-				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
-			}
-			session.updateCSSProperty(htmlID, "perspective-origin", value)
-		}
+		x, y := GetPerspectiveOrigin(view)
+		session.updateCSSProperty(htmlID, "perspective-origin", transformOriginCSS(x, y, AutoSize(), view.Session()))
 
 	case BackfaceVisible:
-		if getTransform3D(view, session) {
-			if GetBackfaceVisible(view) {
-				session.updateCSSProperty(htmlID, string(BackfaceVisible), "visible")
-			} else {
-				session.updateCSSProperty(htmlID, string(BackfaceVisible), "hidden")
-			}
+		if GetBackfaceVisible(view) {
+			session.updateCSSProperty(htmlID, string(BackfaceVisible), "visible")
+		} else {
+			session.updateCSSProperty(htmlID, string(BackfaceVisible), "hidden")
 		}
 
-	case OriginX, OriginY, OriginZ:
-		x, y, z := getOrigin(view, session)
-		value := ""
-
-		if z.Type != Auto {
-			value = x.cssString("50%", session) + " " + y.cssString("50%", session) + " " + z.cssString("50%", session)
-		} else if x.Type != Auto || y.Type != Auto {
-			value = x.cssString("50%", session) + " " + y.cssString("50%", session)
-		}
-		session.updateCSSProperty(htmlID, "transform-origin", value)
+	case TransformOriginX, TransformOriginY, TransformOriginZ:
+		x, y, z := getTransformOrigin(view, session)
+		session.updateCSSProperty(htmlID, "transform-origin", transformOriginCSS(x, y, z, view.Session()))
 
 	case TransformTag, Perspective, SkewX, SkewY, TranslateX, TranslateY, TranslateZ,
 		ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ:
@@ -801,17 +766,6 @@ func viewPropertyChanged(view View, tag PropertyName) {
 			session.updateCSSProperty(htmlID, string(Opacity), "")
 		}
 	}
-}
-
-func viewGet(view View, tag PropertyName) any {
-	if tag == ID {
-		if id := view.ID(); id != "" {
-			return id
-		} else {
-			return nil
-		}
-	}
-	return viewStyleGet(view, tag)
 }
 
 func (view *viewData) htmlTag() string {
@@ -999,13 +953,13 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 
 	case FocusEvent:
 		view.hasFocus = true
-		for _, listener := range getNoParamEventListeners[View](view, nil, command) {
+		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
 			listener(self)
 		}
 
 	case LostFocusEvent:
 		view.hasFocus = false
-		for _, listener := range getNoParamEventListeners[View](view, nil, command) {
+		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
 			listener(self)
 		}
 

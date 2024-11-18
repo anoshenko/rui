@@ -53,7 +53,7 @@ func (progress *progressBarData) init(session Session) {
 	progress.viewData.init(session)
 	progress.tag = "ProgressBar"
 	progress.normalize = normalizeProgressBarTag
-	progress.changed = progressBarPropertyChanged
+	progress.changed = progress.propertyChanged
 }
 
 func normalizeProgressBarTag(tag PropertyName) PropertyName {
@@ -68,19 +68,19 @@ func normalizeProgressBarTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func progressBarPropertyChanged(view View, tag PropertyName) {
+func (progress *progressBarData) propertyChanged(tag PropertyName) {
 
 	switch tag {
 	case ProgressBarMax:
-		view.Session().updateProperty(view.htmlID(), "max",
-			strconv.FormatFloat(GetProgressBarMax(view), 'f', -1, 32))
+		progress.Session().updateProperty(progress.htmlID(), "max",
+			strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 32))
 
 	case ProgressBarValue:
-		view.Session().updateProperty(view.htmlID(), "value",
-			strconv.FormatFloat(GetProgressBarValue(view), 'f', -1, 32))
+		progress.Session().updateProperty(progress.htmlID(), "value",
+			strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 32))
 
 	default:
-		viewPropertyChanged(view, tag)
+		progress.viewData.propertyChanged(tag)
 	}
 }
 

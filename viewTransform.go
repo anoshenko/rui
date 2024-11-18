@@ -79,7 +79,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	OriginX PropertyName = "origin-x"
+	TransformOriginX PropertyName = "transform-origin-x"
 
 	// OriginY is the constant for "origin-y" property tag.
 	//
@@ -90,7 +90,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	OriginY PropertyName = "origin-y"
+	TransformOriginY PropertyName = "transform-origin-y"
 
 	// OriginZ is the constant for "origin-z" property tag.
 	//
@@ -101,7 +101,7 @@ const (
 	//
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
-	OriginZ PropertyName = "origin-z"
+	TransformOriginZ PropertyName = "transform-origin-z"
 
 	// TranslateX is the constant for "translate-x" property tag.
 	//
@@ -527,29 +527,31 @@ func getTransformProperty(properties Properties) Transform {
 func setTransformPropertyElement(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Perspective, RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ, TranslateX, TranslateY, TranslateZ:
+		var result []PropertyName = nil
 		if transform := getTransformProperty(properties); transform != nil {
-			if result := transformSet(transform, tag, value); result != nil {
+			if result = transformSet(transform, tag, value); result != nil {
 				result = append(result, TransformTag)
 			}
 		} else {
 			transform := NewTransform(nil)
-			if result := transformSet(transform, tag, value); result != nil {
+			if result = transformSet(transform, tag, value); result != nil {
 				properties.setRaw(TransformTag, transform)
 				result = append(result, TransformTag)
 			}
 		}
-
-	default:
-		ErrorLogF(`"Transform" interface does not support the "%s" property`, tag)
+		return result
 	}
 
+	ErrorLogF(`"Transform" interface does not support the "%s" property`, tag)
 	return nil
 }
 
+/*
 func getTransform3D(style Properties, session Session) bool {
 	perspective, ok := sizeProperty(style, Perspective, session)
 	return ok && perspective.Type != Auto && perspective.Value != 0
 }
+*/
 
 func getPerspectiveOrigin(style Properties, session Session) (SizeUnit, SizeUnit) {
 	x, _ := sizeProperty(style, PerspectiveOriginX, session)
@@ -557,10 +559,10 @@ func getPerspectiveOrigin(style Properties, session Session) (SizeUnit, SizeUnit
 	return x, y
 }
 
-func getOrigin(style Properties, session Session) (SizeUnit, SizeUnit, SizeUnit) {
-	x, _ := sizeProperty(style, OriginX, session)
-	y, _ := sizeProperty(style, OriginY, session)
-	z, _ := sizeProperty(style, OriginZ, session)
+func getTransformOrigin(style Properties, session Session) (SizeUnit, SizeUnit, SizeUnit) {
+	x, _ := sizeProperty(style, TransformOriginX, session)
+	y, _ := sizeProperty(style, TransformOriginY, session)
+	z, _ := sizeProperty(style, TransformOriginZ, session)
 	return x, y, z
 }
 
@@ -674,8 +676,9 @@ func (transform *transformData) transformCSS(session Session) string {
 
 func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Session) {
 	x, y := getPerspectiveOrigin(style, session)
-	if x.Type != Auto || y.Type != Auto {
-		builder.addValues(`perspective-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
+	z := AutoSize()
+	if css := transformOriginCSS(x, y, z, session); css != "" {
+		builder.add(`perspective-origin`, css)
 	}
 
 	if backfaceVisible, ok := boolProperty(style, BackfaceVisible, session); ok {
@@ -686,16 +689,64 @@ func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Sessio
 		}
 	}
 
-	x, y, z := getOrigin(style, session)
-	if z.Type != Auto && z.Value != 0 {
-		builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session), z.cssString("0", session))
-	} else if x.Type != Auto || y.Type != Auto {
-		builder.addValues(`transform-origin`, ` `, x.cssString("50%", session), y.cssString("50%", session))
+	x, y, z = getTransformOrigin(style, session)
+	if css := transformOriginCSS(x, y, z, session); css != "" {
+		builder.add(`transform-origin`, css)
 	}
 
 	if transform := getTransformProperty(style); transform != nil {
 		builder.add(`transform`, transform.transformCSS(session))
 	}
+}
+
+func transformOriginCSS(x, y, z SizeUnit, session Session) string {
+	if z.Type == Auto && x.Type == Auto && y.Type == Auto {
+		return ""
+	}
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	if x.Type == SizeInPercent {
+		switch x.Value {
+		case 0:
+			buffer.WriteString("left")
+		case 50:
+			buffer.WriteString("center")
+		case 100:
+			buffer.WriteString("right")
+
+		default:
+			buffer.WriteString(x.cssString("center", session))
+		}
+	} else {
+		buffer.WriteString(x.cssString("center", session))
+	}
+
+	buffer.WriteRune(' ')
+
+	if y.Type == SizeInPercent {
+		switch y.Value {
+		case 0:
+			buffer.WriteString("top")
+		case 50:
+			buffer.WriteString("center")
+		case 100:
+			buffer.WriteString("bottom")
+
+		default:
+			buffer.WriteString(y.cssString("center", session))
+		}
+	} else {
+		buffer.WriteString(y.cssString("center", session))
+	}
+
+	if z.Type != Auto && z.Value != 0 {
+		buffer.WriteRune(' ')
+		buffer.WriteString(z.cssString("0", session))
+	}
+
+	return buffer.String()
 }
 
 /*

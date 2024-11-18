@@ -37,8 +37,8 @@ func (canvasView *canvasViewData) init(session Session) {
 	canvasView.viewData.init(session)
 	canvasView.tag = "CanvasView"
 	canvasView.normalize = normalizeCanvasViewTag
-	canvasView.set = canvasViewSet
-	canvasView.remove = canvasViewRemove
+	canvasView.set = canvasView.setFunc
+	canvasView.remove = canvasView.removeFunc
 
 }
 
@@ -51,36 +51,32 @@ func normalizeCanvasViewTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func canvasViewRemove(view View, tag PropertyName) []PropertyName {
+func (canvasView *canvasViewData) removeFunc(tag PropertyName) []PropertyName {
 	if tag == DrawFunction {
-		if view.getRaw(DrawFunction) != nil {
-			view.setRaw(DrawFunction, nil)
-			if canvasView, ok := view.(CanvasView); ok {
-				canvasView.Redraw()
-			}
+		if canvasView.getRaw(DrawFunction) != nil {
+			canvasView.setRaw(DrawFunction, nil)
+			canvasView.Redraw()
 			return []PropertyName{DrawFunction}
 		}
 		return []PropertyName{}
 	}
 
-	return viewRemove(view, tag)
+	return canvasView.viewData.removeFunc(tag)
 }
 
-func canvasViewSet(view View, tag PropertyName, value any) []PropertyName {
+func (canvasView *canvasViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	if tag == DrawFunction {
 		if fn, ok := value.(func(Canvas)); ok {
-			view.setRaw(DrawFunction, fn)
+			canvasView.setRaw(DrawFunction, fn)
 		} else {
 			notCompatibleType(tag, value)
 			return nil
 		}
-		if canvasView, ok := view.(CanvasView); ok {
-			canvasView.Redraw()
-		}
+		canvasView.Redraw()
 		return []PropertyName{DrawFunction}
 	}
 
-	return viewSet(view, tag, value)
+	return canvasView.viewData.setFunc(tag, value)
 }
 
 func (canvasView *canvasViewData) htmlTag() string {

@@ -497,6 +497,16 @@ func normalizeViewStyleTag(tag PropertyName) PropertyName {
 
 	case "left-padding":
 		return PaddingLeft
+
+	case "origin-x":
+		return TransformOriginX
+
+	case "origin-y":
+		return TransformOriginY
+
+	case "origin-z":
+		return TransformOriginZ
+
 	}
 	return tag
 }
@@ -868,7 +878,8 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 	}
 
 	finalTags := []PropertyName{
-		Perspective, PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible, OriginX, OriginY, OriginZ,
+		PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible,
+		TransformOriginX, TransformOriginY, TransformOriginZ,
 		TransformTag, Clip, Filter, BackdropFilter, Summary, Content, Transition}
 	for _, tag := range finalTags {
 		removeTag(tag)

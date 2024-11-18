@@ -54,7 +54,7 @@ func (detailsView *detailsViewData) init(session Session) {
 	detailsView.viewsContainerData.init(session)
 	detailsView.tag = "DetailsView"
 	detailsView.set = detailsView.setFunc
-	detailsView.changed = detailsViewPropertyChanged
+	detailsView.changed = detailsView.propertyChanged
 	//detailsView.systemClass = "ruiDetailsView"
 }
 
@@ -69,7 +69,7 @@ func (detailsView *detailsViewData) Views() []View {
 	return views
 }
 
-func (detailsView *detailsViewData) setFunc(self View, tag PropertyName, value any) []PropertyName {
+func (detailsView *detailsViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Summary:
 		switch value := value.(type) {
@@ -95,26 +95,26 @@ func (detailsView *detailsViewData) setFunc(self View, tag PropertyName, value a
 		return []PropertyName{tag}
 	}
 
-	return detailsView.viewsContainerData.setFunc(detailsView, tag, value)
+	return detailsView.viewsContainerData.setFunc(tag, value)
 }
 
-func detailsViewPropertyChanged(view View, tag PropertyName) {
+func (detailsView *detailsViewData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Summary:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 	case Expanded:
-		if IsDetailsExpanded(view) {
-			view.Session().updateProperty(view.htmlID(), "open", "")
+		if IsDetailsExpanded(detailsView) {
+			detailsView.Session().updateProperty(detailsView.htmlID(), "open", "")
 		} else {
-			view.Session().removeProperty(view.htmlID(), "open")
+			detailsView.Session().removeProperty(detailsView.htmlID(), "open")
 		}
 
 	case NotTranslate:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 	default:
-		viewsContainerPropertyChanged(view, tag)
+		detailsView.viewsContainerData.propertyChanged(tag)
 	}
 }
 
@@ -155,8 +155,8 @@ func (detailsView *detailsViewData) handleCommand(self View, command PropertyNam
 	if command == "details-open" {
 		if n, ok := dataIntProperty(data, "open"); ok {
 			detailsView.properties[Expanded] = (n != 0)
-			if listener, ok := detailsView.changeListener[Current]; ok {
-				listener(detailsView, Current)
+			if listener, ok := detailsView.changeListener[Expanded]; ok {
+				listener(detailsView, Expanded)
 			}
 		}
 		return true

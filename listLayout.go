@@ -64,10 +64,10 @@ func (listLayout *listLayoutData) init(session Session) {
 	listLayout.tag = "ListLayout"
 	listLayout.systemClass = "ruiListLayout"
 	listLayout.normalize = normalizeListLayoutTag
-	listLayout.getFunc = listLayout.get
+	listLayout.get = listLayout.getFunc
 	listLayout.set = listLayout.setFunc
 	listLayout.remove = listLayout.removeFunc
-	listLayout.changed = listLayoutPropertyChanged
+	listLayout.changed = listLayout.propertyChanged
 
 }
 
@@ -86,7 +86,7 @@ func normalizeListLayoutTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func (listLayout *listLayoutData) get(self View, tag PropertyName) any {
+func (listLayout *listLayoutData) getFunc(tag PropertyName) any {
 	switch tag {
 	case Gap:
 		if rowGap := GetListRowGap(listLayout); rowGap.Equal(GetListColumnGap(listLayout)) {
@@ -100,10 +100,10 @@ func (listLayout *listLayoutData) get(self View, tag PropertyName) any {
 		}
 	}
 
-	return listLayout.viewsContainerData.get(listLayout, tag)
+	return listLayout.viewsContainerData.getFunc(tag)
 }
 
-func (listLayout *listLayoutData) removeFunc(self View, tag PropertyName) []PropertyName {
+func (listLayout *listLayoutData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case Gap:
 		result := []PropertyName{}
@@ -116,18 +116,18 @@ func (listLayout *listLayoutData) removeFunc(self View, tag PropertyName) []Prop
 		return result
 
 	case Content:
-		listLayout.viewsContainerData.removeFunc(listLayout, Content)
+		listLayout.viewsContainerData.removeFunc(Content)
 		listLayout.adapter = nil
 		return []PropertyName{Content}
 	}
 
-	return listLayout.viewsContainerData.removeFunc(listLayout, tag)
+	return listLayout.viewsContainerData.removeFunc(tag)
 }
 
-func (listLayout *listLayoutData) setFunc(self View, tag PropertyName, value any) []PropertyName {
+func (listLayout *listLayoutData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Gap:
-		result := listLayout.setFunc(listLayout, ListRowGap, value)
+		result := listLayout.setFunc(ListRowGap, value)
 		if result != nil {
 			if gap := listLayout.getRaw(ListRowGap); gap != nil {
 				listLayout.setRaw(ListColumnGap, gap)
@@ -147,16 +147,16 @@ func (listLayout *listLayoutData) setFunc(self View, tag PropertyName, value any
 		}
 		return []PropertyName{Content}
 	}
-	return listLayout.viewsContainerData.setFunc(listLayout, tag, value)
+	return listLayout.viewsContainerData.setFunc(tag, value)
 }
 
-func listLayoutPropertyChanged(view View, tag PropertyName) {
+func (listLayout *listLayoutData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Orientation, ListWrap, HorizontalAlign, VerticalAlign:
-		updateCSSStyle(view.htmlID(), view.Session())
+		updateCSSStyle(listLayout.htmlID(), listLayout.Session())
 
 	default:
-		viewsContainerPropertyChanged(view, tag)
+		listLayout.viewsContainerData.propertyChanged(tag)
 	}
 }
 

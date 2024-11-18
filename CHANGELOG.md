@@ -1,4 +1,7 @@
 # v0.18.0
+
+* OriginX, OriginY, and OriginZ properties renamed to TransformOriginX, TransformOriginY, and TransformOriginZ
+* GetOrigin function renamed to GetTransformOrigin
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
 * Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.
 

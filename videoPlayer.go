@@ -61,22 +61,22 @@ func newVideoPlayer(session Session) View {
 func (player *videoPlayerData) init(session Session) {
 	player.mediaPlayerData.init(session)
 	player.tag = "VideoPlayer"
-	player.changed = videoPlayerPropertyChanged
+	player.changed = player.propertyChanged
 }
 
 func (player *videoPlayerData) htmlTag() string {
 	return "video"
 }
 
-func videoPlayerPropertyChanged(view View, tag PropertyName) {
+func (player *videoPlayerData) propertyChanged(tag PropertyName) {
 
-	session := view.Session()
+	session := player.Session()
 	updateSize := func(cssTag string) {
-		if size, ok := floatTextProperty(view, tag, session, 0); ok {
+		if size, ok := floatTextProperty(player, tag, session, 0); ok {
 			if size != "0" {
-				session.updateProperty(view.htmlID(), cssTag, size)
+				session.updateProperty(player.htmlID(), cssTag, size)
 			} else {
-				session.removeProperty(view.htmlID(), cssTag)
+				session.removeProperty(player.htmlID(), cssTag)
 			}
 		}
 	}
@@ -89,14 +89,14 @@ func videoPlayerPropertyChanged(view View, tag PropertyName) {
 		updateSize("height")
 
 	case Poster:
-		if url, ok := stringProperty(view, Poster, session); ok {
-			session.updateProperty(view.htmlID(), string(Poster), url)
+		if url, ok := stringProperty(player, Poster, session); ok {
+			session.updateProperty(player.htmlID(), string(Poster), url)
 		} else {
-			session.removeProperty(view.htmlID(), string(Poster))
+			session.removeProperty(player.htmlID(), string(Poster))
 		}
 
 	default:
-		mediaPlayerPropertyChanged(view, tag)
+		player.mediaPlayerData.propertyChanged(tag)
 	}
 }
 

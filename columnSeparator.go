@@ -82,6 +82,7 @@ func NewColumnSeparator(params Params) ColumnSeparatorProperty {
 func (separator *columnSeparatorProperty) init() {
 	separator.dataProperty.init()
 	separator.normalize = normalizeVolumnSeparatorTag
+	separator.set = columnSeparatorSet
 	separator.supportedProperties = []PropertyName{Style, Width, ColorTag}
 }
 
@@ -170,4 +171,11 @@ func (separator *columnSeparatorProperty) cssValue(session Session) string {
 	}
 
 	return buffer.String()
+}
+
+func columnSeparatorSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	if tag == Style {
+		return setEnumProperty(properties, Style, value, enumProperties[BorderStyle].values)
+	}
+	return propertiesSet(properties, tag, value)
 }

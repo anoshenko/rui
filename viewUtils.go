@@ -613,17 +613,17 @@ func GetBackfaceVisible(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, BackfaceVisible, false)
 }
 
-// GetOrigin returns a x-, y-, and z-coordinate of the point around which a view transformation is applied.
+// GetTransformOrigin returns a x-, y-, and z-coordinate of the point around which a view transformation is applied.
 // The default value is (50%, 50%, 50%).
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
+func GetTransformOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
 	if view == nil {
 		return AutoSize(), AutoSize(), AutoSize()
 	}
-	return getOrigin(view, view.Session())
+	return getTransformOrigin(view, view.Session())
 }
 
 // GetTranslate returns a x-, y-, and z-axis translation value of a 2D/3D translation

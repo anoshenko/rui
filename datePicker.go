@@ -138,8 +138,8 @@ func (picker *datePickerData) init(session Session) {
 	picker.tag = "DatePicker"
 	picker.hasHtmlDisabled = true
 	picker.normalize = normalizeDatePickerTag
-	picker.set = datePickerSet
-	picker.changed = datePickerPropertyChanged
+	picker.set = picker.setFunc
+	picker.changed = picker.propertyChanged
 }
 
 func (picker *datePickerData) Focusable() bool {
@@ -198,22 +198,22 @@ func stringToDate(value string) (time.Time, bool) {
 	return time.Now(), false
 }
 
-func datePickerSet(view View, tag PropertyName, value any) []PropertyName {
+func (picker *datePickerData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	setDateValue := func(tag PropertyName) []PropertyName {
 		switch value := value.(type) {
 		case time.Time:
-			view.setRaw(tag, value)
+			picker.setRaw(tag, value)
 			return []PropertyName{tag}
 
 		case string:
 			if isConstantName(value) {
-				view.setRaw(tag, value)
+				picker.setRaw(tag, value)
 				return []PropertyName{tag}
 			}
 
 			if date, ok := stringToDate(value); ok {
-				view.setRaw(tag, date)
+				picker.setRaw(tag, date)
 				return []PropertyName{tag}
 			}
 		}
@@ -227,67 +227,67 @@ func datePickerSet(view View, tag PropertyName, value any) []PropertyName {
 		return setDateValue(tag)
 
 	case DatePickerStep:
-		return setIntProperty(view, DatePickerStep, value)
+		return setIntProperty(picker, DatePickerStep, value)
 
 	case DatePickerValue:
-		view.setRaw("old-date", GetDatePickerValue(view))
+		picker.setRaw("old-date", GetDatePickerValue(picker))
 		return setDateValue(tag)
 
 	case DateChangedEvent:
-		return setEventWithOldListener[DatePicker, time.Time](view, tag, value)
+		return setTwoArgEventListener[DatePicker, time.Time](picker, tag, value)
 
 	case DataList:
-		return setDataList(view, value, dateFormat)
+		return setDataList(picker, value, dateFormat)
 	}
 
-	return viewSet(view, tag, value)
+	return picker.viewData.setFunc(tag, value)
 }
 
-func datePickerPropertyChanged(view View, tag PropertyName) {
+func (picker *datePickerData) propertyChanged(tag PropertyName) {
 
-	session := view.Session()
+	session := picker.Session()
 
 	switch tag {
 
 	case DatePickerMin:
-		if date, ok := GetDatePickerMin(view); ok {
-			session.updateProperty(view.htmlID(), "min", date.Format(dateFormat))
+		if date, ok := GetDatePickerMin(picker); ok {
+			session.updateProperty(picker.htmlID(), "min", date.Format(dateFormat))
 		} else {
-			session.removeProperty(view.htmlID(), "min")
+			session.removeProperty(picker.htmlID(), "min")
 		}
 
 	case DatePickerMax:
-		if date, ok := GetDatePickerMax(view); ok {
-			session.updateProperty(view.htmlID(), "max", date.Format(dateFormat))
+		if date, ok := GetDatePickerMax(picker); ok {
+			session.updateProperty(picker.htmlID(), "max", date.Format(dateFormat))
 		} else {
-			session.removeProperty(view.htmlID(), "max")
+			session.removeProperty(picker.htmlID(), "max")
 		}
 
 	case DatePickerStep:
-		if step := GetDatePickerStep(view); step > 0 {
-			session.updateProperty(view.htmlID(), "step", strconv.Itoa(step))
+		if step := GetDatePickerStep(picker); step > 0 {
+			session.updateProperty(picker.htmlID(), "step", strconv.Itoa(step))
 		} else {
-			session.removeProperty(view.htmlID(), "step")
+			session.removeProperty(picker.htmlID(), "step")
 		}
 
 	case DatePickerValue:
-		date := GetDatePickerValue(view)
-		session.callFunc("setInputValue", view.htmlID(), date.Format(dateFormat))
+		date := GetDatePickerValue(picker)
+		session.callFunc("setInputValue", picker.htmlID(), date.Format(dateFormat))
 
-		if listeners := GetDateChangedListeners(view); len(listeners) > 0 {
+		if listeners := GetDateChangedListeners(picker); len(listeners) > 0 {
 			oldDate := time.Now()
-			if value := view.getRaw("old-date"); value != nil {
+			if value := picker.getRaw("old-date"); value != nil {
 				if date, ok := value.(time.Time); ok {
 					oldDate = date
 				}
 			}
 			for _, listener := range listeners {
-				listener(view, date, oldDate)
+				listener(picker, date, oldDate)
 			}
 		}
 
 	default:
-		viewPropertyChanged(view, tag)
+		picker.viewData.propertyChanged(tag)
 	}
 }
 
@@ -447,5 +447,5 @@ func GetDatePickerValue(view View, subviewID ...string) time.Time {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time, time.Time) {
-	return getEventWithOldListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
+	return getTwoArgEventListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
 }

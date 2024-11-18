@@ -51,11 +51,11 @@ func focusEventsHtml(view View, buffer *strings.Builder) {
 // GetFocusListeners returns a FocusListener list. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFocusListeners(view View, subviewID ...string) []func(View) {
-	return getNoParamEventListeners[View](view, subviewID, FocusEvent)
+	return getNoArgEventListeners[View](view, subviewID, FocusEvent)
 }
 
 // GetLostFocusListeners returns a LostFocusListener list. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetLostFocusListeners(view View, subviewID ...string) []func(View) {
-	return getNoParamEventListeners[View](view, subviewID, LostFocusEvent)
+	return getNoArgEventListeners[View](view, subviewID, LostFocusEvent)
 }

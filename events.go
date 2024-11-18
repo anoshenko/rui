@@ -35,7 +35,7 @@ var eventJsFunc = map[PropertyName]struct{ jsEvent, jsFunc string }{
 	AnimationCancelEvent:    {jsEvent: "onanimationcancel", jsFunc: "animationCancelEvent"},
 }
 
-func valueToNoParamListeners[V any](value any) ([]func(V), bool) {
+func valueToNoArgEventListeners[V any](value any) ([]func(V), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -106,7 +106,7 @@ func valueToNoParamListeners[V any](value any) ([]func(V), bool) {
 	return nil, false
 }
 
-func valueToEventListeners[V View, E any](value any) ([]func(V, E), bool) {
+func valueToOneArgEventListeners[V View, E any](value any) ([]func(V, E), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -231,7 +231,7 @@ func valueToEventListeners[V View, E any](value any) ([]func(V, E), bool) {
 	return nil, false
 }
 
-func valueToEventWithOldListeners[V View, E any](value any) ([]func(V, E, E), bool) {
+func valueToTwoArgEventListeners[V View, E any](value any) ([]func(V, E, E), bool) {
 	if value == nil {
 		return nil, true
 	}
@@ -410,7 +410,7 @@ func valueToEventWithOldListeners[V View, E any](value any) ([]func(V, E, E), bo
 	return nil, false
 }
 
-func getNoParamEventListeners[V View](view View, subviewID []string, tag PropertyName) []func(V) {
+func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []func(V) {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -424,7 +424,7 @@ func getNoParamEventListeners[V View](view View, subviewID []string, tag Propert
 	return []func(V){}
 }
 
-func getEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E) {
+func getOneArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E) {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -438,7 +438,7 @@ func getEventListeners[V View, E any](view View, subviewID []string, tag Propert
 	return []func(V, E){}
 }
 
-func getEventWithOldListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E, E) {
+func getTwoArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E, E) {
 	if len(subviewID) > 0 && subviewID[0] != "" {
 		view = ViewByID(view, subviewID[0])
 	}
@@ -452,8 +452,8 @@ func getEventWithOldListeners[V View, E any](view View, subviewID []string, tag 
 	return []func(V, E, E){}
 }
 
-func setNoParamEventListener[V View](properties Properties, tag PropertyName, value any) []PropertyName {
-	if listeners, ok := valueToNoParamListeners[V](value); ok {
+func setNoArgEventListener[V View](properties Properties, tag PropertyName, value any) []PropertyName {
+	if listeners, ok := valueToNoArgEventListeners[V](value); ok {
 		if len(listeners) > 0 {
 			properties.setRaw(tag, listeners)
 		} else if properties.getRaw(tag) != nil {
@@ -467,8 +467,8 @@ func setNoParamEventListener[V View](properties Properties, tag PropertyName, va
 	return nil
 }
 
-func setViewEventListener[V View, T any](properties Properties, tag PropertyName, value any) []PropertyName {
-	if listeners, ok := valueToEventListeners[V, T](value); ok {
+func setOneArgEventListener[V View, T any](properties Properties, tag PropertyName, value any) []PropertyName {
+	if listeners, ok := valueToOneArgEventListeners[V, T](value); ok {
 		if len(listeners) > 0 {
 			properties.setRaw(tag, listeners)
 		} else if properties.getRaw(tag) != nil {
@@ -482,8 +482,8 @@ func setViewEventListener[V View, T any](properties Properties, tag PropertyName
 	return nil
 }
 
-func setEventWithOldListener[V View, T any](properties Properties, tag PropertyName, value any) []PropertyName {
-	listeners, ok := valueToEventWithOldListeners[V, T](value)
+func setTwoArgEventListener[V View, T any](properties Properties, tag PropertyName, value any) []PropertyName {
+	listeners, ok := valueToTwoArgEventListeners[V, T](value)
 	if !ok {
 		notCompatibleType(tag, value)
 		return nil
@@ -498,7 +498,7 @@ func setEventWithOldListener[V View, T any](properties Properties, tag PropertyN
 }
 
 func viewEventsHtml[T any](view View, events []PropertyName, buffer *strings.Builder) {
-	for _, tag := range []PropertyName{AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent} {
+	for _, tag := range events {
 		if value := view.getRaw(tag); value != nil {
 			if js, ok := eventJsFunc[tag]; ok {
 				if listeners, ok := value.([]func(View, T)); ok && len(listeners) > 0 {

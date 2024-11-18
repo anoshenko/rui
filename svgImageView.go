@@ -34,8 +34,8 @@ func (imageView *svgImageViewData) init(session Session) {
 	imageView.tag = "SvgImageView"
 	imageView.systemClass = "ruiSvgImageView"
 	imageView.normalize = normalizeSvgImageViewTag
-	imageView.set = svgImageViewSet
-	imageView.changed = svgImageViewPropertyChanged
+	imageView.set = imageView.setFunc
+	imageView.changed = imageView.propertyChanged
 
 }
 
@@ -54,28 +54,28 @@ func normalizeSvgImageViewTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func svgImageViewSet(view View, tag PropertyName, value any) []PropertyName {
+func (imageView *svgImageViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Content:
 		if text, ok := value.(string); ok {
-			view.setRaw(Content, text)
+			imageView.setRaw(Content, text)
 			return []PropertyName{tag}
 		}
 		notCompatibleType(Source, value)
 		return nil
 
 	default:
-		return viewSet(view, tag, value)
+		return imageView.viewData.setFunc(tag, value)
 	}
 }
 
-func svgImageViewPropertyChanged(view View, tag PropertyName) {
+func (imageView *svgImageViewData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Content:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(imageView.htmlID(), imageView.Session())
 
 	default:
-		viewPropertyChanged(view, tag)
+		imageView.viewData.propertyChanged(tag)
 	}
 }
 

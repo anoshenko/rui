@@ -152,28 +152,28 @@ func GetTableCurrent(view View, subviewID ...string) CellIndex {
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableCellClickedListeners(view View, subviewID ...string) []func(TableView, int, int) {
-	return getEventWithOldListeners[TableView, int](view, subviewID, TableCellClickedEvent)
+	return getTwoArgEventListeners[TableView, int](view, subviewID, TableCellClickedEvent)
 }
 
 // GetTableCellSelectedListeners returns listeners of event which occurs when a table cell becomes selected.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableCellSelectedListeners(view View, subviewID ...string) []func(TableView, int, int) {
-	return getEventWithOldListeners[TableView, int](view, subviewID, TableCellSelectedEvent)
+	return getTwoArgEventListeners[TableView, int](view, subviewID, TableCellSelectedEvent)
 }
 
 // GetTableRowClickedListeners returns listeners of event which occurs when the user clicks on a table row.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableRowClickedListeners(view View, subviewID ...string) []func(TableView, int) {
-	return getEventListeners[TableView, int](view, subviewID, TableRowClickedEvent)
+	return getOneArgEventListeners[TableView, int](view, subviewID, TableRowClickedEvent)
 }
 
 // GetTableRowSelectedListeners returns listeners of event which occurs when a table row becomes selected.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableRowSelectedListeners(view View, subviewID ...string) []func(TableView, int) {
-	return getEventListeners[TableView, int](view, subviewID, TableRowSelectedEvent)
+	return getOneArgEventListeners[TableView, int](view, subviewID, TableRowSelectedEvent)
 }
 
 // ReloadTableViewData updates TableView

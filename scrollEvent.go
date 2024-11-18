@@ -54,7 +54,7 @@ func GetViewScroll(view View, subviewID ...string) Frame {
 // GetScrollListeners returns the list of "scroll-event" listeners. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
 func GetScrollListeners(view View, subviewID ...string) []func(View, Frame) {
-	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
+	return getOneArgEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }
 
 // ScrollTo scrolls the view's content to the given position.

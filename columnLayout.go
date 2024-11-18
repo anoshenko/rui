@@ -141,7 +141,7 @@ func (columnLayout *columnLayoutData) init(session Session) {
 	columnLayout.viewsContainerData.init(session)
 	columnLayout.tag = "ColumnLayout"
 	columnLayout.normalize = normalizeColumnLayoutTag
-	columnLayout.changed = columnLayoutPropertyChanged
+	columnLayout.changed = columnLayout.propertyChanged
 	//columnLayout.systemClass = "ruiColumnLayout"
 }
 
@@ -154,27 +154,27 @@ func normalizeColumnLayoutTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func columnLayoutPropertyChanged(view View, tag PropertyName) {
+func (columnLayout *columnLayoutData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case ColumnSeparator:
 		css := ""
-		session := view.Session()
-		if value := view.getRaw(ColumnSeparator); value != nil {
+		session := columnLayout.Session()
+		if value := columnLayout.getRaw(ColumnSeparator); value != nil {
 			separator := value.(ColumnSeparatorProperty)
-			css = separator.cssValue(view.Session())
+			css = separator.cssValue(session)
 		}
-		session.updateCSSProperty(view.htmlID(), "column-rule", css)
+		session.updateCSSProperty(columnLayout.htmlID(), "column-rule", css)
 
 	case ColumnCount:
-		session := view.Session()
-		if count, ok := intProperty(view, tag, session, 0); ok && count > 0 {
-			session.updateCSSProperty(view.htmlID(), string(ColumnCount), strconv.Itoa(count))
+		session := columnLayout.Session()
+		if count := GetColumnCount(columnLayout); count > 0 {
+			session.updateCSSProperty(columnLayout.htmlID(), string(ColumnCount), strconv.Itoa(count))
 		} else {
-			session.updateCSSProperty(view.htmlID(), string(ColumnCount), "auto")
+			session.updateCSSProperty(columnLayout.htmlID(), string(ColumnCount), "auto")
 		}
 
 	default:
-		viewsContainerPropertyChanged(view, tag)
+		columnLayout.viewsContainerData.propertyChanged(tag)
 	}
 }
 

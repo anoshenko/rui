@@ -121,8 +121,8 @@ func (edit *editViewData) init(session Session) {
 	edit.hasHtmlDisabled = true
 	edit.tag = "EditView"
 	edit.normalize = normalizeEditViewTag
-	edit.set = editViewSet
-	edit.changed = editViewPropertyChanged
+	edit.set = edit.setFunc
+	edit.changed = edit.propertyChanged
 }
 
 func (edit *editViewData) Focusable() bool {
@@ -148,18 +148,18 @@ func normalizeEditViewTag(tag PropertyName) PropertyName {
 	return normalizeDataListTag(tag)
 }
 
-func editViewSet(view View, tag PropertyName, value any) []PropertyName {
+func (edit *editViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Text:
 		if text, ok := value.(string); ok {
 			old := ""
-			if val := view.getRaw(Text); val != nil {
+			if val := edit.getRaw(Text); val != nil {
 				if txt, ok := val.(string); ok {
 					old = txt
 				}
 			}
-			view.setRaw("old-text", old)
-			view.setRaw(tag, text)
+			edit.setRaw("old-text", old)
+			edit.setRaw(tag, text)
 			return []PropertyName{tag}
 		}
 
@@ -168,85 +168,83 @@ func editViewSet(view View, tag PropertyName, value any) []PropertyName {
 
 	case Hint:
 		if text, ok := value.(string); ok {
-			return setStringPropertyValue(view, tag, strings.Trim(text, " \t\n"))
+			return setStringPropertyValue(edit, tag, strings.Trim(text, " \t\n"))
 		}
 		notCompatibleType(tag, value)
 		return nil
 
 	case DataList:
-		setDataList(view, value, "")
+		setDataList(edit, value, "")
 
 	case EditTextChangedEvent:
-		return setEventWithOldListener[EditView, string](view, tag, value)
+		return setTwoArgEventListener[EditView, string](edit, tag, value)
 	}
 
-	return viewSet(view, tag, value)
+	return edit.viewData.setFunc(tag, value)
 }
 
-func editViewPropertyChanged(view View, tag PropertyName) {
-	session := view.Session()
+func (edit *editViewData) propertyChanged(tag PropertyName) {
+	session := edit.Session()
 
 	switch tag {
 	case Text:
-		text := GetText(view)
-		session.callFunc("setInputValue", view.htmlID(), text)
+		text := GetText(edit)
+		session.callFunc("setInputValue", edit.htmlID(), text)
 
-		if edit, ok := view.(EditView); ok {
-			old := ""
-			if val := view.getRaw("old-text"); val != nil {
-				if txt, ok := val.(string); ok {
-					old = txt
-				}
+		old := ""
+		if val := edit.getRaw("old-text"); val != nil {
+			if txt, ok := val.(string); ok {
+				old = txt
 			}
-			edit.textChanged(text, old)
 		}
+		edit.textChanged(text, old)
 
 	case Hint:
-		if text := GetHint(view); text != "" {
-			session.updateProperty(view.htmlID(), "placeholder", text)
+		if text := GetHint(edit); text != "" {
+			session.updateProperty(edit.htmlID(), "placeholder", text)
 		} else {
-			session.removeProperty(view.htmlID(), "placeholder")
+			session.removeProperty(edit.htmlID(), "placeholder")
 		}
 
 	case MaxLength:
-		if maxLength := GetMaxLength(view); maxLength > 0 {
-			session.updateProperty(view.htmlID(), "maxlength", strconv.Itoa(maxLength))
+		if maxLength := GetMaxLength(edit); maxLength > 0 {
+			session.updateProperty(edit.htmlID(), "maxlength", strconv.Itoa(maxLength))
 		} else {
-			session.removeProperty(view.htmlID(), "maxlength")
+			session.removeProperty(edit.htmlID(), "maxlength")
 		}
 
 	case ReadOnly:
-		if IsReadOnly(view) {
-			session.updateProperty(view.htmlID(), "readonly", "")
+		if IsReadOnly(edit) {
+			session.updateProperty(edit.htmlID(), "readonly", "")
 		} else {
-			session.removeProperty(view.htmlID(), "readonly")
+			session.removeProperty(edit.htmlID(), "readonly")
 		}
 
 	case Spellcheck:
-		session.updateProperty(view.htmlID(), "spellcheck", IsSpellcheck(view))
+		session.updateProperty(edit.htmlID(), "spellcheck", IsSpellcheck(edit))
 
 	case EditViewPattern:
-		if text := GetEditViewPattern(view); text != "" {
-			session.updateProperty(view.htmlID(), "pattern", text)
+		if text := GetEditViewPattern(edit); text != "" {
+			session.updateProperty(edit.htmlID(), "pattern", text)
 		} else {
-			session.removeProperty(view.htmlID(), "pattern")
+			session.removeProperty(edit.htmlID(), "pattern")
 		}
 
 	case EditViewType:
-		updateInnerHTML(view.parentHTMLID(), session)
+		updateInnerHTML(edit.parentHTMLID(), session)
 
 	case EditWrap:
-		if wrap := IsEditViewWrap(view); wrap {
-			session.updateProperty(view.htmlID(), "wrap", "soft")
+		if wrap := IsEditViewWrap(edit); wrap {
+			session.updateProperty(edit.htmlID(), "wrap", "soft")
 		} else {
-			session.updateProperty(view.htmlID(), "wrap", "off")
+			session.updateProperty(edit.htmlID(), "wrap", "off")
 		}
 
 	case DataList:
-		updateInnerHTML(view.htmlID(), session)
+		updateInnerHTML(edit.htmlID(), session)
 
 	default:
-		viewPropertyChanged(view, tag)
+		edit.viewData.propertyChanged(tag)
 	}
 }
 
@@ -467,7 +465,7 @@ func IsSpellcheck(view View, subviewID ...string) bool {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string, string) {
-	return getEventWithOldListeners[EditView, string](view, subviewID, EditTextChangedEvent)
+	return getTwoArgEventListeners[EditView, string](view, subviewID, EditTextChangedEvent)
 }
 
 // GetEditViewType returns a value of the Type property of EditView.

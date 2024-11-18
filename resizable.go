@@ -80,8 +80,8 @@ func (resizable *resizableData) init(session Session) {
 	resizable.viewData.init(session)
 	resizable.tag = "Resizable"
 	resizable.systemClass = "ruiGridLayout"
-	resizable.set = resizableSet
-	resizable.changed = resizablePropertyChanged
+	resizable.set = resizable.setFunc
+	resizable.changed = resizable.propertyChanged
 }
 
 func (resizable *resizableData) Views() []View {
@@ -100,25 +100,25 @@ func (resizable *resizableData) content() View {
 	return nil
 }
 
-func resizableSet(view View, tag PropertyName, value any) []PropertyName {
+func (resizable *resizableData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Side:
-		return resizableSetSide(view, value)
+		return resizableSetSide(resizable, value)
 
 	case ResizeBorderWidth:
-		return setSizeProperty(view, tag, value)
+		return setSizeProperty(resizable, tag, value)
 
 	case Content:
 		var newContent View = nil
 		switch value := value.(type) {
 		case string:
-			newContent = NewTextView(view.Session(), Params{Text: value})
+			newContent = NewTextView(resizable.Session(), Params{Text: value})
 
 		case View:
 			newContent = value
 
 		case DataObject:
-			if newContent = CreateViewFromObject(view.Session(), value); newContent == nil {
+			if newContent = CreateViewFromObject(resizable.Session(), value); newContent == nil {
 				return nil
 			}
 
@@ -127,7 +127,7 @@ func resizableSet(view View, tag PropertyName, value any) []PropertyName {
 			return nil
 		}
 
-		view.setRaw(Content, newContent)
+		resizable.setRaw(Content, newContent)
 		return []PropertyName{}
 
 	case CellWidth, CellHeight, GridRowGap, GridColumnGap, CellVerticalAlign, CellHorizontalAlign:
@@ -135,28 +135,28 @@ func resizableSet(view View, tag PropertyName, value any) []PropertyName {
 		return nil
 	}
 
-	return viewSet(view, tag, value)
+	return resizable.viewData.setFunc(tag, value)
 }
 
-func resizablePropertyChanged(view View, tag PropertyName) {
+func (resizable *resizableData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Side:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(resizable.htmlID(), resizable.Session())
 		fallthrough
 
 	case ResizeBorderWidth:
-		htmlID := view.htmlID()
-		session := view.Session()
-		column, row := resizableCellSizeCSS(view)
+		htmlID := resizable.htmlID()
+		session := resizable.Session()
+		column, row := resizableCellSizeCSS(resizable)
 
 		session.updateCSSProperty(htmlID, "grid-template-columns", column)
 		session.updateCSSProperty(htmlID, "grid-template-rows", row)
 
 	case Content:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(resizable.htmlID(), resizable.Session())
 
 	default:
-		viewPropertyChanged(view, tag)
+		resizable.viewData.propertyChanged(tag)
 	}
 
 }

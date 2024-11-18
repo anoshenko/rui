@@ -81,9 +81,10 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
 	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
-	layout.getFunc = layout.get
+	layout.get = layout.getFunc
 	layout.set = layout.setFunc
 	layout.remove = layout.removeFunc
+	layout.changed = layout.propertyChanged
 }
 
 func (layout *stackLayoutData) pushFinished(view View, tag string) {
@@ -121,14 +122,14 @@ func (layout *stackLayoutData) popFinished(view View, tag string) {
 	}
 }
 
-func (layout *stackLayoutData) setFunc(view View, tag PropertyName, value any) []PropertyName {
+func (layout *stackLayoutData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		listeners, ok := valueToEventListeners[View, string](value)
+		listeners, ok := valueToOneArgEventListeners[View, string](value)
 		if ok && listeners != nil {
 			listeners = append(listeners, layout.pushFinished)
 			listeners = append(listeners, layout.popFinished)
-			view.setRaw(TransitionEndEvent, listeners)
+			layout.setRaw(TransitionEndEvent, listeners)
 			return []PropertyName{tag}
 		}
 		return nil
@@ -170,42 +171,42 @@ func (layout *stackLayoutData) setFunc(view View, tag PropertyName, value any) [
 		layout.peek = newCurrent
 		return []PropertyName{tag}
 	}
-	return layout.viewsContainerData.setFunc(view, tag, value)
+	return layout.viewsContainerData.setFunc(tag, value)
 }
 
-func (layout *stackLayoutData) propertyChanged(view View, tag PropertyName) {
+func (layout *stackLayoutData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Current:
 		if layout.prevPeek != layout.peek {
 			if layout.prevPeek < len(layout.views) {
 				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.prevPeek), "visibility", "hidden")
 			}
-			layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.prevPeek), "visibility", "visible")
+			layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.peek), "visibility", "visible")
 			layout.prevPeek = layout.peek
 		}
 	default:
-		viewsContainerPropertyChanged(view, tag)
+		layout.viewsContainerData.propertyChanged(tag)
 	}
 }
 
-func (layout *stackLayoutData) removeFunc(view View, tag PropertyName) []PropertyName {
+func (layout *stackLayoutData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		view.setRaw(TransitionEndEvent, []func(View, string){layout.pushFinished, layout.popFinished})
+		layout.setRaw(TransitionEndEvent, []func(View, string){layout.pushFinished, layout.popFinished})
 		return []PropertyName{tag}
 
 	case Current:
-		view.setRaw(Current, 0)
+		layout.setRaw(Current, 0)
 		return []PropertyName{tag}
 	}
-	return layout.viewsContainerData.removeFunc(view, tag)
+	return layout.viewsContainerData.removeFunc(tag)
 }
 
-func (layout *stackLayoutData) get(view View, tag PropertyName) any {
+func (layout *stackLayoutData) getFunc(tag PropertyName) any {
 	if tag == Current {
 		return layout.peek
 	}
-	return layout.viewsContainerData.get(view, tag)
+	return layout.viewsContainerData.getFunc(tag)
 }
 
 func (layout *stackLayoutData) Peek() View {

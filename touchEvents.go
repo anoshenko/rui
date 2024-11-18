@@ -144,7 +144,7 @@ type TouchEvent struct {
 
 /*
 func setTouchListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToEventListeners[View, TouchEvent](value); ok {
+	if listeners, ok := valueToOneArgEventListeners[View, TouchEvent](value); ok {
 		if len(listeners) == 0 {
 			properties.setRaw(tag, nil)
 		} else {
@@ -215,7 +215,7 @@ func (event *TouchEvent) init(data DataObject) {
 }
 
 func handleTouchEvents(view View, tag PropertyName, data DataObject) {
-	listeners := getEventListeners[View, TouchEvent](view, nil, tag)
+	listeners := getOneArgEventListeners[View, TouchEvent](view, nil, tag)
 	if len(listeners) == 0 {
 		return
 	}
@@ -231,23 +231,23 @@ func handleTouchEvents(view View, tag PropertyName, data DataObject) {
 // GetTouchStartListeners returns the "touch-start" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchStartListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchStart)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchStart)
 }
 
 // GetTouchEndListeners returns the "touch-end" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchEndListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchEnd)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchEnd)
 }
 
 // GetTouchMoveListeners returns the "touch-move" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchMoveListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchMove)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchMove)
 }
 
 // GetTouchCancelListeners returns the "touch-cancel" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchCancelListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchCancel)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchCancel)
 }

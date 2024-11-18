@@ -19,6 +19,7 @@ var colorProperties = []PropertyName{
 	OutlineColor,
 	TextLineColor,
 	ColorPickerValue,
+	AccentColor,
 }
 
 func isPropertyInList(tag PropertyName, list []PropertyName) bool {
@@ -74,6 +75,7 @@ var intProperties = []PropertyName{
 	Order,
 	TabIndex,
 	MaxLength,
+	NumberPickerPrecision,
 }
 
 var floatProperties = map[PropertyName]struct{ min, max float64 }{
@@ -136,9 +138,9 @@ var sizeProperties = map[PropertyName]string{
 	Perspective:        string(Perspective),
 	PerspectiveOriginX: string(PerspectiveOriginX),
 	PerspectiveOriginY: string(PerspectiveOriginY),
-	OriginX:            string(OriginX),
-	OriginY:            string(OriginY),
-	OriginZ:            string(OriginZ),
+	TransformOriginX:   string(TransformOriginX),
+	TransformOriginY:   string(TransformOriginY),
+	TransformOriginZ:   string(TransformOriginZ),
 	Radius:             string(Radius),
 	RadiusX:            string(RadiusX),
 	RadiusY:            string(RadiusY),

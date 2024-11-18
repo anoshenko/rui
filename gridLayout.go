@@ -137,10 +137,10 @@ func (gridLayout *gridLayoutData) init(session Session) {
 	gridLayout.systemClass = "ruiGridLayout"
 	gridLayout.adapter = nil
 	gridLayout.normalize = normalizeGridLayoutTag
-	gridLayout.getFunc = gridLayout.get
+	gridLayout.get = gridLayout.getFunc
 	gridLayout.set = gridLayout.setFunc
 	gridLayout.remove = gridLayout.removeFunc
-
+	gridLayout.changed = gridLayout.propertyChanged
 }
 
 func setGridCellSize(properties Properties, tag PropertyName, value any) []PropertyName {
@@ -303,7 +303,7 @@ func normalizeGridLayoutTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func (gridLayout *gridLayoutData) get(self View, tag PropertyName) any {
+func (gridLayout *gridLayoutData) getFunc(tag PropertyName) any {
 	switch tag {
 	case Gap:
 		rowGap := GetGridRowGap(gridLayout)
@@ -319,10 +319,10 @@ func (gridLayout *gridLayoutData) get(self View, tag PropertyName) any {
 		}
 	}
 
-	return gridLayout.viewsContainerData.get(gridLayout, tag)
+	return gridLayout.viewsContainerData.getFunc(tag)
 }
 
-func (gridLayout *gridLayoutData) removeFunc(self View, tag PropertyName) []PropertyName {
+func (gridLayout *gridLayoutData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case Gap:
 		result := []PropertyName{}
@@ -343,13 +343,13 @@ func (gridLayout *gridLayoutData) removeFunc(self View, tag PropertyName) []Prop
 		return []PropertyName{}
 	}
 
-	return gridLayout.viewsContainerData.removeFunc(gridLayout, tag)
+	return gridLayout.viewsContainerData.removeFunc(tag)
 }
 
-func (gridLayout *gridLayoutData) setFunc(self View, tag PropertyName, value any) []PropertyName {
+func (gridLayout *gridLayoutData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Gap:
-		result := gridLayout.setFunc(gridLayout, GridRowGap, value)
+		result := gridLayout.setFunc(GridRowGap, value)
 		if result != nil {
 			if gap := gridLayout.getRaw(GridRowGap); gap != nil {
 				gridLayout.setRaw(GridColumnGap, gap)
@@ -370,21 +370,23 @@ func (gridLayout *gridLayoutData) setFunc(self View, tag PropertyName, value any
 		return []PropertyName{Content}
 	}
 
-	return gridLayout.viewsContainerData.setFunc(gridLayout, tag, value)
+	return gridLayout.viewsContainerData.setFunc(tag, value)
 }
 
-func gridLayoutPropertyChanged(view View, tag PropertyName) {
+func (gridLayout *gridLayoutData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case CellWidth:
-		view.Session().updateCSSProperty(view.htmlID(), `grid-template-columns`,
-			gridCellSizesCSS(view, CellWidth, view.Session()))
+		session := gridLayout.Session()
+		session.updateCSSProperty(gridLayout.htmlID(), `grid-template-columns`,
+			gridCellSizesCSS(gridLayout, CellWidth, session))
 
 	case CellHeight:
-		view.Session().updateCSSProperty(view.htmlID(), `grid-template-rows`,
-			gridCellSizesCSS(view, CellHeight, view.Session()))
+		session := gridLayout.Session()
+		session.updateCSSProperty(gridLayout.htmlID(), `grid-template-rows`,
+			gridCellSizesCSS(gridLayout, CellHeight, session))
 
 	default:
-		viewsContainerPropertyChanged(view, tag)
+		gridLayout.viewsContainerData.propertyChanged(tag)
 	}
 }
 

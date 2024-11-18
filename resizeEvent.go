@@ -33,7 +33,7 @@ func (view *viewData) onItemResize(self View, index string, x, y, width, height 
 
 /*
 func setFrameListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToEventListeners[View, Frame](value); ok {
+	if listeners, ok := valueToOneArgEventListeners[View, Frame](value); ok {
 		if len(listeners) == 0 {
 			properties.setRaw(tag, nil)
 		} else {
@@ -85,5 +85,5 @@ func GetViewFrame(view View, subviewID ...string) Frame {
 // GetResizeListeners returns the list of "resize-event" listeners. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
 func GetResizeListeners(view View, subviewID ...string) []func(View, Frame) {
-	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
+	return getOneArgEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }

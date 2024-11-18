@@ -120,7 +120,7 @@ func normalizeDataListTag(tag PropertyName) PropertyName {
 }
 
 func setDataList(properties Properties, value any, dateTimeFormat string) []PropertyName {
-	if items, ok := anyToStringArray(value, timeFormat); ok {
+	if items, ok := anyToStringArray(value, dateTimeFormat); ok {
 		properties.setRaw(DataList, items)
 		return []PropertyName{DataList}
 	}

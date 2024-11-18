@@ -97,8 +97,8 @@ func (imageView *imageViewData) init(session Session) {
 	imageView.tag = "ImageView"
 	imageView.systemClass = "ruiImageView"
 	imageView.normalize = normalizeImageViewTag
-	imageView.set = imageViewSet
-	imageView.changed = imageViewPropertyChanged
+	imageView.set = imageView.setFunc
+	imageView.changed = imageView.propertyChanged
 }
 
 func normalizeImageViewTag(tag PropertyName) PropertyName {
@@ -122,30 +122,30 @@ func normalizeImageViewTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func imageViewSet(view View, tag PropertyName, value any) []PropertyName {
+func (imageView *imageViewData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	switch tag {
 	case Source, SrcSet, AltText:
 		if text, ok := value.(string); ok {
-			return setStringPropertyValue(view, tag, text)
+			return setStringPropertyValue(imageView, tag, text)
 		}
 		notCompatibleType(tag, value)
 		return nil
 
 	case LoadedEvent, ErrorEvent:
-		return setNoParamEventListener[ImageView](view, tag, value)
+		return setNoArgEventListener[ImageView](imageView, tag, value)
 	}
 
-	return viewSet(view, tag, value)
+	return imageView.viewData.setFunc(tag, value)
 }
 
-func imageViewPropertyChanged(view View, tag PropertyName) {
-	session := view.Session()
-	htmlID := view.htmlID()
+func (imageView *imageViewData) propertyChanged(tag PropertyName) {
+	session := imageView.Session()
+	htmlID := imageView.htmlID()
 
 	switch tag {
 	case Source:
-		src, srcset := imageViewSrc(view, GetImageViewSource(view))
+		src, srcset := imageViewSrc(imageView, GetImageViewSource(imageView))
 		session.updateProperty(htmlID, "src", src)
 		if srcset != "" {
 			session.updateProperty(htmlID, "srcset", srcset)
@@ -154,7 +154,7 @@ func imageViewPropertyChanged(view View, tag PropertyName) {
 		}
 
 	case SrcSet:
-		_, srcset := imageViewSrc(view, GetImageViewSource(view))
+		_, srcset := imageViewSrc(imageView, GetImageViewSource(imageView))
 		if srcset != "" {
 			session.updateProperty(htmlID, "srcset", srcset)
 		} else {
@@ -168,7 +168,7 @@ func imageViewPropertyChanged(view View, tag PropertyName) {
 		updateCSSStyle(htmlID, session)
 
 	default:
-		viewPropertyChanged(view, tag)
+		imageView.viewData.propertyChanged(tag)
 	}
 }
 
@@ -256,7 +256,7 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 
 	buffer.WriteString(` onload="imageLoaded(this, event)"`)
 
-	if len(getNoParamEventListeners[ImageView](imageView, nil, ErrorEvent)) > 0 {
+	if len(getNoArgEventListeners[ImageView](imageView, nil, ErrorEvent)) > 0 {
 		buffer.WriteString(` onerror="imageError(this, event)"`)
 	}
 }
@@ -299,7 +299,7 @@ func (imageView *imageViewData) cssStyle(self View, builder cssBuilder) {
 func (imageView *imageViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "imageViewError":
-		for _, listener := range getNoParamEventListeners[ImageView](imageView, nil, ErrorEvent) {
+		for _, listener := range getNoArgEventListeners[ImageView](imageView, nil, ErrorEvent) {
 			listener(imageView)
 		}
 
@@ -308,7 +308,7 @@ func (imageView *imageViewData) handleCommand(self View, command PropertyName, d
 		imageView.naturalHeight = dataFloatProperty(data, "natural-height")
 		imageView.currentSrc, _ = data.PropertyValue("current-src")
 
-		for _, listener := range getNoParamEventListeners[ImageView](imageView, nil, LoadedEvent) {
+		for _, listener := range getNoArgEventListeners[ImageView](imageView, nil, LoadedEvent) {
 			listener(imageView)
 		}
 

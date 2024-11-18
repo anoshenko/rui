@@ -431,7 +431,7 @@ func (event *KeyEvent) init(data DataObject) {
 
 /*
 func setKeyListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToEventListeners[View, KeyEvent](value); ok {
+	if listeners, ok := valueToOneArgEventListeners[View, KeyEvent](value); ok {
 		if len(listeners) == 0 {
 			properties.setRaw(tag, nil)
 		} else {
@@ -460,15 +460,15 @@ func (view *viewData) removeKeyListener(tag PropertyName) {
 */
 
 func keyEventsHtml(view View, buffer *strings.Builder) {
-	if len(getEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 {
+	if len(getOneArgEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 {
 		buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)
 	} else if view.Focusable() {
-		if len(getEventListeners[View, MouseEvent](view, nil, ClickEvent)) > 0 {
+		if len(getOneArgEventListeners[View, MouseEvent](view, nil, ClickEvent)) > 0 {
 			buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)
 		}
 	}
 
-	if listeners := getEventListeners[View, KeyEvent](view, nil, KeyUpEvent); len(listeners) > 0 {
+	if listeners := getOneArgEventListeners[View, KeyEvent](view, nil, KeyUpEvent); len(listeners) > 0 {
 		buffer.WriteString(`onkeyup="keyUpEvent(this, event)" `)
 	}
 }
@@ -476,7 +476,7 @@ func keyEventsHtml(view View, buffer *strings.Builder) {
 func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 	var event KeyEvent
 	event.init(data)
-	listeners := getEventListeners[View, KeyEvent](view, nil, tag)
+	listeners := getOneArgEventListeners[View, KeyEvent](view, nil, tag)
 
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
@@ -486,7 +486,7 @@ func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 	}
 
 	if tag == KeyDownEvent && view.Focusable() && (event.Key == " " || event.Key == "Enter") && !IsDisabled(view) {
-		if listeners := getEventListeners[View, MouseEvent](view, nil, ClickEvent); len(listeners) > 0 {
+		if listeners := getOneArgEventListeners[View, MouseEvent](view, nil, ClickEvent); len(listeners) > 0 {
 			clickEvent := MouseEvent{
 				TimeStamp: event.TimeStamp,
 				Button:    PrimaryMouseButton,
@@ -512,11 +512,11 @@ func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 // GetKeyDownListeners returns the "key-down-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetKeyDownListeners(view View, subviewID ...string) []func(View, KeyEvent) {
-	return getEventListeners[View, KeyEvent](view, subviewID, KeyDownEvent)
+	return getOneArgEventListeners[View, KeyEvent](view, subviewID, KeyDownEvent)
 }
 
 // GetKeyUpListeners returns the "key-up-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetKeyUpListeners(view View, subviewID ...string) []func(View, KeyEvent) {
-	return getEventListeners[View, KeyEvent](view, subviewID, KeyUpEvent)
+	return getOneArgEventListeners[View, KeyEvent](view, subviewID, KeyUpEvent)
 }

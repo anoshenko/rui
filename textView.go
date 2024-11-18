@@ -30,63 +30,63 @@ func newTextView(session Session) View {
 func (textView *textViewData) init(session Session) {
 	textView.viewData.init(session)
 	textView.tag = "TextView"
-	textView.set = textViewSet
-	textView.changed = textViewPropertyChanged
+	textView.set = textView.setFunc
+	textView.changed = textView.propertyChanged
 }
 
-func textViewPropertyChanged(view View, tag PropertyName) {
+func (textView *textViewData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Text:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(textView.htmlID(), textView.Session())
 
 	case TextOverflow:
-		session := view.Session()
-		if n, ok := enumProperty(view, TextOverflow, session, 0); ok {
+		session := textView.Session()
+		if n, ok := enumProperty(textView, TextOverflow, session, 0); ok {
 			values := enumProperties[TextOverflow].cssValues
 			if n >= 0 && n < len(values) {
-				session.updateCSSProperty(view.htmlID(), string(TextOverflow), values[n])
+				session.updateCSSProperty(textView.htmlID(), string(TextOverflow), values[n])
 				return
 			}
 		}
-		session.updateCSSProperty(view.htmlID(), string(TextOverflow), "")
+		session.updateCSSProperty(textView.htmlID(), string(TextOverflow), "")
 
 	case NotTranslate:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(textView.htmlID(), textView.Session())
 
 	default:
-		viewPropertyChanged(view, tag)
+		textView.viewData.propertyChanged(tag)
 	}
 }
 
-func textViewSet(view View, tag PropertyName, value any) []PropertyName {
+func (textView *textViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Text:
 		switch value := value.(type) {
 		case string:
-			view.setRaw(Text, value)
+			textView.setRaw(Text, value)
 
 		case fmt.Stringer:
-			view.setRaw(Text, value.String())
+			textView.setRaw(Text, value.String())
 
 		case float32:
-			view.setRaw(Text, fmt.Sprintf("%g", float64(value)))
+			textView.setRaw(Text, fmt.Sprintf("%g", float64(value)))
 
 		case float64:
-			view.setRaw(Text, fmt.Sprintf("%g", value))
+			textView.setRaw(Text, fmt.Sprintf("%g", value))
 
 		case []rune:
-			view.setRaw(Text, string(value))
+			textView.setRaw(Text, string(value))
 
 		case bool:
 			if value {
-				view.setRaw(Text, "true")
+				textView.setRaw(Text, "true")
 			} else {
-				view.setRaw(Text, "false")
+				textView.setRaw(Text, "false")
 			}
 
 		default:
 			if n, ok := isInt(value); ok {
-				view.setRaw(Text, fmt.Sprintf("%d", n))
+				textView.setRaw(Text, fmt.Sprintf("%d", n))
 			} else {
 				notCompatibleType(tag, value)
 				return nil
@@ -95,7 +95,7 @@ func textViewSet(view View, tag PropertyName, value any) []PropertyName {
 		return []PropertyName{Text}
 	}
 
-	return viewSet(view, tag, value)
+	return textView.viewData.setFunc(tag, value)
 }
 
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {

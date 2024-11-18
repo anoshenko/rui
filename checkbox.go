@@ -49,117 +49,98 @@ func (button *checkboxData) init(session Session) {
 	button.systemClass = "ruiGridLayout ruiCheckbox"
 	button.set = button.setFunc
 	button.remove = button.removeFunc
-	button.changed = checkboxPropertyChanged
+	button.changed = button.propertyChanged
 
-	button.setRaw(ClickEvent, checkboxClickListener)
-	button.setRaw(KeyDownEvent, checkboxKeyListener)
+	button.setRaw(ClickEvent, []func(View, MouseEvent){checkboxClickListener})
+	button.setRaw(KeyDownEvent, []func(View, KeyEvent){checkboxKeyListener})
 }
 
 func (button *checkboxData) Focusable() bool {
 	return true
 }
 
-func checkboxPropertyChanged(view View, tag PropertyName) {
+func (button *checkboxData) propertyChanged(tag PropertyName) {
 	switch tag {
 
 	case Checked:
-		session := view.Session()
-		checked := IsCheckboxChecked(view)
-		if listeners := GetCheckboxChangedListeners(view); len(listeners) > 0 {
-			if checkbox, ok := view.(Checkbox); ok {
-				for _, listener := range listeners {
-					listener(checkbox, checked)
-				}
+		session := button.Session()
+		checked := IsCheckboxChecked(button)
+		if listeners := GetCheckboxChangedListeners(button); len(listeners) > 0 {
+			for _, listener := range listeners {
+				listener(button, checked)
 			}
 		}
 
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
 
-		checkboxHtml(view, buffer, checked)
-		session.updateInnerHTML(view.htmlID()+"checkbox", buffer.String())
+		checkboxHtml(button, buffer, checked)
+		session.updateInnerHTML(button.htmlID()+"checkbox", buffer.String())
 
 	case CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		htmlID := view.htmlID()
-		session := view.Session()
+		htmlID := button.htmlID()
+		session := button.Session()
 		updateCSSStyle(htmlID, session)
 		updateInnerHTML(htmlID, session)
 
 	case VerticalAlign:
-		view.Session().updateCSSProperty(view.htmlID()+"content", "align-items", checkboxVerticalAlignCSS(view))
+		button.Session().updateCSSProperty(button.htmlID()+"content", "align-items", checkboxVerticalAlignCSS(button))
 
 	case HorizontalAlign:
-		view.Session().updateCSSProperty(view.htmlID()+"content", "justify-items", checkboxHorizontalAlignCSS(view))
+		button.Session().updateCSSProperty(button.htmlID()+"content", "justify-items", checkboxHorizontalAlignCSS(button))
 
 	case AccentColor:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(button.htmlID(), button.Session())
 
 	default:
-		viewsContainerPropertyChanged(view, tag)
+		button.viewsContainerData.propertyChanged(tag)
 	}
 }
 
-func (button *checkboxData) setFunc(view View, tag PropertyName, value any) []PropertyName {
+func (button *checkboxData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case ClickEvent:
-		if button.viewsContainerData.setFunc(view, ClickEvent, value) != nil {
-			if value := view.getRaw(ClickEvent); value != nil {
-				if listeners, ok := value.([]func(View, MouseEvent)); ok {
-					listeners = append(listeners, checkboxClickListener)
-					view.setRaw(ClickEvent, listeners)
-					return []PropertyName{ClickEvent}
-				}
-			}
-
-			return button.viewsContainerData.setFunc(view, ClickEvent, checkboxClickListener)
+		if listeners, ok := valueToOneArgEventListeners[View, MouseEvent](value); ok && listeners != nil {
+			listeners = append(listeners, checkboxClickListener)
+			button.setRaw(tag, listeners)
+			return []PropertyName{tag}
 		}
 		return nil
 
 	case KeyDownEvent:
-		if button.viewsContainerData.setFunc(view, KeyDownEvent, value) != nil {
-			if value := view.getRaw(KeyDownEvent); value != nil {
-				if listeners, ok := value.([]func(View, KeyEvent)); ok {
-					listeners = append(listeners, checkboxKeyListener)
-					view.setRaw(KeyDownEvent, listeners)
-					return []PropertyName{KeyDownEvent}
-				}
-			}
-
-			return button.viewsContainerData.setFunc(view, KeyDownEvent, checkboxKeyListener)
+		if listeners, ok := valueToOneArgEventListeners[View, KeyEvent](value); ok && listeners != nil {
+			listeners = append(listeners, checkboxKeyListener)
+			button.setRaw(tag, listeners)
+			return []PropertyName{tag}
 		}
 		return nil
 
 	case CheckboxChangedEvent:
-		return setViewEventListener[Checkbox, bool](view, tag, value)
+		return setOneArgEventListener[Checkbox, bool](button, tag, value)
 
 	case Checked:
-		return setBoolProperty(view, Checked, value)
+		return setBoolProperty(button, Checked, value)
 
 	case CellVerticalAlign, CellHorizontalAlign, CellWidth, CellHeight:
 		ErrorLogF(`"%s" property is not compatible with the BoundsProperty`, string(tag))
 		return nil
 	}
 
-	return button.viewsContainerData.setFunc(view, tag, value)
+	return button.viewsContainerData.setFunc(tag, value)
 }
 
-func (button *checkboxData) removeFunc(view View, tag PropertyName) []PropertyName {
+func (button *checkboxData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case ClickEvent:
-		button.setRaw(ClickEvent, checkboxClickListener)
+		button.setRaw(ClickEvent, []func(View, MouseEvent){checkboxClickListener})
 		return []PropertyName{ClickEvent}
 
 	case KeyDownEvent:
-		button.setRaw(KeyDownEvent, checkboxKeyListener)
+		button.setRaw(KeyDownEvent, []func(View, KeyEvent){checkboxKeyListener})
 		return []PropertyName{ClickEvent}
 	}
 
-	return button.viewsContainerData.removeFunc(view, tag)
-}
-
-func (button *checkboxData) checked() bool {
-	checked, _ := boolProperty(button, Checked, button.Session())
-	return checked
+	return button.viewsContainerData.removeFunc(tag)
 }
 
 /*
@@ -340,5 +321,5 @@ func GetCheckboxHorizontalAlign(view View, subviewID ...string) int {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCheckboxChangedListeners(view View, subviewID ...string) []func(Checkbox, bool) {
-	return getEventListeners[Checkbox, bool](view, subviewID, CheckboxChangedEvent)
+	return getOneArgEventListeners[Checkbox, bool](view, subviewID, CheckboxChangedEvent)
 }

@@ -46,8 +46,8 @@ func (list *dropDownListData) init(session Session) {
 	list.tag = "DropDownList"
 	list.hasHtmlDisabled = true
 	list.normalize = normalizeDropDownListTag
-	list.set = dropDownListSet
-	list.changed = dropDownListPropertyChanged
+	list.set = list.setFunc
+	list.changed = list.propertyChanged
 }
 
 func (list *dropDownListData) Focusable() bool {
@@ -62,59 +62,49 @@ func normalizeDropDownListTag(tag PropertyName) PropertyName {
 	return tag
 }
 
-func dropDownListSet(view View, tag PropertyName, value any) []PropertyName {
+func (list *dropDownListData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Items:
 		if items, ok := anyToStringArray(value, ""); ok {
-			return setArrayPropertyValue(view, tag, items)
+			return setArrayPropertyValue(list, tag, items)
 		}
 		notCompatibleType(Items, value)
 		return nil
 
 	case DisabledItems, ItemSeparators:
 		if items, ok := parseIndicesArray(value); ok {
-			return setArrayPropertyValue(view, tag, items)
+			return setArrayPropertyValue(list, tag, items)
 		}
 		notCompatibleType(tag, value)
 		return nil
 
 	case DropDownEvent:
-		return setEventWithOldListener[DropDownList, int](view, tag, value)
+		return setTwoArgEventListener[DropDownList, int](list, tag, value)
 
 	case Current:
-		if view, ok := view.(View); ok {
-			view.setRaw("old-current", GetCurrent(view))
-		}
-		return setIntProperty(view, Current, value)
+		list.setRaw("old-current", GetCurrent(list))
+		return setIntProperty(list, Current, value)
 	}
 
-	return viewSet(view, tag, value)
+	return list.viewData.setFunc(tag, value)
 }
 
-func dropDownListPropertyChanged(view View, tag PropertyName) {
+func (list *dropDownListData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Items, DisabledItems, ItemSeparators:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(list.htmlID(), list.Session())
 
 	case Current:
-		current := GetCurrent(view)
-		view.Session().callFunc("selectDropDownListItem", view.htmlID(), current)
+		current := GetCurrent(list)
+		list.Session().callFunc("selectDropDownListItem", list.htmlID(), current)
 
-		if list, ok := view.(DropDownList); ok {
-			oldCurrent := -1
-			if value := view.getRaw("old-current"); value != nil {
-				if n, ok := value.(int); ok {
-					oldCurrent = n
-				}
-			}
-
-			for _, listener := range GetDropDownListeners(view) {
-				listener(list, current, oldCurrent)
-			}
+		oldCurrent, _ := intProperty(list, "old-current", list.Session(), -1)
+		for _, listener := range GetDropDownListeners(list) {
+			listener(list, current, oldCurrent)
 		}
 
 	default:
-		viewPropertyChanged(view, tag)
+		list.viewData.propertyChanged(tag)
 	}
 }
 
@@ -253,6 +243,9 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 					for _, listener := range GetDropDownListeners(list) {
 						listener(list, number, old)
 					}
+					if listener, ok := list.changeListener[Current]; ok {
+						listener(list, Current)
+					}
 				}
 			} else {
 				ErrorLog(err.Error())
@@ -268,7 +261,7 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 // GetDropDownListeners returns the "drop-down-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int, int) {
-	return getEventWithOldListeners[DropDownList, int](view, subviewID, DropDownEvent)
+	return getTwoArgEventListeners[DropDownList, int](view, subviewID, DropDownEvent)
 }
 
 // GetDropDownItems return the DropDownList items list.

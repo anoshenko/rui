@@ -123,8 +123,8 @@ func (picker *filePickerData) init(session Session) {
 	picker.hasHtmlDisabled = true
 	picker.files = []FileInfo{}
 	picker.loader = map[int]func(FileInfo, []byte){}
-	picker.set = filePickerSet
-	picker.changed = filePickerPropertyChanged
+	picker.set = picker.setFunc
+	picker.changed = picker.propertyChanged
 
 }
 
@@ -150,27 +150,16 @@ func (picker *filePickerData) LoadFile(file FileInfo, result func(FileInfo, []by
 	}
 }
 
-func filePickerSet(view View, tag PropertyName, value any) []PropertyName {
-
-	setAccept := func(value string) []PropertyName {
-		if value != "" {
-			view.setRaw(tag, value)
-		} else if view.getRaw(tag) != nil {
-			view.setRaw(tag, nil)
-		} else {
-			return []PropertyName{}
-		}
-		return []PropertyName{Accept}
-	}
+func (picker *filePickerData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	switch tag {
 	case FileSelectedEvent:
-		return setViewEventListener[FilePicker, []FileInfo](view, tag, value)
+		return setOneArgEventListener[FilePicker, []FileInfo](picker, tag, value)
 
 	case Accept:
 		switch value := value.(type) {
 		case string:
-			return setAccept(strings.Trim(value, " \t\n"))
+			return setStringPropertyValue(picker, Accept, strings.Trim(value, " \t\n"))
 
 		case []string:
 			buffer := allocStringBuilder()
@@ -184,27 +173,27 @@ func filePickerSet(view View, tag PropertyName, value any) []PropertyName {
 					buffer.WriteString(val)
 				}
 			}
-			return setAccept(buffer.String())
+			return setStringPropertyValue(picker, Accept, buffer.String())
 		}
 		notCompatibleType(tag, value)
 		return nil
 	}
 
-	return viewSet(view, tag, value)
+	return picker.viewData.setFunc(tag, value)
 }
 
-func filePickerPropertyChanged(view View, tag PropertyName) {
+func (picker *filePickerData) propertyChanged(tag PropertyName) {
 	switch tag {
 	case Accept:
-		session := view.Session()
-		if css := acceptPropertyCSS(view); css != "" {
-			session.updateProperty(view.htmlID(), "accept", css)
+		session := picker.Session()
+		if css := acceptPropertyCSS(picker); css != "" {
+			session.updateProperty(picker.htmlID(), "accept", css)
 		} else {
-			session.removeProperty(view.htmlID(), "accept")
+			session.removeProperty(picker.htmlID(), "accept")
 		}
 
 	default:
-		viewPropertyChanged(view, tag)
+		picker.viewData.propertyChanged(tag)
 	}
 }
 
@@ -381,5 +370,5 @@ func GetFilePickerAccept(view View, subviewID ...string) []string {
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo) {
-	return getEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
+	return getOneArgEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }
