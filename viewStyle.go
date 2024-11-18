@@ -880,7 +880,7 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 	finalTags := []PropertyName{
 		PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible,
 		TransformOriginX, TransformOriginY, TransformOriginZ,
-		TransformTag, Clip, Filter, BackdropFilter, Summary, Content, Transition}
+		Transform, Clip, Filter, BackdropFilter, Summary, Content, Transition}
 	for _, tag := range finalTags {
 		removeTag(tag)
 	}

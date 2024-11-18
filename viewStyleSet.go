@@ -345,9 +345,9 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 		}
 		return nil
 
-	case TransformTag:
+	case Transform:
 		if setTransformProperty(style, value) {
-			return []PropertyName{TransformTag}
+			return []PropertyName{Transform}
 		} else {
 			return nil
 		}

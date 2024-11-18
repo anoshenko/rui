@@ -6,21 +6,21 @@ import (
 	"strings"
 )
 
-// Constants for [Transform] specific properties
+// Constants for [TransformProperty] specific properties
 const (
-	// TransformTag is the constant for "transform" property tag.
+	// Transform is the constant for "transform" property tag.
 	//
 	// Used by `View`.
 	// Specify translation, scale and rotation over x, y and z axes as well as a distorsion of a view along x and y axes.
 	//
-	// Supported types: `Transform`, `string`.
+	// Supported types: `TransformProperty`, `string`.
 	//
 	// See `Transform` description for more details.
 	//
 	// Conversion rules:
 	// `Transform` - stored as is, no conversion performed.
 	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
-	TransformTag PropertyName = "transform"
+	Transform PropertyName = "transform"
 
 	// Perspective is the constant for "perspective" property tag.
 	//
@@ -386,26 +386,26 @@ const (
 	SkewY PropertyName = "skew-y"
 )
 
-// Transform interface specifies view transformation parameters: the x-, y-, and z-axis translation values,
+// TransformProperty interface specifies view transformation parameters: the x-, y-, and z-axis translation values,
 // the x-, y-, and z-axis scaling values, the angle to use to distort the element along the abscissa and ordinate,
 // the angle of the view rotation.
 // Valid property tags: Perspective ("perspective"),  TranslateX ("translate-x"), TranslateY ("translate-y"), TranslateZ ("translate-z"),
 // ScaleX ("scale-x"), ScaleY ("scale-y"), ScaleZ ("scale-z"), Rotate ("rotate"), RotateX ("rotate-x"),
 // RotateY ("rotate-y"), RotateZ ("rotate-z"), SkewX ("skew-x"), and SkewY ("skew-y")
-type Transform interface {
+type TransformProperty interface {
 	Properties
 	fmt.Stringer
 	stringWriter
 	transformCSS(session Session) string
 }
 
-type transformData struct {
+type transformPropertyData struct {
 	dataProperty
 }
 
 // NewTransform creates a new transform property data and return its interface
-func NewTransform(params Params) Transform {
-	transform := new(transformData)
+func NewTransformProperty(params Params) TransformProperty {
+	transform := new(transformPropertyData)
 	transform.init()
 
 	for tag, value := range params {
@@ -414,7 +414,7 @@ func NewTransform(params Params) Transform {
 	return transform
 }
 
-func (transform *transformData) init() {
+func (transform *transformPropertyData) init() {
 	transform.dataProperty.init()
 	transform.set = transformSet
 	transform.supportedProperties = []PropertyName{
@@ -423,14 +423,14 @@ func (transform *transformData) init() {
 	}
 }
 
-func (transform *transformData) String() string {
+func (transform *transformPropertyData) String() string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 	transform.writeString(buffer, "")
 	return buffer.String()
 }
 
-func (transform *transformData) writeString(buffer *strings.Builder, indent string) {
+func (transform *transformPropertyData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("_{ ")
 	comma := false
 	for _, tag := range transform.supportedProperties {
@@ -469,7 +469,7 @@ func transformSet(properties Properties, tag PropertyName, value any) []Property
 func setTransformProperty(properties Properties, value any) bool {
 
 	setObject := func(obj DataObject) bool {
-		transform := NewTransform(nil)
+		transform := NewTransformProperty(nil)
 		ok := true
 		for i := 0; i < obj.PropertyCount(); i++ {
 			if prop := obj.Property(i); prop.Type() == TextNode {
@@ -485,13 +485,13 @@ func setTransformProperty(properties Properties, value any) bool {
 			return false
 		}
 
-		properties.setRaw(TransformTag, transform)
+		properties.setRaw(Transform, transform)
 		return true
 	}
 
 	switch value := value.(type) {
-	case Transform:
-		properties.setRaw(TransformTag, value)
+	case TransformProperty:
+		properties.setRaw(Transform, value)
 		return true
 
 	case DataObject:
@@ -501,23 +501,23 @@ func setTransformProperty(properties Properties, value any) bool {
 		if obj := value.Object(); obj != nil {
 			return setObject(obj)
 		}
-		notCompatibleType(TransformTag, value)
+		notCompatibleType(Transform, value)
 		return false
 
 	case string:
 		if obj := ParseDataText(value); obj != nil {
 			return setObject(obj)
 		}
-		notCompatibleType(TransformTag, value)
+		notCompatibleType(Transform, value)
 		return false
 	}
 
 	return false
 }
 
-func getTransformProperty(properties Properties) Transform {
-	if val := properties.getRaw(TransformTag); val != nil {
-		if transform, ok := val.(Transform); ok {
+func getTransformProperty(properties Properties) TransformProperty {
+	if val := properties.getRaw(Transform); val != nil {
+		if transform, ok := val.(TransformProperty); ok {
 			return transform
 		}
 	}
@@ -530,13 +530,13 @@ func setTransformPropertyElement(properties Properties, tag PropertyName, value 
 		var result []PropertyName = nil
 		if transform := getTransformProperty(properties); transform != nil {
 			if result = transformSet(transform, tag, value); result != nil {
-				result = append(result, TransformTag)
+				result = append(result, Transform)
 			}
 		} else {
-			transform := NewTransform(nil)
+			transform := NewTransformProperty(nil)
 			if result = transformSet(transform, tag, value); result != nil {
-				properties.setRaw(TransformTag, transform)
-				result = append(result, TransformTag)
+				properties.setRaw(Transform, transform)
+				result = append(result, Transform)
 			}
 		}
 		return result
@@ -566,20 +566,20 @@ func getTransformOrigin(style Properties, session Session) (SizeUnit, SizeUnit, 
 	return x, y, z
 }
 
-func (transform *transformData) getSkew(session Session) (AngleUnit, AngleUnit, bool) {
+func (transform *transformPropertyData) getSkew(session Session) (AngleUnit, AngleUnit, bool) {
 	skewX, okX := angleProperty(transform, SkewX, session)
 	skewY, okY := angleProperty(transform, SkewY, session)
 	return skewX, skewY, okX || okY
 }
 
-func (transform *transformData) getTranslate(session Session) (SizeUnit, SizeUnit, SizeUnit) {
+func (transform *transformPropertyData) getTranslate(session Session) (SizeUnit, SizeUnit, SizeUnit) {
 	x, _ := sizeProperty(transform, TranslateX, session)
 	y, _ := sizeProperty(transform, TranslateY, session)
 	z, _ := sizeProperty(transform, TranslateZ, session)
 	return x, y, z
 }
 
-func (transform *transformData) transformCSS(session Session) string {
+func (transform *transformPropertyData) transformCSS(session Session) string {
 
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
