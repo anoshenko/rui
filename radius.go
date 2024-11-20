@@ -624,8 +624,8 @@ func radiusPropertySet(radius Properties, tag PropertyName, value any) []Propert
 		case string:
 			if strings.Contains(value, "/") {
 				if values := strings.Split(value, "/"); len(values) == 2 {
-					if result = radiusPropertySet(radius, tag+"-x", value[0]); result != nil {
-						if resultY := radiusPropertySet(radius, tag+"-y", value[1]); resultY != nil {
+					if result = radiusPropertySet(radius, tag+"-x", values[0]); result != nil {
+						if resultY := radiusPropertySet(radius, tag+"-y", values[1]); resultY != nil {
 							result = append(result, resultY...)
 						}
 

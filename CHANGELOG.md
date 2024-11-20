@@ -1,7 +1,7 @@
 # v0.18.0
 
 * Property name type changed to PropertyName. 
-* Transform interface renamed to TransformProperty. TransformTag constant renamed to Transform. 
+* Transform interface renamed to TransformProperty. NewTransform function renamed to NewTransformProperty. TransformTag constant renamed to Transform. 
 * OriginX, OriginY, and OriginZ properties renamed to TransformOriginX, TransformOriginY, and TransformOriginZ
 * GetOrigin function renamed to GetTransformOrigin
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.

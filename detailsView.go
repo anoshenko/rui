@@ -142,9 +142,9 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 			buffer.WriteString("</summary>")
 
 		case View:
-			buffer.WriteString("<summary>")
+			buffer.WriteString(`<summary><div style="display: inline-block;">`)
 			viewHTML(value, buffer)
-			buffer.WriteString("</summary>")
+			buffer.WriteString("</div></summary>")
 		}
 	}
 

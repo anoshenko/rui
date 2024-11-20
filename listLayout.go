@@ -37,7 +37,6 @@ type ListLayout interface {
 	// UpdateContent updates child Views if the "content" property value is set to ListAdapter,
 	// otherwise does nothing
 	UpdateContent()
-	setAdapter(ListAdapter)
 }
 
 type listLayoutData struct {
@@ -166,13 +165,6 @@ func (listLayout *listLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			view.addToCSSStyle(map[string]string{`flex`: `0 0 auto`})
 			viewHTML(view, buffer)
 		}
-	}
-}
-
-func (listLayout *listLayoutData) setAdapter(adapter ListAdapter) {
-	listLayout.adapter = adapter
-	if adapter != nil {
-		listLayout.createContent()
 	}
 }
 

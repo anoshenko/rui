@@ -142,45 +142,6 @@ type TouchEvent struct {
 	MetaKey bool
 }
 
-/*
-func setTouchListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToOneArgEventListeners[View, TouchEvent](value); ok {
-		if len(listeners) == 0 {
-			properties.setRaw(tag, nil)
-		} else {
-			properties.setRaw(tag, listeners)
-		}
-		return true
-	}
-	notCompatibleType(tag, value)
-	return false
-}
-
-func (view *viewData) removeTouchListener(tag PropertyName) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := eventJsFunc[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func touchEventsHtml(view View, buffer *strings.Builder) {
-	for _, tag := range []PropertyName{TouchStart, TouchEnd, TouchMove, TouchCancel} {
-		if value := view.getRaw(tag); value != nil {
-			if js, ok := eventJsFunc[tag]; ok {
-				if listeners, ok := value.([]func(View, TouchEvent)); ok && len(listeners) > 0 {
-					buffer.WriteString(js.jsEvent)
-					buffer.WriteString(`="`)
-					buffer.WriteString(js.jsFunc)
-					buffer.WriteString(`(this, event)" `)
-				}
-			}
-		}
-	}
-}
-*/
-
 func (event *TouchEvent) init(data DataObject) {
 
 	event.Touches = []Touch{}

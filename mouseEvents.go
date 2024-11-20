@@ -228,50 +228,6 @@ type MouseEvent struct {
 	MetaKey bool
 }
 
-/*
-func setMouseListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToOneArgEventListeners[View, MouseEvent](value); ok {
-		if len(listeners) == 0 {
-			properties.setRaw(tag, nil)
-		} else {
-			properties.setRaw(tag, listeners)
-		}
-		return true
-	}
-	notCompatibleType(tag, value)
-	return false
-}
-
-func (view *viewData) removeMouseListener(tag PropertyName) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := eventJsFunc[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func mouseEventsHtml(view View, buffer *strings.Builder, hasTooltip bool) {
-	for _, tag := range []PropertyName{ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent} {
-		if value := view.getRaw(tag); value != nil {
-			if js, ok := eventJsFunc[tag]; ok {
-				if listeners, ok := value.([]func(View, MouseEvent)); ok && len(listeners) > 0 {
-					buffer.WriteString(js.jsEvent)
-					buffer.WriteString(`="`)
-					buffer.WriteString(js.jsFunc)
-					buffer.WriteString(`(this, event)" `)
-				}
-			}
-		}
-	}
-
-	if hasTooltip {
-		buffer.WriteString(`onmouseenter="mouseEnterEvent(this, event)" `)
-		buffer.WriteString(`onmouseleave="mouseLeaveEvent(this, event)" `)
-	}
-}
-*/
-
 func getTimeStamp(data DataObject) uint64 {
 	if value, ok := data.PropertyValue("timeStamp"); ok {
 		if index := strings.Index(value, "."); index > 0 {

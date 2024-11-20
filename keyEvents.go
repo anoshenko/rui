@@ -429,36 +429,6 @@ func (event *KeyEvent) init(data DataObject) {
 	event.MetaKey = getBool("metaKey")
 }
 
-/*
-func setKeyListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToOneArgEventListeners[View, KeyEvent](value); ok {
-		if len(listeners) == 0 {
-			properties.setRaw(tag, nil)
-		} else {
-			properties.setRaw(tag, listeners)
-		}
-		return true
-	}
-	notCompatibleType(tag, value)
-	return false
-}
-
-func (view *viewData) removeKeyListener(tag PropertyName) {
-	delete(view.properties, tag)
-	if view.created {
-		switch tag {
-		case KeyDownEvent:
-			if !view.Focusable() {
-				view.session.removeProperty(view.htmlID(), "onkeydown")
-			}
-
-		case KeyUpEvent:
-			view.session.removeProperty(view.htmlID(), "onkeyup")
-		}
-	}
-}
-*/
-
 func keyEventsHtml(view View, buffer *strings.Builder) {
 	if len(getOneArgEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 {
 		buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)

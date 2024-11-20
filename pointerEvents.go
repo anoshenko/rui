@@ -154,45 +154,6 @@ type PointerEvent struct {
 	IsPrimary bool
 }
 
-/*
-func setPointerListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToOneArgEventListeners[View, PointerEvent](value); ok {
-		if len(listeners) == 0 {
-			properties.setRaw(tag, nil)
-		} else {
-			properties.setRaw(tag, listeners)
-		}
-		return true
-	}
-	notCompatibleType(tag, value)
-	return false
-}
-
-func (view *viewData) removePointerListener(tag PropertyName) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := eventJsFunc[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func pointerEventsHtml(view View, buffer *strings.Builder) {
-	for _, tag := range []PropertyName{PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel} {
-		if value := view.getRaw(tag); value != nil {
-			if js, ok := eventJsFunc[tag]; ok {
-				if listeners, ok := value.([]func(View, PointerEvent)); ok && len(listeners) > 0 {
-					buffer.WriteString(js.jsEvent)
-					buffer.WriteString(`="`)
-					buffer.WriteString(js.jsFunc)
-					buffer.WriteString(`(this, event)" `)
-				}
-			}
-		}
-	}
-}
-*/
-
 func (event *PointerEvent) init(data DataObject) {
 	event.MouseEvent.init(data)
 
