@@ -165,6 +165,12 @@ func (style *viewStyle) backgroundCSS(session Session) string {
 			}
 
 			if buffer.Len() > 0 {
+				backgroundColor, _ := colorProperty(style, BackgroundColor, session)
+				if backgroundColor != 0 {
+					buffer.WriteRune(' ')
+					buffer.WriteString(backgroundColor.cssString())
+				}
+
 				return buffer.String()
 			}
 		}
@@ -236,7 +242,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	colorProperties := []struct{ property, cssTag string }{
-		{BackgroundColor, BackgroundColor},
+		//{BackgroundColor, BackgroundColor},
 		{TextColor, "color"},
 		{TextLineColor, "text-decoration-color"},
 		{CaretColor, CaretColor},
@@ -254,6 +260,11 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if background := style.backgroundCSS(session); background != "" {
 		builder.add("background", background)
+	} else {
+		backgroundColor, _ := colorProperty(style, BackgroundColor, session)
+		if backgroundColor != 0 {
+			builder.add("background-color", backgroundColor.cssString())
+		}
 	}
 
 	if font, ok := stringProperty(style, FontName, session); ok && font != "" {
