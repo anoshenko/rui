@@ -109,8 +109,9 @@ func split4Values(text string) []string {
 }
 
 func backgroundCSS(properties Properties, session Session) string {
+
 	if value := properties.getRaw(Background); value != nil {
-		if backgrounds, ok := value.([]BackgroundElement); ok {
+		if backgrounds, ok := value.([]BackgroundElement); ok && len(backgrounds) > 0 {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
@@ -124,6 +125,11 @@ func backgroundCSS(properties Properties, session Session) string {
 			}
 
 			if buffer.Len() > 0 {
+				backgroundColor, _ := colorProperty(properties, BackgroundColor, session)
+				if backgroundColor != 0 {
+					buffer.WriteRune(' ')
+					buffer.WriteString(backgroundColor.cssString())
+				}
 				return buffer.String()
 			}
 		}
@@ -199,7 +205,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		cssTag   string
 	}
 	colorProperties := []propertyCss{
-		{BackgroundColor, string(BackgroundColor)},
+		//{BackgroundColor, string(BackgroundColor)},
 		{TextColor, "color"},
 		{TextLineColor, "text-decoration-color"},
 		{CaretColor, string(CaretColor)},
@@ -217,6 +223,11 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if background := backgroundCSS(style, session); background != "" {
 		builder.add("background", background)
+	} else {
+		backgroundColor, _ := colorProperty(style, BackgroundColor, session)
+		if backgroundColor != 0 {
+			builder.add("background-color", backgroundColor.cssString())
+		}
 	}
 
 	if font, ok := stringProperty(style, FontName, session); ok && font != "" {
