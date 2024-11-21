@@ -163,7 +163,7 @@ func (listLayout *listLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	if listLayout.views != nil {
 		for _, view := range listLayout.views {
 			view.addToCSSStyle(map[string]string{`flex`: `0 0 auto`})
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		}
 	}
 }

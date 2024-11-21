@@ -659,7 +659,7 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 
 		if view := listView.getItemView(adapter, i); view != nil {
 			//view.setNoResizeEvent()
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		} else {
 			buffer.WriteString("ERROR: invalid item view")
 		}
@@ -706,7 +706,7 @@ func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *
 
 		if view := listView.getItemView(adapter, i); view != nil {
 			//view.setNoResizeEvent()
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		} else {
 			buffer.WriteString("ERROR: invalid item view")
 		}
@@ -737,7 +737,7 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 	if adapter := listView.getAdapter(); adapter != nil {
 		if view := listView.getItemView(adapter, index); view != nil {
 			view.setNoResizeEvent()
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		} else {
 			buffer.WriteString("ERROR: invalid item view")
 		}

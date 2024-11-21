@@ -720,7 +720,7 @@ func (popup *popupData) Show() {
 
 func (popup *popupData) html(buffer *strings.Builder) {
 
-	viewHTML(popup.layerView, buffer)
+	viewHTML(popup.layerView, buffer, "")
 }
 
 func (popup *popupData) viewByHTMLID(id string) View {

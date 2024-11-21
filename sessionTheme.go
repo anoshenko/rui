@@ -339,7 +339,7 @@ func (session *sessionData) SetLanguage(lang string) {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
-			viewHTML(session.rootView, buffer)
+			viewHTML(session.rootView, buffer, "")
 			session.bridge.updateInnerHTML("ruiRootView", buffer.String())
 		}
 	}

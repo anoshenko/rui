@@ -35,7 +35,7 @@ func (layout *absoluteLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	if layout.views != nil {
 		for _, view := range layout.views {
 			view.addToCSSStyle(map[string]string{`position`: `absolute`})
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		}
 	}
 }

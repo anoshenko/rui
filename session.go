@@ -329,7 +329,7 @@ func (session *sessionData) writeInitScript(writer *strings.Builder) {
 		writer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
-		viewHTML(session.rootView, buffer)
+		viewHTML(session.rootView, buffer, "")
 		text := strings.ReplaceAll(buffer.String(), "'", `\'`)
 		writer.WriteString(text)
 		writer.WriteString("';\nscanElementsSize();")
@@ -360,7 +360,7 @@ func (session *sessionData) reload() {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
 
-		viewHTML(session.rootView, buffer)
+		viewHTML(session.rootView, buffer, "")
 		session.bridge.updateInnerHTML("ruiRootView", buffer.String())
 		session.bridge.callFunc("scanElementsSize")
 	}

@@ -431,6 +431,6 @@ func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder)
 			"grid-row-start":    strconv.Itoa(top),
 			"grid-row-end":      strconv.Itoa(top + 1),
 		})
-		viewHTML(view, buffer)
+		viewHTML(view, buffer, "")
 	}
 }

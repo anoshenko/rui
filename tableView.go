@@ -1559,7 +1559,7 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 		buffer.WriteString(value)
 
 	case View:
-		viewHTML(value, buffer)
+		viewHTML(value, buffer, "")
 		table.cellViews = append(table.cellViews, value)
 
 	case Color:

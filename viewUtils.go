@@ -372,23 +372,7 @@ func GetAccentColor(view View, subviewID ...string) Color {
 // GetFontName returns the subview font.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFontName(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if font, ok := stringProperty(view, FontName, view.Session()); ok {
-			return font
-		}
-		if value := valueFromStyle(view, FontName); value != nil {
-			if font, ok := value.(string); ok {
-				return font
-			}
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetFontName(parent)
-		}
-	}
-	return ""
+	return stringStyledProperty(view, nil, FontName, true)
 }
 
 // GetTextColor returns a text color of the subview.
@@ -723,6 +707,29 @@ func valueFromStyle(view View, tag PropertyName) any {
 		}
 	}
 	return getValue(Style)
+}
+
+func stringStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) string {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+	if view != nil {
+		if text, ok := stringProperty(view, tag, view.Session()); ok {
+			return text
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			if text, ok := value.(string); ok {
+				return text
+			}
+		}
+		if inherit {
+			if parent := view.Parent(); parent != nil {
+				return stringStyledProperty(parent, nil, tag, true)
+			}
+		}
+
+	}
+	return ""
 }
 
 func sizeStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) SizeUnit {

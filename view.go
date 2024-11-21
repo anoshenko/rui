@@ -836,10 +836,13 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	}
 }
 
-func viewHTML(view View, buffer *strings.Builder) {
-	viewHTMLTag := view.htmlTag()
+func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
+	if htmlTag == "" {
+		htmlTag = view.htmlTag()
+	}
+	//viewHTMLTag := view.htmlTag()
 	buffer.WriteRune('<')
-	buffer.WriteString(viewHTMLTag)
+	buffer.WriteString(htmlTag)
 	buffer.WriteString(` id="`)
 	buffer.WriteString(view.htmlID())
 	buffer.WriteRune('"')
@@ -907,7 +910,7 @@ func viewHTML(view View, buffer *strings.Builder) {
 	view.htmlSubviews(view, buffer)
 	if view.closeHTMLTag() {
 		buffer.WriteString(`</`)
-		buffer.WriteString(viewHTMLTag)
+		buffer.WriteString(htmlTag)
 		buffer.WriteRune('>')
 	}
 }

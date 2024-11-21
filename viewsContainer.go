@@ -146,7 +146,7 @@ func (container *viewsContainerData) cssStyle(self View, builder cssBuilder) {
 func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Builder) {
 	if container.views != nil {
 		for _, view := range container.views {
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		}
 	}
 }

@@ -345,7 +345,7 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 
 	buffer.WriteString(`1s ease;">`)
 
-	viewHTML(layout.pushView, buffer)
+	viewHTML(layout.pushView, buffer, "")
 	buffer.WriteString(`</div>`)
 
 	session.appendToInnerHTML(htmlID, buffer.String())
@@ -386,7 +386,7 @@ func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool
 	buffer.WriteString(`', 'ruiPop', event)" ontransitioncancel="stackTransitionEndEvent('`)
 	buffer.WriteString(htmlID)
 	buffer.WriteString(`', 'ruiPop', event)" style="transition: transform 1s ease;">`)
-	viewHTML(layout.popView, buffer)
+	viewHTML(layout.popView, buffer, "")
 	buffer.WriteString(`</div>`)
 
 	session.appendToInnerHTML(htmlID, buffer.String())
@@ -429,7 +429,7 @@ func (layout *stackLayoutData) htmlSubviews(self View, buffer *strings.Builder) 
 				buffer.WriteString(` style="visibility: hidden;"`)
 			}
 			buffer.WriteString(`>`)
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 			buffer.WriteString(`</div>`)
 		}
 	}

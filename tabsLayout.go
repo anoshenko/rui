@@ -861,7 +861,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(`grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;">`)
 		}
 
-		viewHTML(view, buffer)
+		viewHTML(view, buffer, "")
 		buffer.WriteString(`</div>`)
 	}
 }
