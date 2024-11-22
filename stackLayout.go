@@ -80,14 +80,14 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.viewsContainerData.init(session)
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
-	layout.properties[TransitionEndEvent] = []func(View, string){layout.pushFinished, layout.popFinished}
+	layout.properties[TransitionEndEvent] = []func(View, PropertyName){layout.pushFinished, layout.popFinished}
 	layout.get = layout.getFunc
 	layout.set = layout.setFunc
 	layout.remove = layout.removeFunc
 	layout.changed = layout.propertyChanged
 }
 
-func (layout *stackLayoutData) pushFinished(view View, tag string) {
+func (layout *stackLayoutData) pushFinished(view View, tag PropertyName) {
 	if tag == "ruiPush" {
 		if layout.pushView != nil {
 			layout.pushView = nil
@@ -109,7 +109,7 @@ func (layout *stackLayoutData) pushFinished(view View, tag string) {
 	}
 }
 
-func (layout *stackLayoutData) popFinished(view View, tag string) {
+func (layout *stackLayoutData) popFinished(view View, tag PropertyName) {
 	if tag == "ruiPop" {
 		popView := layout.popView
 		layout.popView = nil
@@ -125,7 +125,7 @@ func (layout *stackLayoutData) popFinished(view View, tag string) {
 func (layout *stackLayoutData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		listeners, ok := valueToOneArgEventListeners[View, string](value)
+		listeners, ok := valueToOneArgEventListeners[View, PropertyName](value)
 		if ok && listeners != nil {
 			listeners = append(listeners, layout.pushFinished)
 			listeners = append(listeners, layout.popFinished)
@@ -192,7 +192,7 @@ func (layout *stackLayoutData) propertyChanged(tag PropertyName) {
 func (layout *stackLayoutData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		layout.setRaw(TransitionEndEvent, []func(View, string){layout.pushFinished, layout.popFinished})
+		layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.pushFinished, layout.popFinished})
 		return []PropertyName{tag}
 
 	case Current:
