@@ -70,11 +70,15 @@ type StackLayout interface {
 	// RemovePeek removes the current View and returns it. If StackLayout is empty then it doesn't do anything and returns nil.
 	RemovePeek() View
 
-	// MoveToFront makes the given View current. Returns true if successful, false otherwise.
-	MoveToFront(view View) bool
+	// MoveToFront makes the given View current.
+	// The second argument is a function called after the move to front animation ends.
+	// Returns true if successful, false otherwise.
+	MoveToFront(view View, onShown ...func(View)) bool
 
-	// MoveToFrontByID makes the View current by viewID. Returns true if successful, false otherwise.
-	MoveToFrontByID(viewID string) bool
+	// MoveToFrontByID makes the View current by viewID.
+	// The second argument is a function called after the move to front animation ends.
+	// Returns true if successful, false otherwise.
+	MoveToFrontByID(viewID string, onShown ...func(View)) bool
 
 	// Push adds a new View to the container and makes it current.
 	// It is similar to Append, but the addition is done using an animation effect.
@@ -84,29 +88,30 @@ type StackLayout interface {
 	// * EndToStartAnimation (2) - End-to-Beginning animation;
 	// * TopDownAnimation (3) - Top-down animation;
 	// * BottomUpAnimation (4) - Bottom up animation.
-	// The third argument `onPushFinished` is the function to be called when the animation ends. It may be nil.
-	Push(view View, onPushFinished func())
+	// The second argument `onPushFinished` is the function to be called when the animation ends.
+	Push(view View, onPushFinished ...func())
 
 	// Pop removes the current View from the container using animation.
-	// The second argument `onPopFinished`` is the function to be called when the animation ends. It may be nil.
+	// The argument `onPopFinished` is the function to be called when the animation ends.
 	// The function will return false if the StackLayout is empty and true if the current item has been removed.
-	Pop(onPopFinished func(View)) bool
+	Pop(onPopFinished ...func(View)) bool
 }
 
 type pushFinished struct {
 	peekID   string
-	listener func()
+	listener []func()
 }
 
 type popFinished struct {
 	view     View
-	listener func(View)
+	listener []func(View)
 }
 
 type stackLayoutData struct {
 	viewsContainerData
 	onPushFinished map[string]pushFinished
 	onPopFinished  map[string]popFinished
+	onMoveFinished map[string]popFinished
 }
 
 // NewStackLayout create new StackLayout object and return it
@@ -129,6 +134,7 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.systemClass = "ruiStackLayout"
 	layout.onPushFinished = map[string]pushFinished{}
 	layout.onPopFinished = map[string]popFinished{}
+	layout.onMoveFinished = map[string]popFinished{}
 	layout.set = layout.setFunc
 	layout.remove = layout.removeFunc
 
@@ -167,8 +173,10 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 				session.removeProperty(pageID, "ontransitioncancel")
 				session.finishUpdateScript(pageID)
 
-				if finished.listener != nil {
-					finished.listener()
+				for _, listener := range finished.listener {
+					if listener != nil {
+						listener()
+					}
 				}
 				delete(layout.onPushFinished, viewID)
 				layout.contentChanged()
@@ -177,8 +185,10 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 		case "pop":
 			if finished, ok := layout.onPopFinished[viewID]; ok {
 				session.callFunc("removeView", viewID+"page")
-				if finished.listener != nil {
-					finished.listener(finished.view)
+				for _, listener := range finished.listener {
+					if listener != nil {
+						listener(finished.view)
+					}
 				}
 				delete(layout.onPopFinished, viewID)
 
@@ -209,6 +219,15 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 			session.removeProperty(pageID, "ontransitioncancel")
 			session.finishUpdateScript(pageID)
 			layout.contentChanged()
+
+			if finished, ok := layout.onMoveFinished[viewID]; ok {
+				for _, listener := range finished.listener {
+					if listener != nil {
+						listener(finished.view)
+					}
+				}
+				delete(layout.onMoveFinished, viewID)
+			}
 		}
 	}
 }
@@ -250,7 +269,7 @@ func (layout *stackLayoutData) Peek() View {
 	return nil
 }
 
-func (layout *stackLayoutData) MoveToFront(view View) bool {
+func (layout *stackLayoutData) MoveToFront(view View, onShown ...func(View)) bool {
 	if view == nil {
 		ErrorLog(`MoveToFront(nil) forbidden`)
 		return false
@@ -269,7 +288,7 @@ func (layout *stackLayoutData) MoveToFront(view View) bool {
 	default:
 		for i, view := range layout.views {
 			if view.htmlID() == htmlID {
-				layout.moveToFrontByIndex(i)
+				layout.moveToFrontByIndex(i, onShown)
 				return true
 			}
 		}
@@ -279,7 +298,7 @@ func (layout *stackLayoutData) MoveToFront(view View) bool {
 	return false
 }
 
-func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
+func (layout *stackLayoutData) MoveToFrontByID(viewID string, onShown ...func(View)) bool {
 	switch count := len(layout.views); count {
 	case 0:
 		// do nothing
@@ -292,7 +311,7 @@ func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
 	default:
 		for i, view := range layout.views {
 			if view.ID() == viewID {
-				layout.moveToFrontByIndex(i)
+				layout.moveToFrontByIndex(i, onShown)
 				return true
 			}
 		}
@@ -302,7 +321,7 @@ func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
 	return false
 }
 
-func (layout *stackLayoutData) moveToFrontByIndex(index int) {
+func (layout *stackLayoutData) moveToFrontByIndex(index int, onShow []func(View)) {
 
 	count := len(layout.views)
 	if index == count-1 {
@@ -332,7 +351,17 @@ func (layout *stackLayoutData) moveToFrontByIndex(index int) {
 		session.updateCSSProperty(peekPageID, "visibility", "hidden")
 		session.updateCSSProperty(pageID, "visibility", "visible")
 		layout.contentChanged()
+		for _, listener := range onShow {
+			if listener != nil {
+				listener(view)
+			}
+		}
 		return
+	}
+
+	layout.onMoveFinished[view.htmlID()] = popFinished{
+		view:     view,
+		listener: onShow,
 	}
 
 	buffer := allocStringBuilder()
@@ -514,7 +543,7 @@ func (layout *stackLayoutData) RemoveView(index int) View {
 	return view
 }
 
-func (layout *stackLayoutData) Push(view View, onPushFinished func()) {
+func (layout *stackLayoutData) Push(view View, onPushFinished ...func()) {
 	if view == nil {
 		ErrorLog("StackLayout.Push(nil, ....) is forbidden")
 		return
@@ -523,8 +552,10 @@ func (layout *stackLayoutData) Push(view View, onPushFinished func()) {
 	transform := GetPushTransform(layout)
 	if transform == nil {
 		layout.Append(view)
-		if onPushFinished != nil {
-			onPushFinished()
+		for _, listener := range onPushFinished {
+			if listener != nil {
+				listener()
+			}
 		}
 		return
 	}
@@ -578,7 +609,7 @@ func (layout *stackLayoutData) Push(view View, onPushFinished func()) {
 	layout.session.updateCSSProperty(htmlID+"page", "transform", "")
 }
 
-func (layout *stackLayoutData) Pop(onPopFinished func(View)) bool {
+func (layout *stackLayoutData) Pop(onPopFinished ...func(View)) bool {
 	count := len(layout.views)
 	if count == 0 {
 		ErrorLog("StackLayout is empty")
@@ -588,8 +619,10 @@ func (layout *stackLayoutData) Pop(onPopFinished func(View)) bool {
 	transform := GetPushTransform(layout)
 	if transform == nil {
 		if view := layout.RemovePeek(); view != nil {
-			if onPopFinished != nil {
-				onPopFinished(view)
+			for _, listener := range onPopFinished {
+				if listener != nil {
+					listener(view)
+				}
 			}
 			return true
 		}
