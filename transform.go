@@ -11,14 +11,14 @@ const (
 	// Transform is the constant for "transform" property tag.
 	//
 	// Used by `View`.
-	// Specify translation, scale and rotation over x, y and z axes as well as a distorsion of a view along x and y axes.
+	// Specify translation, scale and rotation over x, y and z axes as well as a distortion of a view along x and y axes.
 	//
 	// Supported types: `TransformProperty`, `string`.
 	//
-	// See `Transform` description for more details.
+	// See `TransformProperty` description for more details.
 	//
 	// Conversion rules:
-	// `Transform` - stored as is, no conversion performed.
+	// `TransformProperty` - stored as is, no conversion performed.
 	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
 	Transform PropertyName = "transform"
 
@@ -466,9 +466,9 @@ func transformSet(properties Properties, tag PropertyName, value any) []Property
 	return nil
 }
 
-func setTransformProperty(properties Properties, value any) bool {
+func valueToTransformProperty(value any) TransformProperty {
 
-	setObject := func(obj DataObject) bool {
+	parseObject := func(obj DataObject) TransformProperty {
 		transform := NewTransformProperty(nil)
 		ok := true
 		for i := 0; i < obj.PropertyCount(); i++ {
@@ -482,41 +482,44 @@ func setTransformProperty(properties Properties, value any) bool {
 		}
 
 		if !ok && transform.empty() {
-			return false
+			return nil
 		}
-
-		properties.setRaw(Transform, transform)
-		return true
+		return transform
 	}
 
 	switch value := value.(type) {
 	case TransformProperty:
-		properties.setRaw(Transform, value)
-		return true
+		return value
 
 	case DataObject:
-		return setObject(value)
+		return parseObject(value)
 
 	case DataNode:
 		if obj := value.Object(); obj != nil {
-			return setObject(obj)
+			return parseObject(obj)
 		}
-		notCompatibleType(Transform, value)
-		return false
 
 	case string:
 		if obj := ParseDataText(value); obj != nil {
-			return setObject(obj)
+			return parseObject(obj)
 		}
-		notCompatibleType(Transform, value)
-		return false
 	}
 
+	return nil
+}
+
+func setTransformProperty(properties Properties, tag PropertyName, value any) bool {
+	if transform := valueToTransformProperty(value); transform != nil {
+		properties.setRaw(tag, transform)
+		return true
+	}
+
+	notCompatibleType(tag, value)
 	return false
 }
 
-func getTransformProperty(properties Properties) TransformProperty {
-	if val := properties.getRaw(Transform); val != nil {
+func getTransformProperty(properties Properties, tag PropertyName) TransformProperty {
+	if val := properties.getRaw(tag); val != nil {
 		if transform, ok := val.(TransformProperty); ok {
 			return transform
 		}
@@ -528,7 +531,7 @@ func setTransformPropertyElement(properties Properties, tag PropertyName, value 
 	switch tag {
 	case Perspective, RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ, TranslateX, TranslateY, TranslateZ:
 		var result []PropertyName = nil
-		if transform := getTransformProperty(properties); transform != nil {
+		if transform := getTransformProperty(properties, Transform); transform != nil {
 			if result = transformSet(transform, tag, value); result != nil {
 				result = append(result, Transform)
 			}
@@ -694,7 +697,7 @@ func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Sessio
 		builder.add(`transform-origin`, css)
 	}
 
-	if transform := getTransformProperty(style); transform != nil {
+	if transform := getTransformProperty(style, Transform); transform != nil {
 		builder.add(`transform`, transform.transformCSS(session))
 	}
 }

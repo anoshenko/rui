@@ -2,22 +2,62 @@ package rui
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
 // Constants which represent [StackLayout] animation type during pushing or popping views
 const (
-	// DefaultAnimation - default animation of StackLayout push
-	DefaultAnimation = 0
-	// StartToEndAnimation - start to end animation of StackLayout push
-	StartToEndAnimation = 1
-	// EndToStartAnimation - end to start animation of StackLayout push
-	EndToStartAnimation = 2
-	// TopDownAnimation - top down animation of StackLayout push
-	TopDownAnimation = 3
-	// BottomUpAnimation - bottom up animation of StackLayout push
-	BottomUpAnimation = 4
+	// PushTransform is the constant for "push-transform" property tag.
+	//
+	// Used by `StackLayout`.
+	// Specify start translation, scale and rotation over x, y and z axes as well as a distortion
+	// for an animated pushing of a child view.
+	//
+	// Supported types: `TransformProperty`, `string`.
+	//
+	// See `TransformProperty` description for more details.
+	//
+	// Conversion rules:
+	// `TransformProperty` - stored as is, no conversion performed.
+	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
+	PushTransform = "push-transform"
+
+	// PushDuration is the constant for "push-duration" property tag.
+	//
+	// Used by `StackLayout`.
+	// Sets the length of time in seconds that an push/pop animation takes to complete.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushDuration = "push-duration"
+
+	// PushTiming is the constant for "push-timing" property tag.
+	//
+	// Used by `StackLayout`.
+	// Set how an push/pop animation progresses through the duration of each cycle.
+	//
+	// Supported types: `string`.
+	//
+	// Values:
+	// "ease"(`EaseTiming`) - Speed increases towards the middle and slows down at the end.
+	// "ease-in"(`EaseInTiming`) - Speed is slow at first, but increases in the end.
+	// "ease-out"(`EaseOutTiming`) - Speed is fast at first, but decreases in the end.
+	// "ease-in-out"(`EaseInOutTiming`) - Speed is slow at first, but quickly increases and at the end it decreases again.
+	// "linear"(`LinearTiming`) - Constant speed.
+	PushTiming = "push-timing"
+
+	// MoveToFrontAnimation is the constant for "move-to-front-animation" property tag.
+	//
+	// Used by `StackLayout`.
+	// Specifies whether animation is used when calling the MoveToFront/MoveToFrontByID method of StackLayout interface.
+	//
+	// Supported types: `bool`, `int`, `string`.
+	//
+	// Values:
+	// `true` or `1` or "true", "yes", "on", "1" - animation is used (default value).
+	// `false` or `0` or "false", "no", "off", "0" - animation is not used.
+	MoveToFrontAnimation = "move-to-front-animation"
 )
 
 // StackLayout represents a StackLayout view
@@ -45,21 +85,28 @@ type StackLayout interface {
 	// * TopDownAnimation (3) - Top-down animation;
 	// * BottomUpAnimation (4) - Bottom up animation.
 	// The third argument `onPushFinished` is the function to be called when the animation ends. It may be nil.
-	Push(view View, animation int, onPushFinished func())
+	Push(view View, onPushFinished func())
 
 	// Pop removes the current View from the container using animation.
 	// The second argument `onPopFinished`` is the function to be called when the animation ends. It may be nil.
 	// The function will return false if the StackLayout is empty and true if the current item has been removed.
-	Pop(animation int, onPopFinished func(View)) bool
+	Pop(onPopFinished func(View)) bool
+}
+
+type pushFinished struct {
+	peekID   string
+	listener func()
+}
+
+type popFinished struct {
+	view     View
+	listener func(View)
 }
 
 type stackLayoutData struct {
 	viewsContainerData
-	peek, prevPeek    int
-	pushView, popView View
-	animationType     int
-	onPushFinished    func()
-	onPopFinished     func(View)
+	onPushFinished map[string]pushFinished
+	onPopFinished  map[string]popFinished
 }
 
 // NewStackLayout create new StackLayout object and return it
@@ -80,44 +127,88 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.viewsContainerData.init(session)
 	layout.tag = "StackLayout"
 	layout.systemClass = "ruiStackLayout"
-	layout.properties[TransitionEndEvent] = []func(View, PropertyName){layout.pushFinished, layout.popFinished}
-	layout.get = layout.getFunc
+	layout.onPushFinished = map[string]pushFinished{}
+	layout.onPopFinished = map[string]popFinished{}
 	layout.set = layout.setFunc
 	layout.remove = layout.removeFunc
-	layout.changed = layout.propertyChanged
-}
 
-func (layout *stackLayoutData) pushFinished(view View, tag PropertyName) {
-	if tag == "ruiPush" {
-		if layout.pushView != nil {
-			layout.pushView = nil
-			count := len(layout.views)
-			if count > 0 {
-				layout.peek = count - 1
-			} else {
-				layout.peek = 0
-			}
-			updateInnerHTML(layout.htmlID(), layout.session)
-			layout.currentChanged()
-		}
-
-		if layout.onPushFinished != nil {
-			onPushFinished := layout.onPushFinished
-			layout.onPushFinished = nil
-			onPushFinished()
-		}
+	layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.transitionFinished})
+	if session.TextDirection() == RightToLeftDirection {
+		layout.setRaw(PushTransform, NewTransformProperty(Params{TranslateX: Percent(-100)}))
+	} else {
+		layout.setRaw(PushTransform, NewTransformProperty(Params{TranslateX: Percent(100)}))
 	}
 }
 
-func (layout *stackLayoutData) popFinished(view View, tag PropertyName) {
-	if tag == "ruiPop" {
-		popView := layout.popView
-		layout.popView = nil
-		updateInnerHTML(layout.htmlID(), layout.session)
-		if layout.onPopFinished != nil {
-			onPopFinished := layout.onPopFinished
-			layout.onPopFinished = nil
-			onPopFinished(popView)
+func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
+	if tags := strings.Split(string(tag), "-"); len(tags) >= 2 {
+		session := layout.Session()
+		viewID := tags[1]
+
+		switch tags[0] {
+		case "push":
+			if finished, ok := layout.onPushFinished[viewID]; ok {
+				if finished.peekID != "" {
+					pageID := finished.peekID + "page"
+					session.startUpdateScript(pageID)
+					session.updateCSSProperty(pageID, "visibility", "hidden")
+					session.updateCSSProperty(pageID, "transition", "")
+					session.updateCSSProperty(pageID, "transform", "")
+					session.removeProperty(pageID, "ontransitionend")
+					session.removeProperty(pageID, "ontransitioncancel")
+					session.finishUpdateScript(pageID)
+				}
+
+				pageID := viewID + "page"
+				session.startUpdateScript(pageID)
+				session.updateCSSProperty(pageID, "z-index", "auto")
+				session.updateCSSProperty(pageID, "transition", "")
+				session.removeProperty(pageID, "ontransitionend")
+				session.removeProperty(pageID, "ontransitioncancel")
+				session.finishUpdateScript(pageID)
+
+				if finished.listener != nil {
+					finished.listener()
+				}
+				delete(layout.onPushFinished, viewID)
+				layout.contentChanged()
+			}
+
+		case "pop":
+			if finished, ok := layout.onPopFinished[viewID]; ok {
+				session.updateCSSProperty(viewID+"page", "display", "none")
+				if finished.listener != nil {
+					finished.listener(finished.view)
+				}
+				delete(layout.onPopFinished, viewID)
+
+				if count := len(layout.views); count > 0 {
+					peekID := layout.views[count-1].htmlID() + "page"
+					session.startUpdateScript(peekID)
+					session.removeProperty(peekID, "ontransitionend")
+					session.removeProperty(peekID, "ontransitioncancel")
+					session.finishUpdateScript(peekID)
+				}
+			}
+
+		case "move":
+			if count := len(layout.views); count > 1 {
+				pageID := layout.views[count-2].htmlID() + "page"
+				session.startUpdateScript(pageID)
+				session.updateCSSProperty(pageID, "visibility", "hidden")
+				session.updateCSSProperty(pageID, "transition", "")
+				session.updateCSSProperty(pageID, "transform", "")
+				session.finishUpdateScript(pageID)
+			}
+
+			pageID := viewID + "page"
+			session.startUpdateScript(pageID)
+			session.updateCSSProperty(pageID, "z-index", "auto")
+			session.updateCSSProperty(pageID, "transition", "")
+			session.removeProperty(pageID, "ontransitionend")
+			session.removeProperty(pageID, "ontransitioncancel")
+			session.finishUpdateScript(pageID)
+			layout.contentChanged()
 		}
 	}
 }
@@ -125,199 +216,225 @@ func (layout *stackLayoutData) popFinished(view View, tag PropertyName) {
 func (layout *stackLayoutData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
+		// TODO
 		listeners, ok := valueToOneArgEventListeners[View, PropertyName](value)
 		if ok && listeners != nil {
-			listeners = append(listeners, layout.pushFinished)
-			listeners = append(listeners, layout.popFinished)
+			listeners = append(listeners, layout.transitionFinished)
 			layout.setRaw(TransitionEndEvent, listeners)
 			return []PropertyName{tag}
 		}
 		return nil
 
-	case Current:
-		newCurrent := 0
-		switch value := value.(type) {
-		case string:
-			text, ok := layout.session.resolveConstants(value)
-			if !ok {
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-			n, err := strconv.Atoi(strings.Trim(text, " \t"))
-			if err != nil {
-				invalidPropertyValue(tag, value)
-				ErrorLog(err.Error())
-				return nil
-			}
-			newCurrent = n
-
-		default:
-			n, ok := isInt(value)
-			if !ok {
-				notCompatibleType(tag, value)
-				return nil
-			} else if n < 0 || n >= len(layout.views) {
-				ErrorLogF(`The view index "%d" of "%s" property is out of range`, n, tag)
-				return nil
-			}
-			newCurrent = n
+	case PushTiming:
+		if text, ok := value.(string); ok {
+			layout.setRaw(tag, text)
+			return []PropertyName{tag}
 		}
-
-		layout.prevPeek = layout.peek
-		if newCurrent == layout.peek {
-			return []PropertyName{}
-		}
-
-		layout.peek = newCurrent
-		return []PropertyName{tag}
 	}
 	return layout.viewsContainerData.setFunc(tag, value)
-}
-
-func (layout *stackLayoutData) propertyChanged(tag PropertyName) {
-	switch tag {
-	case Current:
-		if layout.prevPeek != layout.peek {
-			if layout.prevPeek < len(layout.views) {
-				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.prevPeek), "visibility", "hidden")
-			}
-			layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(layout.peek), "visibility", "visible")
-			layout.prevPeek = layout.peek
-		}
-	default:
-		layout.viewsContainerData.propertyChanged(tag)
-	}
 }
 
 func (layout *stackLayoutData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.pushFinished, layout.popFinished})
-		return []PropertyName{tag}
-
-	case Current:
-		layout.setRaw(Current, 0)
+		layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.transitionFinished})
 		return []PropertyName{tag}
 	}
 	return layout.viewsContainerData.removeFunc(tag)
 }
 
-func (layout *stackLayoutData) getFunc(tag PropertyName) any {
-	if tag == Current {
-		return layout.peek
-	}
-	return layout.viewsContainerData.getFunc(tag)
-}
-
 func (layout *stackLayoutData) Peek() View {
-	if int(layout.peek) < len(layout.views) {
-		return layout.views[layout.peek]
+	if count := len(layout.views); count > 0 {
+		return layout.views[count-1]
 	}
 	return nil
 }
 
 func (layout *stackLayoutData) MoveToFront(view View) bool {
-	peek := int(layout.peek)
-	htmlID := view.htmlID()
-	for i, view2 := range layout.views {
-		if view2.htmlID() == htmlID {
-			if i != peek {
-				if peek < len(layout.views) {
-					layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(peek), "visibility", "hidden")
-				}
+	if view == nil {
+		ErrorLog(`MoveToFront(nil) forbidden`)
+		return false
+	}
 
-				layout.peek = i
-				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible")
-				layout.currentChanged()
-			}
+	htmlID := view.htmlID()
+	switch count := len(layout.views); count {
+	case 0:
+		// do nothing
+
+	case 1:
+		if layout.views[0].htmlID() == htmlID {
 			return true
+		}
+
+	default:
+		for i, view := range layout.views {
+			if view.htmlID() == htmlID {
+				layout.moveToFrontByIndex(i)
+				return true
+			}
 		}
 	}
 
-	ErrorLog(`MoveToFront() fail. Subview not found."`)
+	ErrorLog(`MoveToFront() fail. Subview not found.`)
 	return false
-}
-
-func (layout *stackLayoutData) currentChanged() {
-	if listener, ok := layout.changeListener[Current]; ok {
-		listener(layout, Current)
-	}
 }
 
 func (layout *stackLayoutData) MoveToFrontByID(viewID string) bool {
-	peek := int(layout.peek)
-	for i, view := range layout.views {
-		if view.ID() == viewID {
-			if i != peek {
-				if peek < len(layout.views) {
-					layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(peek), "visibility", "hidden")
-				}
+	switch count := len(layout.views); count {
+	case 0:
+		// do nothing
 
-				layout.peek = i
-				layout.Session().updateCSSProperty(layout.htmlID()+"page"+strconv.Itoa(i), "visibility", "visible")
-				layout.currentChanged()
-			}
+	case 1:
+		if layout.views[0].ID() == viewID {
 			return true
+		}
+
+	default:
+		for i, view := range layout.views {
+			if view.ID() == viewID {
+				layout.moveToFrontByIndex(i)
+				return true
+			}
 		}
 	}
 
-	ErrorLogF(`MoveToFront("%s") fail. Subview with "%s" not found."`, viewID, viewID)
+	ErrorLogF(`MoveToFront("%s") fail. Subview with "%s" not found.`, viewID, viewID)
 	return false
 }
 
-func (layout *stackLayoutData) Append(view View) {
-	if view != nil {
-		layout.peek = len(layout.views)
-		layout.viewsContainerData.Append(view)
-		layout.currentChanged()
-	} else {
-		ErrorLog("StackLayout.Append(nil, ....) is forbidden")
+func (layout *stackLayoutData) moveToFrontByIndex(index int) {
+
+	count := len(layout.views)
+	if index == count-1 {
+		return
 	}
+
+	view := layout.views[index]
+	peekID := layout.views[count-1].htmlID()
+	if index == 0 {
+		layout.views = append(layout.views[1:], view)
+	} else {
+		layout.views = append(append(layout.views[:index], layout.views[index+1:]...), view)
+	}
+
+	session := layout.Session()
+	pageID := view.htmlID() + "page"
+	peekPageID := peekID + "page"
+
+	animated := IsMoveToFrontAnimation(layout)
+
+	var transform TransformProperty = nil
+	if animated {
+		transform = GetPushTransform(layout)
+	}
+
+	if transform == nil {
+		session.updateCSSProperty(peekPageID, "visibility", "hidden")
+		session.updateCSSProperty(pageID, "visibility", "visible")
+		layout.contentChanged()
+		return
+	}
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	buffer.WriteString(`stackTransitionEndEvent('`)
+	buffer.WriteString(layout.htmlID())
+	buffer.WriteString(`', 'move-`)
+	buffer.WriteString(view.htmlID())
+	buffer.WriteString(`', event)`)
+
+	listener := buffer.String()
+
+	transformCSS := transformMirror(transform, session).transformCSS(session)
+	transitionCSS := layout.pushTransitionCSS()
+
+	session.updateCSSProperty(peekPageID, "transition", transitionCSS)
+
+	session.startUpdateScript(pageID)
+	session.updateProperty(pageID, "ontransitionend", listener)
+	session.updateProperty(pageID, "ontransitioncancel", listener)
+	session.updateCSSProperty(pageID, "transform", transformCSS)
+	session.updateCSSProperty(pageID, "z-index", "100")
+	session.updateCSSProperty(pageID, "visibility", "visible")
+	session.finishUpdateScript(pageID)
+
+	session.updateCSSProperty(pageID, "transition", transitionCSS)
+	session.updateCSSProperty(pageID, "transform", "")
+
+	session.updateCSSProperty(peekPageID, "transform", transformCSS)
 }
 
-func (layout *stackLayoutData) Insert(view View, index int) {
-	if view != nil {
-		count := len(layout.views)
-		if index < count {
-			layout.peek = int(index)
-		} else {
-			layout.peek = count
-		}
-		layout.viewsContainerData.Insert(view, index)
-		layout.currentChanged()
-	} else {
-		ErrorLog("StackLayout.Insert(nil, ....) is forbidden")
+func (layout *stackLayoutData) contentChanged() {
+	if listener, ok := layout.changeListener[Content]; ok {
+		listener(layout, Content)
 	}
-}
-
-func (layout *stackLayoutData) RemoveView(index int) View {
-	if index < 0 || index >= len(layout.views) {
-		return nil
-	}
-
-	if layout.peek > 0 {
-		layout.peek--
-	}
-	defer layout.currentChanged()
-	return layout.viewsContainerData.RemoveView(index)
 }
 
 func (layout *stackLayoutData) RemovePeek() View {
 	return layout.RemoveView(len(layout.views) - 1)
 }
 
-func (layout *stackLayoutData) Push(view View, animation int, onPushFinished func()) {
+func (layout *stackLayoutData) pushTransitionCSS() string {
+	return fmt.Sprintf("transform %.2fs %s", GetPushDuration(layout), GetPushTiming(layout))
+}
+
+func transformMirror(transform TransformProperty, session Session) TransformProperty {
+	result := NewTransformProperty(nil)
+
+	for _, tag := range []PropertyName{Perspective, RotateX, RotateY, RotateZ, ScaleX, ScaleY, ScaleZ, TranslateZ} {
+		if value := transform.getRaw(tag); value != nil {
+			result.Set(tag, value)
+		}
+	}
+
+	for _, tag := range []PropertyName{Rotate, SkewX, SkewY} {
+		if angle, ok := angleProperty(transform, tag, session); ok {
+			angle.Value = -angle.Value
+			result.Set(tag, angle)
+		}
+	}
+
+	for _, tag := range []PropertyName{TranslateX, TranslateY} {
+		if size, ok := sizeProperty(transform, tag, session); ok {
+			size.Value = -size.Value
+			result.Set(tag, size)
+		}
+	}
+
+	return result
+}
+
+func (layout *stackLayoutData) Push(view View, onPushFinished func()) {
 	if view == nil {
 		ErrorLog("StackLayout.Push(nil, ....) is forbidden")
 		return
 	}
 
-	layout.pushView = view
-	layout.animationType = animation
-	//layout.animation["ruiPush"] = Animation{FinishListener: layout}
-	layout.onPushFinished = onPushFinished
+	transform := GetPushTransform(layout)
+	if transform == nil {
+		layout.Append(view)
+		if onPushFinished != nil {
+			onPushFinished()
+		}
+		return
+	}
 
-	htmlID := layout.htmlID()
+	prevPeek := ""
+	finished := pushFinished{
+		listener: onPushFinished,
+	}
+	if count := len(layout.views); count > 0 {
+		finished.peekID = layout.views[count-1].htmlID()
+		prevPeek = finished.peekID + "page"
+	}
+
+	htmlID := view.htmlID()
+	layout.onPushFinished[htmlID] = finished
+
+	view.setParentID(layout.htmlID())
+	layout.views = append(layout.views, view)
+
 	session := layout.Session()
 
 	buffer := allocStringBuilder()
@@ -325,105 +442,110 @@ func (layout *stackLayoutData) Push(view View, animation int, onPushFinished fun
 
 	buffer.WriteString(`<div id="`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`push" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent('`)
+	buffer.WriteString(`page" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent('`)
+	buffer.WriteString(layout.htmlID())
+	buffer.WriteString(`', 'push-`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`', 'ruiPush', event)" style="`)
+	buffer.WriteString(`', event)" style="z-index: 100; transform: `)
+	buffer.WriteString(transform.transformCSS(layout.session))
+	buffer.WriteRune(';')
 
-	switch layout.animationType {
-	case StartToEndAnimation:
-		buffer.WriteString(fmt.Sprintf("transform: translate(-%gpx, 0px); transition: transform ", layout.frame.Width))
+	transitionCSS := layout.pushTransitionCSS()
+	buffer.WriteString(" transition: ")
+	buffer.WriteString(transitionCSS)
+	buffer.WriteString(`;">`)
 
-	case TopDownAnimation:
-		buffer.WriteString(fmt.Sprintf("transform: translate(0px, -%gpx); transition: transform ", layout.frame.Height))
-
-	case BottomUpAnimation:
-		buffer.WriteString(fmt.Sprintf("transform: translate(0px, %gpx); transition: transform ", layout.frame.Height))
-
-	default:
-		buffer.WriteString(fmt.Sprintf("transform: translate(%gpx, 0px); transition: transform ", layout.frame.Width))
-	}
-
-	buffer.WriteString(`1s ease;">`)
-
-	viewHTML(layout.pushView, buffer, "")
+	viewHTML(view, buffer, "")
 	buffer.WriteString(`</div>`)
 
-	session.appendToInnerHTML(htmlID, buffer.String())
-	layout.session.updateCSSProperty(htmlID+"push", "transform", "translate(0px, 0px)")
+	session.appendToInnerHTML(layout.htmlID(), buffer.String())
 
-	layout.views = append(layout.views, view)
-	view.setParentID(htmlID)
-
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
+	if prevPeek != "" {
+		mirror := transformMirror(transform, session)
+		layout.session.updateCSSProperty(prevPeek, "transition", transitionCSS)
+		layout.session.updateCSSProperty(prevPeek, "transform", mirror.transformCSS(session))
 	}
+
+	layout.session.updateCSSProperty(htmlID+"page", "transform", "")
 }
 
-func (layout *stackLayoutData) Pop(animation int, onPopFinished func(View)) bool {
+func (layout *stackLayoutData) Pop(onPopFinished func(View)) bool {
 	count := len(layout.views)
-	if count == 0 || layout.peek >= count {
+	if count == 0 {
 		ErrorLog("StackLayout is empty")
 		return false
 	}
 
-	layout.popView = layout.views[layout.peek]
-	layout.RemoveView(layout.peek)
+	transform := GetPushTransform(layout)
+	if transform == nil {
+		if view := layout.RemovePeek(); view != nil {
+			if onPopFinished != nil {
+				onPopFinished(view)
+			}
+			return true
+		}
+		return false
+	}
 
-	layout.animationType = animation
-	//layout.animation["ruiPop"] = Animation{FinishListener: layout}
-	layout.onPopFinished = onPopFinished
+	peek := count - 1
+	view := layout.views[peek]
+	view.setParentID("")
 
-	htmlID := layout.htmlID()
+	layout.views = layout.views[:peek]
+	layout.contentChanged()
+
+	layout.onPopFinished[view.htmlID()] = popFinished{
+		view:     view,
+		listener: onPopFinished,
+	}
+
+	htmlID := view.htmlID()
 	session := layout.Session()
 
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`<div id="`)
+	buffer.WriteString(`stackTransitionEndEvent('`)
+	buffer.WriteString(layout.htmlID())
+	buffer.WriteString(`', 'pop-`)
 	buffer.WriteString(htmlID)
-	buffer.WriteString(`pop" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent('`)
-	buffer.WriteString(htmlID)
-	buffer.WriteString(`', 'ruiPop', event)" ontransitioncancel="stackTransitionEndEvent('`)
-	buffer.WriteString(htmlID)
-	buffer.WriteString(`', 'ruiPop', event)" style="transition: transform 1s ease;">`)
-	viewHTML(layout.popView, buffer, "")
-	buffer.WriteString(`</div>`)
+	buffer.WriteString(`', event)`)
 
-	session.appendToInnerHTML(htmlID, buffer.String())
+	listener := buffer.String()
+	pageID := htmlID + "page"
 
-	var value string
-	switch layout.animationType {
-	case TopDownAnimation:
-		value = fmt.Sprintf("translate(0px, -%gpx)", layout.frame.Height)
+	transitionCSS := layout.pushTransitionCSS()
 
-	case BottomUpAnimation:
-		value = fmt.Sprintf("translate(0px, %gpx)", layout.frame.Height)
+	session.startUpdateScript(pageID)
+	session.updateProperty(pageID, "ontransitionend", listener)
+	session.updateProperty(pageID, "ontransitioncancel", listener)
+	session.updateCSSProperty(pageID, "z-index", "100")
+	session.updateCSSProperty(pageID, "transition", transitionCSS)
+	session.finishUpdateScript(pageID)
 
-	case StartToEndAnimation:
-		value = fmt.Sprintf("translate(-%gpx, 0px)", layout.frame.Width)
-
-	default:
-		value = fmt.Sprintf("translate(%gpx, 0px)", layout.frame.Width)
+	peek--
+	if peek >= 0 {
+		peekID := layout.views[peek].htmlID() + "page"
+		session.updateCSSProperty(peekID, "transition", "")
+		session.startUpdateScript(peekID)
+		session.updateCSSProperty(peekID, "transform", transformMirror(transform, session).transformCSS(session))
+		session.updateCSSProperty(peekID, "visibility", "visible")
+		session.finishUpdateScript(peekID)
+		session.updateCSSProperty(peekID, "transition", transitionCSS)
+		session.updateCSSProperty(peekID, "transform", "")
 	}
+	session.updateCSSProperty(pageID, "transform", transform.transformCSS(session))
 
-	layout.session.updateCSSProperty(htmlID+"pop", "transform", value)
 	return true
 }
 
 func (layout *stackLayoutData) htmlSubviews(self View, buffer *strings.Builder) {
-	count := len(layout.views)
-	if count > 0 {
-		htmlID := layout.htmlID()
-		peek := int(layout.peek)
-		if peek >= count {
-			peek = count - 1
-		}
-
+	if count := len(layout.views); count > 0 {
+		peek := count - 1
 		for i, view := range layout.views {
 			buffer.WriteString(`<div id="`)
-			buffer.WriteString(htmlID)
+			buffer.WriteString(view.htmlID())
 			buffer.WriteString(`page`)
-			buffer.WriteString(strconv.Itoa(i))
 			buffer.WriteString(`" class="ruiStackPageLayout"`)
 			if i != peek {
 				buffer.WriteString(` style="visibility: hidden;"`)
@@ -433,4 +555,50 @@ func (layout *stackLayoutData) htmlSubviews(self View, buffer *strings.Builder) 
 			buffer.WriteString(`</div>`)
 		}
 	}
+}
+
+// IsMoveToFrontAnimation returns "true" if an animation is used when calling the MoveToFront/MoveToFrontByID method of StackLayout interface.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsMoveToFrontAnimation(view View, subviewID ...string) bool {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+
+	if view != nil {
+		if value, ok := boolProperty(view, MoveToFrontAnimation, view.Session()); ok {
+			return value
+		}
+		if value := valueFromStyle(view, MoveToFrontAnimation); value != nil {
+			if b, ok := valueToBool(value, view.Session()); ok {
+				return b
+			}
+		}
+	}
+
+	return true
+}
+
+// GetPushDuration returns the length of time in seconds that an push/pop StackLayout animation takes to complete.
+// If the second argument (subviewID) is not specified or it is "" then a width of the first argument (view) is returned
+func GetPushDuration(view View, subviewID ...string) float64 {
+	return floatStyledProperty(view, subviewID, PushDuration, 1)
+}
+
+// GetPushTiming returns the function which sets how an push/pop animation progresses.
+// If the second argument (subviewID) is not specified or it is "" then a width of the first argument (view) is returned
+func GetPushTiming(view View, subviewID ...string) string {
+	result := stringStyledProperty(view, subviewID, PushTiming, false)
+	if isTimingFunctionValid(result) {
+		return result
+	}
+
+	return "easy"
+}
+
+// GetTransform returns the start transform (translation, scale and rotation over x, y and z axes as well as a distortion)
+// for an animated pushing of a child view.
+// The default value is nil (no transform).
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPushTransform(view View, subviewID ...string) TransformProperty {
+	return transformStyledProperty(view, subviewID, PushTransform)
 }

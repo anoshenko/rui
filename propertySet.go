@@ -62,6 +62,7 @@ var boolProperties = []PropertyName{
 	Repeating,
 	UserSelect,
 	ColumnSpanAll,
+	MoveToFrontAnimation,
 }
 
 var intProperties = []PropertyName{
@@ -88,6 +89,7 @@ var floatProperties = map[PropertyName]struct{ min, max float64 }{
 	ProgressBarValue:  {min: 0, max: math.MaxFloat64},
 	VideoWidth:        {min: 0, max: 10000},
 	VideoHeight:       {min: 0, max: 10000},
+	PushDuration:      {min: 0, max: math.MaxFloat64},
 }
 
 var sizeProperties = map[PropertyName]string{

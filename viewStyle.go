@@ -562,7 +562,7 @@ func viewStyleGet(style Properties, tag PropertyName) any {
 
 	case RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
 		TranslateX, TranslateY, TranslateZ:
-		if transform := getTransformProperty(style); transform != nil {
+		if transform := getTransformProperty(style, Transform); transform != nil {
 			return transform.Get(tag)
 		}
 		return nil

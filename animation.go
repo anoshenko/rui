@@ -556,7 +556,7 @@ func (animation *animationData) animationCSS(session Session) string {
 		buffer.WriteString(" 1s ")
 	}
 
-	buffer.WriteString(animation.timingFunctionCSS(session))
+	buffer.WriteString(timingFunctionCSS(animation, TimingFunction, session))
 
 	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
@@ -594,7 +594,7 @@ func (animation *animationData) transitionCSS(buffer *strings.Builder, session S
 		buffer.WriteString(" 1s ")
 	}
 
-	buffer.WriteString(animation.timingFunctionCSS(session))
+	buffer.WriteString(timingFunctionCSS(animation, TimingFunction, session))
 
 	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
 		buffer.WriteString(fmt.Sprintf(" %gs", delay))
@@ -643,8 +643,8 @@ func (animation *animationData) writeTransitionString(tag PropertyName, buffer *
 	buffer.WriteString(" }")
 }
 
-func (animation *animationData) timingFunctionCSS(session Session) string {
-	if timingFunction, ok := stringProperty(animation, TimingFunction, session); ok {
+func timingFunctionCSS(properties Properties, tag PropertyName, session Session) string {
+	if timingFunction, ok := stringProperty(properties, tag, session); ok {
 		if timingFunction, ok = session.resolveConstants(timingFunction); ok && isTimingFunctionValid(timingFunction) {
 			return timingFunction
 		}

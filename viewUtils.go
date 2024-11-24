@@ -567,6 +567,13 @@ func GetColumn(view View, subviewID ...string) Range {
 	return Range{}
 }
 
+// GetTransform returns a view transform:  translation, scale and rotation over x, y and z axes as well as a distortion of a view along x and y axes.
+// The default value is nil (no transform)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTransform(view View, subviewID ...string) TransformProperty {
+	return transformStyledProperty(view, subviewID, Transform)
+}
+
 // GetPerspective returns a distance between the z = 0 plane and the user in order to give a 3D-positioned
 // element some perspective. Each 3D element with z > 0 becomes larger; each 3D-element with z < 0 becomes smaller.
 // The default value is 0 (no 3D effects).
@@ -858,6 +865,22 @@ func colorStyledProperty(view View, subviewID []string, tag PropertyName, inheri
 		}
 	}
 	return Color(0)
+}
+
+func transformStyledProperty(view View, subviewID []string, tag PropertyName) TransformProperty {
+	if len(subviewID) > 0 && subviewID[0] != "" {
+		view = ViewByID(view, subviewID[0])
+	}
+	if view != nil {
+		if transform := getTransformProperty(view, tag); transform != nil {
+			return transform
+		}
+
+		if value := valueFromStyle(view, tag); value != nil {
+			return valueToTransformProperty(value)
+		}
+	}
+	return nil
 }
 
 // FocusView sets focus on the specified subview, if it can be focused.

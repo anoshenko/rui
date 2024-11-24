@@ -708,7 +708,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case Transform, Perspective, SkewX, SkewY, TranslateX, TranslateY, TranslateZ,
 		ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ:
 		css := ""
-		if transform := getTransformProperty(view); transform != nil {
+		if transform := getTransformProperty(view, Transform); transform != nil {
 			css = transform.transformCSS(session)
 		}
 		session.updateCSSProperty(htmlID, "transform", css)

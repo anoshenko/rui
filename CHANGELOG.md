@@ -1,9 +1,13 @@
 # v0.18.0
 
-* Property name type changed to PropertyName. 
+* Property name type changed from string to PropertyName. 
 * Transform interface renamed to TransformProperty. NewTransform function renamed to NewTransformProperty. TransformTag constant renamed to Transform. 
 * OriginX, OriginY, and OriginZ properties renamed to TransformOriginX, TransformOriginY, and TransformOriginZ
-* GetOrigin function renamed to GetTransformOrigin
+* GetOrigin function renamed to GetTransformOrigin.
+* Changed Push and Pop method of StackLayout interface.
+* Removed DefaultAnimation, StartToEndAnimation, EndToStartAnimation, TopDownAnimation, and BottomUpAnimation constants.
+* Added "push-transform", "push-duration", "push-timing", and "move-to-front-animation" properties.
+* Added GetPushDuration, GetPushTiming, and IsMoveToFrontAnimation functions.
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
 * Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.
 
