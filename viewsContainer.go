@@ -64,13 +64,6 @@ func (container *viewsContainerData) Views() []View {
 	return []View{}
 }
 
-func viewsContainerContentChanged1(container *viewsContainerData) {
-	updateInnerHTML(container.htmlID(), container.Session())
-	if listener, ok := container.changeListener[Content]; ok {
-		listener(container, Content)
-	}
-}
-
 // Append appends a view to the end of the list of a view children
 func (container *viewsContainerData) Append(view View) {
 	if view != nil {
