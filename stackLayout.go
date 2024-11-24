@@ -176,7 +176,7 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 
 		case "pop":
 			if finished, ok := layout.onPopFinished[viewID]; ok {
-				session.updateCSSProperty(viewID+"page", "display", "none")
+				session.callFunc("removeView", viewID+"page")
 				if finished.listener != nil {
 					finished.listener(finished.view)
 				}
@@ -403,6 +403,115 @@ func transformMirror(transform TransformProperty, session Session) TransformProp
 	}
 
 	return result
+}
+
+// Append appends a view to the end of the list of a view children
+func (layout *stackLayoutData) Append(view View) {
+	if view == nil {
+		ErrorLog("StackLayout.Append(nil) is forbidden")
+		return
+	}
+
+	stackID := layout.htmlID()
+	view.setParentID(stackID)
+
+	count := len(layout.views)
+	if count == 0 {
+		layout.views = []View{view}
+	} else {
+		layout.views = append(layout.views, view)
+	}
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	buffer.WriteString(`<div id="`)
+	buffer.WriteString(view.htmlID())
+	buffer.WriteString(`page" class="ruiStackPageLayout">`)
+	viewHTML(view, buffer, "")
+	buffer.WriteString(`</div>`)
+
+	session := layout.Session()
+	if count > 0 {
+		session.updateCSSProperty(layout.views[count-1].htmlID()+"page", "visibility", "hidden")
+	}
+	session.appendToInnerHTML(stackID, buffer.String())
+
+	if listener, ok := layout.changeListener[Content]; ok {
+		listener(layout, Content)
+	}
+}
+
+// Insert inserts a view to the "index" position in the list of a view children
+func (layout *stackLayoutData) Insert(view View, index int) {
+	if view == nil {
+		ErrorLog("StackLayout.Insert(nil, ...) is forbidden")
+		return
+	}
+
+	if layout.views == nil || index < 0 || index >= len(layout.views) {
+		layout.Append(view)
+		return
+	}
+
+	stackID := layout.htmlID()
+	view.setParentID(stackID)
+	if index > 0 {
+		layout.views = append(layout.views[:index], append([]View{view}, layout.views[index:]...)...)
+	} else {
+		layout.views = append([]View{view}, layout.views...)
+	}
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
+	buffer.WriteString(`<div id="`)
+	buffer.WriteString(view.htmlID())
+	buffer.WriteString(`page" class="ruiStackPageLayout" style="visibility: hidden;">`)
+	viewHTML(view, buffer, "")
+	buffer.WriteString(`</div>`)
+
+	session := layout.Session()
+	session.appendToInnerHTML(stackID, buffer.String())
+
+	if listener, ok := layout.changeListener[Content]; ok {
+		listener(layout, Content)
+	}
+}
+
+// Remove removes view from list and return it
+func (layout *stackLayoutData) RemoveView(index int) View {
+	if layout.views == nil {
+		layout.views = []View{}
+		return nil
+	}
+
+	count := len(layout.views)
+	if index < 0 || index >= count {
+		return nil
+	}
+
+	session := layout.Session()
+	view := layout.views[index]
+	view.setParentID("")
+
+	if count == 1 {
+		layout.views = []View{}
+	} else if index == 0 {
+		layout.views = layout.views[1:]
+	} else if index == count-1 {
+		layout.views = layout.views[:index]
+		session.updateCSSProperty(layout.views[count-2].htmlID()+"page", "visibility", "visible")
+	} else {
+		layout.views = append(layout.views[:index], layout.views[index+1:]...)
+	}
+
+	layout.Session().callFunc("removeView", view.htmlID()+"page")
+
+	if listener, ok := layout.changeListener[Content]; ok {
+		listener(layout, Content)
+	}
+	return view
 }
 
 func (layout *stackLayoutData) Push(view View, onPushFinished func()) {

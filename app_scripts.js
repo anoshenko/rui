@@ -223,6 +223,13 @@ function appendToInputValue(elementId, content) {
 	}
 }
 
+function removeView(elementId) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.remove()
+	}
+}
+
 function setDisabled(elementId, disabled) {
 	const element = document.getElementById(elementId);
 	if (element) {

@@ -64,7 +64,7 @@ func (container *viewsContainerData) Views() []View {
 	return []View{}
 }
 
-func viewsContainerContentChanged(container *viewsContainerData) {
+func viewsContainerContentChanged1(container *viewsContainerData) {
 	updateInnerHTML(container.htmlID(), container.Session())
 	if listener, ok := container.changeListener[Content]; ok {
 		listener(container, Content)
@@ -81,24 +81,37 @@ func (container *viewsContainerData) Append(view View) {
 		} else {
 			container.views = append(container.views, view)
 		}
-		viewsContainerContentChanged(container)
+
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		viewHTML(view, buffer, "")
+		container.Session().appendToInnerHTML(htmlID, buffer.String())
+
+		if listener, ok := container.changeListener[Content]; ok {
+			listener(container, Content)
+		}
 	}
 }
 
 // Insert inserts a view to the "index" position in the list of a view children
 func (container *viewsContainerData) Insert(view View, index int) {
 	if view != nil {
-		htmlID := container.htmlID()
 		if container.views == nil || index < 0 || index >= len(container.views) {
 			container.Append(view)
-		} else if index > 0 {
-			view.setParentID(htmlID)
+			return
+		}
+
+		htmlID := container.htmlID()
+		view.setParentID(htmlID)
+		if index > 0 {
 			container.views = append(container.views[:index], append([]View{view}, container.views[index:]...)...)
-			viewsContainerContentChanged(container)
 		} else {
-			view.setParentID(htmlID)
 			container.views = append([]View{view}, container.views...)
-			viewsContainerContentChanged(container)
+		}
+		updateInnerHTML(htmlID, container.Session())
+		if listener, ok := container.changeListener[Content]; ok {
+			listener(container, Content)
 		}
 	}
 }
@@ -125,7 +138,11 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	}
 
 	view.setParentID("")
-	viewsContainerContentChanged(container)
+
+	container.Session().callFunc("removeView", view.htmlID())
+	if listener, ok := container.changeListener[Content]; ok {
+		listener(container, Content)
+	}
 	return view
 }
 
