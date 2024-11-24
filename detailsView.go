@@ -171,10 +171,7 @@ func (detailsView *detailsViewData) handleCommand(self View, command PropertyNam
 // GetDetailsSummary returns a value of the Summary property of DetailsView.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDetailsSummary(view View, subviewID ...string) View {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Summary); value != nil {
 			switch value := value.(type) {
 			case string:

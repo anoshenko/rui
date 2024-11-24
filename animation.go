@@ -981,11 +981,7 @@ func IsAnimationPaused(view View, subviewID ...string) bool {
 // GetTransitions returns the subview transitions. The result is always non-nil.
 // If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
 func GetTransitions(view View, subviewID ...string) map[PropertyName]Animation {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return view.Transitions()
 	}
 
@@ -1025,11 +1021,7 @@ func AddTransition(view View, subviewID string, tag PropertyName, animation Anim
 // GetAnimation returns the subview animations. The result is always non-nil.
 // If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
 func GetAnimation(view View, subviewID ...string) []Animation {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(AnimationTag); value != nil {
 			if animations, ok := value.([]Animation); ok && animations != nil {
 				return animations

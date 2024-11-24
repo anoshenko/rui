@@ -375,10 +375,7 @@ func getTimeProperty(view View, mainTag, shortTag PropertyName) (time.Time, bool
 // "false" as the second value otherwise.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return getTimeProperty(view, TimePickerMin, Min)
 	}
 	return time.Now(), false
@@ -388,10 +385,7 @@ func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool) {
 // "false" as the second value otherwise.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return getTimeProperty(view, TimePickerMax, Max)
 	}
 	return time.Now(), false
@@ -406,10 +400,7 @@ func GetTimePickerStep(view View, subviewID ...string) int {
 // GetTimePickerValue returns the time of TimePicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTimePickerValue(view View, subviewID ...string) time.Time {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
+	if view = getSubview(view, subviewID); view == nil {
 		return time.Now()
 	}
 	time, _ := getTimeProperty(view, TimePickerValue, Value)

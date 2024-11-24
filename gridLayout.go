@@ -533,10 +533,7 @@ func GetGridAutoFlow(view View, subviewID ...string) int {
 // If the result is a single value array, then the width of all cell is equal.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCellWidth(view View, subviewID ...string) []SizeUnit {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return gridCellSizes(view, CellWidth, view.Session())
 	}
 	return []SizeUnit{}
@@ -546,10 +543,7 @@ func GetCellWidth(view View, subviewID ...string) []SizeUnit {
 // If the result is a single value array, then the height of all cell is equal.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCellHeight(view View, subviewID ...string) []SizeUnit {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return gridCellSizes(view, CellHeight, view.Session())
 	}
 	return []SizeUnit{}

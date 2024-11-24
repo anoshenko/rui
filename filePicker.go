@@ -345,10 +345,7 @@ func IsMultipleFilePicker(view View, subviewID ...string) bool {
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFilePickerAccept(view View, subviewID ...string) []string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
 		if !ok {
 			if value := valueFromStyle(view, Accept); value != nil {

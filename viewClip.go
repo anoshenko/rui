@@ -565,10 +565,7 @@ func getClipShape(prop Properties, tag PropertyName, session Session) ClipShape 
 // GetClip returns a View clipping area.
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetClip(view View, subviewID ...string) ClipShape {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return getClipShape(view, Clip, view.Session())
 	}
 
@@ -578,10 +575,7 @@ func GetClip(view View, subviewID ...string) ClipShape {
 // GetShapeOutside returns a shape around which adjacent inline content.
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetShapeOutside(view View, subviewID ...string) ClipShape {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		return getClipShape(view, ShapeOutside, view.Session())
 	}
 

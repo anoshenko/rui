@@ -267,10 +267,7 @@ func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, i
 // GetDropDownItems return the DropDownList items list.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDropDownItems(view View, subviewID ...string) []string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Items); value != nil {
 			if items, ok := value.([]string); ok {
 				return items
@@ -313,19 +310,13 @@ func getIndicesArray(view View, tag PropertyName) []int {
 // GetDropDownDisabledItems return an array of disabled(non selectable) items indices of DropDownList.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDropDownDisabledItems(view View, subviewID ...string) []int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
+	view = getSubview(view, subviewID)
 	return getIndicesArray(view, DisabledItems)
 }
 
 // GetDropDownItemSeparators return an array of indices of DropDownList items after which a separator should be added.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDropDownItemSeparators(view View, subviewID ...string) []int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
+	view = getSubview(view, subviewID)
 	return getIndicesArray(view, ItemSeparators)
 }

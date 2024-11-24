@@ -28,11 +28,7 @@ func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
 // GetTableContent returns a TableAdapter which defines the TableView content.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableContent(view View, subviewID ...string) TableAdapter {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if content := view.getRaw(Content); content != nil {
 			if adapter, ok := content.(TableAdapter); ok {
 				return adapter
@@ -46,11 +42,7 @@ func GetTableContent(view View, subviewID ...string) TableAdapter {
 // GetTableRowStyle returns a TableRowStyle which defines styles of TableView rows.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableRowStyle(view View, subviewID ...string) TableRowStyle {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		for _, tag := range []PropertyName{RowStyle, Content} {
 			if value := view.getRaw(tag); value != nil {
 				if style, ok := value.(TableRowStyle); ok {
@@ -66,11 +58,7 @@ func GetTableRowStyle(view View, subviewID ...string) TableRowStyle {
 // GetTableColumnStyle returns a TableColumnStyle which defines styles of TableView columns.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableColumnStyle(view View, subviewID ...string) TableColumnStyle {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		for _, tag := range []PropertyName{ColumnStyle, Content} {
 			if value := view.getRaw(tag); value != nil {
 				if style, ok := value.(TableColumnStyle); ok {
@@ -86,11 +74,7 @@ func GetTableColumnStyle(view View, subviewID ...string) TableColumnStyle {
 // GetTableCellStyle returns a TableCellStyle which defines styles of TableView cells.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableCellStyle(view View, subviewID ...string) TableCellStyle {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		for _, tag := range []PropertyName{CellStyle, Content} {
 			if value := view.getRaw(tag); value != nil {
 				if style, ok := value.(TableCellStyle); ok {
@@ -136,11 +120,7 @@ func GetTableFootHeight(view View, subviewID ...string) int {
 // If the selection mode is RowSelection (2) then the returned column index is less than 0.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTableCurrent(view View, subviewID ...string) CellIndex {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if selectionMode := GetTableSelectionMode(view); selectionMode != NoneSelection {
 			return tableViewCurrent(view)
 		}
@@ -179,37 +159,23 @@ func GetTableRowSelectedListeners(view View, subviewID ...string) []func(TableVi
 // ReloadTableViewData updates TableView
 // If the second argument (subviewID) is not specified or it is "" then updates the first argument (TableView).
 func ReloadTableViewData(view View, subviewID ...string) bool {
-	var tableView TableView
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		if tableView = TableViewByID(view, subviewID[0]); tableView == nil {
-			return false
-		}
-	} else {
-		var ok bool
-		if tableView, ok = view.(TableView); !ok {
-			return false
+	if view = getSubview(view, subviewID); view != nil {
+		if tableView, ok := view.(TableView); ok {
+			tableView.ReloadTableData()
+			return true
 		}
 	}
-
-	tableView.ReloadTableData()
-	return true
+	return false
 }
 
 // ReloadTableViewCell updates the given table cell.
 // If the last argument (subviewID) is not specified or it is "" then updates the cell of the first argument (TableView).
 func ReloadTableViewCell(row, column int, view View, subviewID ...string) bool {
-	var tableView TableView
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		if tableView = TableViewByID(view, subviewID[0]); tableView == nil {
-			return false
-		}
-	} else {
-		var ok bool
-		if tableView, ok = view.(TableView); !ok {
-			return false
+	if view = getSubview(view, subviewID); view != nil {
+		if tableView, ok := view.(TableView); ok {
+			tableView.ReloadCell(row, column)
+			return true
 		}
 	}
-
-	tableView.ReloadCell(row, column)
-	return true
+	return false
 }

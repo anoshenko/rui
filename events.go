@@ -411,10 +411,7 @@ func valueToTwoArgEventListeners[V View, E any](value any) ([]func(V, E, E), boo
 }
 
 func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []func(V) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(tag); value != nil {
 			if result, ok := value.([]func(V)); ok {
 				return result
@@ -425,10 +422,7 @@ func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyN
 }
 
 func getOneArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(tag); value != nil {
 			if result, ok := value.([]func(V, E)); ok {
 				return result
@@ -439,10 +433,7 @@ func getOneArgEventListeners[V View, E any](view View, subviewID []string, tag P
 }
 
 func getTwoArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E, E) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(tag); value != nil {
 			if result, ok := value.([]func(V, E, E)); ok {
 				return result

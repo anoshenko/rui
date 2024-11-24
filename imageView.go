@@ -329,11 +329,7 @@ func (imageView *imageViewData) CurrentSource() string {
 // GetImageViewSource returns the image URL of an ImageView subview.
 // If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
 func GetImageViewSource(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if image, ok := imageProperty(view, Source, view.Session()); ok {
 			return image
 		}
@@ -345,11 +341,7 @@ func GetImageViewSource(view View, subviewID ...string) string {
 // GetImageViewAltText returns an alternative text description of an ImageView subview.
 // If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
 func GetImageViewAltText(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(AltText); value != nil {
 			if text, ok := value.(string); ok {
 				text, _ = view.Session().GetString(text)

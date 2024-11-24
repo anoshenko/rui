@@ -398,10 +398,7 @@ func (edit *editViewData) handleCommand(self View, command PropertyName, data Da
 // GetText returns a text of the EditView subview.
 // If the second argument (subviewID) is not specified or it is "" then a text of the first argument (view) is returned.
 func GetText(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(Text); value != nil {
 			if text, ok := value.(string); ok {
 				return text
@@ -414,9 +411,7 @@ func GetText(view View, subviewID ...string) string {
 // GetHint returns a hint text of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a text of the first argument (view) is returned.
 func GetHint(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 
 	session := view.Session()
 	text := ""
@@ -477,10 +472,7 @@ func GetEditViewType(view View, subviewID ...string) int {
 // GetEditViewPattern returns a value of the Pattern property of EditView.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetEditViewPattern(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if pattern, ok := stringProperty(view, EditViewPattern, view.Session()); ok {
 			return pattern
 		}

@@ -174,10 +174,7 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 // GetColorPickerValue returns the value of ColorPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetColorPickerValue(view View, subviewID ...string) Color {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
 			return value
 		}

@@ -304,12 +304,8 @@ func GetNumberPickerType(view View, subviewID ...string) int {
 // GetNumberPickerMinMax returns the min and max value of NumberPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
-	var pickerType int
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		pickerType = GetNumberPickerType(view, subviewID[0])
-	} else {
-		pickerType = GetNumberPickerType(view)
-	}
+	view = getSubview(view, subviewID)
+	pickerType := GetNumberPickerType(view)
 
 	var defMin, defMax float64
 	if pickerType == NumberSlider {
@@ -320,8 +316,8 @@ func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 		defMax = math.Inf(1)
 	}
 
-	min := floatStyledProperty(view, subviewID, NumberPickerMin, defMin)
-	max := floatStyledProperty(view, subviewID, NumberPickerMax, defMax)
+	min := floatStyledProperty(view, nil, NumberPickerMin, defMin)
+	max := floatStyledProperty(view, nil, NumberPickerMax, defMax)
 
 	if min > max {
 		return max, min
@@ -332,14 +328,10 @@ func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 // GetNumberPickerStep returns the value changing step of NumberPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberPickerStep(view View, subviewID ...string) float64 {
-	var max float64
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		_, max = GetNumberPickerMinMax(view, subviewID[0])
-	} else {
-		_, max = GetNumberPickerMinMax(view)
-	}
+	view = getSubview(view, subviewID)
+	_, max := GetNumberPickerMinMax(view)
 
-	result := floatStyledProperty(view, subviewID, NumberPickerStep, 0)
+	result := floatStyledProperty(view, nil, NumberPickerStep, 0)
 	if result > max {
 		return max
 	}
@@ -349,15 +341,9 @@ func GetNumberPickerStep(view View, subviewID ...string) float64 {
 // GetNumberPickerValue returns the value of NumberPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberPickerValue(view View, subviewID ...string) float64 {
-	var min float64
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		min, _ = GetNumberPickerMinMax(view, subviewID[0])
-	} else {
-		min, _ = GetNumberPickerMinMax(view)
-	}
-
-	result := floatStyledProperty(view, subviewID, NumberPickerValue, min)
-	return result
+	view = getSubview(view, subviewID)
+	min, _ := GetNumberPickerMinMax(view)
+	return floatStyledProperty(view, nil, NumberPickerValue, min)
 }
 
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.

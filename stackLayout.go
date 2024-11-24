@@ -560,11 +560,7 @@ func (layout *stackLayoutData) htmlSubviews(self View, buffer *strings.Builder) 
 // IsMoveToFrontAnimation returns "true" if an animation is used when calling the MoveToFront/MoveToFrontByID method of StackLayout interface.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func IsMoveToFrontAnimation(view View, subviewID ...string) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := boolProperty(view, MoveToFrontAnimation, view.Session()); ok {
 			return value
 		}

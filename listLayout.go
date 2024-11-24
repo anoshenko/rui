@@ -222,11 +222,7 @@ func GetListHorizontalAlign(view View, subviewID ...string) int {
 // TopDownOrientation (0), StartToEndOrientation (1), BottomUpOrientation (2), or EndToStartOrientation (3)
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListOrientation(view View, subviewID ...string) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if orientation, ok := valueToOrientation(view.Get(Orientation), view.Session()); ok {
 			return orientation
 		}
@@ -264,11 +260,7 @@ func GetListColumnGap(view View, subviewID ...string) SizeUnit {
 // otherwise does nothing.
 // If the second argument (subviewID) is not specified or it is "" then the first argument (view) updates.
 func UpdateContent(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		switch view := view.(type) {
 		case GridLayout:
 			view.UpdateGridContent()
@@ -278,6 +270,9 @@ func UpdateContent(view View, subviewID ...string) {
 
 		case ListView:
 			view.ReloadListViewData()
+
+		case TableView:
+			view.ReloadTableData()
 		}
 	}
 }

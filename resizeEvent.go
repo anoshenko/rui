@@ -73,9 +73,7 @@ func (view *viewData) Frame() Frame {
 // GetViewFrame returns the size and location of view's viewport.
 // If the second argument (subviewID) is not specified or it is "" then the value of the first argument (view) is returned
 func GetViewFrame(view View, subviewID ...string) Frame {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return Frame{}
 	}

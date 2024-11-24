@@ -70,13 +70,37 @@ func SetParams(rootView View, viewID string, params Params) bool {
 	return result
 }
 
+func getSubview(view View, subviewID []string) View {
+	switch len(subviewID) {
+	case 0:
+		// do nothing
+
+	case 1:
+		if subviewID[0] != "" {
+			view = ViewByID(view, subviewID[0])
+		}
+
+	default:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+		for _, id := range subviewID {
+			if id != "" {
+				if buffer.Len() > 0 {
+					buffer.WriteRune('/')
+				}
+				buffer.WriteString(id)
+			}
+		}
+		view = ViewByID(view, buffer.String())
+	}
+
+	return view
+}
+
 // IsDisabled returns "true" if the subview is disabled
 // If the second argument (subviewID) is not specified or it is "" then a state of the first argument (view) is returned
 func IsDisabled(view View, subviewID ...string) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if disabled, _ := boolProperty(view, Disabled, view.Session()); disabled {
 			return true
 		}
@@ -106,10 +130,7 @@ func GetOpacity(view View, subviewID ...string) float64 {
 // GetStyle returns the subview style id.
 // If the second argument (subviewID) is not specified or it is "" then a style of the first argument (view) is returned
 func GetStyle(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if style, ok := stringProperty(view, Style, view.Session()); ok {
 			return style
 		}
@@ -120,10 +141,7 @@ func GetStyle(view View, subviewID ...string) string {
 // GetDisabledStyle returns the disabled subview style id.
 // If the second argument (subviewID) is not specified or it is "" then a style of the first argument (view) is returned
 func GetDisabledStyle(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if style, ok := stringProperty(view, StyleDisabled, view.Session()); ok {
 			return style
 		}
@@ -142,12 +160,8 @@ func GetVisibility(view View, subviewID ...string) int {
 // OverflowHidden (0), OverflowVisible (1), OverflowScroll (2), OverflowAuto (3)
 // If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned
 func GetOverflow(view View, subviewID ...string) int {
-	defaultOverflow := OverflowHidden
-	view2 := view
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view2 = ViewByID(view, subviewID[0])
-	}
-	if view2 != nil {
+	if view = getSubview(view, subviewID); view != nil {
+		defaultOverflow := OverflowHidden
 		switch view.(type) {
 		case EditView:
 			defaultOverflow = OverflowAuto
@@ -155,16 +169,16 @@ func GetOverflow(view View, subviewID ...string) int {
 		case ListView:
 			defaultOverflow = OverflowAuto
 		}
+		return enumStyledProperty(view, nil, Overflow, defaultOverflow, false)
 	}
-	return enumStyledProperty(view, subviewID, Overflow, defaultOverflow, false)
+
+	return OverflowHidden
 }
 
 // GetTabIndex returns the subview tab-index.
 // If the second argument (subviewID) is not specified or it is "" then a tab-index of the first argument (view) is returned
 func GetTabIndex(view View, subviewID ...string) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 
 	defaultValue := -1
 	if view != nil {
@@ -264,11 +278,8 @@ func GetBottom(view View, subviewID ...string) SizeUnit {
 // Margin returns the subview margin.
 // If the second argument (subviewID) is not specified or it is "" then a margin of the first argument (view) is returned
 func GetMargin(view View, subviewID ...string) Bounds {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
 	var bounds Bounds
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		bounds.setFromProperties(Margin, MarginTop, MarginRight, MarginBottom, MarginLeft, view, view.Session())
 	}
 	return bounds
@@ -277,11 +288,8 @@ func GetMargin(view View, subviewID ...string) Bounds {
 // GetPadding returns the subview padding.
 // If the second argument (subviewID) is not specified or it is "" then a padding of the first argument (view) is returned
 func GetPadding(view View, subviewID ...string) Bounds {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
 	var bounds Bounds
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		bounds.setFromProperties(Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft, view, view.Session())
 	}
 	return bounds
@@ -290,10 +298,7 @@ func GetPadding(view View, subviewID ...string) Bounds {
 // GetBorder returns ViewBorders of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a ViewBorders of the first argument (view) is returned.
 func GetBorder(view View, subviewID ...string) ViewBorders {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if border := getBorderProperty(view, Border); border != nil {
 			return border.ViewBorders(view.Session())
 		}
@@ -304,9 +309,7 @@ func GetBorder(view View, subviewID ...string) ViewBorders {
 // Radius returns the BoxRadius structure of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a BoxRadius of the first argument (view) is returned.
 func GetRadius(view View, subviewID ...string) BoxRadius {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return BoxRadius{}
 	}
@@ -316,10 +319,7 @@ func GetRadius(view View, subviewID ...string) BoxRadius {
 // GetOutline returns ViewOutline of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a ViewOutline of the first argument (view) is returned.
 func GetOutline(view View, subviewID ...string) ViewOutline {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if outline := getOutlineProperty(view); outline != nil {
 			return outline.ViewOutline(view.Session())
 		}
@@ -336,9 +336,7 @@ func GetOutlineOffset(view View, subviewID ...string) SizeUnit {
 // GetViewShadows returns shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
 func GetViewShadows(view View, subviewID ...string) []ViewShadow {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return []ViewShadow{}
 	}
@@ -348,9 +346,7 @@ func GetViewShadows(view View, subviewID ...string) []ViewShadow {
 // GetTextShadows returns text shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
 func GetTextShadows(view View, subviewID ...string) []ViewShadow {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return []ViewShadow{}
 	}
@@ -530,10 +526,7 @@ func GetVerticalTextOrientation(view View, subviewID ...string) int {
 // GetRow returns the range of row numbers of a GridLayout in which the subview is placed.
 // If the second argument (subviewID) is not specified or it is "" then a values from the first argument (view) is returned.
 func GetRow(view View, subviewID ...string) Range {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		session := view.Session()
 		if result, ok := rangeProperty(view, Row, session); ok {
 			return result
@@ -550,10 +543,7 @@ func GetRow(view View, subviewID ...string) Range {
 // GetColumn returns the range of column numbers of a GridLayout in which the subview is placed.
 // If the second argument (subviewID) is not specified or it is "" then a values from the first argument (view) is returned.
 func GetColumn(view View, subviewID ...string) Range {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		session := view.Session()
 		if result, ok := rangeProperty(view, Column, session); ok {
 			return result
@@ -586,9 +576,7 @@ func GetPerspective(view View, subviewID ...string) SizeUnit {
 // It is used as the vanishing point by the Perspective property. The default value is (50%, 50%).
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetPerspectiveOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return AutoSize(), AutoSize()
 	}
@@ -608,9 +596,7 @@ func GetBackfaceVisible(view View, subviewID ...string) bool {
 // The default value is (50%, 50%, 50%).
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTransformOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return AutoSize(), AutoSize(), AutoSize()
 	}
@@ -620,9 +606,7 @@ func GetTransformOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, Siz
 // GetTranslate returns a x-, y-, and z-axis translation value of a 2D/3D translation
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return AutoSize(), AutoSize(), AutoSize()
 	}
@@ -638,9 +622,7 @@ func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit)
 // and the ordinate (y-axis). The default value is 0.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return AngleUnit{Value: 0, Type: Radian}, AngleUnit{Value: 0, Type: Radian}
 	}
@@ -652,9 +634,7 @@ func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit) {
 // GetScale returns a x-, y-, and z-axis scaling value of a 2D/3D scale. The default value is 1.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetScale(view View, subviewID ...string) (float64, float64, float64) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return 1, 1, 1
 	}
@@ -669,9 +649,7 @@ func GetScale(view View, subviewID ...string) (float64, float64, float64) {
 // GetRotate returns a x-, y, z-coordinate of the vector denoting the axis of rotation, and the angle of the view rotation
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetRotate(view View, subviewID ...string) (float64, float64, float64, AngleUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return 0, 0, 0, AngleUnit{Value: 0, Type: Radian}
 	}
@@ -717,10 +695,7 @@ func valueFromStyle(view View, tag PropertyName) any {
 }
 
 func stringStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if text, ok := stringProperty(view, tag, view.Session()); ok {
 			return text
 		}
@@ -740,11 +715,7 @@ func stringStyledProperty(view View, subviewID []string, tag PropertyName, inher
 }
 
 func sizeStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) SizeUnit {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := sizeProperty(view, tag, view.Session()); ok {
 			return value
 		}
@@ -764,11 +735,7 @@ func sizeStyledProperty(view View, subviewID []string, tag PropertyName, inherit
 }
 
 func enumStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue int, inherit bool) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := enumProperty(view, tag, view.Session(), defaultValue); ok {
 			return value
 		}
@@ -788,11 +755,7 @@ func enumStyledProperty(view View, subviewID []string, tag PropertyName, default
 }
 
 func boolStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := boolProperty(view, tag, view.Session()); ok {
 			return value
 		}
@@ -813,11 +776,7 @@ func boolStyledProperty(view View, subviewID []string, tag PropertyName, inherit
 }
 
 func intStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue int) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := intProperty(view, tag, view.Session(), defaultValue); ok {
 			return value
 		}
@@ -830,10 +789,7 @@ func intStyledProperty(view View, subviewID []string, tag PropertyName, defaultV
 }
 
 func floatStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue float64) float64 {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := floatProperty(view, tag, view.Session(), defaultValue); ok {
 			return value
 		}
@@ -846,10 +802,7 @@ func floatStyledProperty(view View, subviewID []string, tag PropertyName, defaul
 }
 
 func colorStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) Color {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := colorProperty(view, tag, view.Session()); ok {
 			return value
 		}
@@ -868,10 +821,7 @@ func colorStyledProperty(view View, subviewID []string, tag PropertyName, inheri
 }
 
 func transformStyledProperty(view View, subviewID []string, tag PropertyName) TransformProperty {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if transform := getTransformProperty(view, tag); transform != nil {
 			return transform
 		}
@@ -887,10 +837,7 @@ func transformStyledProperty(view View, subviewID []string, tag PropertyName) Tr
 // The focused View is the View which will receive keyboard events by default.
 // If the second argument (subviewID) is not specified or it is "" then focus is set on the first argument (view)
 func FocusView(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		view.Session().callFunc("focus", view.htmlID())
 	}
 }
@@ -920,12 +867,8 @@ func BlurViewByID(viewID string, session Session) {
 // GetCurrent returns the index of the selected item (<0 if there is no a selected item) or the current view index (StackLayout, TabsLayout).
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCurrent(view View, subviewID ...string) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
 	defaultValue := -1
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if result, ok := intProperty(view, Current, view.Session(), defaultValue); ok {
 			return result
 		} else if view.Tag() != "ListView" {
@@ -938,11 +881,7 @@ func GetCurrent(view View, subviewID ...string) int {
 // IsUserSelect returns "true" if the user can select text, "false" otherwise.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func IsUserSelect(view View, subviewID ...string) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		value, _ := isUserSelect(view)
 		return value
 	}
@@ -1006,11 +945,7 @@ func GetBackgroundBlendMode(view View, subviewID ...string) int {
 // GetTooltip returns a tooltip text of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTooltip(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Tooltip); value != nil {
 			if text, ok := value.(string); ok {
 				return text

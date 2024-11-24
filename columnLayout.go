@@ -199,11 +199,7 @@ func GetColumnGap(view View, subviewID ...string) SizeUnit {
 }
 
 func getColumnSeparator(view View, subviewID []string) ViewBorder {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		value := view.Get(ColumnSeparator)
 		if value == nil {
 			value = valueFromStyle(view, ColumnSeparator)

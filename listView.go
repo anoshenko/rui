@@ -1098,11 +1098,7 @@ func GetListViewCheckbox(view View, subviewID ...string) int {
 // GetListViewCheckedItems returns the array of ListView checked items.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListViewCheckedItems(view View, subviewID ...string) []int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(Checked); value != nil {
 			if checkedItems, ok := value.([]int); ok {
 				switch GetListViewCheckbox(view) {
@@ -1179,10 +1175,7 @@ func GetListItemFrame(view View, subviewID string, index int) Frame {
 // GetListViewAdapter - returns the ListView adapter.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Items); value != nil {
 			if adapter, ok := value.(ListAdapter); ok {
 				return adapter
@@ -1195,11 +1188,7 @@ func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
 // ReloadListViewData updates ListView content
 // If the second argument (subviewID) is not specified or it is "" then content the first argument (view) is updated.
 func ReloadListViewData(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if listView, ok := view.(ListView); ok {
 			listView.ReloadListViewData()
 		}
