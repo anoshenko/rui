@@ -534,6 +534,10 @@ func (layout *stackLayoutData) moveToFrontByIndex(index int, onShow []func(View)
 		layout.views = append(append(layout.views[:index], layout.views[index+1:]...), view)
 	}
 
+	if !layout.created {
+		return
+	}
+
 	session := layout.Session()
 	pageID := view.htmlID() + "page"
 	peekPageID := peekID + "page"
@@ -649,23 +653,25 @@ func (layout *stackLayoutData) Append(view View) {
 		layout.views = append(layout.views, view)
 	}
 
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
+	if layout.created {
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`<div id="`)
-	buffer.WriteString(view.htmlID())
-	buffer.WriteString(`page" class="ruiStackPageLayout">`)
-	viewHTML(view, buffer, "")
-	buffer.WriteString(`</div>`)
+		buffer.WriteString(`<div id="`)
+		buffer.WriteString(view.htmlID())
+		buffer.WriteString(`page" class="ruiStackPageLayout">`)
+		viewHTML(view, buffer, "")
+		buffer.WriteString(`</div>`)
 
-	session := layout.Session()
-	if count > 0 {
-		session.updateCSSProperty(layout.views[count-1].htmlID()+"page", "visibility", "hidden")
-	}
-	session.appendToInnerHTML(stackID, buffer.String())
+		session := layout.Session()
+		if count > 0 {
+			session.updateCSSProperty(layout.views[count-1].htmlID()+"page", "visibility", "hidden")
+		}
+		session.appendToInnerHTML(stackID, buffer.String())
 
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
+		if listener, ok := layout.changeListener[Content]; ok {
+			listener(layout, Content)
+		}
 	}
 }
 

@@ -75,14 +75,16 @@ func (container *viewsContainerData) Append(view View) {
 			container.views = append(container.views, view)
 		}
 
-		buffer := allocStringBuilder()
-		defer freeStringBuilder(buffer)
+		if container.created {
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
 
-		viewHTML(view, buffer, "")
-		container.Session().appendToInnerHTML(htmlID, buffer.String())
+			viewHTML(view, buffer, "")
+			container.Session().appendToInnerHTML(htmlID, buffer.String())
 
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
+			if listener, ok := container.changeListener[Content]; ok {
+				listener(container, Content)
+			}
 		}
 	}
 }
@@ -102,9 +104,12 @@ func (container *viewsContainerData) Insert(view View, index int) {
 		} else {
 			container.views = append([]View{view}, container.views...)
 		}
-		updateInnerHTML(htmlID, container.Session())
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
+
+		if container.created {
+			updateInnerHTML(htmlID, container.Session())
+			if listener, ok := container.changeListener[Content]; ok {
+				listener(container, Content)
+			}
 		}
 	}
 }
@@ -132,9 +137,11 @@ func (container *viewsContainerData) RemoveView(index int) View {
 
 	view.setParentID("")
 
-	container.Session().callFunc("removeView", view.htmlID())
-	if listener, ok := container.changeListener[Content]; ok {
-		listener(container, Content)
+	if container.created {
+		container.Session().callFunc("removeView", view.htmlID())
+		if listener, ok := container.changeListener[Content]; ok {
+			listener(container, Content)
+		}
 	}
 	return view
 }

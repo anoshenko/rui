@@ -712,7 +712,7 @@ func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Sessio
 	}
 
 	if transform := getTransformProperty(style, Transform); transform != nil {
-		builder.add(`TransformProperty`, transform.transformCSS(session))
+		builder.add(`transform`, transform.transformCSS(session))
 	}
 }
 

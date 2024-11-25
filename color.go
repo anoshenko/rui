@@ -11,6 +11,14 @@ import (
 // Color - represent color in argb format
 type Color uint32
 
+// ARGB creates Color using alpha, red, green and blue components
+func ARGB[T int | uint | int8 | uint8](alpha, red, green, blue T) Color {
+	return ((Color(alpha) & 0xFF) << 24) +
+		((Color(red) & 0xFF) << 16) +
+		((Color(green) & 0xFF) << 8) +
+		(Color(blue) & 0xFF)
+}
+
 // ARGB - return alpha, red, green and blue components of the color
 func (color Color) ARGB() (uint8, uint8, uint8, uint8) {
 	return uint8(color >> 24),
