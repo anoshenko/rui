@@ -7,6 +7,8 @@
 * Changed Push and Pop method of StackLayout interface.
 * Removed DefaultAnimation, StartToEndAnimation, EndToStartAnimation, TopDownAnimation, and BottomUpAnimation constants.
 * Added "push-transform", "push-duration", "push-timing", and "move-to-front-animation" properties.
+* Added "push-perspective", "push-rotate-x", "push-rotate-y", "push-rotate-z", "push-rotate", "push-skew-x", "push-skew-y",
+"push-scale-x", "push-scale-y", "push-scale-z", "push-translate-x", "push-translate-y", "push-translate-z" properties.
 * Added GetPushTransform, GetPushDuration, GetPushTiming, and IsMoveToFrontAnimation functions.
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
 * Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.

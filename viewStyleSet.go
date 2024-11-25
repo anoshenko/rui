@@ -354,7 +354,11 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 
 	case Perspective, RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
 		TranslateX, TranslateY, TranslateZ:
-		return setTransformPropertyElement(style, tag, value)
+		return setTransformPropertyElement(style, tag, Transform, value)
+
+	case PushPerspective, PushRotateX, PushRotateY, PushRotateZ, PushRotate, PushSkewX, PushSkewY,
+		PushScaleX, PushScaleY, PushScaleZ, PushTranslateX, PushTranslateY, PushTranslateZ:
+		return setTransformPropertyElement(style, tag, PushTransform, value)
 
 	case Orientation:
 		if text, ok := value.(string); ok {

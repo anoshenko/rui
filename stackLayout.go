@@ -58,6 +58,191 @@ const (
 	// `true` or `1` or "true", "yes", "on", "1" - animation is used (default value).
 	// `false` or `0` or "false", "no", "off", "0" - animation is not used.
 	MoveToFrontAnimation = "move-to-front-animation"
+
+	// PushPerspective is the constant for "push-perspective" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "perspective" property of StackLayout "push-transform" property:
+	// Distance between the z-plane and the user in order to give a 3D-positioned element some perspective. Each 3D element
+	// with z > 0 becomes larger, each 3D-element with z < 0 becomes smaller. The default value is 0 (no 3D effects).
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	PushPerspective PropertyName = "push-perspective"
+
+	// PushTranslateX is the constant for "push-translate-x" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "translate-x" property of StackLayout "push-transform" property:
+	// x-axis translation value of a 2D/3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	PushTranslateX PropertyName = "push-translate-x"
+
+	// PushTranslateY is the constant for "push-translate-y" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "translate-y" property of StackLayout "push-transform" property:
+	// y-axis translation value of a 2D/3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	PushTranslateY PropertyName = "push-translate-y"
+
+	// PushTranslateZ is the constant for "push-translate-z" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "translate-z" property of StackLayout "push-transform" property:
+	// z-axis translation value of a 3D translation.
+	//
+	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	//
+	// Internal type is `SizeUnit`, other types converted to it during assignment.
+	// See `SizeUnit` description for more details.
+	PushTranslateZ PropertyName = "push-translate-z"
+
+	// PushScaleX is the constant for "push-scale-x" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "scale-x" property of StackLayout "push-transform" property:
+	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushScaleX PropertyName = "push-scale-x"
+
+	// PushScaleY is the constant for "push-scale-y" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "scale-y" property of StackLayout "push-transform" property:
+	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushScaleY PropertyName = "push-scale-y"
+
+	// PushScaleZ is the constant for "push-scale-z" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "scale-z" property of StackLayout "push-transform" property:
+	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
+	// scale, more than 1 - to increase. The default value is 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushScaleZ PropertyName = "push-scale-z"
+
+	// PushRotate is the constant for "push-rotate" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "rotate" property of StackLayout "push-transform" property:
+	// Angle of the view rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	PushRotate PropertyName = "push-rotate"
+
+	// PushRotateX is the constant for "push-rotate-x" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "rotate-x" property of StackLayout "push-transform" property:
+	// x-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushRotateX PropertyName = "push-rotate-x"
+
+	// PushRotateY is the constant for "push-rotate-y" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "rotate-y" property of StackLayout "push-transform" property:
+	// y-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushRotateY PropertyName = "push-rotate-y"
+
+	// PushRotateZ is the constant for "push-rotate-z" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "rotate-z" property of StackLayout "push-transform" property:
+	// z-coordinate of the vector denoting the axis of rotation in range 0 to 1.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
+	PushRotateZ PropertyName = "push-rotate-z"
+
+	// PushSkewX is the constant for "push-skew-x" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "skew-x" property of StackLayout "push-transform" property:
+	// Angle to use to distort the element along the abscissa. The default value is 0.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	PushSkewX PropertyName = "push-skew-x"
+
+	// PushSkewY is the constant for "push-skew-y" property tag.
+	//
+	// Used by `StackLayout`.
+	//
+	// Used to access the "skew-y" property of StackLayout "push-transform" property:
+	// Angle to use to distort the element along the ordinate. The default value is 0.
+	//
+	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	//
+	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
+	// See `AngleUnit` description for more details.
+	//
+	// Conversion rules:
+	// `AngleUnit` - stored as is, no conversion performed.
+	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
+	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
+	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	PushSkewY PropertyName = "push-skew-y"
 )
 
 // StackLayout represents a StackLayout view
@@ -137,6 +322,7 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.onMoveFinished = map[string]popFinished{}
 	layout.set = layout.setFunc
 	layout.remove = layout.removeFunc
+	layout.changed = layout.propertyChanged
 
 	layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.transitionFinished})
 	if session.TextDirection() == RightToLeftDirection {
@@ -251,6 +437,18 @@ func (layout *stackLayoutData) setFunc(tag PropertyName, value any) []PropertyNa
 		}
 	}
 	return layout.viewsContainerData.setFunc(tag, value)
+}
+
+func (layout *stackLayoutData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case PushTransform, PushTiming, PushDuration, MoveToFrontAnimation,
+		PushPerspective, PushRotateX, PushRotateY, PushRotateZ, PushRotate, PushSkewX, PushSkewY,
+		PushScaleX, PushScaleY, PushScaleZ, PushTranslateX, PushTranslateY, PushTranslateZ:
+		// do nothing
+
+	default:
+		layout.viewsContainerData.propertyChanged(tag)
+	}
 }
 
 func (layout *stackLayoutData) removeFunc(tag PropertyName) []PropertyName {

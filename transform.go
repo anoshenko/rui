@@ -19,12 +19,12 @@ const (
 	//
 	// Conversion rules:
 	// `TransformProperty` - stored as is, no conversion performed.
-	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
+	// `string` - string representation of `TransformProperty` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
 	Transform PropertyName = "transform"
 
 	// Perspective is the constant for "perspective" property tag.
 	//
-	// Used by `View`.
+	// Used by `View`, `TransformProperty`.
 	// Distance between the z-plane and the user in order to give a 3D-positioned element some perspective. Each 3D element
 	// with z > 0 becomes larger, each 3D-element with z < 0 becomes smaller. The default value is 0 (no 3D effects).
 	//
@@ -70,7 +70,7 @@ const (
 	// `false` or `0` or "false", "no", "off", "0" - Back face is hidden, effectively making the view invisible when turned away from the user.
 	BackfaceVisible PropertyName = "backface-visibility"
 
-	// OriginX is the constant for "origin-x" property tag.
+	// TransformOriginX is the constant for "transform-origin-x" property tag.
 	//
 	// Used by `View`.
 	// x-coordinate of the point around which a view transformation is applied. The default value is 50%.
@@ -81,7 +81,7 @@ const (
 	// See `SizeUnit` description for more details.
 	TransformOriginX PropertyName = "transform-origin-x"
 
-	// OriginY is the constant for "origin-y" property tag.
+	// TransformOriginY is the constant for "transform-origin-y" property tag.
 	//
 	// Used by `View`.
 	// y-coordinate of the point around which a view transformation is applied. The default value is 50%.
@@ -92,7 +92,7 @@ const (
 	// See `SizeUnit` description for more details.
 	TransformOriginY PropertyName = "transform-origin-y"
 
-	// OriginZ is the constant for "origin-z" property tag.
+	// TransformOriginZ is the constant for "transform-origin-z" property tag.
 	//
 	// Used by `View`.
 	// z-coordinate of the point around which a view transformation is applied. The default value is 50%.
@@ -105,7 +105,7 @@ const (
 
 	// TranslateX is the constant for "translate-x" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// x-axis translation value of a 2D/3D translation.
@@ -115,7 +115,7 @@ const (
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// x-axis translation value of a 2D/3D translation.
 	//
 	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
@@ -126,7 +126,7 @@ const (
 
 	// TranslateY is the constant for "translate-y" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// y-axis translation value of a 2D/3D translation.
@@ -136,7 +136,7 @@ const (
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// x-axis translation value of a 2D/3D translation.
 	//
 	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
@@ -147,7 +147,7 @@ const (
 
 	// TranslateZ is the constant for "translate-z" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// z-axis translation value of a 3D translation.
@@ -157,7 +157,7 @@ const (
 	// Internal type is `SizeUnit`, other types converted to it during assignment.
 	// See `SizeUnit` description for more details.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// z-axis translation value of a 3D translation.
 	//
 	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
@@ -168,7 +168,7 @@ const (
 
 	// ScaleX is the constant for "scale-x" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
@@ -178,7 +178,7 @@ const (
 	//
 	// Internal type is `float`, other types converted to it during assignment.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
@@ -189,7 +189,7 @@ const (
 
 	// ScaleY is the constant for "scale-y" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
@@ -199,7 +199,7 @@ const (
 	//
 	// Internal type is `float`, other types converted to it during assignment.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
@@ -210,7 +210,7 @@ const (
 
 	// ScaleZ is the constant for "scale-z" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
@@ -220,7 +220,7 @@ const (
 	//
 	// Internal type is `float`, other types converted to it during assignment.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
 	//
@@ -231,7 +231,7 @@ const (
 
 	// Rotate is the constant for "rotate" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// Angle of the view rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise.
@@ -247,7 +247,7 @@ const (
 	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
 	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// Angle of the view rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise.
 	//
 	// Supported types: `AngleUnit`, `string`, `float`, `int`.
@@ -264,7 +264,7 @@ const (
 
 	// RotateX is the constant for "rotate-x" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// x-coordinate of the vector denoting the axis of rotation in range 0 to 1.
@@ -273,7 +273,7 @@ const (
 	//
 	// Internal type is `float`, other types converted to it during assignment.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// x-coordinate of the vector denoting the axis of rotation in range 0 to 1.
 	//
 	// Supported types: `float`, `int`, `string`.
@@ -283,7 +283,7 @@ const (
 
 	// RotateY is the constant for "rotate-y" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// y-coordinate of the vector denoting the axis of rotation in range 0 to 1.
@@ -292,7 +292,7 @@ const (
 	//
 	// Internal type is `float`, other types converted to it during assignment.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// y-coordinate of the vector denoting the axis of rotation in range 0 to 1.
 	//
 	// Supported types: `float`, `int`, `string`.
@@ -302,7 +302,7 @@ const (
 
 	// RotateZ is the constant for "rotate-z" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// z-coordinate of the vector denoting the axis of rotation in range 0 to 1.
@@ -311,7 +311,7 @@ const (
 	//
 	// Internal type is `float`, other types converted to it during assignment.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// z-coordinate of the vector denoting the axis of rotation in range 0 to 1.
 	//
 	// Supported types: `float`, `int`, `string`.
@@ -321,7 +321,7 @@ const (
 
 	// SkewX is the constant for "skew-x" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// Angle to use to distort the element along the abscissa. The default value is 0.
@@ -337,7 +337,7 @@ const (
 	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
 	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// Angle to use to distort the element along the abscissa. The default value is 0.
 	//
 	// Supported types: `AngleUnit`, `string`, `float`, `int`.
@@ -354,7 +354,7 @@ const (
 
 	// SkewY is the constant for "skew-y" property tag.
 	//
-	// Used by `View`, `Transform`.
+	// Used by `View`, `TransformProperty`.
 	//
 	// Usage in `View`:
 	// Angle to use to distort the element along the ordinate. The default value is 0.
@@ -370,7 +370,7 @@ const (
 	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
 	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
 	//
-	// Usage in `Transform`:
+	// Usage in `TransformProperty`:
 	// Angle to use to distort the element along the ordinate. The default value is 0.
 	//
 	// Supported types: `AngleUnit`, `string`, `float`, `int`.
@@ -416,11 +416,23 @@ func NewTransformProperty(params Params) TransformProperty {
 
 func (transform *transformPropertyData) init() {
 	transform.dataProperty.init()
+	transform.normalize = normalizeTransformTag
 	transform.set = transformSet
 	transform.supportedProperties = []PropertyName{
 		RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ,
 		Perspective, TranslateX, TranslateY, TranslateZ,
 	}
+}
+
+func normalizeTransformTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
+
+	name := string(tag)
+	if strings.HasPrefix(name, "push-") {
+		tag = PropertyName(name[5:])
+	}
+
+	return tag
 }
 
 func (transform *transformPropertyData) String() string {
@@ -527,25 +539,27 @@ func getTransformProperty(properties Properties, tag PropertyName) TransformProp
 	return nil
 }
 
-func setTransformPropertyElement(properties Properties, tag PropertyName, value any) []PropertyName {
+func setTransformPropertyElement(properties Properties, tag, transformTag PropertyName, value any) []PropertyName {
+	srcTag := tag
+	tag = normalizeTransformTag(tag)
 	switch tag {
 	case Perspective, RotateX, RotateY, RotateZ, Rotate, SkewX, SkewY, ScaleX, ScaleY, ScaleZ, TranslateX, TranslateY, TranslateZ:
 		var result []PropertyName = nil
-		if transform := getTransformProperty(properties, Transform); transform != nil {
+		if transform := getTransformProperty(properties, transformTag); transform != nil {
 			if result = transformSet(transform, tag, value); result != nil {
-				result = append(result, Transform)
+				result = []PropertyName{srcTag, transformTag}
 			}
 		} else {
 			transform := NewTransformProperty(nil)
 			if result = transformSet(transform, tag, value); result != nil {
-				properties.setRaw(Transform, transform)
-				result = append(result, Transform)
+				properties.setRaw(transformTag, transform)
+				result = []PropertyName{srcTag, transformTag}
 			}
 		}
 		return result
 	}
 
-	ErrorLogF(`"Transform" interface does not support the "%s" property`, tag)
+	ErrorLogF(`"TransformProperty" interface does not support the "%s" property`, tag)
 	return nil
 }
 
@@ -698,7 +712,7 @@ func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Sessio
 	}
 
 	if transform := getTransformProperty(style, Transform); transform != nil {
-		builder.add(`transform`, transform.transformCSS(session))
+		builder.add(`TransformProperty`, transform.transformCSS(session))
 	}
 }
 
