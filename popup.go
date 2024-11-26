@@ -171,7 +171,7 @@ const (
 
 	// ShowTiming is the constant for "show-timing" property tag.
 	//
-	// Used by `StackLayout`.
+	// Used by `Popup`.
 	// Set how a Popup show/hide animation progresses through the duration of each cycle.
 	//
 	// Supported types: `string`.
@@ -184,6 +184,15 @@ const (
 	// "linear"(`LinearTiming`) - Constant speed.
 	ShowTiming = "show-timing"
 
+	// ShowOpacity is the constant for "show-opacity" property tag.
+	//
+	// Used by `Popup`.
+	// In [1..0] range sets the start opacity of Popup show animation (the finish animation opacity is 1).
+	// Opacity is the degree to which content behind the view is hidden, and is the opposite of transparency.
+	//
+	// Supported types: `float`, `int`, `string`.
+	//
+	// Internal type is `float`, other types converted to it during assignment.
 	ShowOpacity = "show-opacity"
 
 	// ArrowOffset is the constant for "arrow-offset" property tag.
