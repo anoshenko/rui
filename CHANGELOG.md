@@ -2,9 +2,9 @@
 
 * Property name type changed from string to PropertyName. 
 * Transform interface renamed to TransformProperty. NewTransform function renamed to NewTransformProperty. TransformTag constant renamed to Transform. 
-* OriginX, OriginY, and OriginZ properties renamed to TransformOriginX, TransformOriginY, and TransformOriginZ
+* "origin-x", "origin-y", and "origin-z" properties renamed to "transform-origin-x", "transform-origin-y", and "transform-origin-z".
 * GetOrigin function renamed to GetTransformOrigin.
-* Changed Push and Pop method of StackLayout interface.
+* Changed Push, Pop, MoveToFront, and MoveToFrontByID methods of StackLayout interface.
 * Removed DefaultAnimation, StartToEndAnimation, EndToStartAnimation, TopDownAnimation, and BottomUpAnimation constants.
 * Added "push-transform", "push-duration", "push-timing", and "move-to-front-animation" StackLayout properties.
 * Added "push-perspective", "push-rotate-x", "push-rotate-y", "push-rotate-z", "push-rotate", "push-skew-x", "push-skew-y",
