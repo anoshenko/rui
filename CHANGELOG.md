@@ -11,6 +11,9 @@
 "push-scale-x", "push-scale-y", "push-scale-z", "push-translate-x", "push-translate-y", "push-translate-z" StackLayout properties.
 * Added "show-opacity", "show-transform", "show-duration", and "show-timing" Popup properties.
 * Added GetPushTransform, GetPushDuration, GetPushTiming, and IsMoveToFrontAnimation functions.
+* Added "mask", "mask-clip", "mask-origin", and "background-origin" properties.
+* Added GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, and GetMaskOrigin functions.
+* Renamed BorderBoxClip, PaddingBoxClip, and ContentBoxClip constants to BorderBox, PaddingBox, and ContentBox.
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
 * Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.
 

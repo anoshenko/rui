@@ -210,8 +210,8 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 			return []PropertyName{tag}
 		}
 
-	case Background:
-		return setBackgroundProperty(style, value)
+	case Background, Mask:
+		return setBackgroundProperty(style, tag, value)
 
 	case Border, CellBorder:
 		if border := newBorderProperty(value); border != nil {

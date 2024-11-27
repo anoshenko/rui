@@ -220,6 +220,11 @@ func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
 
 		case Color:
 			return color, true
+
+		default:
+			if n, ok := isInt(point.Color); ok {
+				return Color(n), true
+			}
 		}
 	}
 	return 0, false
@@ -315,7 +320,7 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 func (gradient *backgroundLinearGradient) init() {
 	gradient.backgroundElement.init()
 	gradient.set = backgroundLinearGradientSet
-	gradient.supportedProperties = append(gradient.supportedProperties, Direction)
+	gradient.supportedProperties = []PropertyName{Direction, Repeating, Gradient}
 
 }
 
@@ -422,9 +427,9 @@ func (gradient *backgroundRadialGradient) init() {
 	gradient.backgroundElement.init()
 	gradient.normalize = normalizeRadialGradientTag
 	gradient.set = backgroundRadialGradientSet
-	gradient.supportedProperties = append(gradient.supportedProperties, []PropertyName{
-		RadialGradientRadius, RadialGradientShape, CenterX, CenterY,
-	}...)
+	gradient.supportedProperties = []PropertyName{
+		RadialGradientRadius, RadialGradientShape, CenterX, CenterY, Gradient, Repeating,
+	}
 }
 
 func (gradient *backgroundRadialGradient) Tag() string {

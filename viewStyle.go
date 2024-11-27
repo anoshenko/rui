@@ -108,35 +108,6 @@ func split4Values(text string) []string {
 	return []string{}
 }
 
-func backgroundCSS(properties Properties, session Session) string {
-
-	if value := properties.getRaw(Background); value != nil {
-		if backgrounds, ok := value.([]BackgroundElement); ok && len(backgrounds) > 0 {
-			buffer := allocStringBuilder()
-			defer freeStringBuilder(buffer)
-
-			for _, background := range backgrounds {
-				if value := background.cssStyle(session); value != "" {
-					if buffer.Len() > 0 {
-						buffer.WriteString(", ")
-					}
-					buffer.WriteString(value)
-				}
-			}
-
-			if buffer.Len() > 0 {
-				backgroundColor, _ := colorProperty(properties, BackgroundColor, session)
-				if backgroundColor != 0 {
-					buffer.WriteRune(' ')
-					buffer.WriteString(backgroundColor.cssString())
-				}
-				return buffer.String()
-			}
-		}
-	}
-	return ""
-}
-
 func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if visibility, ok := enumProperty(style, Visibility, session, Visible); ok {
@@ -217,8 +188,12 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	if value, ok := enumProperty(style, BackgroundClip, session, 0); ok {
-		builder.add(string(BackgroundClip), enumProperties[BackgroundClip].values[value])
+	for _, tag := range []PropertyName{BackgroundClip, BackgroundOrigin, MaskClip, MaskOrigin} {
+		if value, ok := enumProperty(style, tag, session, 0); ok {
+			if data, ok := enumProperties[tag]; ok {
+				builder.add(data.cssTag, data.values[value])
+			}
+		}
 	}
 
 	if background := backgroundCSS(style, session); background != "" {
@@ -228,6 +203,10 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		if backgroundColor != 0 {
 			builder.add("background-color", backgroundColor.cssString())
 		}
+	}
+
+	if mask := maskCSS(style, session); mask != "" {
+		builder.add("mask", mask)
 	}
 
 	if font, ok := stringProperty(style, FontName, session); ok && font != "" {
@@ -870,7 +849,8 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 	tagOrder := []PropertyName{
 		ID, Row, Column, Top, Right, Bottom, Left, Semantics, Cursor, Visibility,
 		Opacity, ZIndex, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
-		Margin, Padding, BackgroundClip, BackgroundColor, Background, Border, Radius, Outline, Shadow,
+		Margin, Padding, BackgroundColor, Background, BackgroundClip, BackgroundOrigin,
+		Mask, MaskClip, MaskOrigin, Border, Radius, Outline, Shadow,
 		Orientation, ListWrap, VerticalAlign, HorizontalAlign, CellWidth, CellHeight,
 		CellVerticalAlign, CellHorizontalAlign, ListRowGap, ListColumnGap, GridRowGap, GridColumnGap,
 		ColumnCount, ColumnWidth, ColumnSeparator, ColumnGap, AvoidBreak,

@@ -164,11 +164,13 @@ var sizeProperties = map[PropertyName]string{
 	CenterY:            string(CenterX),
 }
 
-var enumProperties = map[PropertyName]struct {
+type enumPropertyData struct {
 	values    []string
 	cssTag    string
 	cssValues []string
-}{
+}
+
+var enumProperties = map[PropertyName]enumPropertyData{
 	Semantics: {
 		[]string{"default", "article", "section", "aside", "header", "main", "footer", "navigation", "figure", "figure-caption", "button", "p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "code"},
 		"",
@@ -408,6 +410,21 @@ var enumProperties = map[PropertyName]struct {
 		[]string{"border-box", "padding-box", "content-box"}, // "text"},
 		"background-clip",
 		[]string{"border-box", "padding-box", "content-box"}, // "text"},
+	},
+	BackgroundOrigin: {
+		[]string{"border-box", "padding-box", "content-box"},
+		"background-origin",
+		[]string{"border-box", "padding-box", "content-box"},
+	},
+	MaskClip: {
+		[]string{"border-box", "padding-box", "content-box"},
+		"mask-clip",
+		[]string{"border-box", "padding-box", "content-box"},
+	},
+	MaskOrigin: {
+		[]string{"border-box", "padding-box", "content-box"},
+		"background-origin",
+		[]string{"border-box", "padding-box", "content-box"},
 	},
 	Direction: {
 		[]string{"to-top", "to-right-top", "to-right", "to-right-bottom", "to-bottom", "to-left-bottom", "to-left", "to-left-top"},

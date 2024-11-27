@@ -12,25 +12,30 @@ const (
 	// will not necessarily be entirely covered). The position of the non-repeated
 	// background image is defined by the background-position CSS property.
 	NoRepeat = 0
+
 	// RepeatXY is value of the Repeat property of an background image:
 	// The image is repeated as much as needed to cover the whole background
 	// image painting area. The last image will be clipped if it doesn't fit.
 	RepeatXY = 1
+
 	// RepeatX is value of the Repeat property of an background image:
 	// The image is repeated horizontally as much as needed to cover
 	// the whole width background image painting area. The image is not repeated vertically.
 	// The last image will be clipped if it doesn't fit.
 	RepeatX = 2
+
 	// RepeatY is value of the Repeat property of an background image:
 	// The image is repeated vertically as much as needed to cover
 	// the whole height background image painting area. The image is not repeated horizontally.
 	// The last image will be clipped if it doesn't fit.
 	RepeatY = 3
+
 	// RepeatRound is value of the Repeat property of an background image:
 	// As the allowed space increases in size, the repeated images will stretch (leaving no gaps)
 	// until there is room (space left >= half of the image width) for another one to be added.
 	// When the next image is added, all of the current ones compress to allow room.
 	RepeatRound = 4
+
 	// RepeatSpace is value of the Repeat property of an background image:
 	// The image is repeated as much as possible without clipping. The first and last images
 	// are pinned to either side of the element, and whitespace is distributed evenly between the images.
@@ -40,10 +45,12 @@ const (
 	// The background is fixed relative to the element itself and does not scroll with its contents.
 	// (It is effectively attached to the element's border.)
 	ScrollAttachment = 0
+
 	// FixedAttachment is value of the Attachment property of an background image:
 	// The background is fixed relative to the viewport. Even if an element has
 	// a scrolling mechanism, the background doesn't move with the element.
 	FixedAttachment = 1
+
 	// LocalAttachment is value of the Attachment property of an background image:
 	// The background is fixed relative to the element's contents. If the element has a scrolling mechanism,
 	// the background scrolls with the element's contents, and the background painting area
@@ -51,15 +58,38 @@ const (
 	// rather than to the border framing them.
 	LocalAttachment = 2
 
-	// BorderBoxClip is value of the BackgroundClip property:
-	// The background extends to the outside edge of the border (but underneath the border in z-ordering).
-	BorderBoxClip = 0
-	// PaddingBoxClip is value of the BackgroundClip property:
-	// The background extends to the outside edge of the padding. No background is drawn beneath the border.
-	PaddingBoxClip = 1
-	// ContentBoxClip is value of the BackgroundClip property:
-	// The background is painted within (clipped to) the content box.
-	ContentBoxClip = 2
+	// BorderBox is the value of the following properties:
+	//
+	// * BackgroundClip - The background extends to the outside edge of the border (but underneath the border in z-ordering).
+	//
+	// * BackgroundOrigin - The background is positioned relative to the border box.
+	//
+	// * MaskClip - The painted content is clipped to the border box.
+	//
+	// * MaskOrigin - The mask is positioned relative to the border box.
+	BorderBox = 0
+
+	// PaddingBox is value of the BackgroundClip and MaskClip property:
+	//
+	// * BackgroundClip - The background extends to the outside edge of the padding. No background is drawn beneath the border.
+	//
+	// * BackgroundOrigin - The background is positioned relative to the padding box.
+	//
+	// * MaskClip - The painted content is clipped to the padding box.
+	//
+	// * MaskOrigin - The mask is positioned relative to the padding box.
+	PaddingBox = 1
+
+	// ContentBox is value of the BackgroundClip and MaskClip property:
+	//
+	// * BackgroundClip - The background is painted within (clipped to) the content box.
+	//
+	// * BackgroundOrigin - The background is positioned relative to the content box.
+	//
+	// * MaskClip - The painted content is clipped to the content box.
+	//
+	// * MaskOrigin - The mask is positioned relative to the content box.
+	ContentBox = 2
 )
 
 // BackgroundElement describes the background element
@@ -253,75 +283,198 @@ func (image *backgroundImage) String() string {
 	return runStringWriter(image)
 }
 
-func setBackgroundProperty(properties Properties, value any) []PropertyName {
-	background := []BackgroundElement{}
-
-	error := func() []PropertyName {
-		notCompatibleType(Background, value)
-		return nil
-	}
+func parseBackgroundValue(value any) []BackgroundElement {
 
 	switch value := value.(type) {
 	case BackgroundElement:
-		background = []BackgroundElement{value}
+		return []BackgroundElement{value}
 
 	case []BackgroundElement:
-		background = value
+		return value
 
 	case []DataValue:
+		background := []BackgroundElement{}
 		for _, el := range value {
 			if el.IsObject() {
 				if element := createBackground(el.Object()); element != nil {
 					background = append(background, element)
 				} else {
-					return error()
+					return nil
 				}
 			} else if obj := ParseDataText(el.Value()); obj != nil {
 				if element := createBackground(obj); element != nil {
 					background = append(background, element)
 				} else {
-					return error()
+					return nil
 				}
 			} else {
-				return error()
+				return nil
 			}
 		}
+		return background
 
 	case DataObject:
 		if element := createBackground(value); element != nil {
-			background = []BackgroundElement{element}
-		} else {
-			return error()
+			return []BackgroundElement{element}
 		}
 
 	case []DataObject:
+		background := []BackgroundElement{}
 		for _, obj := range value {
 			if element := createBackground(obj); element != nil {
 				background = append(background, element)
 			} else {
-				return error()
+				return nil
 			}
 		}
+		return background
 
 	case string:
 		if obj := ParseDataText(value); obj != nil {
 			if element := createBackground(obj); element != nil {
-				background = []BackgroundElement{element}
-			} else {
-				return error()
+				return []BackgroundElement{element}
 			}
-		} else {
-			return error()
 		}
 	}
 
+	return nil
+}
+
+func setBackgroundProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+
+	background := parseBackgroundValue(value)
+	if background == nil {
+		notCompatibleType(tag, value)
+		return nil
+	}
+
 	if len(background) > 0 {
-		properties.setRaw(Background, background)
-	} else if properties.getRaw(Background) != nil {
-		properties.setRaw(Background, nil)
+		properties.setRaw(tag, background)
+	} else if properties.getRaw(tag) != nil {
+		properties.setRaw(tag, nil)
 	} else {
 		return []PropertyName{}
 	}
 
-	return []PropertyName{Background}
+	return []PropertyName{tag}
+}
+
+func backgroundCSS(properties Properties, session Session) string {
+
+	if value := properties.getRaw(Background); value != nil {
+		if backgrounds, ok := value.([]BackgroundElement); ok && len(backgrounds) > 0 {
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
+
+			for _, background := range backgrounds {
+				if value := background.cssStyle(session); value != "" {
+					if buffer.Len() > 0 {
+						buffer.WriteString(", ")
+					}
+					buffer.WriteString(value)
+				}
+			}
+
+			if buffer.Len() > 0 {
+				backgroundColor, _ := colorProperty(properties, BackgroundColor, session)
+				if backgroundColor != 0 {
+					buffer.WriteRune(' ')
+					buffer.WriteString(backgroundColor.cssString())
+				}
+				return buffer.String()
+			}
+		}
+	}
+	return ""
+}
+
+func maskCSS(properties Properties, session Session) string {
+
+	if value := properties.getRaw(Mask); value != nil {
+		if backgrounds, ok := value.([]BackgroundElement); ok && len(backgrounds) > 0 {
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
+
+			for _, background := range backgrounds {
+				if value := background.cssStyle(session); value != "" {
+					if buffer.Len() > 0 {
+						buffer.WriteString(", ")
+					}
+					buffer.WriteString(value)
+				}
+			}
+			return buffer.String()
+		}
+	}
+	return ""
+}
+
+func backgroundStyledPropery(view View, subviewID []string, tag PropertyName) []BackgroundElement {
+	var background []BackgroundElement = nil
+
+	if view = getSubview(view, subviewID); view != nil {
+		if value := view.getRaw(tag); value != nil {
+			if backgrounds, ok := value.([]BackgroundElement); ok {
+				background = backgrounds
+			}
+		} else if value := valueFromStyle(view, tag); value != nil {
+			background = parseBackgroundValue(value)
+		}
+	}
+
+	if count := len(background); count > 0 {
+		result := make([]BackgroundElement, count)
+		copy(result, background)
+		return result
+	}
+
+	return []BackgroundElement{}
+}
+
+// GetBackground returns the view background.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetBackground(view View, subviewID ...string) []BackgroundElement {
+	return backgroundStyledPropery(view, subviewID, Background)
+}
+
+// GetMask returns the view mask.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMask(view View, subviewID ...string) []BackgroundElement {
+	return backgroundStyledPropery(view, subviewID, Mask)
+}
+
+// GetBackgroundClip returns a "background-clip" of the subview. Returns one of next values:
+//
+// BorderBox (0), PaddingBox (1), ContentBox (2)
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetBackgroundClip(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, BackgroundClip, 0, false)
+}
+
+// GetBackgroundOrigin returns a "background-origin" of the subview. Returns one of next values:
+//
+// BorderBox (0), PaddingBox (1), ContentBox (2)
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetBackgroundOrigin(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, BackgroundOrigin, 0, false)
+}
+
+// GetMaskClip returns a "mask-clip" of the subview. Returns one of next values:
+//
+// BorderBox (0), PaddingBox (1), ContentBox (2)
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMaskClip(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, MaskClip, 0, false)
+}
+
+// GetMaskOrigin returns a "mask-origin" of the subview. Returns one of next values:
+//
+// BorderBox (0), PaddingBox (1), ContentBox (2)
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetMaskOrigin(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, MaskOrigin, 0, false)
 }

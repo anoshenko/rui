@@ -491,6 +491,9 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case Background:
 		session.updateCSSProperty(htmlID, string(Background), backgroundCSS(view, session))
 
+	case Mask:
+		session.updateCSSProperty(htmlID, "mask", maskCSS(view, session))
+
 	case Border, BorderLeft, BorderRight, BorderTop, BorderBottom:
 		cssWidth := ""
 		cssColor := ""

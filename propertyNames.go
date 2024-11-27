@@ -594,6 +594,21 @@ const (
 	// `string` - must contain text representation of background element(s) like in resource files.
 	Background PropertyName = "background"
 
+	// Mask is the constant for "mask" property tag.
+	//
+	// Used by `View`.
+	// Set one or more images and/or gradients as the view mask.
+	// As mask is used only alpha channel of images and/or gradients.
+	//
+	// Supported types: `BackgroundElement`, `[]BackgroundElement`, `string`.
+	//
+	// Internal type is `[]BackgroundElement`, other types converted to it during assignment.
+	// See `BackgroundElement` description for more details.
+	//
+	// Conversion rules:
+	// `string` - must contain text representation of background element(s) like in resource files.
+	Mask PropertyName = "mask"
+
 	// Cursor is the constant for "cursor" property tag.
 	//
 	// Used by `View`.
@@ -1824,6 +1839,45 @@ const (
 	// `1`(`PaddingBoxClip`) or "padding-box" - The background extends to the outer edge of the padding. No background is drawn below the border.
 	// `2`(`ContentBoxClip`) or "content-box" - The background is painted inside(clipped) of the content box.
 	BackgroundClip PropertyName = "background-clip"
+
+	// BackgroundOrigin is the constant for "background-origin" property tag.
+	//
+	// Used by `View`.
+	// Determines the background's origin: from the border start, inside the border, or inside the padding.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`BorderBox`) or "border-box" - The background is positioned relative to the border box.
+	// `1`(`PaddingBox`) or "padding-box" - The background is positioned relative to the padding box.
+	// `2`(`ContentBox`) or "content-box" - The background is positioned relative to the content box.
+	BackgroundOrigin PropertyName = "background-origin"
+
+	// MaskClip is the constant for "mask-clip" property tag.
+	//
+	// Used by `View`.
+	// Determines how image/gradient masks will be used below the box borders.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`BorderBox`) or "border-box" - The mask extends to the outer edge of the border.
+	// `1`(`PaddingBox`) or "padding-box" - The mask extends to the outer edge of the padding.
+	// `2`(`ContentBox`) or "content-box" - The mask is used inside(clipped) of the content box.
+	MaskClip PropertyName = "mask-clip"
+
+	// MaskOrigin is the constant for "mask-origin" property tag.
+	//
+	// Used by `View`.
+	// Determines the mask's origin: from the border start, inside the border, or inside the padding.
+	//
+	// Supported types: `int`, `string`.
+	//
+	// Values:
+	// `0`(`BorderBox`) or "border-box" - The mask is positioned relative to the border box.
+	// `1`(`PaddingBox`) or "padding-box" - The mask is positioned relative to the padding box.
+	// `2`(`ContentBox`) or "content-box" - The mask is positioned relative to the content box.
+	MaskOrigin PropertyName = "mask-origin"
 
 	// Gradient is the constant for "gradient" property tag.
 	//
