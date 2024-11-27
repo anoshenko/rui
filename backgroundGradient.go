@@ -653,6 +653,8 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 		buffer.WriteString(x.cssString("50%", session))
 		buffer.WriteString(" ")
 		buffer.WriteString(y.cssString("50%", session))
+	} else if shapeText != "" {
+		buffer.WriteString(shapeText)
 	}
 
 	buffer.WriteString(", ")
