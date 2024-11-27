@@ -72,6 +72,11 @@ func (point *BackgroundGradientAngle) color(session Session) (Color, bool) {
 
 		case Color:
 			return color, true
+
+		default:
+			if n, ok := isInt(color); ok {
+				return Color(n), true
+			}
 		}
 	}
 	return 0, false
