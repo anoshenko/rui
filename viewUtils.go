@@ -71,27 +71,14 @@ func SetParams(rootView View, viewID string, params Params) bool {
 }
 
 func getSubview(view View, subviewID []string) View {
-	switch len(subviewID) {
-	case 0:
-		// do nothing
-
-	case 1:
-		if subviewID[0] != "" {
-			view = ViewByID(view, subviewID[0])
-		}
-
-	default:
-		buffer := allocStringBuilder()
-		defer freeStringBuilder(buffer)
+	if view != nil {
 		for _, id := range subviewID {
 			if id != "" {
-				if buffer.Len() > 0 {
-					buffer.WriteRune('/')
+				if view = ViewByID(view, id); view == nil {
+					return nil
 				}
-				buffer.WriteString(id)
 			}
 		}
-		view = ViewByID(view, buffer.String())
 	}
 
 	return view
