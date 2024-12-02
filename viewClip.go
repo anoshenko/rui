@@ -461,6 +461,7 @@ func parseClipShape(obj DataObject) ClipShape {
 	switch obj.Tag() {
 	case "inset":
 		clip := new(insetClip)
+		clip.init()
 		for _, tag := range []string{Top, Right, Bottom, Left, Radius, RadiusX, RadiusY} {
 			if value, ok := obj.PropertyValue(tag); ok {
 				clip.Set(tag, value)
@@ -470,6 +471,7 @@ func parseClipShape(obj DataObject) ClipShape {
 
 	case "circle":
 		clip := new(ellipseClip)
+		clip.init()
 		for _, tag := range []string{X, Y, Radius} {
 			if value, ok := obj.PropertyValue(tag); ok {
 				clip.Set(tag, value)
@@ -479,6 +481,7 @@ func parseClipShape(obj DataObject) ClipShape {
 
 	case "ellipse":
 		clip := new(ellipseClip)
+		clip.init()
 		for _, tag := range []string{X, Y, RadiusX, RadiusY} {
 			if value, ok := obj.PropertyValue(tag); ok {
 				clip.Set(tag, value)
@@ -488,6 +491,7 @@ func parseClipShape(obj DataObject) ClipShape {
 
 	case "polygon":
 		clip := new(ellipseClip)
+		clip.init()
 		if value, ok := obj.PropertyValue(Points); ok {
 			clip.Set(Points, value)
 		}
