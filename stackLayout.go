@@ -937,7 +937,7 @@ func GetPushTiming(view View, subviewID ...string) string {
 	return "easy"
 }
 
-// GetTransform returns the start transform (translation, scale and rotation over x, y and z axes as well as a distortion)
+// GetPushTransform returns the start transform (translation, scale and rotation over x, y and z axes as well as a distortion)
 // for an animated pushing of a child view.
 // The default value is nil (no transform).
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.

@@ -3,6 +3,8 @@ package rui
 // Get returns a value of the property with name "tag" of the "rootView" subview with "viewID" id value.
 // The type of return value depends on the property.
 // If the subview don't exists or the property is not set then nil is returned.
+//
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is get
 func Get(rootView View, viewID string, tag PropertyName) any {
 	var view View
 	if viewID != "" {
@@ -17,8 +19,12 @@ func Get(rootView View, viewID string, tag PropertyName) any {
 }
 
 // Set sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
+//
 // true - success,
+//
 // false - error (incompatible type or invalid format of a string value, see AppLog).
+//
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is set
 func Set(rootView View, viewID string, tag PropertyName, value any) bool {
 	var view View
 	if viewID != "" {
@@ -33,7 +39,7 @@ func Set(rootView View, viewID string, tag PropertyName, value any) bool {
 }
 
 // SetChangeListener sets a listener for changing a subview property value.
-// If the second argument (subviewID) is not specified or it is "" then a listener for the first argument (view) is set
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is set
 func SetChangeListener(view View, viewID string, tag PropertyName, listener func(View, PropertyName)) {
 	if viewID != "" {
 		view = ViewByID(view, viewID)
@@ -542,111 +548,6 @@ func GetColumn(view View, subviewID ...string) Range {
 		}
 	}
 	return Range{}
-}
-
-// GetTransform returns a view transform:  translation, scale and rotation over x, y and z axes as well as a distortion of a view along x and y axes.
-// The default value is nil (no transform)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTransform(view View, subviewID ...string) TransformProperty {
-	return transformStyledProperty(view, subviewID, Transform)
-}
-
-// GetPerspective returns a distance between the z = 0 plane and the user in order to give a 3D-positioned
-// element some perspective. Each 3D element with z > 0 becomes larger; each 3D-element with z < 0 becomes smaller.
-// The default value is 0 (no 3D effects).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPerspective(view View, subviewID ...string) SizeUnit {
-	return sizeStyledProperty(view, subviewID, Perspective, false)
-}
-
-// GetPerspectiveOrigin returns a x- and y-coordinate of the position at which the viewer is looking.
-// It is used as the vanishing point by the Perspective property. The default value is (50%, 50%).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPerspectiveOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit) {
-	view = getSubview(view, subviewID)
-	if view == nil {
-		return AutoSize(), AutoSize()
-	}
-	return getPerspectiveOrigin(view, view.Session())
-}
-
-// GetBackfaceVisible returns a bool property that sets whether the back face of an element is
-// visible when turned towards the user. Values:
-// true - the back face is visible when turned towards the user (default value).
-// false - the back face is hidden, effectively making the element invisible when turned away from the user.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetBackfaceVisible(view View, subviewID ...string) bool {
-	return boolStyledProperty(view, subviewID, BackfaceVisible, false)
-}
-
-// GetTransformOrigin returns a x-, y-, and z-coordinate of the point around which a view transformation is applied.
-// The default value is (50%, 50%, 50%).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTransformOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
-	view = getSubview(view, subviewID)
-	if view == nil {
-		return AutoSize(), AutoSize(), AutoSize()
-	}
-	return getTransformOrigin(view, view.Session())
-}
-
-// GetTranslate returns a x-, y-, and z-axis translation value of a 2D/3D translation
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
-	view = getSubview(view, subviewID)
-	if view == nil {
-		return AutoSize(), AutoSize(), AutoSize()
-	}
-
-	session := view.Session()
-	x, _ := sizeProperty(view, TranslateX, session)
-	y, _ := sizeProperty(view, TranslateY, session)
-	z, _ := sizeProperty(view, TranslateZ, session)
-	return x, y, z
-}
-
-// GetSkew returns a angles to use to distort the element along the abscissa (x-axis)
-// and the ordinate (y-axis). The default value is 0.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit) {
-	view = getSubview(view, subviewID)
-	if view == nil {
-		return AngleUnit{Value: 0, Type: Radian}, AngleUnit{Value: 0, Type: Radian}
-	}
-	x, _ := angleProperty(view, SkewX, view.Session())
-	y, _ := angleProperty(view, SkewY, view.Session())
-	return x, y
-}
-
-// GetScale returns a x-, y-, and z-axis scaling value of a 2D/3D scale. The default value is 1.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetScale(view View, subviewID ...string) (float64, float64, float64) {
-	view = getSubview(view, subviewID)
-	if view == nil {
-		return 1, 1, 1
-	}
-
-	session := view.Session()
-	x, _ := floatProperty(view, ScaleX, session, 1)
-	y, _ := floatProperty(view, ScaleY, session, 1)
-	z, _ := floatProperty(view, ScaleZ, session, 1)
-	return x, y, z
-}
-
-// GetRotate returns a x-, y, z-coordinate of the vector denoting the axis of rotation, and the angle of the view rotation
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetRotate(view View, subviewID ...string) (float64, float64, float64, AngleUnit) {
-	view = getSubview(view, subviewID)
-	if view == nil {
-		return 0, 0, 0, AngleUnit{Value: 0, Type: Radian}
-	}
-
-	session := view.Session()
-	angle, _ := angleProperty(view, Rotate, view.Session())
-	rotateX, _ := floatProperty(view, RotateX, session, 1)
-	rotateY, _ := floatProperty(view, RotateY, session, 1)
-	rotateZ, _ := floatProperty(view, RotateZ, session, 1)
-	return rotateX, rotateY, rotateZ, angle
 }
 
 // GetAvoidBreak returns "true" if avoids any break from being inserted within the principal box,

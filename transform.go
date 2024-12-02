@@ -397,6 +397,8 @@ type TransformProperty interface {
 	fmt.Stringer
 	stringWriter
 	transformCSS(session Session) string
+	getSkew(session Session) (AngleUnit, AngleUnit, bool)
+	getTranslate(session Session) (SizeUnit, SizeUnit, SizeUnit)
 }
 
 type transformPropertyData struct {
@@ -562,13 +564,6 @@ func setTransformPropertyElement(properties Properties, tag, transformTag Proper
 	ErrorLogF(`"TransformProperty" interface does not support the "%s" property`, tag)
 	return nil
 }
-
-/*
-func getTransform3D(style Properties, session Session) bool {
-	perspective, ok := sizeProperty(style, Perspective, session)
-	return ok && perspective.Type != Auto && perspective.Value != 0
-}
-*/
 
 func getPerspectiveOrigin(style Properties, session Session) (SizeUnit, SizeUnit) {
 	x, _ := sizeProperty(style, PerspectiveOriginX, session)
@@ -766,54 +761,95 @@ func transformOriginCSS(x, y, z SizeUnit, session Session) string {
 	return buffer.String()
 }
 
-/*
-func (view *viewData) updateTransformProperty(tag PropertyName) bool {
-	htmlID := view.htmlID()
-	session := view.session
-
-	switch tag {
-	case PerspectiveOriginX, PerspectiveOriginY:
-		if getTransform3D(view, session) {
-			x, y := GetPerspectiveOrigin(view)
-			value := ""
-			if x.Type != Auto || y.Type != Auto {
-				value = x.cssString("50%", session) + " " + y.cssString("50%", session)
-			}
-			session.updateCSSProperty(htmlID, "perspective-origin", value)
-		}
-
-	case BackfaceVisible:
-		if getTransform3D(view, session) {
-			if GetBackfaceVisible(view) {
-				session.updateCSSProperty(htmlID, string(BackfaceVisible), "visible")
-			} else {
-				session.updateCSSProperty(htmlID, string(BackfaceVisible), "hidden")
-			}
-		}
-
-	case OriginX, OriginY, OriginZ:
-		x, y, z := getOrigin(view, session)
-		value := ""
-
-		if z.Type != Auto {
-			value = x.cssString("50%", session) + " " + y.cssString("50%", session) + " " + z.cssString("50%", session)
-		} else if x.Type != Auto || y.Type != Auto {
-			value = x.cssString("50%", session) + " " + y.cssString("50%", session)
-		}
-		session.updateCSSProperty(htmlID, "transform-origin", value)
-
-	case TransformTag, SkewX, SkewY, TranslateX, TranslateY, TranslateZ,
-		ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ:
-		if transform := getTransformProperty(view); transform != nil {
-			session.updateCSSProperty(htmlID, "transform", transform.transformCSS(session))
-		} else {
-			session.updateCSSProperty(htmlID, "transform", "")
-		}
-
-	default:
-		return false
-	}
-
-	return true
+// GetTransform returns a view transform:  translation, scale and rotation over x, y and z axes as well as a distortion of a view along x and y axes.
+// The default value is nil (no transform)
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTransform(view View, subviewID ...string) TransformProperty {
+	return transformStyledProperty(view, subviewID, Transform)
 }
-*/
+
+// GetPerspective returns a distance between the z = 0 plane and the user in order to give a 3D-positioned
+// element some perspective. Each 3D element with z > 0 becomes larger; each 3D-element with z < 0 becomes smaller.
+// The default value is 0 (no 3D effects).
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPerspective(view View, subviewID ...string) SizeUnit {
+	return sizeStyledProperty(view, subviewID, Perspective, false)
+}
+
+// GetPerspectiveOrigin returns a x- and y-coordinate of the position at which the viewer is looking.
+// It is used as the vanishing point by the Perspective property. The default value is (50%, 50%).
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetPerspectiveOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit) {
+	view = getSubview(view, subviewID)
+	if view == nil {
+		return AutoSize(), AutoSize()
+	}
+	return getPerspectiveOrigin(view, view.Session())
+}
+
+// GetBackfaceVisible returns a bool property that sets whether the back face of an element is
+// visible when turned towards the user. Values:
+// true - the back face is visible when turned towards the user (default value).
+// false - the back face is hidden, effectively making the element invisible when turned away from the user.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetBackfaceVisible(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, BackfaceVisible, false)
+}
+
+// GetTransformOrigin returns a x-, y-, and z-coordinate of the point around which a view transformation is applied.
+// The default value is (50%, 50%, 50%).
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTransformOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
+	view = getSubview(view, subviewID)
+	if view == nil {
+		return AutoSize(), AutoSize(), AutoSize()
+	}
+	return getTransformOrigin(view, view.Session())
+}
+
+// GetTranslate returns a x-, y-, and z-axis translation value of a 2D/3D translation
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
+	if transform := GetTransform(view, subviewID...); transform != nil {
+		return transform.getTranslate(view.Session())
+	}
+	return AutoSize(), AutoSize(), AutoSize()
+}
+
+// GetSkew returns a angles to use to distort the element along the abscissa (x-axis)
+// and the ordinate (y-axis). The default value is 0.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit) {
+	if transform := GetTransform(view, subviewID...); transform != nil {
+		x, y, _ := transform.getSkew(view.Session())
+		return x, y
+	}
+	return AngleUnit{Value: 0, Type: Radian}, AngleUnit{Value: 0, Type: Radian}
+}
+
+// GetScale returns a x-, y-, and z-axis scaling value of a 2D/3D scale. The default value is 1.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetScale(view View, subviewID ...string) (float64, float64, float64) {
+	if transform := GetTransform(view, subviewID...); transform != nil {
+		session := view.Session()
+		x, _ := floatProperty(transform, ScaleX, session, 1)
+		y, _ := floatProperty(transform, ScaleY, session, 1)
+		z, _ := floatProperty(transform, ScaleZ, session, 1)
+		return x, y, z
+	}
+	return 1, 1, 1
+}
+
+// GetRotate returns a x-, y, z-coordinate of the vector denoting the axis of rotation, and the angle of the view rotation
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetRotate(view View, subviewID ...string) (float64, float64, float64, AngleUnit) {
+	if transform := GetTransform(view, subviewID...); transform != nil {
+		session := view.Session()
+		angle, _ := angleProperty(transform, Rotate, view.Session())
+		rotateX, _ := floatProperty(transform, RotateX, session, 1)
+		rotateY, _ := floatProperty(transform, RotateY, session, 1)
+		rotateZ, _ := floatProperty(transform, RotateZ, session, 1)
+		return rotateX, rotateY, rotateZ, angle
+	}
+	return 0, 0, 0, AngleUnit{Value: 0, Type: Radian}
+}
