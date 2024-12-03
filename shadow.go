@@ -119,11 +119,11 @@ type shadowPropertyData struct {
 
 // NewShadow create the new shadow property for a view. Arguments:
 //
-// offsetX, offsetY is x and y offset of the shadow;
+// offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
-// blurRadius is the blur radius of the shadow;
+// blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
-// spreadRadius is the spread radius of the shadow;
+// spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
 // color is the color of the shadow.
 func NewShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64, spreadType SizeUnit | int | float64](
@@ -139,11 +139,11 @@ func NewShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int 
 
 // NewInsetShadow create the new inset shadow property for a view. Arguments:
 //
-// offsetX, offsetY is x and y offset of the shadow;
+// offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
-// blurRadius is the blur radius of the shadow;
+// blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
-// spreadRadius is the spread radius of the shadow;
+// spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
 // color is the color of the shadow.
 func NewInsetShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64, spreadType SizeUnit | int | float64](
@@ -160,9 +160,9 @@ func NewInsetShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit |
 
 // NewTextShadow create the new text shadow property. Arguments:
 //
-// offsetX, offsetY is the x- and y-offset of the shadow;
+// offsetX, offsetY is the x- and y-offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
-// blurRadius is the blur radius of the shadow;
+// blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
 //
 // color is the color of the shadow.
 func NewTextShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64](

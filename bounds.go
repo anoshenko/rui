@@ -35,6 +35,19 @@ func NewBoundsProperty(params Params) BoundsProperty {
 	return bounds
 }
 
+// NewBounds creates the new BoundsProperty object.
+// The arguments specify the boundaries in a clockwise direction: "top", "right", "bottom", and "left".
+// If the argument is specified as int or float64, the value is considered to be in pixels.
+func NewBounds[topType SizeUnit | int | float64, rightType SizeUnit | int | float64, bottomType SizeUnit | int | float64, leftType SizeUnit | int | float64](
+	top topType, right rightType, bottom bottomType, left leftType) BoundsProperty {
+	return NewBoundsProperty(Params{
+		Top:    top,
+		Right:  right,
+		Bottom: bottom,
+		Left:   left,
+	})
+}
+
 func (bounds *boundsPropertyData) init() {
 	bounds.dataProperty.init()
 	bounds.normalize = normalizeBoundsTag
