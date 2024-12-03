@@ -1,6 +1,7 @@
 # v0.18.0
 
 * Property name type changed from string to PropertyName. 
+
 * Renamed:
     Transform interface -> TransformProperty
     NewTransform function -> NewTransformProperty
@@ -17,7 +18,8 @@
     NewInsetViewShadow function -> NewInsetShadow
     NewShadowWithParams function -> NewShadowProperty
 
-* Added functions: NewBounds,  GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
+* Added functions: NewBounds, NewEllipticRadius, NewRadii, 
+GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
 GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin.
 
 * Changed Push, Pop, MoveToFront, and MoveToFrontByID methods of StackLayout interface.

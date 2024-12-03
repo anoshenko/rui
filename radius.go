@@ -226,7 +226,7 @@ const (
 	// See `SizeUnit` description for more details.
 	//
 	// Usage in `RadiusProperty`:
-	// Determines the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	// Determines the x-axis elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
 	//
@@ -247,7 +247,7 @@ const (
 	// See `SizeUnit` description for more details.
 	//
 	// Usage in `RadiusProperty`:
-	// Determines the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
+	// Determines the y-axis elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
 	//
@@ -403,17 +403,38 @@ type radiusPropertyData struct {
 }
 
 // NewRadiusProperty creates the new RadiusProperty
+// The following properties can be used:
+//
+// "x" (X) - Determines the x-axis elliptic rounding radius of an element's outer border edge.
+//
+// "y" (Y) - Determines the y-axis corner elliptic rounding radius of an element's outer border edge.
+//
+// "top-left" (TopLeft) - Determines the top-left corner rounding radius of an element's outer border edge.
+//
+// "top-left-x" (TopLeftX) - Determines the x-axis top-left corner elliptic rounding radius of an element's outer border edge.
+//
+// "top-left-y" (TopLeftY) - Determines the y-axis top-left corner elliptic rounding radius of an element's outer border edge.
+//
+// "top-right" (TopRight) -  Determines the top-right corner rounding radius of an element's outer border edge.
+//
+// "top-right-x" (TopRightX) - Determines the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
+//
+// "top-right-y" (TopRightY) - Determines the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
+//
+// "bottom-left" (BottomLeft) - Determines the bottom-left corner rounding radius of an element's outer border edge.
+//
+// "bottom-left-x" (BottomLeftX) - Determines the x-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
+//
+// "bottom-left-y" (BottomLeftY) -  Determines the y-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
+//
+// "bottom-right" (BottomRight) - Determines the bottom-right corner rounding radius of an element's outer border edge.
+//
+// "bottom-right-x" (BottomRightX) - Determines the x-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
+//
+// "bottom-right-y" (BottomRightY) - Determines the y-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
 func NewRadiusProperty(params Params) RadiusProperty {
 	result := new(radiusPropertyData)
-	result.dataProperty.init()
-	result.normalize = radiusPropertyNormalize
-	result.get = radiusPropertyGet
-	result.remove = radiusPropertyRemove
-	result.set = radiusPropertySet
-	result.supportedProperties = []PropertyName{
-		X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
-		TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY,
-	}
+	result.init()
 
 	if params != nil {
 		for _, tag := range result.supportedProperties {
@@ -425,9 +446,43 @@ func NewRadiusProperty(params Params) RadiusProperty {
 	return result
 }
 
+// NewRadiusProperty creates the new RadiusProperty which having the same elliptical radii for all angles.
+// Arguments determines the x- and y-axis elliptic rounding radius. if an argument is specified as int or float64, the value is considered to be in pixels
+func NewEllipticRadius[xType SizeUnit | int | float64, yType SizeUnit | int | float64](x xType, y yType) RadiusProperty {
+	return NewRadiusProperty(Params{
+		X: x,
+		Y: y,
+	})
+}
+
+// NewRadius creates the new RadiusProperty.
+// The arguments specify the radii in a clockwise direction: "top-right", "bottom-right", "bottom-left", and "top-left".
+// if an argument is specified as int or float64, the value is considered to be in pixels
+func NewRadii[topRightType SizeUnit | int | float64, bottomRightType SizeUnit | int | float64, bottomLeftType SizeUnit | int | float64, topLeftType SizeUnit | int | float64](
+	topRight topRightType, bottomRight bottomRightType, bottomLeft bottomLeftType, topLeft topLeftType) RadiusProperty {
+	return NewRadiusProperty(Params{
+		TopRight:    topRight,
+		BottomRight: bottomRight,
+		BottomLeft:  bottomLeft,
+		TopLeft:     topLeft,
+	})
+}
+
 func radiusPropertyNormalize(tag PropertyName) PropertyName {
 	name := strings.TrimPrefix(strings.ToLower(string(tag)), "radius-")
 	return PropertyName(name)
+}
+
+func (radius *radiusPropertyData) init() {
+	radius.dataProperty.init()
+	radius.normalize = radiusPropertyNormalize
+	radius.get = radiusPropertyGet
+	radius.remove = radiusPropertyRemove
+	radius.set = radiusPropertySet
+	radius.supportedProperties = []PropertyName{
+		X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
+		TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY,
+	}
 }
 
 func (radius *radiusPropertyData) writeString(buffer *strings.Builder, indent string) {

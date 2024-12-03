@@ -152,22 +152,6 @@ func (bounds *Bounds) setFromProperties(tag, topTag, rightTag, bottomTag, leftTa
 	}
 }
 
-/*
-func (bounds *Bounds) allFieldsAuto() bool {
-	return bounds.Left.Type == Auto &&
-		bounds.Top.Type == Auto &&
-		bounds.Right.Type == Auto &&
-		bounds.Bottom.Type == Auto
-}
-
-func (bounds *Bounds) allFieldsZero() bool {
-	return (bounds.Left.Type == Auto || bounds.Left.Value == 0) &&
-		(bounds.Top.Type == Auto || bounds.Top.Value == 0) &&
-		(bounds.Right.Type == Auto || bounds.Right.Value == 0) &&
-		(bounds.Bottom.Type == Auto || bounds.Bottom.Value == 0)
-}
-*/
-
 func (bounds *Bounds) allFieldsEqual() bool {
 	if bounds.Left.Type == bounds.Top.Type &&
 		bounds.Left.Type == bounds.Right.Type &&
@@ -180,20 +164,6 @@ func (bounds *Bounds) allFieldsEqual() bool {
 
 	return false
 }
-
-/*
-func (bounds Bounds) writeCSSString(buffer *strings.Builder, textForAuto string) {
-	buffer.WriteString(bounds.Top.cssString(textForAuto))
-	if !bounds.allFieldsEqual() {
-		buffer.WriteRune(' ')
-		buffer.WriteString(bounds.Right.cssString(textForAuto))
-		buffer.WriteRune(' ')
-		buffer.WriteString(bounds.Bottom.cssString(textForAuto))
-		buffer.WriteRune(' ')
-		buffer.WriteString(bounds.Left.cssString(textForAuto))
-	}
-}
-*/
 
 // String convert Bounds to string
 func (bounds *Bounds) String() string {
