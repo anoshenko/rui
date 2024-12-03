@@ -1,9 +1,22 @@
 # v0.18.0
 
+* Renamed:
+    Transform interface -> TransformProperty
+    NewTransform function -> NewTransformProperty
+    TransformTag constant -> Transform.
+    "origin-x" property -> "transform-origin-x"
+    "origin-y" property -> "transform-origin-y"
+    "origin-z" property -> "transform-origin-z"
+    GetOrigin function -> GetTransformOrigin.
+    BorderBoxClip constant -> BorderBox
+    PaddingBoxClip constant -> PaddingBox
+    ContentBoxClip constant -> ContentBox.
+    ViewShadow interface -> ShadowProperty
+    NewViewShadow function -> NewShadow
+    NewInsetViewShadow function -> NewInsetShadow
+    NewShadowWithParams function -> NewShadowProperty
+
 * Property name type changed from string to PropertyName. 
-* Transform interface renamed to TransformProperty. NewTransform function renamed to NewTransformProperty. TransformTag constant renamed to Transform. 
-* "origin-x", "origin-y", and "origin-z" properties renamed to "transform-origin-x", "transform-origin-y", and "transform-origin-z".
-* GetOrigin function renamed to GetTransformOrigin.
 * Changed Push, Pop, MoveToFront, and MoveToFrontByID methods of StackLayout interface.
 * Removed DefaultAnimation, StartToEndAnimation, EndToStartAnimation, TopDownAnimation, and BottomUpAnimation constants.
 * Added "push-transform", "push-duration", "push-timing", and "move-to-front-animation" StackLayout properties.
@@ -13,7 +26,6 @@
 * Added GetPushTransform, GetPushDuration, GetPushTiming, and IsMoveToFrontAnimation functions.
 * Added "mask", "mask-clip", "mask-origin", and "background-origin" properties.
 * Added GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, and GetMaskOrigin functions.
-* Renamed BorderBoxClip, PaddingBoxClip, and ContentBoxClip constants to BorderBox, PaddingBox, and ContentBox.
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
 * Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.
 

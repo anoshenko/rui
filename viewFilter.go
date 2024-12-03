@@ -47,17 +47,17 @@ const (
 	// Used by `ViewFilter`.
 	// Applies a drop shadow effect to the input image. A drop shadow is effectively a blurred, offset version of the input
 	// image's alpha mask drawn in a particular color, composited below the image. Shadow parameters are set using the
-	// `ViewShadow` interface.
+	// `ShadowProperty` interface.
 	//
-	// Supported types: `[]ViewShadow`, `ViewShadow`, `string`.
+	// Supported types: `[]ShadowProperty`, `ShadowProperty`, `string`.
 	//
-	// Internal type is `[]ViewShadow`, other types converted to it during assignment.
-	// See `ViewShadow` description for more details.
+	// Internal type is `[]ShadowProperty`, other types converted to it during assignment.
+	// See `ShadowProperty` description for more details.
 	//
 	// Conversion rules:
-	// `[]ViewShadow` - stored as is, no conversion performed.
-	// `ViewShadow` - converted to `[]ViewShadow`.
-	// `string` - string representation of `ViewShadow`. Example: "_{blur = 1em, color = black, spread-radius = 0.5em}".
+	// `[]ShadowProperty` - stored as is, no conversion performed.
+	// `ShadowProperty` - converted to `[]ShadowProperty`.
+	// `string` - string representation of `ShadowProperty`. Example: "_{blur = 1em, color = black, spread-radius = 0.5em}".
 	DropShadow PropertyName = "drop-shadow"
 
 	// Grayscale is the constant for "grayscale" property tag.

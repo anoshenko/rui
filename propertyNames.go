@@ -964,15 +964,15 @@ const (
 	// Adds shadow effects around a view's frame. A shadow is described by X and Y offsets relative to the element, blur,
 	// spread radius and color.
 	//
-	// Supported types: `ViewShadow`, `[]ViewShadow`, `string`.
+	// Supported types: `ShadowProperty`, `[]ShadowProperty`, `string`.
 	//
-	// Internal type is `[]ViewShadow`, other types converted to it during assignment.
-	// See `ViewShadow` description for more details.
+	// Internal type is `[]ShadowProperty`, other types converted to it during assignment.
+	// See `ShadowProperty` description for more details.
 	//
 	// Conversion rules:
-	// `[]ViewShadow` - stored as is. no conversion performed.
-	// `ViewShadow` - converted to `[]ViewShadow` during assignment.
-	// `string` - must contain a string representation of `ViewShadow`
+	// `[]ShadowProperty` - stored as is. no conversion performed.
+	// `ShadowProperty` - converted to `[]ShadowProperty` during assignment.
+	// `string` - must contain a string representation of `ShadowProperty`
 	Shadow PropertyName = "shadow"
 
 	// FontName is the constant for "font-name" property tag.
@@ -1178,15 +1178,15 @@ const (
 	// Used by `View`.
 	// Specify shadow for the text.
 	//
-	// Supported types: `ViewShadow`, `[]ViewShadow`, `string`.
+	// Supported types: `ShadowProperty`, `[]ShadowProperty`, `string`.
 	//
-	// Internal type is `[]ViewShadow`, other types converted to it during assignment.
-	// See `ViewShadow` description for more details.
+	// Internal type is `[]ShadowProperty`, other types converted to it during assignment.
+	// See `ShadowProperty` description for more details.
 	//
 	// Conversion rules:
-	// `[]ViewShadow` - stored as is. no conversion performed.
-	// `ViewShadow` - converted to `[]ViewShadow` during assignment.
-	// `string` - must contain a string representation of `ViewShadow`
+	// `[]ShadowProperty` - stored as is. no conversion performed.
+	// `ShadowProperty` - converted to `[]ShadowProperty` during assignment.
+	// `string` - must contain a string representation of `ShadowProperty`
 	TextShadow PropertyName = "text-shadow"
 
 	// TextWrap is the constant for "text-wrap" property tag.

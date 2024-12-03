@@ -1024,7 +1024,7 @@ equivalent to
 ### "shadow" property
 
 The "shadow" property allows you to set shadows for the View. There may be several shadows. 
-The shadow is described using the ViewShadow interface extending the Properties interface (see above). 
+The shadow is described using the ShadowProperty interface extending the Properties interface (see above). 
 The shadow has the following properties:
 
 | Property        | Constant      | Type     | Description                                                           |
@@ -1036,14 +1036,14 @@ The shadow has the following properties:
 | "blur"          | BlurRadius    | float    | Shadow blur radius. The value must be >= 0                            |
 | "spread-radius" | SpreadRadius  | float    | Increase the shadow. Value > 0 increases shadow, < 0 decreases shadow |
 
-Three functions are used to create a ViewShadow:
+Three functions are used to create a ShadowProperty:
 
-	func NewViewShadow(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ViewShadow
-	func NewInsetViewShadow(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ViewShadow
-	func NewShadowWithParams(params Params) ViewShadow
+	func NewShadowProperty(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ShadowProperty
+	func NewInsetShadowProperty(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ShadowProperty
+	func NewShadowWithParams(params Params) ShadowProperty
 
-The NewViewShadow function creates an outer shadow (Inset == false), 
-NewInsetViewShadow - an inner one (Inset == true).
+The NewShadowProperty function creates an outer shadow (Inset == false), 
+NewInsetShadowProperty - an inner one (Inset == true).
 The NewShadowWithParams function is used when constants must be used as parameters. 
 For example:
 
@@ -1053,16 +1053,16 @@ For example:
 		rui.Dilation  : 16.0,
 	})
 
-ViewShadow, ViewShadow array, and ViewShadow textual representation can be assigned as a value to the "shadow" property.
+ShadowProperty, ShadowProperty array, and ShadowProperty textual representation can be assigned as a value to the "shadow" property.
 
-The ViewShadow text representation has the following format:
+The ShadowProperty text representation has the following format:
 
 	_{ color = <color> [, x-offset = <offset>] [, y-offset = <offset>] [, blur = <radius>]
 		[, spread-radius = <increase>] [, inset = <type>] }
 
 You can get the value of "shadow" property using the function
 
-	func GetViewShadows(view View, subviewID ...string) []ViewShadow
+	func GetShadowPropertys(view View, subviewID ...string) []ShadowProperty
 
 If no shadow is specified, then this function will return an empty array
 
@@ -1425,7 +1425,7 @@ The argument lists the effects to apply. The following effects are possible:
 | "blur"        | Blur       | float64  0…10000px | Gaussian blur           |
 | "brightness"  | Brightness | float64  0…10000%  | Brightness change       |
 | "contrast"    | Contrast   | float64  0…10000%  | Contrast change         |
-| "drop-shadow" | DropShadow | []ViewShadow       | Adding shadow           |
+| "drop-shadow" | DropShadow | []ShadowProperty       | Adding shadow           |
 | "grayscale"   | Grayscale  | float64  0…100%    | Converting to grayscale |
 | "hue-rotate"  | HueRotate  | AngleUnit          | Hue rotation            |
 | "invert"      | Invert     | float64  0…100%    | Invert colors           |
@@ -1686,14 +1686,14 @@ You can get the value of this property using the function
 #### "text-shadow" property
 
 The "text-shadow" property allows you to set shadows for the text. There may be several shadows. 
-The shadow is described using the ViewShadow interface (see above, section "The 'shadow' property"). 
+The shadow is described using the ShadowProperty interface (see above, section "The 'shadow' property"). 
 For text shadow, only the "color", "x-offset", "y-offset" and "blur" properties are used. 
 The "inset" and "spread-radius" properties are ignored (i.e. setting them is not an error, they just have no effect on the text shadow).
 
-To create a ViewShadow for the text shadow, the following functions are used:
+To create a ShadowProperty for the text shadow, the following functions are used:
 
-	func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShadow
-	func NewShadowWithParams(params Params) ViewShadow
+	func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ShadowProperty
+	func NewShadowWithParams(params Params) ShadowProperty
 
 The NewShadowWithParams function is used when constants must be used as parameters. For example:
 
@@ -1702,11 +1702,11 @@ The NewShadowWithParams function is used when constants must be used as paramete
 		rui.BlurRadius: 8.0,
 	})
 
-ViewShadow, ViewShadow array, ViewShadow textual representation can be assigned as a value to the "text-shadow" property (see above, section "The 'shadow' property").
+ShadowProperty, ShadowProperty array, ShadowProperty textual representation can be assigned as a value to the "text-shadow" property (see above, section "The 'shadow' property").
 
 You can get the value of this property using the function
 
-	func GetTextShadows(view View, subviewID ...string) []ViewShadow
+	func GetTextShadows(view View, subviewID ...string) []ShadowProperty
 
 If no shadow is specified, then this function will return an empty array
 

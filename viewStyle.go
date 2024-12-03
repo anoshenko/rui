@@ -560,7 +560,7 @@ func supportedPropertyValue(value any) bool {
 	case int:
 	case stringWriter:
 	case fmt.Stringer:
-	case []ViewShadow:
+	case []ShadowProperty:
 	case []View:
 	case []any:
 	case []BackgroundElement:
@@ -671,7 +671,7 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 	case fmt.Stringer:
 		writeString(value.String())
 
-	case []ViewShadow:
+	case []ShadowProperty:
 		switch len(value) {
 		case 0:
 			// do nothing

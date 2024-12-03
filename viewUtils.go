@@ -203,6 +203,13 @@ func GetWidth(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, Width, false)
 }
 
+func SetWidth[T SizeUnit | float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](size T, view View, subviewID ...string) bool {
+	if view = getSubview(view, subviewID); view != nil {
+		return view.Set(Width, size)
+	}
+	return false
+}
+
 // GetHeight returns the subview height.
 // If the second argument (subviewID) is not specified or it is "" then a height of the first argument (view) is returned
 func GetHeight(view View, subviewID ...string) SizeUnit {
@@ -326,22 +333,22 @@ func GetOutlineOffset(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, OutlineOffset, false)
 }
 
-// GetViewShadows returns shadows of the subview.
+// GetShadowPropertys returns shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
-func GetViewShadows(view View, subviewID ...string) []ViewShadow {
+func GetShadowPropertys(view View, subviewID ...string) []ShadowProperty {
 	view = getSubview(view, subviewID)
 	if view == nil {
-		return []ViewShadow{}
+		return []ShadowProperty{}
 	}
 	return getShadows(view, Shadow)
 }
 
 // GetTextShadows returns text shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
-func GetTextShadows(view View, subviewID ...string) []ViewShadow {
+func GetTextShadows(view View, subviewID ...string) []ShadowProperty {
 	view = getSubview(view, subviewID)
 	if view == nil {
-		return []ViewShadow{}
+		return []ShadowProperty{}
 	}
 	return getShadows(view, TextShadow)
 }

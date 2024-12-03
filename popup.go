@@ -363,7 +363,7 @@ func (arrow *popupArrow) createView(popupView View) View {
 
 	params := Params{BackgroundColor: GetBackgroundColor(popupView)}
 
-	if shadow := GetViewShadows(popupView); shadow != nil {
+	if shadow := GetShadowPropertys(popupView); shadow != nil {
 		params[Shadow] = shadow
 	}
 
@@ -554,7 +554,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 		CellVerticalAlign:   StretchAlign,
 		CellHorizontalAlign: StretchAlign,
 		ClickEvent:          func(View) {},
-		Shadow: NewShadowWithParams(Params{
+		Shadow: NewShadowProperty(Params{
 			SpreadRadius: Px(4),
 			Blur:         Px(16),
 			ColorTag:     "@ruiPopupShadow",
