@@ -198,6 +198,24 @@ type Canvas interface {
 	//   stopPoints - the array of stop points
 	SetRadialGradientStrokeStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint)
 
+	// SetConicGradientFillStyle sets a conic gradient around a point
+	// to use inside shapes
+	//   x, y - coordinates of the center of the conic gradient in pilels;
+	//   startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
+	//   startColor - the start color;
+	//   endColor - the end color;
+	//   stopPoints - the array of stop points. The Pos field of GradientPoint, in the range from 0 to 1, specifies the angle in turns.
+	SetConicGradientFillStyle(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint)
+
+	// SetConicGradientFillStyle sets a conic gradient around a point
+	// to use inside shapes
+	//   x, y - coordinates of the center of the conic gradient in pilels;
+	//   startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
+	//   startColor - the start color;
+	//   endColor - the end color;
+	//   stopPoints - the array of stop points. The Pos field of GradientPoint, in the range from 0 to 1, specifies the angle in turns.
+	SetConicGradientStrokeStyle(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint)
+
 	// SetImageFillStyle set the image as the filling pattern.
 	//   repeat - indicating how to repeat the pattern's image. Possible values are:
 	//     NoRepeat (0) - neither direction,
@@ -462,6 +480,30 @@ func (canvas *canvasData) SetRadialGradientFillStyle(x0, y0, r0 float64, color0 
 
 func (canvas *canvasData) SetRadialGradientStrokeStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint) {
 	gradient := canvas.createRadialGradient(x0, y0, r0, color0, x1, y1, r1, color1, stopPoints)
+	canvas.session.updateCanvasProperty("strokeStyle", gradient)
+}
+
+func (canvas *canvasData) createConicGradient(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint) any {
+	gradient := canvas.session.createCanvasVar("createConicGradient", startAngle, x, y)
+	canvas.session.callCanvasVarFunc(gradient, "addColorStop", 0, startColor.cssString())
+
+	for _, point := range stopPoints {
+		if point.Offset >= 0 && point.Offset <= 1 {
+			canvas.session.callCanvasVarFunc(gradient, "addColorStop", point.Offset, point.Color.cssString())
+		}
+	}
+
+	canvas.session.callCanvasVarFunc(gradient, "addColorStop", 1, endColor.cssString())
+	return gradient
+}
+
+func (canvas *canvasData) SetConicGradientFillStyle(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint) {
+	gradient := canvas.createConicGradient(x, y, startAngle, startColor, endColor, stopPoints)
+	canvas.session.updateCanvasProperty("fillStyle", gradient)
+}
+
+func (canvas *canvasData) SetConicGradientStrokeStyle(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint) {
+	gradient := canvas.createConicGradient(x, y, startAngle, startColor, endColor, stopPoints)
 	canvas.session.updateCanvasProperty("strokeStyle", gradient)
 }
 
