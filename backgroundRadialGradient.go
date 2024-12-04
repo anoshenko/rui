@@ -79,7 +79,7 @@ func NewCircleRadialGradient[radiusType SizeUnit | RadialGradientRadiusType](xCe
 	return NewBackgroundRadialGradient(params)
 }
 
-// NewCircleRadialGradient creates the new background ellipse radial gradient.
+// NewEllipseRadialGradient creates the new background ellipse radial gradient.
 func NewEllipseRadialGradient[radiusType []SizeUnit | RadialGradientRadiusType](xCenter, yCenter SizeUnit, radius radiusType, repeating bool, point1 GradientPoint, point2 GradientPoint, points ...GradientPoint) BackgroundElement {
 	params := Params{
 		RadialGradientShape:  EllipseGradient,

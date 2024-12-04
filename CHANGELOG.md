@@ -18,9 +18,11 @@
     NewInsetViewShadow function -> NewInsetShadow
     NewShadowWithParams function -> NewShadowProperty
 
-* Added functions: NewBounds, NewEllipticRadius, NewRadii, 
-GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
+* Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
+NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
 GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin.
+
+* Added SetConicGradientFillStyle and SetConicGradientStrokeStyle methods to Canvas interface.
 
 * Changed Push, Pop, MoveToFront, and MoveToFrontByID methods of StackLayout interface.
 
