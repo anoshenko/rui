@@ -2,31 +2,33 @@ package rui
 
 import "strings"
 
+type LinearGradientDirectionType int
+
 // Constants related to view's background gradient description
 const (
 	// ToTopGradient is value of the Direction property of a linear gradient. The value is equivalent to the 0deg angle
-	ToTopGradient = 0
+	ToTopGradient LinearGradientDirectionType = 0
 
 	// ToRightTopGradient is value of the Direction property of a linear gradient.
-	ToRightTopGradient = 1
+	ToRightTopGradient LinearGradientDirectionType = 1
 
 	// ToRightGradient is value of the Direction property of a linear gradient. The value is equivalent to the 90deg angle
-	ToRightGradient = 2
+	ToRightGradient LinearGradientDirectionType = 2
 
 	// ToRightBottomGradient is value of the Direction property of a linear gradient.
-	ToRightBottomGradient = 3
+	ToRightBottomGradient LinearGradientDirectionType = 3
 
 	// ToBottomGradient is value of the Direction property of a linear gradient. The value is equivalent to the 180deg angle
-	ToBottomGradient = 4
+	ToBottomGradient LinearGradientDirectionType = 4
 
 	// ToLeftBottomGradient is value of the Direction property of a linear gradient.
-	ToLeftBottomGradient = 5
+	ToLeftBottomGradient LinearGradientDirectionType = 5
 
 	// ToLeftGradient is value of the Direction property of a linear gradient. The value is equivalent to the 270deg angle
-	ToLeftGradient = 6
+	ToLeftGradient LinearGradientDirectionType = 6
 
 	// ToLeftTopGradient is value of the Direction property of a linear gradient.
-	ToLeftTopGradient = 7
+	ToLeftTopGradient LinearGradientDirectionType = 7
 )
 
 // BackgroundGradientPoint define point on gradient straight line
@@ -47,7 +49,14 @@ type backgroundLinearGradient struct {
 	backgroundGradient
 }
 
-// NewBackgroundLinearGradient creates the new background linear gradient
+// NewBackgroundLinearGradient creates the new background linear gradient.
+// The following properties can be used:
+//
+// "gradient" (Gradient) - Describes gradient stop points. This is a mandatory property while describing background gradients.
+//
+// "direction" (Direction) - Defines the direction of the gradient line.
+//
+// "repeating" (Repeating) - Defines whether stop points needs to be repeated after the last one.
 func NewBackgroundLinearGradient(params Params) BackgroundElement {
 	result := new(backgroundLinearGradient)
 	result.init()
@@ -55,6 +64,18 @@ func NewBackgroundLinearGradient(params Params) BackgroundElement {
 		result.Set(tag, value)
 	}
 	return result
+}
+
+// NewLinearGradient creates the new background linear gradient.
+func NewLinearGradient[DirectionType LinearGradientDirectionType | AngleUnit](direction DirectionType, repeating bool, point1 GradientPoint, point2 GradientPoint, points ...GradientPoint) BackgroundElement {
+	params := Params{
+		Direction: direction,
+		Gradient:  append([]GradientPoint{point1, point2}, points...),
+	}
+	if repeating {
+		params[Repeating] = true
+	}
+	return NewBackgroundLinearGradient(params)
 }
 
 func parseGradientText(value string) []BackgroundGradientPoint {
@@ -289,7 +310,6 @@ func (gradient *backgroundLinearGradient) init() {
 	gradient.backgroundElement.init()
 	gradient.set = backgroundLinearGradientSet
 	gradient.supportedProperties = []PropertyName{Direction, Repeating, Gradient}
-
 }
 
 func (gradient *backgroundLinearGradient) Tag() string {
@@ -319,6 +339,9 @@ func backgroundLinearGradientSet(properties Properties, tag PropertyName, value 
 				properties.setRaw(Direction, angle)
 				return []PropertyName{tag}
 			}
+
+		case LinearGradientDirectionType:
+			return setEnumProperty(properties, tag, int(value), enumProperties[Direction].values)
 		}
 		return setEnumProperty(properties, tag, value, enumProperties[Direction].values)
 	}

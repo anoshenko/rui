@@ -2,6 +2,8 @@ package rui
 
 import "strings"
 
+type RadialGradientRadiusType int
+
 // Constants related to view's background gradient description
 const (
 	// EllipseGradient is value of the Shape property of a radial gradient background:
@@ -15,29 +17,40 @@ const (
 	// ClosestSideGradient is value of the Radius property of a radial gradient background:
 	// The gradient's ending shape meets the side of the box closest to its center (for circles)
 	// or meets both the vertical and horizontal sides closest to the center (for ellipses).
-	ClosestSideGradient = 0
+	ClosestSideGradient RadialGradientRadiusType = 0
 
 	// ClosestCornerGradient is value of the Radius property of a radial gradient background:
 	// The gradient's ending shape is sized so that it exactly meets the closest corner
 	// of the box from its center.
-	ClosestCornerGradient = 1
+	ClosestCornerGradient RadialGradientRadiusType = 1
 
 	// FarthestSideGradient is value of the Radius property of a radial gradient background:
 	// Similar to closest-side, except the ending shape is sized to meet the side of the box
 	// farthest from its center (or vertical and horizontal sides).
-	FarthestSideGradient = 2
+	FarthestSideGradient RadialGradientRadiusType = 2
 
 	// FarthestCornerGradient is value of the Radius property of a radial gradient background:
 	// The default value, the gradient's ending shape is sized so that it exactly meets
 	// the farthest corner of the box from its center.
-	FarthestCornerGradient = 3
+	FarthestCornerGradient RadialGradientRadiusType = 3
 )
 
 type backgroundRadialGradient struct {
 	backgroundGradient
 }
 
-// NewBackgroundRadialGradient creates the new background radial gradient
+// NewBackgroundRadialGradient creates the new background radial gradient.
+// The following properties can be used:
+//
+// "gradient" (Gradient) - Describes gradient stop points. This is a mandatory property while describing background gradients.
+//
+// "center-x" (CenterX), "center-y" (CenterY) - Defines the gradient center point cooordinates.
+//
+// "radial-gradient-radius" (RadialGradientRadius) - Defines radius of the radial gradient.
+//
+// "radial-gradient-shape" (RadialGradientShape) - Defines shape of the radial gradient.
+//
+// "repeating" (Repeating) - Defines whether stop points needs to be repeated after the last one.
 func NewBackgroundRadialGradient(params Params) BackgroundElement {
 	result := new(backgroundRadialGradient)
 	result.init()
@@ -45,6 +58,44 @@ func NewBackgroundRadialGradient(params Params) BackgroundElement {
 		result.Set(tag, value)
 	}
 	return result
+}
+
+// NewCircleRadialGradient creates the new background circle radial gradient.
+func NewCircleRadialGradient[radiusType SizeUnit | RadialGradientRadiusType](xCenter, yCenter SizeUnit, radius radiusType, repeating bool, point1 GradientPoint, point2 GradientPoint, points ...GradientPoint) BackgroundElement {
+	params := Params{
+		RadialGradientShape:  CircleGradient,
+		Gradient:             append([]GradientPoint{point1, point2}, points...),
+		RadialGradientRadius: radius,
+	}
+	if xCenter.Type != Auto {
+		params[CenterX] = xCenter
+	}
+	if yCenter.Type != Auto {
+		params[CenterY] = yCenter
+	}
+	if repeating {
+		params[Repeating] = true
+	}
+	return NewBackgroundRadialGradient(params)
+}
+
+// NewCircleRadialGradient creates the new background ellipse radial gradient.
+func NewEllipseRadialGradient[radiusType []SizeUnit | RadialGradientRadiusType](xCenter, yCenter SizeUnit, radius radiusType, repeating bool, point1 GradientPoint, point2 GradientPoint, points ...GradientPoint) BackgroundElement {
+	params := Params{
+		RadialGradientShape:  EllipseGradient,
+		Gradient:             append([]GradientPoint{point1, point2}, points...),
+		RadialGradientRadius: radius,
+	}
+	if xCenter.Type != Auto {
+		params[CenterX] = xCenter
+	}
+	if yCenter.Type != Auto {
+		params[CenterY] = yCenter
+	}
+	if repeating {
+		params[Repeating] = true
+	}
+	return NewBackgroundRadialGradient(params)
 }
 
 func (gradient *backgroundRadialGradient) init() {
@@ -143,6 +194,9 @@ func backgroundRadialGradientSet(properties Properties, tag PropertyName, value 
 				properties.setRaw(RadialGradientRadius, value)
 			}
 			return []PropertyName{tag}
+
+		case RadialGradientRadiusType:
+			return setEnumProperty(properties, RadialGradientRadius, int(value), enumProperties[RadialGradientRadius].values)
 
 		case int:
 			return setEnumProperty(properties, RadialGradientRadius, value, enumProperties[RadialGradientRadius].values)

@@ -143,6 +143,46 @@ func parseBackgroundValue(value any) []BackgroundElement {
 				return []BackgroundElement{element}
 			}
 		}
+
+	case []string:
+		elements := make([]BackgroundElement, 0, len(value))
+		for _, element := range value {
+			if obj := ParseDataText(element); obj != nil {
+				if element := createBackground(obj); element != nil {
+					elements = append(elements, element)
+				} else {
+					return nil
+				}
+			} else {
+				return nil
+			}
+		}
+		return elements
+
+	case []any:
+		elements := make([]BackgroundElement, 0, len(value))
+		for _, element := range value {
+			switch element := element.(type) {
+			case BackgroundElement:
+				elements = append(elements, element)
+
+			case string:
+				if obj := ParseDataText(element); obj != nil {
+					if element := createBackground(obj); element != nil {
+						elements = append(elements, element)
+					} else {
+						return nil
+					}
+				} else {
+					return nil
+				}
+
+			default:
+				return nil
+			}
+		}
+		return elements
+
 	}
 
 	return nil
