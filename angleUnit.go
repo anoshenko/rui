@@ -15,12 +15,16 @@ type AngleUnitType uint8
 const (
 	// Radian - angle in radians
 	Radian AngleUnitType = 0
+
 	// Radian - angle in radians * π
 	PiRadian AngleUnitType = 1
+
 	// Degree - angle in degrees
 	Degree AngleUnitType = 2
+
 	// Gradian - angle in gradian (1⁄400 of a full circle)
 	Gradian AngleUnitType = 3
+
 	// Turn - angle in turns (1 turn = 360 degree)
 	Turn AngleUnitType = 4
 )

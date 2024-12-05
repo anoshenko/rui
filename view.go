@@ -55,8 +55,8 @@ type View interface {
 	Scroll() Frame
 
 	// SetParams sets properties with name "tag" of the "rootView" subview. Result:
-	// * true - all properties were set successful,
-	// * false - error (incompatible type or invalid format of a string value, see AppLog).
+	//   - true - all properties were set successful,
+	//   - false - error (incompatible type or invalid format of a string value, see AppLog).
 	SetParams(params Params) bool
 
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.

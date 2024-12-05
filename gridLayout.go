@@ -9,70 +9,70 @@ import (
 const (
 	// CellVerticalAlign is the constant for "cell-vertical-align" property tag.
 	//
-	// Used by `GridLayout`, `SvgImageView`.
+	// Used by GridLayout, SvgImageView.
 	//
-	// Usage in `GridLayout`:
-	// Sets the default vertical alignment of `GridLayout` children within the cell they are occupying.
+	// Usage in GridLayout:
+	// Sets the default vertical alignment of GridLayout children within the cell they are occupying.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`TopAlign`) or "top" - Top alignment.
-	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Full height stretch.
+	//   - 0 (TopAlign) or "top" - Top alignment.
+	//   - 1 (BottomAlign) or "bottom" - Bottom alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Full height stretch.
 	//
-	// Usage in `SvgImageView`:
+	// Usage in SvgImageView:
 	// Same as "vertical-align".
 	CellVerticalAlign PropertyName = "cell-vertical-align"
 
 	// CellHorizontalAlign is the constant for "cell-horizontal-align" property tag.
 	//
-	// Used by `GridLayout`, `SvgImageView`.
+	// Used by GridLayout, SvgImageView.
 	//
-	// Usage in `GridLayout`:
-	// Sets the default horizontal alignment of `GridLayout` children within the occupied cell.
+	// Usage in GridLayout:
+	// Sets the default horizontal alignment of GridLayout children within the occupied cell.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`LeftAlign`) or "left" - Left alignment.
-	// `1`(`RightAlign`) or "right" - Right alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Full width stretch.
+	//   - 0 (LeftAlign) or "left" - Left alignment.
+	//   - 1 (RightAlign) or "right" - Right alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Full width stretch.
 	//
-	// Usage in `SvgImageView`:
+	// Usage in SvgImageView:
 	// Same as "horizontal-align".
 	CellHorizontalAlign PropertyName = "cell-horizontal-align"
 
 	// CellVerticalSelfAlign is the constant for "cell-vertical-self-align" property tag.
 	//
-	// Used by `GridLayout`.
-	// Sets the vertical alignment of `GridLayout` children within the cell they are occupying. The property is set for the
-	// child view of `GridLayout`.
+	// Used by GridLayout.
+	// Sets the vertical alignment of GridLayout children within the cell they are occupying. The property is set for the
+	// child view of GridLayout.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`TopAlign`) or "top" - Top alignment.
-	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Full height stretch.
+	//   - 0 (TopAlign) or "top" - Top alignment.
+	//   - 1 (BottomAlign) or "bottom" - Bottom alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Full height stretch.
 	CellVerticalSelfAlign PropertyName = "cell-vertical-self-align"
 
 	// CellHorizontalSelfAlign is the constant for "cell-horizontal-self-align" property tag.
 	//
-	// Used by `GridLayout`.
-	// Sets the horizontal alignment of `GridLayout` children within the occupied cell. The property is set for the child view
-	// of `GridLayout`.
+	// Used by GridLayout.
+	// Sets the horizontal alignment of GridLayout children within the occupied cell. The property is set for the child view
+	// of GridLayout.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`LeftAlign`) or "left" - Left alignment.
-	// `1`(`RightAlign`) or "right" - Right alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Full width stretch.
+	//   - 0 (LeftAlign) or "left" - Left alignment.
+	//   - 1 (RightAlign) or "right" - Right alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Full width stretch.
 	CellHorizontalSelfAlign PropertyName = "cell-horizontal-self-align"
 )
 

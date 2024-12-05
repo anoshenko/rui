@@ -8,32 +8,32 @@ import (
 const (
 	// VideoWidth is the constant for "video-width" property tag.
 	//
-	// Used by `VideoPlayer`.
+	// Used by VideoPlayer.
 	// Defines the width of the video's display area in pixels.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
 	// Values:
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	VideoWidth PropertyName = "video-width"
 
 	// VideoHeight is the constant for "video-height" property tag.
 	//
-	// Used by `VideoPlayer`.
+	// Used by VideoPlayer.
 	// Defines the height of the video's display area in pixels.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	VideoHeight PropertyName = "video-height"
 
 	// Poster is the constant for "poster" property tag.
 	//
-	// Used by `VideoPlayer`.
+	// Used by VideoPlayer.
 	// Defines an URL for an image to be shown while the video is downloading. If this attribute isn't specified, nothing is
 	// displayed until the first frame is available, then the first frame is shown as the poster frame.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	Poster PropertyName = "poster"
 )
 

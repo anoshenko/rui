@@ -6,32 +6,32 @@ import "strings"
 const (
 	// FocusEvent is the constant for "focus-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the view takes input focus.
 	//
 	// General listener format:
-	// `func(View)`.
+	//  func(rui.View).
 	//
 	// where:
 	// view - Interface of a view which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
+	//  func().
 	FocusEvent PropertyName = "focus-event"
 
 	// LostFocusEvent is the constant for "lost-focus-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the View lost input focus.
 	//
 	// General listener format:
-	// `func(view rui.View)`.
+	//  func(view rui.View).
 	//
 	// where:
 	// view - Interface of a view which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
+	//  func()
 	LostFocusEvent PropertyName = "lost-focus-event"
 )
 

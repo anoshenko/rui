@@ -1,7 +1,9 @@
 package rui
 
 // Get returns a value of the property with name "tag" of the "rootView" subview with "viewID" id value.
+//
 // The type of return value depends on the property.
+//
 // If the subview don't exists or the property is not set then nil is returned.
 //
 // If the second argument (subviewID) is "" then a listener for the first argument (view) is get
@@ -19,10 +21,8 @@ func Get(rootView View, viewID string, tag PropertyName) any {
 }
 
 // Set sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
-//
-// true - success,
-//
-// false - error (incompatible type or invalid format of a string value, see AppLog).
+//   - true - success,
+//   - false - error (incompatible type or invalid format of a string value, see AppLog).
 //
 // If the second argument (subviewID) is "" then a listener for the first argument (view) is set
 func Set(rootView View, viewID string, tag PropertyName, value any) bool {
@@ -39,6 +39,7 @@ func Set(rootView View, viewID string, tag PropertyName, value any) bool {
 }
 
 // SetChangeListener sets a listener for changing a subview property value.
+//
 // If the second argument (subviewID) is "" then a listener for the first argument (view) is set
 func SetChangeListener(view View, viewID string, tag PropertyName, listener func(View, PropertyName)) {
 	if viewID != "" {
@@ -50,8 +51,8 @@ func SetChangeListener(view View, viewID string, tag PropertyName, listener func
 }
 
 // SetParams sets properties with name "tag" of the "rootView" subview. Result:
-// true - all properties were set successful,
-// false - error (incompatible type or invalid format of a string value, see AppLog).
+//   - true - all properties were set successful,
+//   - false - error (incompatible type or invalid format of a string value, see AppLog).
 func SetParams(rootView View, viewID string, params Params) bool {
 	if viewID != "" {
 		rootView = ViewByID(rootView, viewID)

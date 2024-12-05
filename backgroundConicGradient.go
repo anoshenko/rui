@@ -19,6 +19,13 @@ type BackgroundGradientAngle struct {
 }
 
 // NewBackgroundConicGradient creates the new background conic gradient
+//
+// The following properties can be used:
+//   - "gradient" [Gradient] - Describes gradient stop points. This is a mandatory property while describing background gradients.
+//   - "center-x" [CenterX] - center X point of the gradient.
+//   - "center-y" [CenterY] - center Y point of the gradient.
+//   - "from" [From] - start angle position of the gradient.
+//   - "repeating" [Repeating] - Defines whether stop points needs to be repeated after the last one.
 func NewBackgroundConicGradient(params Params) BackgroundElement {
 	result := new(backgroundConicGradient)
 	result.init()

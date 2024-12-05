@@ -9,61 +9,61 @@ import (
 const (
 	// EditTextChangedEvent is the constant for "edit-text-changed" property tag.
 	//
-	// Used by `EditView`.
+	// Used by EditView.
 	// Occur when edit view text has been changed.
 	//
 	// General listener format:
-	// `func(editView rui.EditView, newText, oldText string)`.
+	//  func(editView rui.EditView, newText string, oldText string).
 	//
 	// where:
-	// editView - Interface of an edit view which generated this event,
-	// newText - New edit view text,
-	// oldText - Previous edit view text.
+	//   - editView - Interface of an edit view which generated this event,
+	//   - newText - New edit view text,
+	//   - oldText - Previous edit view text.
 	//
 	// Allowed listener formats:
-	// `func(editView rui.EditView, newText string)`,
-	// `func(newText, oldText string)`,
-	// `func(newText string)`,
-	// `func(editView rui.EditView)`,
-	// `func()`.
+	//   - func(editView rui.EditView, newText string)
+	//   - func(newText string, oldText string)
+	//   - func(newText string)
+	//   - func(editView rui.EditView)
+	//   - func()
 	EditTextChangedEvent PropertyName = "edit-text-changed"
 
 	// EditViewType is the constant for "edit-view-type" property tag.
 	//
-	// Used by `EditView`.
+	// Used by EditView.
 	// Type of the text input. Default value is "text".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`SingleLineText`) or "text" - One-line text editor.
-	// `1`(`PasswordText`) or "password" - Password editor. The text is hidden by asterisks.
-	// `2`(`EmailText`) or "email" - Single e-mail editor.
-	// `3`(`EmailsText`) or "emails" - Multiple e-mail editor.
-	// `4`(`URLText`) or "url" - Internet address input editor.
-	// `5`(`PhoneText`) or "phone" - Phone number editor.
-	// `6`(`MultiLineText`) or "multiline" - Multi-line text editor.
+	//   - 0 (SingleLineText) or "text" - One-line text editor.
+	//   - 1 (PasswordText) or "password" - Password editor. The text is hidden by asterisks.
+	//   - 2 (EmailText) or "email" - Single e-mail editor.
+	//   - 3 (EmailsText) or "emails" - Multiple e-mail editor.
+	//   - 4 (URLText) or "url" - Internet address input editor.
+	//   - 5 (PhoneText) or "phone" - Phone number editor.
+	//   - 6 (MultiLineText) or "multiline" - Multi-line text editor.
 	EditViewType PropertyName = "edit-view-type"
 
 	// EditViewPattern is the constant for "edit-view-pattern" property tag.
 	//
-	// Used by `EditView`.
+	// Used by EditView.
 	// Regular expression to limit editing of a text.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	EditViewPattern PropertyName = "edit-view-pattern"
 
 	// Spellcheck is the constant for "spellcheck" property tag.
 	//
-	// Used by `EditView`.
-	// Enable or disable spell checker. Available in `SingleLineText` and `MultiLineText` types of edit view. Default value is
-	// `false`.
+	// Used by EditView.
+	// Enable or disable spell checker. Available in SingleLineText and MultiLineText types of edit view. Default value is
+	// false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Enable spell checker for text.
-	// `false` or `0` or "false", "no", "off", "0" - Disable spell checker for text.
+	//   - true, 1, "true", "yes", "on", "1" - Enable spell checker for text.
+	//   - false, 0, "false", "no", "off", "0" - Disable spell checker for text.
 	Spellcheck PropertyName = "spellcheck"
 )
 

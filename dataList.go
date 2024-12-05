@@ -10,99 +10,88 @@ import (
 const (
 	// DataList is the constant for "data-list" property tag.
 	//
-	// Used by `ColorPicker`, `DatePicker`, `EditView`, `NumberPicker`, `TimePicker`.
+	// Used by ColorPicker, DatePicker, EditView, NumberPicker, TimePicker.
 	//
-	// Usage in `ColorPicker`:
+	// # Usage in ColorPicker
+	//
 	// List of pre-defined colors.
 	//
-	// Supported types: `[]string`, `string`, `[]fmt.Stringer`, `[]Color`, `[]SizeUnit`, `[]AngleUnit`, `[]any` containing
-	// elements of `string`, `fmt.Stringer`, `bool`, `rune`, `float32`, `float64`, `int`, `int8` … `int64`, `uint`, `uint8` …
-	// `uint64`.
+	// Supported types: []string, string, []fmt.Stringer, []Color, []any containing
+	// elements of string, fmt.Stringer, int, int8…int64, uint, uint8…uint64.
 	//
-	// Internal type is `[]string`, other types converted to it during assignment.
+	// Internal type is []string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - contain single item.
-	// `[]string` - an array of items.
-	// `[]fmt.Stringer` - an array of objects convertible to a string.
-	// `[]Color` - An array of color values which will be converted to a string array.
-	// `[]SizeUnit` - an array of size unit values which will be converted to a string array.
-	// `[]any` - this array must contain only types which were listed in Types section.
+	//   - string - contain single item.
+	//   - []string - an array of items.
+	//   - []fmt.Stringer - an array of objects convertible to a string.
+	//   - []Color - An array of color values which will be converted to a string array.
+	//   - []any - this array must contain only types which were listed in Types section.
 	//
-	// Usage in `DatePicker`:
+	// # Usage in DatePicker
+	//
 	// List of predefined dates. If we set this property, date picker may have a drop-down menu with a list of these values.
 	// Some browsers may ignore this property, such as Safari for macOS. The value of this property must be an array of
 	// strings in the format "YYYY-MM-DD".
 	//
-	// Supported types: `[]string`, `string`, `[]fmt.Stringer`, `[]Color`, `[]SizeUnit`, `[]AngleUnit`, `[]any` containing
-	// elements of `string`, `fmt.Stringer`, `bool`, `rune`, `float32`, `float64`, `int`, `int8` … `int64`, `uint`, `uint8` …
-	// `uint64`.
+	// Supported types: []string, string, []fmt.Stringer, []time.Time, []any containing elements of string, fmt.Stringer, time.Time.
 	//
-	// Internal type is `[]string`, other types converted to it during assignment.
+	// Internal type is []string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - contain single item.
-	// `[]string` - an array of items.
-	// `[]fmt.Stringer` - an array of objects convertible to a string.
-	// `[]Color` - An array of color values which will be converted to a string array.
-	// `[]SizeUnit` - an array of size unit values which will be converted to a string array.
-	// `[]any` - this array must contain only types which were listed in Types section.
+	//   - string - contain single item.
+	//   - []string - an array of items.
+	//   - []fmt.Stringer - an array of objects convertible to a string.
+	//   - []time.Time - an array of Time values which will be converted to a string array.
+	//   - []any - this array must contain only types which were listed in Types section.
 	//
-	// Usage in `EditView`:
+	// # Usage in EditView
+	//
 	// Array of recommended values.
 	//
-	// Supported types: `[]string`, `string`, `[]fmt.Stringer`, `[]Color`, `[]SizeUnit`, `[]AngleUnit`, `[]any` containing
-	// elements of `string`, `fmt.Stringer`, `bool`, `rune`, `float32`, `float64`, `int`, `int8` … `int64`, `uint`, `uint8` …
-	// `uint64`.
+	// Supported types: []string, string, []fmt.Stringer, and []any containing
+	// elements of string, fmt.Stringer, bool, rune, float32, float64, int, int8…int64, uint, uint8…uint64.
 	//
-	// Internal type is `[]string`, other types converted to it during assignment.
+	// Internal type is []string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - contain single item.
-	// `[]string` - an array of items.
-	// `[]fmt.Stringer` - an array of objects convertible to a string.
-	// `[]Color` - An array of color values which will be converted to a string array.
-	// `[]SizeUnit` - an array of size unit values which will be converted to a string array.
-	// `[]any` - this array must contain only types which were listed in Types section.
+	//   - string - contain single item.
+	//   - []string - an array of items.
+	//   - []fmt.Stringer - an array of objects convertible to a string.
+	//   - []any - this array must contain only types which were listed in Types section.
 	//
-	// Usage in `NumberPicker`:
+	// # Usage in NumberPicker
+	//
 	// Specify an array of recommended values.
 	//
-	// Supported types: `[]string`, `string`, `[]fmt.Stringer`, `[]Color`, `[]SizeUnit`, `[]AngleUnit`, `[]float`, `[]int`,
-	// `[]bool`, `[]any` containing elements of `string`, `fmt.Stringer`, `bool`, `rune`, `float32`, `float64`, `int`, `int8`
-	// … `int64`, `uint`, `uint8` … `uint64`.
+	// Supported types: []string, string, []fmt.Stringer, []float, []int, []bool, []any containing elements
+	// of string, fmt.Stringer, rune, float32, float64, int, int8…int64, uint, uint8…uint64.
 	//
-	// Internal type is `[]string`, other types converted to it during assignment.
+	// Internal type is []string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - must contain integer or floating point number, converted to `[]string`.
-	// `[]string` - an array of strings which must contain integer or floating point numbers, stored as is.
-	// `[]fmt.Stringer` - object which implement this interface must contain integer or floating point numbers, converted to a `[]string`.
-	// `[]Color` - an array of color values, converted to `[]string`.
-	// `[]SizeUnit` - an array of size unit, converted to `[]string`.
-	// `[]AngleUnit` - an array of angle unit, converted to `[]string`.
-	// `[]float` - converted to `[]string`.
-	// `[]int` - converted to `[]string`.
-	// `[]bool` - converted to `[]string`.
-	// `[]any` - an array which may contain types listed in Types section above, each value will be converted to a `string` and wrapped to array.
+	//   - string - must contain integer or floating point number, converted to []string.
+	//   - []string - an array of strings which must contain integer or floating point numbers, stored as is.
+	//   - []fmt.Stringer - object which implement this interface must contain integer or floating point numbers, converted to a []string.
+	//   - []float - converted to []string.
+	//   - []int - converted to []string.
+	//   - []any - an array which may contain types listed in Types section above, each value will be converted to a string and wrapped to array.
 	//
-	// Usage in `TimePicker`:
+	// # Usage in TimePicker
+	//
 	// An array of recommended values. The value of this property must be an array of strings in the format "HH:MM:SS" or
 	// "HH:MM".
 	//
-	// Supported types: `[]string`, `string`, `[]fmt.Stringer`, `[]Color`, `[]SizeUnit`, `[]AngleUnit`, `[]any` containing
-	// elements of `string`, `fmt.Stringer`, `bool`, `rune`, `float32`, `float64`, `int`, `int8` … `int64`, `uint`, `uint8` …
-	// `uint64`.
+	// Supported types: []string, string, []fmt.Stringer, []time.Time, []any containing elements of string, fmt.Stringer, time.Time.
 	//
-	// Internal type is `[]string`, other types converted to it during assignment.
+	// Internal type is []string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - contain single item.
-	// `[]string` - an array of items.
-	// `[]fmt.Stringer` - an array of objects convertible to a string.
-	// `[]Color` - An array of color values which will be converted to a string array.
-	// `[]SizeUnit` - an array of size unit values which will be converted to a string array.
-	// `[]any` - this array must contain only types which were listed in Types section.
+	//   - string - contain single item.
+	//   - []string - an array of items.
+	//   - []fmt.Stringer - an array of objects convertible to a string.
+	//   - []time.Time - An array of Time values which will be converted to a string array.
+	//   - []any - this array must contain only types which were listed in Types section.
 	DataList PropertyName = "data-list"
 )
 

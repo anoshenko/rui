@@ -11,84 +11,86 @@ import (
 const (
 	// NumberChangedEvent is the constant for "number-changed" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set listener(s) that track the change in the entered value.
 	//
 	// General listener format:
-	// `func(picker rui.NumberPicker, newValue, oldValue float64)`.
+	//
+	//  func(picker rui.NumberPicker, newValue float64, oldValue float64)
 	//
 	// where:
-	// picker - Interface of a number picker which generated this event,
-	// newValue - New value,
-	// oldValue - Old Value.
+	//   - picker - Interface of a number picker which generated this event,
+	//   - newValue - New value,
+	//   - oldValue - Old Value.
 	//
 	// Allowed listener formats:
-	// `func(picker rui.NumberPicker, newValue float64)`,
-	// `func(newValue, oldValue float64)`,
-	// `func(newValue float64)`,
-	// `func()`.
+	//
+	//  func(picker rui.NumberPicker, newValue float64)
+	//  func(newValue float64, oldValue float64)
+	//  func(newValue float64)
+	//  func()
 	NumberChangedEvent PropertyName = "number-changed"
 
 	// NumberPickerType is the constant for "number-picker-type" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Sets the visual representation.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NumberEditor`) or "editor" - Displayed as an editor.
-	// `1`(`NumberSlider`) or "slider" - Displayed as a slider.
+	//   - 0 (NumberEditor) or "editor" - Displayed as an editor.
+	//   - 1 (NumberSlider) or "slider" - Displayed as a slider.
 	NumberPickerType PropertyName = "number-picker-type"
 
 	// NumberPickerMin is the constant for "number-picker-min" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set the minimum value. The default value is 0.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	NumberPickerMin PropertyName = "number-picker-min"
 
 	// NumberPickerMax is the constant for "number-picker-max" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set the maximum value. The default value is 1.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	NumberPickerMax PropertyName = "number-picker-max"
 
 	// NumberPickerStep is the constant for "number-picker-step" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set the value change step.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	NumberPickerStep PropertyName = "number-picker-step"
 
 	// NumberPickerValue is the constant for "number-picker-value" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Current value. The default value is 0.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	NumberPickerValue PropertyName = "number-picker-value"
 
 	// NumberPickerValue is the constant for "number-picker-value" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Precision of displaying fractional part in editor. The default value is 0 (not used).
 	//
-	// Supported types: `int`, `int8`...`int64`, `uint`, `uint8`...`uint64`, `string`.
+	// Supported types: int, int8...int64, uint, uint8...uint64, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	NumberPickerPrecision PropertyName = "number-picker-precision"
 )
 

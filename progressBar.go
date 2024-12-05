@@ -9,22 +9,22 @@ import (
 const (
 	// ProgressBarMax is the constant for "progress-max" property tag.
 	//
-	// Used by `ProgressBar`.
+	// Used by ProgressBar.
 	// Maximum value, default is 1.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	ProgressBarMax PropertyName = "progress-max"
 
 	// ProgressBarValue is the constant for "progress-value" property tag.
 	//
-	// Used by `ProgressBar`.
+	// Used by ProgressBar.
 	// Current value, default is 0.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	ProgressBarValue PropertyName = "progress-value"
 )
 

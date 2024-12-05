@@ -9,150 +9,166 @@ import (
 const (
 	// ClickEvent is the constant for "click-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the user clicks on the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	ClickEvent PropertyName = "click-event"
 
 	// DoubleClickEvent is the constant for "double-click-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the user double clicks on the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	DoubleClickEvent PropertyName = "double-click-event"
 
 	// MouseDown is the constant for "mouse-down" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a View when a pointing device button is pressed while the pointer is inside the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	MouseDown PropertyName = "mouse-down"
 
 	// MouseUp is the constant for "mouse-up" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a View when a button on a pointing device (such as a mouse or trackpad) is released while the pointer is
 	// located inside it. "mouse-up" events are the counterpoint to "mouse-down" events.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	MouseUp PropertyName = "mouse-up"
 
 	// MouseMove is the constant for "mouse-move" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a view when a pointing device(usually a mouse) is moved while the cursor's hotspot is inside it.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	MouseMove PropertyName = "mouse-move"
 
 	// MouseOut is the constant for "mouse-out" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a View when a pointing device (usually a mouse) is used to move the cursor so that it is no longer
 	// contained within the view or one of its children. "mouse-out" is also delivered to a view if the cursor enters a child
 	// view, because the child view obscures the visible area of the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	MouseOut PropertyName = "mouse-out"
 
 	// MouseOver is the constant for "mouse-over" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a View when a pointing device (such as a mouse or trackpad) is used to move the cursor onto the view or one
 	// of its child views.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	MouseOver PropertyName = "mouse-over"
 
 	// ContextMenuEvent is the constant for "context-menu-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the user calls the context menu by the right mouse clicking.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
 	ContextMenuEvent PropertyName = "context-menu-event"
 
 	// PrimaryMouseButton is a number of the main pressed button, usually the left button or the un-initialized state

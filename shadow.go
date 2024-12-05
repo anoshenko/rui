@@ -9,97 +9,101 @@ import (
 const (
 	// ColorTag is the constant for "color" property tag.
 	//
-	// Used by `ColumnSeparatorProperty`, `BorderProperty`, `OutlineProperty`, `ShadowProperty`.
+	// Used by ColumnSeparatorProperty, BorderProperty, OutlineProperty, ShadowProperty.
 	//
-	// Usage in `ColumnSeparatorProperty`:
+	// # Usage in ColumnSeparatorProperty
+	//
 	// Line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	//
-	// Usage in `BorderProperty`:
+	// # Usage in BorderProperty
+	//
 	// Border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	//
-	// Usage in `OutlineProperty`:
+	// # Usage in OutlineProperty
+	//
 	// Outline line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	//
-	// Usage in `ShadowProperty`:
+	// # Usage in ShadowProperty
+	//
 	// Color property of the shadow.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	ColorTag PropertyName = "color"
 
 	// Inset is the constant for "inset" property tag.
 	//
-	// Used by `ShadowProperty`.
+	// Used by ShadowProperty.
 	// Controls whether to draw shadow inside the frame or outside. Inset shadows are drawn inside the border(even transparent
 	// ones), above the background, but below content.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Drop shadow inside the frame(as if the content was depressed inside the box).
-	// `false` or `0` or "false", "no", "off", "0" - Shadow is assumed to be a drop shadow(as if the box were raised above the content).
+	//   - true, 1, "true", "yes", "on", "1" - Drop shadow inside the frame(as if the content was depressed inside the box).
+	//   - false, 0, "false", "no", "off", "0" - Shadow is assumed to be a drop shadow(as if the box were raised above the content).
 	Inset PropertyName = "inset"
 
 	// XOffset is the constant for "x-offset" property tag.
 	//
-	// Used by `ShadowProperty`.
+	// Used by ShadowProperty.
 	// Determines the shadow horizontal offset. Negative values place the shadow to the left of the element.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	XOffset PropertyName = "x-offset"
 
 	// YOffset is the constant for "y-offset" property tag.
 	//
-	// Used by `ShadowProperty`.
+	// Used by ShadowProperty.
 	// Determines the shadow vertical offset. Negative values place the shadow above the element.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	YOffset PropertyName = "y-offset"
 
 	// BlurRadius is the constant for "blur" property tag.
 	//
-	// Used by `ShadowProperty`.
+	// Used by ShadowProperty.
 	// Determines the radius of the blur effect. The larger this value, the bigger the blur, so the shadow becomes bigger and
 	// lighter. Negative values are not allowed.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	BlurRadius PropertyName = "blur"
 
 	// SpreadRadius is the constant for "spread-radius" property tag.
 	//
-	// Used by `ShadowProperty`.
+	// Used by ShadowProperty.
 	// Positive values will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	SpreadRadius PropertyName = "spread-radius"
 )
 
@@ -118,14 +122,10 @@ type shadowPropertyData struct {
 }
 
 // NewShadow create the new shadow property for a view. Arguments:
-//
-// offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// color is the color of the shadow.
+//   - offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - color is the color of the shadow.
 func NewShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64, spreadType SizeUnit | int | float64](
 	xOffset xOffsetType, yOffset yOffsetType, blurRadius blurType, spreadRadius spreadType, color Color) ShadowProperty {
 	return NewShadowProperty(Params{
@@ -138,14 +138,10 @@ func NewShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int 
 }
 
 // NewInsetShadow create the new inset shadow property for a view. Arguments:
-//
-// offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// color is the color of the shadow.
+//   - offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - color is the color of the shadow.
 func NewInsetShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64, spreadType SizeUnit | int | float64](
 	xOffset xOffsetType, yOffset yOffsetType, blurRadius blurType, spreadRadius spreadType, color Color) ShadowProperty {
 	return NewShadowProperty(Params{
@@ -159,12 +155,9 @@ func NewInsetShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit |
 }
 
 // NewTextShadow create the new text shadow property. Arguments:
-//
-// offsetX, offsetY is the x- and y-offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
-//
-// color is the color of the shadow.
+//   - offsetX, offsetY is the x- and y-offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - color is the color of the shadow.
 func NewTextShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64](
 	xOffset xOffsetType, yOffset yOffsetType, blurRadius blurType, color Color) ShadowProperty {
 	return NewShadowProperty(Params{
@@ -176,19 +169,14 @@ func NewTextShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | 
 }
 
 // NewShadowProperty create the new shadow property for a view.
+//
 // The following properties can be used:
-//
-// "color" (ColorTag). Determines the color of the shadow (Color);
-//
-// "x-offset" (XOffset). Determines the shadow horizontal offset (SizeUnit);
-//
-// "y-offset" (YOffset). Determines the shadow vertical offset (SizeUnit);
-//
-// "blur" (BlurRadius). Determines the radius of the blur effect (SizeUnit);
-//
-// "spread-radius" (SpreadRadius). Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
-//
-// "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
+//   - "color" (ColorTag). Determines the color of the shadow (Color);
+//   - "x-offset" (XOffset). Determines the shadow horizontal offset (SizeUnit);
+//   - "y-offset" (YOffset). Determines the shadow vertical offset (SizeUnit);
+//   - "blur" (BlurRadius). Determines the radius of the blur effect (SizeUnit);
+//   - "spread-radius" (SpreadRadius). Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
+//   - "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
 func NewShadowProperty(params Params) ShadowProperty {
 	shadow := new(shadowPropertyData)
 	shadow.init()

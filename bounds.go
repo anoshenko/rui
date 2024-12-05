@@ -20,6 +20,7 @@ type boundsPropertyData struct {
 }
 
 // NewBoundsProperty creates the new BoundsProperty object.
+//
 // The following SizeUnit properties can be used: "left" (Left), "right" (Right), "top" (Top), and "bottom" (Bottom).
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
@@ -36,7 +37,9 @@ func NewBoundsProperty(params Params) BoundsProperty {
 }
 
 // NewBounds creates the new BoundsProperty object.
+//
 // The arguments specify the boundaries in a clockwise direction: "top", "right", "bottom", and "left".
+//
 // If the argument is specified as int or float64, the value is considered to be in pixels.
 func NewBounds[topType SizeUnit | int | float64, rightType SizeUnit | int | float64, bottomType SizeUnit | int | float64, leftType SizeUnit | int | float64](
 	top topType, right rightType, bottom bottomType, left leftType) BoundsProperty {

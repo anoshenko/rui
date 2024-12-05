@@ -4,154 +4,155 @@ package rui
 const (
 	// TransitionRunEvent is the constant for "transition-run-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Is fired when a transition is first created, i.e. before any transition delay has begun.
 	//
 	// General listener format:
-	// `func(view rui.View, propertyName string)`.
+	//  func(view rui.View, propertyName rui.PropertyName).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// propertyName - Name of the property.
+	//   - view - Interface of a view which generated this event,
+	//   - propertyName - Name of the property.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(propertyName string)`,
-	// `func()`.
+	//  func(view rui.View),
+	//  func(propertyName rui.PropertyName)
+	//  func().
 	TransitionRunEvent PropertyName = "transition-run-event"
 
 	// TransitionStartEvent is the constant for "transition-start-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Is fired when a transition has actually started, i.e., after "delay" has ended.
 	//
 	// General listener format:
-	// `func(view rui.View, propertyName string)`.
+	//  func(view rui.View, propertyName rui.PropertyName).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// propertyName - Name of the property.
+	//   - view - Interface of a view which generated this event,
+	//   - propertyName - Name of the property.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(propertyName string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(propertyName rui.PropertyName)
+	//  func()
 	TransitionStartEvent PropertyName = "transition-start-event"
 
 	// TransitionEndEvent is the constant for "transition-end-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Is fired when a transition has completed.
 	//
 	// General listener format:
-	// `func(view rui.View, propertyName string)`.
+	//  func(view rui.View, propertyName rui.PropertyName).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// propertyName - Name of the property.
+	//   - view - Interface of a view which generated this event,
+	//   - propertyName - Name of the property.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(propertyName string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(propertyName rui.PropertyName)
+	//  func()
 	TransitionEndEvent PropertyName = "transition-end-event"
 
 	// TransitionCancelEvent is the constant for "transition-cancel-event" property tag.
 	//
-	// Used by `View`.
-	// Is fired when a transition is cancelled. The transition is cancelled when: * A new property transition has begun. * The
-	// "visibility" property is set to "gone". * The transition is stopped before it has run to completion, e.g. by moving the
-	// mouse off a hover-transitioning view.
+	// Used by View:
+	// Is fired when a transition is cancelled. The transition is cancelled when:
+	//   - A new property transition has begun.
+	//   - The "visibility" property is set to "gone".
+	//   - The transition is stopped before it has run to completion, e.g. by moving the mouse off a hover-transitioning view.
 	//
 	// General listener format:
-	// `func(view rui.View, propertyName string)`.
+	//  func(view rui.View, propertyName rui.PropertyName).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// propertyName - Name of the property.
+	//   - view - Interface of a view which generated this event,
+	//   - propertyName - Name of the property.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(propertyName string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(propertyName rui.PropertyName)
+	//  func()
 	TransitionCancelEvent PropertyName = "transition-cancel-event"
 
 	// AnimationStartEvent is the constant for "animation-start-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Fired when an animation has started. If there is an "animation-delay", this event will fire once the delay period has
 	// expired.
 	//
 	// General listener format:
-	// `func(view rui.View, animationId string)`.
+	//  func(view rui.View, animationId string).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// animationId - Id of the animation.
+	//   - view - Interface of a view which generated this event,
+	//   - animationId - Id of the animation.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(animationId string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(animationId string)
+	//  func()
 	AnimationStartEvent PropertyName = "animation-start-event"
 
 	// AnimationEndEvent is the constant for "animation-end-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Fired when an animation has completed. If the animation aborts before reaching completion, such as if the element is
 	// removed or the animation is removed from the element, the "animation-end-event" is not fired.
 	//
 	// General listener format:
-	// `func(view rui.View, animationId string)`.
+	//  func(view rui.View, animationId string).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// animationId - Id of the animation.
+	//   - view - Interface of a view which generated this event,
+	//   - animationId - Id of the animation.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(animationId string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(animationId string)
+	//  func()
 	AnimationEndEvent PropertyName = "animation-end-event"
 
 	// AnimationCancelEvent is the constant for "animation-cancel-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Fired when an animation unexpectedly aborts. In other words, any time it stops running without sending the
 	// "animation-end-event". This might happen when the animation-name is changed such that the animation is removed, or when
 	// the animating view is hidden. Therefore, either directly or because any of its containing views are hidden. The event
 	// is not supported by all browsers.
 	//
 	// General listener format:
-	// `func(view rui.View, animationId string)`.
+	//  func(view rui.View, animationId string).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// animationId - Id of the animation.
+	//   - view - Interface of a view which generated this event,
+	//   - animationId - Id of the animation.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(animationId string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(animationId string)
+	//  func()
 	AnimationCancelEvent PropertyName = "animation-cancel-event"
 
 	// AnimationIterationEvent is the constant for "animation-iteration-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View:
 	// Fired when an iteration of an animation ends, and another one begins. This event does not occur at the same time as the
 	// animation end event, and therefore does not occur for animations with an "iteration-count" of one.
 	//
 	// General listener format:
-	// `func(view rui.View, animationId string)`.
+	//  func(view rui.View, animationId string).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// animationId - Id of the animation.
+	//   - view - Interface of a view which generated this event,
+	//   - animationId - Id of the animation.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(animationId string)`,
-	// `func()`.
+	//  func(view rui.View)
+	//  func(animationId string)
+	//  func()
 	AnimationIterationEvent PropertyName = "animation-iteration-event"
 )
 

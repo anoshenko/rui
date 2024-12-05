@@ -9,201 +9,207 @@ import (
 const (
 	// Title is the constant for "title" property tag.
 	//
-	// Used by `Popup`, `TabsLayout`.
+	// Used by Popup, TabsLayout.
 	//
-	// Usage in `Popup`:
+	// Usage in Popup:
 	// Define the title.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	//
-	// Usage in `TabsLayout`:
-	// Set the title of the tab. The property is set for the child view of `TabsLayout`.
+	// Usage in TabsLayout:
+	// Set the title of the tab. The property is set for the child view of TabsLayout.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	Title = "title"
 
 	// TitleStyle is the constant for "title-style" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set popup title style. Default title style is "ruiPopupTitle".
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	TitleStyle PropertyName = "title-style"
 
 	// CloseButton is the constant for "close-button" property tag.
 	//
-	// Used by `Popup`.
-	// Controls whether a close button can be added to the popup. Default value is `false`.
+	// Used by Popup.
+	// Controls whether a close button can be added to the popup. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Close button will be added to a title bar of a window.
-	// `false` or `0` or "false", "no", "off", "0" - Popup without a close button.
+	//   - true, 1, "true", "yes", "on", "1" - Close button will be added to a title bar of a window.
+	//   - false, 0, "false", "no", "off", "0" - Popup without a close button.
 	CloseButton PropertyName = "close-button"
 
 	// OutsideClose is the constant for "outside-close" property tag.
 	//
-	// Used by `Popup`.
-	// Controls whether popup can be closed by clicking outside of the window. Default value is `false`.
+	// Used by Popup.
+	// Controls whether popup can be closed by clicking outside of the window. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Clicking outside the popup window will automatically call the `Dismiss()` method.
-	// `false` or `0` or "false", "no", "off", "0" - Clicking outside the popup window has no effect.
+	//   - true, 1, "true", "yes", "on", "1" - Clicking outside the popup window will automatically call the Dismiss() method.
+	//   - false, 0, "false", "no", "off", "0" - Clicking outside the popup window has no effect.
 	OutsideClose PropertyName = "outside-close"
 
 	// Buttons is the constant for "buttons" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Buttons that will be placed at the bottom of the popup.
 	//
-	// Supported types: `PopupButton`, `[]PopupButton`.
+	// Supported types: PopupButton, []PopupButton.
 	//
-	// Internal type is `[]PopupButton`, other types converted to it during assignment.
-	// See `PopupButton` description for more details.
+	// Internal type is []PopupButton, other types converted to it during assignment.
+	// See PopupButton description for more details.
 	Buttons PropertyName = "buttons"
 
 	// ButtonsAlign is the constant for "buttons-align" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the horizontal alignment of popup buttons.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`LeftAlign`) or "left" - Left alignment.
-	// `1`(`RightAlign`) or "right" - Right alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Width alignment.
+	//   - 0 (LeftAlign) or "left" - Left alignment.
+	//   - 1 (RightAlign) or "right" - Right alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Width alignment.
 	ButtonsAlign PropertyName = "buttons-align"
 
 	// DismissEvent is the constant for "dismiss-event" property tag.
 	//
-	// Used by `Popup`.
-	// Used to track the closing state of the `Popup`. It occurs after the `Popup` disappears from the screen.
+	// Used by Popup.
+	// Used to track the closing state of the Popup. It occurs after the Popup disappears from the screen.
 	//
 	// General listener format:
-	// `func(popup rui.Popup)`.
+	//
+	//  func(popup rui.Popup)
 	//
 	// where:
 	// popup - Interface of a popup which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
+	//
+	//  func()
 	DismissEvent PropertyName = "dismiss-event"
 
 	// Arrow is the constant for "arrow" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Add an arrow to popup. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneArrow`) or "none" - No arrow.
-	// `1`(`TopArrow`) or "top" - Arrow at the top side of the pop-up window.
-	// `2`(`RightArrow`) or "right" - Arrow on the right side of the pop-up window.
-	// `3`(`BottomArrow`) or "bottom" - Arrow at the bottom of the pop-up window.
-	// `4`(`LeftArrow`) or "left" - Arrow on the left side of the pop-up window.
+	//   - 0 (NoneArrow) or "none" - No arrow.
+	//   - 1 (TopArrow) or "top" - Arrow at the top side of the pop-up window.
+	//   - 2 (RightArrow) or "right" - Arrow on the right side of the pop-up window.
+	//   - 3 (BottomArrow) or "bottom" - Arrow at the bottom of the pop-up window.
+	//   - 4 (LeftArrow) or "left" - Arrow on the left side of the pop-up window.
 	Arrow PropertyName = "arrow"
 
 	// ArrowAlign is the constant for "arrow-align" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the horizontal alignment of the popup arrow. Default value is "center".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`TopAlign`/`LeftAlign`) or "top" - Top/left alignment.
-	// `1`(`BottomAlign`/`RightAlign`) or "bottom" - Bottom/right alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
+	//   - 0 (TopAlign/LeftAlign) or "top" - Top/left alignment.
+	//   - 1 (BottomAlign/RightAlign) or "bottom" - Bottom/right alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
 	ArrowAlign PropertyName = "arrow-align"
 
 	// ArrowSize is the constant for "arrow-size" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the size(length) of the popup arrow. Default value is 16px defined by @ruiArrowSize constant.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	ArrowSize PropertyName = "arrow-size"
 
 	// ArrowWidth is the constant for "arrow-width" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the width of the popup arrow. Default value is 16px defined by @ruiArrowWidth constant.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	ArrowWidth PropertyName = "arrow-width"
 
 	// ShowTransform is the constant for "show-transform" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Specify start translation, scale and rotation over x, y and z axes as well as a distortion
 	// for an animated Popup showing/hidding.
 	//
-	// Supported types: `TransformProperty`, `string`.
+	// Supported types: TransformProperty, string.
 	//
-	// See `TransformProperty` description for more details.
+	// See TransformProperty description for more details.
 	//
 	// Conversion rules:
-	// `TransformProperty` - stored as is, no conversion performed.
-	// `string` - string representation of `Transform` interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
+	//   - TransformProperty - stored as is, no conversion performed.
+	//   - string - string representation of Transform interface. Example:
+	//
+	//	"_{ translate-x = 10px, scale-y = 1.1}"
 	ShowTransform = "show-transform"
 
 	// ShowDuration is the constant for "show-duration" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Sets the length of time in seconds that a Popup show/hide animation takes to complete.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	ShowDuration = "show-duration"
 
 	// ShowTiming is the constant for "show-timing" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set how a Popup show/hide animation progresses through the duration of each cycle.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	//
 	// Values:
-	// "ease"(`EaseTiming`) - Speed increases towards the middle and slows down at the end.
-	// "ease-in"(`EaseInTiming`) - Speed is slow at first, but increases in the end.
-	// "ease-out"(`EaseOutTiming`) - Speed is fast at first, but decreases in the end.
-	// "ease-in-out"(`EaseInOutTiming`) - Speed is slow at first, but quickly increases and at the end it decreases again.
-	// "linear"(`LinearTiming`) - Constant speed.
+	//   - "ease" (EaseTiming) - Speed increases towards the middle and slows down at the end.
+	//   - "ease-in" (EaseInTiming) - Speed is slow at first, but increases in the end.
+	//   - "ease-out" (EaseOutTiming) - Speed is fast at first, but decreases in the end.
+	//   - "ease-in-out" (EaseInOutTiming) - Speed is slow at first, but quickly increases and at the end it decreases again.
+	//   - "linear" (LinearTiming) - Constant speed.
+	//   - "step(n)" (StepTiming(n int) function) - Timing function along stepCount stops along the transition, displaying each stop for equal lengths of time.
+	//   - "cubic-bezier(x1, y1, x2, y2)" (CubicBezierTiming(x1, y1, x2, y2 float64) function) - Cubic-Bezier curve timing function. x1 and x2 must be in the range [0, 1].
 	ShowTiming = "show-timing"
 
 	// ShowOpacity is the constant for "show-opacity" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// In [1..0] range sets the start opacity of Popup show animation (the finish animation opacity is 1).
 	// Opacity is the degree to which content behind the view is hidden, and is the opposite of transparency.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	ShowOpacity = "show-opacity"
 
 	// ArrowOffset is the constant for "arrow-offset" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the offset of the popup arrow.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	ArrowOffset PropertyName = "arrow-offset"
 
 	// NoneArrow is value of the popup "arrow" property: no arrow

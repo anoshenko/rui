@@ -129,15 +129,15 @@ type Canvas interface {
 	ClipPath(path Path)
 
 	// SetScale adds a scaling transformation to the canvas units horizontally and/or vertically.
-	//   x - scaling factor in the horizontal direction. A negative value flips pixels across
+	//   * x - scaling factor in the horizontal direction. A negative value flips pixels across
 	//       the vertical axis. A value of 1 results in no horizontal scaling;
-	//   y - scaling factor in the vertical direction. A negative value flips pixels across
+	//   * y - scaling factor in the vertical direction. A negative value flips pixels across
 	//       the horizontal axis. A value of 1 results in no vertical scaling.
 	SetScale(x, y float64)
 
 	// SetTranslation adds a translation transformation to the current matrix.
-	//   x - distance to move in the horizontal direction. Positive values are to the right, and negative to the left;
-	//   y - distance to move in the vertical direction. Positive values are down, and negative are up.
+	//   * x - distance to move in the horizontal direction. Positive values are to the right, and negative to the left;
+	//   * y - distance to move in the vertical direction. Positive values are down, and negative are up.
 	SetTranslation(x, y float64)
 
 	// SetRotation adds a rotation to the transformation matrix.
@@ -147,12 +147,13 @@ type Canvas interface {
 	// SetTransformation multiplies the current transformation with the matrix described by the arguments
 	// of this method. This lets you scale, rotate, translate (move), and skew the context.
 	// The transformation matrix is described by:
-	// ⎡ xScale xSkew  dx ⎤
-	// ⎢ ySkew  yScale dy ⎥
-	// ⎣   0      0     1 ⎦
-	//   xScale, yScale - horizontal and vertical scaling. A value of 1 results in no scaling;
-	//   xSkew, ySkew - horizontal and vertical skewing;
-	//   dx, dy - horizontal and vertical translation (moving).
+	//  ⎡ xScale xSkew  dx ⎤
+	//  ⎢ ySkew  yScale dy ⎥
+	//  ⎣   0      0     1 ⎦
+	// where
+	//   * xScale, yScale - horizontal and vertical scaling. A value of 1 results in no scaling;
+	//   * xSkew, ySkew - horizontal and vertical skewing;
+	//   * dx, dy - horizontal and vertical translation (moving).
 	SetTransformation(xScale, yScale, xSkew, ySkew, dx, dy float64)
 
 	// ResetTransformation resets the current transform to the identity matrix
@@ -165,63 +166,64 @@ type Canvas interface {
 	SetSolidColorStrokeStyle(color Color)
 
 	// SetLinearGradientFillStyle sets a gradient along the line connecting two given coordinates to use inside shapes
-	//   x0, y0 - coordinates of the start point;
-	//   x1, y1 - coordinates of the end point;
-	//   startColor, endColor - the start and end color
-	//   stopPoints - the array of stop points
+	//   * x0, y0 - coordinates of the start point;
+	//   * x1, y1 - coordinates of the end point;
+	//   * startColor, endColor - the start and end color
+	//   * stopPoints - the array of stop points
 	SetLinearGradientFillStyle(x0, y0 float64, color0 Color, x1, y1 float64, color1 Color, stopPoints []GradientPoint)
 
 	// SetLinearGradientStrokeStyle sets a gradient along the line connecting two given coordinates to use for the strokes (outlines) around shapes
-	//   x0, y0 - coordinates of the start point;
-	//   x1, y1 - coordinates of the end point;
-	//   color0, color1 - the start and end color
-	//   stopPoints - the array of stop points
+	//   * x0, y0 - coordinates of the start point;
+	//   * x1, y1 - coordinates of the end point;
+	//   * color0, color1 - the start and end color
+	//   * stopPoints - the array of stop points
 	SetLinearGradientStrokeStyle(x0, y0 float64, color0 Color, x1, y1 float64, color1 Color, stopPoints []GradientPoint)
 
 	// SetRadialGradientFillStyle sets a radial gradient using the size and coordinates of two circles
 	// to use inside shapes
-	//   x0, y0 - coordinates of the center of the start circle;
-	//   r0 - the radius of the start circle;
-	//   x1, y1 - coordinates the center of the end circle;
-	//   r1 - the radius of the end circle;
-	//   color0, color1 - the start and end color
-	//   stopPoints - the array of stop points
+	//   * x0, y0 - coordinates of the center of the start circle;
+	//   * r0 - the radius of the start circle;
+	//   * x1, y1 - coordinates the center of the end circle;
+	//   * r1 - the radius of the end circle;
+	//   * color0, color1 - the start and end color
+	//   * stopPoints - the array of stop points
 	SetRadialGradientFillStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint)
 
 	// SetRadialGradientStrokeStyle sets a radial gradient using the size and coordinates of two circles
 	// to use for the strokes (outlines) around shapes
-	//   x0, y0 - coordinates of the center of the start circle;
-	//   r0 - the radius of the start circle;
-	//   x1, y1 - coordinates the center of the end circle;
-	//   r1 - the radius of the end circle;
-	//   color0, color1 - the start and end color
-	//   stopPoints - the array of stop points
+	//   * x0, y0 - coordinates of the center of the start circle;
+	//   * r0 - the radius of the start circle;
+	//   * x1, y1 - coordinates the center of the end circle;
+	//   * r1 - the radius of the end circle;
+	//   * color0, color1 - the start and end color
+	//   * stopPoints - the array of stop points
 	SetRadialGradientStrokeStyle(x0, y0, r0 float64, color0 Color, x1, y1, r1 float64, color1 Color, stopPoints []GradientPoint)
 
 	// SetConicGradientFillStyle sets a conic gradient around a point
 	// to use inside shapes
-	//   x, y - coordinates of the center of the conic gradient in pilels;
-	//   startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
-	//   startColor - the start color;
-	//   endColor - the end color;
-	//   stopPoints - the array of stop points. The Pos field of GradientPoint, in the range from 0 to 1, specifies the angle in turns.
+	//   * x, y - coordinates of the center of the conic gradient in pilels;
+	//   * startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
+	//   * startColor - the start color;
+	//   * endColor - the end color;
+	//   * stopPoints - the array of stop points. The Pos field of GradientPoint, in the range from 0 to 1, specifies the angle in turns.
 	SetConicGradientFillStyle(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint)
 
 	// SetConicGradientFillStyle sets a conic gradient around a point
 	// to use inside shapes
-	//   x, y - coordinates of the center of the conic gradient in pilels;
-	//   startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
-	//   startColor - the start color;
-	//   endColor - the end color;
-	//   stopPoints - the array of stop points. The Pos field of GradientPoint, in the range from 0 to 1, specifies the angle in turns.
+	//   * x, y - coordinates of the center of the conic gradient in pilels;
+	//   * startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
+	//   * startColor - the start color;
+	//   * endColor - the end color;
+	//   * stopPoints - the array of stop points. The Pos field of GradientPoint, in the range from 0 to 1, specifies the angle in turns.
 	SetConicGradientStrokeStyle(x, y, startAngle float64, startColor, endColor Color, stopPoints []GradientPoint)
 
 	// SetImageFillStyle set the image as the filling pattern.
-	//   repeat - indicating how to repeat the pattern's image. Possible values are:
-	//     NoRepeat (0) - neither direction,
-	//     RepeatXY (1) - both directions,
-	//     RepeatX (2) - horizontal only,
-	//     RepeatY (3) - vertical only.
+	//
+	// repeat - indicating how to repeat the pattern's image. Possible values are:
+	//   * NoRepeat (0) - neither direction,
+	//   * RepeatXY (1) - both directions,
+	//   * RepeatX (2) - horizontal only,
+	//   * RepeatY (3) - vertical only.
 	SetImageFillStyle(image Image, repeat int)
 
 	// SetLineWidth the line width, in coordinate space units. Zero, negative, Infinity, and NaN values are ignored.
@@ -258,9 +260,9 @@ type Canvas interface {
 	SetTextAlign(align int)
 
 	// SetShadow sets shadow parameters:
-	//   offsetX, offsetY - the distance that shadows will be offset horizontally and vertically;
-	//   blur - the amount of blur applied to shadows. Must be non-negative;
-	//   color - the color of shadows.
+	//   * offsetX, offsetY - the distance that shadows will be offset horizontally and vertically;
+	//   * blur - the amount of blur applied to shadows. Must be non-negative;
+	//   * color - the color of shadows.
 	SetShadow(offsetX, offsetY, blur float64, color Color)
 
 	// ResetShadow sets shadow parameters to default values (invisible shadow)
@@ -292,10 +294,10 @@ type Canvas interface {
 	FillAndStrokeRoundedRect(x, y, width, height, r float64)
 
 	// FillEllipse draws a ellipse that is filled according to the current FillStyle.
-	//   x, y - coordinates of the ellipse's center;
-	//   radiusX - the ellipse's major-axis radius. Must be non-negative;
-	//   radiusY - the ellipse's minor-axis radius. Must be non-negative;
-	//   rotation - the rotation of the ellipse, expressed in radians.
+	//   * x, y - coordinates of the ellipse's center;
+	//   * radiusX - the ellipse's major-axis radius. Must be non-negative;
+	//   * radiusY - the ellipse's minor-axis radius. Must be non-negative;
+	//   * rotation - the rotation of the ellipse, expressed in radians.
 	FillEllipse(x, y, radiusX, radiusY, rotation float64)
 
 	// StrokeRoundedRect draws a ellipse that is stroked (outlined) according

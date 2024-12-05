@@ -10,77 +10,86 @@ import (
 const (
 	// ListItemClickedEvent is the constant for "list-item-clicked" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Occur when the user clicks on an item in the list.
 	//
 	// General listener format:
-	// `func(list rui.ListView, item int)`.
+	//
+	//  func(list rui.ListView, item int)
 	//
 	// where:
-	// list - Interface of a list which generated this event,
-	// item - An index of an item clicked.
+	//   - list - Interface of a list which generated this event,
+	//   - item - An index of an item clicked.
 	//
 	// Allowed listener formats:
-	// `func(item int)`,
-	// `func(list rui.ListView)`,
-	// `func()`.
+	//
+	//  func(item int)
+	//  func(list rui.ListView)
+	//  func()
 	ListItemClickedEvent PropertyName = "list-item-clicked"
 
 	// ListItemSelectedEvent is the constant for "list-item-selected" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Occur when a list item becomes selected.
 	//
 	// General listener format:
-	// `func(list rui.ListView, item int)`.
+	//
+	//  func(list rui.ListView, item int)
 	//
 	// where:
-	// list - Interface of a list which generated this event,
-	// item - An index of an item selected.
+	//   - list - Interface of a list which generated this event,
+	//   - item - An index of an item selected.
 	//
 	// Allowed listener formats:
+	//
+	//  func(item int)
+	//  func(list rui.ListView)
+	//  func()
 	ListItemSelectedEvent PropertyName = "list-item-selected"
 
 	// ListItemCheckedEvent is the constant for "list-item-checked" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Occur when a list item checkbox becomes checked or unchecked.
 	//
 	// General listener format:
-	// `func(list rui.ListView, checkedItems []int)`.
+	//
+	//  func(list rui.ListView, checkedItems []int).
 	//
 	// where:
-	// list - Interface of a list which generated this event,
-	// checkedItems - Array of indices of marked elements.
+	//   - list - Interface of a list which generated this event,
+	//   - checkedItems - Array of indices of marked elements.
 	//
 	// Allowed listener formats:
-	// `func(checkedItems []int)`,
-	// `func(list rui.ListView)`,
-	// `func()`.
+	//
+	//  func(checkedItems []int)
+	//  func(list rui.ListView)
+	//  func()
 	ListItemCheckedEvent PropertyName = "list-item-checked"
 
 	// ListItemStyle is the constant for "list-item-style" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Defines the style of an unselected item.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	ListItemStyle PropertyName = "list-item-style"
 
 	// CurrentStyle is the constant for "current-style" property tag.
 	//
-	// Used by `ListView`.
-	// Defines the style of the selected item when the `ListView` is focused.
+	// Used by ListView.
+	// Defines the style of the selected item when the ListView is focused.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	CurrentStyle PropertyName = "current-style"
 
 	// CurrentInactiveStyle is the constant for "current-inactive-style" property tag.
 	//
-	// Used by `ListView`.
-	// Defines the style of the selected item when the `ListView` is unfocused.
+	// Used by ListView.
+	// Defines the style of the selected item when the ListView is unfocused.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	CurrentInactiveStyle PropertyName = "current-inactive-style"
 )
 

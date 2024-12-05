@@ -17,10 +17,11 @@
     NewViewShadow function -> NewShadow
     NewInsetViewShadow function -> NewInsetShadow
     NewShadowWithParams function -> NewShadowProperty
+    NewColumnSeparator function -> NewColumnSeparatorProperty
 
 * Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
 NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
-GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin.
+GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin, NewColumnSeparator.
 
 * Added SetConicGradientFillStyle and SetConicGradientStrokeStyle methods to Canvas interface.
 

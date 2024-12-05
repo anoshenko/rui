@@ -6,36 +6,24 @@ import (
 
 const (
 	// BorderBox is the value of the following properties:
-	//
-	// * BackgroundClip - The background extends to the outside edge of the border (but underneath the border in z-ordering).
-	//
-	// * BackgroundOrigin - The background is positioned relative to the border box.
-	//
-	// * MaskClip - The painted content is clipped to the border box.
-	//
-	// * MaskOrigin - The mask is positioned relative to the border box.
+	//   - BackgroundClip - The background extends to the outside edge of the border (but underneath the border in z-ordering).
+	//   - BackgroundOrigin - The background is positioned relative to the border box.
+	//   - MaskClip - The painted content is clipped to the border box.
+	//   - MaskOrigin - The mask is positioned relative to the border box.
 	BorderBox = 0
 
 	// PaddingBox is value of the BackgroundClip and MaskClip property:
-	//
-	// * BackgroundClip - The background extends to the outside edge of the padding. No background is drawn beneath the border.
-	//
-	// * BackgroundOrigin - The background is positioned relative to the padding box.
-	//
-	// * MaskClip - The painted content is clipped to the padding box.
-	//
-	// * MaskOrigin - The mask is positioned relative to the padding box.
+	//   - BackgroundClip - The background extends to the outside edge of the padding. No background is drawn beneath the border.
+	//   - BackgroundOrigin - The background is positioned relative to the padding box.
+	//   - MaskClip - The painted content is clipped to the padding box.
+	//   - MaskOrigin - The mask is positioned relative to the padding box.
 	PaddingBox = 1
 
 	// ContentBox is value of the BackgroundClip and MaskClip property:
-	//
-	// * BackgroundClip - The background is painted within (clipped to) the content box.
-	//
-	// * BackgroundOrigin - The background is positioned relative to the content box.
-	//
-	// * MaskClip - The painted content is clipped to the content box.
-	//
-	// * MaskOrigin - The mask is positioned relative to the content box.
+	//   - BackgroundClip - The background is painted within (clipped to) the content box.
+	//   - BackgroundOrigin - The background is positioned relative to the content box.
+	//   - MaskClip - The painted content is clipped to the content box.
+	//   - MaskOrigin - The mask is positioned relative to the content box.
 	ContentBox = 2
 )
 
@@ -58,7 +46,6 @@ type backgroundElement struct {
 	dataProperty
 }
 
-// NewBackgroundImage creates the new background image
 func createBackground(obj DataObject) BackgroundElement {
 	var result BackgroundElement = nil
 
@@ -280,12 +267,14 @@ func backgroundStyledPropery(view View, subviewID []string, tag PropertyName) []
 }
 
 // GetBackground returns the view background.
+//
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetBackground(view View, subviewID ...string) []BackgroundElement {
 	return backgroundStyledPropery(view, subviewID, Background)
 }
 
 // GetMask returns the view mask.
+//
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMask(view View, subviewID ...string) []BackgroundElement {
 	return backgroundStyledPropery(view, subviewID, Mask)
@@ -293,7 +282,7 @@ func GetMask(view View, subviewID ...string) []BackgroundElement {
 
 // GetBackgroundClip returns a "background-clip" of the subview. Returns one of next values:
 //
-// BorderBox (0), PaddingBox (1), ContentBox (2)
+//	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetBackgroundClip(view View, subviewID ...string) int {
@@ -302,7 +291,7 @@ func GetBackgroundClip(view View, subviewID ...string) int {
 
 // GetBackgroundOrigin returns a "background-origin" of the subview. Returns one of next values:
 //
-// BorderBox (0), PaddingBox (1), ContentBox (2)
+//	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetBackgroundOrigin(view View, subviewID ...string) int {
@@ -311,7 +300,7 @@ func GetBackgroundOrigin(view View, subviewID ...string) int {
 
 // GetMaskClip returns a "mask-clip" of the subview. Returns one of next values:
 //
-// BorderBox (0), PaddingBox (1), ContentBox (2)
+//	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMaskClip(view View, subviewID ...string) int {
@@ -320,7 +309,7 @@ func GetMaskClip(view View, subviewID ...string) int {
 
 // GetMaskOrigin returns a "mask-origin" of the subview. Returns one of next values:
 //
-// BorderBox (0), PaddingBox (1), ContentBox (2)
+//	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMaskOrigin(view View, subviewID ...string) int {

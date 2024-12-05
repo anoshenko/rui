@@ -11,132 +11,146 @@ import (
 const (
 	// AnimationTag is the constant for "animation" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Sets and starts animations.
 	//
-	// Supported types: `Animation`, `[]Animation`.
+	// Supported types: Animation, []Animation.
 	//
-	// Internal type is `[]Animation`, other types converted to it during assignment.
-	// See `Animation` description for more details.
+	// Internal type is []Animation, other types converted to it during assignment.
+	// See Animation description for more details.
 	AnimationTag PropertyName = "animation"
 
 	// AnimationPaused is the constant for "animation-paused" property tag.
 	//
-	// Used by `Animation`.
+	// Used by Animation.
 	// Controls whether the animation is running or paused.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Animation is paused.
-	// `false` or `0` or "false", "no", "off", "0" - Animation is playing.
+	//   - true, 1, "true", "yes", "on", or "1" - Animation is paused.
+	//   - false, 0, "false", "no", "off", or "0" - Animation is playing.
 	AnimationPaused PropertyName = "animation-paused"
 
 	// Transition is the constant for "transition" property tag.
 	//
-	// Used by `View`.
-	// Sets transition animation of view properties. Each provided property must contain `Animation` which describe how
+	// Used by View.
+	//
+	// Sets transition animation of view properties. Each provided property must contain Animation which describe how
 	// particular property will be animated on property value change. Transition animation can be applied to properties of the
-	// type `SizeUnit`, `Color`, `AngleUnit`, `float64` and composite properties that contain elements of the listed types(for
-	// example, "shadow", "border", etc.). If we'll try to animate other properties with internal type like `bool` or
-	// `string` no error will occur, simply there will be no animation.
+	// type SizeUnit, Color, AngleUnit, float64 and composite properties that contain elements of the listed types(for
+	// example, "shadow", "border", etc.). If we'll try to animate other properties with internal type like bool or
+	// string no error will occur, simply there will be no animation.
 	//
-	// Supported types: `Params`.
+	// Supported types: Params.
 	//
-	// See `Params` description for more details.
+	// See Params description for more details.
 	Transition PropertyName = "transition"
 
 	// PropertyTag is the constant for "property" property tag.
 	//
-	// Used by `Animation`.
-	// Describes a scenario for changing a `View`'s property. Used only for animation script.
+	// Used by Animation.
 	//
-	// Supported types: `[]AnimatedProperty`, `AnimatedProperty`.
+	// Describes a scenario for changing a View's property. Used only for animation script.
 	//
-	// Internal type is `[]AnimatedProperty`, other types converted to it during assignment.
-	// See `AnimatedProperty` description for more details.
+	// Supported types: []AnimatedProperty, AnimatedProperty.
+	//
+	// Internal type is []AnimatedProperty, other types converted to it during assignment.
+	// See AnimatedProperty description for more details.
 	PropertyTag PropertyName = "property"
 
 	// Duration is the constant for "duration" property tag.
 	//
-	// Used by `Animation`.
+	// Used by Animation.
+	//
 	// Sets the length of time in seconds that an animation takes to complete one cycle.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Duration PropertyName = "duration"
 
 	// Delay is the constant for "delay" property tag.
 	//
-	// Used by `Animation`.
+	// Used by Animation.
+	//
 	// Specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
 	// the animation. The animation can start later, immediately from its beginning or immediately and partway through the
 	// animation.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Delay PropertyName = "delay"
 
 	// TimingFunction is the constant for "timing-function" property tag.
 	//
-	// Used by `Animation`.
+	// Used by Animation.
+	//
 	// Set how an animation progresses through the duration of each cycle.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	//
 	// Values:
-	// "ease"(`EaseTiming`) - Speed increases towards the middle and slows down at the end.
-	// "ease-in"(`EaseInTiming`) - Speed is slow at first, but increases in the end.
-	// "ease-out"(`EaseOutTiming`) - Speed is fast at first, but decreases in the end.
-	// "ease-in-out"(`EaseInOutTiming`) - Speed is slow at first, but quickly increases and at the end it decreases again.
-	// "linear"(`LinearTiming`) - Constant speed.
+	//   - "ease" (EaseTiming) - Speed increases towards the middle and slows down at the end.
+	//   - "ease-in" (EaseInTiming) - Speed is slow at first, but increases in the end.
+	//   - "ease-out" (EaseOutTiming) - Speed is fast at first, but decreases in the end.
+	//   - "ease-in-out" (EaseInOutTiming) - Speed is slow at first, but quickly increases and at the end it decreases again.
+	//   - "linear" (LinearTiming) - Constant speed.
+	//   - "step(n)" (StepTiming(n int) function) - Timing function along stepCount stops along the transition, displaying each stop for equal lengths of time.
+	//   - "cubic-bezier(x1, y1, x2, y2)" (CubicBezierTiming(x1, y1, x2, y2 float64) function) - Cubic-Bezier curve timing function. x1 and x2 must be in the range [0, 1].
 	TimingFunction PropertyName = "timing-function"
 
 	// IterationCount is the constant for "iteration-count" property tag.
 	//
-	// Used by `Animation`.
+	// Used by Animation.
+	//
 	// Sets the number of times an animation sequence should be played before stopping. Used only for animation script.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
-	// Internal type is `int`, other types converted to it during assignment.
+	// Internal type is int, other types converted to it during assignment.
 	IterationCount PropertyName = "iteration-count"
 
 	// AnimationDirection is the constant for "animation-direction" property tag.
 	//
-	// Used by `Animation`.
+	// Used by Animation.
+	//
 	// Whether an animation should play forward, backward, or alternate back and forth between playing the sequence forward
 	// and backward. Used only for animation script.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NormalAnimation`) or "normal" - The animation plays forward every iteration, that is, when the animation ends, it is immediately reset to its starting position and played again.
-	// `1`(`ReverseAnimation`) or "reverse" - The animation plays backwards, from the last position to the first, and then resets to the final position and plays again.
-	// `2`(`AlternateAnimation`) or "alternate" - The animation changes direction in each cycle, that is, in the first cycle, it starts from the start position, reaches the end position, and in the second cycle, it continues from the end position and reaches the start position, and so on.
-	// `3`(`AlternateReverseAnimation`) or "alternate-reverse" - The animation starts playing from the end position and reaches the start position, and in the next cycle, continuing from the start position, it goes to the end position.
+	//   - 0 (NormalAnimation) or "normal" - The animation plays forward every iteration, that is, when the animation ends, it is immediately reset to its starting position and played again.
+	//   - 1 (ReverseAnimation) or "reverse" - The animation plays backwards, from the last position to the first, and then resets to the final position and plays again.
+	//   - 2 (AlternateAnimation) or "alternate" - The animation changes direction in each cycle, that is, in the first cycle, it starts from the start position, reaches the end position, and in the second cycle, it continues from the end position and reaches the start position, and so on.
+	//   - 3 (AlternateReverseAnimation) or "alternate-reverse" - The animation starts playing from the end position and reaches the start position, and in the next cycle, continuing from the start position, it goes to the end position.
 	AnimationDirection PropertyName = "animation-direction"
 
 	// NormalAnimation is value of the "animation-direction" property.
+	//
 	// The animation plays forwards each cycle. In other words, each time the animation cycles,
 	// the animation will reset to the beginning state and start over again. This is the default value.
 	NormalAnimation = 0
 
 	// ReverseAnimation is value of the "animation-direction" property.
+	//
 	// The animation plays backwards each cycle. In other words, each time the animation cycles,
 	// the animation will reset to the end state and start over again. Animation steps are performed
 	// backwards, and timing functions are also reversed.
+	//
 	// For example, an "ease-in" timing function becomes "ease-out".
 	ReverseAnimation = 1
 
 	// AlternateAnimation is value of the "animation-direction" property.
+	//
 	// The animation reverses direction each cycle, with the first iteration being played forwards.
 	// The count to determine if a cycle is even or odd starts at one.
 	AlternateAnimation = 2
 
 	// AlternateReverseAnimation is value of the "animation-direction" property.
+	//
 	// The animation reverses direction each cycle, with the first iteration being played backwards.
 	// The count to determine if a cycle is even or odd starts at one.
 	AlternateReverseAnimation = 3
@@ -200,6 +214,7 @@ type animationData struct {
 }
 
 // Animation interface is used to set animation parameters. Used properties:
+//
 // "property", "id", "duration", "delay", "timing-function", "iteration-count", and "animation-direction"
 type Animation interface {
 	Properties

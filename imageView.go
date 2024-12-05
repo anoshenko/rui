@@ -9,32 +9,32 @@ import (
 const (
 	// LoadedEvent is the constant for "loaded-event" property tag.
 	//
-	// Used by `ImageView`.
+	// Used by ImageView.
 	// Occur when the image has been loaded.
 	//
 	// General listener format:
-	// `func(image rui.ImageView)`.
+	//  func(image rui.ImageView)
 	//
 	// where:
 	// image - Interface of an image view which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
+	//  func()
 	LoadedEvent PropertyName = "loaded-event"
 
 	// ErrorEvent is the constant for "error-event" property tag.
 	//
-	// Used by `ImageView`.
+	// Used by ImageView.
 	// Occur when the image loading has been failed.
 	//
 	// General listener format:
-	// `func(image rui.ImageView)`.
+	//  func(image rui.ImageView)
 	//
 	// where:
 	// image - Interface of an image view which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
+	//  func()
 	ErrorEvent PropertyName = "error-event"
 
 	// NoneFit - value of the "object-fit" property of an ImageView. The replaced content is not resized

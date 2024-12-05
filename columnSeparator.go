@@ -58,15 +58,13 @@ func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 	return nil
 }
 
-// NewColumnSeparator creates the new ColumnSeparatorProperty.
+// NewColumnSeparatorProperty creates the new ColumnSeparatorProperty.
+//
 // The following properties can be used:
-//
-// "style" (Style). Determines the line style (int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
-//
-// "color" (ColorTag). Determines the line color (Color);
-//
-// "width" (Width). Determines the line thickness (SizeUnit).
-func NewColumnSeparator(params Params) ColumnSeparatorProperty {
+//   - "style" (Style) - Determines the line style (type is int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
+//   - "color" (ColorTag) - Determines the line color (type is [Color]);
+//   - "width" (Width) - Determines the line thickness (type is [SizeUnit]).
+func NewColumnSeparatorProperty(params Params) ColumnSeparatorProperty {
 	separator := new(columnSeparatorProperty)
 	separator.init()
 	if params != nil {
@@ -77,6 +75,20 @@ func NewColumnSeparator(params Params) ColumnSeparatorProperty {
 		}
 	}
 	return separator
+}
+
+// NewColumnSeparator creates the new ColumnSeparatorProperty.
+//
+// Arguments:
+//   - style - determines the line style. Valid values: 0 [NoneLine], 1 [SolidLine], 2 [DashedLine], 3 [DottedLine], or 4 [DoubleLine];
+//   - color - determines the line color;
+//   - width - determines the line thickness.
+func NewColumnSeparator(style int, color Color, width SizeUnit) ColumnSeparatorProperty {
+	return NewColumnSeparatorProperty(Params{
+		Width:    width,
+		Style:    style,
+		ColorTag: color,
+	})
 }
 
 func (separator *columnSeparatorProperty) init() {

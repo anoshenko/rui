@@ -7,17 +7,22 @@ import (
 
 // DropDownEvent is the constant for "drop-down-event" property tag.
 //
-// Used by `DropDownList`.
+// Used by DropDownList.
 // Occur when a list item becomes selected.
 //
 // General listener format:
-// `func(list rui.DropDownList, index int)`.
+//
+//	func(list rui.DropDownList, index int)
 //
 // where:
-// list - Interface of a drop down list which generated this event,
-// index - Index of a newly selected item.
+//   - list - Interface of a drop down list which generated this event,
+//   - index - Index of a newly selected item.
 //
 // Allowed listener formats:
+//
+//	func(index int)
+//	func(list rui.DropDownList)
+//	func()
 const DropDownEvent PropertyName = "drop-down-event"
 
 // DropDownList represent a DropDownList view

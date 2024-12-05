@@ -7,50 +7,59 @@ import (
 // Constants related to view's background description
 const (
 	// NoRepeat is value of the Repeat property of an background image:
+	//
 	// The image is not repeated (and hence the background image painting area
 	// will not necessarily be entirely covered). The position of the non-repeated
 	// background image is defined by the background-position CSS property.
 	NoRepeat = 0
 
 	// RepeatXY is value of the Repeat property of an background image:
+	//
 	// The image is repeated as much as needed to cover the whole background
 	// image painting area. The last image will be clipped if it doesn't fit.
 	RepeatXY = 1
 
 	// RepeatX is value of the Repeat property of an background image:
+	//
 	// The image is repeated horizontally as much as needed to cover
 	// the whole width background image painting area. The image is not repeated vertically.
 	// The last image will be clipped if it doesn't fit.
 	RepeatX = 2
 
 	// RepeatY is value of the Repeat property of an background image:
+	//
 	// The image is repeated vertically as much as needed to cover
 	// the whole height background image painting area. The image is not repeated horizontally.
 	// The last image will be clipped if it doesn't fit.
 	RepeatY = 3
 
 	// RepeatRound is value of the Repeat property of an background image:
+	//
 	// As the allowed space increases in size, the repeated images will stretch (leaving no gaps)
 	// until there is room (space left >= half of the image width) for another one to be added.
 	// When the next image is added, all of the current ones compress to allow room.
 	RepeatRound = 4
 
 	// RepeatSpace is value of the Repeat property of an background image:
+	//
 	// The image is repeated as much as possible without clipping. The first and last images
 	// are pinned to either side of the element, and whitespace is distributed evenly between the images.
 	RepeatSpace = 5
 
 	// ScrollAttachment is value of the Attachment property of an background image:
+	//
 	// The background is fixed relative to the element itself and does not scroll with its contents.
 	// (It is effectively attached to the element's border.)
 	ScrollAttachment = 0
 
 	// FixedAttachment is value of the Attachment property of an background image:
+	//
 	// The background is fixed relative to the viewport. Even if an element has
 	// a scrolling mechanism, the background doesn't move with the element.
 	FixedAttachment = 1
 
 	// LocalAttachment is value of the Attachment property of an background image:
+	//
 	// The background is fixed relative to the element's contents. If the element has a scrolling mechanism,
 	// the background scrolls with the element's contents, and the background painting area
 	// and background positioning area are relative to the scrollable area of the element
@@ -63,6 +72,16 @@ type backgroundImage struct {
 }
 
 // NewBackgroundImage creates the new background image
+//
+// The following properties can be used:
+//   - "src" [Source] - the name of the image in the "images" folder of the resources, or the URL of the image or inline-image.
+//   - "width" [Width] - the width of the image.
+//   - "height" [Height] - the height of the image.
+//   - "image-horizontal-align" [ImageHorizontalAlign] - the horizontal alignment of the image relative to view's bounds.
+//   - "image-vertical-align" [ImageVerticalAlign] - the vertical alignment of the image relative to view's  bounds.
+//   - "repeat" [Repeat] - the repetition of the image.
+//   - "fit" [Fit] - the image scaling parameters.
+//   - "attachment" [Attachment] - defines whether a background image's position is fixed within the viewport or scrolls with its containing block.
 func NewBackgroundImage(params Params) BackgroundElement {
 	result := new(backgroundImage)
 	result.init()

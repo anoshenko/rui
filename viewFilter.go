@@ -9,122 +9,122 @@ import (
 const (
 	// Blur is the constant for "blur" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Applies a Gaussian blur. The value of radius defines the value of the standard deviation to the Gaussian function, or
 	// how many pixels on the screen blend into each other, so a larger value will create more blur. The lacuna value for
 	// interpolation is 0. The parameter is specified as a length in pixels.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Blur PropertyName = "blur"
 
 	// Brightness is the constant for "brightness" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Applies a linear multiplier to input image, making it appear more or less bright. A value of 0% will create an image
 	// that is completely black. A value of 100% leaves the input unchanged. Other values are linear multipliers on the
 	// effect. Values of an amount over 100% are allowed, providing brighter results.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Brightness PropertyName = "brightness"
 
 	// Contrast is the constant for "contrast" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Adjusts the contrast of the input. A value of 0% will create an image that is completely black. A value of 100% leaves
 	// the input unchanged. Values of amount over 100% are allowed, providing results with less contrast.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Contrast PropertyName = "contrast"
 
 	// DropShadow is the constant for "drop-shadow" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Applies a drop shadow effect to the input image. A drop shadow is effectively a blurred, offset version of the input
 	// image's alpha mask drawn in a particular color, composited below the image. Shadow parameters are set using the
-	// `ShadowProperty` interface.
+	// ShadowProperty interface.
 	//
-	// Supported types: `[]ShadowProperty`, `ShadowProperty`, `string`.
+	// Supported types: []ShadowProperty, ShadowProperty, string.
 	//
-	// Internal type is `[]ShadowProperty`, other types converted to it during assignment.
-	// See `ShadowProperty` description for more details.
+	// Internal type is []ShadowProperty, other types converted to it during assignment.
+	// See ShadowProperty description for more details.
 	//
 	// Conversion rules:
-	// `[]ShadowProperty` - stored as is, no conversion performed.
-	// `ShadowProperty` - converted to `[]ShadowProperty`.
-	// `string` - string representation of `ShadowProperty`. Example: "_{blur = 1em, color = black, spread-radius = 0.5em}".
+	//   - []ShadowProperty - stored as is, no conversion performed.
+	//   - ShadowProperty - converted to []ShadowProperty.
+	//   - string - string representation of ShadowProperty. Example: "_{blur = 1em, color = black, spread-radius = 0.5em}".
 	DropShadow PropertyName = "drop-shadow"
 
 	// Grayscale is the constant for "grayscale" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Converts the input image to grayscale. The value of ‘amount’ defines the proportion of the conversion. A value of 100%
 	// is completely grayscale. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on
 	// the effect.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Grayscale PropertyName = "grayscale"
 
 	// HueRotate is the constant for "hue-rotate" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Applies a hue rotation on the input image. The value of ‘angle’ defines the number of degrees around the color circle
 	// the input samples will be adjusted. A value of 0deg leaves the input unchanged. If the ‘angle’ parameter is missing, a
 	// value of 0deg is used. Though there is no maximum value, the effect of values above 360deg wraps around.
 	//
-	// Supported types: `AngleUnit`, `string`, `float`, `int`.
+	// Supported types: AngleUnit, string, float, int.
 	//
-	// Internal type is `AngleUnit`, other types will be converted to it during assignment.
-	// See `AngleUnit` description for more details.
+	// Internal type is AngleUnit, other types will be converted to it during assignment.
+	// See AngleUnit description for more details.
 	//
 	// Conversion rules:
-	// `AngleUnit` - stored as is, no conversion performed.
-	// `string` - must contain string representation of `AngleUnit`. If numeric value will be provided without any suffix then `AngleUnit` with value and `Radian` value type will be created.
-	// `float` - a new `AngleUnit` value will be created with `Radian` as a type.
-	// `int` - a new `AngleUnit` value will be created with `Radian` as a type.
+	//   - AngleUnit - stored as is, no conversion performed.
+	//   - string - must contain string representation of AngleUnit. If numeric value will be provided without any suffix then AngleUnit with value and Radian value type will be created.
+	//   - float - a new AngleUnit value will be created with Radian as a type.
+	//   - int - a new AngleUnit value will be created with Radian as a type.
 	HueRotate PropertyName = "hue-rotate"
 
 	// Invert is the constant for "invert" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Inverts the samples in the input image. The value of ‘amount’ defines the proportion of the conversion. A value of 100%
 	// is completely inverted. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on
 	// the effect.
 	//
-	// Supported types: `float64`, `int`, `string`.
+	// Supported types: float64, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Invert PropertyName = "invert"
 
 	// Saturate is the constant for "saturate" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Saturates the input image. The value of ‘amount’ defines the proportion of the conversion. A value of 0% is completely
 	// un-saturated. A value of 100% leaves the input unchanged. Other values are linear multipliers on the effect. Values of
 	// amount over 100% are allowed, providing super-saturated results.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Saturate PropertyName = "saturate"
 
 	// Sepia is the constant for "sepia" property tag.
 	//
-	// Used by `ViewFilter`.
+	// Used by ViewFilter.
 	// Converts the input image to sepia. The value of ‘amount’ defines the proportion of the conversion. A value of 100% is
 	// completely sepia. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on the
 	// effect.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
+	// Internal type is float, other types converted to it during assignment.
 	Sepia PropertyName = "sepia"
 )
 

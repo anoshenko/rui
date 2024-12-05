@@ -8,75 +8,83 @@ import (
 const (
 	// TouchStart is the constant for "touch-start" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when one or more touch points are placed on the touch surface.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
 	TouchStart PropertyName = "touch-start"
 
 	// TouchEnd is the constant for "touch-end" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Fired when one or more touch points are removed from the touch surface.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
 	TouchEnd PropertyName = "touch-end"
 
 	// TouchMove is the constant for "touch-move" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when one or more touch points are moved along the touch surface.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
 	TouchMove PropertyName = "touch-move"
 
 	// TouchCancel is the constant for "touch-cancel" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many
 	// touch points are created).
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
 	TouchCancel PropertyName = "touch-cancel"
 )
 

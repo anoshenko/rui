@@ -37,7 +37,7 @@ type BackgroundGradientPoint struct {
 	// Can take a value of Color type or string (color constant or textual description of the color)
 	Color any
 	// Pos - the distance from the start of the gradient straight line. Optional (may be nil).
-	// Can take a value of SizeUnit type or string (angle constant or textual description of the SizeUnit)
+	// Can take a value of SizeUnit type or string (size constant or textual description of the SizeUnit)
 	Pos any
 }
 
@@ -50,13 +50,11 @@ type backgroundLinearGradient struct {
 }
 
 // NewBackgroundLinearGradient creates the new background linear gradient.
+//
 // The following properties can be used:
-//
-// "gradient" (Gradient) - Describes gradient stop points. This is a mandatory property while describing background gradients.
-//
-// "direction" (Direction) - Defines the direction of the gradient line.
-//
-// "repeating" (Repeating) - Defines whether stop points needs to be repeated after the last one.
+//   - "gradient" [Gradient] - Describes gradient stop points. This is a mandatory property while describing background gradients.
+//   - "direction" [Direction] - Defines the direction of the gradient line.
+//   - "repeating" [Repeating] - Defines whether stop points needs to be repeated after the last one.
 func NewBackgroundLinearGradient(params Params) BackgroundElement {
 	result := new(backgroundLinearGradient)
 	result.init()

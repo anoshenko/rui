@@ -6,38 +6,42 @@ import "strings"
 const (
 	// KeyDownEvent is the constant for "key-down-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when a key is pressed.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.KeyEvent)`.
+	//
+	//  func(view rui.View, event rui.KeyEvent).
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Key event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Key event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.KeyEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.KeyEvent)
+	//  func()
 	KeyDownEvent PropertyName = "key-down-event"
 
 	// KeyUpEvent is the constant for "key-up-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when a key is released.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.KeyEvent)`.
+	//
+	//  func(view rui.View, event rui.KeyEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Key event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Key event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.KeyEvent)`,
-	// `func()`.
+	//
+	//  func(view rui.View)
+	//  func(event rui.KeyEvent)
+	//  func()
 	KeyUpEvent PropertyName = "key-up-event"
 )
 

@@ -149,9 +149,9 @@ const (
 	WhiteSpacePreLine = 4
 
 	// WhiteSpaceBreakSpaces - the behavior is identical to that of WhiteSpacePreWrap, except that:
-	// * Any sequence of preserved white space always takes up space, including at the end of the line.
-	// * A line breaking opportunity exists after every preserved white space character, including between white space characters.
-	// * Such preserved spaces take up space and do not hang, and thus affect the box’s intrinsic sizes (min-content size and max-content size).
+	//   - Any sequence of preserved white space always takes up space, including at the end of the line.
+	//   - A line breaking opportunity exists after every preserved white space character, including between white space characters.
+	//   - Such preserved spaces take up space and do not hang, and thus affect the box’s intrinsic sizes (min-content size and max-content size).
 	WhiteSpaceBreakSpaces = 5
 
 	// WordBreakNormal - use the default line break rule.

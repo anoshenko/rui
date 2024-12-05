@@ -11,46 +11,46 @@ import (
 const (
 	// FileSelectedEvent is the constant for "file-selected-event" property tag.
 	//
-	// Used by `FilePicker`.
+	// Used by FilePicker.
 	// Fired when user selects file(s).
 	//
 	// General listener format:
-	// `func(picker rui.FilePicker, files []rui.FileInfo)`.
+	//  func(picker rui.FilePicker, files []rui.FileInfo).
 	//
 	// where:
 	// picker - Interface of a file picker which generated this event,
 	// files - Array of description of selected files.
 	//
 	// Allowed listener formats:
-	// `func(picker rui.FilePicker)`,
-	// `func(files []rui.FileInfo)`,
-	// `func()`.
+	//  func(picker rui.FilePicker)
+	//  func(files []rui.FileInfo)
+	//  func()
 	FileSelectedEvent PropertyName = "file-selected-event"
 
 	// Accept is the constant for "accept" property tag.
 	//
-	// Used by `FilePicker`.
+	// Used by FilePicker.
 	// Set the list of allowed file extensions or MIME types.
 	//
-	// Supported types: `string`, `[]string`.
+	// Supported types: string, []string.
 	//
-	// Internal type is `string`, other types converted to it during assignment.
+	// Internal type is string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - may contain single value of multiple separated by comma(`,`).
-	// `[]string` - an array of acceptable file extensions or MIME types.
+	//   - string - may contain single value of multiple separated by comma(,).
+	//   - []string - an array of acceptable file extensions or MIME types.
 	Accept PropertyName = "accept"
 
 	// Multiple is the constant for "multiple" property tag.
 	//
-	// Used by `FilePicker`.
+	// Used by FilePicker.
 	// Controls whether multiple files can be selected.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Several files can be selected.
-	// `false` or `0` or "false", "no", "off", "0" - Only one file can be selected.
+	//   - true, 1, "true", "yes", "on", "1" - Several files can be selected.
+	//   - false, 0, "false", "no", "off", "0" - Only one file can be selected.
 	Multiple PropertyName = "multiple"
 )
 

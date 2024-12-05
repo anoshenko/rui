@@ -27,150 +27,150 @@ const (
 
 	// LeftStyle is the constant for "left-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Left border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
 	LeftStyle PropertyName = "left-style"
 
 	// RightStyle is the constant for "right-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Right border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
 	RightStyle PropertyName = "right-style"
 
 	// TopStyle is the constant for "top-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Top border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
 	TopStyle PropertyName = "top-style"
 
 	// BottomStyle is the constant for "bottom-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Bottom border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
 	BottomStyle PropertyName = "bottom-style"
 
 	// LeftWidth is the constant for "left-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Left border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
 	LeftWidth PropertyName = "left-width"
 
 	// RightWidth is the constant for "right-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Right border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
 	RightWidth PropertyName = "right-width"
 
 	// TopWidth is the constant for "top-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Top border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
 	TopWidth PropertyName = "top-width"
 
 	// BottomWidth is the constant for "bottom-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Bottom border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
 	BottomWidth PropertyName = "bottom-width"
 
 	// LeftColor is the constant for "left-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Left border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
 	LeftColor PropertyName = "left-color"
 
 	// RightColor is the constant for "right-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Right border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
 	RightColor PropertyName = "right-color"
 
 	// TopColor is the constant for "top-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Top border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
 	TopColor PropertyName = "top-color"
 
 	// BottomColor is the constant for "bottom-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Bottom border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
 	BottomColor PropertyName = "bottom-color"
 )
 

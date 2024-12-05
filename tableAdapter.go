@@ -9,19 +9,20 @@ type TableAdapter interface {
 	ColumnCount() int
 
 	// Cell returns the contents of a table cell. The function can return elements of the following types:
-	// * string
-	// * rune
-	// * float32, float64
-	// * integer values: int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64
-	// * bool
-	// * rui.Color
-	// * rui.View
-	// * fmt.Stringer
-	// * rui.VerticalTableJoin, rui.HorizontalTableJoin
+	//   - string
+	//   - rune
+	//   - float32, float64
+	//   - integer values: int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64
+	//   - bool
+	//   - rui.Color
+	//   - rui.View
+	//   - fmt.Stringer
+	//   - rui.VerticalTableJoin, rui.HorizontalTableJoin
 	Cell(row, column int) any
 }
 
 // TableColumnStyle describes the style of [TableView] columns.
+//
 // To set column styles, you must either implement the [TableColumnStyle] interface in the table adapter
 // or assign its separate implementation to the "column-style" property.
 type TableColumnStyle interface {
@@ -30,6 +31,7 @@ type TableColumnStyle interface {
 }
 
 // TableRowStyle describes the style of [TableView] rows.
+//
 // To set row styles, you must either implement the [TableRowStyle] interface in the table adapter
 // or assign its separate implementation to the "row-style" property.
 type TableRowStyle interface {
@@ -38,6 +40,7 @@ type TableRowStyle interface {
 }
 
 // TableCellStyle describes the style of [TableView] cells.
+//
 // To set row cells, you must either implement the [TableCellStyle] interface in the table adapter
 // or assign its separate implementation to the "cell-style" property.
 type TableCellStyle interface {
@@ -46,7 +49,9 @@ type TableCellStyle interface {
 }
 
 // TableAllowCellSelection determines whether [TableView] cell selection is allowed.
+//
 // It is only used if the "selection-mode" property is set to CellSelection (1).
+//
 // To set cell selection allowing, you must either implement the TableAllowCellSelection interface
 // in the table adapter or assign its separate implementation to the "allow-selection" property.
 type TableAllowCellSelection interface {
@@ -55,7 +60,9 @@ type TableAllowCellSelection interface {
 }
 
 // TableAllowRowSelection determines whether [TableView] row selection is allowed.
+//
 // It is only used if the "selection-mode" property is set to RowSelection (2).
+//
 // To set row selection allowing, you must either implement the TableAllowRowSelection interface
 // in the table adapter or assign its separate implementation to the "allow-selection" property.
 type TableAllowRowSelection interface {
@@ -65,6 +72,7 @@ type TableAllowRowSelection interface {
 
 // SimpleTableAdapter is implementation of [TableAdapter] where the content
 // defines as [][]any.
+//
 // When you assign [][]any value to the "content" property, it is converted to SimpleTableAdapter
 type SimpleTableAdapter interface {
 	TableAdapter

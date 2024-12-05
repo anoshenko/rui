@@ -12,19 +12,19 @@ const (
 	// Event generated when color picker value has been changed.
 	//
 	// General listener format:
-	// `func(picker rui.ColorPicker, newColor, oldColor rui.Color)`.
+	//  func(picker rui.ColorPicker, newColor, oldColor rui.Color)
 	//
 	// where:
-	// picker - Interface of a color picker which generated this event,
-	// newColor - New color value,
-	// oldColor - Old color value.
+	//   - picker - Interface of a color picker which generated this event,
+	//   - newColor - New color value,
+	//   - oldColor - Old color value.
 	//
 	// Allowed listener formats:
-	// `func(picker rui.ColorPicker, newColor rui.Color)`,
-	// `func(newColor, oldColor rui.Color)`,
-	// `func(newColor rui.Color)`,
-	// `func(picker rui.ColorPicker)`,
-	// `func()`.
+	//  func(picker rui.ColorPicker, newColor rui.Color)
+	//  func(newColor, oldColor rui.Color)
+	//  func(newColor rui.Color)
+	//  func(picker rui.ColorPicker)
+	//  func()
 	ColorChangedEvent PropertyName = "color-changed"
 
 	// ColorPickerValue is the constant for "color-picker-value" property tag.
