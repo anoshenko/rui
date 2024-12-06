@@ -382,11 +382,11 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	style.writeViewTransformCSS(builder, session)
 
-	if clip := getClipShape(style, Clip, session); clip != nil && clip.valid(session) {
+	if clip := getClipShapeProperty(style, Clip, session); clip != nil && clip.valid(session) {
 		builder.add(`clip-path`, clip.cssStyle(session))
 	}
 
-	if clip := getClipShape(style, ShapeOutside, session); clip != nil && clip.valid(session) {
+	if clip := getClipShapeProperty(style, ShapeOutside, session); clip != nil && clip.valid(session) {
 		builder.add(`shape-outside`, clip.cssStyle(session))
 	}
 

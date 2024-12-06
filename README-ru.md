@@ -1322,14 +1322,14 @@ AngleUnit или string (угловая константа или текстов
 
 ### Свойство "clip"
 
-Свойство "clip" (константа Clip) типа ClipShape задает задает область образки.
+Свойство "clip" (константа Clip) типа ClipShapeProperty задает задает область образки.
 Есть 4 типа областей обрезки
 
 #### inset
 
 Прямоугольная область обрезки. Создается с помощью функции:
 
-	func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShape
+	func NewInsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShapeProperty
 
 где top, right, bottom, left это расстояние от соответственно верхней, правой, нижней и левой границы
 View до одноименной границы обрезки; radius - задает радиусы скругления углов области обрезки
@@ -1346,7 +1346,7 @@ radius необходимо передать nil
 
 Круглая область обрезки. Создается с помощью функции:
 
-	func CircleClip(x, y, radius SizeUnit) ClipShape
+	func NewCircleClip(x, y, radius SizeUnit) ClipShapeProperty
 
 где x, y - координаты центра окружности; radius - радиус
 
@@ -1358,7 +1358,7 @@ radius необходимо передать nil
 
 Эллиптическая область обрезки. Создается с помощью функции:
 
-	func EllipseClip(x, y, rx, ry SizeUnit) ClipShape
+	func NewEllipseClip(x, y, rx, ry SizeUnit) ClipShapeProperty
 
 где x, y - координаты центра эллипса; rх - радиус эллипса по оси X; ry - радиус эллипса по оси Y.
 
@@ -1370,8 +1370,8 @@ radius необходимо передать nil
 
 Многоугольная область обрезки. Создается с помощью функций:
 
-	func PolygonClip(points []any) ClipShape
-	func PolygonPointsClip(points []SizeUnit) ClipShape
+	func NewPolygonClip(points []any) ClipShapeProperty
+	func NewPolygonPointsClip(points []SizeUnit) ClipShapeProperty
 
 в качестве аргумента передается массив угловых точек многоугольника в следующем порядке: x1, y1, x2, y2, …
 В качестве элементов аргумента функции PolygonClip могут быть или текстовые константы, или

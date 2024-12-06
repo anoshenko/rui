@@ -560,14 +560,14 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 		}
 
 	case Clip:
-		if clip := getClipShape(view, Clip, session); clip != nil && clip.valid(session) {
+		if clip := getClipShapeProperty(view, Clip, session); clip != nil && clip.valid(session) {
 			session.updateCSSProperty(htmlID, `clip-path`, clip.cssStyle(session))
 		} else {
 			session.updateCSSProperty(htmlID, `clip-path`, "none")
 		}
 
 	case ShapeOutside:
-		if clip := getClipShape(view, ShapeOutside, session); clip != nil && clip.valid(session) {
+		if clip := getClipShapeProperty(view, ShapeOutside, session); clip != nil && clip.valid(session) {
 			session.updateCSSProperty(htmlID, string(ShapeOutside), clip.cssStyle(session))
 		} else {
 			session.updateCSSProperty(htmlID, string(ShapeOutside), "none")

@@ -228,7 +228,7 @@ const (
 
 	// Left is the constant for "left" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShape.
+	// Used by View, BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -248,7 +248,7 @@ const (
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See [SizeUnit] description for more details.
 	//
-	// # Usage in ClipShape:
+	// # Usage in ClipShapeProperty:
 	//
 	// Specifies the left border position of inset clip shape.
 	//
@@ -260,7 +260,7 @@ const (
 
 	// Right is the constant for "right" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShape.
+	// Used by View, BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -280,7 +280,7 @@ const (
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See [SizeUnit] description for more details.
 	//
-	// # Usage in ClipShape:
+	// # Usage in ClipShapeProperty:
 	//
 	// Specifies the right border position of inset clip shape.
 	//
@@ -292,7 +292,7 @@ const (
 
 	// Top is the constant for "top" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShape.
+	// Used by View, BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -312,7 +312,7 @@ const (
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See [SizeUnit] description for more details.
 	//
-	// # Usage in ClipShape:
+	// # Usage in ClipShapeProperty:
 	//
 	// Specifies the top border position of inset clip shape.
 	//
@@ -324,7 +324,7 @@ const (
 
 	// Bottom is the constant for "bottom" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShape.
+	// Used by View, BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -344,7 +344,7 @@ const (
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See [SizeUnit] description for more details.
 	//
-	// # Usage in ClipShape:
+	// # Usage in ClipShapeProperty:
 	//
 	// Specifies the bottom border position of inset clip shape.
 	//
@@ -2526,15 +2526,15 @@ const (
 	// Used by View.
 	// Creates a clipping region that sets what part of a view should be shown.
 	//
-	// Supported types: ClipShape, string.
+	// Supported types: ClipShapeProperty, string.
 	//
-	// Internal type is ClipShape, other types converted to it during assignment.
-	// See ClipShape description for more details.
+	// Internal type is ClipShapeProperty, other types converted to it during assignment.
+	// See ClipShapeProperty description for more details.
 	Clip PropertyName = "clip"
 
 	// Points is the constant for "points" property tag.
 	//
-	// Used by ClipShape.
+	// Used by ClipShapeProperty.
 	// Points which describe polygon clip area. Values are in a sequence of pair like: x1, y1, x2, y2 ...
 	//
 	// Supported types: []SizeUnit, string.
@@ -2547,10 +2547,10 @@ const (
 	// inline content should wrap. By default, inline content wraps around its margin box. Property provides a way to
 	// customize this wrapping, making it possible to wrap text around complex objects rather than simple boxes.
 	//
-	// Supported types: ClipShape, string.
+	// Supported types: ClipShapeProperty, string.
 	//
-	// Internal type is ClipShape, other types converted to it during assignment.
-	// See ClipShape description for more details.
+	// Internal type is ClipShapeProperty, other types converted to it during assignment.
+	// See ClipShapeProperty description for more details.
 	ShapeOutside PropertyName = "shape-outside"
 
 	// Float is the constant for "float" property tag.

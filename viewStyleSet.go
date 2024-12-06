@@ -412,7 +412,7 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 		return nil
 
 	case Clip, ShapeOutside:
-		return setClipShapeProperty(style, tag, value)
+		return setClipShapePropertyProperty(style, tag, value)
 
 	case Filter, BackdropFilter:
 		return setFilterProperty(style, tag, value)

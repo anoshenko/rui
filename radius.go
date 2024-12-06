@@ -9,7 +9,7 @@ import (
 const (
 	// Radius is the constant for "radius" property tag.
 	//
-	// Used by View, BackgroundElement, ClipShape.
+	// Used by View, BackgroundElement, ClipShapeProperty.
 	//
 	// Usage in View:
 	// Specifies the corners rounding radius of an element's outer border edge.
@@ -30,7 +30,7 @@ const (
 	// Usage in BackgroundElement:
 	// Same as "radial-gradient-radius".
 	//
-	// Usage in ClipShape:
+	// Usage in ClipShapeProperty:
 	// Specifies the radius of the corners or the radius of the cropping area.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -41,7 +41,7 @@ const (
 
 	// RadiusX is the constant for "radius-x" property tag.
 	//
-	// Used by View, ClipShape.
+	// Used by View, ClipShapeProperty.
 	//
 	// Usage in View:
 	// Specifies the x-axis corners elliptic rounding radius of an element's outer border edge.
@@ -51,7 +51,7 @@ const (
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See SizeUnit description for more details.
 	//
-	// Usage in ClipShape:
+	// Usage in ClipShapeProperty:
 	// Specifies the x-axis corners elliptic rounding radius of the elliptic clip shape.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -62,7 +62,7 @@ const (
 
 	// RadiusY is the constant for "radius-y" property tag.
 	//
-	// Used by View, ClipShape.
+	// Used by View, ClipShapeProperty.
 	//
 	// Usage in View:
 	// Specifies the y-axis corners elliptic rounding radius of an element's outer border edge.
@@ -72,7 +72,7 @@ const (
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See SizeUnit description for more details.
 	//
-	// Usage in ClipShape:
+	// Usage in ClipShapeProperty:
 	// Specifies the y-axis corners elliptic rounding radius of of the elliptic clip shape.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -215,10 +215,10 @@ const (
 
 	// X is the constant for "x" property tag.
 	//
-	// Used by ClipShape, RadiusProperty.
+	// Used by ClipShapeProperty, RadiusProperty.
 	//
-	// Usage in ClipShape:
-	// Specifies x-axis position of the clip shape.
+	// Usage in ClipShapeProperty:
+	// Specifies x-axis position of the clip shape center.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
@@ -236,10 +236,10 @@ const (
 
 	// Y is the constant for "y" property tag.
 	//
-	// Used by ClipShape, RadiusProperty.
+	// Used by ClipShapeProperty, RadiusProperty.
 	//
-	// Usage in ClipShape:
-	// Specifies y-axis position of the clip shape.
+	// Usage in ClipShapeProperty:
+	// Specifies y-axis position of the clip shape center.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
