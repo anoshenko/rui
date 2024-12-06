@@ -1413,10 +1413,10 @@ You can get the value of this property using the function
 The "filter" property (Filter constant) applies graphical effects to the View, such as blurring, color shifting, changing brightness/contrast, etc.
 The "backdrop-filter" property (BackdropFilter constant) applies the same effects but to the area behind a View.
 
-Only the ViewFilter interface is used as the value of the "filter" properties. 
-ViewFilter is created using the function
+Only the FilterProperty interface is used as the value of the "filter" properties. 
+FilterProperty is created using the function
 
-	func NewViewFilter(params Params) ViewFilter
+	func NewFilterProperty(params Params) FilterProperty
 
 The argument lists the effects to apply. The following effects are possible:
 
@@ -1442,8 +1442,8 @@ Example
 
 You can get the value of the current filter using functions
 
-	func GetFilter(view View, subviewID ...string) ViewFilter
-	func GetBackdropFilter(view View, subviewID ...string) ViewFilter
+	func GetFilter(view View, subviewID ...string) FilterProperty
+	func GetBackdropFilter(view View, subviewID ...string) FilterProperty
 
 ### "semantics" property
 

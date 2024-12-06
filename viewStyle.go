@@ -391,7 +391,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	if value := style.getRaw(Filter); value != nil {
-		if filter, ok := value.(ViewFilter); ok {
+		if filter, ok := value.(FilterProperty); ok {
 			if text := filter.cssStyle(session); text != "" {
 				builder.add(string(Filter), text)
 			}
@@ -399,7 +399,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	if value := style.getRaw(BackdropFilter); value != nil {
-		if filter, ok := value.(ViewFilter); ok {
+		if filter, ok := value.(FilterProperty); ok {
 			if text := filter.cssStyle(session); text != "" {
 				builder.add(`-webkit-backdrop-filter`, text)
 				builder.add(string(BackdropFilter), text)

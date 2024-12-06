@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-// Constants for [ViewFilter] specific properties and events
+// Constants for [FilterProperty] specific properties and events
 const (
 	// Blur is the constant for "blur" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Applies a Gaussian blur. The value of radius defines the value of the standard deviation to the Gaussian function, or
 	// how many pixels on the screen blend into each other, so a larger value will create more blur. The lacuna value for
 	// interpolation is 0. The parameter is specified as a length in pixels.
@@ -21,7 +21,7 @@ const (
 
 	// Brightness is the constant for "brightness" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Applies a linear multiplier to input image, making it appear more or less bright. A value of 0% will create an image
 	// that is completely black. A value of 100% leaves the input unchanged. Other values are linear multipliers on the
 	// effect. Values of an amount over 100% are allowed, providing brighter results.
@@ -33,7 +33,7 @@ const (
 
 	// Contrast is the constant for "contrast" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Adjusts the contrast of the input. A value of 0% will create an image that is completely black. A value of 100% leaves
 	// the input unchanged. Values of amount over 100% are allowed, providing results with less contrast.
 	//
@@ -44,7 +44,7 @@ const (
 
 	// DropShadow is the constant for "drop-shadow" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Applies a drop shadow effect to the input image. A drop shadow is effectively a blurred, offset version of the input
 	// image's alpha mask drawn in a particular color, composited below the image. Shadow parameters are set using the
 	// ShadowProperty interface.
@@ -62,7 +62,7 @@ const (
 
 	// Grayscale is the constant for "grayscale" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Converts the input image to grayscale. The value of ‘amount’ defines the proportion of the conversion. A value of 100%
 	// is completely grayscale. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on
 	// the effect.
@@ -74,7 +74,7 @@ const (
 
 	// HueRotate is the constant for "hue-rotate" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Applies a hue rotation on the input image. The value of ‘angle’ defines the number of degrees around the color circle
 	// the input samples will be adjusted. A value of 0deg leaves the input unchanged. If the ‘angle’ parameter is missing, a
 	// value of 0deg is used. Though there is no maximum value, the effect of values above 360deg wraps around.
@@ -93,7 +93,7 @@ const (
 
 	// Invert is the constant for "invert" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Inverts the samples in the input image. The value of ‘amount’ defines the proportion of the conversion. A value of 100%
 	// is completely inverted. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on
 	// the effect.
@@ -105,7 +105,7 @@ const (
 
 	// Saturate is the constant for "saturate" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Saturates the input image. The value of ‘amount’ defines the proportion of the conversion. A value of 0% is completely
 	// un-saturated. A value of 100% leaves the input unchanged. Other values are linear multipliers on the effect. Values of
 	// amount over 100% are allowed, providing super-saturated results.
@@ -117,7 +117,7 @@ const (
 
 	// Sepia is the constant for "sepia" property tag.
 	//
-	// Used by ViewFilter.
+	// Used by FilterProperty.
 	// Converts the input image to sepia. The value of ‘amount’ defines the proportion of the conversion. A value of 100% is
 	// completely sepia. A value of 0% leaves the input unchanged. Values between 0% and 100% are linear multipliers on the
 	// effect.
@@ -128,23 +128,23 @@ const (
 	Sepia PropertyName = "sepia"
 )
 
-// ViewFilter defines an applied to a View a graphical effects like blur or color shift.
+// FilterProperty defines an applied to a View a graphical effects like blur or color shift.
 // Allowable properties are Blur, Brightness, Contrast, DropShadow, Grayscale, HueRotate, Invert, Opacity, Saturate, and Sepia
-type ViewFilter interface {
+type FilterProperty interface {
 	Properties
 	fmt.Stringer
 	stringWriter
 	cssStyle(session Session) string
 }
 
-type viewFilter struct {
+type filterData struct {
 	dataProperty
 }
 
-// NewViewFilter creates the new ViewFilter
-func NewViewFilter(params Params) ViewFilter {
+// NewFilterProperty creates the new FilterProperty
+func NewFilterProperty(params Params) FilterProperty {
 	if len(params) > 0 {
-		filter := new(viewFilter)
+		filter := new(filterData)
 		filter.init()
 		for tag, value := range params {
 			if !filter.Set(tag, value) {
@@ -156,8 +156,8 @@ func NewViewFilter(params Params) ViewFilter {
 	return nil
 }
 
-func newViewFilter(obj DataObject) ViewFilter {
-	filter := new(viewFilter)
+func newFilterProperty(obj DataObject) FilterProperty {
+	filter := new(filterData)
 	filter.init()
 	for i := 0; i < obj.PropertyCount(); i++ {
 		if node := obj.Property(i); node != nil {
@@ -186,13 +186,13 @@ func newViewFilter(obj DataObject) ViewFilter {
 	return nil
 }
 
-func (filter *viewFilter) init() {
+func (filter *filterData) init() {
 	filter.dataProperty.init()
-	filter.set = viewFilterSet
+	filter.set = filterDataSet
 	filter.supportedProperties = []PropertyName{Blur, Brightness, Contrast, Saturate, Grayscale, Invert, Opacity, Sepia, HueRotate, DropShadow}
 }
 
-func viewFilterSet(properties Properties, tag PropertyName, value any) []PropertyName {
+func filterDataSet(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Blur, Brightness, Contrast, Saturate:
 		return setFloatProperty(properties, tag, value, 0, 10000)
@@ -213,11 +213,11 @@ func viewFilterSet(properties Properties, tag PropertyName, value any) []Propert
 	return nil
 }
 
-func (filter *viewFilter) String() string {
+func (filter *filterData) String() string {
 	return runStringWriter(filter)
 }
 
-func (filter *viewFilter) writeString(buffer *strings.Builder, indent string) {
+func (filter *filterData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("filter { ")
 	comma := false
 	tags := filter.AllTags()
@@ -235,7 +235,7 @@ func (filter *viewFilter) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString(" }")
 }
 
-func (filter *viewFilter) cssStyle(session Session) string {
+func (filter *filterData) cssStyle(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
@@ -287,27 +287,27 @@ func (filter *viewFilter) cssStyle(session Session) string {
 
 func setFilterProperty(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch value := value.(type) {
-	case ViewFilter:
+	case FilterProperty:
 		properties.setRaw(tag, value)
 		return []PropertyName{tag}
 
 	case string:
 		if obj := NewDataObject(value); obj == nil {
-			if filter := newViewFilter(obj); filter != nil {
+			if filter := newFilterProperty(obj); filter != nil {
 				properties.setRaw(tag, filter)
 				return []PropertyName{tag}
 			}
 		}
 
 	case DataObject:
-		if filter := newViewFilter(value); filter != nil {
+		if filter := newFilterProperty(value); filter != nil {
 			properties.setRaw(tag, filter)
 			return []PropertyName{tag}
 		}
 
 	case DataValue:
 		if value.IsObject() {
-			if filter := newViewFilter(value.Object()); filter != nil {
+			if filter := newFilterProperty(value.Object()); filter != nil {
 				properties.setRaw(tag, filter)
 				return []PropertyName{tag}
 			}
@@ -320,15 +320,15 @@ func setFilterProperty(properties Properties, tag PropertyName, value any) []Pro
 
 // GetFilter returns a View graphical effects like blur or color shift.
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
-func GetFilter(view View, subviewID ...string) ViewFilter {
+func GetFilter(view View, subviewID ...string) FilterProperty {
 	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(Filter); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+			if filter, ok := value.(FilterProperty); ok {
 				return filter
 			}
 		}
 		if value := valueFromStyle(view, Filter); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+			if filter, ok := value.(FilterProperty); ok {
 				return filter
 			}
 		}
@@ -339,15 +339,15 @@ func GetFilter(view View, subviewID ...string) ViewFilter {
 
 // GetBackdropFilter returns the area behind a View graphical effects like blur or color shift.
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
-func GetBackdropFilter(view View, subviewID ...string) ViewFilter {
+func GetBackdropFilter(view View, subviewID ...string) FilterProperty {
 	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(BackdropFilter); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+			if filter, ok := value.(FilterProperty); ok {
 				return filter
 			}
 		}
 		if value := valueFromStyle(view, BackdropFilter); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+			if filter, ok := value.(FilterProperty); ok {
 				return filter
 			}
 		}

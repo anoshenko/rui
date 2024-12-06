@@ -162,7 +162,7 @@ const (
 
 	// Opacity is the constant for "opacity" property tag.
 	//
-	// Used by View, ViewFilter.
+	// Used by View, FilterProperty.
 	//
 	// # Usage in View:
 	//
@@ -173,7 +173,7 @@ const (
 	//
 	// Internal type is float, other types converted to it during assignment.
 	//
-	// # Usage in ViewFilter:
+	// # Usage in FilterProperty:
 	//
 	// Opacity is the degree to which content behind the view is hidden, and is the opposite of transparency. Value is in
 	// range 0% to 100%, where 0% is fully transparent.
@@ -2505,9 +2505,9 @@ const (
 	// Used by View.
 	// Applies graphical effects to a view, such as blurring, color shifting, changing brightness/contrast, etc.
 	//
-	// Supported types: ViewFilter.
+	// Supported types: FilterProperty.
 	//
-	// See ViewFilter description for more details.
+	// See FilterProperty description for more details.
 	Filter PropertyName = "filter"
 
 	// BackdropFilter is the constant for "backdrop-filter" property tag.
@@ -2516,9 +2516,9 @@ const (
 	// Applies graphical effects to the area behind a view, such as blurring, color shifting, changing brightness/contrast,
 	// etc.
 	//
-	// Supported types: ViewFilter.
+	// Supported types: FilterProperty.
 	//
-	// See ViewFilter description for more details.
+	// See FilterProperty description for more details.
 	BackdropFilter PropertyName = "backdrop-filter"
 
 	// Clip is the constant for "clip" property tag.

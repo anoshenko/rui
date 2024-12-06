@@ -576,7 +576,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case Filter:
 		text := ""
 		if value := view.getRaw(Filter); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+			if filter, ok := value.(FilterProperty); ok {
 				text = filter.cssStyle(session)
 			}
 		}
@@ -585,7 +585,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case BackdropFilter:
 		text := ""
 		if value := view.getRaw(BackdropFilter); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+			if filter, ok := value.(FilterProperty); ok {
 				text = filter.cssStyle(session)
 			}
 		}

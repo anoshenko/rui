@@ -1435,10 +1435,10 @@ radius необходимо передать nil
 Свойство "filter" (константа Filter) применяет ко View такие графические эффекты, как размытие, смещение цвета, изменение яркости/контрастности и т.п.
 Свойства "backdrop-filter" (константа BackdropFilter) применяет такие же эффекты но к содержимому располагающемся ниже View.
 
-В качестве значения свойств "filter" и "backdrop-filter" используется только интерфейс ViewFilter. ViewFilter создается с помощью
+В качестве значения свойств "filter" и "backdrop-filter" используется только интерфейс FilterProperty. FilterProperty создается с помощью
 функции
 
-	func NewViewFilter(params Params) ViewFilter
+	func NewFilterProperty(params Params) FilterProperty
 
 В аргументе перечисляются применяемые эффекты. Возможны следующие эффекты:
 
@@ -1457,8 +1457,8 @@ radius необходимо передать nil
 
 Получить значение текущего фильтра можно с помощью функций
 
-	func GetFilter(view View, subviewID ...string) ViewFilter
-	func GetBackdropFilter(view View, subviewID ...string) ViewFilter
+	func GetFilter(view View, subviewID ...string) FilterProperty
+	func GetBackdropFilter(view View, subviewID ...string) FilterProperty
 
 ### Свойство "semantics"
 

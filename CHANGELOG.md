@@ -24,6 +24,8 @@
     EllipseClip function -> NewEllipseClip
     PolygonClip function -> NewPolygonClip
     PolygonPointsClip function -> NewPolygonPointsClip
+    ViewFilter interface -> FilterProperty
+    NewViewFilter function -> NewFilterProperty
 
 * Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
 NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
