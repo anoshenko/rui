@@ -1308,7 +1308,7 @@ There are 4 types of crop areas
 
 Rectangular cropping area. Created with the function:
 
-	func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShapeProperty
+	func NewInsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShapeProperty
 
 where top, right, bottom, left are the distance from respectively the top, right, bottom and left borders of the View 
 to the cropping border of the same name; radius - sets the radii of the corners of the cropping area 
@@ -1324,7 +1324,7 @@ The textual description of the rectangular cropping area is in the following for
 
 Round cropping area. Created with the function:
 
-	func CircleClip(x, y, radius SizeUnit) ClipShapeProperty
+	func NewCircleClip(x, y, radius SizeUnit) ClipShapeProperty
 
 where x, y - coordinates of the center of the circle; radius - radius
 
@@ -1336,7 +1336,7 @@ The textual description of the circular cropping area is in the following format
 
 Elliptical cropping area. Created with the function:
 
-	func EllipseClip(x, y, rx, ry SizeUnit) ClipShapeProperty
+	func NewEllipseClip(x, y, rx, ry SizeUnit) ClipShapeProperty
 
 where x, y - coordinates of the center of the ellipse; rх - radius of the ellipse along the X axis; ry is the radius of the ellipse along the Y axis.
 
@@ -1348,8 +1348,8 @@ The textual description of the elliptical clipping region is in the following fo
 
 Polygonal cropping area. Created using functions:
 
-	func PolygonClip(points []any) ClipShapeProperty
-	func PolygonPointsClip(points []SizeUnit) ClipShapeProperty
+	func NewPolygonClip(points []any) ClipShapeProperty
+	func NewPolygonPointsClip(points []SizeUnit) ClipShapeProperty
 
 an array of corner points of the polygon is passed as an argument in the following order: x1, y1, x2, y2, …
 The elements of the argument to the PolygonClip function can be either text constants, 
