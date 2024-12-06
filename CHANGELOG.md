@@ -28,11 +28,12 @@
     NewViewFilter function -> NewFilterProperty
     Animation interface -> AnimationProperty
     AnimationTag constant -> Animation
+    NewAnimation function -> NewAnimationProperty
 
 * Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
 NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
 GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin, NewColumnSeparator,
-NewClipShapeProperty.
+NewClipShapeProperty, NewTransitionAnimation, NewAnimation.
 
 * Added SetConicGradientFillStyle and SetConicGradientStrokeStyle methods to Canvas interface.
 

@@ -5043,7 +5043,7 @@ onNo или onCancel (если она не nil).
 Для задания параметров анимации используется интерфейс AnimationProperty. Он расширяет интерфейс Properties.
 Интерфейс создается с помощью функции:
 
-	func NewAnimation(params Params) AnimationProperty
+	func NewAnimationProperty(params Params) AnimationProperty
 
 Часть свойств интерфейса AnimationProperty используется в обоих типах анимации, остальные используются 
 только в сценариях анимации.
@@ -5082,13 +5082,13 @@ onNo или onCancel (если она не nil).
 
 Например
 
-	animation := rui.NewAnimation(rui.Params{
+	animation := rui.NewAnimationProperty(rui.Params{
 		rui.TimingFunction: rui.StepsTiming(10),
 	})
 
 эквивалентно 
 
-	animation := rui.NewAnimation(rui.Params{
+	animation := rui.NewAnimationProperty(rui.Params{
 		rui.TimingFunction: "steps(10)",
 	})
 	
@@ -5117,7 +5117,7 @@ x1 и x2 должны быть в диапазоне [0, 1]. Вы можете �
 Она присваивает свойству новое значение, при этом изменение происходит с использованием заданной анимации.
 Например,
 
-	view.SetAnimated(rui.Width, rui.Px(400), rui.NewAnimation(rui.Params{
+	view.SetAnimated(rui.Width, rui.Px(400), rui.NewAnimationProperty(rui.Params{
 		rui.Duration:       0.75,
 		rui.TimingFunction: rui.EaseOutTiming,
 	}))
@@ -5132,11 +5132,11 @@ x1 и x2 должны быть в диапазоне [0, 1]. Вы можете �
 Например,
 
 	view.Set(rui.Transition, rui.Params{
-		rui.Height: rui.NewAnimation(rui.Params{
+		rui.Height: rui.NewAnimationProperty(rui.Params{
 			rui.Duration:       0.75,
 			rui.TimingFunction: rui.EaseOutTiming,
 		},
-		rui.BackgroundColor: rui.NewAnimation(rui.Params{
+		rui.BackgroundColor: rui.NewAnimationProperty(rui.Params{
 			rui.Duration:       1.5,
 			rui.Delay:          0.5,
 			rui.TimingFunction: rui.Linear,
@@ -5273,7 +5273,7 @@ KeyFrames - промежуточные значения свойства (клю
 			90: rui.Px(220),
 		}
 	}
-	animation := rui.NewAnimation(rui.Params{
+	animation := rui.NewAnimationProperty(rui.Params{
 		rui.PropertyTag:    []rui.AnimatedProperty{prop},
 		rui.Duration:       2,
 		rui.TimingFunction: LinearTiming,

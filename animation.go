@@ -256,14 +256,107 @@ func parseAnimation(obj DataObject) AnimationProperty {
 	return animation
 }
 
-// NewAnimation creates a new animation object and return its interface
-func NewAnimation(params Params) AnimationProperty {
+// NewAnimationProperty creates a new animation object and return its interface
+//
+// The following properties can be used:
+//   - "id" (ID) - specifies the animation identifier. Used only for animation script.
+//   - "duration" (Duration) - specifies the length of time in seconds that an animation takes to complete one cycle;
+//   - "delay" (Delay) - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
+//     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation;
+//   - "timing-function" (TimingFunction) - specifies how an animation progresses through the duration of each cycle;
+//   - "iteration-count" (IterationCount) - specifies the number of times an animation sequence should be played before stopping. Used only for animation script;
+//   - "animation-direction" (AnimationDirection) - specifies whether an animation should play forward, backward,
+//     or alternate back and forth between playing the sequence forward and backward. Used only for animation script;
+//   - "property" (PropertyTag) - describes a scenario for changing a View's property. Used only for animation script.
+func NewAnimationProperty(params Params) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
 
 	for tag, value := range params {
 		animation.Set(tag, value)
 	}
+	return animation
+}
+
+// NewTransitionAnimation creates animation data for the transition.
+//   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used;
+//   - duration - specifies the length of time in seconds that an animation takes to complete one cycle. Must be > 0;
+//   - delay - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
+//     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation.
+func NewTransitionAnimation(timingFunc string, duration float64, delay float64) AnimationProperty {
+	animation := new(animationData)
+	animation.init()
+
+	if duration <= 0 {
+		ErrorLog("Animation duration must be greater than 0")
+		return nil
+	}
+
+	if !animation.Set(Duration, duration) {
+		return nil
+	}
+
+	if timingFunc != "" {
+		if !animation.Set(TimingFunction, timingFunc) {
+			return nil
+		}
+	}
+
+	if delay != 0 {
+		animation.Set(Delay, delay)
+	}
+
+	return animation
+}
+
+// NewTransitionAnimation creates the animation scenario.
+//   - id - specifies the animation identifier.
+//   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used;
+//   - duration - specifies the length of time in seconds that an animation takes to complete one cycle. Must be > 0;
+//   - delay - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
+//     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation.
+//   - direction - specifies whether an animation should play forward, backward,
+//     or alternate back and forth between playing the sequence forward and backward. Only the following values ​​can be used:
+//     0 (NormalAnimation), 1 (ReverseAnimation), 2 (AlternateAnimation), and 3 (AlternateReverseAnimation);
+//   - iterationCount - specifies the number of times an animation sequence should be played before stopping;
+//   - property - describes a scenario for changing a View's property.
+func NewAnimation(id string, timingFunc string, duration float64, delay float64, direction int, iterationCount int, property ...AnimatedProperty) AnimationProperty {
+	animation := new(animationData)
+	animation.init()
+
+	if duration <= 0 {
+		ErrorLog("Animation duration must be greater than 0")
+		return nil
+	}
+
+	if !animation.Set(Duration, duration) {
+		return nil
+	}
+
+	if id != "" {
+		animation.Set(ID, id)
+	}
+
+	if timingFunc != "" {
+		animation.Set(TimingFunction, timingFunc)
+	}
+
+	if delay != 0 {
+		animation.Set(Delay, delay)
+	}
+
+	if direction > 0 {
+		animation.Set(AnimationDirection, direction)
+	}
+
+	if iterationCount > 0 {
+		animation.Set(IterationCount, iterationCount)
+	}
+
+	if len(property) > 0 {
+		animation.Set(PropertyTag, property)
+	}
+
 	return animation
 }
 

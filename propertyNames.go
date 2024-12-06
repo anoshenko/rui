@@ -6,14 +6,14 @@ type PropertyName string
 const (
 	// ID is the constant for "id" property tag.
 	//
-	// # Used by View, Animation.
+	// # Used by View, AnimationProperty.
 	//
 	// Usage in View:
 	// Optional textual identifier for the view. Used to reference view from source code if needed.
 	//
 	// Supported types: string.
 	//
-	// # Usage in Animation:
+	// # Usage in AnimationProperty:
 	//
 	// Specifies the animation identifier. Used only for animation script.
 	//

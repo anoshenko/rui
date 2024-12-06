@@ -797,7 +797,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 	popup.layerView = NewGridLayout(session, layerParams)
 
 	if popup.showOpacity != 1 || popup.showTransform != nil {
-		animation := NewAnimation(Params{
+		animation := NewAnimationProperty(Params{
 			Duration:       popup.showDuration,
 			TimingFunction: popup.showTiming,
 		})
