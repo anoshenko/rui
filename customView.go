@@ -89,7 +89,7 @@ func (customView *CustomViewData) Set(tag PropertyName, value any) bool {
 // SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 // Return "true" if the value has been set, in the opposite case "false" are returned and
 // a description of the error is written to the log
-func (customView *CustomViewData) SetAnimated(tag PropertyName, value any, animation Animation) bool {
+func (customView *CustomViewData) SetAnimated(tag PropertyName, value any, animation AnimationProperty) bool {
 	return customView.superView.SetAnimated(tag, value, animation)
 }
 
@@ -323,7 +323,7 @@ func (customView *CustomViewData) setScroll(x, y, width, height float64) {
 }
 
 // Transition returns the transition animation of the property(tag). Returns nil is there is no transition animation.
-func (customView *CustomViewData) Transition(tag PropertyName) Animation {
+func (customView *CustomViewData) Transition(tag PropertyName) AnimationProperty {
 	if customView.superView != nil {
 		return customView.superView.Transition(tag)
 	}
@@ -331,17 +331,17 @@ func (customView *CustomViewData) Transition(tag PropertyName) Animation {
 }
 
 // Transitions returns a map of transition animations. The result is always non-nil.
-func (customView *CustomViewData) Transitions() map[PropertyName]Animation {
+func (customView *CustomViewData) Transitions() map[PropertyName]AnimationProperty {
 	if customView.superView != nil {
 		return customView.superView.Transitions()
 	}
-	return map[PropertyName]Animation{}
+	return map[PropertyName]AnimationProperty{}
 }
 
 // SetTransition sets the transition animation for the property if "animation" argument is not nil, and
 // removes the transition animation of the property if "animation" argument  is nil.
 // The "tag" argument is the property name.
-func (customView *CustomViewData) SetTransition(tag PropertyName, animation Animation) {
+func (customView *CustomViewData) SetTransition(tag PropertyName, animation AnimationProperty) {
 	if customView.superView != nil {
 		customView.superView.SetTransition(tag, animation)
 	}

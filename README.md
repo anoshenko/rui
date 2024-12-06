@@ -5009,14 +5009,14 @@ The library supports two types of animation:
 * Animated property value changes (hereinafter "transition animation")
 * Script animated change of one or more properties (hereinafter simply "animation script")
 
-### Animation interface
+### AnimationProperty interface
 
-The Animation interface is used to set animation parameters. It extends the Properties interface.
+The AnimationProperty interface is used to set animation parameters. It extends the Properties interface.
 The interface is created using the function:
 
-	func NewAnimation(params Params) Animation
+	func NewAnimation(params Params) AnimationProperty
 
-Some of the properties of the Animation interface are used in both types of animation, the rest are used only 
+Some of the properties of the AnimationProperty interface are used in both types of animation, the rest are used only 
 in animation scripts.
 
 Common properties are
@@ -5082,7 +5082,7 @@ There are two types of transition animations:
 A one-time animation is triggered using the SetAnimated function of the View interface. 
 This function has the following description:
 
-	SetAnimated(tag string, value any, animation Animation) bool
+	SetAnimated(tag string, value any, animation AnimationProperty) bool
 
 It assigns a new value to the property, and the change occurs using the specified animation.
 For example,
@@ -5094,12 +5094,12 @@ For example,
 
 There is also a global function for animated one-time change of the property value of the child View
 
-	func SetAnimated(rootView View, viewID, tag string, value any, animation Animation) bool
+	func SetAnimated(rootView View, viewID, tag string, value any, animation AnimationProperty) bool
 
 A persistent animation runs every time the property value changes. 
 To set the constant animation of the transition, use the "transition" property (the Transition constant). 
 As a value, this property is assigned rui.Params, where the property name should be the key, 
-and the value should be the Animation interface.
+and the value should be the AnimationProperty interface.
 For example,
 
 	view.Set(rui.Transition, rui.Params{
@@ -5122,7 +5122,7 @@ To get the current list of permanent transition animations, use the function
 
 It is recommended to add new transition animations using the function 
 
-	func AddTransition(view View, subviewID, tag string, animation Animation) bool
+	func AddTransition(view View, subviewID, tag string, animation AnimationProperty) bool
 
 Calling this function is equivalent to the following code
 
@@ -5162,7 +5162,7 @@ Get lists of listeners for transition animation events using functions:
 
 ### Animation script
 
-An animation script describes a more complex animation than a transition animation. To do this, additional properties are added to Animation:
+An animation script describes a more complex animation than a transition animation. To do this, additional properties are added to AnimationProperty:
 
 #### "property" property
 
@@ -5228,12 +5228,12 @@ backward playback of the sequence. It can take the following values:
 
 #### Animation start
 
-To start the animation script, you must assign the interface created by Animation to the "animation" property 
-(the AnimationTag constant). If the View is already displayed on the screen, then the animation starts immediately
+To start the animation script, you must assign the interface created by AnimationProperty to the "animation" property 
+(the Animation constant). If the View is already displayed on the screen, then the animation starts immediately
 (taking into account the specified delay), otherwise the animation starts as soon as the View is displayed 
 on the screen.
 
-The "animation" property can be assigned Animation and [] Animation, ie. you can run several animations 
+The "animation" property can be assigned AnimationProperty and [] AnimationProperty, ie. you can run several animations 
 at the same time for one View
 
 Example,
@@ -5251,7 +5251,7 @@ Example,
 		rui.Duration:       2,
 		rui.TimingFunction: LinearTiming,
 	})
-	rui.Set(view, "subview", rui.AnimationTag, animation)
+	rui.Set(view, "subview", rui.Animation, animation)
 
 #### "animation-paused" property
 

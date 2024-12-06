@@ -6,7 +6,7 @@ import (
 
 func setTransitionProperty(properties Properties, value any) bool {
 
-	transitions := map[PropertyName]Animation{}
+	transitions := map[PropertyName]AnimationProperty{}
 
 	setObject := func(obj DataObject) bool {
 		if obj != nil {
@@ -33,7 +33,7 @@ func setTransitionProperty(properties Properties, value any) bool {
 			}
 
 			if val != nil {
-				if animation, ok := val.(Animation); ok {
+				if animation, ok := val.(AnimationProperty); ok {
 					transitions[PropertyName(tag)] = animation
 				} else {
 					notCompatibleType(Transition, val)
@@ -424,7 +424,7 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 			return nil
 		}
 
-	case AnimationTag:
+	case Animation:
 		if setAnimationProperty(style, tag, value) {
 			return []PropertyName{tag}
 		} else {

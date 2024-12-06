@@ -12,15 +12,15 @@ type ViewStyle interface {
 	Properties
 
 	// Transition returns the transition animation of the property. Returns nil is there is no transition animation.
-	Transition(tag PropertyName) Animation
+	Transition(tag PropertyName) AnimationProperty
 
 	// Transitions returns the map of transition animations. The result is always non-nil.
-	Transitions() map[PropertyName]Animation
+	Transitions() map[PropertyName]AnimationProperty
 
 	// SetTransition sets the transition animation for the property if "animation" argument is not nil, and
 	// removes the transition animation of the property if "animation" argument  is nil.
 	// The "tag" argument is the property name.
-	SetTransition(tag PropertyName, animation Animation)
+	SetTransition(tag PropertyName, animation AnimationProperty)
 
 	cssViewStyle(buffer cssBuilder, session Session)
 }
@@ -412,7 +412,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	}
 
 	if animation := animationCSS(style, session); animation != "" {
-		builder.add(string(AnimationTag), animation)
+		builder.add(string(Animation), animation)
 	}
 
 	if pause, ok := boolProperty(style, AnimationPaused, session); ok {
@@ -566,7 +566,7 @@ func supportedPropertyValue(value any) bool {
 	case []BackgroundElement:
 	case []BackgroundGradientPoint:
 	case []BackgroundGradientAngle:
-	case map[PropertyName]Animation:
+	case map[PropertyName]AnimationProperty:
 	default:
 		return false
 	}
@@ -775,7 +775,7 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 		}
 		buffer.WriteRune('"')
 
-	case map[PropertyName]Animation:
+	case map[PropertyName]AnimationProperty:
 		switch count := len(value); count {
 		case 0:
 			buffer.WriteString("[]")

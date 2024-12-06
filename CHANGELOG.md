@@ -26,6 +26,8 @@
     PolygonPointsClip function -> NewPolygonPointsClip
     ViewFilter interface -> FilterProperty
     NewViewFilter function -> NewFilterProperty
+    Animation interface -> AnimationProperty
+    AnimationTag constant -> Animation
 
 * Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
 NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,

@@ -9,20 +9,20 @@ import (
 
 // Constants which related to view's animation
 const (
-	// AnimationTag is the constant for "animation" property tag.
+	// Animation is the constant for "animation" property tag.
 	//
 	// Used by View.
 	// Sets and starts animations.
 	//
-	// Supported types: Animation, []Animation.
+	// Supported types: AnimationProperty, []AnimationProperty.
 	//
-	// Internal type is []Animation, other types converted to it during assignment.
-	// See Animation description for more details.
-	AnimationTag PropertyName = "animation"
+	// Internal type is []AnimationProperty, other types converted to it during assignment.
+	// See AnimationProperty description for more details.
+	Animation PropertyName = "animation"
 
 	// AnimationPaused is the constant for "animation-paused" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	// Controls whether the animation is running or paused.
 	//
 	// Supported types: bool, int, string.
@@ -36,7 +36,7 @@ const (
 	//
 	// Used by View.
 	//
-	// Sets transition animation of view properties. Each provided property must contain Animation which describe how
+	// Sets transition animation of view properties. Each provided property must contain AnimationProperty which describe how
 	// particular property will be animated on property value change. Transition animation can be applied to properties of the
 	// type SizeUnit, Color, AngleUnit, float64 and composite properties that contain elements of the listed types(for
 	// example, "shadow", "border", etc.). If we'll try to animate other properties with internal type like bool or
@@ -49,7 +49,7 @@ const (
 
 	// PropertyTag is the constant for "property" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	//
 	// Describes a scenario for changing a View's property. Used only for animation script.
 	//
@@ -61,7 +61,7 @@ const (
 
 	// Duration is the constant for "duration" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	//
 	// Sets the length of time in seconds that an animation takes to complete one cycle.
 	//
@@ -72,7 +72,7 @@ const (
 
 	// Delay is the constant for "delay" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	//
 	// Specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
 	// the animation. The animation can start later, immediately from its beginning or immediately and partway through the
@@ -85,7 +85,7 @@ const (
 
 	// TimingFunction is the constant for "timing-function" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	//
 	// Set how an animation progresses through the duration of each cycle.
 	//
@@ -103,7 +103,7 @@ const (
 
 	// IterationCount is the constant for "iteration-count" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	//
 	// Sets the number of times an animation sequence should be played before stopping. Used only for animation script.
 	//
@@ -114,7 +114,7 @@ const (
 
 	// AnimationDirection is the constant for "animation-direction" property tag.
 	//
-	// Used by Animation.
+	// Used by AnimationProperty.
 	//
 	// Whether an animation should play forward, backward, or alternate back and forth between playing the sequence forward
 	// and backward. Used only for animation script.
@@ -208,21 +208,21 @@ type animationData struct {
 	keyFramesName string
 	usageCounter  int
 	view          View
-	listener      func(view View, animation Animation, event PropertyName)
+	listener      func(view View, animation AnimationProperty, event PropertyName)
 	oldListeners  map[PropertyName][]func(View, PropertyName)
-	oldAnimation  []Animation
+	oldAnimation  []AnimationProperty
 }
 
-// Animation interface is used to set animation parameters. Used properties:
+// AnimationProperty interface is used to set animation parameters. Used properties:
 //
 // "property", "id", "duration", "delay", "timing-function", "iteration-count", and "animation-direction"
-type Animation interface {
+type AnimationProperty interface {
 	Properties
 	fmt.Stringer
 
 	// Start starts the animation for the view specified by the first argument.
 	// The second argument specifies the animation event listener (can be nil)
-	Start(view View, listener func(view View, animation Animation, event PropertyName)) bool
+	Start(view View, listener func(view View, animation AnimationProperty, event PropertyName)) bool
 	// Stop stops the animation
 	Stop()
 	// Pause pauses the animation
@@ -239,7 +239,7 @@ type Animation interface {
 	unused(session Session)
 }
 
-func parseAnimation(obj DataObject) Animation {
+func parseAnimation(obj DataObject) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
 
@@ -257,7 +257,7 @@ func parseAnimation(obj DataObject) Animation {
 }
 
 // NewAnimation creates a new animation object and return its interface
-func NewAnimation(params Params) Animation {
+func NewAnimation(params Params) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
 
@@ -269,7 +269,7 @@ func NewAnimation(params Params) Animation {
 
 func (animation *animationData) init() {
 	animation.dataProperty.init()
-	animation.normalize = normalizeAnimationTag
+	animation.normalize = normalizeAnimation
 	animation.set = animationSet
 	animation.supportedProperties = []PropertyName{ID, PropertyTag, Duration, Delay, TimingFunction, IterationCount, AnimationDirection}
 }
@@ -314,7 +314,7 @@ func (animation *animationData) unused(session Session) {
 	}
 }
 
-func normalizeAnimationTag(tag PropertyName) PropertyName {
+func normalizeAnimation(tag PropertyName) PropertyName {
 	tag = defaultNormalize(tag)
 	if tag == Direction {
 		return AnimationDirection
@@ -777,7 +777,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 	return name
 }
 
-func (view *viewData) SetAnimated(tag PropertyName, value any, animation Animation) bool {
+func (view *viewData) SetAnimated(tag PropertyName, value any, animation AnimationProperty) bool {
 	if animation == nil {
 		return view.Set(tag, value)
 	}
@@ -790,7 +790,7 @@ func (view *viewData) SetAnimated(tag PropertyName, value any, animation Animati
 	session.updateProperty(htmlID, "ontransitioncancel", "transitionCancelEvent(this, event)")
 
 	transitions := getTransitionProperty(view)
-	var prevAnimation Animation = nil
+	var prevAnimation AnimationProperty = nil
 	if transitions != nil {
 		if prev, ok := transitions[tag]; ok {
 			prevAnimation = prev
@@ -812,8 +812,8 @@ func (view *viewData) SetAnimated(tag PropertyName, value any, animation Animati
 }
 
 func animationCSS(properties Properties, session Session) string {
-	if value := properties.getRaw(AnimationTag); value != nil {
-		if animations, ok := value.([]Animation); ok {
+	if value := properties.getRaw(Animation); value != nil {
+		if animations, ok := value.([]AnimationProperty); ok {
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
 
@@ -874,7 +874,7 @@ func (view *viewData) updateTransitionCSS() {
 }
 */
 
-func (style *viewStyle) Transition(tag PropertyName) Animation {
+func (style *viewStyle) Transition(tag PropertyName) AnimationProperty {
 	if transitions := getTransitionProperty(style); transitions != nil {
 		if anim, ok := transitions[tag]; ok {
 			return anim
@@ -883,26 +883,26 @@ func (style *viewStyle) Transition(tag PropertyName) Animation {
 	return nil
 }
 
-func (style *viewStyle) Transitions() map[PropertyName]Animation {
-	result := map[PropertyName]Animation{}
+func (style *viewStyle) Transitions() map[PropertyName]AnimationProperty {
+	result := map[PropertyName]AnimationProperty{}
 	for tag, animation := range getTransitionProperty(style) {
 		result[tag] = animation
 	}
 	return result
 }
 
-func (style *viewStyle) SetTransition(tag PropertyName, animation Animation) {
+func (style *viewStyle) SetTransition(tag PropertyName, animation AnimationProperty) {
 	setTransition(style, style.normalize(tag), animation)
 }
 
-func (view *viewData) SetTransition(tag PropertyName, animation Animation) {
+func (view *viewData) SetTransition(tag PropertyName, animation AnimationProperty) {
 	setTransition(view, view.normalize(tag), animation)
 	if view.created {
 		view.session.updateCSSProperty(view.htmlID(), "transition", transitionCSS(view, view.session))
 	}
 }
 
-func setTransition(properties Properties, tag PropertyName, animation Animation) {
+func setTransition(properties Properties, tag PropertyName, animation AnimationProperty) {
 	transitions := getTransitionProperty(properties)
 
 	if animation == nil {
@@ -915,13 +915,13 @@ func setTransition(properties Properties, tag PropertyName, animation Animation)
 	} else if transitions != nil {
 		transitions[tag] = animation
 	} else {
-		properties.setRaw(Transition, map[PropertyName]Animation{tag: animation})
+		properties.setRaw(Transition, map[PropertyName]AnimationProperty{tag: animation})
 	}
 }
 
-func getTransitionProperty(properties Properties) map[PropertyName]Animation {
+func getTransitionProperty(properties Properties) map[PropertyName]AnimationProperty {
 	if value := properties.getRaw(Transition); value != nil {
-		if transitions, ok := value.(map[PropertyName]Animation); ok {
+		if transitions, ok := value.(map[PropertyName]AnimationProperty); ok {
 			return transitions
 		}
 	}
@@ -930,7 +930,7 @@ func getTransitionProperty(properties Properties) map[PropertyName]Animation {
 
 func setAnimationProperty(properties Properties, tag PropertyName, value any) bool {
 
-	set := func(animations []Animation) {
+	set := func(animations []AnimationProperty) {
 		properties.setRaw(tag, animations)
 		for _, animation := range animations {
 			animation.used()
@@ -938,22 +938,22 @@ func setAnimationProperty(properties Properties, tag PropertyName, value any) bo
 	}
 
 	switch value := value.(type) {
-	case Animation:
-		set([]Animation{value})
+	case AnimationProperty:
+		set([]AnimationProperty{value})
 		return true
 
-	case []Animation:
+	case []AnimationProperty:
 		set(value)
 		return true
 
 	case DataObject:
 		if animation := parseAnimation(value); animation.hasAnimatedProperty() {
-			set([]Animation{animation})
+			set([]AnimationProperty{animation})
 			return true
 		}
 
 	case DataNode:
-		animations := []Animation{}
+		animations := []AnimationProperty{}
 		result := true
 		for i := 0; i < value.ArraySize(); i++ {
 			if obj := value.ArrayElement(i).Object(); obj != nil {
@@ -980,7 +980,7 @@ func setAnimationProperty(properties Properties, tag PropertyName, value any) bo
 // SetAnimated sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
 // true - success,
 // false - error (incompatible type or invalid format of a string value, see AppLog).
-func SetAnimated(rootView View, viewID string, tag PropertyName, value any, animation Animation) bool {
+func SetAnimated(rootView View, viewID string, tag PropertyName, value any, animation AnimationProperty) bool {
 	if view := ViewByID(rootView, viewID); view != nil {
 		return view.SetAnimated(tag, value, animation)
 	}
@@ -995,17 +995,17 @@ func IsAnimationPaused(view View, subviewID ...string) bool {
 
 // GetTransitions returns the subview transitions. The result is always non-nil.
 // If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
-func GetTransitions(view View, subviewID ...string) map[PropertyName]Animation {
+func GetTransitions(view View, subviewID ...string) map[PropertyName]AnimationProperty {
 	if view = getSubview(view, subviewID); view != nil {
 		return view.Transitions()
 	}
 
-	return map[PropertyName]Animation{}
+	return map[PropertyName]AnimationProperty{}
 }
 
 // GetTransition returns the subview property transition. If there is no transition for the given property then nil is returned.
 // If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
-func GetTransition(view View, subviewID string, tag PropertyName) Animation {
+func GetTransition(view View, subviewID string, tag PropertyName) AnimationProperty {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
 	}
@@ -1019,7 +1019,7 @@ func GetTransition(view View, subviewID string, tag PropertyName) Animation {
 
 // AddTransition adds the transition for the subview property.
 // If the second argument (subviewID) is not specified or it is "" then the transition is added to the first argument (view)
-func AddTransition(view View, subviewID string, tag PropertyName, animation Animation) bool {
+func AddTransition(view View, subviewID string, tag PropertyName, animation AnimationProperty) bool {
 	if tag != "" {
 		if subviewID != "" {
 			view = ViewByID(view, subviewID)
@@ -1035,14 +1035,14 @@ func AddTransition(view View, subviewID string, tag PropertyName, animation Anim
 
 // GetAnimation returns the subview animations. The result is always non-nil.
 // If the second argument (subviewID) is not specified or it is "" then transitions of the first argument (view) is returned
-func GetAnimation(view View, subviewID ...string) []Animation {
+func GetAnimation(view View, subviewID ...string) []AnimationProperty {
 	if view = getSubview(view, subviewID); view != nil {
-		if value := view.getRaw(AnimationTag); value != nil {
-			if animations, ok := value.([]Animation); ok && animations != nil {
+		if value := view.getRaw(Animation); value != nil {
+			if animations, ok := value.([]AnimationProperty); ok && animations != nil {
 				return animations
 			}
 		}
 	}
 
-	return []Animation{}
+	return []AnimationProperty{}
 }

@@ -62,7 +62,7 @@ type View interface {
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
-	SetAnimated(tag PropertyName, value any, animation Animation) bool
+	SetAnimated(tag PropertyName, value any, animation AnimationProperty) bool
 
 	// SetChangeListener set the function to track the change of the View property
 	SetChangeListener(tag PropertyName, listener func(View, PropertyName))
@@ -102,7 +102,7 @@ type viewData struct {
 	parentID         string
 	systemClass      string
 	changeListener   map[PropertyName]func(View, PropertyName)
-	singleTransition map[PropertyName]Animation
+	singleTransition map[PropertyName]AnimationProperty
 	addCSS           map[string]string
 	frame            Frame
 	scroll           Frame
@@ -155,7 +155,7 @@ func (view *viewData) init(session Session) {
 	view.changeListener = map[PropertyName]func(View, PropertyName){}
 	view.addCSS = map[string]string{}
 	//view.animation = map[string]AnimationEndListener{}
-	view.singleTransition = map[PropertyName]Animation{}
+	view.singleTransition = map[PropertyName]AnimationProperty{}
 	view.noResizeEvent = false
 	view.created = false
 	view.hasHtmlDisabled = false
@@ -294,16 +294,16 @@ func (view *viewData) removeFunc(tag PropertyName) []PropertyName {
 			changedTags = []PropertyName{}
 		}
 
-	case AnimationTag:
-		if val := view.getRaw(AnimationTag); val != nil {
-			if animations, ok := val.([]Animation); ok {
+	case Animation:
+		if val := view.getRaw(Animation); val != nil {
+			if animations, ok := val.([]AnimationProperty); ok {
 				for _, animation := range animations {
 					animation.unused(view.session)
 				}
 			}
 
-			view.setRaw(AnimationTag, nil)
-			changedTags = []PropertyName{AnimationTag}
+			view.setRaw(Animation, nil)
+			changedTags = []PropertyName{Animation}
 		}
 
 	default:
@@ -326,10 +326,10 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 		notCompatibleType(ID, value)
 		return nil
 
-	case AnimationTag:
-		oldAnimations := []Animation{}
-		if val := view.getRaw(AnimationTag); val != nil {
-			if animation, ok := val.([]Animation); ok {
+	case Animation:
+		oldAnimations := []AnimationProperty{}
+		if val := view.getRaw(Animation); val != nil {
+			if animation, ok := val.([]AnimationProperty); ok {
 				oldAnimations = animation
 			}
 		}
@@ -341,7 +341,7 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 		for _, animation := range oldAnimations {
 			animation.unused(view.session)
 		}
-		return []PropertyName{AnimationTag}
+		return []PropertyName{Animation}
 
 	case TabIndex, "tab-index":
 		return setIntProperty(view, TabIndex, value)
@@ -635,7 +635,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case Transition:
 		session.updateCSSProperty(htmlID, "transition", transitionCSS(view, session))
 
-	case AnimationTag:
+	case Animation:
 		session.updateCSSProperty(htmlID, "animation", animationCSS(view, session))
 
 	case AnimationPaused:
