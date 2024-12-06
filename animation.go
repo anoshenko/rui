@@ -319,8 +319,8 @@ func NewTransitionAnimation(timingFunc string, duration float64, delay float64) 
 //     or alternate back and forth between playing the sequence forward and backward. Only the following values ​​can be used:
 //     0 (NormalAnimation), 1 (ReverseAnimation), 2 (AlternateAnimation), and 3 (AlternateReverseAnimation);
 //   - iterationCount - specifies the number of times an animation sequence should be played before stopping. A negative value specifies infinite repetition;
-//   - property - describes a scenario for changing a View's property.
-func NewAnimation(id string, timingFunc string, duration float64, delay float64, direction int, iterationCount int, property ...AnimatedProperty) AnimationProperty {
+//   - property, properties - describes a scenario for changing a View's property.
+func NewAnimation(id string, timingFunc string, duration float64, delay float64, direction int, iterationCount int, property AnimatedProperty, properties ...AnimatedProperty) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
 
@@ -353,7 +353,9 @@ func NewAnimation(id string, timingFunc string, duration float64, delay float64,
 		animation.Set(IterationCount, iterationCount)
 	}
 
-	if len(property) > 0 {
+	if len(properties) > 0 {
+		animation.Set(PropertyTag, append([]AnimatedProperty{property}, properties...))
+	} else {
 		animation.Set(PropertyTag, property)
 	}
 
