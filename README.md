@@ -2963,13 +2963,14 @@ DetailsView switches between states by clicking on "summary" view.
 For forced switching of the DetailsView states, the bool property "expanded" (Expanded constant) is used. 
 Accordingly, the value "true" shows child Views, "false" - hides.
 
-You can get the value of the "expanded" property using the function
+By default, a ▶︎/▼ marker is displayed at the beginning of the "summary" element. It can be hidden.
+For this, the "hide-summary-marker" bool property (DetailsView constant) is used.
 
-	func IsDetailsExpanded(view View, subviewID ...string) bool
-
-and the value of the "summary" property can be obtained using the function
+The value of the "summary", "expanded" and "hide-summary-marker" properties can be obtained using the functions
 
 	func GetDetailsSummary(view View, subviewID ...string) View
+	func IsDetailsExpanded(view View, subviewID ...string) bool
+	func IsSummaryMarkerHidden(view View, subviewID ...string) bool
 
 ## Resizable
 

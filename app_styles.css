@@ -181,6 +181,14 @@ ul:focus {
   overflow: auto;
 }
 
+.hiddenMarker {
+  list-style: none;
+}
+
+.hiddenMarker::-webkit-details-marker {
+  display: none;
+}
+
 /*
 @media (prefers-color-scheme: light) {
   body {

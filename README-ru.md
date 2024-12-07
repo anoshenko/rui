@@ -2980,13 +2980,14 @@ DetailsView переключается между состояниями по к
 "expanded" (константа Expanded). Соответственно значение "true" показывает дочерние
 View, "false" - скрывает.
 
-Получить значение свойства "expanded" можно с помощью функции
+По умолчанию в начале элемента "summary" отображается маркер ▶︎/▼. Его можно спрятать.
+Для этого используется свойство "hide-summary-marker" (константа DetailsView) типа bool.
 
-	func IsDetailsExpanded(view View, subviewID ...string) bool
-
-а значение свойства "summary" можно получить с помощью функции
+Получить значение свойств "summary", "expanded" и "hide-summary-marker" можно с помощью функций
 
 	func GetDetailsSummary(view View, subviewID ...string) View
+	func IsDetailsExpanded(view View, subviewID ...string) bool
+	func IsSummaryMarkerHidden(view View, subviewID ...string) bool
 
 ## Resizable
 

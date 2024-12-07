@@ -63,6 +63,7 @@ var boolProperties = []PropertyName{
 	UserSelect,
 	ColumnSpanAll,
 	MoveToFrontAnimation,
+	HideSummaryMarker,
 }
 
 var intProperties = []PropertyName{

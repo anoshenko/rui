@@ -25,6 +25,18 @@ const (
 	//   - true, 1, "true", "yes", "on", or "1" - Content is visible.
 	//   - false, 0, "false", "no", "off", or "0" - Content is collapsed (hidden).
 	Expanded PropertyName = "expanded"
+
+	// HideSummaryMarker is the constant for "hide-summary-marker" property tag.
+	//
+	// Used by DetailsView.
+	// Allows you to hide the summary marker (▶︎). Default value is false.
+	//
+	// Supported types: bool, int, string.
+	//
+	// Values:
+	//   - true, 1, "true", "yes", "on", or "1" - The summary marker is hidden.
+	//   - false, 0, "false", "no", "off", or "0" - The summary marker is displayed (default value).
+	HideSummaryMarker PropertyName = "hide-summary-marker"
 )
 
 // DetailsView represent a DetailsView view, which is a collapsible container of views
@@ -99,7 +111,7 @@ func (detailsView *detailsViewData) setFunc(tag PropertyName, value any) []Prope
 
 func (detailsView *detailsViewData) propertyChanged(tag PropertyName) {
 	switch tag {
-	case Summary:
+	case Summary, HideSummaryMarker:
 		updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 	case Expanded:
@@ -130,24 +142,46 @@ func (detailsView *detailsViewData) htmlProperties(self View, buffer *strings.Bu
 }
 
 func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	summary := false
+	hidden := IsSummaryMarkerHidden(detailsView)
+
 	if value, ok := detailsView.properties[Summary]; ok {
+
 		switch value := value.(type) {
 		case string:
 			if !GetNotTranslate(detailsView) {
 				value, _ = detailsView.session.GetString(value)
 			}
-			buffer.WriteString("<summary>")
+			if hidden {
+				buffer.WriteString(`<summary class="hiddenMarker">`)
+			} else {
+				buffer.WriteString("<summary>")
+			}
 			buffer.WriteString(value)
 			buffer.WriteString("</summary>")
+			summary = true
 
 		case View:
-			if value.htmlTag() == "div" {
+			if hidden {
+				buffer.WriteString(`<summary class="hiddenMarker">`)
+				viewHTML(value, buffer, "")
+				buffer.WriteString("</summary>")
+			} else if value.htmlTag() == "div" {
 				viewHTML(value, buffer, "summary")
 			} else {
 				buffer.WriteString(`<summary><div style="display: inline-block;">`)
 				viewHTML(value, buffer, "")
 				buffer.WriteString("</div></summary>")
 			}
+			summary = true
+		}
+	}
+
+	if !summary {
+		if hidden {
+			buffer.WriteString(`<summary class="hiddenMarker"></summary>`)
+		} else {
+			buffer.WriteString("<summary></summary>")
 		}
 	}
 
@@ -188,4 +222,10 @@ func GetDetailsSummary(view View, subviewID ...string) View {
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func IsDetailsExpanded(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Expanded, false)
+}
+
+// IsDetailsExpanded returns a value of the HideSummaryMarker property of DetailsView.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsSummaryMarkerHidden(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, HideSummaryMarker, false)
 }

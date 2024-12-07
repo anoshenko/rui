@@ -33,7 +33,7 @@
 * Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
 NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
 GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin, NewColumnSeparator,
-NewClipShapeProperty, NewTransitionAnimation, NewAnimation.
+NewClipShapeProperty, NewTransitionAnimation, NewAnimation, IsSummaryMarkerHidden.
 
 * Added SetConicGradientFillStyle and SetConicGradientStrokeStyle methods to Canvas interface.
 
@@ -48,6 +48,8 @@ NewClipShapeProperty, NewTransitionAnimation, NewAnimation.
 * Added "show-opacity", "show-transform", "show-duration", and "show-timing" Popup properties.
 
 * Added "mask", "mask-clip", "mask-origin", and "background-origin" properties.
+
+* Added "hide-summary-marker" DetailsView property.
 
 * Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
 
