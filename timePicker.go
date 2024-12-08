@@ -316,7 +316,7 @@ func (picker *timePickerData) handleCommand(self View, command PropertyName, dat
 	switch command {
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
-			if value, err := time.Parse(timeFormat, text); err == nil {
+			if value, ok := stringToTime(text); ok {
 				oldValue := GetTimePickerValue(picker)
 				picker.properties[TimePickerValue] = value
 				if value != oldValue {
