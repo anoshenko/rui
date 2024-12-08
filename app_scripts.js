@@ -633,6 +633,7 @@ function listItemClickEvent(element, event) {
 	const list = element.parentNode.parentNode
 	if (list) {
 		const number = getListItemNumber(element.id)
+		selectListItem(list, element)
 		sendMessage("itemClick{session=" + sessionID + ",id=" + list.id + ",number=" + number + "}");
 	}
 }
@@ -692,7 +693,6 @@ function selectListItem(element, item) {
 		if (number != undefined) {
 			message = "itemSelected{session=" + sessionID + ",id=" + element.id + ",number=" + number + "}";
 		}
-		
 
 		if (item.scrollIntoViewIfNeeded) {
 			item.scrollIntoViewIfNeeded()
