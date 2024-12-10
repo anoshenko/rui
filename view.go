@@ -731,6 +731,13 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case DataList:
 		updateInnerHTML(view.htmlID(), view.Session())
 
+	case Opacity:
+		if f, ok := floatTextProperty(view, Opacity, session, 0); ok {
+			session.updateCSSProperty(htmlID, string(Opacity), f)
+		} else {
+			session.updateCSSProperty(htmlID, string(Opacity), "")
+		}
+
 	default:
 		if cssTag, ok := sizeProperties[tag]; ok {
 			if size, ok := sizeProperty(view, tag, session); ok {
@@ -764,12 +771,6 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 				session.updateCSSProperty(htmlID, valuesData.cssTag, "")
 			}
 			return
-		}
-
-		if f, ok := floatTextProperty(view, Opacity, session, 0); ok {
-			session.updateCSSProperty(htmlID, string(Opacity), f)
-		} else {
-			session.updateCSSProperty(htmlID, string(Opacity), "")
 		}
 	}
 }

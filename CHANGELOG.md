@@ -35,6 +35,8 @@ NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMo
 GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin, NewColumnSeparator,
 NewClipShapeProperty, NewTransitionAnimation, NewAnimation, IsSummaryMarkerHidden.
 
+* Changed ViewByID functions
+
 * Added SetConicGradientFillStyle and SetConicGradientStrokeStyle methods to Canvas interface.
 
 * Changed Push, Pop, MoveToFront, and MoveToFrontByID methods of StackLayout interface.

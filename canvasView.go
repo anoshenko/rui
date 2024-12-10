@@ -39,7 +39,7 @@ func (canvasView *canvasViewData) init(session Session) {
 	canvasView.normalize = normalizeCanvasViewTag
 	canvasView.set = canvasView.setFunc
 	canvasView.remove = canvasView.removeFunc
-
+	canvasView.changed = canvasView.propertyChanged
 }
 
 func normalizeCanvasViewTag(tag PropertyName) PropertyName {
@@ -72,11 +72,18 @@ func (canvasView *canvasViewData) setFunc(tag PropertyName, value any) []Propert
 			notCompatibleType(tag, value)
 			return nil
 		}
-		canvasView.Redraw()
 		return []PropertyName{DrawFunction}
 	}
 
 	return canvasView.viewData.setFunc(tag, value)
+}
+
+func (canvasView *canvasViewData) propertyChanged(tag PropertyName) {
+	if tag == DrawFunction {
+		canvasView.Redraw()
+	} else {
+		canvasView.viewData.propertyChanged(tag)
+	}
 }
 
 func (canvasView *canvasViewData) htmlTag() string {
