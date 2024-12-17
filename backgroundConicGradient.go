@@ -19,9 +19,16 @@ type BackgroundGradientAngle struct {
 }
 
 // NewBackgroundConicGradient creates the new background conic gradient
+//
+// The following properties can be used:
+//   - "gradient" [Gradient] - Describes gradient stop points. This is a mandatory property while describing background gradients.
+//   - "center-x" [CenterX] - center X point of the gradient.
+//   - "center-y" [CenterY] - center Y point of the gradient.
+//   - "from" [From] - start angle position of the gradient.
+//   - "repeating" [Repeating] - Defines whether stop points needs to be repeated after the last one.
 func NewBackgroundConicGradient(params Params) BackgroundElement {
 	result := new(backgroundConicGradient)
-	result.properties = map[string]any{}
+	result.init()
 	for tag, value := range params {
 		result.Set(tag, value)
 	}
@@ -48,7 +55,6 @@ func (point *BackgroundGradientAngle) String() string {
 
 		case AngleUnit:
 			result += " " + value.String()
-
 		}
 	}
 
@@ -73,6 +79,11 @@ func (point *BackgroundGradientAngle) color(session Session) (Color, bool) {
 
 		case Color:
 			return color, true
+
+		default:
+			if n, ok := isInt(color); ok {
+				return Color(n), true
+			}
 		}
 	}
 	return 0, false
@@ -115,6 +126,15 @@ func (point *BackgroundGradientAngle) cssString(session Session, buffer *strings
 	}
 }
 
+func (gradient *backgroundConicGradient) init() {
+	gradient.backgroundElement.init()
+	gradient.normalize = normalizeConicGradientTag
+	gradient.set = backgroundConicGradientSet
+	gradient.supportedProperties = []PropertyName{
+		CenterX, CenterY, Repeating, From, Gradient,
+	}
+}
+
 func (gradient *backgroundConicGradient) Tag() string {
 	return "conic-gradient"
 }
@@ -127,8 +147,8 @@ func (image *backgroundConicGradient) Clone() BackgroundElement {
 	return result
 }
 
-func (gradient *backgroundConicGradient) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeConicGradientTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case "x-center":
 		tag = CenterX
@@ -140,18 +160,50 @@ func (gradient *backgroundConicGradient) normalizeTag(tag string) string {
 	return tag
 }
 
-func (gradient *backgroundConicGradient) Set(tag string, value any) bool {
-	tag = gradient.normalizeTag(tag)
+func backgroundConicGradientSet(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
-	case CenterX, CenterY, Repeating, From:
-		return gradient.propertyList.Set(tag, value)
-
 	case Gradient:
-		return gradient.setGradient(value)
+		switch value := value.(type) {
+		case string:
+			if value == "" {
+				return propertiesRemove(properties, tag)
+			}
+
+			if strings.Contains(value, ",") || strings.Contains(value, " ") {
+				if vector := parseGradientText(value); vector != nil {
+					properties.setRaw(Gradient, vector)
+					return []PropertyName{tag}
+				}
+			} else if isConstantName(value) {
+				properties.setRaw(Gradient, value)
+				return []PropertyName{tag}
+			}
+
+			ErrorLogF(`Invalid conic gradient: "%s"`, value)
+
+		case []BackgroundGradientAngle:
+			count := len(value)
+			if count < 2 {
+				ErrorLog("The gradient must contain at least 2 points")
+				return nil
+			}
+
+			for i, point := range value {
+				if point.Color == nil {
+					ErrorLogF("Invalid %d element of the conic gradient: Color is nil", i)
+					return nil
+				}
+			}
+			properties.setRaw(Gradient, value)
+			return []PropertyName{tag}
+
+		default:
+			notCompatibleType(tag, value)
+		}
+		return nil
 	}
 
-	ErrorLogF(`"%s" property is not supported by BackgroundConicGradient`, tag)
-	return false
+	return propertiesSet(properties, tag, value)
 }
 
 func (gradient *backgroundConicGradient) stringToAngle(text string) (any, bool) {
@@ -216,57 +268,6 @@ func (gradient *backgroundConicGradient) parseGradientText(value string) []Backg
 	}
 	return vector
 }
-
-func (gradient *backgroundConicGradient) setGradient(value any) bool {
-	if value == nil {
-		delete(gradient.properties, Gradient)
-		return true
-	}
-
-	switch value := value.(type) {
-	case string:
-		if value == "" {
-			delete(gradient.properties, Gradient)
-			return true
-		}
-
-		if strings.Contains(value, ",") || strings.Contains(value, " ") {
-			if vector := gradient.parseGradientText(value); vector != nil {
-				gradient.properties[Gradient] = vector
-				return true
-			}
-			return false
-		} else if value[0] == '@' {
-			gradient.properties[Gradient] = value
-			return true
-		}
-
-		ErrorLogF(`Invalid conic gradient: "%s"`, value)
-		return false
-
-	case []BackgroundGradientAngle:
-		count := len(value)
-		if count < 2 {
-			ErrorLog("The gradient must contain at least 2 points")
-			return false
-		}
-
-		for i, point := range value {
-			if point.Color == nil {
-				ErrorLogF("Invalid %d element of the conic gradient: Color is nil", i)
-				return false
-			}
-		}
-		gradient.properties[Gradient] = value
-		return true
-	}
-	return false
-}
-
-func (gradient *backgroundConicGradient) Get(tag string) any {
-	return gradient.backgroundElement.Get(gradient.normalizeTag(tag))
-}
-
 func (gradient *backgroundConicGradient) cssStyle(session Session) string {
 
 	points := []BackgroundGradientAngle{}
@@ -339,7 +340,7 @@ func (gradient *backgroundConicGradient) cssStyle(session Session) string {
 }
 
 func (gradient *backgroundConicGradient) writeString(buffer *strings.Builder, indent string) {
-	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []string{
+	gradient.writeToBuffer(buffer, indent, gradient.Tag(), []PropertyName{
 		Gradient,
 		CenterX,
 		CenterY,

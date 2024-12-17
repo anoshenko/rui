@@ -2,21 +2,23 @@ package rui
 
 // ScrollEvent is the constant for "scroll-event" property tag.
 //
-// Used by `View`.
+// Used by View.
 // Is fired when the content of the view is scrolled.
 //
 // General listener format:
-// `func(view rui.View, frame rui.Frame)`.
+//
+//	func(view rui.View, frame rui.Frame)
 //
 // where:
-// view - Interface of a view which generated this event,
-// frame - New offset and size of the view's visible area.
+//   - view - Interface of a view which generated this event,
+//   - frame - New offset and size of the view's visible area.
 //
 // Allowed listener formats:
-// `func(frame rui.Frame)`,
-// `func(view rui.View)`,
-// `func()`.
-const ScrollEvent = "scroll-event"
+//
+//	func(frame rui.Frame)
+//	func(view rui.View)
+//	func()
+const ScrollEvent PropertyName = "scroll-event"
 
 func (view *viewData) onScroll(self View, x, y, width, height float64) {
 	view.scroll.Left = x
@@ -42,9 +44,7 @@ func (view *viewData) setScroll(x, y, width, height float64) {
 // GetViewScroll returns ...
 // If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned
 func GetViewScroll(view View, subviewID ...string) Frame {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return Frame{}
 	}
@@ -54,7 +54,7 @@ func GetViewScroll(view View, subviewID ...string) Frame {
 // GetScrollListeners returns the list of "scroll-event" listeners. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
 func GetScrollListeners(view View, subviewID ...string) []func(View, Frame) {
-	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
+	return getOneArgEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }
 
 // ScrollTo scrolls the view's content to the given position.
@@ -71,10 +71,7 @@ func ScrollViewTo(view View, subviewID string, x, y float64) {
 // ScrollViewToEnd scrolls the view's content to the start of view.
 // If the second argument (subviewID) is not specified or it is "" then the first argument (view) is used
 func ScrollViewToStart(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		view.Session().callFunc("scrollToStart", view.htmlID())
 	}
 }
@@ -82,10 +79,7 @@ func ScrollViewToStart(view View, subviewID ...string) {
 // ScrollViewToEnd scrolls the view's content to the end of view.
 // If the second argument (subviewID) is not specified or it is "" then the first argument (view) is used
 func ScrollViewToEnd(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		view.Session().callFunc("scrollToEnd", view.htmlID())
 	}
 }

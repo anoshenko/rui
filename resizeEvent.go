@@ -2,21 +2,23 @@ package rui
 
 // ResizeEvent is the constant for "resize-event" property tag.
 //
-// Used by `View`.
+// Used by View.
 // Is fired when the view changes its size.
 //
 // General listener format:
-// `func(view rui.View, frame rui.Frame)`.
+//
+//	func(view rui.View, frame rui.Frame)
 //
 // where:
-// view - Interface of a view which generated this event,
-// frame - New offset and size of the view's visible area.
+//   - view - Interface of a view which generated this event,
+//   - frame - New offset and size of the view's visible area.
 //
 // Allowed listener formats:
-// `func(frame rui.Frame)`,
-// `func(view rui.View)`,
-// `func()`.
-const ResizeEvent = "resize-event"
+//
+//	func(frame rui.Frame)
+//	func(view rui.View)
+//	func()
+const ResizeEvent PropertyName = "resize-event"
 
 func (view *viewData) onResize(self View, x, y, width, height float64) {
 	view.frame.Left = x
@@ -31,21 +33,20 @@ func (view *viewData) onResize(self View, x, y, width, height float64) {
 func (view *viewData) onItemResize(self View, index string, x, y, width, height float64) {
 }
 
-func (view *viewData) setFrameListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, Frame](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
+/*
+func setFrameListener(properties Properties, tag PropertyName, value any) bool {
+	if listeners, ok := valueToOneArgEventListeners[View, Frame](value); ok {
+		if len(listeners) == 0 {
+			properties.setRaw(tag, nil)
+		} else {
+			properties.setRaw(tag, listeners)
+		}
+		return true
 	}
-
-	if listeners == nil {
-		delete(view.properties, tag)
-	} else {
-		view.properties[tag] = listeners
-	}
-	view.propertyChangedEvent(tag)
-	return true
+	notCompatibleType(tag, value)
+	return false
 }
+*/
 
 func (view *viewData) setNoResizeEvent() {
 	view.noResizeEvent = true
@@ -74,9 +75,7 @@ func (view *viewData) Frame() Frame {
 // GetViewFrame returns the size and location of view's viewport.
 // If the second argument (subviewID) is not specified or it is "" then the value of the first argument (view) is returned
 func GetViewFrame(view View, subviewID ...string) Frame {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return Frame{}
 	}
@@ -86,5 +85,5 @@ func GetViewFrame(view View, subviewID ...string) Frame {
 // GetResizeListeners returns the list of "resize-event" listeners. If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
 func GetResizeListeners(view View, subviewID ...string) []func(View, Frame) {
-	return getEventListeners[View, Frame](view, subviewID, ResizeEvent)
+	return getOneArgEventListeners[View, Frame](view, subviewID, ResizeEvent)
 }

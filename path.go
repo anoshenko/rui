@@ -11,51 +11,50 @@ type Path interface {
 
 	// ArcTo adds a circular arc to the current sub-path, using the given control points and radius.
 	// The arc is automatically connected to the path's latest point with a straight line, if necessary.
-	//   x0, y0 - coordinates of the first control point;
-	//   x1, y1 - coordinates of the second control point;
-	//   radius - the arc's radius. Must be non-negative.
+	//  - x0, y0 - coordinates of the first control point;
+	//  - x1, y1 - coordinates of the second control point;
+	//  - radius - the arc's radius. Must be non-negative.
 	ArcTo(x0, y0, x1, y1, radius float64)
 
 	// Arc adds a circular arc to the current sub-path.
-	//   x, y - coordinates of the arc's center;
-	//   radius - the arc's radius. Must be non-negative;
-	//   startAngle - the angle at which the arc starts, measured clockwise from the positive
+	//   - x, y - coordinates of the arc's center;
+	//   - radius - the arc's radius. Must be non-negative;
+	//   - startAngle - the angle at which the arc starts, measured clockwise from the positive
 	//                x-axis and expressed in radians.
-	//   endAngle - the angle at which the arc ends, measured clockwise from the positive
+	//   - endAngle - the angle at which the arc ends, measured clockwise from the positive
 	//                x-axis and expressed in radians.
-	//   clockwise - if true, causes the arc to be drawn clockwise between the start and end angles,
+	//   - clockwise - if true, causes the arc to be drawn clockwise between the start and end angles,
 	//               otherwise - counter-clockwise
 	Arc(x, y, radius, startAngle, endAngle float64, clockwise bool)
 
 	// BezierCurveTo adds a cubic Bézier curve to the current sub-path. The starting point is
 	// the latest point in the current path.
-	//   cp0x, cp0y - coordinates of the first control point;
-	//   cp1x, cp1y - coordinates of the second control point;
-	//   x, y - coordinates of the end point.
+	//   - cp0x, cp0y - coordinates of the first control point;
+	//   - cp1x, cp1y - coordinates of the second control point;
+	//   - x, y - coordinates of the end point.
 	BezierCurveTo(cp0x, cp0y, cp1x, cp1y, x, y float64)
 
 	// QuadraticCurveTo  adds a quadratic Bézier curve to the current sub-path.
-	//   cpx, cpy - coordinates of the control point;
-	//   x, y - coordinates of the end point.
+	//   - cpx, cpy - coordinates of the control point;
+	//   - x, y - coordinates of the end point.
 	QuadraticCurveTo(cpx, cpy, x, y float64)
 
 	// Ellipse adds an elliptical arc to the current sub-path
-	//   x, y - coordinates of the ellipse's center;
-	//   radiusX - the ellipse's major-axis radius. Must be non-negative;
-	//   radiusY - the ellipse's minor-axis radius. Must be non-negative;
-	//   rotation - the rotation of the ellipse, expressed in radians;
-	//   startAngle - the angle at which the ellipse starts, measured clockwise
+	//   - x, y - coordinates of the ellipse's center;
+	//   - radiusX - the ellipse's major-axis radius. Must be non-negative;
+	//   - radiusY - the ellipse's minor-axis radius. Must be non-negative;
+	//   - rotation - the rotation of the ellipse, expressed in radians;
+	//   - startAngle - the angle at which the ellipse starts, measured clockwise
 	//                from the positive x-axis and expressed in radians;
-	//   endAngle - the angle at which the ellipse ends, measured clockwise
+	//   - endAngle - the angle at which the ellipse ends, measured clockwise
 	//	            from the positive x-axis and expressed in radians.
-	//   clockwise - if true, draws the ellipse clockwise, otherwise draws counter-clockwise
+	//   - clockwise - if true, draws the ellipse clockwise, otherwise draws counter-clockwise
 	Ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle float64, clockwise bool)
 
 	// Close adds a straight line from the current point to the start of the current sub-path.
 	// If the shape has already been closed or has only one point, this function does nothing.
 	Close()
 
-	//create(session Session)
 	obj() any
 }
 

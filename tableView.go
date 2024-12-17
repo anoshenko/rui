@@ -10,520 +10,528 @@ import (
 const (
 	// TableVerticalAlign is the constant for "table-vertical-align" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the vertical alignment of the content inside a table cell.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`TopAlign`) or "top" - Top alignment.
-	// `1`(`BottomAlign`) or "bottom" - Bottom alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Work as baseline alignment, see below.
-	// `4`(`BaselineAlign`) or "baseline" - Baseline alignment.
-	TableVerticalAlign = "table-vertical-align"
+	//   - 0 (TopAlign) or "top" - Top alignment.
+	//   - 1 (BottomAlign) or "bottom" - Bottom alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Work as baseline alignment, see below.
+	//   - 4 (BaselineAlign) or "baseline" - Baseline alignment.
+	TableVerticalAlign PropertyName = "table-vertical-align"
 
 	// HeadHeight is the constant for "head-height" property tag.
 	//
-	// Used by `TableView`.
-	// Sets the number of rows in the table header. The default value is `0` (no header).
+	// Used by TableView.
+	// Sets the number of rows in the table header. The default value is 0 (no header).
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0` or "0" - No header.
-	// > `0` or > "0" - Number of rows act as a header.
-	HeadHeight = "head-height"
+	//   - 0 or "0" - No header.
+	//   - positive value - Number of rows act as a header.
+	HeadHeight PropertyName = "head-height"
 
 	// HeadStyle is the constant for "head-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the header style name or description of style properties.
 	//
-	// Supported types: `string`, `Params`.
+	// Supported types: string, Params.
 	//
-	// Internal type is either `string` or `Params`.
+	// Internal type is either string or Params.
 	//
 	// Conversion rules:
-	// `string` - must contain style name defined in resources.
-	// `Params` - must contain style properties.
-	HeadStyle = "head-style"
+	//   - string - must contain style name defined in resources.
+	//   - Params - must contain style properties.
+	HeadStyle PropertyName = "head-style"
 
 	// FootHeight is the constant for "foot-height" property tag.
 	//
-	// Used by `TableView`.
-	// Sets the number of rows in the table footer. The default value is `0` (no footer).
+	// Used by TableView.
+	// Sets the number of rows in the table footer. The default value is 0 (no footer).
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0` or "0" - No footer.
-	// > `0` or > "0" - Number of rows act as a footer.
-	FootHeight = "foot-height"
+	//   - 0 or "0" - No footer.
+	//   - positive value - Number of rows act as a footer.
+	FootHeight PropertyName = "foot-height"
 
 	// FootStyle is the constant for "foot-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the footer style name or description of style properties.
 	//
-	// Supported types: `string`, `Params`.
+	// Supported types: string, Params.
 	//
-	// Internal type is either `string` or `Params`.
+	// Internal type is either string or Params.
 	//
 	// Conversion rules:
-	// `string` - must contain style name defined in resources.
-	// `Params` - must contain style properties.
-	FootStyle = "foot-style"
+	//   - string - must contain style name defined in resources.
+	//   - Params - must contain style properties.
+	FootStyle PropertyName = "foot-style"
 
 	// RowSpan is the constant for "row-span" property tag.
 	//
-	// Used by `TableView`.
-	// Set the number of table row to span. Used only when specifying cell parameters in the implementation of 
-	// `TableCellStyle`.
+	// Used by TableView.
+	// Set the number of table row to span. Used only when specifying cell parameters in the implementation of
+	// TableCellStyle.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0` or "0" - No merging will be applied.
-	// > `0` or > "0" - Number of rows including current one to be merged together.
-	RowSpan = "row-span"
+	//   - 0 or "0" - No merging will be applied.
+	//   - positive value - Number of rows including current one to be merged together.
+	RowSpan PropertyName = "row-span"
 
 	// ColumnSpan is the constant for "column-span" property tag.
 	//
-	// Used by `TableView`.
-	// Sets the number of table column cells to be merged together. Used only when specifying cell parameters in the 
-	// implementation of `TableCellStyle`.
+	// Used by TableView.
+	// Sets the number of table column cells to be merged together. Used only when specifying cell parameters in the
+	// implementation of TableCellStyle.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0` or "0" - No merging will be applied.
-	// > `0` or > "0" - Number of columns including current one to be merged together.
-	ColumnSpan = "column-span"
+	//   - 0 or "0" - No merging will be applied.
+	//   - positive value - Number of columns including current one to be merged together.
+	ColumnSpan PropertyName = "column-span"
 
 	// RowStyle is the constant for "row-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the adapter which specifies styles of each table row.
 	//
-	// Supported types: `TableRowStyle`, `[]Params`.
+	// Supported types: TableRowStyle, []Params.
 	//
-	// Internal type is `TableRowStyle`, other types converted to it during assignment.
-	// See `TableRowStyle` description for more details.
-	RowStyle = "row-style"
+	// Internal type is TableRowStyle, other types converted to it during assignment.
+	// See TableRowStyle description for more details.
+	RowStyle PropertyName = "row-style"
 
 	// ColumnStyle is the constant for "column-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the adapter which specifies styles of each table column.
 	//
-	// Supported types: `TableColumnStyle`, `[]Params`.
+	// Supported types: TableColumnStyle, []Params.
 	//
-	// Internal type is `TableColumnStyle`, other types converted to it during assignment.
-	// See `TableColumnStyle` description for more details.
-	ColumnStyle = "column-style"
+	// Internal type is TableColumnStyle, other types converted to it during assignment.
+	// See TableColumnStyle description for more details.
+	ColumnStyle PropertyName = "column-style"
 
 	// CellStyle is the constant for "cell-style" property tag.
 	//
-	// Used by `TableView`.
-	// Set the adapter which specifies styles of each table cell. This property can be assigned only by an implementation of 
-	// `TableCellStyle` interface.
+	// Used by TableView.
+	// Set the adapter which specifies styles of each table cell. This property can be assigned only by an implementation of
+	// TableCellStyle interface.
 	//
-	// Supported types: `TableCellStyle`.
-	CellStyle = "cell-style"
+	// Supported types: TableCellStyle.
+	CellStyle PropertyName = "cell-style"
 
 	// CellPadding is the constant for "cell-padding" property tag.
 	//
-	// Used by `TableView`.
-	// Sets the padding area on all four sides of a table cell at once. An element's padding area is the space between its 
+	// Used by TableView.
+	// Sets the padding area on all four sides of a table cell at once. An element's padding area is the space between its
 	// content and its border.
 	//
-	// Supported types: `BoundsProperty`, `Bounds`, `SizeUnit`, `float32`, `float64`, `int`.
+	// Supported types: BoundsProperty, Bounds, SizeUnit, float32, float64, int.
 	//
-	// Internal type is `BoundsProperty`, other types converted to it during assignment.
-	// See `BoundsProperty`, `Bounds` and `SizeUnit` description for more details.
-	CellPadding = "cell-padding"
+	// Internal type is BoundsProperty, other types converted to it during assignment.
+	// See BoundsProperty, Bounds and SizeUnit description for more details.
+	CellPadding PropertyName = "cell-padding"
 
 	// CellPaddingLeft is the constant for "cell-padding-left" property tag.
 	//
-	// Used by `TableView`.
-	// Set the width of the padding area to the left of a cell content. An element's padding area is the space between its 
+	// Used by TableView.
+	// Set the width of the padding area to the left of a cell content. An element's padding area is the space between its
 	// content and its border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellPaddingLeft = "cell-padding-left"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellPaddingLeft PropertyName = "cell-padding-left"
 
 	// CellPaddingRight is the constant for "cell-padding-right" property tag.
 	//
-	// Used by `TableView`.
-	// Set the width of the padding area to the left of a cell content. An element's padding area is the space between its 
+	// Used by TableView.
+	// Set the width of the padding area to the left of a cell content. An element's padding area is the space between its
 	// content and its border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellPaddingRight = "cell-padding-right"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellPaddingRight PropertyName = "cell-padding-right"
 
 	// CellPaddingTop is the constant for "cell-padding-top" property tag.
 	//
-	// Used by `TableView`.
-	// Set the height of the padding area to the top of a cell content. An element's padding area is the space between its 
+	// Used by TableView.
+	// Set the height of the padding area to the top of a cell content. An element's padding area is the space between its
 	// content and its border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellPaddingTop = "cell-padding-top"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellPaddingTop PropertyName = "cell-padding-top"
 
 	// CellPaddingBottom is the constant for "cell-padding-bottom" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the height of the padding area to the bottom of a cell content.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellPaddingBottom = "cell-padding-bottom"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellPaddingBottom PropertyName = "cell-padding-bottom"
 
 	// CellBorder is the constant for "cell-border" property tag.
 	//
-	// Used by `TableView`.
-	// Set a table cell's border. It sets the values of a border width, style, and color. Can also be used when setting 
+	// Used by TableView.
+	// Set a table cell's border. It sets the values of a border width, style, and color. Can also be used when setting
 	// parameters in properties "row-style", "column-style", "foot-style" and "head-style".
 	//
-	// Supported types: `BorderProperty`, `ViewBorder`, `ViewBorders`.
+	// Supported types: BorderProperty, ViewBorder, ViewBorders.
 	//
-	// Internal type is `BorderProperty`, other types converted to it during assignment.
-	// See `BorderProperty`, `ViewBorder` and `ViewBorders` description for more details.
-	CellBorder = "cell-border"
+	// Internal type is BorderProperty, other types converted to it during assignment.
+	// See BorderProperty, ViewBorder and ViewBorders description for more details.
+	CellBorder PropertyName = "cell-border"
 
 	// CellBorderLeft is the constant for "cell-border-left" property tag.
 	//
-	// Used by `TableView`.
-	// Set a view's left border. It sets the values of a border width, style, and color. This property can be assigned a value 
-	// of `BorderProperty`, `ViewBorder` types or `BorderProperty` text representation.
+	// Used by TableView.
+	// Set a view's left border. It sets the values of a border width, style, and color. This property can be assigned a value
+	// of BorderProperty, ViewBorder types or BorderProperty text representation.
 	//
-	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	// Supported types: ViewBorder, BorderProperty, string.
 	//
-	// Internal type is `BorderProperty`, other types converted to it during assignment.
-	// See `ViewBorder` and `BorderProperty` description for more details.
-	CellBorderLeft = "cell-border-left"
+	// Internal type is BorderProperty, other types converted to it during assignment.
+	// See ViewBorder and BorderProperty description for more details.
+	CellBorderLeft PropertyName = "cell-border-left"
 
 	// CellBorderRight is the constant for "cell-border-right" property tag.
 	//
-	// Used by `TableView`.
-	// Set a view's right border. It sets the values of a border width, style, and color. This property can be assigned a 
-	// value of `BorderProperty`, `ViewBorder` types or `BorderProperty` text representation.
+	// Used by TableView.
+	// Set a view's right border. It sets the values of a border width, style, and color. This property can be assigned a
+	// value of BorderProperty, ViewBorder types or BorderProperty text representation.
 	//
-	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	// Supported types: ViewBorder, BorderProperty, string.
 	//
-	// Internal type is `BorderProperty`, other types converted to it during assignment.
-	// See `ViewBorder` and `BorderProperty` description for more details.
-	CellBorderRight = "cell-border-right"
+	// Internal type is BorderProperty, other types converted to it during assignment.
+	// See ViewBorder and BorderProperty description for more details.
+	CellBorderRight PropertyName = "cell-border-right"
 
 	// CellBorderTop is the constant for "cell-border-top" property tag.
 	//
-	// Used by `TableView`.
-	// Set a view's top border. It sets the values of a border width, style, and color. This property can be assigned a value 
-	// of `BorderProperty`, `ViewBorder` types or `BorderProperty` text representation.
+	// Used by TableView.
+	// Set a view's top border. It sets the values of a border width, style, and color. This property can be assigned a value
+	// of BorderProperty, ViewBorder types or BorderProperty text representation.
 	//
-	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	// Supported types: ViewBorder, BorderProperty, string.
 	//
-	// Internal type is `BorderProperty`, other types converted to it during assignment.
-	// See `ViewBorder` and `BorderProperty` description for more details.
-	CellBorderTop = "cell-border-top"
+	// Internal type is BorderProperty, other types converted to it during assignment.
+	// See ViewBorder and BorderProperty description for more details.
+	CellBorderTop PropertyName = "cell-border-top"
 
 	// CellBorderBottom is the constant for "cell-border-bottom" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set a view's bottom border. It sets the values of a border width, style, and color.
 	//
-	// Supported types: `ViewBorder`, `BorderProperty`, `string`.
+	// Supported types: ViewBorder, BorderProperty, string.
 	//
-	// Internal type is `BorderProperty`, other types converted to it during assignment.
-	// See `ViewBorder` and `BorderProperty` description for more details.
-	CellBorderBottom = "cell-border-bottom"
+	// Internal type is BorderProperty, other types converted to it during assignment.
+	// See ViewBorder and BorderProperty description for more details.
+	CellBorderBottom PropertyName = "cell-border-bottom"
 
 	// CellBorderStyle is the constant for "cell-border-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line style for all four sides of a table cell's border. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	CellBorderStyle = "cell-border-style"
+	//   - 0 (NoneLine) or "none" - The border will not be drawn.
+	//   - 1 (SolidLine) or "solid" - Solid line as a border.
+	//   - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//   - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//   - 4 (DoubleLine) or "double" - Double line as a border.
+	CellBorderStyle PropertyName = "cell-border-style"
 
 	// CellBorderLeftStyle is the constant for "cell-border-left-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line style of a table cell's left border. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	CellBorderLeftStyle = "cell-border-left-style"
+	//   - 0 (NoneLine) or "none" - The border will not be drawn.
+	//   - 1 (SolidLine) or "solid" - Solid line as a border.
+	//   - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//   - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//   - 4 (DoubleLine) or "double" - Double line as a border.
+	CellBorderLeftStyle PropertyName = "cell-border-left-style"
 
 	// CellBorderRightStyle is the constant for "cell-border-right-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line style of a table cell's right border. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	CellBorderRightStyle = "cell-border-right-style"
+	//   - 0 (NoneLine) or "none" - The border will not be drawn.
+	//   - 1 (SolidLine) or "solid" - Solid line as a border.
+	//   - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//   - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//   - 4 (DoubleLine) or "double" - Double line as a border.
+	CellBorderRightStyle PropertyName = "cell-border-right-style"
 
 	// CellBorderTopStyle is the constant for "cell-border-top-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line style of a table cell's top border. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	CellBorderTopStyle = "cell-border-top-style"
+	//   - 0 (NoneLine) or "none" - The border will not be drawn.
+	//   - 1 (SolidLine) or "solid" - Solid line as a border.
+	//   - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//   - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//   - 4 (DoubleLine) or "double" - Double line as a border.
+	CellBorderTopStyle PropertyName = "cell-border-top-style"
 
 	// CellBorderBottomStyle is the constant for "cell-border-bottom-style" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Sets the line style of a table cell's bottom border. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	CellBorderBottomStyle = "cell-border-bottom-style"
+	//   - 0 (NoneLine) or "none" - The border will not be drawn.
+	//   - 1 (SolidLine) or "solid" - Solid line as a border.
+	//   - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//   - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//   - 4 (DoubleLine) or "double" - Double line as a border.
+	CellBorderBottomStyle PropertyName = "cell-border-bottom-style"
 
 	// CellBorderWidth is the constant for "cell-border-width" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line width for all four sides of a table cell's border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellBorderWidth = "cell-border-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellBorderWidth PropertyName = "cell-border-width"
 
 	// CellBorderLeftWidth is the constant for "cell-border-left-width" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line width of a table cell's left border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellBorderLeftWidth = "cell-border-left-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellBorderLeftWidth PropertyName = "cell-border-left-width"
 
 	// CellBorderRightWidth is the constant for "cell-border-right-width" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line width of a table cell's right border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellBorderRightWidth = "cell-border-right-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellBorderRightWidth PropertyName = "cell-border-right-width"
 
 	// CellBorderTopWidth is the constant for "cell-border-top-width" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line width of a table cell's top border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellBorderTopWidth = "cell-border-top-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellBorderTopWidth PropertyName = "cell-border-top-width"
 
 	// CellBorderBottomWidth is the constant for "cell-border-bottom-width" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line width of a table cell's bottom border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	CellBorderBottomWidth = "cell-border-bottom-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	CellBorderBottomWidth PropertyName = "cell-border-bottom-width"
 
 	// CellBorderColor is the constant for "cell-border-color" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line color for all four sides of a table cell's border.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	CellBorderColor = "cell-border-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	CellBorderColor PropertyName = "cell-border-color"
 
 	// CellBorderLeftColor is the constant for "cell-border-left-color" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line color of a table cell's left border.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	CellBorderLeftColor = "cell-border-left-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	CellBorderLeftColor PropertyName = "cell-border-left-color"
 
 	// CellBorderRightColor is the constant for "cell-border-right-color" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line color of a table cell's right border.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	CellBorderRightColor = "cell-border-right-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	CellBorderRightColor PropertyName = "cell-border-right-color"
 
 	// CellBorderTopColor is the constant for "cell-border-top-color" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line color of a table cell's top border.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	CellBorderTopColor = "cell-border-top-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	CellBorderTopColor PropertyName = "cell-border-top-color"
 
 	// CellBorderBottomColor is the constant for "cell-border-bottom-color" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Set the line color of a table cell's bottom border.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	CellBorderBottomColor = "cell-border-bottom-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	CellBorderBottomColor PropertyName = "cell-border-bottom-color"
 
 	// SelectionMode is the constant for "selection-mode" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Sets the mode of the table elements selection. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneSelection`) or "none" - Table elements are not selectable. The table cannot receive input focus.
-	// `1`(`CellSelection`) or "cell" - One table cell can be selected(highlighted). The cell is selected interactively using the mouse or keyboard(using the cursor keys).
-	// `2`(`RowSelection`) or "row" - The entire table row can be selected (highlighted). The row is selected interactively using the mouse or keyboard (using the cursor keys).
-	SelectionMode = "selection-mode"
+	//   - 0 (NoneSelection) or "none" - Table elements are not selectable. The table cannot receive input focus.
+	//   - 1 (CellSelection) or "cell" - One table cell can be selected(highlighted). The cell is selected interactively using the mouse or keyboard(using the cursor keys).
+	//   - 2 (RowSelection) or "row" - The entire table row can be selected (highlighted). The row is selected interactively using the mouse or keyboard (using the cursor keys).
+	SelectionMode PropertyName = "selection-mode"
 
 	// TableCellClickedEvent is the constant for "table-cell-clicked" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Occur when the user clicks on a table cell.
 	//
 	// General listener format:
-	// `func(table rui.TableView, row, col int)`.
+	//
+	//  func(table rui.TableView, row, col int)
 	//
 	// where:
-	// table - Interface of a table view which generated this event,
-	// row - Row of the clicked cell,
-	// col - Column of the clicked cell.
+	//   - table - Interface of a table view which generated this event,
+	//   - row - Row of the clicked cell,
+	//   - col - Column of the clicked cell.
 	//
 	// Allowed listener formats:
-	// `func(row, col int)`.
-	TableCellClickedEvent = "table-cell-clicked"
+	//
+	//  func(row, col int)
+	TableCellClickedEvent PropertyName = "table-cell-clicked"
 
 	// TableCellSelectedEvent is the constant for "table-cell-selected" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Occur when a table cell becomes selected.
 	//
 	// General listener format:
-	// `func(table rui.TableView, row, col int)`.
+	//
+	//  func(table rui.TableView, row, col int)
 	//
 	// where:
-	// table - Interface of a table view which generated this event,
-	// row - Row of the selected cell,
-	// col - Column of the selected cell.
+	//   - table - Interface of a table view which generated this event,
+	//   - row - Row of the selected cell,
+	//   - col - Column of the selected cell.
 	//
 	// Allowed listener formats:
-	// `func(row, col int)`.
-	TableCellSelectedEvent = "table-cell-selected"
+	//
+	//  func(row, col int)
+	TableCellSelectedEvent PropertyName = "table-cell-selected"
 
 	// TableRowClickedEvent is the constant for "table-row-clicked" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Occur when the user clicks on a table row.
 	//
 	// General listener format:
-	// `func(table rui.TableView, row int)`.
+	//
+	//  func(table rui.TableView, row int)
 	//
 	// where:
-	// table - Interface of a table view which generated this event,
-	// row - Clicked row.
+	//   - table - Interface of a table view which generated this event,
+	//   - row - Clicked row.
 	//
 	// Allowed listener formats:
-	// `func(row int)`.
-	TableRowClickedEvent = "table-row-clicked"
+	//
+	//  func(row int)
+	TableRowClickedEvent PropertyName = "table-row-clicked"
 
 	// TableRowSelectedEvent is the constant for "table-row-selected" property tag.
 	//
-	// Used by `TableView`.
+	// Used by TableView.
 	// Occur when a table row becomes selected.
 	//
 	// General listener format:
-	// `func(table rui.TableView, row int)`.
+	//
+	//  func(table rui.TableView, row int)
 	//
 	// where:
-	// table - Interface of a table view which generated this event,
-	// row - Selected row.
+	//   - table - Interface of a table view which generated this event,
+	//   - row - Selected row.
 	//
 	// Allowed listener formats:
-	// `func(row int)`.
-	TableRowSelectedEvent = "table-row-selected"
+	//
+	//  func(row int)
+	TableRowSelectedEvent PropertyName = "table-row-selected"
 
 	// AllowSelection is the constant for "allow-selection" property tag.
 	//
-	// Used by `TableView`.
-	// Set the adapter which specifies whether cell/row selection is allowed. This property can be assigned by an 
-	// implementation of `TableAllowCellSelection` or `TableAllowRowSelection` interface.
+	// Used by TableView.
+	// Set the adapter which specifies whether cell/row selection is allowed. This property can be assigned by an
+	// implementation of TableAllowCellSelection or TableAllowRowSelection interface.
 	//
-	// Supported types: `TableAllowCellSelection`, `TableAllowRowSelection`.
+	// Supported types: TableAllowCellSelection, TableAllowRowSelection.
 	//
-	// Internal type is either `TableAllowCellSelection`, `TableAllowRowSelection`, see their description for more details.
-	AllowSelection = "allow-selection"
+	// Internal type is either TableAllowCellSelection, TableAllowRowSelection, see their description for more details.
+	AllowSelection PropertyName = "allow-selection"
 )
 
 // Constants which represent values of "selection-mode" property of a [TableView]
@@ -554,21 +562,12 @@ type TableView interface {
 
 	// CellFrame returns the frame of a specific cell, describing its position and size within the table view
 	CellFrame(row, column int) Frame
-
-	content() TableAdapter
-	getCurrent() CellIndex
-	getRowStyle() TableRowStyle
-	getColumnStyle() TableColumnStyle
-	getCellStyle() TableCellStyle
 }
 
 type tableViewData struct {
 	viewData
-	cellViews                                 []View
-	cellFrame                                 []Frame
-	cellSelectedListener, cellClickedListener []func(TableView, int, int)
-	rowSelectedListener, rowClickedListener   []func(TableView, int)
-	current                                   CellIndex
+	cellViews []View
+	cellFrame []Frame
 }
 
 type tableCellView struct {
@@ -584,7 +583,7 @@ func NewTableView(session Session, params Params) TableView {
 }
 
 func newTableView(session Session) View {
-	return NewTableView(session, nil)
+	return new(tableViewData) // NewTableView(session, nil)
 }
 
 // Init initialize fields of TableView by default values
@@ -593,20 +592,21 @@ func (table *tableViewData) init(session Session) {
 	table.tag = "TableView"
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
-	table.cellSelectedListener = []func(TableView, int, int){}
-	table.cellClickedListener = []func(TableView, int, int){}
-	table.rowSelectedListener = []func(TableView, int){}
-	table.rowClickedListener = []func(TableView, int){}
-	table.current.Row = -1
-	table.current.Column = -1
+	/*
+		table.cellSelectedListener = []func(TableView, int, int){}
+		table.cellClickedListener = []func(TableView, int, int){}
+		table.rowSelectedListener = []func(TableView, int){}
+		table.rowClickedListener = []func(TableView, int){}
+		table.current.Row = -1
+		table.current.Column = -1
+	*/
+	table.normalize = normalizeTableViewTag
+	table.set = table.setFunc
+	table.changed = table.propertyChanged
 }
 
-func (table *tableViewData) String() string {
-	return getViewString(table, nil)
-}
-
-func (table *tableViewData) normalizeTag(tag string) string {
-	switch tag = strings.ToLower(tag); tag {
+func normalizeTableViewTag(tag PropertyName) PropertyName {
+	switch tag = defaultNormalize(tag); tag {
 	case "top-cell-padding":
 		tag = CellPaddingTop
 
@@ -626,246 +626,171 @@ func (table *tableViewData) Focusable() bool {
 	return GetTableSelectionMode(table) != NoneSelection
 }
 
-func (table *tableViewData) Get(tag string) any {
-	return table.get(table.normalizeTag(tag))
-}
+func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName {
 
-func (table *tableViewData) Remove(tag string) {
-	table.remove(table.normalizeTag(tag))
-}
+	setLineStyle := func() []PropertyName {
+		params := []Params{}
+		switch value := value.(type) {
+		case []Params:
+			params = value
 
-func (table *tableViewData) remove(tag string) {
-	switch tag {
-	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
-		table.removeBoundsSide(CellPadding, tag)
-		table.propertyChanged(tag)
+		case DataNode:
+			params = value.ArrayAsParams()
 
-	case SelectionMode, TableVerticalAlign, Gap, CellBorder, CellPadding, RowStyle,
-		ColumnStyle, CellStyle, HeadHeight, HeadStyle, FootHeight, FootStyle, AllowSelection:
-		if _, ok := table.properties[tag]; ok {
-			delete(table.properties, tag)
-			table.propertyChanged(tag)
+		default:
+			notCompatibleType(tag, params)
+			return nil
 		}
 
-	case TableCellClickedEvent:
-		table.cellClickedListener = []func(TableView, int, int){}
-		table.propertyChanged(tag)
-
-	case TableCellSelectedEvent:
-		table.cellSelectedListener = []func(TableView, int, int){}
-		table.propertyChanged(tag)
-
-	case TableRowClickedEvent:
-		table.rowClickedListener = []func(TableView, int){}
-		table.propertyChanged(tag)
-
-	case TableRowSelectedEvent:
-		table.rowSelectedListener = []func(TableView, int){}
-		table.propertyChanged(tag)
-
-	case Current:
-		table.current.Row = -1
-		table.current.Column = -1
-		table.propertyChanged(tag)
-
-	default:
-		table.viewData.remove(tag)
-	}
-}
-
-func (table *tableViewData) Set(tag string, value any) bool {
-	return table.set(table.normalizeTag(tag), value)
-}
-
-func (table *tableViewData) set(tag string, value any) bool {
-	if value == nil {
-		table.remove(tag)
-		return true
+		if len(params) > 0 {
+			style := new(simpleTableLineStyle)
+			style.params = params
+			table.setRaw(tag, style)
+		} else if table.getRaw(tag) != nil {
+			table.setRaw(tag, nil)
+		} else {
+			return []PropertyName{}
+		}
+		return []PropertyName{tag}
 	}
 
 	switch tag {
 	case Content:
 		switch val := value.(type) {
 		case TableAdapter:
-			table.properties[Content] = value
+			table.setRaw(Content, value)
 
 		case [][]any:
-			table.properties[Content] = NewSimpleTableAdapter(val)
+			table.setRaw(Content, NewSimpleTableAdapter(val))
 
 		case [][]string:
-			table.properties[Content] = NewTextTableAdapter(val)
+			table.setRaw(Content, NewTextTableAdapter(val))
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
+		return []PropertyName{tag}
 
-	case TableCellClickedEvent:
-		listeners := table.valueToCellListeners(value)
-		if listeners == nil {
-			notCompatibleType(tag, value)
-			return false
-		}
-		table.cellClickedListener = listeners
+	case TableCellClickedEvent, TableCellSelectedEvent:
+		return setTwoArgEventListener[TableView, int](table, tag, value)
 
-	case TableCellSelectedEvent:
-		listeners := table.valueToCellListeners(value)
-		if listeners == nil {
-			notCompatibleType(tag, value)
-			return false
-		}
-		table.cellSelectedListener = listeners
-
-	case TableRowClickedEvent:
-		listeners, ok := valueToEventListeners[TableView, int](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(TableView, int){}
-		}
-		table.rowClickedListener = listeners
-
-	case TableRowSelectedEvent:
-		listeners, ok := valueToEventListeners[TableView, int](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(TableView, int){}
-		}
-		table.rowSelectedListener = listeners
+	case TableRowClickedEvent, TableRowSelectedEvent:
+		return setOneArgEventListener[TableView, int](table, tag, value)
 
 	case CellStyle:
 		if style, ok := value.(TableCellStyle); ok {
-			table.properties[tag] = style
-		} else {
-			notCompatibleType(tag, value)
-			return false
+			table.setRaw(tag, style)
+			return []PropertyName{tag}
 		}
+		notCompatibleType(tag, value)
+		return nil
 
 	case RowStyle:
-		if !table.setRowStyle(value) {
-			notCompatibleType(tag, value)
-			return false
+		if style, ok := value.(TableRowStyle); ok {
+			table.setRaw(tag, style)
+			return []PropertyName{tag}
 		}
+		return setLineStyle()
 
 	case ColumnStyle:
-		if !table.setColumnStyle(value) {
-			notCompatibleType(tag, value)
-			return false
+		if style, ok := value.(TableColumnStyle); ok {
+			table.setRaw(tag, style)
+			return []PropertyName{tag}
 		}
+		return setLineStyle()
 
 	case HeadHeight, FootHeight:
 		switch value := value.(type) {
 		case string:
 			if isConstantName(value) {
-				table.properties[tag] = value
+				table.setRaw(tag, value)
 			} else if n, err := strconv.Atoi(value); err == nil {
-				table.properties[tag] = n
+				table.setRaw(tag, n)
 			} else {
 				ErrorLog(err.Error())
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 
 		default:
 			if n, ok := isInt(value); ok {
-				table.properties[tag] = n
+				table.setRaw(tag, n)
+			} else {
+				notCompatibleType(tag, value)
+				return nil
 			}
 		}
+		return []PropertyName{tag}
 
 	case HeadStyle, FootStyle:
 		switch value := value.(type) {
 		case string:
-			table.properties[tag] = value
+			table.setRaw(tag, value)
 
 		case Params:
 			if len(value) > 0 {
-				table.properties[tag] = value
+				table.setRaw(tag, value)
+			} else if table.getRaw(tag) != nil {
+				table.setRaw(tag, nil)
 			} else {
-				delete(table.properties, tag)
+				return []PropertyName{}
 			}
 
 		case DataObject:
 			params := Params{}
 			for k := 0; k < value.PropertyCount(); k++ {
 				if prop := value.Property(k); prop != nil && prop.Type() == TextNode {
-					params[prop.Tag()] = prop.Text()
+					params[PropertyName(prop.Tag())] = prop.Text()
 				}
 			}
-			if len(params) > 0 {
-				table.properties[tag] = params
-			} else {
-				delete(table.properties, tag)
-			}
+			return table.setFunc(tag, params)
 
 		case DataNode:
 			switch value.Type() {
 			case ObjectNode:
-				return table.set(tag, value.Object())
+				return table.setFunc(tag, value.Object())
 
 			case TextNode:
-				table.properties[tag] = value.Text()
+				table.setRaw(tag, value.Text())
 
 			default:
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
-
-	case CellPadding:
-		if !table.setBounds(tag, value) {
-			return false
-		}
-
-	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
-		if !table.setBoundsSide(CellPadding, tag, value) {
-			return false
-		}
-
-	case Gap:
-		if !table.setSizeProperty(Gap, value) {
-			return false
-		}
-
-	case SelectionMode, TableVerticalAlign, CellBorder, CellBorderStyle, CellBorderColor, CellBorderWidth,
-		CellBorderLeft, CellBorderLeftStyle, CellBorderLeftColor, CellBorderLeftWidth,
-		CellBorderRight, CellBorderRightStyle, CellBorderRightColor, CellBorderRightWidth,
-		CellBorderTop, CellBorderTopStyle, CellBorderTopColor, CellBorderTopWidth,
-		CellBorderBottom, CellBorderBottomStyle, CellBorderBottomColor, CellBorderBottomWidth:
-		if !table.viewData.set(tag, value) {
-			return false
-		}
+		return []PropertyName{tag}
 
 	case AllowSelection:
 		switch value.(type) {
 		case TableAllowCellSelection:
-			table.properties[tag] = value
+			table.setRaw(tag, value)
 
 		case TableAllowRowSelection:
-			table.properties[tag] = value
+			table.setRaw(tag, value)
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
+		return []PropertyName{tag}
 
 	case Current:
+		current := CellIndex{Row: -1, Column: -1}
 		switch value := value.(type) {
 		case CellIndex:
-			table.current = value
+			current = value
 
 		case DataObject:
 			if row, ok := dataIntProperty(value, "row"); ok {
-				table.current.Row = row
+				current.Row = row
 			}
 			if column, ok := dataIntProperty(value, "column"); ok {
-				table.current.Column = column
+				current.Column = column
 			}
 
 		case string:
@@ -876,137 +801,135 @@ func (table *tableViewData) set(tag string, value any) bool {
 						var err error
 						if n[i], err = strconv.Atoi(values[i]); err != nil {
 							ErrorLog(err.Error())
-							return false
+							return nil
 						}
 					}
-					table.current.Row = n[0]
-					table.current.Column = n[1]
+					current.Row = n[0]
+					current.Column = n[1]
 				} else {
 					notCompatibleType(tag, value)
-					return false
+					return nil
 				}
 			} else {
 				n, err := strconv.Atoi(value)
 				if err != nil {
 					ErrorLog(err.Error())
-					return false
+					return nil
 				}
-				table.current.Row = n
-				table.current.Column = -1
+				current.Row = n
 			}
 
 		default:
 			if n, ok := isInt(value); ok {
-				table.current.Row = n
-				table.current.Column = -1
+				current.Row = n
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
+		table.setRaw(Current, current)
+		return []PropertyName{tag}
+	}
+
+	return table.viewData.setFunc(tag, value)
+}
+
+func (table *tableViewData) propertyChanged(tag PropertyName) {
+
+	htmlID := table.htmlID()
+	session := table.Session()
+
+	switch tag {
+	case Content, TableVerticalAlign, RowStyle, ColumnStyle, CellStyle, CellPadding,
+		CellBorder, HeadHeight, HeadStyle, FootHeight, FootStyle,
+		CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
+		TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
+		TableRowSelectedEvent, AllowSelection, AccentColor:
+		ReloadTableViewData(table)
+
+	case Current:
+		switch GetTableSelectionMode(table) {
+		case CellSelection:
+			current := tableViewCurrent(table)
+			session.callFunc("setTableCellCursorByID", htmlID, current.Row, current.Column)
+
+		case RowSelection:
+			session.callFunc("setTableRowCursorByID", htmlID, tableViewCurrent(table).Row)
+		}
+
+	case Gap:
+		gap, ok := sizeProperty(table, Gap, session)
+		if !ok || gap.Type == Auto || gap.Value <= 0 {
+			session.updateCSSProperty(htmlID, "border-spacing", "0")
+			session.updateCSSProperty(htmlID, "border-collapse", "collapse")
+		} else {
+			session.updateCSSProperty(htmlID, "border-spacing", gap.cssString("0", session))
+			session.updateCSSProperty(htmlID, "border-collapse", "separate")
+		}
+
+	case SelectionMode:
+		switch GetTableSelectionMode(table) {
+		case CellSelection:
+			tabIndex, _ := intProperty(table, TabIndex, session, 0)
+			session.updateProperty(htmlID, "tabindex", tabIndex)
+			session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
+			session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
+			session.updateProperty(htmlID, "data-selection", "cell")
+			session.updateProperty(htmlID, "data-focusitemstyle", tableViewCurrentStyle(table))
+			session.updateProperty(htmlID, "data-bluritemstyle", tableViewCurrentInactiveStyle(table))
+
+			current := tableViewCurrent(table)
+			if current.Row >= 0 && current.Column >= 0 {
+				session.updateProperty(htmlID, "data-current", tableViewCellID(table, current.Row, current.Column))
+			} else {
+				session.removeProperty(htmlID, "data-current")
+			}
+			session.updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)")
+
+		case RowSelection:
+			tabIndex, _ := intProperty(table, TabIndex, session, 0)
+			session.updateProperty(htmlID, "tabindex", tabIndex)
+			session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
+			session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
+			session.updateProperty(htmlID, "data-selection", "row")
+			session.updateProperty(htmlID, "data-focusitemstyle", tableViewCurrentStyle(table))
+			session.updateProperty(htmlID, "data-bluritemstyle", tableViewCurrentInactiveStyle(table))
+
+			current := tableViewCurrent(table)
+			if current.Row >= 0 {
+				session.updateProperty(htmlID, "data-current", tableViewRowID(table, current.Row))
+			} else {
+				session.removeProperty(htmlID, "data-current")
+			}
+			session.updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)")
+
+		default: // NoneSelection
+			if tabIndex, ok := intProperty(table, TabIndex, session, -1); !ok || tabIndex < 0 {
+				session.removeProperty(htmlID, "tabindex")
+			}
+
+			for _, prop := range []string{"data-current", "onfocus", "onblur", "onkeydown", "data-selection"} {
+				session.removeProperty(htmlID, prop)
+			}
+		}
+		updateInnerHTML(htmlID, session)
 
 	default:
-		return table.viewData.set(tag, value)
+		table.viewData.propertyChanged(tag)
 	}
-
-	table.propertyChanged(tag)
-	return true
 }
 
-func (table *tableViewData) propertyChanged(tag string) {
-	if table.created {
-		switch tag {
-		case Content, TableVerticalAlign, RowStyle, ColumnStyle, CellStyle, CellPadding,
-			CellBorder, HeadHeight, HeadStyle, FootHeight, FootStyle,
-			CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft,
-			TableCellClickedEvent, TableCellSelectedEvent, TableRowClickedEvent,
-			TableRowSelectedEvent, AllowSelection, AccentColor:
-			table.ReloadTableData()
-
-		case Current:
-			switch GetTableSelectionMode(table) {
-			case CellSelection:
-				table.session.callFunc("setTableCellCursorByID", table.htmlID(), table.current.Row, table.current.Column)
-
-			case RowSelection:
-				table.session.callFunc("setTableRowCursorByID", table.htmlID(), table.current.Row)
-			}
-
-		case Gap:
-			htmlID := table.htmlID()
-			session := table.Session()
-			gap, ok := sizeProperty(table, Gap, session)
-			if !ok || gap.Type == Auto || gap.Value <= 0 {
-				session.updateCSSProperty(htmlID, "border-spacing", "0")
-				session.updateCSSProperty(htmlID, "border-collapse", "collapse")
-			} else {
-				session.updateCSSProperty(htmlID, "border-spacing", gap.cssString("0", session))
-				session.updateCSSProperty(htmlID, "border-collapse", "separate")
-			}
-
-		case SelectionMode:
-			htmlID := table.htmlID()
-			session := table.Session()
-
-			switch GetTableSelectionMode(table) {
-			case CellSelection:
-				tabIndex, _ := intProperty(table, TabIndex, session, 0)
-				session.updateProperty(htmlID, "tabindex", tabIndex)
-				session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
-				session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
-				session.updateProperty(htmlID, "data-selection", "cell")
-				session.updateProperty(htmlID, "data-focusitemstyle", table.currentStyle())
-				session.updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle())
-
-				if table.current.Row >= 0 && table.current.Column >= 0 {
-					session.updateProperty(htmlID, "data-current", table.cellID(table.current.Row, table.current.Column))
-				} else {
-					session.removeProperty(htmlID, "data-current")
-				}
-				session.updateProperty(htmlID, "onkeydown", "tableViewCellKeyDownEvent(this, event)")
-
-			case RowSelection:
-				tabIndex, _ := intProperty(table, TabIndex, session, 0)
-				session.updateProperty(htmlID, "tabindex", tabIndex)
-				session.updateProperty(htmlID, "onfocus", "tableViewFocusEvent(this, event)")
-				session.updateProperty(htmlID, "onblur", "tableViewBlurEvent(this, event)")
-				session.updateProperty(htmlID, "data-selection", "row")
-				session.updateProperty(htmlID, "data-focusitemstyle", table.currentStyle())
-				session.updateProperty(htmlID, "data-bluritemstyle", table.currentInactiveStyle())
-
-				if table.current.Row >= 0 {
-					session.updateProperty(htmlID, "data-current", table.rowID(table.current.Row))
-				} else {
-					session.removeProperty(htmlID, "data-current")
-				}
-				session.updateProperty(htmlID, "onkeydown", "tableViewRowKeyDownEvent(this, event)")
-
-			default: // NoneSelection
-				if tabIndex, ok := intProperty(table, TabIndex, session, -1); !ok || tabIndex < 0 {
-					session.removeProperty(htmlID, "tabindex")
-				}
-
-				for _, prop := range []string{"data-current", "onfocus", "onblur", "onkeydown", "data-selection"} {
-					session.removeProperty(htmlID, prop)
-				}
-			}
-			updateInnerHTML(htmlID, session)
-		}
-	}
-	table.propertyChangedEvent(tag)
-}
-
-func (table *tableViewData) currentStyle() string {
-	if value := table.getRaw(CurrentStyle); value != nil {
+func tableViewCurrentStyle(view View) string {
+	if value := view.getRaw(CurrentStyle); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = table.session.resolveConstants(style); ok {
+			if style, ok = view.Session().resolveConstants(style); ok {
 				return style
 			}
 		}
 	}
-	if value := valueFromStyle(table, CurrentStyle); value != nil {
+	if value := valueFromStyle(view, CurrentStyle); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = table.session.resolveConstants(style); ok {
+			if style, ok = view.Session().resolveConstants(style); ok {
 				return style
 			}
 		}
@@ -1014,17 +937,17 @@ func (table *tableViewData) currentStyle() string {
 	return "ruiCurrentTableCellFocused"
 }
 
-func (table *tableViewData) currentInactiveStyle() string {
-	if value := table.getRaw(CurrentInactiveStyle); value != nil {
+func tableViewCurrentInactiveStyle(view View) string {
+	if value := view.getRaw(CurrentInactiveStyle); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = table.session.resolveConstants(style); ok {
+			if style, ok = view.Session().resolveConstants(style); ok {
 				return style
 			}
 		}
 	}
-	if value := valueFromStyle(table, CurrentInactiveStyle); value != nil {
+	if value := valueFromStyle(view, CurrentInactiveStyle); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = table.session.resolveConstants(style); ok {
+			if style, ok = view.Session().resolveConstants(style); ok {
 				return style
 			}
 		}
@@ -1032,6 +955,7 @@ func (table *tableViewData) currentInactiveStyle() string {
 	return "ruiCurrentTableCell"
 }
 
+/*
 func (table *tableViewData) valueToCellListeners(value any) []func(TableView, int, int) {
 	if value == nil {
 		return []func(TableView, int, int){}
@@ -1086,22 +1010,23 @@ func (table *tableViewData) valueToCellListeners(value any) []func(TableView, in
 
 	return nil
 }
+*/
 
 func (table *tableViewData) htmlTag() string {
 	return "table"
 }
 
-func (table *tableViewData) rowID(index int) string {
-	return fmt.Sprintf("%s-%d", table.htmlID(), index)
+func tableViewRowID(view View, index int) string {
+	return fmt.Sprintf("%s-%d", view.htmlID(), index)
 }
 
-func (table *tableViewData) cellID(row, column int) string {
-	return fmt.Sprintf("%s-%d-%d", table.htmlID(), row, column)
+func tableViewCellID(view View, row, column int) string {
+	return fmt.Sprintf("%s-%d-%d", view.htmlID(), row, column)
 }
 
 func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 
-	if content := table.content(); content != nil {
+	if content := GetTableContent(table); content != nil {
 		buffer.WriteString(` data-rows="`)
 		buffer.WriteString(strconv.Itoa(content.RowCount()))
 		buffer.WriteString(`" data-columns="`)
@@ -1111,25 +1036,27 @@ func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 
 	if selectionMode := GetTableSelectionMode(table); selectionMode != NoneSelection {
 		buffer.WriteString(` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`)
-		buffer.WriteString(table.currentStyle())
+		buffer.WriteString(tableViewCurrentStyle(table))
 		buffer.WriteString(`" data-bluritemstyle="`)
-		buffer.WriteString(table.currentInactiveStyle())
+		buffer.WriteString(tableViewCurrentInactiveStyle(table))
 		buffer.WriteRune('"')
+
+		current := tableViewCurrent(table)
 
 		switch selectionMode {
 		case RowSelection:
 			buffer.WriteString(` data-selection="row" onkeydown="tableViewRowKeyDownEvent(this, event)"`)
-			if table.current.Row >= 0 {
+			if current.Row >= 0 {
 				buffer.WriteString(` data-current="`)
-				buffer.WriteString(table.rowID(table.current.Row))
+				buffer.WriteString(tableViewRowID(table, current.Row))
 				buffer.WriteRune('"')
 			}
 
 		case CellSelection:
 			buffer.WriteString(` data-selection="cell" onkeydown="tableViewCellKeyDownEvent(this, event)"`)
-			if table.current.Row >= 0 && table.current.Column >= 0 {
+			if current.Row >= 0 && current.Column >= 0 {
 				buffer.WriteString(` data-current="`)
-				buffer.WriteString(table.cellID(table.current.Row, table.current.Column))
+				buffer.WriteString(tableViewCellID(table, current.Row, current.Column))
 				buffer.WriteRune('"')
 			}
 		}
@@ -1138,21 +1065,11 @@ func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 	table.viewData.htmlProperties(self, buffer)
 }
 
-func (table *tableViewData) content() TableAdapter {
-	if content := table.getRaw(Content); content != nil {
-		if adapter, ok := content.(TableAdapter); ok {
-			return adapter
-		}
-	}
-
-	return nil
-}
-
 func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
 
-	adapter := table.content()
+	adapter := GetTableContent(table)
 	if adapter == nil {
 		return
 	}
@@ -1165,10 +1082,11 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	table.cellFrame = make([]Frame, rowCount*columnCount)
 
-	rowStyle := table.getRowStyle()
-	cellStyle := table.getCellStyle()
+	rowStyle := GetTableRowStyle(table)
+	cellStyle := GetTableCellStyle(table)
 
 	session := table.Session()
+	current := tableViewCurrent(table)
 
 	if !session.ignoreViewUpdates() {
 		session.setIgnoreViewUpdates(true)
@@ -1178,8 +1096,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	cssBuilder := viewCSSBuilder{buffer: allocStringBuilder()}
 	defer freeStringBuilder(cssBuilder.buffer)
 
-	var view tableCellView
-	view.init(session)
+	view := newTableCellView(session)
 
 	ignoreCells := []struct{ row, column int }{}
 	selectionMode := GetTableSelectionMode(table)
@@ -1223,21 +1140,21 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					for tag, value := range styles {
 						view.Set(tag, value)
 					}
-					view.cssStyle(&view, &cssBuilder)
+					view.cssStyle(view, &cssBuilder)
 				}
 			}
 
 			buffer.WriteString(`<tr id="`)
-			buffer.WriteString(table.rowID(row))
+			buffer.WriteString(tableViewRowID(table, row))
 			buffer.WriteRune('"')
 
 			if selectionMode == RowSelection {
-				if row == table.current.Row {
+				if row == current.Row {
 					buffer.WriteString(` class="`)
 					if table.HasFocus() {
-						buffer.WriteString(table.currentStyle())
+						buffer.WriteString(tableViewCurrentStyle(table))
 					} else {
-						buffer.WriteString(table.currentInactiveStyle())
+						buffer.WriteString(tableViewCurrentInactiveStyle(table))
 					}
 					buffer.WriteRune('"')
 				}
@@ -1273,11 +1190,11 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					view.Clear()
 
 					if cellBorder != nil {
-						view.set(Border, cellBorder)
+						view.Set(Border, cellBorder)
 					}
 
 					if cellPadding != nil {
-						view.set(Padding, cellPadding)
+						view.Set(Padding, cellPadding)
 					}
 
 					if cellStyle != nil {
@@ -1298,7 +1215,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 									return 0
 								}
 
-								switch tag = strings.ToLower(tag); tag {
+								switch tag = defaultNormalize(tag); tag {
 								case RowSpan:
 									rowSpan = valueToInt()
 
@@ -1306,28 +1223,28 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 									columnSpan = valueToInt()
 
 								default:
-									view.set(tag, value)
+									view.Set(tag, value)
 								}
 							}
 						}
 					}
 
 					if len(view.properties) > 0 {
-						view.cssStyle(&view, &cssBuilder)
+						view.cssStyle(view, &cssBuilder)
 					}
 
 					buffer.WriteRune('<')
 					buffer.WriteString(cellTag)
 					buffer.WriteString(` id="`)
-					buffer.WriteString(table.cellID(row, column))
+					buffer.WriteString(tableViewCellID(table, row, column))
 					buffer.WriteString(`" class="ruiView`)
 
-					if selectionMode == CellSelection && row == table.current.Row && column == table.current.Column {
+					if selectionMode == CellSelection && row == current.Row && column == current.Column {
 						buffer.WriteRune(' ')
 						if table.HasFocus() {
-							buffer.WriteString(table.currentStyle())
+							buffer.WriteString(tableViewCurrentStyle(table))
 						} else {
-							buffer.WriteString(table.currentInactiveStyle())
+							buffer.WriteString(tableViewCurrentInactiveStyle(table))
 						}
 					}
 					buffer.WriteRune('"')
@@ -1440,7 +1357,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		}
 	}
 
-	if columnStyle := table.getColumnStyle(); columnStyle != nil {
+	if columnStyle := GetTableColumnStyle(table); columnStyle != nil {
 		buffer.WriteString("<colgroup>")
 		for column := 0; column < columnCount; column++ {
 			cssBuilder.buffer.Reset()
@@ -1449,7 +1366,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				for tag, value := range styles {
 					view.Set(tag, value)
 				}
-				view.cssStyle(&view, &cssBuilder)
+				view.cssStyle(view, &cssBuilder)
 			}
 
 			if cssBuilder.buffer.Len() > 0 {
@@ -1466,7 +1383,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	headHeight := GetTableHeadHeight(table)
 	footHeight := GetTableFootHeight(table)
 	cellBorder := table.getCellBorder()
-	cellPadding := table.boundsProperty(CellPadding)
+	cellPadding := getBoundsProperty(table, CellPadding)
 	if cellPadding == nil || len(cellPadding.AllTags()) == 0 {
 		cellPadding = nil
 		if style, ok := stringProperty(table, Style, table.Session()); ok {
@@ -1476,7 +1393,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 		}
 	}
 
-	headFootStart := func(htmlTag, styleTag string) (BorderProperty, BoundsProperty) {
+	headFootStart := func(htmlTag string, styleTag PropertyName) (BorderProperty, BoundsProperty) {
 		buffer.WriteRune('<')
 		buffer.WriteString(htmlTag)
 		value := table.getRaw(styleTag)
@@ -1524,7 +1441,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					}
 				}
 
-				view.cssStyle(&view, &cssBuilder)
+				view.cssStyle(view, &cssBuilder)
 				if cssBuilder.buffer.Len() > 0 {
 					buffer.WriteString(` style="`)
 					buffer.WriteString(cssBuilder.buffer.String())
@@ -1613,7 +1530,7 @@ func (table *tableViewData) cellPaddingFromStyle(style string) BoundsProperty {
 					case 4:
 						result := NewBoundsProperty(nil)
 						n := 0
-						for i, tag := range []string{Top, Right, Bottom, Left} {
+						for i, tag := range []PropertyName{Top, Right, Bottom, Left} {
 							if size, ok := StringToSizeUnit(values[i]); ok && size.Type != Auto {
 								result.Set(tag, size)
 								n++
@@ -1650,7 +1567,7 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 		buffer.WriteString(value)
 
 	case View:
-		viewHTML(value, buffer)
+		viewHTML(value, buffer, "")
 		table.cellViews = append(table.cellViews, value)
 
 	case Color:
@@ -1726,8 +1643,13 @@ func (table *tableViewData) getCellBorder() BorderProperty {
 	return nil
 }
 
-func (table *tableViewData) getCurrent() CellIndex {
-	return table.current
+func tableViewCurrent(view View) CellIndex {
+	if value := view.getRaw(Current); value != nil {
+		if current, ok := value.(CellIndex); ok {
+			return current
+		}
+	}
+	return CellIndex{Row: -1, Column: -1}
 }
 
 func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
@@ -1747,7 +1669,7 @@ func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
 func (table *tableViewData) ReloadTableData() {
 	session := table.Session()
 	htmlID := table.htmlID()
-	if content := table.content(); content != nil {
+	if content := GetTableContent(table); content != nil {
 		session.updateProperty(htmlID, "data-rows", strconv.Itoa(content.RowCount()))
 		session.updateProperty(htmlID, "data-columns", strconv.Itoa(content.ColumnCount()))
 	}
@@ -1758,7 +1680,7 @@ func (table *tableViewData) onItemResize(self View, index string, x, y, width, h
 	if n := strings.IndexRune(index, '-'); n > 0 {
 		if row, err := strconv.Atoi(index[:n]); err == nil {
 			if column, err := strconv.Atoi(index[n+1:]); err == nil {
-				if content := table.content(); content != nil {
+				if content := GetTableContent(table); content != nil {
 					i := row*content.ColumnCount() + column
 					if i < len(table.cellFrame) {
 						table.cellFrame[i].Left = x
@@ -1779,7 +1701,7 @@ func (table *tableViewData) onItemResize(self View, index string, x, y, width, h
 }
 
 func (table *tableViewData) CellFrame(row, column int) Frame {
-	if content := table.content(); content != nil {
+	if content := GetTableContent(table); content != nil {
 		i := row*content.ColumnCount() + column
 		if i < len(table.cellFrame) {
 			return table.cellFrame[i]
@@ -1789,28 +1711,31 @@ func (table *tableViewData) CellFrame(row, column int) Frame {
 }
 
 func (table *tableViewData) ReloadCell(row, column int) {
-	adapter := table.content()
-	if adapter == nil {
-		return
+	if adapter := GetTableContent(table); adapter != nil {
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		table.writeCellHtml(adapter, row, column, buffer)
+		table.session.updateInnerHTML(tableViewCellID(table, row, column), buffer.String())
 	}
-
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-
-	table.writeCellHtml(adapter, row, column, buffer)
-	table.session.updateInnerHTML(table.cellID(row, column), buffer.String())
 }
 
 func (table *tableViewData) Views() []View {
 	return table.cellViews
 }
 
-func (table *tableViewData) handleCommand(self View, command string, data DataObject) bool {
+func (table *tableViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "currentRow":
-		if row, ok := dataIntProperty(data, "row"); ok && row != table.current.Row {
-			table.current.Row = row
-			for _, listener := range table.rowSelectedListener {
+		current := tableViewCurrent(table)
+		if row, ok := dataIntProperty(data, "row"); ok && row != current.Row {
+			current.Row = row
+			table.setRaw(Current, current.Row)
+			if listener, ok := table.changeListener[Current]; ok {
+				listener(table, Current)
+			}
+
+			for _, listener := range GetTableRowSelectedListeners(table) {
 				listener(table, row)
 			}
 		}
@@ -1818,10 +1743,16 @@ func (table *tableViewData) handleCommand(self View, command string, data DataOb
 	case "currentCell":
 		if row, ok := dataIntProperty(data, "row"); ok {
 			if column, ok := dataIntProperty(data, "column"); ok {
-				if row != table.current.Row || column != table.current.Column {
-					table.current.Row = row
-					table.current.Column = column
-					for _, listener := range table.cellSelectedListener {
+				current := tableViewCurrent(table)
+				if row != current.Row || column != current.Column {
+					current.Row = row
+					current.Column = column
+					table.setRaw(Current, current.Row)
+					if listener, ok := table.changeListener[Current]; ok {
+						listener(table, Current)
+					}
+
+					for _, listener := range GetTableCellSelectedListeners(table) {
 						listener(table, row, column)
 					}
 				}
@@ -1830,7 +1761,7 @@ func (table *tableViewData) handleCommand(self View, command string, data DataOb
 
 	case "rowClick":
 		if row, ok := dataIntProperty(data, "row"); ok {
-			for _, listener := range table.rowClickedListener {
+			for _, listener := range GetTableRowClickedListeners(table) {
 				listener(table, row)
 			}
 		}
@@ -1838,7 +1769,7 @@ func (table *tableViewData) handleCommand(self View, command string, data DataOb
 	case "cellClick":
 		if row, ok := dataIntProperty(data, "row"); ok {
 			if column, ok := dataIntProperty(data, "column"); ok {
-				for _, listener := range table.cellClickedListener {
+				for _, listener := range GetTableCellClickedListeners(table) {
 					listener(table, row, column)
 				}
 			}

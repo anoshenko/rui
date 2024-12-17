@@ -421,8 +421,8 @@ func (bridge *webBridge) remoteValue(funcName string, args ...any) (DataObject, 
 
 	funcArgs := append([]any{answerID}, args...)
 	var result DataObject = nil
-	ok := bridge.callFuncImmediately(funcName, funcArgs...)
-	if ok {
+
+	if bridge.callFuncImmediately(funcName, funcArgs...) {
 		result = <-answer
 	}
 

@@ -9,151 +9,167 @@ import (
 const (
 	// ClickEvent is the constant for "click-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the user clicks on the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	ClickEvent = "click-event"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	ClickEvent PropertyName = "click-event"
 
 	// DoubleClickEvent is the constant for "double-click-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the user double clicks on the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	DoubleClickEvent = "double-click-event"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	DoubleClickEvent PropertyName = "double-click-event"
 
 	// MouseDown is the constant for "mouse-down" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a View when a pointing device button is pressed while the pointer is inside the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	MouseDown = "mouse-down"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	MouseDown PropertyName = "mouse-down"
 
 	// MouseUp is the constant for "mouse-up" property tag.
 	//
-	// Used by `View`.
-	// Is fired at a View when a button on a pointing device (such as a mouse or trackpad) is released while the pointer is 
+	// Used by View.
+	// Is fired at a View when a button on a pointing device (such as a mouse or trackpad) is released while the pointer is
 	// located inside it. "mouse-up" events are the counterpoint to "mouse-down" events.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	MouseUp = "mouse-up"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	MouseUp PropertyName = "mouse-up"
 
 	// MouseMove is the constant for "mouse-move" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired at a view when a pointing device(usually a mouse) is moved while the cursor's hotspot is inside it.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	MouseMove = "mouse-move"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	MouseMove PropertyName = "mouse-move"
 
 	// MouseOut is the constant for "mouse-out" property tag.
 	//
-	// Used by `View`.
-	// Is fired at a View when a pointing device (usually a mouse) is used to move the cursor so that it is no longer 
-	// contained within the view or one of its children. "mouse-out" is also delivered to a view if the cursor enters a child 
+	// Used by View.
+	// Is fired at a View when a pointing device (usually a mouse) is used to move the cursor so that it is no longer
+	// contained within the view or one of its children. "mouse-out" is also delivered to a view if the cursor enters a child
 	// view, because the child view obscures the visible area of the view.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	MouseOut = "mouse-out"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	MouseOut PropertyName = "mouse-out"
 
 	// MouseOver is the constant for "mouse-over" property tag.
 	//
-	// Used by `View`.
-	// Is fired at a View when a pointing device (such as a mouse or trackpad) is used to move the cursor onto the view or one 
+	// Used by View.
+	// Is fired at a View when a pointing device (such as a mouse or trackpad) is used to move the cursor onto the view or one
 	// of its child views.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	MouseOver = "mouse-over"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	MouseOver PropertyName = "mouse-over"
 
 	// ContextMenuEvent is the constant for "context-menu-event" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Occur when the user calls the context menu by the right mouse clicking.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.MouseEvent)`.
+	//
+	//  func(view rui.View, event rui.MouseEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Mouse event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Mouse event.
 	//
 	// Allowed listener formats:
-	// `func(view rui.View)`,
-	// `func(event rui.MouseEvent)`,
-	// `func()`.
-	ContextMenuEvent = "context-menu-event"
+	//
+	//  func(view rui.View)
+	//  func(event rui.MouseEvent)
+	//  func()
+	ContextMenuEvent PropertyName = "context-menu-event"
 
 	// PrimaryMouseButton is a number of the main pressed button, usually the left button or the un-initialized state
 	PrimaryMouseButton = 0
@@ -228,64 +244,6 @@ type MouseEvent struct {
 	MetaKey bool
 }
 
-var mouseEvents = map[string]struct{ jsEvent, jsFunc string }{
-	ClickEvent:       {jsEvent: "onclick", jsFunc: "clickEvent"},
-	DoubleClickEvent: {jsEvent: "ondblclick", jsFunc: "doubleClickEvent"},
-	MouseDown:        {jsEvent: "onmousedown", jsFunc: "mouseDownEvent"},
-	MouseUp:          {jsEvent: "onmouseup", jsFunc: "mouseUpEvent"},
-	MouseMove:        {jsEvent: "onmousemove", jsFunc: "mouseMoveEvent"},
-	MouseOut:         {jsEvent: "onmouseout", jsFunc: "mouseOutEvent"},
-	MouseOver:        {jsEvent: "onmouseover", jsFunc: "mouseOverEvent"},
-	ContextMenuEvent: {jsEvent: "oncontextmenu", jsFunc: "contextMenuEvent"},
-}
-
-func (view *viewData) setMouseListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, MouseEvent](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
-	}
-
-	if listeners == nil {
-		view.removeMouseListener(tag)
-	} else if js, ok := mouseEvents[tag]; ok {
-		view.properties[tag] = listeners
-		if view.created {
-			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
-		}
-	} else {
-		return false
-	}
-	return true
-}
-
-func (view *viewData) removeMouseListener(tag string) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := mouseEvents[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func mouseEventsHtml(view View, buffer *strings.Builder, hasTooltip bool) {
-	for tag, js := range mouseEvents {
-		if value := view.getRaw(tag); value != nil {
-			if listeners, ok := value.([]func(View, MouseEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
-			}
-		}
-	}
-
-	if hasTooltip {
-		buffer.WriteString(`onmouseenter="mouseEnterEvent(this, event)" `)
-		buffer.WriteString(`onmouseleave="mouseLeaveEvent(this, event)" `)
-	}
-}
-
 func getTimeStamp(data DataObject) uint64 {
 	if value, ok := data.PropertyValue("timeStamp"); ok {
 		if index := strings.Index(value, "."); index > 0 {
@@ -315,8 +273,8 @@ func (event *MouseEvent) init(data DataObject) {
 	event.MetaKey = dataBoolProperty(data, "metaKey")
 }
 
-func handleMouseEvents(view View, tag string, data DataObject) {
-	listeners := getEventListeners[View, MouseEvent](view, nil, tag)
+func handleMouseEvents(view View, tag PropertyName, data DataObject) {
+	listeners := getOneArgEventListeners[View, MouseEvent](view, nil, tag)
 	if len(listeners) > 0 {
 		var event MouseEvent
 		event.init(data)
@@ -330,48 +288,48 @@ func handleMouseEvents(view View, tag string, data DataObject) {
 // GetClickListeners returns the "click-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetClickListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, ClickEvent)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, ClickEvent)
 }
 
 // GetDoubleClickListeners returns the "double-click-event" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDoubleClickListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, DoubleClickEvent)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, DoubleClickEvent)
 }
 
 // GetContextMenuListeners returns the "context-menu" listener list.
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetContextMenuListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, ContextMenuEvent)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, ContextMenuEvent)
 }
 
 // GetMouseDownListeners returns the "mouse-down" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMouseDownListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, MouseDown)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseDown)
 }
 
 // GetMouseUpListeners returns the "mouse-up" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMouseUpListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, MouseUp)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseUp)
 }
 
 // GetMouseMoveListeners returns the "mouse-move" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMouseMoveListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, MouseMove)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseMove)
 }
 
 // GetMouseOverListeners returns the "mouse-over" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMouseOverListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, MouseOver)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseOver)
 }
 
 // GetMouseOutListeners returns the "mouse-out" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetMouseOutListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getEventListeners[View, MouseEvent](view, subviewID, MouseOut)
+	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseOut)
 }

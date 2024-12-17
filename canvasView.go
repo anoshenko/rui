@@ -1,14 +1,12 @@
 package rui
 
-import "strings"
-
 // DrawFunction is the constant for "draw-function" property tag.
 //
 // Used by `CanvasView`.
 // Property sets the draw function of `CanvasView`.
 //
 // Supported types: `func(Canvas)`.
-const DrawFunction = "draw-function"
+const DrawFunction PropertyName = "draw-function"
 
 // CanvasView interface of a custom draw view
 type CanvasView interface {
@@ -20,7 +18,6 @@ type CanvasView interface {
 
 type canvasViewData struct {
 	viewData
-	drawer func(Canvas)
 }
 
 // NewCanvasView creates the new custom draw view
@@ -32,21 +29,21 @@ func NewCanvasView(session Session, params Params) CanvasView {
 }
 
 func newCanvasView(session Session) View {
-	return NewCanvasView(session, nil)
+	return new(canvasViewData)
 }
 
 // Init initialize fields of ViewsContainer by default values
 func (canvasView *canvasViewData) init(session Session) {
 	canvasView.viewData.init(session)
 	canvasView.tag = "CanvasView"
+	canvasView.normalize = normalizeCanvasViewTag
+	canvasView.set = canvasView.setFunc
+	canvasView.remove = canvasView.removeFunc
+	canvasView.changed = canvasView.propertyChanged
 }
 
-func (canvasView *canvasViewData) String() string {
-	return getViewString(canvasView, nil)
-}
-
-func (canvasView *canvasViewData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeCanvasViewTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case "draw-func":
 		tag = DrawFunction
@@ -54,51 +51,39 @@ func (canvasView *canvasViewData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (canvasView *canvasViewData) Remove(tag string) {
-	canvasView.remove(canvasView.normalizeTag(tag))
-}
-
-func (canvasView *canvasViewData) remove(tag string) {
+func (canvasView *canvasViewData) removeFunc(tag PropertyName) []PropertyName {
 	if tag == DrawFunction {
-		canvasView.drawer = nil
-		canvasView.Redraw()
-		canvasView.propertyChangedEvent(tag)
-	} else {
-		canvasView.viewData.remove(tag)
+		if canvasView.getRaw(DrawFunction) != nil {
+			canvasView.setRaw(DrawFunction, nil)
+			canvasView.Redraw()
+			return []PropertyName{DrawFunction}
+		}
+		return []PropertyName{}
 	}
+
+	return canvasView.viewData.removeFunc(tag)
 }
 
-func (canvasView *canvasViewData) Set(tag string, value any) bool {
-	return canvasView.set(canvasView.normalizeTag(tag), value)
-}
-
-func (canvasView *canvasViewData) set(tag string, value any) bool {
+func (canvasView *canvasViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	if tag == DrawFunction {
-		if value == nil {
-			canvasView.drawer = nil
-		} else if fn, ok := value.(func(Canvas)); ok {
-			canvasView.drawer = fn
+		if fn, ok := value.(func(Canvas)); ok {
+			canvasView.setRaw(DrawFunction, fn)
 		} else {
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
-		canvasView.Redraw()
-		canvasView.propertyChangedEvent(tag)
-		return true
+		return []PropertyName{DrawFunction}
 	}
 
-	return canvasView.viewData.set(tag, value)
+	return canvasView.viewData.setFunc(tag, value)
 }
 
-func (canvasView *canvasViewData) Get(tag string) any {
-	return canvasView.get(canvasView.normalizeTag(tag))
-}
-
-func (canvasView *canvasViewData) get(tag string) any {
+func (canvasView *canvasViewData) propertyChanged(tag PropertyName) {
 	if tag == DrawFunction {
-		return canvasView.drawer
+		canvasView.Redraw()
+	} else {
+		canvasView.viewData.propertyChanged(tag)
 	}
-	return canvasView.viewData.get(tag)
 }
 
 func (canvasView *canvasViewData) htmlTag() string {
@@ -106,14 +91,14 @@ func (canvasView *canvasViewData) htmlTag() string {
 }
 
 func (canvasView *canvasViewData) Redraw() {
-	if canvasView.drawer != nil {
-		canvas := newCanvas(canvasView)
-		canvas.ClearRect(0, 0, canvasView.frame.Width, canvasView.frame.Height)
-		if canvasView.drawer != nil {
-			canvasView.drawer(canvas)
+	canvas := newCanvas(canvasView)
+	canvas.ClearRect(0, 0, canvasView.frame.Width, canvasView.frame.Height)
+	if value := canvasView.getRaw(DrawFunction); value != nil {
+		if drawer, ok := value.(func(Canvas)); ok {
+			drawer(canvas)
 		}
-		canvas.finishDraw()
 	}
+	canvas.finishDraw()
 }
 
 func (canvasView *canvasViewData) onResize(self View, x, y, width, height float64) {

@@ -1,3 +1,62 @@
+# v0.18.0
+
+* Property name type changed from string to PropertyName. 
+
+* Renamed:
+    Transform interface -> TransformProperty
+    NewTransform function -> NewTransformProperty
+    TransformTag constant -> Transform.
+    "origin-x" property -> "transform-origin-x"
+    "origin-y" property -> "transform-origin-y"
+    "origin-z" property -> "transform-origin-z"
+    GetOrigin function -> GetTransformOrigin.
+    BorderBoxClip constant -> BorderBox
+    PaddingBoxClip constant -> PaddingBox
+    ContentBoxClip constant -> ContentBox.
+    ViewShadow interface -> ShadowProperty
+    NewViewShadow function -> NewShadow
+    NewInsetViewShadow function -> NewInsetShadow
+    NewShadowWithParams function -> NewShadowProperty
+    NewColumnSeparator function -> NewColumnSeparatorProperty
+    ClipShape interface -> ClipShapeProperty
+    InsetClip function -> NewInsetClip
+    CircleClip function -> NewCircleClip
+    EllipseClip function -> NewEllipseClip
+    PolygonClip function -> NewPolygonClip
+    PolygonPointsClip function -> NewPolygonPointsClip
+    ViewFilter interface -> FilterProperty
+    NewViewFilter function -> NewFilterProperty
+    Animation interface -> AnimationProperty
+    AnimationTag constant -> Animation
+    NewAnimation function -> NewAnimationProperty
+
+* Added functions: NewBounds, NewEllipticRadius, NewRadii, NewLinearGradient, NewCircleRadialGradient,
+NewEllipseRadialGradient, GetPushTransform, GetPushDuration, GetPushTiming, IsMoveToFrontAnimation,
+GetBackground, GetMask, GetBackgroundClip,GetBackgroundOrigin, GetMaskClip, GetMaskOrigin, NewColumnSeparator,
+NewClipShapeProperty, NewTransitionAnimation, NewAnimation, IsSummaryMarkerHidden.
+
+* Changed ViewByID functions
+
+* Added SetConicGradientFillStyle and SetConicGradientStrokeStyle methods to Canvas interface.
+
+* Changed Push, Pop, MoveToFront, and MoveToFrontByID methods of StackLayout interface.
+
+* Removed DefaultAnimation, StartToEndAnimation, EndToStartAnimation, TopDownAnimation, and BottomUpAnimation constants.
+
+* Added StackLayout properties: "push-transform", "push-duration", "push-timing", "move-to-front-animation", "push-perspective", 
+"push-rotate-x", "push-rotate-y", "push-rotate-z", "push-rotate", "push-skew-x", "push-skew-y",
+"push-scale-x", "push-scale-y", "push-scale-z", "push-translate-x", "push-translate-y", "push-translate-z".
+
+* Added "show-opacity", "show-transform", "show-duration", and "show-timing" Popup properties.
+
+* Added "mask", "mask-clip", "mask-origin", and "background-origin" properties.
+
+* Added "hide-summary-marker" DetailsView property.
+
+* Added LineJoin type. Type of constants MiterJoin, RoundJoin, and BevelJoin changed to LineJoin. Type of Canvas.SetLineJoin function argument changed to LineJoin.
+
+* Added LineCap type. Type of constants ButtCap, RoundCap, and SquareCap changed to LineCap. Type of Canvas.SetLineCap function argument changed to LineCap.
+
 # v0.17.3
 Added SetParams method to View interface
 

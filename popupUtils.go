@@ -17,7 +17,9 @@ func ShowMessage(title, text string, session Session) {
 }
 
 // ShowQuestion displays a message with the given title and text and two buttons "Yes" and "No".
+//
 // When the "Yes" button is clicked, the message is closed and the onYes function is called (if it is not nil).
+//
 // When the "No" button is pressed, the message is closed and the onNo function is called (if it is not nil).
 func ShowQuestion(title, text string, session Session, onYes func(), onNo func()) {
 	textView := NewTextView(session, Params{
@@ -57,6 +59,7 @@ func ShowQuestion(title, text string, session Session, onYes func(), onNo func()
 }
 
 // ShowCancellableQuestion displays a message with the given title and text and three buttons "Yes", "No" and "Cancel".
+//
 // When the "Yes", "No" or "Cancel" button is pressed, the message is closed and the onYes, onNo or onCancel function
 // (if it is not nil) is called, respectively.
 func ShowCancellableQuestion(title, text string, session Session, onYes func(), onNo func(), onCancel func()) {

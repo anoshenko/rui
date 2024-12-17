@@ -2,83 +2,90 @@ package rui
 
 import (
 	"strconv"
-	"strings"
 )
 
 // Constants which represent [View] specific touch events properties
 const (
 	// TouchStart is the constant for "touch-start" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when one or more touch points are placed on the touch surface.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
-	TouchStart = "touch-start"
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
+	TouchStart PropertyName = "touch-start"
 
 	// TouchEnd is the constant for "touch-end" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Fired when one or more touch points are removed from the touch surface.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
-	TouchEnd = "touch-end"
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
+	TouchEnd PropertyName = "touch-end"
 
 	// TouchMove is the constant for "touch-move" property tag.
 	//
-	// Used by `View`.
+	// Used by View.
 	// Is fired when one or more touch points are moved along the touch surface.
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
-	TouchMove = "touch-move"
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
+	TouchMove PropertyName = "touch-move"
 
 	// TouchCancel is the constant for "touch-cancel" property tag.
 	//
-	// Used by `View`.
-	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many 
+	// Used by View.
+	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many
 	// touch points are created).
 	//
 	// General listener format:
-	// `func(view rui.View, event rui.TouchEvent)`.
+	//
+	//  func(view rui.View, event rui.TouchEvent)
 	//
 	// where:
-	// view - Interface of a view which generated this event,
-	// event - Touch event.
+	//   - view - Interface of a view which generated this event,
+	//   - event - Touch event.
 	//
 	// Allowed listener formats:
-	// `func(event rui.TouchEvent)`,
-	// `func(view rui.View)`,
-	// `func()`.
-	TouchCancel = "touch-cancel"
+	//
+	//  func(event rui.TouchEvent)
+	//  func(view rui.View)
+	//  func()
+	TouchCancel PropertyName = "touch-cancel"
 )
 
 // Touch contains parameters of a single touch of a touch event
@@ -143,55 +150,6 @@ type TouchEvent struct {
 	MetaKey bool
 }
 
-var touchEvents = map[string]struct{ jsEvent, jsFunc string }{
-	TouchStart:  {jsEvent: "ontouchstart", jsFunc: "touchStartEvent"},
-	TouchEnd:    {jsEvent: "ontouchend", jsFunc: "touchEndEvent"},
-	TouchMove:   {jsEvent: "ontouchmove", jsFunc: "touchMoveEvent"},
-	TouchCancel: {jsEvent: "ontouchcancel", jsFunc: "touchCancelEvent"},
-}
-
-func (view *viewData) setTouchListener(tag string, value any) bool {
-	listeners, ok := valueToEventListeners[View, TouchEvent](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return false
-	}
-
-	if listeners == nil {
-		view.removeTouchListener(tag)
-	} else if js, ok := touchEvents[tag]; ok {
-		view.properties[tag] = listeners
-		if view.created {
-			view.session.updateProperty(view.htmlID(), js.jsEvent, js.jsFunc+"(this, event)")
-		}
-	} else {
-		return false
-	}
-	return true
-}
-
-func (view *viewData) removeTouchListener(tag string) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := touchEvents[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func touchEventsHtml(view View, buffer *strings.Builder) {
-	for tag, js := range touchEvents {
-		if value := view.getRaw(tag); value != nil {
-			if listeners, ok := value.([]func(View, TouchEvent)); ok && len(listeners) > 0 {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
-			}
-		}
-	}
-}
-
 func (event *TouchEvent) init(data DataObject) {
 
 	event.Touches = []Touch{}
@@ -225,8 +183,8 @@ func (event *TouchEvent) init(data DataObject) {
 	event.MetaKey = dataBoolProperty(data, "metaKey")
 }
 
-func handleTouchEvents(view View, tag string, data DataObject) {
-	listeners := getEventListeners[View, TouchEvent](view, nil, tag)
+func handleTouchEvents(view View, tag PropertyName, data DataObject) {
+	listeners := getOneArgEventListeners[View, TouchEvent](view, nil, tag)
 	if len(listeners) == 0 {
 		return
 	}
@@ -242,23 +200,23 @@ func handleTouchEvents(view View, tag string, data DataObject) {
 // GetTouchStartListeners returns the "touch-start" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchStartListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchStart)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchStart)
 }
 
 // GetTouchEndListeners returns the "touch-end" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchEndListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchEnd)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchEnd)
 }
 
 // GetTouchMoveListeners returns the "touch-move" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchMoveListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchMove)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchMove)
 }
 
 // GetTouchCancelListeners returns the "touch-cancel" listener list. If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTouchCancelListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getEventListeners[View, TouchEvent](view, subviewID, TouchCancel)
+	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchCancel)
 }

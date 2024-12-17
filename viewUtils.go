@@ -1,9 +1,13 @@
 package rui
 
 // Get returns a value of the property with name "tag" of the "rootView" subview with "viewID" id value.
+//
 // The type of return value depends on the property.
+//
 // If the subview don't exists or the property is not set then nil is returned.
-func Get(rootView View, viewID, tag string) any {
+//
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is get
+func Get(rootView View, viewID string, tag PropertyName) any {
 	var view View
 	if viewID != "" {
 		view = ViewByID(rootView, viewID)
@@ -17,9 +21,11 @@ func Get(rootView View, viewID, tag string) any {
 }
 
 // Set sets the property with name "tag" of the "rootView" subview with "viewID" id by value. Result:
-// true - success,
-// false - error (incompatible type or invalid format of a string value, see AppLog).
-func Set(rootView View, viewID, tag string, value any) bool {
+//   - true - success,
+//   - false - error (incompatible type or invalid format of a string value, see AppLog).
+//
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is set
+func Set(rootView View, viewID string, tag PropertyName, value any) bool {
 	var view View
 	if viewID != "" {
 		view = ViewByID(rootView, viewID)
@@ -33,8 +39,9 @@ func Set(rootView View, viewID, tag string, value any) bool {
 }
 
 // SetChangeListener sets a listener for changing a subview property value.
-// If the second argument (subviewID) is not specified or it is "" then a listener for the first argument (view) is set
-func SetChangeListener(view View, viewID, tag string, listener func(View, string)) {
+//
+// If the second argument (subviewID) is "" then a listener for the first argument (view) is set
+func SetChangeListener(view View, viewID string, tag PropertyName, listener func(View, PropertyName)) {
 	if viewID != "" {
 		view = ViewByID(view, viewID)
 	}
@@ -44,8 +51,8 @@ func SetChangeListener(view View, viewID, tag string, listener func(View, string
 }
 
 // SetParams sets properties with name "tag" of the "rootView" subview. Result:
-// true - all properties were set successful,
-// false - error (incompatible type or invalid format of a string value, see AppLog).
+//   - true - all properties were set successful,
+//   - false - error (incompatible type or invalid format of a string value, see AppLog).
 func SetParams(rootView View, viewID string, params Params) bool {
 	if viewID != "" {
 		rootView = ViewByID(rootView, viewID)
@@ -70,13 +77,24 @@ func SetParams(rootView View, viewID string, params Params) bool {
 	return result
 }
 
+func getSubview(view View, subviewID []string) View {
+	if view != nil {
+		for _, id := range subviewID {
+			if id != "" {
+				if view = ViewByID(view, id); view == nil {
+					return nil
+				}
+			}
+		}
+	}
+
+	return view
+}
+
 // IsDisabled returns "true" if the subview is disabled
 // If the second argument (subviewID) is not specified or it is "" then a state of the first argument (view) is returned
 func IsDisabled(view View, subviewID ...string) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if disabled, _ := boolProperty(view, Disabled, view.Session()); disabled {
 			return true
 		}
@@ -106,10 +124,7 @@ func GetOpacity(view View, subviewID ...string) float64 {
 // GetStyle returns the subview style id.
 // If the second argument (subviewID) is not specified or it is "" then a style of the first argument (view) is returned
 func GetStyle(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if style, ok := stringProperty(view, Style, view.Session()); ok {
 			return style
 		}
@@ -120,10 +135,7 @@ func GetStyle(view View, subviewID ...string) string {
 // GetDisabledStyle returns the disabled subview style id.
 // If the second argument (subviewID) is not specified or it is "" then a style of the first argument (view) is returned
 func GetDisabledStyle(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if style, ok := stringProperty(view, StyleDisabled, view.Session()); ok {
 			return style
 		}
@@ -142,12 +154,8 @@ func GetVisibility(view View, subviewID ...string) int {
 // OverflowHidden (0), OverflowVisible (1), OverflowScroll (2), OverflowAuto (3)
 // If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned
 func GetOverflow(view View, subviewID ...string) int {
-	defaultOverflow := OverflowHidden
-	view2 := view
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view2 = ViewByID(view, subviewID[0])
-	}
-	if view2 != nil {
+	if view = getSubview(view, subviewID); view != nil {
+		defaultOverflow := OverflowHidden
 		switch view.(type) {
 		case EditView:
 			defaultOverflow = OverflowAuto
@@ -155,16 +163,16 @@ func GetOverflow(view View, subviewID ...string) int {
 		case ListView:
 			defaultOverflow = OverflowAuto
 		}
+		return enumStyledProperty(view, nil, Overflow, defaultOverflow, false)
 	}
-	return enumStyledProperty(view, subviewID, Overflow, defaultOverflow, false)
+
+	return OverflowHidden
 }
 
 // GetTabIndex returns the subview tab-index.
 // If the second argument (subviewID) is not specified or it is "" then a tab-index of the first argument (view) is returned
 func GetTabIndex(view View, subviewID ...string) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 
 	defaultValue := -1
 	if view != nil {
@@ -194,6 +202,13 @@ func GetOrder(view View, subviewID ...string) int {
 // If the second argument (subviewID) is not specified or it is "" then a width of the first argument (view) is returned
 func GetWidth(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, Width, false)
+}
+
+func SetWidth[T SizeUnit | float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](size T, view View, subviewID ...string) bool {
+	if view = getSubview(view, subviewID); view != nil {
+		return view.Set(Width, size)
+	}
+	return false
 }
 
 // GetHeight returns the subview height.
@@ -264,11 +279,8 @@ func GetBottom(view View, subviewID ...string) SizeUnit {
 // Margin returns the subview margin.
 // If the second argument (subviewID) is not specified or it is "" then a margin of the first argument (view) is returned
 func GetMargin(view View, subviewID ...string) Bounds {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
 	var bounds Bounds
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		bounds.setFromProperties(Margin, MarginTop, MarginRight, MarginBottom, MarginLeft, view, view.Session())
 	}
 	return bounds
@@ -277,11 +289,8 @@ func GetMargin(view View, subviewID ...string) Bounds {
 // GetPadding returns the subview padding.
 // If the second argument (subviewID) is not specified or it is "" then a padding of the first argument (view) is returned
 func GetPadding(view View, subviewID ...string) Bounds {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
 	var bounds Bounds
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		bounds.setFromProperties(Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft, view, view.Session())
 	}
 	return bounds
@@ -290,11 +299,8 @@ func GetPadding(view View, subviewID ...string) Bounds {
 // GetBorder returns ViewBorders of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a ViewBorders of the first argument (view) is returned.
 func GetBorder(view View, subviewID ...string) ViewBorders {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if border := getBorder(view, Border); border != nil {
+	if view = getSubview(view, subviewID); view != nil {
+		if border := getBorderProperty(view, Border); border != nil {
 			return border.ViewBorders(view.Session())
 		}
 	}
@@ -304,9 +310,7 @@ func GetBorder(view View, subviewID ...string) ViewBorders {
 // Radius returns the BoxRadius structure of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a BoxRadius of the first argument (view) is returned.
 func GetRadius(view View, subviewID ...string) BoxRadius {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	view = getSubview(view, subviewID)
 	if view == nil {
 		return BoxRadius{}
 	}
@@ -316,11 +320,8 @@ func GetRadius(view View, subviewID ...string) BoxRadius {
 // GetOutline returns ViewOutline of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a ViewOutline of the first argument (view) is returned.
 func GetOutline(view View, subviewID ...string) ViewOutline {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if outline := getOutline(view); outline != nil {
+	if view = getSubview(view, subviewID); view != nil {
+		if outline := getOutlineProperty(view); outline != nil {
 			return outline.ViewOutline(view.Session())
 		}
 	}
@@ -333,26 +334,22 @@ func GetOutlineOffset(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, OutlineOffset, false)
 }
 
-// GetViewShadows returns shadows of the subview.
+// GetShadowPropertys returns shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
-func GetViewShadows(view View, subviewID ...string) []ViewShadow {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+func GetShadowPropertys(view View, subviewID ...string) []ShadowProperty {
+	view = getSubview(view, subviewID)
 	if view == nil {
-		return []ViewShadow{}
+		return []ShadowProperty{}
 	}
 	return getShadows(view, Shadow)
 }
 
 // GetTextShadows returns text shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
-func GetTextShadows(view View, subviewID ...string) []ViewShadow {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+func GetTextShadows(view View, subviewID ...string) []ShadowProperty {
+	view = getSubview(view, subviewID)
 	if view == nil {
-		return []ViewShadow{}
+		return []ShadowProperty{}
 	}
 	return getShadows(view, TextShadow)
 }
@@ -372,23 +369,7 @@ func GetAccentColor(view View, subviewID ...string) Color {
 // GetFontName returns the subview font.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFontName(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
-		if font, ok := stringProperty(view, FontName, view.Session()); ok {
-			return font
-		}
-		if value := valueFromStyle(view, FontName); value != nil {
-			if font, ok := value.(string); ok {
-				return font
-			}
-		}
-		if parent := view.Parent(); parent != nil {
-			return GetFontName(parent)
-		}
-	}
-	return ""
+	return stringStyledProperty(view, nil, FontName, true)
 }
 
 // GetTextColor returns a text color of the subview.
@@ -546,10 +527,7 @@ func GetVerticalTextOrientation(view View, subviewID ...string) int {
 // GetRow returns the range of row numbers of a GridLayout in which the subview is placed.
 // If the second argument (subviewID) is not specified or it is "" then a values from the first argument (view) is returned.
 func GetRow(view View, subviewID ...string) Range {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		session := view.Session()
 		if result, ok := rangeProperty(view, Row, session); ok {
 			return result
@@ -566,10 +544,7 @@ func GetRow(view View, subviewID ...string) Range {
 // GetColumn returns the range of column numbers of a GridLayout in which the subview is placed.
 // If the second argument (subviewID) is not specified or it is "" then a values from the first argument (view) is returned.
 func GetColumn(view View, subviewID ...string) Range {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		session := view.Session()
 		if result, ok := rangeProperty(view, Column, session); ok {
 			return result
@@ -581,116 +556,6 @@ func GetColumn(view View, subviewID ...string) Range {
 		}
 	}
 	return Range{}
-}
-
-// GetPerspective returns a distance between the z = 0 plane and the user in order to give a 3D-positioned
-// element some perspective. Each 3D element with z > 0 becomes larger; each 3D-element with z < 0 becomes smaller.
-// The default value is 0 (no 3D effects).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPerspective(view View, subviewID ...string) SizeUnit {
-	return sizeStyledProperty(view, subviewID, Perspective, false)
-}
-
-// GetPerspectiveOrigin returns a x- and y-coordinate of the position at which the viewer is looking.
-// It is used as the vanishing point by the Perspective property. The default value is (50%, 50%).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPerspectiveOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
-		return AutoSize(), AutoSize()
-	}
-	return getPerspectiveOrigin(view, view.Session())
-}
-
-// GetBackfaceVisible returns a bool property that sets whether the back face of an element is
-// visible when turned towards the user. Values:
-// true - the back face is visible when turned towards the user (default value).
-// false - the back face is hidden, effectively making the element invisible when turned away from the user.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetBackfaceVisible(view View, subviewID ...string) bool {
-	return boolStyledProperty(view, subviewID, BackfaceVisible, false)
-}
-
-// GetOrigin returns a x-, y-, and z-coordinate of the point around which a view transformation is applied.
-// The default value is (50%, 50%, 50%).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetOrigin(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
-		return AutoSize(), AutoSize(), AutoSize()
-	}
-	return getOrigin(view, view.Session())
-}
-
-// GetTranslate returns a x-, y-, and z-axis translation value of a 2D/3D translation
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTranslate(view View, subviewID ...string) (SizeUnit, SizeUnit, SizeUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
-		return AutoSize(), AutoSize(), AutoSize()
-	}
-
-	session := view.Session()
-	x, _ := sizeProperty(view, TranslateX, session)
-	y, _ := sizeProperty(view, TranslateY, session)
-	z, _ := sizeProperty(view, TranslateZ, session)
-	return x, y, z
-}
-
-// GetSkew returns a angles to use to distort the element along the abscissa (x-axis)
-// and the ordinate (y-axis). The default value is 0.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetSkew(view View, subviewID ...string) (AngleUnit, AngleUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
-		return AngleUnit{Value: 0, Type: Radian}, AngleUnit{Value: 0, Type: Radian}
-	}
-	x, _ := angleProperty(view, SkewX, view.Session())
-	y, _ := angleProperty(view, SkewY, view.Session())
-	return x, y
-}
-
-// GetScale returns a x-, y-, and z-axis scaling value of a 2D/3D scale. The default value is 1.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetScale(view View, subviewID ...string) (float64, float64, float64) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
-		return 1, 1, 1
-	}
-
-	session := view.Session()
-	x, _ := floatProperty(view, ScaleX, session, 1)
-	y, _ := floatProperty(view, ScaleY, session, 1)
-	z, _ := floatProperty(view, ScaleZ, session, 1)
-	return x, y, z
-}
-
-// GetRotate returns a x-, y, z-coordinate of the vector denoting the axis of rotation, and the angle of the view rotation
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetRotate(view View, subviewID ...string) (float64, float64, float64, AngleUnit) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view == nil {
-		return 0, 0, 0, AngleUnit{Value: 0, Type: Radian}
-	}
-
-	session := view.Session()
-	angle, _ := angleProperty(view, Rotate, view.Session())
-	rotateX, _ := floatProperty(view, RotateX, session, 1)
-	rotateY, _ := floatProperty(view, RotateY, session, 1)
-	rotateZ, _ := floatProperty(view, RotateZ, session, 1)
-	return rotateX, rotateY, rotateZ, angle
 }
 
 // GetAvoidBreak returns "true" if avoids any break from being inserted within the principal box,
@@ -706,9 +571,9 @@ func GetNotTranslate(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, NotTranslate, true)
 }
 
-func valueFromStyle(view View, tag string) any {
+func valueFromStyle(view View, tag PropertyName) any {
 	session := view.Session()
-	getValue := func(styleTag string) any {
+	getValue := func(styleTag PropertyName) any {
 		if style, ok := stringProperty(view, styleTag, session); ok {
 			if style, ok := session.resolveConstants(style); ok {
 				return session.styleProperty(style, tag)
@@ -725,12 +590,28 @@ func valueFromStyle(view View, tag string) any {
 	return getValue(Style)
 }
 
-func sizeStyledProperty(view View, subviewID []string, tag string, inherit bool) SizeUnit {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+func stringStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) string {
+	if view = getSubview(view, subviewID); view != nil {
+		if text, ok := stringProperty(view, tag, view.Session()); ok {
+			return text
+		}
+		if value := valueFromStyle(view, tag); value != nil {
+			if text, ok := value.(string); ok {
+				return text
+			}
+		}
+		if inherit {
+			if parent := view.Parent(); parent != nil {
+				return stringStyledProperty(parent, nil, tag, true)
+			}
+		}
 
-	if view != nil {
+	}
+	return ""
+}
+
+func sizeStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) SizeUnit {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := sizeProperty(view, tag, view.Session()); ok {
 			return value
 		}
@@ -749,12 +630,8 @@ func sizeStyledProperty(view View, subviewID []string, tag string, inherit bool)
 	return AutoSize()
 }
 
-func enumStyledProperty(view View, subviewID []string, tag string, defaultValue int, inherit bool) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+func enumStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue int, inherit bool) int {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := enumProperty(view, tag, view.Session(), defaultValue); ok {
 			return value
 		}
@@ -773,12 +650,8 @@ func enumStyledProperty(view View, subviewID []string, tag string, defaultValue 
 	return defaultValue
 }
 
-func boolStyledProperty(view View, subviewID []string, tag string, inherit bool) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+func boolStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) bool {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := boolProperty(view, tag, view.Session()); ok {
 			return value
 		}
@@ -798,12 +671,8 @@ func boolStyledProperty(view View, subviewID []string, tag string, inherit bool)
 	return false
 }
 
-func intStyledProperty(view View, subviewID []string, tag string, defaultValue int) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+func intStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue int) int {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := intProperty(view, tag, view.Session(), defaultValue); ok {
 			return value
 		}
@@ -815,11 +684,8 @@ func intStyledProperty(view View, subviewID []string, tag string, defaultValue i
 	return defaultValue
 }
 
-func floatStyledProperty(view View, subviewID []string, tag string, defaultValue float64) float64 {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+func floatStyledProperty(view View, subviewID []string, tag PropertyName, defaultValue float64) float64 {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := floatProperty(view, tag, view.Session(), defaultValue); ok {
 			return value
 		}
@@ -831,11 +697,8 @@ func floatStyledProperty(view View, subviewID []string, tag string, defaultValue
 	return defaultValue
 }
 
-func colorStyledProperty(view View, subviewID []string, tag string, inherit bool) Color {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+func colorStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) Color {
+	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := colorProperty(view, tag, view.Session()); ok {
 			return value
 		}
@@ -853,14 +716,24 @@ func colorStyledProperty(view View, subviewID []string, tag string, inherit bool
 	return Color(0)
 }
 
+func transformStyledProperty(view View, subviewID []string, tag PropertyName) TransformProperty {
+	if view = getSubview(view, subviewID); view != nil {
+		if transform := getTransformProperty(view, tag); transform != nil {
+			return transform
+		}
+
+		if value := valueFromStyle(view, tag); value != nil {
+			return valueToTransformProperty(value)
+		}
+	}
+	return nil
+}
+
 // FocusView sets focus on the specified subview, if it can be focused.
 // The focused View is the View which will receive keyboard events by default.
 // If the second argument (subviewID) is not specified or it is "" then focus is set on the first argument (view)
 func FocusView(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		view.Session().callFunc("focus", view.htmlID())
 	}
 }
@@ -890,12 +763,8 @@ func BlurViewByID(viewID string, session Session) {
 // GetCurrent returns the index of the selected item (<0 if there is no a selected item) or the current view index (StackLayout, TabsLayout).
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCurrent(view View, subviewID ...string) int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
 	defaultValue := -1
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if result, ok := intProperty(view, Current, view.Session(), defaultValue); ok {
 			return result
 		} else if view.Tag() != "ListView" {
@@ -908,11 +777,7 @@ func GetCurrent(view View, subviewID ...string) int {
 // IsUserSelect returns "true" if the user can select text, "false" otherwise.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func IsUserSelect(view View, subviewID ...string) bool {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		value, _ := isUserSelect(view)
 		return value
 	}
@@ -976,11 +841,7 @@ func GetBackgroundBlendMode(view View, subviewID ...string) int {
 // GetTooltip returns a tooltip text of the subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetTooltip(view View, subviewID ...string) string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Tooltip); value != nil {
 			if text, ok := value.(string); ok {
 				return text

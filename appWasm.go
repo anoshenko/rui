@@ -141,7 +141,7 @@ func (app *wasmApp) init(params AppParams) {
 	div := document.Call("createElement", "div")
 	div.Set("className", "ruiRoot")
 	div.Set("id", "ruiRootView")
-	viewHTML(app.session.RootView(), buffer)
+	viewHTML(app.session.RootView(), buffer, "")
 	div.Set("innerHTML", buffer.String())
 	body.Call("appendChild", div)
 

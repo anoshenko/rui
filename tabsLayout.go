@@ -5,109 +5,113 @@ import (
 	"strings"
 )
 
-// Constants for [TabsLayout] specific properties and events
+// Constants for [TabsLayout] specific view and events
 const (
 	// CurrentTabChangedEvent is the constant for "current-tab-changed" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Occur when the new tab becomes active.
 	//
 	// General listener format:
-	// `func(tabsLayout rui.TabsLayout, newTab, oldTab int)`.
+	//
+	//   func(tabsLayout rui.TabsLayout, newTab, oldTab int)
 	//
 	// where:
-	// tabsLayout - Interface of a tabs layout which generated this event,
-	// newTab - Index of a new active tab,
-	// oldTab - Index of an old active tab.
+	//   - tabsLayout - Interface of a tabs layout which generated this event,
+	//   - newTab - Index of a new active tab,
+	//   - oldTab - Index of an old active tab.
 	//
 	// Allowed listener formats:
-	// `func(tabsLayout rui.TabsLayout, newTab int)`,
-	// `func(newTab, oldTab int)`,
-	// `func(newTab int)`,
-	// `func()`.
-	CurrentTabChangedEvent = "current-tab-changed"
+	//
+	//  func(tabsLayout rui.TabsLayout, newTab int)
+	//  func(newTab, oldTab int)
+	//  func(newTab int)
+	//  func()
+	CurrentTabChangedEvent PropertyName = "current-tab-changed"
 
 	// Icon is the constant for "icon" property tag.
 	//
-	// Used by `TabsLayout`.
-	// Defines the icon name that is displayed in the tab. The property is set for the child view of `TabsLayout`.
+	// Used by TabsLayout.
+	// Defines the icon name that is displayed in the tab. The property is set for the child view of TabsLayout.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	Icon = "icon"
 
 	// TabCloseButton is the constant for "tab-close-button" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Controls whether to add close button to a tab(s). This property can be set separately for each child view or for tabs
 	// layout itself. Property set for child view takes precedence over the value set for tabs layout. Default value is
-	// `false`.
+	// false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Tab(s) has close button.
-	// `false` or `0` or "false", "no", "off", "0" - No close button in tab(s).
-	TabCloseButton = "tab-close-button"
+	//   - true, 1, "true", "yes", "on", "1" - Tab(s) has close button.
+	//   - false, 0, "false", "no", "off", "0" - No close button in tab(s).
+	TabCloseButton PropertyName = "tab-close-button"
 
 	// TabCloseEvent is the constant for "tab-close-event" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Occurs when the user clicks on the tab close button.
 	//
 	// General listener format:
-	// `func(tabsLayout rui.TabsLayout, tab int)`.
+	//
+	//  func(tabsLayout rui.TabsLayout, tab int)
 	//
 	// where:
-	// tabsLayout - Interface of a tabs layout which generated this event,
-	// tab - Index of the tab.
+	//   - tabsLayout - Interface of a tabs layout which generated this event,
+	//   - tab - Index of the tab.
 	//
 	// Allowed listener formats:
-	// `func(tab int)`,
-	// `func(tabsLayout rui.TabsLayout)`,
-	// `func()`.
-	TabCloseEvent = "tab-close-event"
+	//
+	//  func(tab int)
+	//  func(tabsLayout rui.TabsLayout)
+	//  func()
+	TabCloseEvent PropertyName = "tab-close-event"
 
 	// Tabs is the constant for "tabs" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Sets where the tabs are located. Default value is "top".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`TopTabs`) or "top" - Tabs on the top.
-	// `1`(`BottomTabs`) or "bottom" - Tabs on the bottom.
-	// `2`(`LeftTabs`) or "left" - Tabs on the left. Each tab is rotated 90° counterclockwise.
-	// `3`(`RightTabs`) or "right" - Tabs located on the right. Each tab is rotated 90° clockwise.
-	// `4`(`LeftListTabs`) or "left-list" - Tabs on the left. The tabs are displayed as a list.
-	// `5`(`RightListTabs`) or "right-list" - Tabs on the right. The tabs are displayed as a list.
-	// `6`(`HiddenTabs`) or "hidden" - Tabs are hidden.
-	Tabs = "tabs"
+	//   - 0 (TopTabs) or "top" - Tabs on the top.
+	//   - 1 (BottomTabs) or "bottom" - Tabs on the bottom.
+	//   - 2 (LeftTabs) or "left" - Tabs on the left. Each tab is rotated 90° counterclockwise.
+	//   - 3 (RightTabs) or "right" - Tabs located on the right. Each tab is rotated 90° clockwise.
+	//   - 4 (LeftListTabs) or "left-list" - Tabs on the left. The tabs are displayed as a list.
+	//   - 5 (RightListTabs) or "right-list" - Tabs on the right. The tabs are displayed as a list.
+	//   - 6 (HiddenTabs) or "hidden" - Tabs are hidden.
+	Tabs PropertyName = "tabs"
 
 	// TabBarStyle is the constant for "tab-bar-style" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Set the style for the display of the tab bar. The default value is "ruiTabBar".
 	//
-	// Supported types: `string`.
-	TabBarStyle = "tab-bar-style"
+	// Supported types: string.
+	TabBarStyle PropertyName = "tab-bar-style"
 
 	// TabStyle is the constant for "tab-style" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Set the style for the display of the tab. The default value is "ruiTab" or "ruiVerticalTab".
 	//
-	// Supported types: `string`.
-	TabStyle = "tab-style"
+	// Supported types: string.
+	TabStyle PropertyName = "tab-style"
 
 	// CurrentTabStyle is the constant for "current-tab-style" property tag.
 	//
-	// Used by `TabsLayout`.
+	// Used by TabsLayout.
 	// Set the style for the display of the current(selected) tab. The default value is "ruiCurrentTab" or
 	// "ruiCurrentVerticalTab".
 	//
-	// Supported types: `string`.
-	CurrentTabStyle = "current-tab-style"
+	// Supported types: string.
+	CurrentTabStyle PropertyName = "current-tab-style"
 
 	inactiveTabStyle = "data-inactiveTabStyle"
 	activeTabStyle   = "data-activeTabStyle"
@@ -139,8 +143,6 @@ type TabsLayout interface {
 
 type tabsLayoutData struct {
 	viewsContainerData
-	tabListener      []func(TabsLayout, int, int)
-	tabCloseListener []func(TabsLayout, int)
 }
 
 // NewTabsLayout create new TabsLayout object and return it
@@ -152,7 +154,8 @@ func NewTabsLayout(session Session, params Params) TabsLayout {
 }
 
 func newTabsLayout(session Session) View {
-	return NewTabsLayout(session, nil)
+	//return NewTabsLayout(session, nil)
+	return new(tabsLayoutData)
 }
 
 // Init initialize fields of ViewsContainer by default values
@@ -160,345 +163,229 @@ func (tabsLayout *tabsLayoutData) init(session Session) {
 	tabsLayout.viewsContainerData.init(session)
 	tabsLayout.tag = "TabsLayout"
 	tabsLayout.systemClass = "ruiTabsLayout"
-	tabsLayout.tabListener = []func(TabsLayout, int, int){}
-	tabsLayout.tabCloseListener = []func(TabsLayout, int){}
+	tabsLayout.set = tabsLayout.setFunc
+	tabsLayout.changed = tabsLayout.propertyChanged
 }
 
-func (tabsLayout *tabsLayoutData) String() string {
-	return getViewString(tabsLayout, nil)
-}
-
-func (tabsLayout *tabsLayoutData) currentItem(defaultValue int) int {
-	result, _ := intProperty(tabsLayout, Current, tabsLayout.session, defaultValue)
+func tabsLayoutCurrent(view View, defaultValue int) int {
+	result, _ := intProperty(view, Current, view.Session(), defaultValue)
 	return result
 }
 
-func (tabsLayout *tabsLayoutData) Get(tag string) any {
-	return tabsLayout.get(strings.ToLower(tag))
-}
-
-func (tabsLayout *tabsLayoutData) get(tag string) any {
+func (tabsLayout *tabsLayoutData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case CurrentTabChangedEvent:
-		return tabsLayout.tabListener
+		return setTwoArgEventListener[TabsLayout, int](tabsLayout, tag, value)
 
 	case TabCloseEvent:
-		return tabsLayout.tabCloseListener
-	}
-
-	return tabsLayout.viewsContainerData.get(tag)
-}
-
-func (tabsLayout *tabsLayoutData) Remove(tag string) {
-	tabsLayout.remove(strings.ToLower(tag))
-}
-
-func (tabsLayout *tabsLayoutData) remove(tag string) {
-	switch tag {
-	case CurrentTabChangedEvent:
-		if len(tabsLayout.tabListener) > 0 {
-			tabsLayout.tabListener = []func(TabsLayout, int, int){}
-			tabsLayout.propertyChangedEvent(tag)
-		}
-		return
-
-	case TabCloseEvent:
-		if len(tabsLayout.tabCloseListener) > 0 {
-			tabsLayout.tabCloseListener = []func(TabsLayout, int){}
-			tabsLayout.propertyChangedEvent(tag)
-		}
-		return
+		return setOneArgEventListener[TabsLayout, int](tabsLayout, tag, value)
 
 	case Current:
-		oldCurrent := tabsLayout.currentItem(0)
-		delete(tabsLayout.properties, Current)
-		if oldCurrent == 0 {
-			return
-		}
-		if tabsLayout.created {
-			tabsLayout.session.callFunc("activateTab", tabsLayout.htmlID(), 0)
-			for _, listener := range tabsLayout.tabListener {
-				listener(tabsLayout, 0, oldCurrent)
-			}
-		}
+		tabsLayout.setRaw("old-current", tabsLayoutCurrent(tabsLayout, -1))
 
-	case Tabs:
-		delete(tabsLayout.properties, Tabs)
-		if tabsLayout.created {
-			htmlID := tabsLayout.htmlID()
-			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
-			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
-			updateCSSStyle(htmlID, tabsLayout.session)
-			updateInnerHTML(htmlID, tabsLayout.session)
-		}
-
-	case TabStyle, CurrentTabStyle:
-		delete(tabsLayout.properties, tag)
-		if tabsLayout.created {
-			htmlID := tabsLayout.htmlID()
-			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
-			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
-			updateInnerHTML(htmlID, tabsLayout.session)
-		}
-
-	case TabCloseButton:
-		delete(tabsLayout.properties, tag)
-		if tabsLayout.created {
-			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
-		}
-
-	default:
-		tabsLayout.viewsContainerData.remove(tag)
-		return
-	}
-
-	tabsLayout.propertyChangedEvent(tag)
-}
-
-func (tabsLayout *tabsLayoutData) Set(tag string, value any) bool {
-	return tabsLayout.set(strings.ToLower(tag), value)
-}
-
-func (tabsLayout *tabsLayoutData) set(tag string, value any) bool {
-	if value == nil {
-		tabsLayout.remove(tag)
-		return true
-	}
-
-	switch tag {
-	case CurrentTabChangedEvent:
-		listeners := tabsLayout.valueToTabListeners(value)
-		if listeners == nil {
-			notCompatibleType(tag, value)
-			return false
-		}
-		tabsLayout.tabListener = listeners
-
-	case TabCloseEvent:
-		listeners, ok := valueToEventListeners[TabsLayout, int](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(TabsLayout, int){}
-		}
-		tabsLayout.tabCloseListener = listeners
-
-	case Current:
 		if current, ok := value.(int); ok && current < 0 {
-			tabsLayout.remove(Current)
-			return true
+			tabsLayout.setRaw(Current, nil)
+			return []PropertyName{tag}
 		}
 
-		oldCurrent := tabsLayout.currentItem(-1)
-		if !tabsLayout.setIntProperty(Current, value) {
-			return false
-		}
+		return setIntProperty(tabsLayout, Current, value)
 
-		current := tabsLayout.currentItem(0)
-		if oldCurrent == current {
-			return true
+	case TabStyle, CurrentTabStyle, TabBarStyle:
+		if text, ok := value.(string); ok {
+			return setStringPropertyValue(tabsLayout, tag, text)
 		}
-		if tabsLayout.created {
-			tabsLayout.session.callFunc("activateTab", tabsLayout.htmlID(), current)
-			for _, listener := range tabsLayout.tabListener {
+		notCompatibleType(tag, value)
+		return nil
+	}
+
+	return tabsLayout.viewsContainerData.setFunc(tag, value)
+}
+
+func (tabsLayout *tabsLayoutData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Current:
+		session := tabsLayout.Session()
+		current := GetCurrent(tabsLayout)
+		session.callFunc("activateTab", tabsLayout.htmlID(), current)
+
+		if listeners := getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent); len(listeners) > 0 {
+			oldCurrent, _ := intProperty(tabsLayout, "old-current", session, -1)
+			for _, listener := range listeners {
 				listener(tabsLayout, current, oldCurrent)
 			}
 		}
 
 	case Tabs:
-		if !tabsLayout.setEnumProperty(Tabs, value, enumProperties[Tabs].values) {
-			return false
-		}
-		if tabsLayout.created {
-			htmlID := tabsLayout.htmlID()
-			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
-			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
-			updateCSSStyle(htmlID, tabsLayout.session)
-			updateInnerHTML(htmlID, tabsLayout.session)
-		}
+		htmlID := tabsLayout.htmlID()
+		session := tabsLayout.Session()
+		session.updateProperty(htmlID, inactiveTabStyle, tabsLayoutInactiveTabStyle(tabsLayout))
+		session.updateProperty(htmlID, activeTabStyle, tabsLayoutActiveTabStyle(tabsLayout))
+		updateCSSStyle(htmlID, session)
+		updateInnerHTML(htmlID, session)
 
 	case TabStyle, CurrentTabStyle, TabBarStyle:
-		if text, ok := value.(string); ok {
-			if text == "" {
-				delete(tabsLayout.properties, tag)
-			} else {
-				tabsLayout.properties[tag] = text
-			}
-		} else {
-			notCompatibleType(tag, value)
-			return false
-		}
-
-		if tabsLayout.created {
-			htmlID := tabsLayout.htmlID()
-			tabsLayout.session.updateProperty(htmlID, inactiveTabStyle, tabsLayout.inactiveTabStyle())
-			tabsLayout.session.updateProperty(htmlID, activeTabStyle, tabsLayout.activeTabStyle())
-			updateInnerHTML(htmlID, tabsLayout.session)
-		}
+		htmlID := tabsLayout.htmlID()
+		session := tabsLayout.Session()
+		session.updateProperty(htmlID, inactiveTabStyle, tabsLayoutInactiveTabStyle(tabsLayout))
+		session.updateProperty(htmlID, activeTabStyle, tabsLayoutActiveTabStyle(tabsLayout))
+		updateInnerHTML(htmlID, session)
 
 	case TabCloseButton:
-		if !tabsLayout.setBoolProperty(tag, value) {
-			return false
-		}
-		if tabsLayout.created {
-			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
-		}
+		updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
 
 	default:
-		return tabsLayout.viewsContainerData.set(tag, value)
+		tabsLayout.viewsContainerData.propertyChanged(tag)
 	}
-
-	tabsLayout.propertyChangedEvent(tag)
-	return true
 }
 
-func (tabsLayout *tabsLayoutData) valueToTabListeners(value any) []func(TabsLayout, int, int) {
-	if value == nil {
-		return []func(TabsLayout, int, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TabsLayout, int, int):
-		return []func(TabsLayout, int, int){value}
-
-	case func(TabsLayout, int):
-		fn := func(view TabsLayout, current, _ int) {
-			value(view, current)
+/*
+	func (tabsLayout *tabsLayoutData) valueToTabListeners(value any) []func(TabsLayout, int, int) {
+		if value == nil {
+			return []func(TabsLayout, int, int){}
 		}
-		return []func(TabsLayout, int, int){fn}
 
-	case func(TabsLayout):
-		fn := func(view TabsLayout, _, _ int) {
-			value(view)
-		}
-		return []func(TabsLayout, int, int){fn}
+		switch value := value.(type) {
+		case func(TabsLayout, int, int):
+			return []func(TabsLayout, int, int){value}
 
-	case func(int, int):
-		fn := func(_ TabsLayout, current, old int) {
-			value(current, old)
-		}
-		return []func(TabsLayout, int, int){fn}
-
-	case func(int):
-		fn := func(_ TabsLayout, current, _ int) {
-			value(current)
-		}
-		return []func(TabsLayout, int, int){fn}
-
-	case func():
-		fn := func(TabsLayout, int, int) {
-			value()
-		}
-		return []func(TabsLayout, int, int){fn}
-
-	case []func(TabsLayout, int, int):
-		return value
-
-	case []func(TabsLayout, int):
-		listeners := make([]func(TabsLayout, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
+		case func(TabsLayout, int):
+			fn := func(view TabsLayout, current, _ int) {
+				value(view, current)
 			}
-			listeners[i] = func(view TabsLayout, current, _ int) {
-				val(view, current)
-			}
-		}
-		return listeners
+			return []func(TabsLayout, int, int){fn}
 
-	case []func(TabsLayout):
-		listeners := make([]func(TabsLayout, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
+		case func(TabsLayout):
+			fn := func(view TabsLayout, _, _ int) {
+				value(view)
 			}
-			listeners[i] = func(view TabsLayout, _, _ int) {
-				val(view)
-			}
-		}
-		return listeners
+			return []func(TabsLayout, int, int){fn}
 
-	case []func(int, int):
-		listeners := make([]func(TabsLayout, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
+		case func(int, int):
+			fn := func(_ TabsLayout, current, old int) {
+				value(current, old)
 			}
-			listeners[i] = func(_ TabsLayout, current, old int) {
-				val(current, old)
-			}
-		}
-		return listeners
+			return []func(TabsLayout, int, int){fn}
 
-	case []func(int):
-		listeners := make([]func(TabsLayout, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
+		case func(int):
+			fn := func(_ TabsLayout, current, _ int) {
+				value(current)
 			}
-			listeners[i] = func(_ TabsLayout, current, _ int) {
-				val(current)
-			}
-		}
-		return listeners
+			return []func(TabsLayout, int, int){fn}
 
-	case []func():
-		listeners := make([]func(TabsLayout, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
+		case func():
+			fn := func(TabsLayout, int, int) {
+				value()
 			}
-			listeners[i] = func(TabsLayout, int, int) {
-				val()
-			}
-		}
-		return listeners
+			return []func(TabsLayout, int, int){fn}
 
-	case []any:
-		listeners := make([]func(TabsLayout, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TabsLayout, int, int):
-				listeners[i] = val
+		case []func(TabsLayout, int, int):
+			return value
 
-			case func(TabsLayout, int):
+		case []func(TabsLayout, int):
+			listeners := make([]func(TabsLayout, int, int), len(value))
+			for i, val := range value {
+				if val == nil {
+					return nil
+				}
 				listeners[i] = func(view TabsLayout, current, _ int) {
 					val(view, current)
 				}
+			}
+			return listeners
 
-			case func(TabsLayout):
+		case []func(TabsLayout):
+			listeners := make([]func(TabsLayout, int, int), len(value))
+			for i, val := range value {
+				if val == nil {
+					return nil
+				}
 				listeners[i] = func(view TabsLayout, _, _ int) {
 					val(view)
 				}
+			}
+			return listeners
 
-			case func(int, int):
+		case []func(int, int):
+			listeners := make([]func(TabsLayout, int, int), len(value))
+			for i, val := range value {
+				if val == nil {
+					return nil
+				}
 				listeners[i] = func(_ TabsLayout, current, old int) {
 					val(current, old)
 				}
+			}
+			return listeners
 
-			case func(int):
+		case []func(int):
+			listeners := make([]func(TabsLayout, int, int), len(value))
+			for i, val := range value {
+				if val == nil {
+					return nil
+				}
 				listeners[i] = func(_ TabsLayout, current, _ int) {
 					val(current)
 				}
+			}
+			return listeners
 
-			case func():
+		case []func():
+			listeners := make([]func(TabsLayout, int, int), len(value))
+			for i, val := range value {
+				if val == nil {
+					return nil
+				}
 				listeners[i] = func(TabsLayout, int, int) {
 					val()
 				}
-
-			default:
-				return nil
 			}
-		}
-		return listeners
-	}
+			return listeners
 
-	return nil
-}
+		case []any:
+			listeners := make([]func(TabsLayout, int, int), len(value))
+			for i, val := range value {
+				if val == nil {
+					return nil
+				}
+				switch val := val.(type) {
+				case func(TabsLayout, int, int):
+					listeners[i] = val
+
+				case func(TabsLayout, int):
+					listeners[i] = func(view TabsLayout, current, _ int) {
+						val(view, current)
+					}
+
+				case func(TabsLayout):
+					listeners[i] = func(view TabsLayout, _, _ int) {
+						val(view)
+					}
+
+				case func(int, int):
+					listeners[i] = func(_ TabsLayout, current, old int) {
+						val(current, old)
+					}
+
+				case func(int):
+					listeners[i] = func(_ TabsLayout, current, _ int) {
+						val(current)
+					}
+
+				case func():
+					listeners[i] = func(TabsLayout, int, int) {
+						val()
+					}
+
+				default:
+					return nil
+				}
+			}
+			return listeners
+		}
+
+		return nil
+	}
+*/
 
 func (tabsLayout *tabsLayoutData) tabsLocation() int {
 	tabs, _ := enumProperty(tabsLayout, Tabs, tabsLayout.session, 0)
@@ -519,36 +406,42 @@ func (tabsLayout *tabsLayoutData) tabBarStyle() string {
 	return "ruiTabBar"
 }
 
-func (tabsLayout *tabsLayoutData) inactiveTabStyle() string {
-	if style, ok := stringProperty(tabsLayout, TabStyle, tabsLayout.session); ok {
+func tabsLayoutInactiveTabStyle(view View) string {
+	session := view.Session()
+	if style, ok := stringProperty(view, TabStyle, session); ok {
 		return style
 	}
-	if value := valueFromStyle(tabsLayout, TabStyle); value != nil {
+	if value := valueFromStyle(view, TabStyle); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = tabsLayout.session.resolveConstants(style); ok {
+			if style, ok = session.resolveConstants(style); ok {
 				return style
 			}
 		}
 	}
-	switch tabsLayout.tabsLocation() {
+
+	tabs, _ := enumProperty(view, Tabs, session, 0)
+	switch tabs {
 	case LeftTabs, RightTabs:
 		return "ruiVerticalTab"
 	}
 	return "ruiTab"
 }
 
-func (tabsLayout *tabsLayoutData) activeTabStyle() string {
-	if style, ok := stringProperty(tabsLayout, CurrentTabStyle, tabsLayout.session); ok {
+func tabsLayoutActiveTabStyle(view View) string {
+	session := view.Session()
+	if style, ok := stringProperty(view, CurrentTabStyle, session); ok {
 		return style
 	}
-	if value := valueFromStyle(tabsLayout, CurrentTabStyle); value != nil {
+	if value := valueFromStyle(view, CurrentTabStyle); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = tabsLayout.session.resolveConstants(style); ok {
+			if style, ok = session.resolveConstants(style); ok {
 				return style
 			}
 		}
 	}
-	switch tabsLayout.tabsLocation() {
+
+	tabs, _ := enumProperty(view, Tabs, session, 0)
+	switch tabs {
 	case LeftTabs, RightTabs:
 		return "ruiCurrentVerticalTab"
 	}
@@ -610,7 +503,7 @@ func (tabsLayout *tabsLayoutData) ListItem(index int, session Session) View {
 			Column:  2,
 			Content: "✕",
 			ClickEvent: func() {
-				for _, listener := range tabsLayout.tabCloseListener {
+				for _, listener := range getOneArgEventListeners[TabsLayout, int](tabsLayout, nil, TabCloseEvent) {
 					listener(tabsLayout, index)
 				}
 			},
@@ -632,7 +525,7 @@ func (tabsLayout *tabsLayoutData) IsListItemEnabled(index int) bool {
 	return true
 }
 
-func (tabsLayout *tabsLayoutData) updateTitle(view View, tag string) {
+func (tabsLayout *tabsLayoutData) updateTitle(view View, tag PropertyName) {
 	session := tabsLayout.session
 	title, _ := stringProperty(view, Title, session)
 	if !GetNotTranslate(tabsLayout) {
@@ -641,13 +534,13 @@ func (tabsLayout *tabsLayoutData) updateTitle(view View, tag string) {
 	session.updateInnerHTML(view.htmlID()+"-title", title)
 }
 
-func (tabsLayout *tabsLayoutData) updateIcon(view View, tag string) {
+func (tabsLayout *tabsLayoutData) updateIcon(view View, tag PropertyName) {
 	session := tabsLayout.session
 	icon, _ := stringProperty(view, Icon, session)
 	session.updateProperty(view.htmlID()+"-icon", "src", icon)
 }
 
-func (tabsLayout *tabsLayoutData) updateTabCloseButton(view View, tag string) {
+func (tabsLayout *tabsLayoutData) updateTabCloseButton(view View, tag PropertyName) {
 	updateInnerHTML(tabsLayout.htmlID(), tabsLayout.session)
 }
 
@@ -662,11 +555,8 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 		view.SetChangeListener(Icon, tabsLayout.updateIcon)
 		view.SetChangeListener(TabCloseButton, tabsLayout.updateTabCloseButton)
 		if len(tabsLayout.views) == 1 {
-			tabsLayout.properties[Current] = 0
-			for _, listener := range tabsLayout.tabListener {
-				listener(tabsLayout, 0, -1)
-			}
-			defer tabsLayout.propertyChangedEvent(Current)
+			tabsLayout.setRaw(Current, nil)
+			tabsLayout.Set(Current, 0)
 		}
 	}
 }
@@ -677,9 +567,9 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 		tabsLayout.views = []View{}
 	}
 	if view != nil {
-		if current := tabsLayout.currentItem(0); current >= index {
-			tabsLayout.properties[Current] = current + 1
-			defer tabsLayout.propertyChangedEvent(Current)
+		if current := GetCurrent(tabsLayout); current >= index {
+			tabsLayout.setRaw(Current, current+1)
+			defer tabsLayout.currentChanged(current+1, current)
 		}
 		tabsLayout.viewsContainerData.Insert(view, index)
 		view.SetChangeListener(Title, tabsLayout.updateTitle)
@@ -688,56 +578,90 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 	}
 }
 
+func (tabsLayout *tabsLayoutData) currentChanged(newCurrent, oldCurrent int) {
+	for _, listener := range getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent) {
+		listener(tabsLayout, newCurrent, oldCurrent)
+	}
+	if listener, ok := tabsLayout.changeListener[Current]; ok {
+		listener(tabsLayout, Current)
+	}
+}
+
 // Remove removes view from list and return it
 func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
-	if tabsLayout.views == nil {
-		tabsLayout.views = []View{}
+
+	if index < 0 || index >= len(tabsLayout.views) {
 		return nil
 	}
 
-	count := len(tabsLayout.views)
-	if index < 0 || index >= count {
-		return nil
+	oldCurrent := GetCurrent(tabsLayout)
+	newCurrent := oldCurrent
+	if index < oldCurrent || (index == oldCurrent && oldCurrent > 0) {
+		newCurrent--
 	}
 
-	view := tabsLayout.views[index]
-	view.setParentID("")
-	view.SetChangeListener(Title, nil)
-	view.SetChangeListener(Icon, nil)
-	view.SetChangeListener(TabCloseButton, nil)
+	if view := tabsLayout.viewsContainerData.RemoveView(index); view != nil {
+		view.SetChangeListener(Title, nil)
+		view.SetChangeListener(Icon, nil)
+		view.SetChangeListener(TabCloseButton, nil)
 
-	current := tabsLayout.currentItem(0)
-	if index < current || (index == current && current > 0) {
-		current--
+		if newCurrent != oldCurrent {
+			tabsLayout.setRaw(Current, newCurrent)
+			tabsLayout.currentChanged(newCurrent, oldCurrent)
+		}
 	}
+	return nil
 
-	if len(tabsLayout.views) == 1 {
-		tabsLayout.views = []View{}
-		current = -1
-	} else if index == 0 {
-		tabsLayout.views = tabsLayout.views[1:]
-	} else if index == count-1 {
-		tabsLayout.views = tabsLayout.views[:index]
-	} else {
-		tabsLayout.views = append(tabsLayout.views[:index], tabsLayout.views[index+1:]...)
-	}
+	/*
+		if tabsLayout.views == nil {
+			tabsLayout.views = []View{}
+			return nil
+		}
 
-	updateInnerHTML(tabsLayout.parentHTMLID(), tabsLayout.session)
-	tabsLayout.propertyChangedEvent(Content)
+		count := len(tabsLayout.views)
+		if index < 0 || index >= count {
+			return nil
+		}
 
-	delete(tabsLayout.properties, Current)
-	tabsLayout.set(Current, current)
-	return view
+		view := tabsLayout.views[index]
+		view.setParentID("")
+		view.SetChangeListener(Title, nil)
+		view.SetChangeListener(Icon, nil)
+		view.SetChangeListener(TabCloseButton, nil)
+
+		current := GetCurrent(tabsLayout)
+		if index < current || (index == current && current > 0) {
+			current--
+		}
+
+		if len(tabsLayout.views) == 1 {
+			tabsLayout.views = []View{}
+			current = -1
+		} else if index == 0 {
+			tabsLayout.views = tabsLayout.views[1:]
+		} else if index == count-1 {
+			tabsLayout.views = tabsLayout.views[:index]
+		} else {
+			tabsLayout.views = append(tabsLayout.views[:index], tabsLayout.views[index+1:]...)
+		}
+
+		updateInnerHTML(tabsLayout.parentHTMLID(), tabsLayout.session)
+		tabsLayout.propertyChangedEvent(Content)
+
+		delete(tabsLayout.view, Current)
+		tabsLayout.Set(Current, current)
+		return view
+	*/
 }
 
 func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Builder) {
 	tabsLayout.viewsContainerData.htmlProperties(self, buffer)
 	buffer.WriteString(` data-inactiveTabStyle="`)
-	buffer.WriteString(tabsLayout.inactiveTabStyle())
+	buffer.WriteString(tabsLayoutInactiveTabStyle(tabsLayout))
 	buffer.WriteString(`" data-activeTabStyle="`)
-	buffer.WriteString(tabsLayout.activeTabStyle())
+	buffer.WriteString(tabsLayoutActiveTabStyle(tabsLayout))
 	buffer.WriteString(`" data-current="`)
-	buffer.WriteString(strconv.Itoa(tabsLayout.currentItem(0)))
+	buffer.WriteString(strconv.Itoa(GetCurrent(tabsLayout)))
 	buffer.WriteRune('"')
 }
 
@@ -763,8 +687,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 		return
 	}
 
-	//viewCount := len(tabsLayout.views)
-	current := tabsLayout.currentItem(0)
+	current := GetCurrent(tabsLayout)
 	location := tabsLayout.tabsLocation()
 	tabsLayoutID := tabsLayout.htmlID()
 
@@ -796,8 +719,8 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 
 		buffer.WriteString(`">`)
 
-		inactiveStyle := tabsLayout.inactiveTabStyle()
-		activeStyle := tabsLayout.activeTabStyle()
+		inactiveStyle := tabsLayoutInactiveTabStyle(tabsLayout)
+		activeStyle := tabsLayoutActiveTabStyle(tabsLayout)
 
 		notTranslate := GetNotTranslate(tabsLayout)
 		closeButton, _ := boolProperty(tabsLayout, TabCloseButton, tabsLayout.session)
@@ -942,23 +865,21 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(`grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;">`)
 		}
 
-		viewHTML(view, buffer)
+		viewHTML(view, buffer, "")
 		buffer.WriteString(`</div>`)
 	}
 }
 
-func (tabsLayout *tabsLayoutData) handleCommand(self View, command string, data DataObject) bool {
+func (tabsLayout *tabsLayoutData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "tabClick":
 		if numberText, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(numberText); err == nil {
-				current := tabsLayout.currentItem(0)
+				current := GetCurrent(tabsLayout)
 				if current != number {
-					tabsLayout.properties[Current] = number
-					for _, listener := range tabsLayout.tabListener {
-						listener(tabsLayout, number, current)
-					}
-					tabsLayout.propertyChangedEvent(Current)
+					tabsLayout.setRaw(Current, number)
+
+					tabsLayout.currentChanged(number, current)
 				}
 			}
 		}
@@ -967,7 +888,7 @@ func (tabsLayout *tabsLayoutData) handleCommand(self View, command string, data 
 	case "tabCloseClick":
 		if numberText, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(numberText); err == nil {
-				for _, listener := range tabsLayout.tabCloseListener {
+				for _, listener := range getOneArgEventListeners[TabsLayout, int](tabsLayout, nil, TabCloseEvent) {
 					listener(tabsLayout, number)
 				}
 			}

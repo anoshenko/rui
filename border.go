@@ -27,151 +27,151 @@ const (
 
 	// LeftStyle is the constant for "left-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Left border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	LeftStyle = "left-style"
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
+	LeftStyle PropertyName = "left-style"
 
 	// RightStyle is the constant for "right-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Right border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	RightStyle = "right-style"
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
+	RightStyle PropertyName = "right-style"
 
 	// TopStyle is the constant for "top-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Top border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	TopStyle = "top-style"
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
+	TopStyle PropertyName = "top-style"
 
 	// BottomStyle is the constant for "bottom-style" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Bottom border line style.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The border will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a border.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a border.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a border.
-	// `4`(`DoubleLine`) or "double" - Double line as a border.
-	BottomStyle = "bottom-style"
+	//  - 0 (NoneLine) or "none" - The border will not be drawn.
+	//  - 1 (SolidLine) or "solid" - Solid line as a border.
+	//  - 2 (DashedLine) or "dashed" - Dashed line as a border.
+	//  - 3 (DottedLine) or "dotted" - Dotted line as a border.
+	//  - 4 (DoubleLine) or "double" - Double line as a border.
+	BottomStyle PropertyName = "bottom-style"
 
 	// LeftWidth is the constant for "left-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Left border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	LeftWidth = "left-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
+	LeftWidth PropertyName = "left-width"
 
 	// RightWidth is the constant for "right-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Right border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	RightWidth = "right-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
+	RightWidth PropertyName = "right-width"
 
 	// TopWidth is the constant for "top-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Top border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	TopWidth = "top-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
+	TopWidth PropertyName = "top-width"
 
 	// BottomWidth is the constant for "bottom-width" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Bottom border line width.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	BottomWidth = "bottom-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
+	BottomWidth PropertyName = "bottom-width"
 
 	// LeftColor is the constant for "left-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Left border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	LeftColor = "left-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
+	LeftColor PropertyName = "left-color"
 
 	// RightColor is the constant for "right-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Right border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	RightColor = "right-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
+	RightColor PropertyName = "right-color"
 
 	// TopColor is the constant for "top-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Top border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	TopColor = "top-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
+	TopColor PropertyName = "top-color"
 
 	// BottomColor is the constant for "bottom-color" property tag.
 	//
-	// Used by `BorderProperty`.
+	// Used by BorderProperty.
 	// Bottom border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	BottomColor = "bottom-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
+	BottomColor PropertyName = "bottom-color"
 )
 
 // BorderProperty is the interface of a view border data
@@ -183,7 +183,7 @@ type BorderProperty interface {
 	// ViewBorders returns top, right, bottom and left borders information all together
 	ViewBorders(session Session) ViewBorders
 
-	delete(tag string)
+	deleteTag(tag PropertyName) bool
 	cssStyle(builder cssBuilder, session Session)
 	cssWidth(builder cssBuilder, session Session)
 	cssColor(builder cssBuilder, session Session)
@@ -193,12 +193,12 @@ type BorderProperty interface {
 }
 
 type borderProperty struct {
-	propertyList
+	dataProperty
 }
 
 func newBorderProperty(value any) BorderProperty {
 	border := new(borderProperty)
-	border.properties = map[string]any{}
+	border.init()
 
 	if value != nil {
 		switch value := value.(type) {
@@ -270,9 +270,10 @@ func newBorderProperty(value any) BorderProperty {
 // "width" (Width). Determines the line thickness (SizeUnit).
 func NewBorder(params Params) BorderProperty {
 	border := new(borderProperty)
-	border.properties = map[string]any{}
+	border.init()
+
 	if params != nil {
-		for _, tag := range []string{Style, Width, ColorTag, Left, Right, Top, Bottom,
+		for _, tag := range []PropertyName{Style, Width, ColorTag, Left, Right, Top, Bottom,
 			LeftStyle, RightStyle, TopStyle, BottomStyle,
 			LeftWidth, RightWidth, TopWidth, BottomWidth,
 			LeftColor, RightColor, TopColor, BottomColor} {
@@ -284,8 +285,37 @@ func NewBorder(params Params) BorderProperty {
 	return border
 }
 
-func (border *borderProperty) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func (border *borderProperty) init() {
+	border.dataProperty.init()
+	border.normalize = normalizeBorderTag
+	border.get = borderGet
+	border.set = borderSet
+	border.remove = borderRemove
+	border.supportedProperties = []PropertyName{
+		Left,
+		Right,
+		Top,
+		Bottom,
+		Style,
+		LeftStyle,
+		RightStyle,
+		TopStyle,
+		BottomStyle,
+		Width,
+		LeftWidth,
+		RightWidth,
+		TopWidth,
+		BottomWidth,
+		ColorTag,
+		LeftColor,
+		RightColor,
+		TopColor,
+		BottomColor,
+	}
+}
+
+func normalizeBorderTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case BorderLeft, CellBorderLeft:
 		return Left
@@ -352,23 +382,23 @@ func (border *borderProperty) writeString(buffer *strings.Builder, indent string
 	buffer.WriteString("_{ ")
 	comma := false
 
-	write := func(tag string, value any) {
+	write := func(tag PropertyName, value any) {
 		if comma {
 			buffer.WriteString(", ")
 		}
-		buffer.WriteString(tag)
+		buffer.WriteString(string(tag))
 		buffer.WriteString(" = ")
 		writePropertyValue(buffer, BorderStyle, value, indent)
 		comma = true
 	}
 
-	for _, tag := range []string{Style, Width, ColorTag} {
+	for _, tag := range []PropertyName{Style, Width, ColorTag} {
 		if value, ok := border.properties[tag]; ok {
 			write(tag, value)
 		}
 	}
 
-	for _, side := range []string{Top, Right, Bottom, Left} {
+	for _, side := range []PropertyName{Top, Right, Bottom, Left} {
 		style, okStyle := border.properties[side+"-"+Style]
 		width, okWidth := border.properties[side+"-"+Width]
 		color, okColor := border.properties[side+"-"+ColorTag]
@@ -378,7 +408,7 @@ func (border *borderProperty) writeString(buffer *strings.Builder, indent string
 				comma = false
 			}
 
-			buffer.WriteString(side)
+			buffer.WriteString(string(side))
 			buffer.WriteString(" = _{ ")
 			if okStyle {
 				write(Style, style)
@@ -401,164 +431,96 @@ func (border *borderProperty) String() string {
 	return runStringWriter(border)
 }
 
-func (border *borderProperty) setSingleBorderObject(prefix string, obj DataObject) bool {
-	result := true
-	if text, ok := obj.PropertyValue(Style); ok {
-		if !border.setEnumProperty(prefix+"-style", text, enumProperties[BorderStyle].values) {
-			result = false
-		}
-	}
-	if text, ok := obj.PropertyValue(ColorTag); ok {
-		if !border.setColorProperty(prefix+"-color", text) {
-			result = false
-		}
-	}
-	if text, ok := obj.PropertyValue("width"); ok {
-		if !border.setSizeProperty(prefix+"-width", text) {
-			result = false
-		}
-	}
-	return result
-}
-
 func (border *borderProperty) setBorderObject(obj DataObject) bool {
 	result := true
-
-	for _, side := range []string{Top, Right, Bottom, Left} {
-		if node := obj.PropertyByTag(side); node != nil {
-			if node.Type() == ObjectNode {
-				if !border.setSingleBorderObject(side, node.Object()) {
+	for i := 0; i < obj.PropertyCount(); i++ {
+		if node := obj.Property(i); node != nil {
+			tag := PropertyName(node.Tag())
+			switch node.Type() {
+			case TextNode:
+				if borderSet(border, tag, node.Text()) == nil {
 					result = false
 				}
-			} else {
-				notCompatibleType(side, node)
-				result = false
-			}
-		}
-	}
 
-	if text, ok := obj.PropertyValue(Style); ok {
-		values := split4Values(text)
-		styles := enumProperties[BorderStyle].values
-		switch len(values) {
-		case 1:
-			if !border.setEnumProperty(Style, values[0], styles) {
-				result = false
-			}
-
-		case 4:
-			for n, tag := range [4]string{TopStyle, RightStyle, BottomStyle, LeftStyle} {
-				if !border.setEnumProperty(tag, values[n], styles) {
+			case ObjectNode:
+				if borderSet(border, tag, node.Object()) == nil {
 					result = false
 				}
-			}
 
-		default:
-			notCompatibleType(Style, text)
+			default:
+				result = false
+			}
+		} else {
 			result = false
 		}
 	}
-
-	if text, ok := obj.PropertyValue(ColorTag); ok {
-		values := split4Values(text)
-		switch len(values) {
-		case 1:
-			if !border.setColorProperty(ColorTag, values[0]) {
-				return false
-			}
-
-		case 4:
-			for n, tag := range [4]string{TopColor, RightColor, BottomColor, LeftColor} {
-				if !border.setColorProperty(tag, values[n]) {
-					return false
-				}
-			}
-
-		default:
-			notCompatibleType(ColorTag, text)
-			result = false
-		}
-	}
-
-	if text, ok := obj.PropertyValue(Width); ok {
-		values := split4Values(text)
-		switch len(values) {
-		case 1:
-			if !border.setSizeProperty(Width, values[0]) {
-				result = false
-			}
-
-		case 4:
-			for n, tag := range [4]string{TopWidth, RightWidth, BottomWidth, LeftWidth} {
-				if !border.setSizeProperty(tag, values[n]) {
-					result = false
-				}
-			}
-
-		default:
-			notCompatibleType(Width, text)
-			result = false
-		}
-	}
-
 	return result
 }
 
-func (border *borderProperty) Remove(tag string) {
-	tag = border.normalizeTag(tag)
+func borderRemove(properties Properties, tag PropertyName) []PropertyName {
+	result := []PropertyName{}
+	removeTag := func(t PropertyName) {
+		if properties.getRaw(t) != nil {
+			properties.setRaw(t, nil)
+			result = append(result, t)
+		}
+	}
 
 	switch tag {
 	case Style:
-		for _, t := range []string{tag, TopStyle, RightStyle, BottomStyle, LeftStyle} {
-			delete(border.properties, t)
+		for _, t := range []PropertyName{tag, TopStyle, RightStyle, BottomStyle, LeftStyle} {
+			removeTag(t)
 		}
 
 	case Width:
-		for _, t := range []string{tag, TopWidth, RightWidth, BottomWidth, LeftWidth} {
-			delete(border.properties, t)
+		for _, t := range []PropertyName{tag, TopWidth, RightWidth, BottomWidth, LeftWidth} {
+			removeTag(t)
 		}
 
 	case ColorTag:
-		for _, t := range []string{tag, TopColor, RightColor, BottomColor, LeftColor} {
-			delete(border.properties, t)
+		for _, t := range []PropertyName{tag, TopColor, RightColor, BottomColor, LeftColor} {
+			removeTag(t)
 		}
 
 	case Left, Right, Top, Bottom:
-		border.Remove(tag + "-style")
-		border.Remove(tag + "-width")
-		border.Remove(tag + "-color")
+		removeTag(tag + "-style")
+		removeTag(tag + "-width")
+		removeTag(tag + "-color")
 
 	case LeftStyle, RightStyle, TopStyle, BottomStyle:
-		delete(border.properties, tag)
-		if style, ok := border.properties[Style]; ok && style != nil {
-			for _, t := range []string{TopStyle, RightStyle, BottomStyle, LeftStyle} {
+		removeTag(tag)
+		if style := properties.getRaw(Style); style != nil {
+			for _, t := range []PropertyName{TopStyle, RightStyle, BottomStyle, LeftStyle} {
 				if t != tag {
-					if _, ok := border.properties[t]; !ok {
-						border.properties[t] = style
+					if properties.getRaw(t) == nil {
+						properties.setRaw(t, style)
+						result = append(result, t)
 					}
 				}
 			}
 		}
 
 	case LeftWidth, RightWidth, TopWidth, BottomWidth:
-		delete(border.properties, tag)
-		if width, ok := border.properties[Width]; ok && width != nil {
-			for _, t := range []string{TopWidth, RightWidth, BottomWidth, LeftWidth} {
+		removeTag(tag)
+		if width := properties.getRaw(Width); width != nil {
+			for _, t := range []PropertyName{TopWidth, RightWidth, BottomWidth, LeftWidth} {
 				if t != tag {
-					if _, ok := border.properties[t]; !ok {
-						border.properties[t] = width
+					if properties.getRaw(t) == nil {
+						properties.setRaw(t, width)
+						result = append(result, t)
 					}
 				}
 			}
 		}
 
 	case LeftColor, RightColor, TopColor, BottomColor:
-		delete(border.properties, tag)
-		if color, ok := border.properties[ColorTag]; ok && color != nil {
-			for _, t := range []string{TopColor, RightColor, BottomColor, LeftColor} {
+		removeTag(tag)
+		if color := properties.getRaw(ColorTag); color != nil {
+			for _, t := range []PropertyName{TopColor, RightColor, BottomColor, LeftColor} {
 				if t != tag {
-					if _, ok := border.properties[t]; !ok {
-						border.properties[t] = color
+					if properties.getRaw(t) == nil {
+						properties.setRaw(t, color)
+						result = append(result, t)
 					}
 				}
 			}
@@ -567,80 +529,118 @@ func (border *borderProperty) Remove(tag string) {
 	default:
 		ErrorLogF(`"%s" property is not compatible with the BorderProperty`, tag)
 	}
+
+	return result
 }
 
-func (border *borderProperty) Set(tag string, value any) bool {
-	if value == nil {
-		border.Remove(tag)
-		return true
-	}
+func borderSet(properties Properties, tag PropertyName, value any) []PropertyName {
 
-	tag = border.normalizeTag(tag)
+	setSingleBorderObject := func(prefix PropertyName, obj DataObject) []PropertyName {
+		result := []PropertyName{}
+		if text, ok := obj.PropertyValue(string(Style)); ok {
+			props := setEnumProperty(properties, prefix+"-style", text, enumProperties[BorderStyle].values)
+			if props == nil {
+				return nil
+			}
+			result = append(result, props...)
+		}
+		if text, ok := obj.PropertyValue(string(ColorTag)); ok {
+			props := setColorProperty(properties, prefix+"-color", text)
+			if props == nil && len(result) == 0 {
+				return nil
+			}
+			result = append(result, props...)
+		}
+		if text, ok := obj.PropertyValue("width"); ok {
+			props := setSizeProperty(properties, prefix+"-width", text)
+			if props == nil && len(result) == 0 {
+				return nil
+			}
+			result = append(result, props...)
+		}
+		if len(result) > 0 {
+			result = append(result, prefix)
+		}
+		return result
+	}
 
 	switch tag {
 	case Style:
-		if border.setEnumProperty(Style, value, enumProperties[BorderStyle].values) {
-			for _, side := range []string{TopStyle, RightStyle, BottomStyle, LeftStyle} {
-				delete(border.properties, side)
+		if result := setEnumProperty(properties, Style, value, enumProperties[BorderStyle].values); result != nil {
+			for _, side := range []PropertyName{TopStyle, RightStyle, BottomStyle, LeftStyle} {
+				if value := properties.getRaw(side); value != nil {
+					properties.setRaw(side, nil)
+					result = append(result, side)
+				}
 			}
-			return true
+			return result
 		}
 
 	case Width:
-		if border.setSizeProperty(Width, value) {
-			for _, side := range []string{TopWidth, RightWidth, BottomWidth, LeftWidth} {
-				delete(border.properties, side)
+		if result := setSizeProperty(properties, Width, value); result != nil {
+			for _, side := range []PropertyName{TopWidth, RightWidth, BottomWidth, LeftWidth} {
+				if value := properties.getRaw(side); value != nil {
+					properties.setRaw(side, nil)
+					result = append(result, side)
+				}
 			}
-			return true
+			return result
 		}
 
 	case ColorTag:
-		if border.setColorProperty(ColorTag, value) {
-			for _, side := range []string{TopColor, RightColor, BottomColor, LeftColor} {
-				delete(border.properties, side)
+		if result := setColorProperty(properties, ColorTag, value); result != nil {
+			for _, side := range []PropertyName{TopColor, RightColor, BottomColor, LeftColor} {
+				if value := properties.getRaw(side); value != nil {
+					properties.setRaw(side, nil)
+					result = append(result, side)
+				}
 			}
-			return true
+			return result
 		}
 
 	case LeftStyle, RightStyle, TopStyle, BottomStyle:
-		return border.setEnumProperty(tag, value, enumProperties[BorderStyle].values)
+		return setEnumProperty(properties, tag, value, enumProperties[BorderStyle].values)
 
 	case LeftWidth, RightWidth, TopWidth, BottomWidth:
-		return border.setSizeProperty(tag, value)
+		return setSizeProperty(properties, tag, value)
 
 	case LeftColor, RightColor, TopColor, BottomColor:
-		return border.setColorProperty(tag, value)
+		return setColorProperty(properties, tag, value)
 
 	case Left, Right, Top, Bottom:
 		switch value := value.(type) {
 		case string:
 			if obj := ParseDataText(value); obj != nil {
-				return border.setSingleBorderObject(tag, obj)
+				return setSingleBorderObject(tag, obj)
 			}
 
 		case DataObject:
-			return border.setSingleBorderObject(tag, value)
+			return setSingleBorderObject(tag, value)
 
 		case BorderProperty:
+			result := []PropertyName{}
 			styleTag := tag + "-" + Style
 			if style := value.Get(styleTag); value != nil {
-				border.properties[styleTag] = style
+				properties.setRaw(styleTag, style)
+				result = append(result, styleTag)
 			}
 			colorTag := tag + "-" + ColorTag
 			if color := value.Get(colorTag); value != nil {
-				border.properties[colorTag] = color
+				properties.setRaw(colorTag, color)
+				result = append(result, colorTag)
 			}
 			widthTag := tag + "-" + Width
 			if width := value.Get(widthTag); value != nil {
-				border.properties[widthTag] = width
+				properties.setRaw(widthTag, width)
+				result = append(result, widthTag)
 			}
-			return true
+			return result
 
 		case ViewBorder:
-			border.properties[tag+"-"+Style] = value.Style
-			border.properties[tag+"-"+Width] = value.Width
-			border.properties[tag+"-"+ColorTag] = value.Color
-			return true
+			properties.setRaw(tag+"-"+Style, value.Style)
+			properties.setRaw(tag+"-"+Width, value.Width)
+			properties.setRaw(tag+"-"+ColorTag, value.Color)
+			return []PropertyName{tag + "-" + Style, tag + "-" + Width, tag + "-" + ColorTag}
 		}
 		fallthrough
 
@@ -648,105 +648,119 @@ func (border *borderProperty) Set(tag string, value any) bool {
 		ErrorLogF(`"%s" property is not compatible with the BorderProperty`, tag)
 	}
 
-	return false
+	return nil
 }
 
-func (border *borderProperty) Get(tag string) any {
-	tag = border.normalizeTag(tag)
-
-	if result, ok := border.properties[tag]; ok {
+func borderGet(properties Properties, tag PropertyName) any {
+	if result := properties.getRaw(tag); result != nil {
 		return result
 	}
 
 	switch tag {
 	case Left, Right, Top, Bottom:
 		result := newBorderProperty(nil)
-		if style, ok := border.properties[tag+"-"+Style]; ok {
+		if style := properties.getRaw(tag + "-" + Style); style != nil {
 			result.Set(Style, style)
-		} else if style, ok := border.properties[Style]; ok {
+		} else if style := properties.getRaw(Style); style != nil {
 			result.Set(Style, style)
 		}
-		if width, ok := border.properties[tag+"-"+Width]; ok {
+		if width := properties.getRaw(tag + "-" + Width); width != nil {
 			result.Set(Width, width)
-		} else if width, ok := border.properties[Width]; ok {
+		} else if width := properties.getRaw(Width); width != nil {
 			result.Set(Width, width)
 		}
-		if color, ok := border.properties[tag+"-"+ColorTag]; ok {
+		if color := properties.getRaw(tag + "-" + ColorTag); color != nil {
 			result.Set(ColorTag, color)
-		} else if color, ok := border.properties[ColorTag]; ok {
+		} else if color := properties.getRaw(ColorTag); color != nil {
 			result.Set(ColorTag, color)
 		}
 		return result
 
 	case LeftStyle, RightStyle, TopStyle, BottomStyle:
-		if style, ok := border.properties[tag]; ok {
+		if style := properties.getRaw(tag); style != nil {
 			return style
 		}
-		return border.properties[Style]
+		return properties.getRaw(Style)
 
 	case LeftWidth, RightWidth, TopWidth, BottomWidth:
-		if width, ok := border.properties[tag]; ok {
+		if width := properties.getRaw(tag); width != nil {
 			return width
 		}
-		return border.properties[Width]
+		return properties.getRaw(Width)
 
 	case LeftColor, RightColor, TopColor, BottomColor:
-		if color, ok := border.properties[tag]; ok {
+		if color := properties.getRaw(tag); color != nil {
 			return color
 		}
-		return border.properties[ColorTag]
+		return properties.getRaw(ColorTag)
 	}
 
 	return nil
 }
 
-func (border *borderProperty) delete(tag string) {
-	tag = border.normalizeTag(tag)
-	remove := []string{}
+func (border *borderProperty) deleteTag(tag PropertyName) bool {
+
+	result := false
+	removeTags := func(tags []PropertyName) {
+		for _, tag := range tags {
+			if border.getRaw(tag) != nil {
+				border.setRaw(tag, nil)
+				result = true
+			}
+		}
+	}
 
 	switch tag {
 	case Style:
-		remove = []string{Style, LeftStyle, RightStyle, TopStyle, BottomStyle}
+		removeTags([]PropertyName{Style, LeftStyle, RightStyle, TopStyle, BottomStyle})
 
 	case Width:
-		remove = []string{Width, LeftWidth, RightWidth, TopWidth, BottomWidth}
+		removeTags([]PropertyName{Width, LeftWidth, RightWidth, TopWidth, BottomWidth})
 
 	case ColorTag:
-		remove = []string{ColorTag, LeftColor, RightColor, TopColor, BottomColor}
+		removeTags([]PropertyName{ColorTag, LeftColor, RightColor, TopColor, BottomColor})
 
 	case Left, Right, Top, Bottom:
 		if border.Get(Style) != nil {
 			border.properties[tag+"-"+Style] = 0
-			remove = []string{tag + "-" + ColorTag, tag + "-" + Width}
+			result = true
+			removeTags([]PropertyName{tag + "-" + ColorTag, tag + "-" + Width})
 		} else {
-			remove = []string{tag + "-" + Style, tag + "-" + ColorTag, tag + "-" + Width}
+			removeTags([]PropertyName{tag + "-" + Style, tag + "-" + ColorTag, tag + "-" + Width})
 		}
 
 	case LeftStyle, RightStyle, TopStyle, BottomStyle:
-		if border.Get(Style) != nil {
-			border.properties[tag] = 0
-		} else {
-			remove = []string{tag}
+		if border.getRaw(tag) != nil {
+			if border.Get(Style) != nil {
+				border.properties[tag] = 0
+				result = true
+			} else {
+				removeTags([]PropertyName{tag})
+			}
 		}
 
 	case LeftWidth, RightWidth, TopWidth, BottomWidth:
-		if border.Get(Width) != nil {
-			border.properties[tag] = AutoSize()
-		} else {
-			remove = []string{tag}
+		if border.getRaw(tag) != nil {
+			if border.Get(Width) != nil {
+				border.properties[tag] = AutoSize()
+				result = true
+			} else {
+				removeTags([]PropertyName{tag})
+			}
 		}
 
 	case LeftColor, RightColor, TopColor, BottomColor:
-		if border.Get(ColorTag) != nil {
-			border.properties[tag] = 0
-		} else {
-			remove = []string{tag}
+		if border.getRaw(tag) != nil {
+			if border.Get(ColorTag) != nil {
+				border.properties[tag] = 0
+				result = true
+			} else {
+				removeTags([]PropertyName{tag})
+			}
 		}
 	}
 
-	for _, tag := range remove {
-		delete(border.properties, tag)
-	}
+	return result
 }
 
 func (border *borderProperty) ViewBorders(session Session) ViewBorders {
@@ -755,7 +769,7 @@ func (border *borderProperty) ViewBorders(session Session) ViewBorders {
 	defWidth, _ := sizeProperty(border, Width, session)
 	defColor, _ := colorProperty(border, ColorTag, session)
 
-	getBorder := func(prefix string) ViewBorder {
+	getBorder := func(prefix PropertyName) ViewBorder {
 		var result ViewBorder
 		var ok bool
 		if result.Style, ok = valueToEnum(border.getRaw(prefix+Style), BorderStyle, session, NoneLine); !ok {
@@ -784,9 +798,9 @@ func (border *borderProperty) cssStyle(builder cssBuilder, session Session) {
 	if borders.Top.Style == borders.Right.Style &&
 		borders.Top.Style == borders.Left.Style &&
 		borders.Top.Style == borders.Bottom.Style {
-		builder.add(BorderStyle, values[borders.Top.Style])
+		builder.add(string(BorderStyle), values[borders.Top.Style])
 	} else {
-		builder.addValues(BorderStyle, " ", values[borders.Top.Style],
+		builder.addValues(string(BorderStyle), " ", values[borders.Top.Style],
 			values[borders.Right.Style], values[borders.Bottom.Style], values[borders.Left.Style])
 	}
 }
@@ -870,11 +884,25 @@ func (border *ViewBorders) AllTheSame() bool {
 		border.Top.Width.Equal(border.Bottom.Width)
 }
 
-func getBorder(style Properties, tag string) BorderProperty {
-	if value := style.Get(tag); value != nil {
+func getBorderProperty(properties Properties, tag PropertyName) BorderProperty {
+	if value := properties.getRaw(tag); value != nil {
 		if border, ok := value.(BorderProperty); ok {
 			return border
 		}
+	}
+	return nil
+}
+
+func setBorderPropertyElement(properties Properties, mainTag, tag PropertyName, value any) []PropertyName {
+	border := getBorderProperty(properties, mainTag)
+	if border == nil {
+		border = NewBorder(nil)
+		if border.Set(tag, value) {
+			properties.setRaw(mainTag, border)
+			return []PropertyName{mainTag, tag}
+		}
+	} else if border.Set(tag, value) {
+		return []PropertyName{mainTag, tag}
 	}
 	return nil
 }

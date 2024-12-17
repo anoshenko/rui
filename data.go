@@ -212,12 +212,12 @@ func (object *dataObject) ToParams() Params {
 		switch node.Type() {
 		case TextNode:
 			if text := node.Text(); text != "" {
-				params[node.Tag()] = text
+				params[PropertyName(node.Tag())] = text
 			}
 
 		case ObjectNode:
 			if obj := node.Object(); obj != nil {
-				params[node.Tag()] = node.Object()
+				params[PropertyName(node.Tag())] = node.Object()
 			}
 
 		case ArrayNode:
@@ -234,7 +234,7 @@ func (object *dataObject) ToParams() Params {
 				}
 			}
 			if len(array) > 0 {
-				params[node.Tag()] = array
+				params[PropertyName(node.Tag())] = array
 			}
 		}
 	}

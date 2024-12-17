@@ -15,12 +15,16 @@ type AngleUnitType uint8
 const (
 	// Radian - angle in radians
 	Radian AngleUnitType = 0
+
 	// Radian - angle in radians * π
 	PiRadian AngleUnitType = 1
+
 	// Degree - angle in degrees
 	Degree AngleUnitType = 2
+
 	// Gradian - angle in gradian (1⁄400 of a full circle)
 	Gradian AngleUnitType = 3
+
 	// Turn - angle in turns (1 turn = 360 degree)
 	Turn AngleUnitType = 4
 )
@@ -35,23 +39,23 @@ type AngleUnit struct {
 }
 
 // Deg creates AngleUnit with Degree type
-func Deg(value float64) AngleUnit {
-	return AngleUnit{Type: Degree, Value: value}
+func Deg[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) AngleUnit {
+	return AngleUnit{Type: Degree, Value: float64(value)}
 }
 
 // Rad create AngleUnit with Radian type
-func Rad(value float64) AngleUnit {
-	return AngleUnit{Type: Radian, Value: value}
+func Rad[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) AngleUnit {
+	return AngleUnit{Type: Radian, Value: float64(value)}
 }
 
 // PiRad create AngleUnit with PiRadian type
-func PiRad(value float64) AngleUnit {
-	return AngleUnit{Type: PiRadian, Value: value}
+func PiRad[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) AngleUnit {
+	return AngleUnit{Type: PiRadian, Value: float64(value)}
 }
 
 // Grad create AngleUnit with Gradian type
-func Grad(value float64) AngleUnit {
-	return AngleUnit{Type: Gradian, Value: value}
+func Grad[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) AngleUnit {
+	return AngleUnit{Type: Gradian, Value: float64(value)}
 }
 
 // Equal compare two AngleUnit. Return true if AngleUnit are equal

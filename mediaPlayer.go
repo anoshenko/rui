@@ -11,816 +11,497 @@ import (
 const (
 	// Controls is the constant for "controls" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
-	// Controls whether the browser need to provide controls to allow user to control audio playback, volume, seeking and 
-	// pause/resume playback. Default value is `false`.
+	// Controls whether the browser need to provide controls to allow user to control audio playback, volume, seeking and
+	// pause/resume playback. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
-	//
-	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - The browser will offer controls to allow the user to control audio playback, volume, seeking and pause/resume playback.
-	// `false` or `0` or "false", "no", "off", "0" - No controls will be visible to the end user.
-	//
-	// Usage in `VideoPlayer`:
-	// Whether the browser need to provide controls to allow user to control video playback, volume, seeking and pause/resume 
-	// playback. Default value is `false`.
-	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - The browser will offer controls to allow the user to control video playback, volume, seeking and pause/resume playback.
-	// `false` or `0` or "false", "no", "off", "0" - No controls will be visible to the end user.
-	Controls = "controls"
+	//   - true, 1, "true", "yes", "on", "1" - The browser will offer controls to allow the user to control audio playback, volume, seeking and pause/resume playback.
+	//   - false, 0, "false", "no", "off", "0" - No controls will be visible to the end user.
+	Controls PropertyName = "controls"
 
 	// Loop is the constant for "loop" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
-	// Controls whether the audio player will play media in a loop. Default value is `false`.
+	// Controls whether the audio player will play media in a loop. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
-	//
-	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - The audio player will automatically seek back to the start upon reaching the end of the audio.
-	// `false` or `0` or "false", "no", "off", "0" - Audio player will stop playing when the end of the media file has been reached.
-	//
-	// Usage in `VideoPlayer`:
-	// Controls whether the video player will play media in a loop. Default value is `false`.
-	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - The video player will automatically seek back to the start upon reaching the end of the video.
-	// `false` or `0` or "false", "no", "off", "0" - Video player will stop playing when the end of the media file has been reached.
-	Loop = "loop"
+	//   - true, 1, "true", "yes", "on", "1" - The audio player will automatically seek back to the start upon reaching the end of the audio.
+	//   - false, 0, "false", "no", "off", "0" - Audio player will stop playing when the end of the media file has been reached.
+	Loop PropertyName = "loop"
 
 	// Muted is the constant for "muted" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
-	// Controls whether the audio will be initially silenced. Default value is `false`.
+	// Controls whether the audio will be initially silenced. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
-	//
-	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Audio will be muted.
-	// `false` or `0` or "false", "no", "off", "0" - Audio playing normally.
-	//
-	// Usage in `VideoPlayer`:
-	// Controls whether the video will be initially silenced. Default value is `false`.
-	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Video will be muted.
-	// `false` or `0` or "false", "no", "off", "0" - Video playing normally.
-	Muted = "muted"
+	//   - true, 1, "true", "yes", "on", "1" - Audio will be muted.
+	//   - false, 0, "false", "no", "off", "0" - Audio playing normally.
+	Muted PropertyName = "muted"
 
 	// Preload is the constant for "preload" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
-	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user 
+	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user
 	// experience. Default value is different for each browser.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`PreloadNone`) or "none" - Media file must not be pre-loaded.
-	// `1`(`PreloadMetadata`) or "metadata" - Only metadata is preloaded.
-	// `2`(`PreloadAuto`) or "auto" - The entire media file can be downloaded even if the user doesn't have to use it.
-	//
-	// Usage in `VideoPlayer`:
-	// Property is intended to provide a hint to the browser about what the author thinks will lead to the best user 
-	// experience. Default value is different for each browser.
-	//
-	// Supported types: `int`, `string`.
-	//
-	// Values:
-	// `0`(`PreloadNone`) or "none" - Media file must not be pre-loaded.
-	// `1`(`PreloadMetadata`) or "metadata" - Only metadata is preloaded.
-	// `2`(`PreloadAuto`) or "auto" - The entire media file can be downloaded even if the user doesn't have to use it.
-	Preload = "preload"
+	//   - 0 (PreloadNone) or "none" - Media file must not be pre-loaded.
+	//   - 1 (PreloadMetadata) or "metadata" - Only metadata is preloaded.
+	//   - 2 (PreloadAuto) or "auto" - The entire media file can be downloaded even if the user doesn't have to use it.
+	Preload PropertyName = "preload"
 
 	// AbortEvent is the constant for "abort-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Fired when the resource was not fully loaded, but not as the result of an error.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Fired when the resource was not fully loaded, but not as the result of an error.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	AbortEvent = "abort-event"
+	//  func()
+	AbortEvent PropertyName = "abort-event"
 
 	// CanPlayEvent is the constant for "can-play-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
-	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to 
+	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to
 	// its end without having to stop for further buffering of content.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the browser can play the media, but estimates that not enough data has been loaded to play the media up to 
-	// its end without having to stop for further buffering of content.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	CanPlayEvent = "can-play-event"
+	//  func()
+	CanPlayEvent PropertyName = "can-play-event"
 
 	// CanPlayThroughEvent is the constant for "can-play-through-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the browser estimates it can play the media up to its end without stopping for content buffering.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the browser estimates it can play the media up to its end without stopping for content buffering.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	CanPlayThroughEvent = "can-play-through-event"
+	//  func()
+	CanPlayThroughEvent PropertyName = "can-play-through-event"
 
 	// CompleteEvent is the constant for "complete-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the rendering of an OfflineAudioContext has been terminated.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the rendering of an OfflineAudioContext has been terminated.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	CompleteEvent = "complete-event"
+	//  func()
+	CompleteEvent PropertyName = "complete-event"
 
 	// DurationChangedEvent is the constant for "duration-changed-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the duration attribute has been updated.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer, duration float64)`.
+	//
+	//  func(player rui.MediaPlayer, duration float64).
 	//
 	// where:
-	// player - Interface of a player which generated this event,
-	// duration - Current duration.
+	//   - player - Interface of a player which generated this event,
+	//   - duration - Current duration.
 	//
 	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(duration float64)`,
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the duration attribute has been updated.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer, duration float64)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event,
-	// duration - Current duration.
-	//
-	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(duration float64)`,
-	// `func()`.
-	DurationChangedEvent = "duration-changed-event"
+	//  func(player rui.MediaPlayer),
+	//  func(duration float64),
+	//  func()
+	DurationChangedEvent PropertyName = "duration-changed-event"
 
 	// EmptiedEvent is the constant for "emptied-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
-	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or 
+	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or
 	// partially loaded), and the HTMLMediaElement.load method is called to reload it.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the media has become empty; for example, this event is sent if the media has already been loaded(or 
-	// partially loaded), and the HTMLMediaElement.load method is called to reload it.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	EmptiedEvent = "emptied-event"
+	//  func()
+	EmptiedEvent PropertyName = "emptied-event"
 
 	// EndedEvent is the constant for "ended-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the playback has stopped because the end of the media was reached.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the playback has stopped because the end of the media was reached.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	EndedEvent = "ended-event"
+	//  func()
+	EndedEvent PropertyName = "ended-event"
 
 	// LoadedDataEvent is the constant for "loaded-data-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the first frame of the media has finished loading.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the first frame of the media has finished loading.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	LoadedDataEvent = "loaded-data-event"
+	//  func()
+	LoadedDataEvent PropertyName = "loaded-data-event"
 
 	// LoadedMetadataEvent is the constant for "loaded-metadata-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the metadata has been loaded.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the metadata has been loaded.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	LoadedMetadataEvent = "loaded-metadata-event"
+	//  func()
+	LoadedMetadataEvent PropertyName = "loaded-metadata-event"
 
 	// LoadStartEvent is the constant for "load-start-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Fired when the browser has started to load a resource.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Fired when the browser has started to load a resource.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	LoadStartEvent = "load-start-event"
+	//  func()
+	LoadStartEvent PropertyName = "load-start-event"
 
 	// PauseEvent is the constant for "pause-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the playback has been paused.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the playback has been paused.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	PauseEvent = "pause-event"
+	//  func()
+	PauseEvent PropertyName = "pause-event"
 
 	// PlayEvent is the constant for "play-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the playback has begun.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the playback has begun.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	PlayEvent = "play-event"
+	//  func()
+	PlayEvent PropertyName = "play-event"
 
 	// PlayingEvent is the constant for "playing-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the playback is ready to start after having been paused or delayed due to lack of data.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the playback is ready to start after having been paused or delayed due to lack of data.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	PlayingEvent = "playing-event"
+	//  func()
+	PlayingEvent PropertyName = "playing-event"
 
 	// ProgressEvent is the constant for "progress-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Fired periodically as the browser loads a resource.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Fired periodically as the browser loads a resource.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	ProgressEvent = "progress-event"
+	//  func()
+	ProgressEvent PropertyName = "progress-event"
 
 	// RateChangedEvent is the constant for "rate-changed-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the playback rate has changed.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer, rate float64)`.
+	//
+	//  func(player rui.MediaPlayer, rate float64).
 	//
 	// where:
-	// player - Interface of a player which generated this event,
-	// rate - Playback rate.
+	//   - player - Interface of a player which generated this event,
+	//   - rate - Playback rate.
 	//
 	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(rate float64)`,
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the playback rate has changed.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer, rate float64)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event,
-	// rate - Playback rate.
-	//
-	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(rate float64)`,
-	// `func()`.
-	RateChangedEvent = "rate-changed-event"
+	//  func(player rui.MediaPlayer),
+	//  func(rate float64),
+	//  func()
+	RateChangedEvent PropertyName = "rate-changed-event"
 
 	// SeekedEvent is the constant for "seeked-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when a seek operation completed.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when a seek operation completed.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	SeekedEvent = "seeked-event"
+	//  func()
+	SeekedEvent PropertyName = "seeked-event"
 
 	// SeekingEvent is the constant for "seeking-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when a seek operation has began.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when a seek operation has began.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	SeekingEvent = "seeking-event"
+	//  func()
+	SeekingEvent PropertyName = "seeking-event"
 
 	// StalledEvent is the constant for "stalled-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the user agent is trying to fetch media data, but data is unexpectedly not forthcoming.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the user agent is trying to fetch media data, but data is unexpectedly not forthcoming.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	StalledEvent = "stalled-event"
+	//  func()
+	StalledEvent PropertyName = "stalled-event"
 
 	// SuspendEvent is the constant for "suspend-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the media data loading has been suspended.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the media data loading has been suspended.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	SuspendEvent = "suspend-event"
+	//  func()
+	SuspendEvent PropertyName = "suspend-event"
 
 	// TimeUpdateEvent is the constant for "time-update-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the time indicated by the currentTime attribute has been updated.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer, time float64)`.
+	//
+	//  func(player rui.MediaPlayer, time float64).
 	//
 	// where:
-	// player - Interface of a player which generated this event,
-	// time - Current time.
+	//   - player - Interface of a player which generated this event,
+	//   - time - Current time.
 	//
 	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(time float64)`,
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the time indicated by the currentTime attribute has been updated.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer, time float64)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event,
-	// time - Current time.
-	//
-	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(time float64)`,
-	// `func()`.
-	TimeUpdateEvent = "time-update-event"
+	//  func(player rui.MediaPlayer),
+	//  func(time float64),
+	//  func()
+	TimeUpdateEvent PropertyName = "time-update-event"
 
 	// VolumeChangedEvent is the constant for "volume-changed-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the volume has changed.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer, volume float64)`.
+	//
+	//  func(player rui.MediaPlayer, volume float64).
 	//
 	// where:
-	// player - Interface of a player which generated this event,
-	// volume - New volume level.
+	//   - player - Interface of a player which generated this event,
+	//   - volume - New volume level.
 	//
 	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(volume float64)`,
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the volume has changed.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer, volume float64)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event,
-	// volume - New volume level.
-	//
-	// Allowed listener formats:
-	// `func(player rui.MediaPlayer)`,
-	// `func(volume float64)`,
-	// `func()`.
-	VolumeChangedEvent = "volume-changed-event"
+	//  func(player rui.MediaPlayer),
+	//  func(volume float64),
+	//  func()
+	VolumeChangedEvent PropertyName = "volume-changed-event"
 
 	// WaitingEvent is the constant for "waiting-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Occur when the playback has stopped because of a temporary lack of data.
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer)`.
+	//
+	//  func(player rui.MediaPlayer)
 	//
 	// where:
 	// player - Interface of a player which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Occur when the playback has stopped because of a temporary lack of data.
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event.
-	//
-	// Allowed listener formats:
-	// `func()`.
-	WaitingEvent = "waiting-event"
+	//  func()
+	WaitingEvent PropertyName = "waiting-event"
 
 	// PlayerErrorEvent is the constant for "player-error-event" property tag.
 	//
-	// Used by `AudioPlayer`, `VideoPlayer`.
+	// Used by AudioPlayer, VideoPlayer.
 	//
-	// Usage in `AudioPlayer`:
 	// Fired when the resource could not be loaded due to an error(for example, a network connectivity problem).
 	//
 	// General listener format:
-	// `func(player rui.MediaPlayer, code int, message string)`.
+	//
+	//  func(player rui.MediaPlayer, code int, message string).
 	//
 	// where:
-	// player - Interface of a player which generated this event,
-	// code - Error code. See below,
-	// message - Error message,
+	//   - player - Interface of a player which generated this event,
+	//   - code - Error code. See below,
+	//   - message - Error message,
+
 	// Error codes:
-	// `0`(`PlayerErrorUnknown`) - Unknown error,
-	// `1`(`PlayerErrorAborted`) - Fetching the associated resource was interrupted by a user request,
-	// `2`(`PlayerErrorNetwork`) - Some kind of network error has occurred that prevented the media from successfully ejecting, even though it was previously available,
-	// `3`(`PlayerErrorDecode`) - Although the resource was previously identified as being used, an error occurred while trying to decode the media resource,
-	// `4`(`PlayerErrorSourceNotSupported`) - The associated resource object or media provider was found to be invalid.
+	//   - 0 (PlayerErrorUnknown) - Unknown error,
+	//   - 1 (PlayerErrorAborted) - Fetching the associated resource was interrupted by a user request,
+	//   - 2 (PlayerErrorNetwork) - Some kind of network error has occurred that prevented the media from successfully ejecting, even though it was previously available,
+	//   - 3 (PlayerErrorDecode) - Although the resource was previously identified as being used, an error occurred while trying to decode the media resource,
+	//   - 4 (PlayerErrorSourceNotSupported) - The associated resource object or media provider was found to be invalid.
 	//
 	// Allowed listener formats:
-	// `func(code int, message string)`,
-	// `func(player rui.MediaPlayer)`,
-	// `func()`.
 	//
-	// Usage in `VideoPlayer`:
-	// Fired when the resource could not be loaded due to an error(for example, a network connectivity problem).
-	//
-	// General listener format:
-	// `func(player rui.MediaPlayer, code int, message string)`.
-	//
-	// where:
-	// player - Interface of a player which generated this event,
-	// code - Error code. See below,
-	// message - Error message,
-	// Error codes:
-	// `0`(`PlayerErrorUnknown`) - Unknown error,
-	// `1`(`PlayerErrorAborted`) - Fetching the associated resource was interrupted by a user request,
-	// `2`(`PlayerErrorNetwork`) - Some kind of network error has occurred that prevented the media from successfully ejecting, even though it was previously available,
-	// `3`(`PlayerErrorDecode`) - Although the resource was previously identified as being used, an error occurred while trying to decode the media resource,
-	// `4`(`PlayerErrorSourceNotSupported`) - The associated resource object or media provider was found to be invalid.
-	//
-	// Allowed listener formats:
-	// `func(code int, message string)`,
-	// `func(player rui.MediaPlayer)`,
-	// `func()`.
-	PlayerErrorEvent = "player-error-event"
+	//  func(code int, message string),
+	//  func(player rui.MediaPlayer),
+	//  func()
+	PlayerErrorEvent PropertyName = "player-error-event"
 
 	// PreloadNone - value of the view "preload" property: indicates that the audio/video should not be preloaded.
 	PreloadNone = 0
@@ -907,119 +588,63 @@ type MediaSource struct {
 func (player *mediaPlayerData) init(session Session) {
 	player.viewData.init(session)
 	player.tag = "MediaPlayer"
-}
-
-func (player *mediaPlayerData) String() string {
-	return getViewString(player, nil)
+	player.set = player.setFunc
+	player.changed = player.propertyChanged
 }
 
 func (player *mediaPlayerData) Focusable() bool {
 	return true
 }
 
-func (player *mediaPlayerData) Remove(tag string) {
-	player.remove(strings.ToLower(tag))
-}
-
-func (player *mediaPlayerData) remove(tag string) {
-	player.viewData.remove(tag)
-	player.propertyChanged(tag)
-}
-
-func (player *mediaPlayerData) Set(tag string, value any) bool {
-	return player.set(strings.ToLower(tag), value)
-}
-
-func (player *mediaPlayerData) set(tag string, value any) bool {
-	if value == nil {
-		player.remove(tag)
-		return true
-	}
-
+func (player *mediaPlayerData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
-	case Controls, Loop, Muted, Preload:
-		if player.viewData.set(tag, value) {
-			player.propertyChanged(tag)
-			return true
-		}
 
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent, LoadStartEvent,
 		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent,
 		ProgressEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
-		if listeners, ok := valueToNoParamListeners[MediaPlayer](value); ok {
-			if listeners == nil {
-				delete(player.properties, tag)
-			} else {
-				player.properties[tag] = listeners
-			}
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
-		}
-		notCompatibleType(tag, value)
+
+		return setNoArgEventListener[MediaPlayer](player, tag, value)
 
 	case DurationChangedEvent, RateChangedEvent, TimeUpdateEvent, VolumeChangedEvent:
-		if listeners, ok := valueToEventListeners[MediaPlayer, float64](value); ok {
-			if listeners == nil {
-				delete(player.properties, tag)
-			} else {
-				player.properties[tag] = listeners
-			}
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
-		}
-		notCompatibleType(tag, value)
+
+		return setOneArgEventListener[MediaPlayer, float64](player, tag, value)
 
 	case PlayerErrorEvent:
 		if listeners, ok := valueToPlayerErrorListeners(value); ok {
-			if listeners == nil {
-				delete(player.properties, tag)
-			} else {
-				player.properties[tag] = listeners
-			}
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
+			return setArrayPropertyValue(player, tag, listeners)
 		}
 		notCompatibleType(tag, value)
+		return nil
 
 	case Source:
-		if player.setSource(value) {
-			player.propertyChanged(tag)
-			player.propertyChangedEvent(tag)
-			return true
-		}
-
-	default:
-		return player.viewData.set(tag, value)
+		return setMediaPlayerSource(player, value)
 	}
 
-	return false
+	return player.viewData.setFunc(tag, value)
 }
 
-func (player *mediaPlayerData) setSource(value any) bool {
+func setMediaPlayerSource(properties Properties, value any) []PropertyName {
 	switch value := value.(type) {
 	case string:
 		src := MediaSource{Url: value, MimeType: ""}
-		player.properties[Source] = []MediaSource{src}
+		properties.setRaw(Source, []MediaSource{src})
 
 	case MediaSource:
-		player.properties[Source] = []MediaSource{value}
+		properties.setRaw(Source, []MediaSource{value})
 
 	case []MediaSource:
-		player.properties[Source] = value
+		properties.setRaw(Source, value)
 
 	case DataObject:
 		url, ok := value.PropertyValue("src")
 		if !ok || url == "" {
 			invalidPropertyValue(Source, value)
-			return false
+			return nil
 		}
 
 		mimeType, _ := value.PropertyValue("mime-type")
 		src := MediaSource{Url: url, MimeType: mimeType}
-		player.properties[Source] = []MediaSource{src}
+		properties.setRaw(Source, []MediaSource{src})
 
 	case []DataValue:
 		src := []MediaSource{}
@@ -1031,7 +656,7 @@ func (player *mediaPlayerData) setSource(value any) bool {
 					src = append(src, MediaSource{Url: url, MimeType: mimeType})
 				} else {
 					invalidPropertyValue(Source, value)
-					return false
+					return nil
 				}
 			} else {
 				src = append(src, MediaSource{Url: val.Value(), MimeType: ""})
@@ -1040,16 +665,16 @@ func (player *mediaPlayerData) setSource(value any) bool {
 
 		if len(src) == 0 {
 			invalidPropertyValue(Source, value)
-			return false
+			return nil
 		}
-		player.properties[Source] = src
+		properties.setRaw(Source, src)
 
 	default:
 		notCompatibleType(Source, value)
-		return false
+		return nil
 	}
 
-	return true
+	return []PropertyName{Source}
 }
 
 func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), bool) {
@@ -1177,109 +802,106 @@ func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), b
 	return nil, false
 }
 
-func playerEvents() []struct{ tag, cssTag string } {
-	return []struct{ tag, cssTag string }{
-		{AbortEvent, "onabort"},
-		{CanPlayEvent, "oncanplay"},
-		{CanPlayThroughEvent, "oncanplaythrough"},
-		{CompleteEvent, "oncomplete"},
-		{EmptiedEvent, "onemptied"},
-		{EndedEvent, "ended"},
-		{LoadedDataEvent, "onloadeddata"},
-		{LoadedMetadataEvent, "onloadedmetadata"},
-		{LoadStartEvent, "onloadstart"},
-		{PauseEvent, "onpause"},
-		{PlayEvent, "onplay"},
-		{PlayingEvent, "onplaying"},
-		{ProgressEvent, "onprogress"},
-		{SeekedEvent, "onseeked"},
-		{SeekingEvent, "onseeking"},
-		{StalledEvent, "onstalled"},
-		{SuspendEvent, "onsuspend"},
-		{WaitingEvent, "onwaiting"},
+func mediaPlayerEvents() map[PropertyName]string {
+	return map[PropertyName]string{
+		AbortEvent:          "onabort",
+		CanPlayEvent:        "oncanplay",
+		CanPlayThroughEvent: "oncanplaythrough",
+		CompleteEvent:       "oncomplete",
+		EmptiedEvent:        "onemptied",
+		EndedEvent:          "ended",
+		LoadedDataEvent:     "onloadeddata",
+		LoadedMetadataEvent: "onloadedmetadata",
+		LoadStartEvent:      "onloadstart",
+		PauseEvent:          "onpause",
+		PlayEvent:           "onplay",
+		PlayingEvent:        "onplaying",
+		ProgressEvent:       "onprogress",
+		SeekedEvent:         "onseeked",
+		SeekingEvent:        "onseeking",
+		StalledEvent:        "onstalled",
+		SuspendEvent:        "onsuspend",
+		WaitingEvent:        "onwaiting",
 	}
 }
 
-func (player *mediaPlayerData) propertyChanged(tag string) {
-	if player.created {
-		switch tag {
-		case Controls, Loop:
-			value, _ := boolProperty(player, tag, player.session)
-			if value {
-				player.session.updateProperty(player.htmlID(), tag, value)
-			} else {
-				player.session.removeProperty(player.htmlID(), tag)
-			}
+func (player *mediaPlayerData) propertyChanged(tag PropertyName) {
+	session := player.Session()
 
-		case Muted:
-			value, _ := boolProperty(player, tag, player.session)
-			player.session.callFunc("setMediaMuted", player.htmlID(), value)
-
-		case Preload:
-			value, _ := enumProperty(player, tag, player.session, 0)
-			values := enumProperties[Preload].values
-			player.session.updateProperty(player.htmlID(), tag, values[value])
-
-		case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
-			EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
-			LoadStartEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
-
-			for _, event := range playerEvents() {
-				if event.tag == tag {
-					if value := player.getRaw(event.tag); value != nil {
-						switch value := value.(type) {
-						case []func(MediaPlayer):
-							if len(value) > 0 {
-								fn := fmt.Sprintf(`playerEvent(this, "%s")`, event.tag)
-								player.session.updateProperty(player.htmlID(), event.cssTag, fn)
-								return
-							}
-						}
-					}
-					player.session.updateProperty(player.htmlID(), tag, "")
-					break
-				}
-
-			}
-		case TimeUpdateEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "ontimeupdate", "playerTimeUpdatedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "ontimeupdate", "")
-			}
-
-		case VolumeChangedEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "onvolumechange", "playerVolumeChangedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "onvolumechange", "")
-			}
-
-		case DurationChangedEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "ondurationchange", "playerDurationChangedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "ondurationchange", "")
-			}
-
-		case RateChangedEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "onratechange", "playerRateChangedEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "onratechange", "")
-			}
-
-		case PlayerErrorEvent:
-			if value := player.getRaw(tag); value != nil {
-				player.session.updateProperty(player.htmlID(), "onerror", "playerErrorEvent(this)")
-			} else {
-				player.session.updateProperty(player.htmlID(), "onerror", "")
-			}
-
-		case Source:
-			updateInnerHTML(player.htmlID(), player.session)
+	switch tag {
+	case Controls, Loop:
+		value, _ := boolProperty(player, tag, session)
+		if value {
+			session.updateProperty(player.htmlID(), string(tag), value)
+		} else {
+			session.removeProperty(player.htmlID(), string(tag))
 		}
+
+	case Muted:
+		value, _ := boolProperty(player, Muted, session)
+		session.callFunc("setMediaMuted", player.htmlID(), value)
+
+	case Preload:
+		value, _ := enumProperty(player, Preload, session, 0)
+		values := enumProperties[Preload].values
+		session.updateProperty(player.htmlID(), string(Preload), values[value])
+
+	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent,
+		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent, ProgressEvent,
+		LoadStartEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
+
+		if cssTag, ok := mediaPlayerEvents()[tag]; ok {
+			fn := ""
+			if value := player.getRaw(tag); value != nil {
+				if listeners, ok := value.([]func(MediaPlayer)); ok && len(listeners) > 0 {
+					fn = fmt.Sprintf(`viewEvent(this, "%s")`, string(tag))
+				}
+			}
+			session.updateProperty(player.htmlID(), cssTag, fn)
+		}
+
+	case TimeUpdateEvent:
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "ontimeupdate", "viewTimeUpdatedEvent(this)")
+		} else {
+			session.updateProperty(player.htmlID(), "ontimeupdate", "")
+		}
+
+	case VolumeChangedEvent:
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "onvolumechange", "viewVolumeChangedEvent(this)")
+		} else {
+			session.updateProperty(player.htmlID(), "onvolumechange", "")
+		}
+
+	case DurationChangedEvent:
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "ondurationchange", "viewDurationChangedEvent(this)")
+		} else {
+			session.updateProperty(player.htmlID(), "ondurationchange", "")
+		}
+
+	case RateChangedEvent:
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "onratechange", "viewRateChangedEvent(this)")
+		} else {
+			session.updateProperty(player.htmlID(), "onratechange", "")
+		}
+
+	case PlayerErrorEvent:
+		if value := player.getRaw(tag); value != nil {
+			session.updateProperty(player.htmlID(), "onerror", "viewErrorEvent(this)")
+		} else {
+			session.updateProperty(player.htmlID(), "onerror", "")
+		}
+
+	case Source:
+		updateInnerHTML(player.htmlID(), session)
+
+	default:
+		player.viewData.propertyChanged(tag)
 	}
+
 }
 
 func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) {
@@ -1305,10 +927,10 @@ func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) 
 
 func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder) {
 	player.viewData.htmlProperties(self, buffer)
-	for _, tag := range []string{Controls, Loop, Muted, Preload} {
+	for _, tag := range []PropertyName{Controls, Loop, Muted, Preload} {
 		if value, _ := boolProperty(player, tag, player.session); value {
 			buffer.WriteRune(' ')
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 		}
 	}
 
@@ -1319,17 +941,14 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 		buffer.WriteRune('"')
 	}
 
-	for _, event := range playerEvents() {
-		if value := player.getRaw(event.tag); value != nil {
-			switch value := value.(type) {
-			case []func(MediaPlayer):
-				if len(value) > 0 {
-					buffer.WriteString(` `)
-					buffer.WriteString(event.cssTag)
-					buffer.WriteString(`="playerEvent(this, '`)
-					buffer.WriteString(event.tag)
-					buffer.WriteString(`')"`)
-				}
+	for tag, cssTag := range mediaPlayerEvents() {
+		if value := player.getRaw(tag); value != nil {
+			if listeners, ok := value.([]func(MediaPlayer)); ok && len(listeners) > 0 {
+				buffer.WriteString(` `)
+				buffer.WriteString(cssTag)
+				buffer.WriteString(`="playerEvent(this, '`)
+				buffer.WriteString(string(tag))
+				buffer.WriteString(`')"`)
 			}
 		}
 	}
@@ -1355,7 +974,7 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 	}
 }
 
-func (player *mediaPlayerData) handleCommand(self View, command string, data DataObject) bool {
+func (player *mediaPlayerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, LoadStartEvent,
 		EmptiedEvent, EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent,

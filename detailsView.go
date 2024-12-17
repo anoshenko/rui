@@ -6,26 +6,37 @@ import "strings"
 const (
 	// Summary is the constant for "summary" property tag.
 	//
-	// Used by `DetailsView`.
+	// Used by DetailsView.
 	// The content of this property is used as the label for the disclosure widget.
 	//
-	// Supported types: `string`, `View`.
-	//
-	// `string` - Summary as a text.
-	// `View` - Summary as a view, in this case it can be quite complex if needed.
-	Summary = "summary"
+	// Supported types:
+	//   - string - Summary as a text.
+	//   - View - Summary as a view, in this case it can be quite complex if needed.
+	Summary PropertyName = "summary"
 
 	// Expanded is the constant for "expanded" property tag.
 	//
-	// Used by `DetailsView`.
-	// Controls the content expanded state of the details view. Default value is `false`.
+	// Used by DetailsView.
+	// Controls the content expanded state of the details view. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Content is visible.
-	// `false` or `0` or "false", "no", "off", "0" - Content is collapsed(hidden).
-	Expanded = "expanded"
+	//   - true, 1, "true", "yes", "on", or "1" - Content is visible.
+	//   - false, 0, "false", "no", "off", or "0" - Content is collapsed (hidden).
+	Expanded PropertyName = "expanded"
+
+	// HideSummaryMarker is the constant for "hide-summary-marker" property tag.
+	//
+	// Used by DetailsView.
+	// Allows you to hide the summary marker (▶︎). Default value is false.
+	//
+	// Supported types: bool, int, string.
+	//
+	// Values:
+	//   - true, 1, "true", "yes", "on", or "1" - The summary marker is hidden.
+	//   - false, 0, "false", "no", "off", or "0" - The summary marker is displayed (default value).
+	HideSummaryMarker PropertyName = "hide-summary-marker"
 )
 
 // DetailsView represent a DetailsView view, which is a collapsible container of views
@@ -46,19 +57,21 @@ func NewDetailsView(session Session, params Params) DetailsView {
 }
 
 func newDetailsView(session Session) View {
-	return NewDetailsView(session, nil)
+	return new(detailsViewData)
 }
 
 // Init initialize fields of DetailsView by default values
 func (detailsView *detailsViewData) init(session Session) {
 	detailsView.viewsContainerData.init(session)
 	detailsView.tag = "DetailsView"
+	detailsView.set = detailsView.setFunc
+	detailsView.changed = detailsView.propertyChanged
 	//detailsView.systemClass = "ruiDetailsView"
 }
 
 func (detailsView *detailsViewData) Views() []View {
 	views := detailsView.viewsContainerData.Views()
-	if summary := detailsView.get(Summary); summary != nil {
+	if summary := detailsView.Get(Summary); summary != nil {
 		switch summary := summary.(type) {
 		case View:
 			return append([]View{summary}, views...)
@@ -67,94 +80,53 @@ func (detailsView *detailsViewData) Views() []View {
 	return views
 }
 
-func (detailsView *detailsViewData) Remove(tag string) {
-	detailsView.remove(strings.ToLower(tag))
-}
-
-func (detailsView *detailsViewData) remove(tag string) {
-	detailsView.viewsContainerData.remove(tag)
-	if detailsView.created {
-		switch tag {
-		case Summary:
-			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-
-		case Expanded:
-			detailsView.session.removeProperty(detailsView.htmlID(), "open")
-		}
-	}
-}
-
-func (detailsView *detailsViewData) Set(tag string, value any) bool {
-	return detailsView.set(strings.ToLower(tag), value)
-}
-
-func (detailsView *detailsViewData) set(tag string, value any) bool {
-	if value == nil {
-		detailsView.remove(tag)
-		return true
-	}
-
+func (detailsView *detailsViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Summary:
 		switch value := value.(type) {
 		case string:
-			detailsView.properties[Summary] = value
+			detailsView.setRaw(Summary, value)
 
 		case View:
-			detailsView.properties[Summary] = value
+			detailsView.setRaw(Summary, value)
 			value.setParentID(detailsView.htmlID())
 
 		case DataObject:
 			if view := CreateViewFromObject(detailsView.Session(), value); view != nil {
-				detailsView.properties[Summary] = view
+				detailsView.setRaw(Summary, view)
 				view.setParentID(detailsView.htmlID())
 			} else {
-				return false
+				return nil
 			}
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
-		if detailsView.created {
-			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-		}
+		return []PropertyName{tag}
+	}
+
+	return detailsView.viewsContainerData.setFunc(tag, value)
+}
+
+func (detailsView *detailsViewData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Summary, HideSummaryMarker:
+		updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 	case Expanded:
-		if !detailsView.setBoolProperty(tag, value) {
-			notCompatibleType(tag, value)
-			return false
-		}
-		if detailsView.created {
-			if IsDetailsExpanded(detailsView) {
-				detailsView.session.updateProperty(detailsView.htmlID(), "open", "")
-			} else {
-				detailsView.session.removeProperty(detailsView.htmlID(), "open")
-			}
+		if IsDetailsExpanded(detailsView) {
+			detailsView.Session().updateProperty(detailsView.htmlID(), "open", "")
+		} else {
+			detailsView.Session().removeProperty(detailsView.htmlID(), "open")
 		}
 
 	case NotTranslate:
-		if !detailsView.viewData.set(tag, value) {
-			return false
-		}
-		if detailsView.created {
-			updateInnerHTML(detailsView.htmlID(), detailsView.Session())
-		}
+		updateInnerHTML(detailsView.htmlID(), detailsView.Session())
 
 	default:
-		return detailsView.viewsContainerData.Set(tag, value)
+		detailsView.viewsContainerData.propertyChanged(tag)
 	}
-
-	detailsView.propertyChangedEvent(tag)
-	return true
-}
-
-func (detailsView *detailsViewData) Get(tag string) any {
-	return detailsView.get(strings.ToLower(tag))
-}
-
-func (detailsView *detailsViewData) get(tag string) any {
-	return detailsView.viewsContainerData.get(tag)
 }
 
 func (detailsView *detailsViewData) htmlTag() string {
@@ -170,31 +142,59 @@ func (detailsView *detailsViewData) htmlProperties(self View, buffer *strings.Bu
 }
 
 func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	summary := false
+	hidden := IsSummaryMarkerHidden(detailsView)
+
 	if value, ok := detailsView.properties[Summary]; ok {
+
 		switch value := value.(type) {
 		case string:
 			if !GetNotTranslate(detailsView) {
 				value, _ = detailsView.session.GetString(value)
 			}
-			buffer.WriteString("<summary>")
+			if hidden {
+				buffer.WriteString(`<summary class="hiddenMarker">`)
+			} else {
+				buffer.WriteString("<summary>")
+			}
 			buffer.WriteString(value)
 			buffer.WriteString("</summary>")
+			summary = true
 
 		case View:
-			buffer.WriteString("<summary>")
-			viewHTML(value, buffer)
-			buffer.WriteString("</summary>")
+			if hidden {
+				buffer.WriteString(`<summary class="hiddenMarker">`)
+				viewHTML(value, buffer, "")
+				buffer.WriteString("</summary>")
+			} else if value.htmlTag() == "div" {
+				viewHTML(value, buffer, "summary")
+			} else {
+				buffer.WriteString(`<summary><div style="display: inline-block;">`)
+				viewHTML(value, buffer, "")
+				buffer.WriteString("</div></summary>")
+			}
+			summary = true
+		}
+	}
+
+	if !summary {
+		if hidden {
+			buffer.WriteString(`<summary class="hiddenMarker"></summary>`)
+		} else {
+			buffer.WriteString("<summary></summary>")
 		}
 	}
 
 	detailsView.viewsContainerData.htmlSubviews(self, buffer)
 }
 
-func (detailsView *detailsViewData) handleCommand(self View, command string, data DataObject) bool {
+func (detailsView *detailsViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	if command == "details-open" {
 		if n, ok := dataIntProperty(data, "open"); ok {
 			detailsView.properties[Expanded] = (n != 0)
-			detailsView.propertyChangedEvent(Expanded)
+			if listener, ok := detailsView.changeListener[Expanded]; ok {
+				listener(detailsView, Expanded)
+			}
 		}
 		return true
 	}
@@ -204,10 +204,7 @@ func (detailsView *detailsViewData) handleCommand(self View, command string, dat
 // GetDetailsSummary returns a value of the Summary property of DetailsView.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDetailsSummary(view View, subviewID ...string) View {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Summary); value != nil {
 			switch value := value.(type) {
 			case string:
@@ -225,4 +222,10 @@ func GetDetailsSummary(view View, subviewID ...string) View {
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func IsDetailsExpanded(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Expanded, false)
+}
+
+// IsDetailsExpanded returns a value of the HideSummaryMarker property of DetailsView.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func IsSummaryMarkerHidden(view View, subviewID ...string) bool {
+	return boolStyledProperty(view, subviewID, HideSummaryMarker, false)
 }

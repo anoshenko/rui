@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -10,75 +11,87 @@ import (
 const (
 	// NumberChangedEvent is the constant for "number-changed" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set listener(s) that track the change in the entered value.
 	//
 	// General listener format:
-	// `func(picker rui.NumberPicker, newValue, oldValue float64)`.
+	//
+	//  func(picker rui.NumberPicker, newValue float64, oldValue float64)
 	//
 	// where:
-	// picker - Interface of a number picker which generated this event,
-	// newValue - New value,
-	// oldValue - Old Value.
+	//   - picker - Interface of a number picker which generated this event,
+	//   - newValue - New value,
+	//   - oldValue - Old Value.
 	//
 	// Allowed listener formats:
-	// `func(picker rui.NumberPicker, newValue float64)`,
-	// `func(newValue, oldValue float64)`,
-	// `func(newValue float64)`,
-	// `func()`.
-	NumberChangedEvent = "number-changed"
+	//
+	//  func(picker rui.NumberPicker, newValue float64)
+	//  func(newValue float64, oldValue float64)
+	//  func(newValue float64)
+	//  func()
+	NumberChangedEvent PropertyName = "number-changed"
 
 	// NumberPickerType is the constant for "number-picker-type" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Sets the visual representation.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NumberEditor`) or "editor" - Displayed as an editor.
-	// `1`(`NumberSlider`) or "slider" - Displayed as a slider.
-	NumberPickerType = "number-picker-type"
+	//   - 0 (NumberEditor) or "editor" - Displayed as an editor.
+	//   - 1 (NumberSlider) or "slider" - Displayed as a slider.
+	NumberPickerType PropertyName = "number-picker-type"
 
 	// NumberPickerMin is the constant for "number-picker-min" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set the minimum value. The default value is 0.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
-	NumberPickerMin = "number-picker-min"
+	// Internal type is float, other types converted to it during assignment.
+	NumberPickerMin PropertyName = "number-picker-min"
 
 	// NumberPickerMax is the constant for "number-picker-max" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set the maximum value. The default value is 1.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
-	NumberPickerMax = "number-picker-max"
+	// Internal type is float, other types converted to it during assignment.
+	NumberPickerMax PropertyName = "number-picker-max"
 
 	// NumberPickerStep is the constant for "number-picker-step" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Set the value change step.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
-	NumberPickerStep = "number-picker-step"
+	// Internal type is float, other types converted to it during assignment.
+	NumberPickerStep PropertyName = "number-picker-step"
 
 	// NumberPickerValue is the constant for "number-picker-value" property tag.
 	//
-	// Used by `NumberPicker`.
+	// Used by NumberPicker.
 	// Current value. The default value is 0.
 	//
-	// Supported types: `float`, `int`, `string`.
+	// Supported types: float, int, string.
 	//
-	// Internal type is `float`, other types converted to it during assignment.
-	NumberPickerValue = "number-picker-value"
+	// Internal type is float, other types converted to it during assignment.
+	NumberPickerValue PropertyName = "number-picker-value"
+
+	// NumberPickerValue is the constant for "number-picker-value" property tag.
+	//
+	// Used by NumberPicker.
+	// Precision of displaying fractional part in editor. The default value is 0 (not used).
+	//
+	// Supported types: int, int8...int64, uint, uint8...uint64, string.
+	//
+	// Internal type is float, other types converted to it during assignment.
+	NumberPickerPrecision PropertyName = "number-picker-precision"
 )
 
 // Constants which describe values of the "number-picker-type" property of a [NumberPicker]
@@ -97,8 +110,6 @@ type NumberPicker interface {
 
 type numberPickerData struct {
 	viewData
-	dataList
-	numberChangedListeners []func(NumberPicker, float64, float64)
 }
 
 // NewNumberPicker create new NumberPicker object and return it
@@ -110,165 +121,102 @@ func NewNumberPicker(session Session, params Params) NumberPicker {
 }
 
 func newNumberPicker(session Session) View {
-	return NewNumberPicker(session, nil)
+	return new(numberPickerData)
 }
 
 func (picker *numberPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "NumberPicker"
 	picker.hasHtmlDisabled = true
-	picker.numberChangedListeners = []func(NumberPicker, float64, float64){}
-	picker.dataListInit()
-}
-
-func (picker *numberPickerData) String() string {
-	return getViewString(picker, nil)
+	picker.normalize = normalizeNumberPickerTag
+	picker.set = picker.setFunc
+	picker.changed = picker.propertyChanged
 }
 
 func (picker *numberPickerData) Focusable() bool {
 	return true
 }
 
-func (picker *numberPickerData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeNumberPickerTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
-	case Type, Min, Max, Step, Value:
+	case Type, Min, Max, Step, Value, "precision":
 		return "number-picker-" + tag
 	}
 
-	return picker.normalizeDataListTag(tag)
+	return normalizeDataListTag(tag)
 }
 
-func (picker *numberPickerData) Remove(tag string) {
-	picker.remove(picker.normalizeTag(tag))
-}
-
-func (picker *numberPickerData) remove(tag string) {
+func (picker *numberPickerData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case NumberChangedEvent:
-		if len(picker.numberChangedListeners) > 0 {
-			picker.numberChangedListeners = []func(NumberPicker, float64, float64){}
-			picker.propertyChangedEvent(tag)
-		}
+		return setTwoArgEventListener[NumberPicker, float64](picker, tag, value)
 
 	case NumberPickerValue:
-		oldValue := GetNumberPickerValue(picker)
-		picker.viewData.remove(tag)
-		if oldValue != 0 {
-			if picker.created {
-				picker.session.callFunc("setInputValue", picker.htmlID(), 0)
-			}
-			for _, listener := range picker.numberChangedListeners {
-				listener(picker, 0, oldValue)
-			}
-			picker.propertyChangedEvent(tag)
-		}
-
-	case DataList:
-		if len(picker.dataList.dataList) > 0 {
-			picker.setDataList(picker, []string{}, true)
-		}
-
-	default:
-		picker.viewData.remove(tag)
-		picker.propertyChanged(tag)
-	}
-}
-
-func (picker *numberPickerData) Set(tag string, value any) bool {
-	return picker.set(picker.normalizeTag(tag), value)
-}
-
-func (picker *numberPickerData) set(tag string, value any) bool {
-	if value == nil {
-		picker.remove(tag)
-		return true
-	}
-
-	switch tag {
-	case NumberChangedEvent:
-		listeners, ok := valueToEventWithOldListeners[NumberPicker, float64](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(NumberPicker, float64, float64){}
-		}
-		picker.numberChangedListeners = listeners
-		picker.propertyChangedEvent(tag)
-		return true
-
-	case NumberPickerValue:
-		oldValue := GetNumberPickerValue(picker)
+		picker.setRaw("old-number", GetNumberPickerValue(picker))
 		min, max := GetNumberPickerMinMax(picker)
-		if picker.setFloatProperty(NumberPickerValue, value, min, max) {
-			if f, ok := floatProperty(picker, NumberPickerValue, picker.Session(), min); ok && f != oldValue {
-				newValue, _ := floatTextProperty(picker, NumberPickerValue, picker.Session(), min)
-				if picker.created {
-					picker.session.callFunc("setInputValue", picker.htmlID(), newValue)
-				}
-				for _, listener := range picker.numberChangedListeners {
-					listener(picker, f, oldValue)
-				}
-				picker.propertyChangedEvent(tag)
-			}
-			return true
-		}
+
+		return setFloatProperty(picker, NumberPickerValue, value, min, max)
 
 	case DataList:
-		return picker.setDataList(picker, value, picker.created)
-
-	default:
-		if picker.viewData.set(tag, value) {
-			picker.propertyChanged(tag)
-			return true
-		}
+		return setDataList(picker, value, "")
 	}
-	return false
+
+	return picker.viewData.setFunc(tag, value)
 }
 
-func (picker *numberPickerData) propertyChanged(tag string) {
-	if picker.created {
-		switch tag {
-		case NumberPickerType:
-			if GetNumberPickerType(picker) == NumberSlider {
-				picker.session.updateProperty(picker.htmlID(), "type", "range")
-			} else {
-				picker.session.updateProperty(picker.htmlID(), "type", "number")
-			}
-
-		case NumberPickerMin:
-			min, _ := GetNumberPickerMinMax(picker)
-			picker.session.updateProperty(picker.htmlID(), Min, strconv.FormatFloat(min, 'f', -1, 32))
-
-		case NumberPickerMax:
-			_, max := GetNumberPickerMinMax(picker)
-			picker.session.updateProperty(picker.htmlID(), Max, strconv.FormatFloat(max, 'f', -1, 32))
-
-		case NumberPickerStep:
-			if step := GetNumberPickerStep(picker); step > 0 {
-				picker.session.updateProperty(picker.htmlID(), Step, strconv.FormatFloat(step, 'f', -1, 32))
-			} else {
-				picker.session.updateProperty(picker.htmlID(), Step, "any")
-			}
-		}
+func (picker *numberPickerData) numberFormat() string {
+	if precission := GetNumberPickerPrecision(picker); precission > 0 {
+		return fmt.Sprintf("%%.%df", precission)
 	}
+	return "%g"
 }
 
-func (picker *numberPickerData) Get(tag string) any {
-	return picker.get(picker.normalizeTag(tag))
-}
-
-func (picker *numberPickerData) get(tag string) any {
+func (picker *numberPickerData) propertyChanged(tag PropertyName) {
 	switch tag {
-	case NumberChangedEvent:
-		return picker.numberChangedListeners
+	case NumberPickerType:
+		if GetNumberPickerType(picker) == NumberSlider {
+			picker.Session().updateProperty(picker.htmlID(), "type", "range")
+		} else {
+			picker.Session().updateProperty(picker.htmlID(), "type", "number")
+		}
 
-	case DataList:
-		return picker.dataList.dataList
+	case NumberPickerMin:
+		min, _ := GetNumberPickerMinMax(picker)
+		picker.Session().updateProperty(picker.htmlID(), "min", fmt.Sprintf(picker.numberFormat(), min))
+
+	case NumberPickerMax:
+		_, max := GetNumberPickerMinMax(picker)
+		picker.Session().updateProperty(picker.htmlID(), "max", fmt.Sprintf(picker.numberFormat(), max))
+
+	case NumberPickerStep:
+		if step := GetNumberPickerStep(picker); step > 0 {
+			picker.Session().updateProperty(picker.htmlID(), "step", fmt.Sprintf(picker.numberFormat(), step))
+		} else {
+			picker.Session().updateProperty(picker.htmlID(), "step", "any")
+		}
+
+	case NumberPickerValue:
+		value := GetNumberPickerValue(picker)
+		format := picker.numberFormat()
+		picker.Session().callFunc("setInputValue", picker.htmlID(), fmt.Sprintf(format, value))
+
+		if listeners := GetNumberChangedListeners(picker); len(listeners) > 0 {
+			old := 0.0
+			if val := picker.getRaw("old-number"); val != nil {
+				if n, ok := val.(float64); ok {
+					old = n
+				}
+			}
+			if old != value {
+				for _, listener := range listeners {
+					listener(picker, value, old)
+				}
+			}
+		}
 
 	default:
-		return picker.viewData.get(tag)
+		picker.viewData.propertyChanged(tag)
 	}
 }
 
@@ -277,7 +225,10 @@ func (picker *numberPickerData) htmlTag() string {
 }
 
 func (picker *numberPickerData) htmlSubviews(self View, buffer *strings.Builder) {
-	picker.dataListHtmlSubviews(self, buffer)
+	dataListHtmlSubviews(self, buffer, func(text string, session Session) string {
+		text, _ = session.resolveConstants(text)
+		return text
+	})
 }
 
 func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builder) {
@@ -289,38 +240,39 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 		buffer.WriteString(` type="number"`)
 	}
 
+	format := picker.numberFormat()
 	min, max := GetNumberPickerMinMax(picker)
 	if min != math.Inf(-1) {
 		buffer.WriteString(` min="`)
-		buffer.WriteString(strconv.FormatFloat(min, 'f', -1, 64))
+		buffer.WriteString(fmt.Sprintf(format, min))
 		buffer.WriteByte('"')
 	}
 
 	if max != math.Inf(1) {
 		buffer.WriteString(` max="`)
-		buffer.WriteString(strconv.FormatFloat(max, 'f', -1, 64))
+		buffer.WriteString(fmt.Sprintf(format, max))
 		buffer.WriteByte('"')
 	}
 
 	step := GetNumberPickerStep(picker)
 	if step != 0 {
 		buffer.WriteString(` step="`)
-		buffer.WriteString(strconv.FormatFloat(step, 'f', -1, 64))
+		buffer.WriteString(fmt.Sprintf(format, step))
 		buffer.WriteByte('"')
 	} else {
 		buffer.WriteString(` step="any"`)
 	}
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(strconv.FormatFloat(GetNumberPickerValue(picker), 'f', -1, 64))
+	buffer.WriteString(fmt.Sprintf(format, GetNumberPickerValue(picker)))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 
-	picker.dataListHtmlProperties(picker, buffer)
+	dataListHtmlProperties(picker, buffer)
 }
 
-func (picker *numberPickerData) handleCommand(self View, command string, data DataObject) bool {
+func (picker *numberPickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
 		if text, ok := data.PropertyValue("text"); ok {
@@ -328,8 +280,11 @@ func (picker *numberPickerData) handleCommand(self View, command string, data Da
 				oldValue := GetNumberPickerValue(picker)
 				picker.properties[NumberPickerValue] = text
 				if value != oldValue {
-					for _, listener := range picker.numberChangedListeners {
+					for _, listener := range GetNumberChangedListeners(picker) {
 						listener(picker, value, oldValue)
+					}
+					if listener, ok := picker.changeListener[NumberPickerValue]; ok {
+						listener(picker, NumberPickerValue)
 					}
 				}
 			}
@@ -351,12 +306,8 @@ func GetNumberPickerType(view View, subviewID ...string) int {
 // GetNumberPickerMinMax returns the min and max value of NumberPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
-	var pickerType int
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		pickerType = GetNumberPickerType(view, subviewID[0])
-	} else {
-		pickerType = GetNumberPickerType(view)
-	}
+	view = getSubview(view, subviewID)
+	pickerType := GetNumberPickerType(view)
 
 	var defMin, defMax float64
 	if pickerType == NumberSlider {
@@ -367,8 +318,8 @@ func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 		defMax = math.Inf(1)
 	}
 
-	min := floatStyledProperty(view, subviewID, NumberPickerMin, defMin)
-	max := floatStyledProperty(view, subviewID, NumberPickerMax, defMax)
+	min := floatStyledProperty(view, nil, NumberPickerMin, defMin)
+	max := floatStyledProperty(view, nil, NumberPickerMax, defMax)
 
 	if min > max {
 		return max, min
@@ -379,14 +330,10 @@ func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 // GetNumberPickerStep returns the value changing step of NumberPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberPickerStep(view View, subviewID ...string) float64 {
-	var max float64
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		_, max = GetNumberPickerMinMax(view, subviewID[0])
-	} else {
-		_, max = GetNumberPickerMinMax(view)
-	}
+	view = getSubview(view, subviewID)
+	_, max := GetNumberPickerMinMax(view)
 
-	result := floatStyledProperty(view, subviewID, NumberPickerStep, 0)
+	result := floatStyledProperty(view, nil, NumberPickerStep, 0)
 	if result > max {
 		return max
 	}
@@ -396,20 +343,20 @@ func GetNumberPickerStep(view View, subviewID ...string) float64 {
 // GetNumberPickerValue returns the value of NumberPicker subview.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberPickerValue(view View, subviewID ...string) float64 {
-	var min float64
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		min, _ = GetNumberPickerMinMax(view, subviewID[0])
-	} else {
-		min, _ = GetNumberPickerMinMax(view)
-	}
-
-	result := floatStyledProperty(view, subviewID, NumberPickerValue, min)
-	return result
+	view = getSubview(view, subviewID)
+	min, _ := GetNumberPickerMinMax(view)
+	return floatStyledProperty(view, nil, NumberPickerValue, min)
 }
 
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64) {
-	return getEventWithOldListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
+	return getTwoArgEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
+}
+
+// GetNumberPickerPrecision returns the precision of displaying fractional part in editor of NumberPicker subview.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetNumberPickerPrecision(view View, subviewID ...string) int {
+	return intStyledProperty(view, subviewID, NumberPickerPrecision, 0)
 }

@@ -11,47 +11,47 @@ import (
 const (
 	// FileSelectedEvent is the constant for "file-selected-event" property tag.
 	//
-	// Used by `FilePicker`.
+	// Used by FilePicker.
 	// Fired when user selects file(s).
 	//
 	// General listener format:
-	// `func(picker rui.FilePicker, files []rui.FileInfo)`.
+	//  func(picker rui.FilePicker, files []rui.FileInfo).
 	//
 	// where:
 	// picker - Interface of a file picker which generated this event,
 	// files - Array of description of selected files.
 	//
 	// Allowed listener formats:
-	// `func(picker rui.FilePicker)`,
-	// `func(files []rui.FileInfo)`,
-	// `func()`.
-	FileSelectedEvent = "file-selected-event"
+	//  func(picker rui.FilePicker)
+	//  func(files []rui.FileInfo)
+	//  func()
+	FileSelectedEvent PropertyName = "file-selected-event"
 
 	// Accept is the constant for "accept" property tag.
 	//
-	// Used by `FilePicker`.
+	// Used by FilePicker.
 	// Set the list of allowed file extensions or MIME types.
 	//
-	// Supported types: `string`, `[]string`.
+	// Supported types: string, []string.
 	//
-	// Internal type is `string`, other types converted to it during assignment.
+	// Internal type is string, other types converted to it during assignment.
 	//
 	// Conversion rules:
-	// `string` - may contain single value of multiple separated by comma(`,`).
-	// `[]string` - an array of acceptable file extensions or MIME types.
-	Accept = "accept"
+	//   - string - may contain single value of multiple separated by comma(,).
+	//   - []string - an array of acceptable file extensions or MIME types.
+	Accept PropertyName = "accept"
 
 	// Multiple is the constant for "multiple" property tag.
 	//
-	// Used by `FilePicker`.
+	// Used by FilePicker.
 	// Controls whether multiple files can be selected.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Several files can be selected.
-	// `false` or `0` or "false", "no", "off", "0" - Only one file can be selected.
-	Multiple = "multiple"
+	//   - true, 1, "true", "yes", "on", "1" - Several files can be selected.
+	//   - false, 0, "false", "no", "off", "0" - Only one file can be selected.
+	Multiple PropertyName = "multiple"
 )
 
 // FileInfo describes a file which selected in the FilePicker view
@@ -82,9 +82,8 @@ type FilePicker interface {
 
 type filePickerData struct {
 	viewData
-	files                 []FileInfo
-	fileSelectedListeners []func(FilePicker, []FileInfo)
-	loader                map[int]func(FileInfo, []byte)
+	files  []FileInfo
+	loader map[int]func(FileInfo, []byte)
 }
 
 func (file *FileInfo) initBy(node DataValue) {
@@ -115,7 +114,7 @@ func NewFilePicker(session Session, params Params) FilePicker {
 }
 
 func newFilePicker(session Session) View {
-	return NewFilePicker(session, nil)
+	return new(filePickerData) // NewFilePicker(session, nil)
 }
 
 func (picker *filePickerData) init(session Session) {
@@ -124,11 +123,9 @@ func (picker *filePickerData) init(session Session) {
 	picker.hasHtmlDisabled = true
 	picker.files = []FileInfo{}
 	picker.loader = map[int]func(FileInfo, []byte){}
-	picker.fileSelectedListeners = []func(FilePicker, []FileInfo){}
-}
+	picker.set = picker.setFunc
+	picker.changed = picker.propertyChanged
 
-func (picker *filePickerData) String() string {
-	return getViewString(picker, nil)
 }
 
 func (picker *filePickerData) Focusable() bool {
@@ -153,62 +150,16 @@ func (picker *filePickerData) LoadFile(file FileInfo, result func(FileInfo, []by
 	}
 }
 
-func (picker *filePickerData) Remove(tag string) {
-	picker.remove(strings.ToLower(tag))
-}
-
-func (picker *filePickerData) remove(tag string) {
-	switch tag {
-	case FileSelectedEvent:
-		if len(picker.fileSelectedListeners) > 0 {
-			picker.fileSelectedListeners = []func(FilePicker, []FileInfo){}
-			picker.propertyChangedEvent(tag)
-		}
-
-	case Accept:
-		delete(picker.properties, tag)
-		if picker.created {
-			picker.session.removeProperty(picker.htmlID(), "accept")
-		}
-		picker.propertyChangedEvent(tag)
-
-	default:
-		picker.viewData.remove(tag)
-	}
-}
-
-func (picker *filePickerData) Set(tag string, value any) bool {
-	return picker.set(strings.ToLower(tag), value)
-}
-
-func (picker *filePickerData) set(tag string, value any) bool {
-	if value == nil {
-		picker.remove(tag)
-		return true
-	}
+func (picker *filePickerData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	switch tag {
 	case FileSelectedEvent:
-		listeners, ok := valueToEventListeners[FilePicker, []FileInfo](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(FilePicker, []FileInfo){}
-		}
-		picker.fileSelectedListeners = listeners
-		picker.propertyChangedEvent(tag)
-		return true
+		return setOneArgEventListener[FilePicker, []FileInfo](picker, tag, value)
 
 	case Accept:
 		switch value := value.(type) {
 		case string:
-			value = strings.Trim(value, " \t\n")
-			if value == "" {
-				picker.remove(Accept)
-			} else {
-				picker.properties[Accept] = value
-			}
+			return setStringPropertyValue(picker, Accept, strings.Trim(value, " \t\n"))
 
 		case []string:
 			buffer := allocStringBuilder()
@@ -222,29 +173,27 @@ func (picker *filePickerData) set(tag string, value any) bool {
 					buffer.WriteString(val)
 				}
 			}
-			if buffer.Len() == 0 {
-				picker.remove(Accept)
-			} else {
-				picker.properties[Accept] = buffer.String()
-			}
-
-		default:
-			notCompatibleType(tag, value)
-			return false
+			return setStringPropertyValue(picker, Accept, buffer.String())
 		}
+		notCompatibleType(tag, value)
+		return nil
+	}
 
-		if picker.created {
-			if css := picker.acceptCSS(); css != "" {
-				picker.session.updateProperty(picker.htmlID(), "accept", css)
-			} else {
-				picker.session.removeProperty(picker.htmlID(), "accept")
-			}
+	return picker.viewData.setFunc(tag, value)
+}
+
+func (picker *filePickerData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Accept:
+		session := picker.Session()
+		if css := acceptPropertyCSS(picker); css != "" {
+			session.updateProperty(picker.htmlID(), "accept", css)
+		} else {
+			session.removeProperty(picker.htmlID(), "accept")
 		}
-		picker.propertyChangedEvent(tag)
-		return true
 
 	default:
-		return picker.viewData.set(tag, value)
+		picker.viewData.propertyChanged(tag)
 	}
 }
 
@@ -252,10 +201,10 @@ func (picker *filePickerData) htmlTag() string {
 	return "input"
 }
 
-func (picker *filePickerData) acceptCSS() string {
-	accept, ok := stringProperty(picker, Accept, picker.Session())
+func acceptPropertyCSS(view View) string {
+	accept, ok := stringProperty(view, Accept, view.Session())
 	if !ok {
-		if value := valueFromStyle(picker, Accept); value != nil {
+		if value := valueFromStyle(view, Accept); value != nil {
 			accept, ok = value.(string)
 		}
 	}
@@ -282,7 +231,7 @@ func (picker *filePickerData) acceptCSS() string {
 func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder) {
 	picker.viewData.htmlProperties(self, buffer)
 
-	if accept := picker.acceptCSS(); accept != "" {
+	if accept := acceptPropertyCSS(picker); accept != "" {
 		buffer.WriteString(` accept="`)
 		buffer.WriteString(accept)
 		buffer.WriteRune('"')
@@ -299,7 +248,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 }
 
-func (picker *filePickerData) handleCommand(self View, command string, data DataObject) bool {
+func (picker *filePickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "fileSelected":
 		if node := data.PropertyByTag("files"); node != nil && node.Type() == ArrayNode {
@@ -312,7 +261,7 @@ func (picker *filePickerData) handleCommand(self View, command string, data Data
 			}
 			picker.files = files
 
-			for _, listener := range picker.fileSelectedListeners {
+			for _, listener := range GetFileSelectedListeners(picker) {
 				listener(picker, files)
 			}
 		}
@@ -396,10 +345,7 @@ func IsMultipleFilePicker(view View, subviewID ...string) bool {
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFilePickerAccept(view View, subviewID ...string) []string {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
 		if !ok {
 			if value := valueFromStyle(view, Accept); value != nil {
@@ -421,5 +367,5 @@ func GetFilePickerAccept(view View, subviewID ...string) []string {
 // If there are no listeners then the empty list is returned.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo) {
-	return getEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
+	return getOneArgEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }

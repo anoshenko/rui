@@ -5,106 +5,110 @@ import (
 	"strings"
 )
 
-// Constants for [ViewShadow] specific properties
+// Constants for [ShadowProperty] specific properties
 const (
 	// ColorTag is the constant for "color" property tag.
 	//
-	// Used by `ColumnSeparatorProperty`, `BorderProperty`, `OutlineProperty`, `ViewShadow`.
+	// Used by ColumnSeparatorProperty, BorderProperty, OutlineProperty, ShadowProperty.
 	//
-	// Usage in `ColumnSeparatorProperty`:
+	// # Usage in ColumnSeparatorProperty
+	//
 	// Line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	//
-	// Usage in `BorderProperty`:
+	// # Usage in BorderProperty
+	//
 	// Border line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	//
-	// Usage in `OutlineProperty`:
+	// # Usage in OutlineProperty
+	//
 	// Outline line color.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
 	//
-	// Usage in `ViewShadow`:
+	// # Usage in ShadowProperty
+	//
 	// Color property of the shadow.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	ColorTag = "color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	ColorTag PropertyName = "color"
 
 	// Inset is the constant for "inset" property tag.
 	//
-	// Used by `ViewShadow`.
+	// Used by ShadowProperty.
 	// Controls whether to draw shadow inside the frame or outside. Inset shadows are drawn inside the border(even transparent
 	// ones), above the background, but below content.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Drop shadow inside the frame(as if the content was depressed inside the box).
-	// `false` or `0` or "false", "no", "off", "0" - Shadow is assumed to be a drop shadow(as if the box were raised above the content).
-	Inset = "inset"
+	//   - true, 1, "true", "yes", "on", "1" - Drop shadow inside the frame(as if the content was depressed inside the box).
+	//   - false, 0, "false", "no", "off", "0" - Shadow is assumed to be a drop shadow(as if the box were raised above the content).
+	Inset PropertyName = "inset"
 
 	// XOffset is the constant for "x-offset" property tag.
 	//
-	// Used by `ViewShadow`.
+	// Used by ShadowProperty.
 	// Determines the shadow horizontal offset. Negative values place the shadow to the left of the element.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	XOffset = "x-offset"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	XOffset PropertyName = "x-offset"
 
 	// YOffset is the constant for "y-offset" property tag.
 	//
-	// Used by `ViewShadow`.
+	// Used by ShadowProperty.
 	// Determines the shadow vertical offset. Negative values place the shadow above the element.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	YOffset = "y-offset"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	YOffset PropertyName = "y-offset"
 
 	// BlurRadius is the constant for "blur" property tag.
 	//
-	// Used by `ViewShadow`.
+	// Used by ShadowProperty.
 	// Determines the radius of the blur effect. The larger this value, the bigger the blur, so the shadow becomes bigger and
 	// lighter. Negative values are not allowed.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	BlurRadius = "blur"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	BlurRadius PropertyName = "blur"
 
 	// SpreadRadius is the constant for "spread-radius" property tag.
 	//
-	// Used by `ViewShadow`.
+	// Used by ShadowProperty.
 	// Positive values will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	SpreadRadius = "spread-radius"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	SpreadRadius PropertyName = "spread-radius"
 )
 
-// ViewShadow contains attributes of the view shadow
-type ViewShadow interface {
+// ShadowProperty contains attributes of the view shadow
+type ShadowProperty interface {
 	Properties
 	fmt.Stringer
 	stringWriter
@@ -113,42 +117,36 @@ type ViewShadow interface {
 	visible(session Session) bool
 }
 
-type viewShadowData struct {
-	propertyList
+type shadowPropertyData struct {
+	dataProperty
 }
 
-// NewViewShadow create the new shadow for a view. Arguments:
-//
-// offsetX, offsetY is x and y offset of the shadow;
-//
-// blurRadius is the blur radius of the shadow;
-//
-// spreadRadius is the spread radius of the shadow;
-//
-// color is the color of the shadow.
-func NewViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Color) ViewShadow {
-	return NewShadowWithParams(Params{
-		XOffset:      offsetX,
-		YOffset:      offsetY,
+// NewShadow create the new shadow property for a view. Arguments:
+//   - offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - color is the color of the shadow.
+func NewShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64, spreadType SizeUnit | int | float64](
+	xOffset xOffsetType, yOffset yOffsetType, blurRadius blurType, spreadRadius spreadType, color Color) ShadowProperty {
+	return NewShadowProperty(Params{
+		XOffset:      xOffset,
+		YOffset:      yOffset,
 		BlurRadius:   blurRadius,
 		SpreadRadius: spreadRadius,
 		ColorTag:     color,
 	})
 }
 
-// NewInsetViewShadow create the new inset shadow for a view. Arguments:
-//
-// offsetX, offsetY is x and y offset of the shadow;
-//
-// blurRadius is the blur radius of the shadow;
-//
-// spreadRadius is the spread radius of the shadow;
-//
-// color is the color of the shadow.
-func NewInsetViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, color Color) ViewShadow {
-	return NewShadowWithParams(Params{
-		XOffset:      offsetX,
-		YOffset:      offsetY,
+// NewInsetShadow create the new inset shadow property for a view. Arguments:
+//   - offsetX, offsetY is x and y offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - spreadRadius is the spread radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - color is the color of the shadow.
+func NewInsetShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64, spreadType SizeUnit | int | float64](
+	xOffset xOffsetType, yOffset yOffsetType, blurRadius blurType, spreadRadius spreadType, color Color) ShadowProperty {
+	return NewShadowProperty(Params{
+		XOffset:      xOffset,
+		YOffset:      yOffset,
 		BlurRadius:   blurRadius,
 		SpreadRadius: spreadRadius,
 		ColorTag:     color,
@@ -156,82 +154,57 @@ func NewInsetViewShadow(offsetX, offsetY, blurRadius, spreadRadius SizeUnit, col
 	})
 }
 
-// NewTextShadow create the new text shadow. Arguments:
-//
-// offsetX, offsetY is the x- and y-offset of the shadow;
-//
-// blurRadius is the blur radius of the shadow;
-//
-// color is the color of the shadow.
-func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShadow {
-	return NewShadowWithParams(Params{
-		XOffset:    offsetX,
-		YOffset:    offsetY,
+// NewTextShadow create the new text shadow property. Arguments:
+//   - offsetX, offsetY is the x- and y-offset of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - blurRadius is the blur radius of the shadow (if the argument is specified as int or float64, the value is considered to be in pixels);
+//   - color is the color of the shadow.
+func NewTextShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | int | float64, blurType SizeUnit | int | float64](
+	xOffset xOffsetType, yOffset yOffsetType, blurRadius blurType, color Color) ShadowProperty {
+	return NewShadowProperty(Params{
+		XOffset:    xOffset,
+		YOffset:    yOffset,
 		BlurRadius: blurRadius,
 		ColorTag:   color,
 	})
 }
 
-// NewShadowWithParams create the new shadow for a view.
+// NewShadowProperty create the new shadow property for a view.
+//
 // The following properties can be used:
-//
-// "color" (ColorTag). Determines the color of the shadow (Color);
-//
-// "x-offset" (XOffset). Determines the shadow horizontal offset (SizeUnit);
-//
-// "y-offset" (YOffset). Determines the shadow vertical offset (SizeUnit);
-//
-// "blur" (BlurRadius). Determines the radius of the blur effect (SizeUnit);
-//
-// "spread-radius" (SpreadRadius). Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
-//
-// "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
-func NewShadowWithParams(params Params) ViewShadow {
-	shadow := new(viewShadowData)
-	shadow.propertyList.init()
+//   - "color" (ColorTag). Determines the color of the shadow (Color);
+//   - "x-offset" (XOffset). Determines the shadow horizontal offset (SizeUnit);
+//   - "y-offset" (YOffset). Determines the shadow vertical offset (SizeUnit);
+//   - "blur" (BlurRadius). Determines the radius of the blur effect (SizeUnit);
+//   - "spread-radius" (SpreadRadius). Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
+//   - "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
+func NewShadowProperty(params Params) ShadowProperty {
+	shadow := new(shadowPropertyData)
+	shadow.init()
+
 	if params != nil {
-		for _, tag := range []string{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius} {
+		for _, tag := range []PropertyName{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius} {
 			if value, ok := params[tag]; ok && value != nil {
-				shadow.Set(tag, value)
+				shadow.set(shadow, tag, value)
 			}
 		}
 	}
 	return shadow
 }
 
-// parseViewShadow parse DataObject and create ViewShadow object
-func parseViewShadow(object DataObject) ViewShadow {
-	shadow := new(viewShadowData)
-	shadow.propertyList.init()
+// parseShadowProperty parse DataObject and create ShadowProperty object
+func parseShadowProperty(object DataObject) ShadowProperty {
+	shadow := new(shadowPropertyData)
+	shadow.init()
 	parseProperties(shadow, object)
 	return shadow
 }
 
-func (shadow *viewShadowData) Remove(tag string) {
-	delete(shadow.properties, strings.ToLower(tag))
+func (shadow *shadowPropertyData) init() {
+	shadow.dataProperty.init()
+	shadow.supportedProperties = []PropertyName{ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius}
 }
 
-func (shadow *viewShadowData) Set(tag string, value any) bool {
-	if value == nil {
-		shadow.Remove(tag)
-		return true
-	}
-
-	tag = strings.ToLower(tag)
-	switch tag {
-	case ColorTag, Inset, XOffset, YOffset, BlurRadius, SpreadRadius:
-		return shadow.propertyList.Set(tag, value)
-	}
-
-	ErrorLogF(`"%s" property is not supported by Shadow`, tag)
-	return false
-}
-
-func (shadow *viewShadowData) Get(tag string) any {
-	return shadow.propertyList.Get(strings.ToLower(tag))
-}
-
-func (shadow *viewShadowData) cssStyle(buffer *strings.Builder, session Session, lead string) bool {
+func (shadow *shadowPropertyData) cssStyle(buffer *strings.Builder, session Session, lead string) bool {
 	color, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
@@ -263,7 +236,7 @@ func (shadow *viewShadowData) cssStyle(buffer *strings.Builder, session Session,
 	return true
 }
 
-func (shadow *viewShadowData) cssTextStyle(buffer *strings.Builder, session Session, lead string) bool {
+func (shadow *shadowPropertyData) cssTextStyle(buffer *strings.Builder, session Session, lead string) bool {
 	color, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
@@ -287,7 +260,7 @@ func (shadow *viewShadowData) cssTextStyle(buffer *strings.Builder, session Sess
 	return true
 }
 
-func (shadow *viewShadowData) visible(session Session) bool {
+func (shadow *shadowPropertyData) visible(session Session) bool {
 	color, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
@@ -304,11 +277,11 @@ func (shadow *viewShadowData) visible(session Session) bool {
 	return true
 }
 
-func (shadow *viewShadowData) String() string {
+func (shadow *shadowPropertyData) String() string {
 	return runStringWriter(shadow)
 }
 
-func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string) {
+func (shadow *shadowPropertyData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("_{ ")
 	comma := false
 	for _, tag := range shadow.AllTags() {
@@ -316,7 +289,7 @@ func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, tag, value, indent)
 			comma = true
@@ -325,41 +298,41 @@ func (shadow *viewShadowData) writeString(buffer *strings.Builder, indent string
 	buffer.WriteString(" }")
 }
 
-func (properties *propertyList) setShadow(tag string, value any) bool {
+func setShadowProperty(properties Properties, tag PropertyName, value any) bool {
 
 	if value == nil {
-		delete(properties.properties, tag)
+		properties.setRaw(tag, nil)
 		return true
 	}
 
 	switch value := value.(type) {
-	case ViewShadow:
-		properties.properties[tag] = []ViewShadow{value}
+	case ShadowProperty:
+		properties.setRaw(tag, []ShadowProperty{value})
 
-	case []ViewShadow:
+	case []ShadowProperty:
 		if len(value) == 0 {
-			delete(properties.properties, tag)
+			properties.setRaw(tag, nil)
 		} else {
-			properties.properties[tag] = value
+			properties.setRaw(tag, value)
 		}
 
 	case DataValue:
 		if !value.IsObject() {
 			return false
 		}
-		properties.properties[tag] = []ViewShadow{parseViewShadow(value.Object())}
+		properties.setRaw(tag, []ShadowProperty{parseShadowProperty(value.Object())})
 
 	case []DataValue:
-		shadows := []ViewShadow{}
+		shadows := []ShadowProperty{}
 		for _, data := range value {
 			if data.IsObject() {
-				shadows = append(shadows, parseViewShadow(data.Object()))
+				shadows = append(shadows, parseShadowProperty(data.Object()))
 			}
 		}
 		if len(shadows) == 0 {
 			return false
 		}
-		properties.properties[tag] = shadows
+		properties.setRaw(tag, shadows)
 
 	case string:
 		obj := NewDataObject(value)
@@ -367,7 +340,7 @@ func (properties *propertyList) setShadow(tag string, value any) bool {
 			notCompatibleType(tag, value)
 			return false
 		}
-		properties.properties[tag] = []ViewShadow{parseViewShadow(obj)}
+		properties.setRaw(tag, []ShadowProperty{parseShadowProperty(obj)})
 
 	default:
 		notCompatibleType(tag, value)
@@ -377,20 +350,20 @@ func (properties *propertyList) setShadow(tag string, value any) bool {
 	return true
 }
 
-func getShadows(properties Properties, tag string) []ViewShadow {
+func getShadows(properties Properties, tag PropertyName) []ShadowProperty {
 	if value := properties.Get(tag); value != nil {
 		switch value := value.(type) {
-		case []ViewShadow:
+		case []ShadowProperty:
 			return value
 
-		case ViewShadow:
-			return []ViewShadow{value}
+		case ShadowProperty:
+			return []ShadowProperty{value}
 		}
 	}
-	return []ViewShadow{}
+	return []ShadowProperty{}
 }
 
-func shadowCSS(properties Properties, tag string, session Session) string {
+func shadowCSS(properties Properties, tag PropertyName, session Session) string {
 	shadows := getShadows(properties, tag)
 	if len(shadows) == 0 {
 		return ""

@@ -215,6 +215,21 @@ function appendToInnerHTML(elementId, content) {
 	}
 }
 
+function appendToInputValue(elementId, content) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.value += content;
+		scanElementsSize();
+	}
+}
+
+function removeView(elementId) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.remove()
+	}
+}
+
 function setDisabled(elementId, disabled) {
 	const element = document.getElementById(elementId);
 	if (element) {
@@ -615,21 +630,11 @@ function listItemClickEvent(element, event) {
 		return
 	}
 
-	let selected = false;
-	if (element.classList) {
-		const focusStyle = getListFocusedItemStyle(element);
-		const blurStyle = getListSelectedItemStyle(element);
-		selected = (element.classList.contains(focusStyle) || element.classList.contains(blurStyle));
-	} 
-
 	const list = element.parentNode.parentNode
 	if (list) {
-		if (!selected) {
-			selectListItem(list, element, true)
-		}
-
-		const message = "itemClick{session=" + sessionID + ",id=" + list.id + "}"
-		sendMessage(message);
+		const number = getListItemNumber(element.id)
+		selectListItem(list, element)
+		sendMessage("itemClick{session=" + sessionID + ",id=" + list.id + ",number=" + number + "}");
 	}
 }
 
@@ -656,7 +661,7 @@ function getListSelectedItemStyle(element) {
 	return getStyleAttribute(element, "data-bluritemstyle", "ruiListItemSelected");
 }
 
-function selectListItem(element, item, needSendMessage) {
+function selectListItem(element, item) {
 	const currentId = element.getAttribute("data-current");
 	let message;
 	const focusStyle = getListFocusedItemStyle(element);
@@ -668,9 +673,7 @@ function selectListItem(element, item, needSendMessage) {
 			if (current.classList) {
 				current.classList.remove(focusStyle, blurStyle);
 			}
-			if (sendMessage) {
-				message = "itemUnselected{session=" + sessionID + ",id=" + element.id + "}";
-			}
+			message = "itemUnselected{session=" + sessionID + ",id=" + element.id + "}";
 		}
 	}
 
@@ -685,12 +688,10 @@ function selectListItem(element, item, needSendMessage) {
 			}
 		}
 
-		element.setAttribute("data-current", item.id);
-		if (sendMessage) {
-			const number = getListItemNumber(item.id)
-			if (number != undefined) {
-				message = "itemSelected{session=" + sessionID + ",id=" + element.id + ",number=" + number + "}";
-			}
+		element.setAttribute("data-current", item.id);		
+		const number = getListItemNumber(item.id)
+		if (number != undefined) {
+			message = "itemSelected{session=" + sessionID + ",id=" + element.id + ",number=" + number + "}";
 		}
 
 		if (item.scrollIntoViewIfNeeded) {
@@ -698,29 +699,9 @@ function selectListItem(element, item, needSendMessage) {
 		} else {
 			item.scrollIntoView({block: "nearest", inline: "nearest"});
 		}
-	/*
-		let left = item.offsetLeft - element.offsetLeft;
-		if (left < element.scrollLeft) {
-			element.scrollLeft = left;
-		}
-
-		let top = item.offsetTop - element.offsetTop;
-		if (top < element.scrollTop) {
-			element.scrollTop = top;
-		}
-		
-		let right = left + item.offsetWidth;
-		if (right > element.scrollLeft + element.clientWidth) {
-			element.scrollLeft = right - element.clientWidth;
-		}
-
-		let bottom = top + item.offsetHeight
-		if (bottom > element.scrollTop + element.clientHeight) {
-			element.scrollTop = bottom - element.clientHeight;
-		}*/
 	}
 
-	if (needSendMessage && message != undefined) {
+	if (message != undefined) {
 		sendMessage(message);
 	}
 	scanElementsSize();
@@ -849,7 +830,7 @@ function listViewKeyDownEvent(element, event) {
 			switch (key) {
 				case " ": 
 				case "Enter":
-					const message = "itemClick{session=" + sessionID + ",id=" + element.id + "}";
+					const message = "itemClick{session=" + sessionID + ",id=" + element.id + ",number=" + getListItemNumber(currentId) + "}";
 					sendMessage(message);
 					break;
 
@@ -889,7 +870,7 @@ function listViewKeyDownEvent(element, event) {
 					return;
 			}
 			if (item && item !== current) {
-				selectListItem(element, item, true);
+				selectListItem(element, item);
 			}
 		} else {
 			switch (key) {
@@ -908,7 +889,7 @@ function listViewKeyDownEvent(element, event) {
 						if (item.getAttribute("data-disabled") == "1") {
 							continue;
 						}
-						selectListItem(element, item, true);
+						selectListItem(element, item);
 						return;
 					}
 					break;

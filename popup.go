@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -8,151 +9,208 @@ import (
 const (
 	// Title is the constant for "title" property tag.
 	//
-	// Used by `Popup`, `TabsLayout`.
+	// Used by Popup, TabsLayout.
 	//
-	// Usage in `Popup`:
+	// Usage in Popup:
 	// Define the title.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	//
-	// Usage in `TabsLayout`:
-	// Set the title of the tab. The property is set for the child view of `TabsLayout`.
+	// Usage in TabsLayout:
+	// Set the title of the tab. The property is set for the child view of TabsLayout.
 	//
-	// Supported types: `string`.
+	// Supported types: string.
 	Title = "title"
 
 	// TitleStyle is the constant for "title-style" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set popup title style. Default title style is "ruiPopupTitle".
 	//
-	// Supported types: `string`.
-	TitleStyle = "title-style"
+	// Supported types: string.
+	TitleStyle PropertyName = "title-style"
 
 	// CloseButton is the constant for "close-button" property tag.
 	//
-	// Used by `Popup`.
-	// Controls whether a close button can be added to the popup. Default value is `false`.
+	// Used by Popup.
+	// Controls whether a close button can be added to the popup. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Close button will be added to a title bar of a window.
-	// `false` or `0` or "false", "no", "off", "0" - Popup without a close button.
-	CloseButton = "close-button"
+	//   - true, 1, "true", "yes", "on", "1" - Close button will be added to a title bar of a window.
+	//   - false, 0, "false", "no", "off", "0" - Popup without a close button.
+	CloseButton PropertyName = "close-button"
 
 	// OutsideClose is the constant for "outside-close" property tag.
 	//
-	// Used by `Popup`.
-	// Controls whether popup can be closed by clicking outside of the window. Default value is `false`.
+	// Used by Popup.
+	// Controls whether popup can be closed by clicking outside of the window. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - Clicking outside the popup window will automatically call the `Dismiss()` method.
-	// `false` or `0` or "false", "no", "off", "0" - Clicking outside the popup window has no effect.
-	OutsideClose = "outside-close"
+	//   - true, 1, "true", "yes", "on", "1" - Clicking outside the popup window will automatically call the Dismiss() method.
+	//   - false, 0, "false", "no", "off", "0" - Clicking outside the popup window has no effect.
+	OutsideClose PropertyName = "outside-close"
 
 	// Buttons is the constant for "buttons" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Buttons that will be placed at the bottom of the popup.
 	//
-	// Supported types: `PopupButton`, `[]PopupButton`.
+	// Supported types: PopupButton, []PopupButton.
 	//
-	// Internal type is `[]PopupButton`, other types converted to it during assignment.
-	// See `PopupButton` description for more details.
-	Buttons = "buttons"
+	// Internal type is []PopupButton, other types converted to it during assignment.
+	// See PopupButton description for more details.
+	Buttons PropertyName = "buttons"
 
 	// ButtonsAlign is the constant for "buttons-align" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the horizontal alignment of popup buttons.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`LeftAlign`) or "left" - Left alignment.
-	// `1`(`RightAlign`) or "right" - Right alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	// `3`(`StretchAlign`) or "stretch" - Width alignment.
-	ButtonsAlign = "buttons-align"
+	//   - 0 (LeftAlign) or "left" - Left alignment.
+	//   - 1 (RightAlign) or "right" - Right alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	//   - 3 (StretchAlign) or "stretch" - Width alignment.
+	ButtonsAlign PropertyName = "buttons-align"
 
 	// DismissEvent is the constant for "dismiss-event" property tag.
 	//
-	// Used by `Popup`.
-	// Used to track the closing state of the `Popup`. It occurs after the `Popup` disappears from the screen.
+	// Used by Popup.
+	// Used to track the closing state of the Popup. It occurs after the Popup disappears from the screen.
 	//
 	// General listener format:
-	// `func(popup rui.Popup)`.
+	//
+	//  func(popup rui.Popup)
 	//
 	// where:
 	// popup - Interface of a popup which generated this event.
 	//
 	// Allowed listener formats:
-	// `func()`.
-	DismissEvent = "dismiss-event"
+	//
+	//  func()
+	DismissEvent PropertyName = "dismiss-event"
 
 	// Arrow is the constant for "arrow" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Add an arrow to popup. Default value is "none".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneArrow`) or "none" - No arrow.
-	// `1`(`TopArrow`) or "top" - Arrow at the top side of the pop-up window.
-	// `2`(`RightArrow`) or "right" - Arrow on the right side of the pop-up window.
-	// `3`(`BottomArrow`) or "bottom" - Arrow at the bottom of the pop-up window.
-	// `4`(`LeftArrow`) or "left" - Arrow on the left side of the pop-up window.
-	Arrow = "arrow"
+	//   - 0 (NoneArrow) or "none" - No arrow.
+	//   - 1 (TopArrow) or "top" - Arrow at the top side of the pop-up window.
+	//   - 2 (RightArrow) or "right" - Arrow on the right side of the pop-up window.
+	//   - 3 (BottomArrow) or "bottom" - Arrow at the bottom of the pop-up window.
+	//   - 4 (LeftArrow) or "left" - Arrow on the left side of the pop-up window.
+	Arrow PropertyName = "arrow"
 
 	// ArrowAlign is the constant for "arrow-align" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the horizontal alignment of the popup arrow. Default value is "center".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`TopAlign`/`LeftAlign`) or "top" - Top/left alignment.
-	// `1`(`BottomAlign`/`RightAlign`) or "bottom" - Bottom/right alignment.
-	// `2`(`CenterAlign`) or "center" - Center alignment.
-	ArrowAlign = "arrow-align"
+	//   - 0 (TopAlign/LeftAlign) or "top" - Top/left alignment.
+	//   - 1 (BottomAlign/RightAlign) or "bottom" - Bottom/right alignment.
+	//   - 2 (CenterAlign) or "center" - Center alignment.
+	ArrowAlign PropertyName = "arrow-align"
 
 	// ArrowSize is the constant for "arrow-size" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the size(length) of the popup arrow. Default value is 16px defined by @ruiArrowSize constant.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	ArrowSize = "arrow-size"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	ArrowSize PropertyName = "arrow-size"
 
 	// ArrowWidth is the constant for "arrow-width" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the width of the popup arrow. Default value is 16px defined by @ruiArrowWidth constant.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	ArrowWidth = "arrow-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	ArrowWidth PropertyName = "arrow-width"
+
+	// ShowTransform is the constant for "show-transform" property tag.
+	//
+	// Used by Popup.
+	// Specify start translation, scale and rotation over x, y and z axes as well as a distortion
+	// for an animated Popup showing/hidding.
+	//
+	// Supported types: TransformProperty, string.
+	//
+	// See TransformProperty description for more details.
+	//
+	// Conversion rules:
+	//   - TransformProperty - stored as is, no conversion performed.
+	//   - string - string representation of Transform interface. Example:
+	//
+	//	"_{ translate-x = 10px, scale-y = 1.1}"
+	ShowTransform = "show-transform"
+
+	// ShowDuration is the constant for "show-duration" property tag.
+	//
+	// Used by Popup.
+	// Sets the length of time in seconds that a Popup show/hide animation takes to complete.
+	//
+	// Supported types: float, int, string.
+	//
+	// Internal type is float, other types converted to it during assignment.
+	ShowDuration = "show-duration"
+
+	// ShowTiming is the constant for "show-timing" property tag.
+	//
+	// Used by Popup.
+	// Set how a Popup show/hide animation progresses through the duration of each cycle.
+	//
+	// Supported types: string.
+	//
+	// Values:
+	//   - "ease" (EaseTiming) - Speed increases towards the middle and slows down at the end.
+	//   - "ease-in" (EaseInTiming) - Speed is slow at first, but increases in the end.
+	//   - "ease-out" (EaseOutTiming) - Speed is fast at first, but decreases in the end.
+	//   - "ease-in-out" (EaseInOutTiming) - Speed is slow at first, but quickly increases and at the end it decreases again.
+	//   - "linear" (LinearTiming) - Constant speed.
+	//   - "step(n)" (StepTiming(n int) function) - Timing function along stepCount stops along the transition, displaying each stop for equal lengths of time.
+	//   - "cubic-bezier(x1, y1, x2, y2)" (CubicBezierTiming(x1, y1, x2, y2 float64) function) - Cubic-Bezier curve timing function. x1 and x2 must be in the range [0, 1].
+	ShowTiming = "show-timing"
+
+	// ShowOpacity is the constant for "show-opacity" property tag.
+	//
+	// Used by Popup.
+	// In [1..0] range sets the start opacity of Popup show animation (the finish animation opacity is 1).
+	// Opacity is the degree to which content behind the view is hidden, and is the opposite of transparency.
+	//
+	// Supported types: float, int, string.
+	//
+	// Internal type is float, other types converted to it during assignment.
+	ShowOpacity = "show-opacity"
 
 	// ArrowOffset is the constant for "arrow-offset" property tag.
 	//
-	// Used by `Popup`.
+	// Used by Popup.
 	// Set the offset of the popup arrow.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	ArrowOffset = "arrow-offset"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	ArrowOffset PropertyName = "arrow-offset"
 
 	// NoneArrow is value of the popup "arrow" property: no arrow
 	NoneArrow = 0
@@ -219,14 +277,21 @@ type Popup interface {
 	html(buffer *strings.Builder)
 	viewByHTMLID(id string) View
 	keyEvent(event KeyEvent) bool
+	showAnimation()
+	dissmissAnimation(listener func(PropertyName)) bool
 }
 
 type popupData struct {
-	layerView       View
-	view            View
+	layerView       GridLayout
+	popupView       GridLayout
+	contentView     View
 	buttons         []PopupButton
 	cancelable      bool
 	dismissListener []func(Popup)
+	showTransform   TransformProperty
+	showOpacity     float64
+	showDuration    float64
+	showTiming      string
 }
 
 type popupManager struct {
@@ -304,7 +369,7 @@ func (arrow *popupArrow) createView(popupView View) View {
 
 	params := Params{BackgroundColor: GetBackgroundColor(popupView)}
 
-	if shadow := GetViewShadows(popupView); shadow != nil {
+	if shadow := GetShadowPropertys(popupView); shadow != nil {
 		params[Shadow] = shadow
 	}
 
@@ -316,28 +381,28 @@ func (arrow *popupArrow) createView(popupView View) View {
 	case TopArrow:
 		params[Row] = 0
 		params[Column] = 1
-		params[Clip] = PolygonClip([]any{"0%", "100%", "50%", "0%", "100%", "100%"})
+		params[Clip] = NewPolygonClip([]any{"0%", "100%", "50%", "0%", "100%", "100%"})
 		params[Width] = arrow.width
 		params[Height] = arrow.size
 
 	case RightArrow:
 		params[Row] = 1
 		params[Column] = 0
-		params[Clip] = PolygonClip([]any{"0%", "0%", "100%", "50%", "0%", "100%"})
+		params[Clip] = NewPolygonClip([]any{"0%", "0%", "100%", "50%", "0%", "100%"})
 		params[Width] = arrow.size
 		params[Height] = arrow.width
 
 	case BottomArrow:
 		params[Row] = 0
 		params[Column] = 1
-		params[Clip] = PolygonClip([]any{"0%", "0%", "50%", "100%", "100%", "0%"})
+		params[Clip] = NewPolygonClip([]any{"0%", "0%", "50%", "100%", "100%", "0%"})
 		params[Width] = arrow.width
 		params[Height] = arrow.size
 
 	case LeftArrow:
 		params[Row] = 1
 		params[Column] = 0
-		params[Clip] = PolygonClip([]any{"100%", "0%", "0%", "50%", "100%", "100%"})
+		params[Clip] = NewPolygonClip([]any{"100%", "0%", "0%", "50%", "100%", "100%"})
 		params[Width] = arrow.size
 		params[Height] = arrow.width
 	}
@@ -397,39 +462,15 @@ func (arrow *popupArrow) createView(popupView View) View {
 	return NewGridLayout(session, params)
 }
 
-func (popup *popupData) init(view View, popupParams Params) {
-	popup.view = view
-	popup.cancelable = false
-	session := view.Session()
+func (popup *popupData) layerCellWidth(arrowLocation int, popupParams Params, session Session) []SizeUnit {
 
-	columnCount := 3
-	rowCount := 3
-	popupRow := 1
-	popupColumn := 1
-	arrow := popupArrow{
-		row:    1,
-		column: 1,
-		align:  CenterAlign,
-	}
-
-	switch arrow.location, _ = enumProperty(popupParams, Arrow, session, NoneArrow); arrow.location {
-	case TopArrow:
-		rowCount = 4
-		popupRow = 2
-
-	case BottomArrow:
-		rowCount = 4
-		arrow.row = 2
-
-	case LeftArrow:
+	var columnCount int
+	switch arrowLocation {
+	case LeftArrow, RightArrow:
 		columnCount = 4
-		popupColumn = 2
-
-	case RightArrow:
-		columnCount = 4
-		arrow.column = 2
 
 	default:
+		columnCount = 3
 	}
 
 	cellWidth := make([]SizeUnit, columnCount)
@@ -443,6 +484,19 @@ func (popup *popupData) init(view View, popupParams Params) {
 	default:
 		cellWidth[0] = Fr(1)
 		cellWidth[columnCount-1] = Fr(1)
+	}
+	return cellWidth
+}
+
+func (popup *popupData) layerCellHeight(arrowLocation int, popupParams Params, session Session) []SizeUnit {
+
+	var rowCount int
+	switch arrowLocation {
+	case TopArrow, BottomArrow:
+		rowCount = 4
+
+	default:
+		rowCount = 3
 	}
 
 	cellHeight := make([]SizeUnit, rowCount)
@@ -458,16 +512,47 @@ func (popup *popupData) init(view View, popupParams Params) {
 		cellHeight[rowCount-1] = Fr(1)
 	}
 
+	return cellHeight
+}
+
+func (popup *popupData) init(view View, popupParams Params) {
+	popup.contentView = view
+	popup.cancelable = false
+	session := view.Session()
+
+	popupRow := 1
+	popupColumn := 1
+	arrow := popupArrow{
+		row:    1,
+		column: 1,
+		align:  CenterAlign,
+	}
+
+	switch arrow.location, _ = enumProperty(popupParams, Arrow, session, NoneArrow); arrow.location {
+	case TopArrow:
+		popupRow = 2
+
+	case BottomArrow:
+		arrow.row = 2
+
+	case LeftArrow:
+		popupColumn = 2
+
+	case RightArrow:
+		arrow.column = 2
+	}
+
 	layerParams := Params{
 		Style:      "ruiPopupLayer",
 		MaxWidth:   Percent(100),
 		MaxHeight:  Percent(100),
-		CellWidth:  cellWidth,
-		CellHeight: cellHeight,
+		CellWidth:  popup.layerCellWidth(arrow.location, popupParams, session),
+		CellHeight: popup.layerCellHeight(arrow.location, popupParams, session),
 	}
 
 	params := Params{
 		Style:               "ruiPopup",
+		ID:                  "ruiPopup",
 		Row:                 popupRow,
 		Column:              popupColumn,
 		MaxWidth:            Percent(100),
@@ -475,7 +560,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 		CellVerticalAlign:   StretchAlign,
 		CellHorizontalAlign: StretchAlign,
 		ClickEvent:          func(View) {},
-		Shadow: NewShadowWithParams(Params{
+		Shadow: NewShadowProperty(Params{
 			SpreadRadius: Px(4),
 			Blur:         Px(16),
 			ColorTag:     "@ruiPopupShadow",
@@ -483,10 +568,14 @@ func (popup *popupData) init(view View, popupParams Params) {
 	}
 
 	var closeButton View = nil
-	outsideClose := false
-	buttons := []PopupButton{}
-	titleStyle := "ruiPopupTitle"
 	var title View = nil
+	outsideClose := false
+	popup.buttons = []PopupButton{}
+	titleStyle := "ruiPopupTitle"
+
+	popup.showOpacity = 1.0
+	popup.showDuration = 1.0
+	popup.showTiming = "easy"
 
 	for tag, value := range popupParams {
 		if value != nil {
@@ -532,10 +621,10 @@ func (popup *popupData) init(view View, popupParams Params) {
 			case Buttons:
 				switch value := value.(type) {
 				case PopupButton:
-					buttons = []PopupButton{value}
+					popup.buttons = []PopupButton{value}
 
 				case []PopupButton:
-					buttons = value
+					popup.buttons = value
 				}
 
 			case Title:
@@ -560,7 +649,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 				}
 
 			case DismissEvent:
-				if listeners, ok := valueToNoParamListeners[Popup](value); ok {
+				if listeners, ok := valueToNoArgEventListeners[Popup](value); ok {
 					if listeners != nil {
 						popup.dismissListener = listeners
 					}
@@ -587,13 +676,36 @@ func (popup *popupData) init(view View, popupParams Params) {
 			case ArrowOffset:
 				arrow.off, _ = sizeProperty(popupParams, ArrowOffset, session)
 
+			case ShowOpacity:
+				if opacity, _ := floatProperty(popupParams, ShowOpacity, session, 1); opacity >= 0 && opacity < 1 {
+					popup.showOpacity = opacity
+				}
+
+			case ShowTransform:
+				if transform := valueToTransformProperty(value); transform != nil && !transform.empty() {
+					popup.showTransform = transform
+				}
+
+			case ShowDuration:
+				if duration, _ := floatProperty(popupParams, ShowDuration, session, 1); duration > 0 {
+					popup.showDuration = duration
+				}
+
+			case ShowTiming:
+				if text, ok := value.(string); ok {
+					text, _ = session.resolveConstants(text)
+					if isTimingFunctionValid(text) {
+						popup.showTiming = text
+					}
+				}
+
 			default:
 				params[tag] = value
 			}
 		}
 	}
 
-	popupView := NewGridLayout(view.Session(), params)
+	popup.popupView = NewGridLayout(view.Session(), params)
 
 	var popupCellHeight []SizeUnit
 	viewRow := 0
@@ -605,7 +717,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 		if closeButton != nil {
 			titleContent = append(titleContent, closeButton)
 		}
-		popupView.Append(NewGridLayout(session, Params{
+		popup.popupView.Append(NewGridLayout(session, Params{
 			Row:               0,
 			Style:             titleStyle,
 			CellWidth:         []any{Fr(1), AutoSize()},
@@ -621,10 +733,9 @@ func (popup *popupData) init(view View, popupParams Params) {
 	}
 
 	view.Set(Row, viewRow)
-	popupView.Append(view)
+	popup.popupView.Append(view)
 
-	popup.buttons = buttons
-	if buttonCount := len(buttons); buttonCount > 0 {
+	if buttonCount := len(popup.buttons); buttonCount > 0 {
 		buttonsAlign, _ := enumProperty(params, ButtonsAlign, session, RightAlign)
 		popupCellHeight = append(popupCellHeight, AutoSize())
 		gap, _ := sizeConstant(session, "ruiPopupButtonGap")
@@ -641,7 +752,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 			buttonsPanel.Set(Margin, gap)
 		}
 
-		for i, button := range buttons {
+		for i, button := range popup.buttons {
 			title := button.Title
 			if title == "" && button.Type == CancelButton {
 				title = "Cancel"
@@ -668,33 +779,82 @@ func (popup *popupData) init(view View, popupParams Params) {
 			buttonsPanel.Append(buttonView)
 		}
 
-		popupView.Append(NewGridLayout(session, Params{
+		popup.popupView.Append(NewGridLayout(session, Params{
 			Row:                 viewRow + 1,
 			CellHorizontalAlign: buttonsAlign,
 			Content:             buttonsPanel,
 		}))
 	}
 
-	popupView.Set(CellHeight, popupCellHeight)
+	popup.popupView.Set(CellHeight, popupCellHeight)
 
 	if arrow.location != NoneArrow {
-		layerParams[Content] = []View{popupView, arrow.createView(popupView)}
+		layerParams[Content] = []View{popup.popupView, arrow.createView(popup.popupView)}
 	} else {
-		layerParams[Content] = []View{popupView}
+		layerParams[Content] = []View{popup.popupView}
 	}
 
 	popup.layerView = NewGridLayout(session, layerParams)
+
+	if popup.showOpacity != 1 || popup.showTransform != nil {
+		animation := NewAnimationProperty(Params{
+			Duration:       popup.showDuration,
+			TimingFunction: popup.showTiming,
+		})
+		if popup.showOpacity != 1 {
+			popup.popupView.Set(Opacity, popup.showOpacity)
+			popup.popupView.SetTransition(Opacity, animation)
+		}
+		if popup.showTransform != nil {
+			popup.popupView.Set(Transform, popup.showTransform)
+			popup.popupView.SetTransition(Transform, animation)
+		}
+	} else {
+		session.updateCSSProperty("ruiPopupLayer", "transition", "")
+	}
+
 	if outsideClose {
 		popup.layerView.Set(ClickEvent, popup.cancel)
 	}
 }
 
-func (popup popupData) View() View {
-	return popup.view
+func (popup *popupData) showAnimation() {
+	if popup.showOpacity != 1 || popup.showTransform != nil {
+		htmlID := popup.popupView.htmlID()
+		session := popup.Session()
+		if popup.showOpacity != 1 {
+			session.updateCSSProperty(htmlID, string(Opacity), "1")
+		}
+		if popup.showTransform != nil {
+			session.updateCSSProperty(htmlID, string(Transform), "")
+		}
+	}
+}
+
+func (popup *popupData) dissmissAnimation(listener func(PropertyName)) bool {
+	if popup.showOpacity != 1 || popup.showTransform != nil {
+		session := popup.Session()
+		popup.popupView.Set(TransitionEndEvent, listener)
+		popup.popupView.Set(TransitionCancelEvent, listener)
+
+		htmlID := popup.popupView.htmlID()
+		if popup.showOpacity != 1 {
+			session.updateCSSProperty(htmlID, string(Opacity), fmt.Sprintf("%.2f", popup.showOpacity))
+		}
+		if popup.showTransform != nil {
+			session.updateCSSProperty(htmlID, string(Transform), popup.showTransform.transformCSS(session))
+		}
+		return true
+	}
+	return false
+}
+
+func (popup *popupData) View() View {
+	return popup.contentView
 }
 
 func (popup *popupData) Session() Session {
-	return popup.view.Session()
+	return popup.contentView.Session()
 }
 
 func (popup *popupData) cancel() {
@@ -709,9 +869,6 @@ func (popup *popupData) cancel() {
 
 func (popup *popupData) Dismiss() {
 	popup.Session().popupManager().dismissPopup(popup)
-	for _, listener := range popup.dismissListener {
-		listener(popup)
-	}
 }
 
 func (popup *popupData) Show() {
@@ -719,8 +876,7 @@ func (popup *popupData) Show() {
 }
 
 func (popup *popupData) html(buffer *strings.Builder) {
-
-	viewHTML(popup.layerView, buffer)
+	viewHTML(popup.layerView, buffer, "")
 }
 
 func (popup *popupData) viewByHTMLID(id string) View {
@@ -728,6 +884,8 @@ func (popup *popupData) viewByHTMLID(id string) View {
 }
 
 func (popup *popupData) onDismiss() {
+	popup.Session().callFunc("removeView", popup.layerView.htmlID())
+
 	for _, listener := range popup.dismissListener {
 		listener(popup)
 	}
@@ -808,6 +966,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 	session.updateCSSProperty("ruiTooltipLayer", "opacity", "0")
 	session.updateCSSProperty("ruiPopupLayer", "visibility", "visible")
 	session.updateCSSProperty("ruiRoot", "pointer-events", "none")
+	popup.showAnimation()
 }
 
 func (manager *popupManager) dismissPopup(popup Popup) {
@@ -821,31 +980,37 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 		return
 	}
 
-	session := popup.Session()
-	if manager.popups[count-1] == popup {
-		if count == 1 {
-			manager.popups = []Popup{}
-			session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
-			session.updateCSSProperty("ruiPopupLayer", "visibility", "hidden")
-			session.updateInnerHTML("ruiPopupLayer", "")
-		} else {
-			manager.popups = manager.popups[:count-1]
-			manager.updatePopupLayerInnerHTML(session)
+	index := -1
+	for n, p := range manager.popups {
+		if p == popup {
+			index = n
+			break
 		}
-		popup.onDismiss()
+	}
+
+	if index < 0 {
 		return
 	}
 
-	for n, p := range manager.popups {
-		if p == popup {
-			if n == 0 {
-				manager.popups = manager.popups[1:]
+	session := popup.Session()
+	listener := func(PropertyName) {
+		if index == count-1 {
+			if count == 1 {
+				manager.popups = []Popup{}
+				session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
+				session.updateCSSProperty("ruiPopupLayer", "visibility", "hidden")
 			} else {
-				manager.popups = append(manager.popups[:n], manager.popups[n+1:]...)
+				manager.popups = manager.popups[:count-1]
 			}
-			manager.updatePopupLayerInnerHTML(session)
-			popup.onDismiss()
-			return
+		} else if index == 0 {
+			manager.popups = manager.popups[1:]
+		} else {
+			manager.popups = append(manager.popups[:index], manager.popups[index+1:]...)
 		}
+		popup.onDismiss()
+	}
+
+	if !popup.dissmissAnimation(listener) {
+		listener("")
 	}
 }

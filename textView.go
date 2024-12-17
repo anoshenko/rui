@@ -23,116 +23,79 @@ func NewTextView(session Session, params Params) TextView {
 }
 
 func newTextView(session Session) View {
-	return NewTextView(session, nil)
+	return new(textViewData)
 }
 
 // Init initialize fields of TextView by default values
 func (textView *textViewData) init(session Session) {
 	textView.viewData.init(session)
 	textView.tag = "TextView"
+	textView.set = textView.setFunc
+	textView.changed = textView.propertyChanged
 }
 
-func (textView *textViewData) String() string {
-	return getViewString(textView, nil)
-}
+func (textView *textViewData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Text:
+		updateInnerHTML(textView.htmlID(), textView.Session())
 
-func (textView *textViewData) Get(tag string) any {
-	return textView.get(strings.ToLower(tag))
-}
-
-func (textView *textViewData) Remove(tag string) {
-	textView.remove(strings.ToLower(tag))
-}
-
-func (textView *textViewData) remove(tag string) {
-	textView.viewData.remove(tag)
-	if textView.created {
-		switch tag {
-		case Text:
-			updateInnerHTML(textView.htmlID(), textView.session)
-
-		case TextOverflow:
-			textView.textOverflowUpdated()
+	case TextOverflow:
+		session := textView.Session()
+		if n, ok := enumProperty(textView, TextOverflow, session, 0); ok {
+			values := enumProperties[TextOverflow].cssValues
+			if n >= 0 && n < len(values) {
+				session.updateCSSProperty(textView.htmlID(), string(TextOverflow), values[n])
+				return
+			}
 		}
+		session.updateCSSProperty(textView.htmlID(), string(TextOverflow), "")
+
+	case NotTranslate:
+		updateInnerHTML(textView.htmlID(), textView.Session())
+
+	default:
+		textView.viewData.propertyChanged(tag)
 	}
 }
 
-func (textView *textViewData) Set(tag string, value any) bool {
-	return textView.set(strings.ToLower(tag), value)
-}
-
-func (textView *textViewData) set(tag string, value any) bool {
+func (textView *textViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Text:
 		switch value := value.(type) {
 		case string:
-			textView.properties[Text] = value
+			textView.setRaw(Text, value)
 
 		case fmt.Stringer:
-			textView.properties[Text] = value.String()
+			textView.setRaw(Text, value.String())
 
 		case float32:
-			textView.properties[Text] = fmt.Sprintf("%g", float64(value))
+			textView.setRaw(Text, fmt.Sprintf("%g", float64(value)))
 
 		case float64:
-			textView.properties[Text] = fmt.Sprintf("%g", value)
+			textView.setRaw(Text, fmt.Sprintf("%g", value))
 
 		case []rune:
-			textView.properties[Text] = string(value)
+			textView.setRaw(Text, string(value))
 
 		case bool:
 			if value {
-				textView.properties[Text] = "true"
+				textView.setRaw(Text, "true")
 			} else {
-				textView.properties[Text] = "false"
+				textView.setRaw(Text, "false")
 			}
 
 		default:
 			if n, ok := isInt(value); ok {
-				textView.properties[Text] = fmt.Sprintf("%d", n)
+				textView.setRaw(Text, fmt.Sprintf("%d", n))
 			} else {
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
-		if textView.created {
-			updateInnerHTML(textView.htmlID(), textView.session)
-		}
-
-	case TextOverflow:
-		if !textView.viewData.set(tag, value) {
-			return false
-		}
-		if textView.created {
-			textView.textOverflowUpdated()
-		}
-
-	case NotTranslate:
-		if !textView.viewData.set(tag, value) {
-			return false
-		}
-		if textView.created {
-			updateInnerHTML(textView.htmlID(), textView.Session())
-		}
-
-	default:
-		return textView.viewData.set(tag, value)
+		return []PropertyName{Text}
 	}
 
-	textView.propertyChangedEvent(tag)
-	return true
-}
-
-func (textView *textViewData) textOverflowUpdated() {
-	session := textView.Session()
-	if n, ok := enumProperty(textView, TextOverflow, session, 0); ok {
-		values := enumProperties[TextOverflow].cssValues
-		if n >= 0 && n < len(values) {
-			session.updateCSSProperty(textView.htmlID(), TextOverflow, values[n])
-			return
-		}
-	}
-	session.updateCSSProperty(textView.htmlID(), TextOverflow, "")
+	return textView.viewData.setFunc(tag, value)
 }
 
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {

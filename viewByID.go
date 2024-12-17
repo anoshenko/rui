@@ -2,34 +2,45 @@ package rui
 
 import "strings"
 
-// ViewByID return a View with id equal to the argument of the function or nil if there is no such View
-func ViewByID(rootView View, id string) View {
+// ViewByID returns the child View path to which is specified using the arguments id, ids. Example
+//
+//	view := ViewByID(rootView, "id1", "id2", "id3")
+//	view := ViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found, the function will return nil
+func ViewByID(rootView View, id string, ids ...string) View {
 	if rootView == nil {
 		ErrorLog(`ViewByID(nil, "` + id + `"): rootView is nil`)
 		return nil
 	}
-	if rootView.ID() == id {
-		return rootView
+
+	path := []string{id}
+	if len(ids) > 0 {
+		path = append(path, ids...)
 	}
 
-	if container, ok := rootView.(ParentView); ok {
-		if view := viewByID(container, id); view != nil {
-			return view
-		}
-	}
-
-	if index := strings.IndexRune(id, '/'); index > 0 {
-		if view2 := ViewByID(rootView, id[:index]); view2 != nil {
-			if view := ViewByID(view2, id[index+1:]); view != nil {
-				return view
+	result := rootView
+	for _, id := range path {
+		if result.ID() != id {
+			if container, ok := result.(ParentView); ok {
+				if view := viewByID(container, id); view != nil {
+					result = view
+				} else if index := strings.IndexRune(id, '/'); index > 0 {
+					if view := ViewByID(result, id[:index], id[index+1:]); view != nil {
+						result = view
+					} else {
+						ErrorLog(`ViewByID(_, "` + id + `"): View not found`)
+						return nil
+					}
+				} else {
+					ErrorLog(`ViewByID(_, "` + id + `"): View not found`)
+					return nil
+				}
 			}
-			return nil
 		}
-		return nil
 	}
-
-	ErrorLog(`ViewByID(_, "` + id + `"): View not found`)
-	return nil
+	return result
 }
 
 func viewByID(rootView ParentView, id string) View {
@@ -49,10 +60,15 @@ func viewByID(rootView ParentView, id string) View {
 	return nil
 }
 
-// ViewsContainerByID return a ViewsContainer with id equal to the argument of the function or
-// nil if there is no such View or View is not ViewsContainer
-func ViewsContainerByID(rootView View, id string) ViewsContainer {
-	if view := ViewByID(rootView, id); view != nil {
+// ViewsContainerByID return the ViewsContainer path to which is specified using the arguments id, ids. Example
+//
+//	view := ViewsContainerByID(rootView, "id1", "id2", "id3")
+//	view := ViewsContainerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ViewsContainer, the function will return nil
+func ViewsContainerByID(rootView View, id string, ids ...string) ViewsContainer {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(ViewsContainer); ok {
 			return list
 		}
@@ -61,10 +77,15 @@ func ViewsContainerByID(rootView View, id string) ViewsContainer {
 	return nil
 }
 
-// ListLayoutByID return a ListLayout with id equal to the argument of the function or
-// nil if there is no such View or View is not ListLayout
-func ListLayoutByID(rootView View, id string) ListLayout {
-	if view := ViewByID(rootView, id); view != nil {
+// ListLayoutByID return the ListLayout  path to which is specified using the arguments id, ids. Example
+//
+//	view := ListLayoutByID(rootView, "id1", "id2", "id3")
+//	view := ListLayoutByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ListLayout, the function will return nil
+func ListLayoutByID(rootView View, id string, ids ...string) ListLayout {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(ListLayout); ok {
 			return list
 		}
@@ -73,10 +94,15 @@ func ListLayoutByID(rootView View, id string) ListLayout {
 	return nil
 }
 
-// StackLayoutByID return a StackLayout with id equal to the argument of the function or
-// nil if there is no such View or View is not StackLayout
-func StackLayoutByID(rootView View, id string) StackLayout {
-	if view := ViewByID(rootView, id); view != nil {
+// StackLayoutByID return the StackLayout path to which is specified using the arguments id, ids. Example
+//
+//	view := StackLayoutByID(rootView, "id1", "id2", "id3")
+//	view := StackLayoutByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not StackLayout, the function will return nil
+func StackLayoutByID(rootView View, id string, ids ...string) StackLayout {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(StackLayout); ok {
 			return list
 		}
@@ -85,10 +111,15 @@ func StackLayoutByID(rootView View, id string) StackLayout {
 	return nil
 }
 
-// GridLayoutByID return a GridLayout with id equal to the argument of the function or
-// nil if there is no such View or View is not GridLayout
-func GridLayoutByID(rootView View, id string) GridLayout {
-	if view := ViewByID(rootView, id); view != nil {
+// GridLayoutByID return the GridLayout path to which is specified using the arguments id, ids. Example
+//
+//	view := GridLayoutByID(rootView, "id1", "id2", "id3")
+//	view := GridLayoutByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not GridLayout, the function will return nil
+func GridLayoutByID(rootView View, id string, ids ...string) GridLayout {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(GridLayout); ok {
 			return list
 		}
@@ -97,10 +128,15 @@ func GridLayoutByID(rootView View, id string) GridLayout {
 	return nil
 }
 
-// ColumnLayoutByID return a ColumnLayout with id equal to the argument of the function or
-// nil if there is no such View or View is not ColumnLayout
-func ColumnLayoutByID(rootView View, id string) ColumnLayout {
-	if view := ViewByID(rootView, id); view != nil {
+// ColumnLayoutByID return the ColumnLayout path to which is specified using the arguments id, ids. Example
+//
+//	view := ColumnLayoutByID(rootView, "id1", "id2", "id3")
+//	view := ColumnLayoutByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ColumnLayout, the function will return nil
+func ColumnLayoutByID(rootView View, id string, ids ...string) ColumnLayout {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(ColumnLayout); ok {
 			return list
 		}
@@ -109,10 +145,15 @@ func ColumnLayoutByID(rootView View, id string) ColumnLayout {
 	return nil
 }
 
-// DetailsViewByID return a ColumnLayout with id equal to the argument of the function or
-// nil if there is no such View or View is not DetailsView
-func DetailsViewByID(rootView View, id string) DetailsView {
-	if view := ViewByID(rootView, id); view != nil {
+// DetailsViewByID return the ColumnLayout path to which is specified using the arguments id, ids. Example
+//
+//	view := DetailsViewByID(rootView, "id1", "id2", "id3")
+//	view := DetailsViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not DetailsView, the function will return nil
+func DetailsViewByID(rootView View, id string, ids ...string) DetailsView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if details, ok := view.(DetailsView); ok {
 			return details
 		}
@@ -121,10 +162,15 @@ func DetailsViewByID(rootView View, id string) DetailsView {
 	return nil
 }
 
-// DropDownListByID return a DropDownListView with id equal to the argument of the function or
-// nil if there is no such View or View is not DropDownListView
-func DropDownListByID(rootView View, id string) DropDownList {
-	if view := ViewByID(rootView, id); view != nil {
+// DropDownListByID return the DropDownListView path to which is specified using the arguments id, ids. Example
+//
+//	view := DropDownListByID(rootView, "id1", "id2", "id3")
+//	view := DropDownListByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not DropDownList, the function will return nil
+func DropDownListByID(rootView View, id string, ids ...string) DropDownList {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(DropDownList); ok {
 			return list
 		}
@@ -133,10 +179,15 @@ func DropDownListByID(rootView View, id string) DropDownList {
 	return nil
 }
 
-// TabsLayoutByID return a TabsLayout with id equal to the argument of the function or
-// nil if there is no such View or View is not TabsLayout
-func TabsLayoutByID(rootView View, id string) TabsLayout {
-	if view := ViewByID(rootView, id); view != nil {
+// TabsLayoutByID return the TabsLayout path to which is specified using the arguments id, ids. Example
+//
+//	view := TabsLayoutByID(rootView, "id1", "id2", "id3")
+//	view := TabsLayoutByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not TabsLayout, the function will return nil
+func TabsLayoutByID(rootView View, id string, ids ...string) TabsLayout {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(TabsLayout); ok {
 			return list
 		}
@@ -145,10 +196,15 @@ func TabsLayoutByID(rootView View, id string) TabsLayout {
 	return nil
 }
 
-// ListViewByID return a ListView with id equal to the argument of the function or
-// nil if there is no such View or View is not ListView
-func ListViewByID(rootView View, id string) ListView {
-	if view := ViewByID(rootView, id); view != nil {
+// ListViewByID return the ListView path to which is specified using the arguments id, ids. Example
+//
+//	view := ListViewByID(rootView, "id1", "id2", "id3")
+//	view := ListViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ListView, the function will return nil
+func ListViewByID(rootView View, id string, ids ...string) ListView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if list, ok := view.(ListView); ok {
 			return list
 		}
@@ -157,10 +213,15 @@ func ListViewByID(rootView View, id string) ListView {
 	return nil
 }
 
-// TextViewByID return a TextView with id equal to the argument of the function or
-// nil if there is no such View or View is not TextView
-func TextViewByID(rootView View, id string) TextView {
-	if view := ViewByID(rootView, id); view != nil {
+// TextViewByID return the TextView path to which is specified using the arguments id, ids. Example
+//
+//	view := TextViewByID(rootView, "id1", "id2", "id3")
+//	view := TextViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not TextView, the function will return nil
+func TextViewByID(rootView View, id string, ids ...string) TextView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if text, ok := view.(TextView); ok {
 			return text
 		}
@@ -169,10 +230,15 @@ func TextViewByID(rootView View, id string) TextView {
 	return nil
 }
 
-// ButtonByID return a Button with id equal to the argument of the function or
-// nil if there is no such View or View is not Button
-func ButtonByID(rootView View, id string) Button {
-	if view := ViewByID(rootView, id); view != nil {
+// ButtonByID return the Button path to which is specified using the arguments id, ids. Example
+//
+//	view := ButtonByID(rootView, "id1", "id2", "id3")
+//	view := ButtonByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not Button, the function will return nil
+func ButtonByID(rootView View, id string, ids ...string) Button {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if button, ok := view.(Button); ok {
 			return button
 		}
@@ -181,10 +247,15 @@ func ButtonByID(rootView View, id string) Button {
 	return nil
 }
 
-// CheckboxByID return a Checkbox with id equal to the argument of the function or
-// nil if there is no such View or View is not Checkbox
-func CheckboxByID(rootView View, id string) Checkbox {
-	if view := ViewByID(rootView, id); view != nil {
+// CheckboxByID return the Checkbox path to which is specified using the arguments id, ids. Example
+//
+//	view := CheckboxByID(rootView, "id1", "id2", "id3")
+//	view := CheckboxByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not Checkbox, the function will return nil
+func CheckboxByID(rootView View, id string, ids ...string) Checkbox {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if checkbox, ok := view.(Checkbox); ok {
 			return checkbox
 		}
@@ -193,10 +264,15 @@ func CheckboxByID(rootView View, id string) Checkbox {
 	return nil
 }
 
-// EditViewByID return a EditView with id equal to the argument of the function or
-// nil if there is no such View or View is not EditView
-func EditViewByID(rootView View, id string) EditView {
-	if view := ViewByID(rootView, id); view != nil {
+// EditViewByID return the EditView path to which is specified using the arguments id, ids. Example
+//
+//	view := EditViewByID(rootView, "id1", "id2", "id3")
+//	view := EditViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not EditView, the function will return nil
+func EditViewByID(rootView View, id string, ids ...string) EditView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if buttons, ok := view.(EditView); ok {
 			return buttons
 		}
@@ -205,10 +281,15 @@ func EditViewByID(rootView View, id string) EditView {
 	return nil
 }
 
-// ProgressBarByID return a ProgressBar with id equal to the argument of the function or
-// nil if there is no such View or View is not ProgressBar
-func ProgressBarByID(rootView View, id string) ProgressBar {
-	if view := ViewByID(rootView, id); view != nil {
+// ProgressBarByID return the ProgressBar path to which is specified using the arguments id, ids. Example
+//
+//	view := ProgressBarByID(rootView, "id1", "id2", "id3")
+//	view := ProgressBarByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ProgressBar, the function will return nil
+func ProgressBarByID(rootView View, id string, ids ...string) ProgressBar {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if buttons, ok := view.(ProgressBar); ok {
 			return buttons
 		}
@@ -217,10 +298,15 @@ func ProgressBarByID(rootView View, id string) ProgressBar {
 	return nil
 }
 
-// ColorPickerByID return a ColorPicker with id equal to the argument of the function or
-// nil if there is no such View or View is not ColorPicker
-func ColorPickerByID(rootView View, id string) ColorPicker {
-	if view := ViewByID(rootView, id); view != nil {
+// ColorPickerByID return the ColorPicker path to which is specified using the arguments id, ids. Example
+//
+//	view := ColorPickerByID(rootView, "id1", "id2", "id3")
+//	view := ColorPickerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ColorPicker, the function will return nil
+func ColorPickerByID(rootView View, id string, ids ...string) ColorPicker {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if input, ok := view.(ColorPicker); ok {
 			return input
 		}
@@ -229,10 +315,15 @@ func ColorPickerByID(rootView View, id string) ColorPicker {
 	return nil
 }
 
-// NumberPickerByID return a NumberPicker with id equal to the argument of the function or
-// nil if there is no such View or View is not NumberPicker
-func NumberPickerByID(rootView View, id string) NumberPicker {
-	if view := ViewByID(rootView, id); view != nil {
+// NumberPickerByID return the NumberPicker path to which is specified using the arguments id, ids. Example
+//
+//	view := NumberPickerByID(rootView, "id1", "id2", "id3")
+//	view := NumberPickerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not NumberPicker, the function will return nil
+func NumberPickerByID(rootView View, id string, ids ...string) NumberPicker {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if input, ok := view.(NumberPicker); ok {
 			return input
 		}
@@ -241,10 +332,15 @@ func NumberPickerByID(rootView View, id string) NumberPicker {
 	return nil
 }
 
-// TimePickerByID return a TimePicker with id equal to the argument of the function or
-// nil if there is no such View or View is not TimePicker
-func TimePickerByID(rootView View, id string) TimePicker {
-	if view := ViewByID(rootView, id); view != nil {
+// TimePickerByID return the TimePicker path to which is specified using the arguments id, ids. Example
+//
+//	view := TimePickerByID(rootView, "id1", "id2", "id3")
+//	view := TimePickerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not TimePicker, the function will return nil
+func TimePickerByID(rootView View, id string, ids ...string) TimePicker {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if input, ok := view.(TimePicker); ok {
 			return input
 		}
@@ -253,10 +349,15 @@ func TimePickerByID(rootView View, id string) TimePicker {
 	return nil
 }
 
-// DatePickerByID return a DatePicker with id equal to the argument of the function or
-// nil if there is no such View or View is not DatePicker
-func DatePickerByID(rootView View, id string) DatePicker {
-	if view := ViewByID(rootView, id); view != nil {
+// DatePickerByID return the DatePicker path to which is specified using the arguments id, ids. Example
+//
+//	view := DatePickerByID(rootView, "id1", "id2", "id3")
+//	view := DatePickerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not DatePicker, the function will return nil
+func DatePickerByID(rootView View, id string, ids ...string) DatePicker {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if input, ok := view.(DatePicker); ok {
 			return input
 		}
@@ -265,10 +366,15 @@ func DatePickerByID(rootView View, id string) DatePicker {
 	return nil
 }
 
-// FilePickerByID return a FilePicker with id equal to the argument of the function or
-// nil if there is no such View or View is not FilePicker
-func FilePickerByID(rootView View, id string) FilePicker {
-	if view := ViewByID(rootView, id); view != nil {
+// FilePickerByID return the FilePicker path to which is specified using the arguments id, ids. Example
+//
+//	view := FilePickerByID(rootView, "id1", "id2", "id3")
+//	view := FilePickerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not FilePicker, the function will return nil
+func FilePickerByID(rootView View, id string, ids ...string) FilePicker {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if input, ok := view.(FilePicker); ok {
 			return input
 		}
@@ -277,10 +383,15 @@ func FilePickerByID(rootView View, id string) FilePicker {
 	return nil
 }
 
-// CanvasViewByID return a CanvasView with id equal to the argument of the function or
-// nil if there is no such View or View is not CanvasView
-func CanvasViewByID(rootView View, id string) CanvasView {
-	if view := ViewByID(rootView, id); view != nil {
+// CanvasViewByID return the CanvasView path to which is specified using the arguments id, ids. Example
+//
+//	view := CanvasViewByID(rootView, "id1", "id2", "id3")
+//	view := CanvasViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not CanvasView, the function will return nil
+func CanvasViewByID(rootView View, id string, ids ...string) CanvasView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if canvas, ok := view.(CanvasView); ok {
 			return canvas
 		}
@@ -289,24 +400,15 @@ func CanvasViewByID(rootView View, id string) CanvasView {
 	return nil
 }
 
-/*
-// TableViewByID return a TableView with id equal to the argument of the function or
-// nil if there is no such View or View is not TableView
-func TableViewByID(rootView View, id string) TableView {
-	if view := ViewByID(rootView, id); view != nil {
-		if canvas, ok := view.(TableView); ok {
-			return canvas
-		}
-		ErrorLog(`TableViewByID(_, "` + id + `"): The found View is not TableView`)
-	}
-	return nil
-}
-*/
-
-// AudioPlayerByID return a AudioPlayer with id equal to the argument of the function or
-// nil if there is no such View or View is not AudioPlayer
-func AudioPlayerByID(rootView View, id string) AudioPlayer {
-	if view := ViewByID(rootView, id); view != nil {
+// AudioPlayerByID return the AudioPlayer path to which is specified using the arguments id, ids. Example
+//
+//	view := AudioPlayerByID(rootView, "id1", "id2", "id3")
+//	view := AudioPlayerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not AudioPlayer, the function will return nil
+func AudioPlayerByID(rootView View, id string, ids ...string) AudioPlayer {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if canvas, ok := view.(AudioPlayer); ok {
 			return canvas
 		}
@@ -315,10 +417,15 @@ func AudioPlayerByID(rootView View, id string) AudioPlayer {
 	return nil
 }
 
-// VideoPlayerByID return a VideoPlayer with id equal to the argument of the function or
-// nil if there is no such View or View is not VideoPlayer
-func VideoPlayerByID(rootView View, id string) VideoPlayer {
-	if view := ViewByID(rootView, id); view != nil {
+// VideoPlayerByID return the VideoPlayer path to which is specified using the arguments id, ids. Example
+//
+//	view := VideoPlayerByID(rootView, "id1", "id2", "id3")
+//	view := VideoPlayerByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not VideoPlayer, the function will return nil
+func VideoPlayerByID(rootView View, id string, ids ...string) VideoPlayer {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if canvas, ok := view.(VideoPlayer); ok {
 			return canvas
 		}
@@ -327,10 +434,15 @@ func VideoPlayerByID(rootView View, id string) VideoPlayer {
 	return nil
 }
 
-// ImageViewByID return a ImageView with id equal to the argument of the function or
-// nil if there is no such View or View is not ImageView
-func ImageViewByID(rootView View, id string) ImageView {
-	if view := ViewByID(rootView, id); view != nil {
+// ImageViewByID return the ImageView path to which is specified using the arguments id, ids. Example
+//
+//	view := ImageViewByID(rootView, "id1", "id2", "id3")
+//	view := ImageViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not ImageView, the function will return nil
+func ImageViewByID(rootView View, id string, ids ...string) ImageView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if canvas, ok := view.(ImageView); ok {
 			return canvas
 		}
@@ -339,10 +451,15 @@ func ImageViewByID(rootView View, id string) ImageView {
 	return nil
 }
 
-// TableViewByID return a TableView with id equal to the argument of the function or
-// nil if there is no such View or View is not TableView
-func TableViewByID(rootView View, id string) TableView {
-	if view := ViewByID(rootView, id); view != nil {
+// TableViewByID return the TableView path to which is specified using the arguments id, ids. Example
+//
+//	view := TableViewByID(rootView, "id1", "id2", "id3")
+//	view := TableViewByID(rootView, "id1/id2/id3")
+//
+// These two function calls are equivalent.
+// If a View with this path is not found or View is not TableView, the function will return nil
+func TableViewByID(rootView View, id string, ids ...string) TableView {
+	if view := ViewByID(rootView, id, ids...); view != nil {
 		if canvas, ok := view.(TableView); ok {
 			return canvas
 		}

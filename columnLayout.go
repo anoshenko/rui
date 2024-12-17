@@ -2,118 +2,117 @@ package rui
 
 import (
 	"strconv"
-	"strings"
 )
 
 // Constants for [ColumnLayout] specific properties and events
 const (
 	// ColumnCount is the constant for "column-count" property tag.
 	//
-	// Used by `ColumnLayout`.
-	// Specifies number of columns into which the content is break. Values less than zero are not valid. If this property 
+	// Used by ColumnLayout.
+	// Specifies number of columns into which the content is break. Values less than zero are not valid. If this property
 	// value is 0 then the number of columns is calculated based on the "column-width" property.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0` or "0" - Use "column-width" to control how many columns will be created.
-	// >= `0` or >= "0" - Тhe number of columns into which the content is divided.
-	ColumnCount = "column-count"
+	//   - 0 or "0" - Use "column-width" to control how many columns will be created.
+	//   - positive value - Тhe number of columns into which the content is divided.
+	ColumnCount PropertyName = "column-count"
 
 	// ColumnWidth is the constant for "column-width" property tag.
 	//
-	// Used by `ColumnLayout`.
+	// Used by ColumnLayout.
 	// Specifies the width of each column.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	ColumnWidth = "column-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
+	ColumnWidth PropertyName = "column-width"
 
 	// ColumnGap is the constant for "column-gap" property tag.
 	//
-	// Used by `ColumnLayout`.
+	// Used by ColumnLayout.
 	// Set the size of the gap (gutter) between columns.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	ColumnGap = "column-gap"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See [SizeUnit] description for more details.
+	ColumnGap PropertyName = "column-gap"
 
 	// ColumnSeparator is the constant for "column-separator" property tag.
 	//
-	// Used by `ColumnLayout`.
+	// Used by ColumnLayout.
 	// Specifies the line drawn between columns in a multi-column layout.
 	//
-	// Supported types: `ColumnSeparatorProperty`, `ViewBorder`.
+	// Supported types: ColumnSeparatorProperty, ViewBorder.
 	//
-	// Internal type is `ColumnSeparatorProperty`, other types converted to it during assignment.
-	// See `ColumnSeparatorProperty` and `ViewBorder` description for more details.
-	ColumnSeparator = "column-separator"
+	// Internal type is ColumnSeparatorProperty, other types converted to it during assignment.
+	// See [ColumnSeparatorProperty] and [ViewBorder] description for more details.
+	ColumnSeparator PropertyName = "column-separator"
 
 	// ColumnSeparatorStyle is the constant for "column-separator-style" property tag.
 	//
-	// Used by `ColumnLayout`.
+	// Used by ColumnLayout.
 	// Controls the style of the line drawn between columns in a multi-column layout.
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`NoneLine`) or "none" - The separator will not be drawn.
-	// `1`(`SolidLine`) or "solid" - Solid line as a separator.
-	// `2`(`DashedLine`) or "dashed" - Dashed line as a separator.
-	// `3`(`DottedLine`) or "dotted" - Dotted line as a separator.
-	// `4`(`DoubleLine`) or "double" - Double line as a separator.
-	ColumnSeparatorStyle = "column-separator-style"
+	//   - 0 (NoneLine) or "none" - The separator will not be drawn.
+	//   - 1 (SolidLine) or "solid" - Solid line as a separator.
+	//   - 2 (DashedLine) or "dashed" - Dashed line as a separator.
+	//   - 3 (DottedLine) or "dotted" - Dotted line as a separator.
+	//   - 4 (DoubleLine) or "double" - Double line as a separator.
+	ColumnSeparatorStyle PropertyName = "column-separator-style"
 
 	// ColumnSeparatorWidth is the constant for "column-separator-width" property tag.
 	//
-	// Used by `ColumnLayout`.
+	// Used by ColumnLayout.
 	// Set the width of the line drawn between columns in a multi-column layout.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
-	ColumnSeparatorWidth = "column-separator-width"
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	ColumnSeparatorWidth PropertyName = "column-separator-width"
 
 	// ColumnSeparatorColor is the constant for "column-separator-color" property tag.
 	//
-	// Used by `ColumnLayout`.
+	// Used by ColumnLayout.
 	// Set the color of the line drawn between columns in a multi-column layout.
 	//
-	// Supported types: `Color`, `string`.
+	// Supported types: Color, string.
 	//
-	// Internal type is `Color`, other types converted to it during assignment.
-	// See `Color` description for more details.
-	ColumnSeparatorColor = "column-separator-color"
+	// Internal type is Color, other types converted to it during assignment.
+	// See Color description for more details.
+	ColumnSeparatorColor PropertyName = "column-separator-color"
 
 	// ColumnFill is the constant for "column-fill" property tag.
 	//
-	// Used by `ColumnLayout`.
-	// Controls how a `ColumnLayout`'s content is balanced when broken into columns. Default value is "balance".
+	// Used by ColumnLayout.
+	// Controls how a ColumnLayout's content is balanced when broken into columns. Default value is "balance".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `0`(`ColumnFillBalance`) or "balance" - Content is equally divided between columns.
-	// `1`(`ColumnFillAuto`) or "auto" - Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
-	ColumnFill = "column-fill"
+	//   - 0 (ColumnFillBalance) or "balance" - Content is equally divided between columns.
+	//   - 1 (ColumnFillAuto) or "auto" - Columns are filled sequentially. Content takes up only the room it needs, possibly resulting in some columns remaining empty.
+	ColumnFill PropertyName = "column-fill"
 
 	// ColumnSpanAll is the constant for "column-span-all" property tag.
 	//
-	// Used by `ColumnLayout`.
-	// Property used in views placed inside the column layout container. Makes it possible for a view to span across all 
-	// columns. Default value is `false`.
+	// Used by ColumnLayout.
+	// Property used in views placed inside the column layout container. Makes it possible for a view to span across all
+	// columns. Default value is false.
 	//
-	// Supported types: `bool`, `int`, `string`.
+	// Supported types: bool, int, string.
 	//
 	// Values:
-	// `true` or `1` or "true", "yes", "on", "1" - View will span across all columns.
-	// `false` or `0` or "false", "no", "off", "0" - View will be a part of a column.
-	ColumnSpanAll = "column-span-all"
+	//   - true, 1, "true", "yes", "on", or  "1" - View will span across all columns.
+	//   - false, 0, "false", "no", "off", or "0" - View will be a part of a column.
+	ColumnSpanAll PropertyName = "column-span-all"
 )
 
 // ColumnLayout represent a ColumnLayout view
@@ -134,22 +133,20 @@ func NewColumnLayout(session Session, params Params) ColumnLayout {
 }
 
 func newColumnLayout(session Session) View {
-	return NewColumnLayout(session, nil)
+	return new(columnLayoutData)
 }
 
 // Init initialize fields of ColumnLayout by default values
-func (ColumnLayout *columnLayoutData) init(session Session) {
-	ColumnLayout.viewsContainerData.init(session)
-	ColumnLayout.tag = "ColumnLayout"
-	//ColumnLayout.systemClass = "ruiColumnLayout"
+func (columnLayout *columnLayoutData) init(session Session) {
+	columnLayout.viewsContainerData.init(session)
+	columnLayout.tag = "ColumnLayout"
+	columnLayout.normalize = normalizeColumnLayoutTag
+	columnLayout.changed = columnLayout.propertyChanged
+	//columnLayout.systemClass = "ruiColumnLayout"
 }
 
-func (columnLayout *columnLayoutData) String() string {
-	return getViewString(columnLayout, nil)
-}
-
-func (columnLayout *columnLayoutData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeColumnLayoutTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case Gap:
 		return ColumnGap
@@ -157,62 +154,28 @@ func (columnLayout *columnLayoutData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (columnLayout *columnLayoutData) Get(tag string) any {
-	return columnLayout.get(columnLayout.normalizeTag(tag))
-}
-
-func (columnLayout *columnLayoutData) Remove(tag string) {
-	columnLayout.remove(columnLayout.normalizeTag(tag))
-}
-
-func (columnLayout *columnLayoutData) remove(tag string) {
-	columnLayout.viewsContainerData.remove(tag)
-	if columnLayout.created {
-		switch tag {
-		case ColumnCount, ColumnWidth, ColumnGap:
-			columnLayout.session.updateCSSProperty(columnLayout.htmlID(), tag, "")
-
-		case ColumnSeparator:
-			columnLayout.session.updateCSSProperty(columnLayout.htmlID(), "column-rule", "")
+func (columnLayout *columnLayoutData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case ColumnSeparator:
+		css := ""
+		session := columnLayout.Session()
+		if value := columnLayout.getRaw(ColumnSeparator); value != nil {
+			separator := value.(ColumnSeparatorProperty)
+			css = separator.cssValue(session)
 		}
-	}
-}
+		session.updateCSSProperty(columnLayout.htmlID(), "column-rule", css)
 
-func (columnLayout *columnLayoutData) Set(tag string, value any) bool {
-	return columnLayout.set(columnLayout.normalizeTag(tag), value)
-}
-
-func (columnLayout *columnLayoutData) set(tag string, value any) bool {
-	if value == nil {
-		columnLayout.remove(tag)
-		return true
-	}
-
-	if !columnLayout.viewsContainerData.set(tag, value) {
-		return false
-	}
-
-	if columnLayout.created {
-		switch tag {
-		case ColumnSeparator:
-			css := ""
-			session := columnLayout.Session()
-			if val, ok := columnLayout.properties[ColumnSeparator]; ok {
-				separator := val.(ColumnSeparatorProperty)
-				css = separator.cssValue(columnLayout.Session())
-			}
-			session.updateCSSProperty(columnLayout.htmlID(), "column-rule", css)
-
-		case ColumnCount:
-			session := columnLayout.Session()
-			if count, ok := intProperty(columnLayout, tag, session, 0); ok && count > 0 {
-				session.updateCSSProperty(columnLayout.htmlID(), tag, strconv.Itoa(count))
-			} else {
-				session.updateCSSProperty(columnLayout.htmlID(), tag, "auto")
-			}
+	case ColumnCount:
+		session := columnLayout.Session()
+		if count := GetColumnCount(columnLayout); count > 0 {
+			session.updateCSSProperty(columnLayout.htmlID(), string(ColumnCount), strconv.Itoa(count))
+		} else {
+			session.updateCSSProperty(columnLayout.htmlID(), string(ColumnCount), "auto")
 		}
+
+	default:
+		columnLayout.viewsContainerData.propertyChanged(tag)
 	}
-	return true
 }
 
 // GetColumnCount returns int value which specifies number of columns into which the content of
@@ -236,11 +199,7 @@ func GetColumnGap(view View, subviewID ...string) SizeUnit {
 }
 
 func getColumnSeparator(view View, subviewID []string) ViewBorder {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		value := view.Get(ColumnSeparator)
 		if value == nil {
 			value = valueFromStyle(view, ColumnSeparator)

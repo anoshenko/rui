@@ -18,14 +18,14 @@ type ColumnSeparatorProperty interface {
 }
 
 type columnSeparatorProperty struct {
-	propertyList
+	dataProperty
 }
 
 func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 
 	if value == nil {
 		separator := new(columnSeparatorProperty)
-		separator.properties = map[string]any{}
+		separator.init()
 		return separator
 	}
 
@@ -35,17 +35,18 @@ func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 
 	case DataObject:
 		separator := new(columnSeparatorProperty)
-		separator.properties = map[string]any{}
-		for _, tag := range []string{Style, Width, ColorTag} {
-			if val, ok := value.PropertyValue(tag); ok && val != "" {
-				separator.set(tag, value)
+		separator.init()
+		for _, tag := range []PropertyName{Style, Width, ColorTag} {
+			if val, ok := value.PropertyValue(string(tag)); ok && val != "" {
+				propertiesSet(separator, tag, value)
 			}
 		}
 		return separator
 
 	case ViewBorder:
 		separator := new(columnSeparatorProperty)
-		separator.properties = map[string]any{
+		separator.init()
+		separator.properties = map[PropertyName]any{
 			Style:    value.Style,
 			Width:    value.Width,
 			ColorTag: value.Color,
@@ -57,19 +58,17 @@ func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 	return nil
 }
 
-// NewColumnSeparator creates the new ColumnSeparatorProperty.
+// NewColumnSeparatorProperty creates the new ColumnSeparatorProperty.
+//
 // The following properties can be used:
-//
-// "style" (Style). Determines the line style (int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
-//
-// "color" (ColorTag). Determines the line color (Color);
-//
-// "width" (Width). Determines the line thickness (SizeUnit).
-func NewColumnSeparator(params Params) ColumnSeparatorProperty {
+//   - "style" (Style) - Determines the line style (type is int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
+//   - "color" (ColorTag) - Determines the line color (type is [Color]);
+//   - "width" (Width) - Determines the line thickness (type is [SizeUnit]).
+func NewColumnSeparatorProperty(params Params) ColumnSeparatorProperty {
 	separator := new(columnSeparatorProperty)
-	separator.properties = map[string]any{}
+	separator.init()
 	if params != nil {
-		for _, tag := range []string{Style, Width, ColorTag} {
+		for _, tag := range []PropertyName{Style, Width, ColorTag} {
 			if value, ok := params[tag]; ok && value != nil {
 				separator.Set(tag, value)
 			}
@@ -78,8 +77,29 @@ func NewColumnSeparator(params Params) ColumnSeparatorProperty {
 	return separator
 }
 
-func (separator *columnSeparatorProperty) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+// NewColumnSeparator creates the new ColumnSeparatorProperty.
+//
+// Arguments:
+//   - style - determines the line style. Valid values: 0 [NoneLine], 1 [SolidLine], 2 [DashedLine], 3 [DottedLine], or 4 [DoubleLine];
+//   - color - determines the line color;
+//   - width - determines the line thickness.
+func NewColumnSeparator(style int, color Color, width SizeUnit) ColumnSeparatorProperty {
+	return NewColumnSeparatorProperty(Params{
+		Width:    width,
+		Style:    style,
+		ColorTag: color,
+	})
+}
+
+func (separator *columnSeparatorProperty) init() {
+	separator.dataProperty.init()
+	separator.normalize = normalizeVolumnSeparatorTag
+	separator.set = columnSeparatorSet
+	separator.supportedProperties = []PropertyName{Style, Width, ColorTag}
+}
+
+func normalizeVolumnSeparatorTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case ColumnSeparatorStyle, "separator-style":
 		return Style
@@ -97,12 +117,12 @@ func (separator *columnSeparatorProperty) normalizeTag(tag string) string {
 func (separator *columnSeparatorProperty) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("_{ ")
 	comma := false
-	for _, tag := range []string{Style, Width, ColorTag} {
+	for _, tag := range []PropertyName{Style, Width, ColorTag} {
 		if value, ok := separator.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, BorderStyle, value, indent)
 			comma = true
@@ -116,47 +136,12 @@ func (separator *columnSeparatorProperty) String() string {
 	return runStringWriter(separator)
 }
 
-func (separator *columnSeparatorProperty) Remove(tag string) {
-
-	switch tag = separator.normalizeTag(tag); tag {
-	case Style, Width, ColorTag:
-		delete(separator.properties, tag)
-
-	default:
-		ErrorLogF(`"%s" property is not compatible with the ColumnSeparatorProperty`, tag)
+func getColumnSeparatorProperty(properties Properties) ColumnSeparatorProperty {
+	if val := properties.getRaw(ColumnSeparator); val != nil {
+		if separator, ok := val.(ColumnSeparatorProperty); ok {
+			return separator
+		}
 	}
-}
-
-func (separator *columnSeparatorProperty) Set(tag string, value any) bool {
-	tag = separator.normalizeTag(tag)
-
-	if value == nil {
-		separator.remove(tag)
-		return true
-	}
-
-	switch tag {
-	case Style:
-		return separator.setEnumProperty(Style, value, enumProperties[BorderStyle].values)
-
-	case Width:
-		return separator.setSizeProperty(Width, value)
-
-	case ColorTag:
-		return separator.setColorProperty(ColorTag, value)
-	}
-
-	ErrorLogF(`"%s" property is not compatible with the ColumnSeparatorProperty`, tag)
-	return false
-}
-
-func (separator *columnSeparatorProperty) Get(tag string) any {
-	tag = separator.normalizeTag(tag)
-
-	if result, ok := separator.properties[tag]; ok {
-		return result
-	}
-
 	return nil
 }
 
@@ -198,4 +183,11 @@ func (separator *columnSeparatorProperty) cssValue(session Session) string {
 	}
 
 	return buffer.String()
+}
+
+func columnSeparatorSet(properties Properties, tag PropertyName, value any) []PropertyName {
+	if tag == Style {
+		return setEnumProperty(properties, Style, value, enumProperties[BorderStyle].values)
+	}
+	return propertiesSet(properties, tag, value)
 }

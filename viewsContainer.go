@@ -24,6 +24,8 @@ type ViewsContainer interface {
 
 	// ViewIndex returns the index of view, -1 overwise
 	ViewIndex(view View) int
+
+	setContent(value any) bool
 }
 
 type viewsContainerData struct {
@@ -36,10 +38,10 @@ func (container *viewsContainerData) init(session Session) {
 	container.viewData.init(session)
 	container.tag = "ViewsContainer"
 	container.views = []View{}
-}
-
-func (container *viewsContainerData) String() string {
-	return getViewString(container, nil)
+	container.get = container.getFunc
+	container.set = container.setFunc
+	container.remove = container.removeFunc
+	container.changed = container.propertyChanged
 }
 
 func (container *viewsContainerData) setParentID(parentID string) {
@@ -72,27 +74,42 @@ func (container *viewsContainerData) Append(view View) {
 		} else {
 			container.views = append(container.views, view)
 		}
-		updateInnerHTML(container.htmlID(), container.session)
-		container.propertyChangedEvent(Content)
+
+		if container.created {
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
+
+			viewHTML(view, buffer, "")
+			container.Session().appendToInnerHTML(htmlID, buffer.String())
+
+			if listener, ok := container.changeListener[Content]; ok {
+				listener(container, Content)
+			}
+		}
 	}
 }
 
 // Insert inserts a view to the "index" position in the list of a view children
 func (container *viewsContainerData) Insert(view View, index int) {
 	if view != nil {
-		htmlID := container.htmlID()
 		if container.views == nil || index < 0 || index >= len(container.views) {
 			container.Append(view)
-		} else if index > 0 {
-			view.setParentID(htmlID)
+			return
+		}
+
+		htmlID := container.htmlID()
+		view.setParentID(htmlID)
+		if index > 0 {
 			container.views = append(container.views[:index], append([]View{view}, container.views[index:]...)...)
-			updateInnerHTML(container.htmlID(), container.session)
-			container.propertyChangedEvent(Content)
 		} else {
-			view.setParentID(htmlID)
 			container.views = append([]View{view}, container.views...)
-			updateInnerHTML(container.htmlID(), container.session)
-			container.propertyChangedEvent(Content)
+		}
+
+		if container.created {
+			updateInnerHTML(htmlID, container.Session())
+			if listener, ok := container.changeListener[Content]; ok {
+				listener(container, Content)
+			}
 		}
 	}
 }
@@ -119,8 +136,13 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	}
 
 	view.setParentID("")
-	updateInnerHTML(container.htmlID(), container.session)
-	container.propertyChangedEvent(Content)
+
+	if container.created {
+		container.Session().callFunc("removeView", view.htmlID())
+		if listener, ok := container.changeListener[Content]; ok {
+			listener(container, Content)
+		}
+	}
 	return view
 }
 
@@ -141,7 +163,7 @@ func (container *viewsContainerData) cssStyle(self View, builder cssBuilder) {
 func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Builder) {
 	if container.views != nil {
 		for _, view := range container.views {
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		}
 	}
 }
@@ -158,67 +180,60 @@ func viewFromTextValue(text string, session Session) View {
 	return NewTextView(session, Params{Text: text})
 }
 
-func (container *viewsContainerData) Remove(tag string) {
-	container.remove(strings.ToLower(tag))
-}
-
-func (container *viewsContainerData) remove(tag string) {
+func (container *viewsContainerData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case Content:
-		if container.views == nil || len(container.views) > 0 {
+		if len(container.views) > 0 {
 			container.views = []View{}
-			updateInnerHTML(container.htmlID(), container.Session())
+			return []PropertyName{tag}
 		}
-		container.propertyChangedEvent(Content)
+		return []PropertyName{}
 
 	case Disabled:
-		if _, ok := container.properties[Disabled]; ok {
-			delete(container.properties, Disabled)
-			if container.views != nil {
-				for _, view := range container.views {
-					view.Remove(Disabled)
-				}
+		if container.getRaw(Disabled) != nil {
+			container.setRaw(Disabled, nil)
+			for _, view := range container.views {
+				view.Remove(Disabled)
 			}
-			container.propertyChangedEvent(tag)
+			return []PropertyName{tag}
 		}
-
-	default:
-		container.viewData.remove(tag)
 	}
+	return container.viewData.removeFunc(tag)
 }
 
-func (container *viewsContainerData) Set(tag string, value any) bool {
-	return container.set(strings.ToLower(tag), value)
-}
-
-func (container *viewsContainerData) set(tag string, value any) bool {
-	if value == nil {
-		container.remove(tag)
-		return true
-	}
-
+func (container *viewsContainerData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Content:
-		return container.setContent(value)
+		if container.setContent(value) {
+			return []PropertyName{tag}
+		}
+		return nil
 
 	case Disabled:
 		oldDisabled := IsDisabled(container)
-		if container.viewData.Set(Disabled, value) {
+		result := container.viewData.setFunc(Disabled, value)
+		if result != nil {
 			disabled := IsDisabled(container)
 			if oldDisabled != disabled {
-				if container.views != nil {
-					for _, view := range container.views {
-						view.Set(Disabled, disabled)
-					}
+				for _, view := range container.views {
+					view.Set(Disabled, disabled)
 				}
 			}
-			container.propertyChangedEvent(tag)
-			return true
 		}
-		return false
+		return result
 	}
 
-	return container.viewData.set(tag, value)
+	return container.viewData.setFunc(tag, value)
+}
+
+func (container *viewsContainerData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Content:
+		updateInnerHTML(container.htmlID(), container.Session())
+
+	default:
+		container.viewData.propertyChanged(tag)
+	}
 }
 
 func (container *viewsContainerData) setContent(value any) bool {
@@ -291,25 +306,16 @@ func (container *viewsContainerData) setContent(value any) bool {
 		}
 	}
 
-	if container.created {
-		updateInnerHTML(htmlID, container.session)
-	}
-
-	container.propertyChangedEvent(Content)
 	return true
 }
 
-func (container *viewsContainerData) Get(tag string) any {
-	return container.get(strings.ToLower(tag))
-}
-
-func (container *viewsContainerData) get(tag string) any {
+func (container *viewsContainerData) getFunc(tag PropertyName) any {
 	switch tag {
 	case Content:
 		return container.views
 
 	default:
-		return container.viewData.get(tag)
+		return container.viewData.getFunc(tag)
 	}
 }
 

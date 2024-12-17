@@ -79,7 +79,7 @@ ul:focus {
 }
 
 .ruiPopupLayer {
-  background-color: rgba(128,128,128,0.1);
+  /*background-color: rgba(128,128,128,0.1);*/
   position: absolute;
   top: 0px;
   bottom: 0px;
@@ -179,6 +179,14 @@ ul:focus {
 
 .ruiListView {
   overflow: auto;
+}
+
+.hiddenMarker {
+  list-style: none;
+}
+
+.hiddenMarker::-webkit-details-marker {
+  display: none;
 }
 
 /*

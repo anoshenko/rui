@@ -429,7 +429,7 @@ View has a number of properties like height, width, color, text parameters, etc.
 The Properties interface is used to read and write the property value (View implements this interface):
 
 	type Properties interface {
-		Get(tag string) any
+		Get(tag PropertyName) any
 		Set(tag string, value any) bool
 		Remove(tag string)
 		Clear()
@@ -1024,7 +1024,7 @@ equivalent to
 ### "shadow" property
 
 The "shadow" property allows you to set shadows for the View. There may be several shadows. 
-The shadow is described using the ViewShadow interface extending the Properties interface (see above). 
+The shadow is described using the ShadowProperty interface extending the Properties interface (see above). 
 The shadow has the following properties:
 
 | Property        | Constant      | Type     | Description                                                           |
@@ -1036,14 +1036,14 @@ The shadow has the following properties:
 | "blur"          | BlurRadius    | float    | Shadow blur radius. The value must be >= 0                            |
 | "spread-radius" | SpreadRadius  | float    | Increase the shadow. Value > 0 increases shadow, < 0 decreases shadow |
 
-Three functions are used to create a ViewShadow:
+Three functions are used to create a ShadowProperty:
 
-	func NewViewShadow(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ViewShadow
-	func NewInsetViewShadow(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ViewShadow
-	func NewShadowWithParams(params Params) ViewShadow
+	func NewShadowProperty(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ShadowProperty
+	func NewInsetShadowProperty(offsetX, offsetY, blurRadius, spread-radius SizeUnit, color Color) ShadowProperty
+	func NewShadowWithParams(params Params) ShadowProperty
 
-The NewViewShadow function creates an outer shadow (Inset == false), 
-NewInsetViewShadow - an inner one (Inset == true).
+The NewShadowProperty function creates an outer shadow (Inset == false), 
+NewInsetShadowProperty - an inner one (Inset == true).
 The NewShadowWithParams function is used when constants must be used as parameters. 
 For example:
 
@@ -1053,16 +1053,16 @@ For example:
 		rui.Dilation  : 16.0,
 	})
 
-ViewShadow, ViewShadow array, and ViewShadow textual representation can be assigned as a value to the "shadow" property.
+ShadowProperty, ShadowProperty array, and ShadowProperty textual representation can be assigned as a value to the "shadow" property.
 
-The ViewShadow text representation has the following format:
+The ShadowProperty text representation has the following format:
 
 	_{ color = <color> [, x-offset = <offset>] [, y-offset = <offset>] [, blur = <radius>]
 		[, spread-radius = <increase>] [, inset = <type>] }
 
 You can get the value of "shadow" property using the function
 
-	func GetViewShadows(view View, subviewID ...string) []ViewShadow
+	func GetShadowPropertys(view View, subviewID ...string) []ShadowProperty
 
 If no shadow is specified, then this function will return an empty array
 
@@ -1301,14 +1301,14 @@ You can get the value of this property using the function
 
 ### "clip" property
 
-The "clip" property (Clip constant) of the ClipShape type specifies the crop area.
+The "clip" property (Clip constant) of the ClipShapeProperty type specifies the crop area.
 There are 4 types of crop areas
 
 #### inset
 
 Rectangular cropping area. Created with the function:
 
-	func InsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShape
+	func NewInsetClip(top, right, bottom, left SizeUnit, radius RadiusProperty) ClipShapeProperty
 
 where top, right, bottom, left are the distance from respectively the top, right, bottom and left borders of the View 
 to the cropping border of the same name; radius - sets the radii of the corners of the cropping area 
@@ -1324,7 +1324,7 @@ The textual description of the rectangular cropping area is in the following for
 
 Round cropping area. Created with the function:
 
-	func CircleClip(x, y, radius SizeUnit) ClipShape
+	func NewCircleClip(x, y, radius SizeUnit) ClipShapeProperty
 
 where x, y - coordinates of the center of the circle; radius - radius
 
@@ -1336,7 +1336,7 @@ The textual description of the circular cropping area is in the following format
 
 Elliptical cropping area. Created with the function:
 
-	func EllipseClip(x, y, rx, ry SizeUnit) ClipShape
+	func NewEllipseClip(x, y, rx, ry SizeUnit) ClipShapeProperty
 
 where x, y - coordinates of the center of the ellipse; rх - radius of the ellipse along the X axis; ry is the radius of the ellipse along the Y axis.
 
@@ -1348,8 +1348,8 @@ The textual description of the elliptical clipping region is in the following fo
 
 Polygonal cropping area. Created using functions:
 
-	func PolygonClip(points []any) ClipShape
-	func PolygonPointsClip(points []SizeUnit) ClipShape
+	func NewPolygonClip(points []any) ClipShapeProperty
+	func NewPolygonPointsClip(points []SizeUnit) ClipShapeProperty
 
 an array of corner points of the polygon is passed as an argument in the following order: x1, y1, x2, y2, …
 The elements of the argument to the PolygonClip function can be either text constants, 
@@ -1413,10 +1413,10 @@ You can get the value of this property using the function
 The "filter" property (Filter constant) applies graphical effects to the View, such as blurring, color shifting, changing brightness/contrast, etc.
 The "backdrop-filter" property (BackdropFilter constant) applies the same effects but to the area behind a View.
 
-Only the ViewFilter interface is used as the value of the "filter" properties. 
-ViewFilter is created using the function
+Only the FilterProperty interface is used as the value of the "filter" properties. 
+FilterProperty is created using the function
 
-	func NewViewFilter(params Params) ViewFilter
+	func NewFilterProperty(params Params) FilterProperty
 
 The argument lists the effects to apply. The following effects are possible:
 
@@ -1425,7 +1425,7 @@ The argument lists the effects to apply. The following effects are possible:
 | "blur"        | Blur       | float64  0…10000px | Gaussian blur           |
 | "brightness"  | Brightness | float64  0…10000%  | Brightness change       |
 | "contrast"    | Contrast   | float64  0…10000%  | Contrast change         |
-| "drop-shadow" | DropShadow | []ViewShadow       | Adding shadow           |
+| "drop-shadow" | DropShadow | []ShadowProperty       | Adding shadow           |
 | "grayscale"   | Grayscale  | float64  0…100%    | Converting to grayscale |
 | "hue-rotate"  | HueRotate  | AngleUnit          | Hue rotation            |
 | "invert"      | Invert     | float64  0…100%    | Invert colors           |
@@ -1442,8 +1442,8 @@ Example
 
 You can get the value of the current filter using functions
 
-	func GetFilter(view View, subviewID ...string) ViewFilter
-	func GetBackdropFilter(view View, subviewID ...string) ViewFilter
+	func GetFilter(view View, subviewID ...string) FilterProperty
+	func GetBackdropFilter(view View, subviewID ...string) FilterProperty
 
 ### "semantics" property
 
@@ -1686,14 +1686,14 @@ You can get the value of this property using the function
 #### "text-shadow" property
 
 The "text-shadow" property allows you to set shadows for the text. There may be several shadows. 
-The shadow is described using the ViewShadow interface (see above, section "The 'shadow' property"). 
+The shadow is described using the ShadowProperty interface (see above, section "The 'shadow' property"). 
 For text shadow, only the "color", "x-offset", "y-offset" and "blur" properties are used. 
 The "inset" and "spread-radius" properties are ignored (i.e. setting them is not an error, they just have no effect on the text shadow).
 
-To create a ViewShadow for the text shadow, the following functions are used:
+To create a ShadowProperty for the text shadow, the following functions are used:
 
-	func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ViewShadow
-	func NewShadowWithParams(params Params) ViewShadow
+	func NewTextShadow(offsetX, offsetY, blurRadius SizeUnit, color Color) ShadowProperty
+	func NewShadowWithParams(params Params) ShadowProperty
 
 The NewShadowWithParams function is used when constants must be used as parameters. For example:
 
@@ -1702,11 +1702,11 @@ The NewShadowWithParams function is used when constants must be used as paramete
 		rui.BlurRadius: 8.0,
 	})
 
-ViewShadow, ViewShadow array, ViewShadow textual representation can be assigned as a value to the "text-shadow" property (see above, section "The 'shadow' property").
+ShadowProperty, ShadowProperty array, ShadowProperty textual representation can be assigned as a value to the "text-shadow" property (see above, section "The 'shadow' property").
 
 You can get the value of this property using the function
 
-	func GetTextShadows(view View, subviewID ...string) []ViewShadow
+	func GetTextShadows(view View, subviewID ...string) []ShadowProperty
 
 If no shadow is specified, then this function will return an empty array
 
@@ -2963,13 +2963,14 @@ DetailsView switches between states by clicking on "summary" view.
 For forced switching of the DetailsView states, the bool property "expanded" (Expanded constant) is used. 
 Accordingly, the value "true" shows child Views, "false" - hides.
 
-You can get the value of the "expanded" property using the function
+By default, a ▶︎/▼ marker is displayed at the beginning of the "summary" element. It can be hidden.
+For this, the "hide-summary-marker" bool property (DetailsView constant) is used.
 
-	func IsDetailsExpanded(view View, subviewID ...string) bool
-
-and the value of the "summary" property can be obtained using the function
+The value of the "summary", "expanded" and "hide-summary-marker" properties can be obtained using the functions
 
 	func GetDetailsSummary(view View, subviewID ...string) View
+	func IsDetailsExpanded(view View, subviewID ...string) bool
+	func IsSummaryMarkerHidden(view View, subviewID ...string) bool
 
 ## Resizable
 
@@ -5009,14 +5010,14 @@ The library supports two types of animation:
 * Animated property value changes (hereinafter "transition animation")
 * Script animated change of one or more properties (hereinafter simply "animation script")
 
-### Animation interface
+### AnimationProperty interface
 
-The Animation interface is used to set animation parameters. It extends the Properties interface.
+The AnimationProperty interface is used to set animation parameters. It extends the Properties interface.
 The interface is created using the function:
 
-	func NewAnimation(params Params) Animation
+	func NewAnimationProperty(params Params) AnimationProperty
 
-Some of the properties of the Animation interface are used in both types of animation, the rest are used only 
+Some of the properties of the AnimationProperty interface are used in both types of animation, the rest are used only 
 in animation scripts.
 
 Common properties are
@@ -5053,13 +5054,13 @@ You can specify this function either as text or using the function:
 
 For example
 
-	animation := rui.NewAnimation(rui.Params{
+	animation := rui.NewAnimationProperty(rui.Params{
 		rui.TimingFunction: rui.StepsTiming(10),
 	})
 
 equivalent to 
 
-	animation := rui.NewAnimation(rui.Params{
+	animation := rui.NewAnimationProperty(rui.Params{
 		rui.TimingFunction: "steps(10)",
 	})
 	
@@ -5082,32 +5083,32 @@ There are two types of transition animations:
 A one-time animation is triggered using the SetAnimated function of the View interface. 
 This function has the following description:
 
-	SetAnimated(tag string, value any, animation Animation) bool
+	SetAnimated(tag string, value any, animation AnimationProperty) bool
 
 It assigns a new value to the property, and the change occurs using the specified animation.
 For example,
 
-	view.SetAnimated(rui.Width, rui.Px(400), rui.NewAnimation(rui.Params{
+	view.SetAnimated(rui.Width, rui.Px(400), rui.NewAnimationProperty(rui.Params{
 		rui.Duration:       0.75,
 		rui.TimingFunction: rui.EaseOutTiming,
 	}))
 
 There is also a global function for animated one-time change of the property value of the child View
 
-	func SetAnimated(rootView View, viewID, tag string, value any, animation Animation) bool
+	func SetAnimated(rootView View, viewID, tag string, value any, animation AnimationProperty) bool
 
 A persistent animation runs every time the property value changes. 
 To set the constant animation of the transition, use the "transition" property (the Transition constant). 
 As a value, this property is assigned rui.Params, where the property name should be the key, 
-and the value should be the Animation interface.
+and the value should be the AnimationProperty interface.
 For example,
 
 	view.Set(rui.Transition, rui.Params{
-		rui.Height: rui.NewAnimation(rui.Params{
+		rui.Height: rui.NewAnimationProperty(rui.Params{
 			rui.Duration:       0.75,
 			rui.TimingFunction: rui.EaseOutTiming,
 		},
-		rui.BackgroundColor: rui.NewAnimation(rui.Params{
+		rui.BackgroundColor: rui.NewAnimationProperty(rui.Params{
 			rui.Duration:       1.5,
 			rui.Delay:          0.5,
 			rui.TimingFunction: rui.Linear,
@@ -5122,7 +5123,7 @@ To get the current list of permanent transition animations, use the function
 
 It is recommended to add new transition animations using the function 
 
-	func AddTransition(view View, subviewID, tag string, animation Animation) bool
+	func AddTransition(view View, subviewID, tag string, animation AnimationProperty) bool
 
 Calling this function is equivalent to the following code
 
@@ -5162,7 +5163,7 @@ Get lists of listeners for transition animation events using functions:
 
 ### Animation script
 
-An animation script describes a more complex animation than a transition animation. To do this, additional properties are added to Animation:
+An animation script describes a more complex animation than a transition animation. To do this, additional properties are added to AnimationProperty:
 
 #### "property" property
 
@@ -5228,12 +5229,12 @@ backward playback of the sequence. It can take the following values:
 
 #### Animation start
 
-To start the animation script, you must assign the interface created by Animation to the "animation" property 
-(the AnimationTag constant). If the View is already displayed on the screen, then the animation starts immediately
+To start the animation script, you must assign the interface created by AnimationProperty to the "animation" property 
+(the Animation constant). If the View is already displayed on the screen, then the animation starts immediately
 (taking into account the specified delay), otherwise the animation starts as soon as the View is displayed 
 on the screen.
 
-The "animation" property can be assigned Animation and [] Animation, ie. you can run several animations 
+The "animation" property can be assigned AnimationProperty and [] AnimationProperty, ie. you can run several animations 
 at the same time for one View
 
 Example,
@@ -5246,12 +5247,12 @@ Example,
 			90: rui.Px(220),
 		}
 	}
-	animation := rui.NewAnimation(rui.Params{
+	animation := rui.NewAnimationProperty(rui.Params{
 		rui.PropertyTag:    []rui.AnimatedProperty{prop},
 		rui.Duration:       2,
 		rui.TimingFunction: LinearTiming,
 	})
-	rui.Set(view, "subview", rui.AnimationTag, animation)
+	rui.Set(view, "subview", rui.Animation, animation)
 
 #### "animation-paused" property
 

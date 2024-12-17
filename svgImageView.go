@@ -25,7 +25,7 @@ func NewSvgImageView(session Session, params Params) SvgImageView {
 }
 
 func newSvgImageView(session Session) View {
-	return NewSvgImageView(session, nil)
+	return new(svgImageViewData) // NewSvgImageView(session, nil)
 }
 
 // Init initialize fields of imageView by default values
@@ -33,14 +33,14 @@ func (imageView *svgImageViewData) init(session Session) {
 	imageView.viewData.init(session)
 	imageView.tag = "SvgImageView"
 	imageView.systemClass = "ruiSvgImageView"
+	imageView.normalize = normalizeSvgImageViewTag
+	imageView.set = imageView.setFunc
+	imageView.changed = imageView.propertyChanged
+
 }
 
-func (imageView *svgImageViewData) String() string {
-	return getViewString(imageView, nil)
-}
-
-func (imageView *svgImageViewData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeSvgImageViewTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
 	case Source, "source":
 		tag = Content
@@ -54,51 +54,29 @@ func (imageView *svgImageViewData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (imageView *svgImageViewData) Remove(tag string) {
-	imageView.remove(imageView.normalizeTag(tag))
-}
-
-func (imageView *svgImageViewData) remove(tag string) {
-	imageView.viewData.remove(tag)
-
-	if imageView.created {
-		switch tag {
-		case Content:
-			updateInnerHTML(imageView.htmlID(), imageView.session)
-		}
-	}
-}
-
-func (imageView *svgImageViewData) Set(tag string, value any) bool {
-	return imageView.set(imageView.normalizeTag(tag), value)
-}
-
-func (imageView *svgImageViewData) set(tag string, value any) bool {
-	if value == nil {
-		imageView.remove(tag)
-		return true
-	}
-
+func (imageView *svgImageViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Content:
 		if text, ok := value.(string); ok {
-			imageView.properties[Content] = text
-			if imageView.created {
-				updateInnerHTML(imageView.htmlID(), imageView.session)
-			}
-			imageView.propertyChangedEvent(Content)
-			return true
+			imageView.setRaw(Content, text)
+			return []PropertyName{tag}
 		}
 		notCompatibleType(Source, value)
-		return false
+		return nil
 
 	default:
-		return imageView.viewData.set(tag, value)
+		return imageView.viewData.setFunc(tag, value)
 	}
 }
 
-func (imageView *svgImageViewData) Get(tag string) any {
-	return imageView.viewData.get(imageView.normalizeTag(tag))
+func (imageView *svgImageViewData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Content:
+		updateInnerHTML(imageView.htmlID(), imageView.Session())
+
+	default:
+		imageView.viewData.propertyChanged(tag)
+	}
 }
 
 func (imageView *svgImageViewData) htmlTag() string {

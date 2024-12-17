@@ -699,13 +699,13 @@ func (theme *theme) addText(themeText string) bool {
 			if node := obj.Property(i); node != nil {
 				switch node.Type() {
 				case ArrayNode:
-					params[node.Tag()] = node.ArrayElements()
+					params[PropertyName(node.Tag())] = node.ArrayElements()
 
 				case ObjectNode:
-					params[node.Tag()] = node.Object()
+					params[PropertyName(node.Tag())] = node.Object()
 
 				default:
-					params[node.Tag()] = node.Text()
+					params[PropertyName(node.Tag())] = node.Text()
 				}
 			}
 		}

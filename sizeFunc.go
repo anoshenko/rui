@@ -7,7 +7,9 @@ import (
 )
 
 // SizeFunc describes a function that calculates the SizeUnit size.
+//
 // Used as the value of the SizeUnit properties.
+//
 // "min", "max", "clamp", "sum", "sub", "mul", "div", mod,
 // "round", "round-up", "round-down" and "round-to-zero" functions are available.
 type SizeFunc interface {

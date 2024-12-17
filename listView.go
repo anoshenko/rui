@@ -10,78 +10,87 @@ import (
 const (
 	// ListItemClickedEvent is the constant for "list-item-clicked" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Occur when the user clicks on an item in the list.
 	//
 	// General listener format:
-	// `func(list rui.ListView, item int)`.
+	//
+	//  func(list rui.ListView, item int)
 	//
 	// where:
-	// list - Interface of a list which generated this event,
-	// item - An index of an item clicked.
+	//   - list - Interface of a list which generated this event,
+	//   - item - An index of an item clicked.
 	//
 	// Allowed listener formats:
-	// `func(item int)`,
-	// `func(list rui.ListView)`,
-	// `func()`.
-	ListItemClickedEvent = "list-item-clicked"
+	//
+	//  func(item int)
+	//  func(list rui.ListView)
+	//  func()
+	ListItemClickedEvent PropertyName = "list-item-clicked"
 
 	// ListItemSelectedEvent is the constant for "list-item-selected" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Occur when a list item becomes selected.
 	//
 	// General listener format:
-	// `func(list rui.ListView, item int)`.
+	//
+	//  func(list rui.ListView, item int)
 	//
 	// where:
-	// list - Interface of a list which generated this event,
-	// item - An index of an item selected.
+	//   - list - Interface of a list which generated this event,
+	//   - item - An index of an item selected.
 	//
 	// Allowed listener formats:
-	ListItemSelectedEvent = "list-item-selected"
+	//
+	//  func(item int)
+	//  func(list rui.ListView)
+	//  func()
+	ListItemSelectedEvent PropertyName = "list-item-selected"
 
 	// ListItemCheckedEvent is the constant for "list-item-checked" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Occur when a list item checkbox becomes checked or unchecked.
 	//
 	// General listener format:
-	// `func(list rui.ListView, checkedItems []int)`.
+	//
+	//  func(list rui.ListView, checkedItems []int).
 	//
 	// where:
-	// list - Interface of a list which generated this event,
-	// checkedItems - Array of indices of marked elements.
+	//   - list - Interface of a list which generated this event,
+	//   - checkedItems - Array of indices of marked elements.
 	//
 	// Allowed listener formats:
-	// `func(checkedItems []int)`,
-	// `func(list rui.ListView)`,
-	// `func()`.
-	ListItemCheckedEvent = "list-item-checked"
+	//
+	//  func(checkedItems []int)
+	//  func(list rui.ListView)
+	//  func()
+	ListItemCheckedEvent PropertyName = "list-item-checked"
 
 	// ListItemStyle is the constant for "list-item-style" property tag.
 	//
-	// Used by `ListView`.
+	// Used by ListView.
 	// Defines the style of an unselected item.
 	//
-	// Supported types: `string`.
-	ListItemStyle = "list-item-style"
+	// Supported types: string.
+	ListItemStyle PropertyName = "list-item-style"
 
 	// CurrentStyle is the constant for "current-style" property tag.
 	//
-	// Used by `ListView`.
-	// Defines the style of the selected item when the `ListView` is focused.
+	// Used by ListView.
+	// Defines the style of the selected item when the ListView is focused.
 	//
-	// Supported types: `string`.
-	CurrentStyle = "current-style"
+	// Supported types: string.
+	CurrentStyle PropertyName = "current-style"
 
 	// CurrentInactiveStyle is the constant for "current-inactive-style" property tag.
 	//
-	// Used by `ListView`.
-	// Defines the style of the selected item when the `ListView` is unfocused.
+	// Used by ListView.
+	// Defines the style of the selected item when the ListView is unfocused.
 	//
-	// Supported types: `string`.
-	CurrentInactiveStyle = "current-inactive-style"
+	// Supported types: string.
+	CurrentInactiveStyle PropertyName = "current-inactive-style"
 )
 
 // Constants which represent values of the "orientation" property of the [ListView]. These are aliases for values used in
@@ -113,19 +122,19 @@ type ListView interface {
 	// ReloadListViewData updates ListView content
 	ReloadListViewData()
 
-	getCheckedItems() []int
+	//getCheckedItems() []int
 	getItemFrames() []Frame
 }
 
 type listViewData struct {
 	viewData
-	adapter           ListAdapter
-	clickedListeners  []func(ListView, int)
-	selectedListeners []func(ListView, int)
-	checkedListeners  []func(ListView, []int)
-	items             []View
-	itemFrame         []Frame
-	checkedItem       []int
+	//adapter ListAdapter
+	//clickedListeners  []func(ListView, int)
+	//selectedListeners []func(ListView, int)
+	//checkedListeners  []func(ListView, []int)
+	items     []View
+	itemFrame []Frame
+	//checkedItem       []int
 }
 
 // NewListView creates the new list view
@@ -137,7 +146,7 @@ func NewListView(session Session, params Params) ListView {
 }
 
 func newListView(session Session) View {
-	return NewListView(session, nil)
+	return new(listViewData) // NewListView(session, nil)
 }
 
 // Init initialize fields of ViewsContainer by default values
@@ -147,23 +156,23 @@ func (listView *listViewData) init(session Session) {
 	listView.systemClass = "ruiListView"
 	listView.items = []View{}
 	listView.itemFrame = []Frame{}
-	listView.checkedItem = []int{}
-	listView.clickedListeners = []func(ListView, int){}
-	listView.selectedListeners = []func(ListView, int){}
-	listView.checkedListeners = []func(ListView, []int){}
-}
-
-func (listView *listViewData) String() string {
-	return getViewString(listView, nil)
+	listView.normalize = normalizeListViewTag
+	listView.get = listView.getFunc
+	listView.set = listView.setFunc
+	listView.remove = listView.removeFunc
+	listView.changed = listView.propertyChanged
 }
 
 func (listView *listViewData) Views() []View {
 	return listView.items
 }
 
-func (listView *listViewData) normalizeTag(tag string) string {
-	tag = strings.ToLower(tag)
+func normalizeListViewTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
 	switch tag {
+	case Content:
+		tag = Items
+
 	case HorizontalAlign:
 		tag = ItemHorizontalAlign
 
@@ -182,289 +191,143 @@ func (listView *listViewData) normalizeTag(tag string) string {
 	return tag
 }
 
-func (listView *listViewData) Remove(tag string) {
-	listView.remove(listView.normalizeTag(tag))
-}
-
-func (listView *listViewData) remove(tag string) {
+func (listView *listViewData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case Gap:
-		listView.remove(ListRowGap)
-		listView.remove(ListColumnGap)
-		return
-
-	case Checked:
-		if len(listView.checkedItem) == 0 {
-			return
-		}
-		listView.checkedItem = []int{}
-		if listView.created {
-			updateInnerHTML(listView.htmlID(), listView.session)
-		}
-
-	case Items:
-		if listView.adapter == nil {
-			return
-		}
-		listView.adapter = nil
-		if listView.created {
-			updateInnerHTML(listView.htmlID(), listView.session)
-		}
-
-	case Orientation, ListWrap:
-		if _, ok := listView.properties[tag]; !ok {
-			return
-		}
-		delete(listView.properties, tag)
-		if listView.created {
-			updateCSSStyle(listView.htmlID(), listView.session)
-		}
-
-	case Current:
-		current := GetCurrent(listView)
-		if current == -1 {
-			return
-		}
-		delete(listView.properties, tag)
-		if listView.created {
-			htmlID := listView.htmlID()
-			session := listView.session
-			session.removeProperty(htmlID, "data-current")
-			updateInnerHTML(htmlID, session)
-		}
-		if current != -1 {
-			for _, listener := range listView.selectedListeners {
-				listener(listView, -1)
+		result := listView.removeFunc(ListRowGap)
+		if result != nil {
+			if result2 := listView.removeFunc(ListColumnGap); result2 != nil {
+				result = append(result, result2...)
 			}
 		}
-
-	case ItemWidth, ItemHeight, ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox,
-		CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		if _, ok := listView.properties[tag]; !ok {
-			return
-		}
-		delete(listView.properties, tag)
-		if listView.created {
-			updateInnerHTML(listView.htmlID(), listView.session)
-		}
-
-	case ListItemStyle, CurrentStyle, CurrentInactiveStyle:
-		if !listView.setItemStyle(tag, "") {
-			return
-		}
-
-	case ListItemClickedEvent:
-		if len(listView.clickedListeners) == 0 {
-			return
-		}
-		listView.clickedListeners = []func(ListView, int){}
-
-	case ListItemSelectedEvent:
-		if len(listView.selectedListeners) == 0 {
-			return
-		}
-		listView.selectedListeners = []func(ListView, int){}
-
-	case ListItemCheckedEvent:
-		if len(listView.checkedListeners) == 0 {
-			return
-		}
-		listView.checkedListeners = []func(ListView, []int){}
-
-	default:
-		listView.viewData.remove(tag)
-		return
+		return result
 	}
-
-	listView.propertyChangedEvent(tag)
+	return listView.viewData.removeFunc(tag)
 }
 
-func (listView *listViewData) Set(tag string, value any) bool {
-	return listView.set(listView.normalizeTag(tag), value)
-}
-
-func (listView *listViewData) set(tag string, value any) bool {
-	if value == nil {
-		listView.remove(tag)
-		return true
-	}
-
+func (listView *listViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Gap:
-		return listView.set(ListRowGap, value) && listView.set(ListColumnGap, value)
-
-	case ListItemClickedEvent:
-		listeners, ok := valueToEventListeners[ListView, int](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(ListView, int){}
-		}
-		listView.clickedListeners = listeners
-		listView.propertyChangedEvent(tag)
-		return true
-
-	case ListItemSelectedEvent:
-		listeners, ok := valueToEventListeners[ListView, int](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(ListView, int){}
-		}
-		listView.selectedListeners = listeners
-		listView.propertyChangedEvent(tag)
-		return true
-
-	case ListItemCheckedEvent:
-		listeners, ok := valueToEventListeners[ListView, []int](value)
-		if !ok {
-			notCompatibleType(tag, value)
-			return false
-		} else if listeners == nil {
-			listeners = []func(ListView, []int){}
-		}
-		listView.checkedListeners = listeners
-		listView.propertyChangedEvent(tag)
-		return true
-
-	case Checked:
-		if !listView.setChecked(value) {
-			return false
-		}
-
-	case Items:
-		if !listView.setItems(value) {
-			return false
-		}
-
-	case Current:
-		oldCurrent := GetCurrent(listView)
-		if !listView.setIntProperty(Current, value) {
-			return false
-		}
-
-		current := GetCurrent(listView)
-		if oldCurrent == current {
-			return true
-		}
-
-		if listView.created {
-			htmlID := listView.htmlID()
-			if current >= 0 {
-				listView.session.updateProperty(htmlID, "data-current", fmt.Sprintf("%s-%d", htmlID, current))
-			} else {
-				listView.session.removeProperty(htmlID, "data-current")
+		result := listView.setFunc(ListRowGap, value)
+		if result != nil {
+			if result2 := listView.setFunc(ListColumnGap, value); result2 != nil {
+				result = append(result, result2...)
 			}
-		}
-		for _, listener := range listView.selectedListeners {
-			listener(listView, current)
-		}
-
-	case Orientation, ListWrap, ListRowGap, ListColumnGap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight:
-		result := listView.viewData.set(tag, value)
-		if result && listView.created {
-			updateInnerHTML(listView.htmlID(), listView.session)
 		}
 		return result
 
-	case ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox, CheckboxHorizontalAlign, CheckboxVerticalAlign:
-		if !listView.setEnumProperty(tag, value, enumProperties[tag].values) {
-			return false
+	case ListItemClickedEvent, ListItemSelectedEvent:
+		return setOneArgEventListener[ListView, int](listView, tag, value)
+
+	case ListItemCheckedEvent:
+		return setOneArgEventListener[ListView, []int](listView, tag, value)
+
+	case Checked:
+		var checked []int
+		switch value := value.(type) {
+		case string:
+			elements := strings.Split(value, ",")
+			checked = make([]int, 0, len(elements))
+			for _, val := range elements {
+				if val = strings.Trim(val, " \t"); val != "" {
+					n, err := strconv.Atoi(val)
+					if err != nil {
+						invalidPropertyValue(Checked, value)
+						ErrorLog(err.Error())
+						return nil
+					}
+					checked = append(checked, n)
+				}
+			}
+
+		case int:
+			checked = []int{value}
+
+		case []int:
+			checked = value
+
+		default:
+			notCompatibleType(tag, value)
+			return nil
 		}
+
+		return setArrayPropertyValue(listView, Checked, checked)
+
+	case Items:
+		return listView.setItems(value)
 
 	case ListItemStyle, CurrentStyle, CurrentInactiveStyle:
-		if !listView.setItemStyle(tag, value) {
-			return false
+		if text, ok := value.(string); ok {
+			return setStringPropertyValue(listView, tag, text)
 		}
-
-	case AccentColor:
-		if !listView.setColorProperty(AccentColor, value) {
-			return false
-		}
-
-	default:
-		return listView.viewData.set(tag, value)
-	}
-
-	if listView.created {
-		updateInnerHTML(listView.htmlID(), listView.session)
-	}
-	listView.propertyChangedEvent(tag)
-	return true
-}
-
-func (listView *listViewData) setItemStyle(tag string, value any) bool {
-	switch value := value.(type) {
-	case string:
-		if value == "" {
-			delete(listView.properties, tag)
-		} else {
-			listView.properties[tag] = value
-		}
-
-	default:
 		notCompatibleType(tag, value)
-		return false
+		return nil
+
+	case Current:
+		return setIntProperty(listView, Current, value)
 	}
 
-	if listView.created {
-		switch tag {
-		case CurrentStyle:
-			listView.session.updateProperty(listView.htmlID(), "data-focusitemstyle", listView.currentStyle())
+	return listView.viewData.setFunc(tag, value)
 
-		case CurrentInactiveStyle:
-			listView.session.updateProperty(listView.htmlID(), "data-bluritemstyle", listView.currentInactiveStyle())
+}
+
+func (listView *listViewData) propertyChanged(tag PropertyName) {
+	switch tag {
+
+	case Current:
+		updateInnerHTML(listView.htmlID(), listView.Session())
+		if listeners := getOneArgEventListeners[ListView, int](listView, nil, ListItemSelectedEvent); len(listeners) > 0 {
+			current := GetCurrent(listView)
+			for _, listener := range listeners {
+				listener(listView, current)
+			}
 		}
+
+	case Checked:
+		updateInnerHTML(listView.htmlID(), listView.Session())
+		if listeners := getOneArgEventListeners[ListView, []int](listView, nil, ListItemCheckedEvent); len(listeners) > 0 {
+			checked := GetListViewCheckedItems(listView)
+			for _, listener := range listeners {
+				listener(listView, checked)
+			}
+		}
+
+	case Items, Orientation, ListWrap, ListRowGap, ListColumnGap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight,
+		ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox, CheckboxHorizontalAlign, CheckboxVerticalAlign, ListItemStyle, AccentColor:
+		updateInnerHTML(listView.htmlID(), listView.Session())
+
+	case CurrentStyle:
+		listView.Session().updateProperty(listView.htmlID(), "data-focusitemstyle", listViewCurrentStyle(listView))
+		updateInnerHTML(listView.htmlID(), listView.Session())
+
+	case CurrentInactiveStyle:
+		listView.Session().updateProperty(listView.htmlID(), "data-bluritemstyle", listViewCurrentInactiveStyle(listView))
+		updateInnerHTML(listView.htmlID(), listView.Session())
+
+	default:
+		listView.viewData.propertyChanged(tag)
 	}
-
-	return true
 }
 
-func (listView *listViewData) Get(tag string) any {
-	return listView.get(listView.normalizeTag(tag))
-}
-
-func (listView *listViewData) get(tag string) any {
+func (listView *listViewData) getFunc(tag PropertyName) any {
 	switch tag {
 	case Gap:
 		if rowGap := GetListRowGap(listView); rowGap.Equal(GetListColumnGap(listView)) {
 			return rowGap
 		}
 		return AutoSize()
-
-	case ListItemClickedEvent:
-		return listView.clickedListeners
-
-	case ListItemSelectedEvent:
-		return listView.selectedListeners
-
-	case ListItemCheckedEvent:
-		return listView.checkedListeners
-
-	case Checked:
-		return listView.checkedItem
-
-	case Items:
-		return listView.adapter
-
-	case ListItemStyle:
-		return listView.listItemStyle()
-
-	case CurrentStyle:
-		return listView.currentStyle()
-
-	case CurrentInactiveStyle:
-		return listView.currentInactiveStyle()
 	}
-	return listView.viewData.get(tag)
+	return listView.viewData.getFunc(tag)
 }
 
-func (listView *listViewData) setItems(value any) bool {
+func (listView *listViewData) setItems(value any) []PropertyName {
+	var adapter ListAdapter = nil
+
+	session := listView.session
+
 	switch value := value.(type) {
 	case []string:
-		listView.adapter = NewTextListAdapter(value, nil)
+		adapter = NewTextListAdapter(value, nil)
 
 	case []DataValue:
 		hasObject := false
@@ -479,22 +342,22 @@ func (listView *listViewData) setItems(value any) bool {
 			items := make([]View, len(value))
 			for i, val := range value {
 				if val.IsObject() {
-					if view := CreateViewFromObject(listView.session, val.Object()); view != nil {
+					if view := CreateViewFromObject(session, val.Object()); view != nil {
 						items[i] = view
 					} else {
-						return false
+						return nil
 					}
 				} else {
-					items[i] = NewTextView(listView.session, Params{Text: val.Value()})
+					items[i] = NewTextView(session, Params{Text: val.Value()})
 				}
 			}
-			listView.adapter = NewViewListAdapter(items)
+			adapter = NewViewListAdapter(items)
 		} else {
 			items := make([]string, len(value))
 			for i, val := range value {
 				items[i] = val.Value()
 			}
-			listView.adapter = NewTextListAdapter(items, nil)
+			adapter = NewTextListAdapter(items, nil)
 		}
 
 	case []any:
@@ -505,132 +368,60 @@ func (listView *listViewData) setItems(value any) bool {
 				items[i] = value
 
 			case string:
-				items[i] = NewTextView(listView.session, Params{Text: value})
+				items[i] = NewTextView(session, Params{Text: value})
 
 			case fmt.Stringer:
-				items[i] = NewTextView(listView.session, Params{Text: value.String()})
+				items[i] = NewTextView(session, Params{Text: value.String()})
 
 			case float32:
-				items[i] = NewTextView(listView.session, Params{Text: fmt.Sprintf("%g", float64(value))})
+				items[i] = NewTextView(session, Params{Text: fmt.Sprintf("%g", float64(value))})
 
 			case float64:
-				items[i] = NewTextView(listView.session, Params{Text: fmt.Sprintf("%g", value)})
+				items[i] = NewTextView(session, Params{Text: fmt.Sprintf("%g", value)})
 
 			default:
 				if n, ok := isInt(val); ok {
-					items[i] = NewTextView(listView.session, Params{Text: strconv.Itoa(n)})
+					items[i] = NewTextView(session, Params{Text: strconv.Itoa(n)})
 				} else {
 					notCompatibleType(Items, value)
-					return false
+					return nil
 				}
 			}
 		}
-		listView.adapter = NewViewListAdapter(items)
+		adapter = NewViewListAdapter(items)
 
 	case []View:
-		listView.adapter = NewViewListAdapter(value)
+		adapter = NewViewListAdapter(value)
 
 	case ListAdapter:
-		listView.adapter = value
+		adapter = value
 
 	default:
 		notCompatibleType(Items, value)
-		return false
+		return nil
 	}
 
-	size := listView.adapter.ListSize()
-	listView.items = make([]View, size)
-	listView.itemFrame = make([]Frame, size)
-
-	return true
-}
-
-func (listView *listViewData) setChecked(value any) bool {
-	var checked []int
-	if value == nil {
-		checked = []int{}
-	} else {
-		switch value := value.(type) {
-		case string:
-			checked = []int{}
-			for _, val := range strings.Split(value, ",") {
-				n, err := strconv.Atoi(strings.Trim(val, " \t"))
-				if err != nil {
-					invalidPropertyValue(Checked, value)
-					ErrorLog(err.Error())
-					return false
-				}
-				checked = append(checked, n)
-			}
-
-		case int:
-			checked = []int{value}
-
-		case []int:
-			checked = value
-
-		default:
-			return false
-		}
-	}
-
-	switch GetListViewCheckbox(listView) {
-	case SingleCheckbox:
-		count := len(checked)
-		if count > 1 {
-			return false
-		}
-
-		if len(listView.checkedItem) > 0 &&
-			(count == 0 || listView.checkedItem[0] != checked[0]) {
-			listView.updateCheckboxItem(listView.checkedItem[0], false)
-		}
-
-		if count == 1 {
-			listView.updateCheckboxItem(checked[0], true)
-		}
-
-	case MultipleCheckbox:
-		inSlice := func(n int, slice []int) bool {
-			for _, n2 := range slice {
-				if n2 == n {
-					return true
-				}
-			}
-			return false
-		}
-
-		for _, n := range listView.checkedItem {
-			if !inSlice(n, checked) {
-				listView.updateCheckboxItem(n, false)
-			}
-		}
-
-		for _, n := range checked {
-			if !inSlice(n, listView.checkedItem) {
-				listView.updateCheckboxItem(n, true)
-			}
-		}
-
-	default:
-		return false
-	}
-
-	listView.checkedItem = checked
-	for _, listener := range listView.checkedListeners {
-		listener(listView, listView.checkedItem)
-	}
-	return true
+	listView.setRaw(Items, adapter)
+	return []PropertyName{Items}
 }
 
 func (listView *listViewData) Focusable() bool {
 	return true
 }
 
+func (listView *listViewData) getAdapter() ListAdapter {
+	if value := listView.getRaw(Items); value != nil {
+		if adapter, ok := value.(ListAdapter); ok {
+			return adapter
+		}
+	}
+	return nil
+}
+
 func (listView *listViewData) ReloadListViewData() {
 	itemCount := 0
-	if listView.adapter != nil {
-		itemCount = listView.adapter.ListSize()
+	if adapter := listView.getAdapter(); adapter != nil {
+		itemCount = adapter.ListSize()
 
 		if itemCount != len(listView.items) {
 			listView.items = make([]View, itemCount)
@@ -638,7 +429,7 @@ func (listView *listViewData) ReloadListViewData() {
 		}
 
 		for i := 0; i < itemCount; i++ {
-			listView.items[i] = listView.adapter.ListItem(i, listView.Session())
+			listView.items[i] = adapter.ListItem(i, listView.Session())
 		}
 	} else if len(listView.items) > 0 {
 		listView.items = []View{}
@@ -646,10 +437,6 @@ func (listView *listViewData) ReloadListViewData() {
 	}
 
 	updateInnerHTML(listView.htmlID(), listView.session)
-}
-
-func (listView *listViewData) getCheckedItems() []int {
-	return listView.checkedItem
 }
 
 func (listView *listViewData) getItemFrames() []Frame {
@@ -785,34 +572,35 @@ func (listView *listViewData) checkboxItemDiv(checkbox, hCheckboxAlign, vCheckbo
 
 }
 
-func (listView *listViewData) getItemView(index int) View {
-	if listView.adapter == nil || index < 0 || index >= listView.adapter.ListSize() {
+func (listView *listViewData) getItemView(adapter ListAdapter, index int) View {
+	if adapter == nil || index < 0 || index >= adapter.ListSize() {
 		return nil
 	}
 
-	size := listView.adapter.ListSize()
-	if size != len(listView.items) {
+	if size := adapter.ListSize(); size != len(listView.items) {
 		listView.items = make([]View, size)
+		listView.itemFrame = make([]Frame, size)
 	}
 
 	if listView.items[index] == nil {
-		listView.items[index] = listView.adapter.ListItem(index, listView.Session())
+		listView.items[index] = adapter.ListItem(index, listView.Session())
 	}
 
 	return listView.items[index]
 }
 
-func (listView *listViewData) itemStyle(tag, defaultStyle string) string {
-	if value := listView.getRaw(tag); value != nil {
+func listViewItemStyle(view View, tag PropertyName, defaultStyle string) string {
+	session := view.Session()
+	if value := view.getRaw(tag); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = listView.session.resolveConstants(style); ok {
+			if style, ok = session.resolveConstants(style); ok {
 				return style
 			}
 		}
 	}
-	if value := valueFromStyle(listView, tag); value != nil {
+	if value := valueFromStyle(view, tag); value != nil {
 		if style, ok := value.(string); ok {
-			if style, ok = listView.session.resolveConstants(style); ok {
+			if style, ok = session.resolveConstants(style); ok {
 				return style
 			}
 		}
@@ -821,19 +609,19 @@ func (listView *listViewData) itemStyle(tag, defaultStyle string) string {
 }
 
 func (listView *listViewData) listItemStyle() string {
-	return listView.itemStyle(ListItemStyle, "ruiListItem")
+	return listViewItemStyle(listView, ListItemStyle, "ruiListItem")
 }
 
-func (listView *listViewData) currentStyle() string {
-	return listView.itemStyle(CurrentStyle, "ruiListItemFocused")
+func listViewCurrentStyle(view View) string {
+	return listViewItemStyle(view, CurrentStyle, "ruiListItemFocused")
 }
 
-func (listView *listViewData) currentInactiveStyle() string {
-	return listView.itemStyle(CurrentInactiveStyle, "ruiListItemSelected")
+func listViewCurrentInactiveStyle(view View) string {
+	return listViewItemStyle(view, CurrentInactiveStyle, "ruiListItemSelected")
 }
 
-func (listView *listViewData) checkboxSubviews(buffer *strings.Builder, checkbox int) {
-	count := listView.adapter.ListSize()
+func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *strings.Builder, checkbox int) {
+	count := adapter.ListSize()
 	listViewID := listView.htmlID()
 
 	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
@@ -853,11 +641,11 @@ func (listView *listViewData) checkboxSubviews(buffer *strings.Builder, checkbox
 		buffer.WriteString(listView.listItemStyle())
 		if i == current {
 			buffer.WriteRune(' ')
-			buffer.WriteString(listView.currentInactiveStyle())
+			buffer.WriteString(listViewCurrentInactiveStyle(listView))
 		}
 		buffer.WriteString(`" onclick="listItemClickEvent(this, event)" data-left="0" data-top="0" data-width="0" data-height="0" style="display: grid; justify-items: stretch; align-items: stretch;`)
 		listView.itemSize(buffer)
-		if ext, ok := listView.adapter.(ListItemEnabled); ok {
+		if ext, ok := adapter.(ListItemEnabled); ok {
 			if !ext.IsListItemEnabled(i) {
 				buffer.WriteString(`" data-disabled="1`)
 			}
@@ -878,9 +666,9 @@ func (listView *listViewData) checkboxSubviews(buffer *strings.Builder, checkbox
 		}
 		buffer.WriteString(contentDiv)
 
-		if view := listView.getItemView(i); view != nil {
+		if view := listView.getItemView(adapter, i); view != nil {
 			//view.setNoResizeEvent()
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		} else {
 			buffer.WriteString("ERROR: invalid item view")
 		}
@@ -889,8 +677,8 @@ func (listView *listViewData) checkboxSubviews(buffer *strings.Builder, checkbox
 	}
 }
 
-func (listView *listViewData) noneCheckboxSubviews(buffer *strings.Builder) {
-	count := listView.adapter.ListSize()
+func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *strings.Builder) {
+	count := adapter.ListSize()
 	listViewID := listView.htmlID()
 
 	itemStyleBuilder := allocStringBuilder()
@@ -914,20 +702,20 @@ func (listView *listViewData) noneCheckboxSubviews(buffer *strings.Builder) {
 		buffer.WriteString(listView.listItemStyle())
 		if i == current {
 			buffer.WriteRune(' ')
-			buffer.WriteString(listView.currentInactiveStyle())
+			buffer.WriteString(listViewCurrentInactiveStyle(listView))
 		}
 		buffer.WriteString(`" `)
 		buffer.WriteString(itemStyle)
-		if ext, ok := listView.adapter.(ListItemEnabled); ok {
+		if ext, ok := adapter.(ListItemEnabled); ok {
 			if !ext.IsListItemEnabled(i) {
 				buffer.WriteString(` data-disabled="1"`)
 			}
 		}
 		buffer.WriteString(`>`)
 
-		if view := listView.getItemView(i); view != nil {
+		if view := listView.getItemView(adapter, i); view != nil {
 			//view.setNoResizeEvent()
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		} else {
 			buffer.WriteString("ERROR: invalid item view")
 		}
@@ -955,10 +743,10 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 	buffer.WriteString(contentDiv)
 
 	session := listView.Session()
-	if listView.adapter != nil {
-		if view := listView.getItemView(index); view != nil {
+	if adapter := listView.getAdapter(); adapter != nil {
+		if view := listView.getItemView(adapter, index); view != nil {
 			view.setNoResizeEvent()
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		} else {
 			buffer.WriteString("ERROR: invalid item view")
 		}
@@ -971,19 +759,20 @@ func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder)
 	listView.viewData.htmlProperties(self, buffer)
 	buffer.WriteString(`onfocus="listViewFocusEvent(this, event)" onblur="listViewBlurEvent(this, event)"`)
 	buffer.WriteString(` onkeydown="listViewKeyDownEvent(this, event)" data-focusitemstyle="`)
-	buffer.WriteString(listView.currentStyle())
+	buffer.WriteString(listViewCurrentStyle(listView))
 	buffer.WriteString(`" data-bluritemstyle="`)
-	buffer.WriteString(listView.currentInactiveStyle())
+	buffer.WriteString(listViewCurrentInactiveStyle(listView))
 	buffer.WriteString(`"`)
-	current := GetCurrent(listView)
-	if listView.adapter != nil && current >= 0 && current < listView.adapter.ListSize() {
-		buffer.WriteString(` data-current="`)
-		buffer.WriteString(listView.htmlID())
-		buffer.WriteRune('-')
-		buffer.WriteString(strconv.Itoa(current))
-		buffer.WriteRune('"')
-	}
 
+	if adapter := listView.getAdapter(); adapter != nil {
+		if current := GetCurrent(listView); current >= 0 && current < adapter.ListSize() {
+			buffer.WriteString(` data-current="`)
+			buffer.WriteString(listView.htmlID())
+			buffer.WriteRune('-')
+			buffer.WriteString(strconv.Itoa(current))
+			buffer.WriteRune('"')
+		}
+	}
 	listView.viewData.htmlProperties(self, buffer)
 }
 
@@ -1003,7 +792,12 @@ func (listView *listViewData) cssStyle(self View, builder cssBuilder) {
 */
 
 func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	if listView.adapter == nil || listView.adapter.ListSize() == 0 {
+	adapter := listView.getAdapter()
+	if adapter == nil {
+		return
+	}
+
+	if listSize := adapter.ListSize(); listSize == 0 {
 		return
 	}
 
@@ -1137,36 +931,30 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	checkbox := GetListViewCheckbox(listView)
 	if checkbox == NoneCheckbox {
-		listView.noneCheckboxSubviews(buffer)
+		listView.noneCheckboxSubviews(adapter, buffer)
 	} else {
-		listView.checkboxSubviews(buffer, checkbox)
+		listView.checkboxSubviews(adapter, buffer, checkbox)
 	}
 
 	buffer.WriteString(`</div>`)
 }
 
-func (listView *listViewData) handleCommand(self View, command string, data DataObject) bool {
+func (listView *listViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "itemSelected":
 		if number, ok := dataIntProperty(data, `number`); ok {
-			listView.properties[Current] = number
-			for _, listener := range listView.selectedListeners {
-				listener(listView, number)
-			}
-			listView.propertyChangedEvent(Current)
+			listView.handleCurrent(number)
 		}
 
 	case "itemUnselected":
 		if _, ok := listView.properties[Current]; ok {
-			delete(listView.properties, Current)
-			for _, listener := range listView.selectedListeners {
-				listener(listView, -1)
-			}
-			listView.propertyChangedEvent(Current)
+			listView.handleCurrent(-1)
 		}
 
 	case "itemClick":
-		listView.onItemClick()
+		if number, ok := dataIntProperty(data, `number`); ok {
+			listView.onItemClick(number)
+		}
 
 	default:
 		return listView.viewData.handleCommand(self, command, data)
@@ -1175,54 +963,83 @@ func (listView *listViewData) handleCommand(self View, command string, data Data
 	return true
 }
 
-func (listView *listViewData) onItemClick() {
-	current := GetCurrent(listView)
-	if current >= 0 && !IsDisabled(listView) {
-		checkbox := GetListViewCheckbox(listView)
-	m:
+func (listView *listViewData) handleCurrent(number int) {
+	listView.properties[Current] = number
+	for _, listener := range getOneArgEventListeners[ListView, int](listView, nil, ListItemSelectedEvent) {
+		listener(listView, number)
+	}
+	if listener, ok := listView.changeListener[Current]; ok {
+		listener(listView, Current)
+	}
+}
+
+func (listView *listViewData) onItemClick(number int) {
+
+	if IsDisabled(listView) {
+		return
+	}
+
+	if current := GetCurrent(listView); current != number {
+		listView.Set(Current, number)
+	}
+
+	if checkbox := GetListViewCheckbox(listView); checkbox != NoneCheckbox {
+		checkedItem := GetListViewCheckedItems(listView)
+
 		switch checkbox {
 		case SingleCheckbox:
-			if len(listView.checkedItem) == 0 {
-				listView.checkedItem = []int{current}
-				listView.updateCheckboxItem(current, true)
-			} else if listView.checkedItem[0] != current {
-				listView.updateCheckboxItem(listView.checkedItem[0], false)
-				listView.checkedItem[0] = current
-				listView.updateCheckboxItem(current, true)
+			if len(checkedItem) == 0 {
+				checkedItem = []int{number}
+				listView.updateCheckboxItem(number, true)
+			} else if checkedItem[0] != number {
+				listView.updateCheckboxItem(checkedItem[0], false)
+				checkedItem = []int{number}
+				listView.updateCheckboxItem(number, true)
+			} else {
+				checkedItem = []int{}
+				listView.updateCheckboxItem(number, false)
 			}
 
 		case MultipleCheckbox:
-			for i, index := range listView.checkedItem {
-				if index == current {
+			uncheck := false
+			for i, index := range checkedItem {
+				if index == number {
+					uncheck = true
 					listView.updateCheckboxItem(index, false)
-					count := len(listView.checkedItem)
+					count := len(checkedItem)
 					if count == 1 {
-						listView.checkedItem = []int{}
+						checkedItem = []int{}
 					} else if i == 0 {
-						listView.checkedItem = listView.checkedItem[1:]
+						checkedItem = checkedItem[1:]
 					} else if i == count-1 {
-						listView.checkedItem = listView.checkedItem[:i]
+						checkedItem = checkedItem[:i]
 					} else {
-						listView.checkedItem = append(listView.checkedItem[:i], listView.checkedItem[i+1:]...)
+						checkedItem = append(checkedItem[:i], checkedItem[i+1:]...)
 					}
-					break m
+					break
 				}
 			}
 
-			listView.updateCheckboxItem(current, true)
-			listView.checkedItem = append(listView.checkedItem, current)
+			if !uncheck {
+				listView.updateCheckboxItem(number, true)
+				checkedItem = append(checkedItem, number)
+			}
 		}
 
-		if checkbox != NoneCheckbox {
-			for _, listener := range listView.checkedListeners {
-				listener(listView, listView.checkedItem)
-			}
-			listView.propertyChangedEvent(Checked)
+		setArrayPropertyValue(listView, Checked, checkedItem)
+		if listener, ok := listView.changeListener[Checked]; ok {
+			listener(listView, Checked)
 		}
-		for _, listener := range listView.clickedListeners {
-			listener(listView, current)
+
+		for _, listener := range getOneArgEventListeners[ListView, []int](listView, nil, ListItemCheckedEvent) {
+			listener(listView, checkedItem)
 		}
 	}
+
+	for _, listener := range getOneArgEventListeners[ListView, int](listView, nil, ListItemClickedEvent) {
+		listener(listView, number)
+	}
+
 }
 
 func (listView *listViewData) onItemResize(self View, index string, x, y, width, height float64) {
@@ -1252,21 +1069,21 @@ func GetHorizontalAlign(view View, subviewID ...string) int {
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListItemClickedListeners(view View, subviewID ...string) []func(ListView, int) {
-	return getEventListeners[ListView, int](view, subviewID, ListItemClickedEvent)
+	return getOneArgEventListeners[ListView, int](view, subviewID, ListItemClickedEvent)
 }
 
 // GetListItemSelectedListeners returns a ListItemSelectedListener of the ListView.
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListItemSelectedListeners(view View, subviewID ...string) []func(ListView, int) {
-	return getEventListeners[ListView, int](view, subviewID, ListItemSelectedEvent)
+	return getOneArgEventListeners[ListView, int](view, subviewID, ListItemSelectedEvent)
 }
 
 // GetListItemCheckedListeners returns a ListItemCheckedListener of the ListView.
 // If there are no listeners then the empty list is returned
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListItemCheckedListeners(view View, subviewID ...string) []func(ListView, []int) {
-	return getEventListeners[ListView, []int](view, subviewID, ListItemCheckedEvent)
+	return getOneArgEventListeners[ListView, []int](view, subviewID, ListItemCheckedEvent)
 }
 
 // GetListItemWidth returns the width of a ListView item.
@@ -1290,24 +1107,19 @@ func GetListViewCheckbox(view View, subviewID ...string) int {
 // GetListViewCheckedItems returns the array of ListView checked items.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListViewCheckedItems(view View, subviewID ...string) []int {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
+	if view = getSubview(view, subviewID); view != nil {
+		if value := view.getRaw(Checked); value != nil {
+			if checkedItems, ok := value.([]int); ok {
+				switch GetListViewCheckbox(view) {
+				case MultipleCheckbox:
+					return checkedItems
 
-	if view != nil {
-		if listView, ok := view.(ListView); ok {
-			checkedItems := listView.getCheckedItems()
-			switch GetListViewCheckbox(view) {
-			case NoneCheckbox:
-				return []int{}
-
-			case SingleCheckbox:
-				if len(checkedItems) > 1 {
-					return []int{checkedItems[0]}
+				case SingleCheckbox:
+					if len(checkedItems) > 1 {
+						return []int{checkedItems[0]}
+					}
 				}
 			}
-
-			return checkedItems
 		}
 	}
 	return []int{}
@@ -1372,10 +1184,7 @@ func GetListItemFrame(view View, subviewID string, index int) Frame {
 // GetListViewAdapter - returns the ListView adapter.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Items); value != nil {
 			if adapter, ok := value.(ListAdapter); ok {
 				return adapter
@@ -1388,11 +1197,7 @@ func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
 // ReloadListViewData updates ListView content
 // If the second argument (subviewID) is not specified or it is "" then content the first argument (view) is updated.
 func ReloadListViewData(view View, subviewID ...string) {
-	if len(subviewID) > 0 && subviewID[0] != "" {
-		view = ViewByID(view, subviewID[0])
-	}
-
-	if view != nil {
+	if view = getSubview(view, subviewID); view != nil {
 		if listView, ok := view.(ListView); ok {
 			listView.ReloadListViewData()
 		}

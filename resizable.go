@@ -10,29 +10,29 @@ import (
 const (
 	// Side is the constant for "side" property tag.
 	//
-	// Used by `Resizable`.
-	// Determines which side of the container is used to resize. The value of property is an or-combination of values listed. 
+	// Used by Resizable.
+	// Determines which side of the container is used to resize. The value of property is an or-combination of values listed.
 	// Default value is "all".
 	//
-	// Supported types: `int`, `string`.
+	// Supported types: int, string.
 	//
 	// Values:
-	// `1`(`TopSide`) or "top" - Top frame side.
-	// `2`(`RightSide`) or "right" - Right frame side.
-	// `4`(`BottomSide`) or "bottom" - Bottom frame side.
-	// `8`(`LeftSide`) or "left" - Left frame side.
-	// `15`(`AllSides`) or "all" - All frame sides.
+	//   - 1 (TopSide) or "top" - Top frame side.
+	//   - 2 (RightSide) or "right" - Right frame side.
+	//   - 4 (BottomSide) or "bottom" - Bottom frame side.
+	//   - 8 (LeftSide) or "left" - Left frame side.
+	//   - 15 (AllSides) or "all" - All frame sides.
 	Side = "side"
 
 	// ResizeBorderWidth is the constant for "resize-border-width" property tag.
 	//
-	// Used by `Resizable`.
+	// Used by Resizable.
 	// Specifies the width of the resizing border.
 	//
-	// Supported types: `SizeUnit`, `SizeFunc`, `string`, `float`, `int`.
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
 	//
-	// Internal type is `SizeUnit`, other types converted to it during assignment.
-	// See `SizeUnit` description for more details.
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
 	ResizeBorderWidth = "resize-border-width"
 )
 
@@ -62,7 +62,6 @@ type Resizable interface {
 
 type resizableData struct {
 	viewData
-	content []View
 }
 
 // NewResizable create new Resizable object and return it
@@ -74,97 +73,40 @@ func NewResizable(session Session, params Params) Resizable {
 }
 
 func newResizable(session Session) View {
-	return NewResizable(session, nil)
+	return new(resizableData)
 }
 
 func (resizable *resizableData) init(session Session) {
 	resizable.viewData.init(session)
 	resizable.tag = "Resizable"
 	resizable.systemClass = "ruiGridLayout"
-	resizable.content = []View{}
-}
-
-func (resizable *resizableData) String() string {
-	return getViewString(resizable, nil)
+	resizable.set = resizable.setFunc
+	resizable.changed = resizable.propertyChanged
 }
 
 func (resizable *resizableData) Views() []View {
-	return resizable.content
+	if view := resizable.content(); view != nil {
+		return []View{view}
+	}
+	return []View{}
 }
 
-func (resizable *resizableData) Remove(tag string) {
-	resizable.remove(strings.ToLower(tag))
+func (resizable *resizableData) content() View {
+	if value := resizable.getRaw(Content); value != nil {
+		if content, ok := value.(View); ok {
+			return content
+		}
+	}
+	return nil
 }
 
-func (resizable *resizableData) remove(tag string) {
+func (resizable *resizableData) setFunc(tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Side:
-		oldSide := resizable.getSide()
-		delete(resizable.properties, Side)
-		if oldSide != resizable.getSide() {
-			if resizable.created {
-				updateInnerHTML(resizable.htmlID(), resizable.Session())
-				resizable.updateResizeBorderWidth()
-			}
-			resizable.propertyChangedEvent(tag)
-		}
+		return resizableSetSide(resizable, value)
 
 	case ResizeBorderWidth:
-		w := resizable.resizeBorderWidth()
-		delete(resizable.properties, ResizeBorderWidth)
-		if !w.Equal(resizable.resizeBorderWidth()) {
-			resizable.updateResizeBorderWidth()
-			resizable.propertyChangedEvent(tag)
-		}
-
-	case Content:
-		if len(resizable.content) > 0 {
-			resizable.content = []View{}
-			if resizable.created {
-				updateInnerHTML(resizable.htmlID(), resizable.Session())
-			}
-			resizable.propertyChangedEvent(tag)
-		}
-
-	default:
-		resizable.viewData.remove(tag)
-	}
-}
-
-func (resizable *resizableData) Set(tag string, value any) bool {
-	return resizable.set(strings.ToLower(tag), value)
-}
-
-func (resizable *resizableData) set(tag string, value any) bool {
-	if value == nil {
-		resizable.remove(tag)
-		return true
-	}
-
-	switch tag {
-	case Side:
-		oldSide := resizable.getSide()
-		if !resizable.setSide(value) {
-			notCompatibleType(tag, value)
-			return false
-		}
-		if oldSide != resizable.getSide() {
-			if resizable.created {
-				updateInnerHTML(resizable.htmlID(), resizable.Session())
-				resizable.updateResizeBorderWidth()
-			}
-			resizable.propertyChangedEvent(tag)
-		}
-		return true
-
-	case ResizeBorderWidth:
-		w := resizable.resizeBorderWidth()
-		ok := resizable.setSizeProperty(tag, value)
-		if ok && !w.Equal(resizable.resizeBorderWidth()) {
-			resizable.updateResizeBorderWidth()
-			resizable.propertyChangedEvent(tag)
-		}
-		return ok
+		return setSizeProperty(resizable, tag, value)
 
 	case Content:
 		var newContent View = nil
@@ -176,45 +118,54 @@ func (resizable *resizableData) set(tag string, value any) bool {
 			newContent = value
 
 		case DataObject:
-			if view := CreateViewFromObject(resizable.Session(), value); view != nil {
-				newContent = view
-			} else {
-				return false
+			if newContent = CreateViewFromObject(resizable.Session(), value); newContent == nil {
+				return nil
 			}
 
 		default:
 			notCompatibleType(tag, value)
-			return false
+			return nil
 		}
 
-		if len(resizable.content) == 0 {
-			resizable.content = []View{newContent}
-		} else {
-			resizable.content[0] = newContent
-		}
-		if resizable.created {
-			updateInnerHTML(resizable.htmlID(), resizable.Session())
-		}
-		resizable.propertyChangedEvent(tag)
-		return true
+		resizable.setRaw(Content, newContent)
+		return []PropertyName{}
 
 	case CellWidth, CellHeight, GridRowGap, GridColumnGap, CellVerticalAlign, CellHorizontalAlign:
-		ErrorLogF(`Not supported "%s" property`, tag)
-		return false
+		ErrorLogF(`Not supported "%s" property`, string(tag))
+		return nil
 	}
 
-	return resizable.viewData.set(tag, value)
+	return resizable.viewData.setFunc(tag, value)
 }
 
-func (resizable *resizableData) Get(tag string) any {
-	return resizable.get(strings.ToLower(tag))
+func (resizable *resizableData) propertyChanged(tag PropertyName) {
+	switch tag {
+	case Side:
+		updateInnerHTML(resizable.htmlID(), resizable.Session())
+		fallthrough
+
+	case ResizeBorderWidth:
+		htmlID := resizable.htmlID()
+		session := resizable.Session()
+		column, row := resizableCellSizeCSS(resizable)
+
+		session.updateCSSProperty(htmlID, "grid-template-columns", column)
+		session.updateCSSProperty(htmlID, "grid-template-rows", row)
+
+	case Content:
+		updateInnerHTML(resizable.htmlID(), resizable.Session())
+
+	default:
+		resizable.viewData.propertyChanged(tag)
+	}
+
 }
 
-func (resizable *resizableData) getSide() int {
-	if value := resizable.getRaw(Side); value != nil {
+func resizableSide(view View) int {
+	if value := view.getRaw(Side); value != nil {
 		switch value := value.(type) {
 		case string:
-			if value, ok := resizable.session.resolveConstants(value); ok {
+			if value, ok := view.Session().resolveConstants(value); ok {
 				validValues := map[string]int{
 					"top":    TopSide,
 					"right":  RightSide,
@@ -258,15 +209,15 @@ func (resizable *resizableData) getSide() int {
 	return AllSides
 }
 
-func (resizable *resizableData) setSide(value any) bool {
+func resizableSetSide(properties Properties, value any) []PropertyName {
 	switch value := value.(type) {
 	case string:
 		if n, err := strconv.Atoi(value); err == nil {
 			if n >= 1 && n <= AllSides {
-				resizable.properties[Side] = n
-				return true
+				properties.setRaw(Side, n)
+				return []PropertyName{Side}
 			}
-			return false
+			return nil
 		}
 		validValues := map[string]int{
 			"top":    TopSide,
@@ -287,13 +238,13 @@ func (resizable *resizableData) setSide(value any) bool {
 					hasConst = true
 				} else if n, err := strconv.Atoi(val); err == nil {
 					if n < 1 || n > AllSides {
-						return false
+						return nil
 					}
 					sides |= n
 				} else if n, ok := validValues[val]; ok {
 					sides |= n
 				} else {
-					return false
+					return nil
 				}
 			}
 
@@ -302,69 +253,58 @@ func (resizable *resizableData) setSide(value any) bool {
 				for i := 1; i < len(values); i++ {
 					value += "|" + values[i]
 				}
-				resizable.properties[Side] = value
-				return true
+				properties.setRaw(Side, value)
+				return []PropertyName{Side}
 			}
 
 			if sides >= 1 && sides <= AllSides {
-				resizable.properties[Side] = sides
-				return true
+				properties.setRaw(Side, sides)
+				return []PropertyName{Side}
 			}
 
 		} else if value[0] == '@' {
-			resizable.properties[Side] = value
-			return true
+			properties.setRaw(Side, value)
+			return []PropertyName{Side}
 		} else if n, ok := validValues[value]; ok {
-			resizable.properties[Side] = n
-			return true
+			properties.setRaw(Side, n)
+			return []PropertyName{Side}
 		}
 
 	case int:
 		if value >= 1 && value <= AllSides {
-			resizable.properties[Side] = value
-			return true
+			properties.setRaw(Side, value)
+			return []PropertyName{Side}
 		} else {
 			ErrorLogF(`Invalid value %d of "side" property`, value)
-			return false
+			return nil
 		}
 
 	default:
 		if n, ok := isInt(value); ok {
 			if n >= 1 && n <= AllSides {
-				resizable.properties[Side] = n
-				return true
+				properties.setRaw(Side, n)
+				return []PropertyName{Side}
 			} else {
 				ErrorLogF(`Invalid value %d of "side" property`, n)
-				return false
+				return nil
 			}
 		}
 	}
 
-	return false
+	return nil
 }
 
-func (resizable *resizableData) resizeBorderWidth() SizeUnit {
-	result, _ := sizeProperty(resizable, ResizeBorderWidth, resizable.Session())
+func resizableBorderWidth(view View) SizeUnit {
+	result, _ := sizeProperty(view, ResizeBorderWidth, view.Session())
 	if result.Type == Auto || result.Value == 0 {
 		return Px(4)
 	}
 	return result
 }
 
-func (resizable *resizableData) updateResizeBorderWidth() {
-	if resizable.created {
-		htmlID := resizable.htmlID()
-		session := resizable.Session()
-		column, row := resizable.cellSizeCSS()
-
-		session.updateCSSProperty(htmlID, "grid-template-columns", column)
-		session.updateCSSProperty(htmlID, "grid-template-rows", row)
-	}
-}
-
-func (resizable *resizableData) cellSizeCSS() (string, string) {
-	w := resizable.resizeBorderWidth().cssString("4px", resizable.Session())
-	side := resizable.getSide()
+func resizableCellSizeCSS(view View) (string, string) {
+	w := resizableBorderWidth(view).cssString("4px", view.Session())
+	side := resizableSide(view)
 	column := "1fr"
 	row := "1fr"
 
@@ -392,7 +332,7 @@ func (resizable *resizableData) cellSizeCSS() (string, string) {
 }
 
 func (resizable *resizableData) cssStyle(self View, builder cssBuilder) {
-	column, row := resizable.cellSizeCSS()
+	column, row := resizableCellSizeCSS(resizable)
 
 	builder.add("grid-template-columns", column)
 	builder.add("grid-template-rows", row)
@@ -402,12 +342,12 @@ func (resizable *resizableData) cssStyle(self View, builder cssBuilder) {
 
 func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder) {
 
-	side := resizable.getSide()
+	side := resizableSide(resizable)
 	left := 1
 	top := 1
 	leftSide := (side & LeftSide) != 0
 	rightSide := (side & RightSide) != 0
-	w := resizable.resizeBorderWidth().cssString("4px", resizable.Session())
+	w := resizableBorderWidth(resizable).cssString("4px", resizable.Session())
 
 	if leftSide {
 		left = 2
@@ -484,14 +424,13 @@ func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder)
 		}
 	}
 
-	if len(resizable.content) > 0 {
-		view := resizable.content[0]
+	if view := resizable.content(); view != nil {
 		view.addToCSSStyle(map[string]string{
 			"grid-column-start": strconv.Itoa(left),
 			"grid-column-end":   strconv.Itoa(left + 1),
 			"grid-row-start":    strconv.Itoa(top),
 			"grid-row-end":      strconv.Itoa(top + 1),
 		})
-		viewHTML(view, buffer)
+		viewHTML(view, buffer, "")
 	}
 }

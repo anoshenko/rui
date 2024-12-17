@@ -16,33 +16,39 @@ type OutlineProperty interface {
 }
 
 type outlinePropertyData struct {
-	propertyList
+	dataProperty
 }
 
 // NewOutlineProperty creates the new OutlineProperty.
+//
 // The following properties can be used:
-//
-// "color" (ColorTag). Determines the line color (Color);
-//
-// "width" (Width). Determines the line thickness (SizeUnit).
+//   - "color" (ColorTag) - Determines the line color (Color);
+//   - "width" (Width) -  Determines the line thickness (SizeUnit).
 func NewOutlineProperty(params Params) OutlineProperty {
 	outline := new(outlinePropertyData)
-	outline.properties = map[string]any{}
+	outline.init()
 	for tag, value := range params {
 		outline.Set(tag, value)
 	}
 	return outline
 }
 
+func (outline *outlinePropertyData) init() {
+	outline.propertyList.init()
+	outline.normalize = normalizeOutlineTag
+	outline.set = outlineSet
+	outline.supportedProperties = []PropertyName{Style, Width, ColorTag}
+}
+
 func (outline *outlinePropertyData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("_{ ")
 	comma := false
-	for _, tag := range []string{Style, Width, ColorTag} {
+	for _, tag := range []PropertyName{Style, Width, ColorTag} {
 		if value, ok := outline.properties[tag]; ok {
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(tag)
+			buffer.WriteString(string(tag))
 			buffer.WriteString(" = ")
 			writePropertyValue(buffer, BorderStyle, value, indent)
 			comma = true
@@ -56,46 +62,33 @@ func (outline *outlinePropertyData) String() string {
 	return runStringWriter(outline)
 }
 
-func (outline *outlinePropertyData) normalizeTag(tag string) string {
-	return strings.TrimPrefix(strings.ToLower(tag), "outline-")
+func normalizeOutlineTag(tag PropertyName) PropertyName {
+	tag = defaultNormalize(tag)
+	return PropertyName(strings.TrimPrefix(string(tag), "outline-"))
 }
 
-func (outline *outlinePropertyData) Remove(tag string) {
-	delete(outline.properties, outline.normalizeTag(tag))
-}
-
-func (outline *outlinePropertyData) Set(tag string, value any) bool {
-	if value == nil {
-		outline.Remove(tag)
-		return true
-	}
-
-	tag = outline.normalizeTag(tag)
+func outlineSet(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
 	case Style:
-		return outline.setEnumProperty(Style, value, enumProperties[BorderStyle].values)
+		return setEnumProperty(properties, Style, value, enumProperties[BorderStyle].values)
 
 	case Width:
 		if width, ok := value.(SizeUnit); ok {
 			switch width.Type {
 			case SizeInFraction, SizeInPercent:
 				notCompatibleType(tag, value)
-				return false
+				return nil
 			}
 		}
-		return outline.setSizeProperty(Width, value)
+		return setSizeProperty(properties, Width, value)
 
 	case ColorTag:
-		return outline.setColorProperty(ColorTag, value)
+		return setColorProperty(properties, ColorTag, value)
 
 	default:
 		ErrorLogF(`"%s" property is not compatible with the OutlineProperty`, tag)
 	}
-	return false
-}
-
-func (outline *outlinePropertyData) Get(tag string) any {
-	return outline.propertyList.Get(outline.normalizeTag(tag))
+	return nil
 }
 
 func (outline *outlinePropertyData) ViewOutline(session Session) ViewOutline {
@@ -132,7 +125,7 @@ func (outline ViewOutline) cssString(session Session) string {
 	return builder.finish()
 }
 
-func getOutline(properties Properties) OutlineProperty {
+func getOutlineProperty(properties Properties) OutlineProperty {
 	if value := properties.Get(Outline); value != nil {
 		if outline, ok := value.(OutlineProperty); ok {
 			return outline
@@ -142,30 +135,30 @@ func getOutline(properties Properties) OutlineProperty {
 	return nil
 }
 
-func (style *viewStyle) setOutline(value any) bool {
+func setOutlineProperty(properties Properties, value any) []PropertyName {
 	switch value := value.(type) {
 	case OutlineProperty:
-		style.properties[Outline] = value
+		properties.setRaw(Outline, value)
 
 	case ViewOutline:
-		style.properties[Outline] = NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorTag: value.Color})
+		properties.setRaw(Outline, NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorTag: value.Color}))
 
 	case ViewBorder:
-		style.properties[Outline] = NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorTag: value.Color})
+		properties.setRaw(Outline, NewOutlineProperty(Params{Style: value.Style, Width: value.Width, ColorTag: value.Color}))
 
 	case DataObject:
 		outline := NewOutlineProperty(nil)
-		for _, tag := range []string{Style, Width, ColorTag} {
-			if text, ok := value.PropertyValue(tag); ok && text != "" {
+		for _, tag := range []PropertyName{Style, Width, ColorTag} {
+			if text, ok := value.PropertyValue(string(tag)); ok && text != "" {
 				outline.Set(tag, text)
 			}
 		}
-		style.properties[Outline] = outline
+		properties.setRaw(Outline, outline)
 
 	default:
 		notCompatibleType(Outline, value)
-		return false
+		return nil
 	}
 
-	return true
+	return []PropertyName{Outline}
 }

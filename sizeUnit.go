@@ -62,53 +62,53 @@ func AutoSize() SizeUnit {
 }
 
 // Px creates SizeUnit with SizeInPixel type
-func Px(value float64) SizeUnit {
-	return SizeUnit{SizeInPixel, value, nil}
+func Px[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInPixel, Value: float64(value), Function: nil}
 }
 
 // Em creates SizeUnit with SizeInEM type
-func Em(value float64) SizeUnit {
-	return SizeUnit{SizeInEM, value, nil}
+func Em[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInEM, Value: float64(value), Function: nil}
 }
 
 // Ex creates SizeUnit with SizeInEX type
-func Ex(value float64) SizeUnit {
-	return SizeUnit{SizeInEX, value, nil}
+func Ex[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInEX, Value: float64(value), Function: nil}
 }
 
 // Percent creates SizeUnit with SizeInDIP type
-func Percent(value float64) SizeUnit {
-	return SizeUnit{SizeInPercent, value, nil}
+func Percent[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInPercent, Value: float64(value), Function: nil}
 }
 
 // Pt creates SizeUnit with SizeInPt type
-func Pt(value float64) SizeUnit {
-	return SizeUnit{SizeInPt, value, nil}
+func Pt[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInPt, Value: float64(value), Function: nil}
 }
 
 // Pc creates SizeUnit with SizeInPc type
-func Pc(value float64) SizeUnit {
-	return SizeUnit{SizeInPc, value, nil}
+func Pc[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInPc, Value: float64(value), Function: nil}
 }
 
 // Mm creates SizeUnit with SizeInMM type
-func Mm(value float64) SizeUnit {
-	return SizeUnit{SizeInMM, value, nil}
+func Mm[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInMM, Value: float64(value), Function: nil}
 }
 
 // Cm creates SizeUnit with SizeInCM type
-func Cm(value float64) SizeUnit {
-	return SizeUnit{SizeInCM, value, nil}
+func Cm[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInCM, Value: float64(value), Function: nil}
 }
 
 // Inch creates SizeUnit with SizeInInch type
-func Inch(value float64) SizeUnit {
-	return SizeUnit{SizeInInch, value, nil}
+func Inch[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{Type: SizeInInch, Value: float64(value), Function: nil}
 }
 
 // Fr creates SizeUnit with SizeInFraction type
-func Fr(value float64) SizeUnit {
-	return SizeUnit{SizeInFraction, value, nil}
+func Fr[T float64 | float32 | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64](value T) SizeUnit {
+	return SizeUnit{SizeInFraction, float64(value), nil}
 }
 
 // Equal compare two SizeUnit. Return true if SizeUnit are equal

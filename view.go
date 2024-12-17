@@ -55,22 +55,23 @@ type View interface {
 	Scroll() Frame
 
 	// SetParams sets properties with name "tag" of the "rootView" subview. Result:
-	// * true - all properties were set successful,
-	// * false - error (incompatible type or invalid format of a string value, see AppLog).
+	//   - true - all properties were set successful,
+	//   - false - error (incompatible type or invalid format of a string value, see AppLog).
 	SetParams(params Params) bool
 
 	// SetAnimated sets the value (second argument) of the property with name defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
-	SetAnimated(tag string, value any, animation Animation) bool
+	SetAnimated(tag PropertyName, value any, animation AnimationProperty) bool
 
 	// SetChangeListener set the function to track the change of the View property
-	SetChangeListener(tag string, listener func(View, string))
+	SetChangeListener(tag PropertyName, listener func(View, PropertyName))
 
 	// HasFocus returns 'true' if the view has focus
 	HasFocus() bool
 
-	handleCommand(self View, command string, data DataObject) bool
+	init(session Session)
+	handleCommand(self View, command PropertyName, data DataObject) bool
 	htmlClass(disabled bool) string
 	htmlTag() string
 	closeHTMLTag() bool
@@ -81,7 +82,8 @@ type View interface {
 	htmlProperties(self View, buffer *strings.Builder)
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
-	exscludeTags() []string
+	exscludeTags() []PropertyName
+	htmlDisabledProperty() bool
 
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index string, x, y, width, height float64)
@@ -99,8 +101,8 @@ type viewData struct {
 	_htmlID          string
 	parentID         string
 	systemClass      string
-	changeListener   map[string]func(View, string)
-	singleTransition map[string]Animation
+	changeListener   map[PropertyName]func(View, PropertyName)
+	singleTransition map[PropertyName]AnimationProperty
 	addCSS           map[string]string
 	frame            Frame
 	scroll           Frame
@@ -108,12 +110,21 @@ type viewData struct {
 	created          bool
 	hasFocus         bool
 	hasHtmlDisabled  bool
-	//animation map[string]AnimationEndListener
+	get              func(tag PropertyName) any
+	set              func(tag PropertyName, value any) []PropertyName
+	remove           func(tag PropertyName) []PropertyName
+	changed          func(tag PropertyName)
 }
 
 func newView(session Session) View {
+	return new(viewData)
+}
+
+// NewView create new View object and return it
+func NewView(session Session, params Params) View {
 	view := new(viewData)
 	view.init(session)
+	setInitParams(view, params)
 	return view
 }
 
@@ -132,22 +143,19 @@ func setInitParams(view View, params Params) {
 	}
 }
 
-// NewView create new View object and return it
-func NewView(session Session, params Params) View {
-	view := new(viewData)
-	view.init(session)
-	setInitParams(view, params)
-	return view
-}
-
 func (view *viewData) init(session Session) {
 	view.viewStyle.init()
+	view.get = view.getFunc
+	view.set = view.setFunc
+	view.remove = view.removeFunc
+	view.normalize = normalizeViewTag
+	view.changed = view.propertyChanged
 	view.tag = "View"
 	view.session = session
-	view.changeListener = map[string]func(View, string){}
+	view.changeListener = map[PropertyName]func(View, PropertyName){}
 	view.addCSS = map[string]string{}
 	//view.animation = map[string]AnimationEndListener{}
-	view.singleTransition = map[string]Animation{}
+	view.singleTransition = map[PropertyName]AnimationProperty{}
 	view.noResizeEvent = false
 	view.created = false
 	view.hasHtmlDisabled = false
@@ -205,227 +213,195 @@ func (view *viewData) Focusable() bool {
 	return false
 }
 
-func (view *viewData) Remove(tag string) {
-	view.remove(strings.ToLower(tag))
+func (view *viewData) Remove(tag PropertyName) {
+	changedTags := view.removeFunc(view.normalize(tag))
+
+	if view.created && len(changedTags) > 0 {
+		for _, tag := range changedTags {
+			view.changed(tag)
+		}
+
+		for _, tag := range changedTags {
+			if listener, ok := view.changeListener[tag]; ok {
+				listener(view, tag)
+			}
+		}
+	}
 }
 
-func (view *viewData) remove(tag string) {
+func (view *viewData) Get(tag PropertyName) any {
 	switch tag {
 	case ID:
-		view.viewID = ""
-
-	case TabIndex, "tab-index":
-		delete(view.properties, tag)
-		if view.Focusable() {
-			view.session.updateProperty(view.htmlID(), "tabindex", "0")
-		} else {
-			view.session.updateProperty(view.htmlID(), "tabindex", "-1")
-		}
-
-	case UserData:
-		delete(view.properties, tag)
-
-	case Style, StyleDisabled:
-		if _, ok := view.properties[tag]; ok {
-			delete(view.properties, tag)
-			view.session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
-		}
-
-	case FocusEvent, LostFocusEvent:
-		view.removeFocusListener(tag)
-
-	case KeyDownEvent, KeyUpEvent:
-		view.removeKeyListener(tag)
-
-	case ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent:
-		view.removeMouseListener(tag)
-
-	case PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel:
-		view.removePointerListener(tag)
-
-	case TouchStart, TouchEnd, TouchMove, TouchCancel:
-		view.removeTouchListener(tag)
-
-	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
-		view.removeTransitionListener(tag)
-
-	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
-		view.removeAnimationListener(tag)
-
-	case ResizeEvent, ScrollEvent:
-		delete(view.properties, tag)
-
-	case Content:
-		if _, ok := view.properties[Content]; ok {
-			delete(view.properties, Content)
-			updateInnerHTML(view.htmlID(), view.session)
-		}
-
-	default:
-		view.viewStyle.remove(tag)
-		viewPropertyChanged(view, tag)
+		return view.ID()
 	}
+	return view.get(view.normalize(tag))
 
-	view.propertyChangedEvent(tag)
 }
 
-func (view *viewData) propertyChangedEvent(tag string) {
-	if listener, ok := view.changeListener[tag]; ok {
-		listener(view, tag)
-	}
-
-	switch tag {
-	case BorderLeft, BorderRight, BorderTop, BorderBottom,
-		BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle,
-		BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor,
-		BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
-		tag = Border
-
-	case CellBorderStyle, CellBorderColor, CellBorderWidth,
-		CellBorderLeft, CellBorderLeftStyle, CellBorderLeftColor, CellBorderLeftWidth,
-		CellBorderRight, CellBorderRightStyle, CellBorderRightColor, CellBorderRightWidth,
-		CellBorderTop, CellBorderTopStyle, CellBorderTopColor, CellBorderTopWidth,
-		CellBorderBottom, CellBorderBottomStyle, CellBorderBottomColor, CellBorderBottomWidth:
-		tag = CellBorder
-
-	case OutlineColor, OutlineStyle, OutlineWidth:
-		tag = Outline
-
-	case RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
-		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
-		RadiusBottomLeft, RadiusBottomLeftX, RadiusBottomLeftY,
-		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
-		tag = Radius
-
-	case MarginTop, MarginRight, MarginBottom, MarginLeft,
-		"top-margin", "right-margin", "bottom-margin", "left-margin":
-		tag = Margin
-
-	case PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
-		"top-padding", "right-padding", "bottom-padding", "left-padding":
-		tag = Padding
-
-	case CellPaddingTop, CellPaddingRight, CellPaddingBottom, CellPaddingLeft:
-		tag = CellPadding
-
-	case ColumnSeparatorStyle, ColumnSeparatorWidth, ColumnSeparatorColor:
-		tag = ColumnSeparator
-
-	default:
-		return
-	}
-
-	if listener, ok := view.changeListener[tag]; ok {
-		listener(view, tag)
-	}
-}
-
-func (view *viewData) Set(tag string, value any) bool {
-	return view.set(strings.ToLower(tag), value)
-}
-
-func (view *viewData) set(tag string, value any) bool {
+func (view *viewData) Set(tag PropertyName, value any) bool {
 	if value == nil {
-		view.remove(tag)
+		view.Remove(tag)
 		return true
 	}
 
-	result := func(res bool) bool {
-		if res {
-			view.propertyChangedEvent(tag)
+	tag = view.normalize(tag)
+	changedTags := view.set(tag, value)
+
+	if view.created && len(changedTags) > 0 {
+		for _, tag := range changedTags {
+			view.changed(tag)
 		}
-		return res
+
+		for _, tag := range changedTags {
+			if listener, ok := view.changeListener[tag]; ok {
+				listener(view, tag)
+			}
+		}
 	}
+
+	return changedTags != nil
+}
+
+func normalizeViewTag(tag PropertyName) PropertyName {
+	tag = normalizeViewStyleTag(tag)
+	switch tag {
+	case "tab-index":
+		return TabIndex
+	}
+	return tag
+}
+
+func (view *viewData) getFunc(tag PropertyName) any {
+	if tag == ID {
+		if id := view.ID(); id != "" {
+			return id
+		} else {
+			return nil
+		}
+	}
+	return viewStyleGet(view, tag)
+}
+
+func (view *viewData) removeFunc(tag PropertyName) []PropertyName {
+	var changedTags []PropertyName = nil
 
 	switch tag {
 	case ID:
-		text, ok := value.(string)
-		if !ok {
-			notCompatibleType(ID, value)
-			return false
+		if view.viewID != "" {
+			view.viewID = ""
+			changedTags = []PropertyName{ID}
+		} else {
+			changedTags = []PropertyName{}
 		}
-		view.viewID = text
 
-	case AnimationTag:
-		oldAnimations := []Animation{}
-		if val, ok := view.properties[AnimationTag]; ok && val != nil {
-			if animation, ok := val.([]Animation); ok {
+	case Animation:
+		if val := view.getRaw(Animation); val != nil {
+			if animations, ok := val.([]AnimationProperty); ok {
+				for _, animation := range animations {
+					animation.unused(view.session)
+				}
+			}
+
+			view.setRaw(Animation, nil)
+			changedTags = []PropertyName{Animation}
+		}
+
+	default:
+		changedTags = viewStyleRemove(view, tag)
+	}
+
+	return changedTags
+}
+
+func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
+
+	switch tag {
+
+	case ID:
+		if text, ok := value.(string); ok {
+			view.viewID = text
+			view.setRaw(ID, text)
+			return []PropertyName{ID}
+		}
+		notCompatibleType(ID, value)
+		return nil
+
+	case Animation:
+		oldAnimations := []AnimationProperty{}
+		if val := view.getRaw(Animation); val != nil {
+			if animation, ok := val.([]AnimationProperty); ok {
 				oldAnimations = animation
 			}
 		}
 
-		if !view.setAnimation(tag, value) {
-			return false
+		if !setAnimationProperty(view, tag, value) {
+			return nil
 		}
 
 		for _, animation := range oldAnimations {
 			animation.unused(view.session)
 		}
-		if view.created {
-			viewPropertyChanged(view, tag)
-		}
+		return []PropertyName{Animation}
 
 	case TabIndex, "tab-index":
-		if !view.setIntProperty(tag, value) {
-			return false
-		}
-		if value, ok := intProperty(view, TabIndex, view.Session(), 0); ok {
-			view.session.updateProperty(view.htmlID(), "tabindex", strconv.Itoa(value))
-		} else if view.Focusable() {
-			view.session.updateProperty(view.htmlID(), "tabindex", "0")
-		} else {
-			view.session.updateProperty(view.htmlID(), "tabindex", "-1")
-		}
+		return setIntProperty(view, TabIndex, value)
 
 	case UserData:
-		view.properties[tag] = value
+		view.setRaw(tag, value)
+		return []PropertyName{UserData}
 
 	case Style, StyleDisabled:
-		text, ok := value.(string)
-		if !ok {
-			notCompatibleType(ID, value)
-			return false
+		if text, ok := value.(string); ok {
+			view.setRaw(tag, text)
+			return []PropertyName{tag}
 		}
-		view.properties[tag] = text
-		if view.created {
-			view.session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
-		}
+		notCompatibleType(ID, value)
+		return nil
 
 	case FocusEvent, LostFocusEvent:
-		return result(view.setFocusListener(tag, value))
+		return setNoArgEventListener[View](view, tag, value)
 
 	case KeyDownEvent, KeyUpEvent:
-		return result(view.setKeyListener(tag, value))
+		return setOneArgEventListener[View, KeyEvent](view, tag, value)
 
 	case ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent:
-		return result(view.setMouseListener(tag, value))
+		return setOneArgEventListener[View, MouseEvent](view, tag, value)
 
 	case PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel:
-		return result(view.setPointerListener(tag, value))
+		return setOneArgEventListener[View, PointerEvent](view, tag, value)
 
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
-		return result(view.setTouchListener(tag, value))
+		return setOneArgEventListener[View, TouchEvent](view, tag, value)
 
 	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
-		return result(view.setTransitionListener(tag, value))
+		result := setOneArgEventListener[View, PropertyName](view, tag, value)
+		if result == nil {
+			result = setOneArgEventListener[View, string](view, tag, value)
+			if result != nil {
+				if listeners, ok := view.getRaw(tag).([]func(View, string)); ok {
+					newListeners := make([]func(View, PropertyName), len(listeners))
+					for i, listener := range listeners {
+						newListeners[i] = func(view View, name PropertyName) {
+							listener(view, string(name))
+						}
+					}
+					view.setRaw(tag, newListeners)
+					return result
+				}
+				view.setRaw(tag, nil)
+				return nil
+			}
+		}
+		return result
 
 	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
-		return result(view.setAnimationListener(tag, value))
+		return setOneArgEventListener[View, string](view, tag, value)
 
 	case ResizeEvent, ScrollEvent:
-		return result(view.setFrameListener(tag, value))
-
-	default:
-		if !view.viewStyle.set(tag, value) {
-			return false
-		}
-		if view.created {
-			viewPropertyChanged(view, tag)
-		}
+		return setOneArgEventListener[View, Frame](view, tag, value)
 	}
 
-	view.propertyChangedEvent(tag)
-	return true
+	return viewStyleSet(view, tag, value)
 }
 
 func (view *viewData) SetParams(params Params) bool {
@@ -446,15 +422,24 @@ func (view *viewData) SetParams(params Params) bool {
 	return result
 }
 
-func viewPropertyChanged(view *viewData, tag string) {
-	if view.updateTransformProperty(tag) {
-		return
-	}
+func (view *viewData) propertyChanged(tag PropertyName) {
 
 	htmlID := view.htmlID()
-	session := view.session
+	session := view.Session()
 
 	switch tag {
+	case TabIndex:
+		if value, ok := intProperty(view, TabIndex, view.Session(), 0); ok {
+			session.updateProperty(view.htmlID(), "tabindex", strconv.Itoa(value))
+		} else if view.Focusable() {
+			session.updateProperty(view.htmlID(), "tabindex", "0")
+		} else {
+			session.updateProperty(view.htmlID(), "tabindex", "-1")
+		}
+
+	case Style, StyleDisabled:
+		session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
+
 	case Disabled:
 		tabIndex := GetTabIndex(view, htmlID)
 		enabledClass := view.htmlClass(false)
@@ -462,7 +447,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 		session.startUpdateScript(htmlID)
 		if IsDisabled(view) {
 			session.updateProperty(htmlID, "data-disabled", "1")
-			if view.hasHtmlDisabled {
+			if view.htmlDisabledProperty() {
 				session.updateProperty(htmlID, "disabled", true)
 			}
 			if tabIndex >= 0 {
@@ -473,7 +458,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 			}
 		} else {
 			session.updateProperty(htmlID, "data-disabled", "0")
-			if view.hasHtmlDisabled {
+			if view.htmlDisabledProperty() {
 				session.removeProperty(htmlID, "disabled")
 			}
 			if tabIndex >= 0 {
@@ -485,82 +470,68 @@ func viewPropertyChanged(view *viewData, tag string) {
 		}
 		session.finishUpdateScript(htmlID)
 		updateInnerHTML(htmlID, session)
-		return
 
 	case Visibility:
 		switch GetVisibility(view) {
 		case Invisible:
-			session.updateCSSProperty(htmlID, Visibility, "hidden")
+			session.updateCSSProperty(htmlID, string(Visibility), "hidden")
 			session.updateCSSProperty(htmlID, "display", "")
 			session.callFunc("hideTooltip")
 
 		case Gone:
-			session.updateCSSProperty(htmlID, Visibility, "hidden")
+			session.updateCSSProperty(htmlID, string(Visibility), "hidden")
 			session.updateCSSProperty(htmlID, "display", "none")
 			session.callFunc("hideTooltip")
 
 		default:
-			session.updateCSSProperty(htmlID, Visibility, "visible")
+			session.updateCSSProperty(htmlID, string(Visibility), "visible")
 			session.updateCSSProperty(htmlID, "display", "")
 		}
-		return
 
 	case Background:
-		session.updateCSSProperty(htmlID, Background, view.backgroundCSS(session))
-		return
+		session.updateCSSProperty(htmlID, string(Background), backgroundCSS(view, session))
 
-	case Border:
-		if getBorder(view, Border) == nil {
-			if session.startUpdateScript(htmlID) {
-				defer session.finishUpdateScript(htmlID)
-			}
-			session.updateCSSProperty(htmlID, BorderWidth, "")
-			session.updateCSSProperty(htmlID, BorderColor, "")
-			session.updateCSSProperty(htmlID, BorderStyle, "none")
-			return
-		}
-		fallthrough
+	case Mask:
+		session.updateCSSProperty(htmlID, "mask", maskCSS(view, session))
 
-	case BorderLeft, BorderRight, BorderTop, BorderBottom:
-		if border := getBorder(view, Border); border != nil {
-			if session.startUpdateScript(htmlID) {
-				defer session.finishUpdateScript(htmlID)
-			}
-			session.updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session))
-			session.updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session))
-			session.updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session))
+	case Border, BorderLeft, BorderRight, BorderTop, BorderBottom:
+		cssWidth := ""
+		cssColor := ""
+		cssStyle := "none"
+
+		if border := getBorderProperty(view, Border); border != nil {
+			cssWidth = border.cssWidthValue(session)
+			cssColor = border.cssColorValue(session)
+			cssStyle = border.cssStyleValue(session)
 		}
-		return
+
+		session.updateCSSProperty(htmlID, string(BorderWidth), cssWidth)
+		session.updateCSSProperty(htmlID, string(BorderColor), cssColor)
+		session.updateCSSProperty(htmlID, string(BorderStyle), cssStyle)
 
 	case BorderStyle, BorderLeftStyle, BorderRightStyle, BorderTopStyle, BorderBottomStyle:
-		if border := getBorder(view, Border); border != nil {
-			session.updateCSSProperty(htmlID, BorderStyle, border.cssStyleValue(session))
+		if border := getBorderProperty(view, Border); border != nil {
+			session.updateCSSProperty(htmlID, string(BorderStyle), border.cssStyleValue(session))
 		}
-		return
 
 	case BorderColor, BorderLeftColor, BorderRightColor, BorderTopColor, BorderBottomColor:
-		if border := getBorder(view, Border); border != nil {
-			session.updateCSSProperty(htmlID, BorderColor, border.cssColorValue(session))
+		if border := getBorderProperty(view, Border); border != nil {
+			session.updateCSSProperty(htmlID, string(BorderColor), border.cssColorValue(session))
 		}
-		return
 
 	case BorderWidth, BorderLeftWidth, BorderRightWidth, BorderTopWidth, BorderBottomWidth:
-		if border := getBorder(view, Border); border != nil {
-			session.updateCSSProperty(htmlID, BorderWidth, border.cssWidthValue(session))
+		if border := getBorderProperty(view, Border); border != nil {
+			session.updateCSSProperty(htmlID, string(BorderWidth), border.cssWidthValue(session))
 		}
-		return
 
 	case Outline, OutlineColor, OutlineStyle, OutlineWidth:
-		session.updateCSSProperty(htmlID, Outline, GetOutline(view).cssString(session))
-		return
+		session.updateCSSProperty(htmlID, string(Outline), GetOutline(view).cssString(session))
 
 	case Shadow:
 		session.updateCSSProperty(htmlID, "box-shadow", shadowCSS(view, Shadow, session))
-		return
 
 	case TextShadow:
 		session.updateCSSProperty(htmlID, "text-shadow", shadowCSS(view, TextShadow, session))
-		return
 
 	case Radius, RadiusX, RadiusY, RadiusTopLeft, RadiusTopLeftX, RadiusTopLeftY,
 		RadiusTopRight, RadiusTopRightX, RadiusTopRightY,
@@ -568,19 +539,16 @@ func viewPropertyChanged(view *viewData, tag string) {
 		RadiusBottomRight, RadiusBottomRightX, RadiusBottomRightY:
 		radius := GetRadius(view)
 		session.updateCSSProperty(htmlID, "border-radius", radius.cssString(session))
-		return
 
 	case Margin, MarginTop, MarginRight, MarginBottom, MarginLeft,
 		"top-margin", "right-margin", "bottom-margin", "left-margin":
 		margin := GetMargin(view)
-		session.updateCSSProperty(htmlID, Margin, margin.cssString(session))
-		return
+		session.updateCSSProperty(htmlID, string(Margin), margin.cssString(session))
 
 	case Padding, PaddingTop, PaddingRight, PaddingBottom, PaddingLeft,
 		"top-padding", "right-padding", "bottom-padding", "left-padding":
 		padding := GetPadding(view)
-		session.updateCSSProperty(htmlID, Padding, padding.cssString(session))
-		return
+		session.updateCSSProperty(htmlID, string(Padding), padding.cssString(session))
 
 	case AvoidBreak:
 		if avoid, ok := boolProperty(view, AvoidBreak, session); ok {
@@ -590,38 +558,34 @@ func viewPropertyChanged(view *viewData, tag string) {
 				session.updateCSSProperty(htmlID, "break-inside", "auto")
 			}
 		}
-		return
 
 	case Clip:
-		if clip := getClipShape(view, Clip, session); clip != nil && clip.valid(session) {
+		if clip := getClipShapeProperty(view, Clip, session); clip != nil && clip.valid(session) {
 			session.updateCSSProperty(htmlID, `clip-path`, clip.cssStyle(session))
 		} else {
 			session.updateCSSProperty(htmlID, `clip-path`, "none")
 		}
-		return
 
 	case ShapeOutside:
-		if clip := getClipShape(view, ShapeOutside, session); clip != nil && clip.valid(session) {
-			session.updateCSSProperty(htmlID, ShapeOutside, clip.cssStyle(session))
+		if clip := getClipShapeProperty(view, ShapeOutside, session); clip != nil && clip.valid(session) {
+			session.updateCSSProperty(htmlID, string(ShapeOutside), clip.cssStyle(session))
 		} else {
-			session.updateCSSProperty(htmlID, ShapeOutside, "none")
+			session.updateCSSProperty(htmlID, string(ShapeOutside), "none")
 		}
-		return
 
 	case Filter:
 		text := ""
-		if value := view.getRaw(tag); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+		if value := view.getRaw(Filter); value != nil {
+			if filter, ok := value.(FilterProperty); ok {
 				text = filter.cssStyle(session)
 			}
 		}
-		session.updateCSSProperty(htmlID, tag, text)
-		return
+		session.updateCSSProperty(htmlID, string(Filter), text)
 
 	case BackdropFilter:
 		text := ""
-		if value := view.getRaw(tag); value != nil {
-			if filter, ok := value.(ViewFilter); ok {
+		if value := view.getRaw(BackdropFilter); value != nil {
+			if filter, ok := value.(FilterProperty); ok {
 				text = filter.cssStyle(session)
 			}
 		}
@@ -629,8 +593,7 @@ func viewPropertyChanged(view *viewData, tag string) {
 			defer session.finishUpdateScript(htmlID)
 		}
 		session.updateCSSProperty(htmlID, "-webkit-backdrop-filter", text)
-		session.updateCSSProperty(htmlID, tag, text)
-		return
+		session.updateCSSProperty(htmlID, string(BackdropFilter), text)
 
 	case FontName:
 		if font, ok := stringProperty(view, FontName, session); ok {
@@ -638,7 +601,6 @@ func viewPropertyChanged(view *viewData, tag string) {
 		} else {
 			session.updateCSSProperty(htmlID, "font-family", "")
 		}
-		return
 
 	case Italic:
 		if state, ok := boolProperty(view, tag, session); ok {
@@ -650,7 +612,6 @@ func viewPropertyChanged(view *viewData, tag string) {
 		} else {
 			session.updateCSSProperty(htmlID, "font-style", "")
 		}
-		return
 
 	case SmallCaps:
 		if state, ok := boolProperty(view, tag, session); ok {
@@ -662,22 +623,20 @@ func viewPropertyChanged(view *viewData, tag string) {
 		} else {
 			session.updateCSSProperty(htmlID, "font-variant", "")
 		}
-		return
 
 	case Strikethrough, Overline, Underline:
-		session.updateCSSProperty(htmlID, "text-decoration", view.cssTextDecoration(session))
-		for _, tag2 := range []string{TextLineColor, TextLineStyle, TextLineThickness} {
-			viewPropertyChanged(view, tag2)
-		}
-		return
+		session.updateCSSProperty(htmlID, "text-decoration", textDecorationCSS(view, session))
+		/*
+			for _, tag2 := range []PropertyName{TextLineColor, TextLineStyle, TextLineThickness} {
+				view.propertyChanged(tag2)
+			}
+		*/
 
 	case Transition:
-		view.updateTransitionCSS()
-		return
+		session.updateCSSProperty(htmlID, "transition", transitionCSS(view, session))
 
-	case AnimationTag:
-		session.updateCSSProperty(htmlID, AnimationTag, view.animationCSS(session))
-		return
+	case Animation:
+		session.updateCSSProperty(htmlID, "animation", animationCSS(view, session))
 
 	case AnimationPaused:
 		paused, ok := boolProperty(view, AnimationPaused, session)
@@ -688,21 +647,18 @@ func viewPropertyChanged(view *viewData, tag string) {
 		} else {
 			session.updateCSSProperty(htmlID, `animation-play-state`, `running`)
 		}
-		return
 
 	case ZIndex, Order, TabSize:
 		if i, ok := intProperty(view, tag, session, 0); ok {
-			session.updateCSSProperty(htmlID, tag, strconv.Itoa(i))
+			session.updateCSSProperty(htmlID, string(tag), strconv.Itoa(i))
 		} else {
-			session.updateCSSProperty(htmlID, tag, "")
+			session.updateCSSProperty(htmlID, string(tag), "")
 		}
-		return
 
 	case Row, Column:
 		if parentID := view.parentHTMLID(); parentID != "" {
 			updateInnerHTML(parentID, session)
 		}
-		return
 
 	case UserSelect:
 		if session.startUpdateScript(htmlID) {
@@ -720,7 +676,6 @@ func viewPropertyChanged(view *viewData, tag string) {
 			session.updateCSSProperty(htmlID, "-webkit-user-select", "")
 			session.updateCSSProperty(htmlID, "user-select", "")
 		}
-		return
 
 	case ColumnSpanAll:
 		if spanAll, ok := boolProperty(view, ColumnSpanAll, session); ok && spanAll {
@@ -728,7 +683,6 @@ func viewPropertyChanged(view *viewData, tag string) {
 		} else {
 			session.updateCSSProperty(htmlID, `column-span`, `none`)
 		}
-		return
 
 	case Tooltip:
 		if tooltip := GetTooltip(view); tooltip == "" {
@@ -738,68 +692,87 @@ func viewPropertyChanged(view *viewData, tag string) {
 			session.updateProperty(htmlID, "onmouseenter", "mouseEnterEvent(this, event)")
 			session.updateProperty(htmlID, "onmouseleave", "mouseLeaveEvent(this, event)")
 		}
-		return
-	}
 
-	if cssTag, ok := sizeProperties[tag]; ok {
-		if size, ok := sizeProperty(view, tag, session); ok {
-			session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
+	case PerspectiveOriginX, PerspectiveOriginY:
+		x, y := GetPerspectiveOrigin(view)
+		session.updateCSSProperty(htmlID, "perspective-origin", transformOriginCSS(x, y, AutoSize(), view.Session()))
+
+	case BackfaceVisible:
+		if GetBackfaceVisible(view) {
+			session.updateCSSProperty(htmlID, string(BackfaceVisible), "visible")
 		} else {
-			session.updateCSSProperty(htmlID, cssTag, "")
+			session.updateCSSProperty(htmlID, string(BackfaceVisible), "hidden")
 		}
-		return
-	}
 
-	colorTags := map[string]string{
-		BackgroundColor: BackgroundColor,
-		TextColor:       "color",
-		TextLineColor:   "text-decoration-color",
-		CaretColor:      CaretColor,
-		AccentColor:     AccentColor,
-	}
-	if cssTag, ok := colorTags[tag]; ok {
-		if color, ok := colorProperty(view, tag, session); ok {
-			session.updateCSSProperty(htmlID, cssTag, color.cssString())
+	case TransformOriginX, TransformOriginY, TransformOriginZ:
+		x, y, z := getTransformOrigin(view, session)
+		session.updateCSSProperty(htmlID, "transform-origin", transformOriginCSS(x, y, z, view.Session()))
+
+	case Transform:
+		css := ""
+		if transform := getTransformProperty(view, Transform); transform != nil {
+			css = transform.transformCSS(session)
+		}
+		session.updateCSSProperty(htmlID, "transform", css)
+
+	case Perspective, SkewX, SkewY, TranslateX, TranslateY, TranslateZ,
+		ScaleX, ScaleY, ScaleZ, Rotate, RotateX, RotateY, RotateZ:
+		// do nothing
+
+	case FocusEvent, LostFocusEvent, ResizeEvent, ScrollEvent, KeyDownEvent, KeyUpEvent,
+		ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent,
+		PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel,
+		TouchStart, TouchEnd, TouchMove, TouchCancel,
+		TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
+		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+
+		updateEventListenerHtml(view, tag)
+
+	case DataList:
+		updateInnerHTML(view.htmlID(), view.Session())
+
+	case Opacity:
+		if f, ok := floatTextProperty(view, Opacity, session, 0); ok {
+			session.updateCSSProperty(htmlID, string(Opacity), f)
 		} else {
-			session.updateCSSProperty(htmlID, cssTag, "")
+			session.updateCSSProperty(htmlID, string(Opacity), "")
 		}
-		return
-	}
 
-	if valuesData, ok := enumProperties[tag]; ok && valuesData.cssTag != "" {
-		if n, ok := enumProperty(view, tag, session, 0); ok {
-			session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
-		} else {
-			session.updateCSSProperty(htmlID, valuesData.cssTag, "")
-		}
-		return
-	}
-
-	for _, floatTag := range []string{Opacity, ScaleX, ScaleY, ScaleZ, RotateX, RotateY, RotateZ} {
-		if tag == floatTag {
-			if f, ok := floatTextProperty(view, floatTag, session, 0); ok {
-				session.updateCSSProperty(htmlID, floatTag, f)
+	default:
+		if cssTag, ok := sizeProperties[tag]; ok {
+			if size, ok := sizeProperty(view, tag, session); ok {
+				session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
 			} else {
-				session.updateCSSProperty(htmlID, floatTag, "")
+				session.updateCSSProperty(htmlID, cssTag, "")
+			}
+			return
+		}
+
+		colorTags := map[PropertyName]string{
+			BackgroundColor: string(BackgroundColor),
+			TextColor:       "color",
+			TextLineColor:   "text-decoration-color",
+			CaretColor:      string(CaretColor),
+			AccentColor:     string(AccentColor),
+		}
+		if cssTag, ok := colorTags[tag]; ok {
+			if color, ok := colorProperty(view, tag, session); ok {
+				session.updateCSSProperty(htmlID, cssTag, color.cssString())
+			} else {
+				session.updateCSSProperty(htmlID, cssTag, "")
+			}
+			return
+		}
+
+		if valuesData, ok := enumProperties[tag]; ok && valuesData.cssTag != "" {
+			if n, ok := enumProperty(view, tag, session, 0); ok {
+				session.updateCSSProperty(htmlID, valuesData.cssTag, valuesData.cssValues[n])
+			} else {
+				session.updateCSSProperty(htmlID, valuesData.cssTag, "")
 			}
 			return
 		}
 	}
-}
-
-func (view *viewData) Get(tag string) any {
-	return view.get(strings.ToLower(tag))
-}
-
-func (view *viewData) get(tag string) any {
-	if tag == ID {
-		if view.viewID != "" {
-			return view.viewID
-		} else {
-			return nil
-		}
-	}
-	return view.viewStyle.get(tag)
 }
 
 func (view *viewData) htmlTag() string {
@@ -848,6 +821,10 @@ func (view *viewData) cssStyle(self View, builder cssBuilder) {
 	}
 }
 
+func (view *viewData) htmlDisabledProperty() bool {
+	return view.hasHtmlDisabled
+}
+
 func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	view.created = true
 
@@ -866,10 +843,13 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	}
 }
 
-func viewHTML(view View, buffer *strings.Builder) {
-	viewHTMLTag := view.htmlTag()
+func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
+	if htmlTag == "" {
+		htmlTag = view.htmlTag()
+	}
+	//viewHTMLTag := view.htmlTag()
 	buffer.WriteRune('<')
-	buffer.WriteString(viewHTMLTag)
+	buffer.WriteString(htmlTag)
 	buffer.WriteString(` id="`)
 	buffer.WriteString(view.htmlID())
 	buffer.WriteRune('"')
@@ -908,29 +888,36 @@ func viewHTML(view View, buffer *strings.Builder) {
 		}
 	}
 
-	hasTooltip := false
 	if tooltip := GetTooltip(view); tooltip != "" {
 		buffer.WriteString(`data-tooltip=" `)
 		buffer.WriteString(tooltip)
-		buffer.WriteString(`" `)
-		hasTooltip = true
+		buffer.WriteString(`" onmouseenter="mouseEnterEvent(this, event)" onmouseleave="mouseLeaveEvent(this, event)" `)
 	}
 
 	buffer.WriteString(`onscroll="scrollEvent(this, event)" `)
 
-	keyEventsHtml(view, buffer)
-	mouseEventsHtml(view, buffer, hasTooltip)
-	pointerEventsHtml(view, buffer)
-	touchEventsHtml(view, buffer)
 	focusEventsHtml(view, buffer)
-	transitionEventsHtml(view, buffer)
-	animationEventsHtml(view, buffer)
+	keyEventsHtml(view, buffer)
+
+	viewEventsHtml[MouseEvent](view, []PropertyName{ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent}, buffer)
+	//mouseEventsHtml(view, buffer, hasTooltip)
+
+	viewEventsHtml[PointerEvent](view, []PropertyName{PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel}, buffer)
+	//pointerEventsHtml(view, buffer)
+
+	viewEventsHtml[TouchEvent](view, []PropertyName{TouchStart, TouchEnd, TouchMove, TouchCancel}, buffer)
+	//touchEventsHtml(view, buffer)
+
+	viewEventsHtml[string](view, []PropertyName{TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
+		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent}, buffer)
+	//transitionEventsHtml(view, buffer)
+	//animationEventsHtml(view, buffer)
 
 	buffer.WriteRune('>')
 	view.htmlSubviews(view, buffer)
 	if view.closeHTMLTag() {
 		buffer.WriteString(`</`)
-		buffer.WriteString(viewHTMLTag)
+		buffer.WriteString(htmlTag)
 		buffer.WriteRune('>')
 	}
 }
@@ -957,7 +944,7 @@ func (view *viewData) htmlClass(disabled bool) string {
 	return cls
 }
 
-func (view *viewData) handleCommand(self View, command string, data DataObject) bool {
+func (view *viewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 
 	case KeyDownEvent, KeyUpEvent:
@@ -976,13 +963,13 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 
 	case FocusEvent:
 		view.hasFocus = true
-		for _, listener := range getFocusListeners(view, nil, command) {
+		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
 			listener(self)
 		}
 
 	case LostFocusEvent:
 		view.hasFocus = false
-		for _, listener := range getFocusListeners(view, nil, command) {
+		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
 			listener(self)
 		}
 
@@ -1030,7 +1017,7 @@ func (view *viewData) handleCommand(self View, command string, data DataObject) 
 
 }
 
-func (view *viewData) SetChangeListener(tag string, listener func(View, string)) {
+func (view *viewData) SetChangeListener(tag PropertyName, listener func(View, PropertyName)) {
 	if listener == nil {
 		delete(view.changeListener, tag)
 	} else {
@@ -1043,9 +1030,12 @@ func (view *viewData) HasFocus() bool {
 }
 
 func (view *viewData) String() string {
-	return getViewString(view, nil)
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	writeViewStyle(view.tag, view, buffer, "", nil)
+	return buffer.String()
 }
 
-func (view *viewData) exscludeTags() []string {
+func (view *viewData) exscludeTags() []PropertyName {
 	return nil
 }

@@ -20,7 +20,8 @@ func NewAbsoluteLayout(session Session, params Params) AbsoluteLayout {
 }
 
 func newAbsoluteLayout(session Session) View {
-	return NewAbsoluteLayout(session, nil)
+	//return NewAbsoluteLayout(session, nil)
+	return new(absoluteLayoutData)
 }
 
 // Init initialize fields of ViewsContainer by default values
@@ -34,7 +35,7 @@ func (layout *absoluteLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	if layout.views != nil {
 		for _, view := range layout.views {
 			view.addToCSSStyle(map[string]string{`position`: `absolute`})
-			viewHTML(view, buffer)
+			viewHTML(view, buffer, "")
 		}
 	}
 }
