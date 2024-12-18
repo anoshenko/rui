@@ -201,7 +201,7 @@ func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) 
 		if tag == TransitionEndEvent || tag == TransitionCancelEvent {
 			if animation, ok := view.singleTransition[property]; ok {
 				delete(view.singleTransition, property)
-				setTransition(view, tag, animation)
+				setTransition(view, property, animation)
 				session := view.session
 				session.updateCSSProperty(view.htmlID(), "transition", transitionCSS(view, session))
 			}

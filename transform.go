@@ -499,19 +499,19 @@ func (transform *transformPropertyData) transformCSS(session Session) string {
 	if z.Type != Auto && z.Value != 0 {
 
 		buffer.WriteString(`translate3d(`)
-		buffer.WriteString(x.cssString("0", session))
+		buffer.WriteString(x.cssString("0px", session))
 		buffer.WriteRune(',')
-		buffer.WriteString(y.cssString("0", session))
+		buffer.WriteString(y.cssString("0px", session))
 		buffer.WriteRune(',')
-		buffer.WriteString(z.cssString("0", session))
+		buffer.WriteString(z.cssString("0px", session))
 		buffer.WriteString(") ")
 
 	} else if (x.Type != Auto && x.Value != 0) || (y.Type != Auto && y.Value != 0) {
 
 		buffer.WriteString(`translate(`)
-		buffer.WriteString(x.cssString("0", session))
+		buffer.WriteString(x.cssString("0px", session))
 		buffer.WriteRune(',')
-		buffer.WriteString(y.cssString("0", session))
+		buffer.WriteString(y.cssString("0px", session))
 		buffer.WriteString(") ")
 	}
 
