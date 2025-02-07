@@ -805,15 +805,6 @@ func (view *viewData) addToCSSStyle(addCSS map[string]string) {
 
 func (view *viewData) cssStyle(self View, builder cssBuilder) {
 	view.viewStyle.cssViewStyle(builder, view.session)
-	/*
-		switch GetVisibility(view) {
-		case Invisible:
-			builder.add(`visibility`, `hidden`)
-
-		case Gone:
-			builder.add(`display`, `none`)
-		}
-	*/
 	if view.addCSS != nil {
 		for tag, value := range view.addCSS {
 			builder.add(tag, value)

@@ -505,12 +505,6 @@ func gridCellSizes(properties Properties, tag PropertyName, session Session) []S
 	return []SizeUnit{}
 }
 
-/*
-func (gridLayout *gridLayoutData) cssStyle(self View, builder cssBuilder) {
-	gridLayout.viewsContainerData.cssStyle(self, builder)
-}
-*/
-
 // GetCellVerticalAlign returns the vertical align of a GridLayout cell content: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetCellVerticalAlign(view View, subviewID ...string) int {

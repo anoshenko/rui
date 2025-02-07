@@ -197,7 +197,7 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 	builder.add("align-items", "stretch")
 	builder.add("justify-items", "stretch")
 
-	button.viewsContainerData.cssStyle(self, builder)
+	button.viewData.cssStyle(self, builder)
 }
 
 func checkboxHtml(button View, buffer *strings.Builder, checked bool) (int, int) {

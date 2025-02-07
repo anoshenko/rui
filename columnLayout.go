@@ -140,9 +140,9 @@ func newColumnLayout(session Session) View {
 func (columnLayout *columnLayoutData) init(session Session) {
 	columnLayout.viewsContainerData.init(session)
 	columnLayout.tag = "ColumnLayout"
+	columnLayout.systemClass = "ruiColumnLayout"
 	columnLayout.normalize = normalizeColumnLayoutTag
 	columnLayout.changed = columnLayout.propertyChanged
-	//columnLayout.systemClass = "ruiColumnLayout"
 }
 
 func normalizeColumnLayoutTag(tag PropertyName) PropertyName {

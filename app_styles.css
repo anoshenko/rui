@@ -147,6 +147,11 @@ ul:focus {
 
 .ruiListLayout {
   display: flex;
+  overflow: auto;
+}
+
+.ruiColumnLayout {
+  overflow: auto;
 }
 
 .ruiStackLayout {

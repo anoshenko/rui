@@ -666,7 +666,7 @@ func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Buil
 }
 
 func (tabsLayout *tabsLayoutData) cssStyle(self View, builder cssBuilder) {
-	tabsLayout.viewsContainerData.cssStyle(self, builder)
+	tabsLayout.viewData.cssStyle(self, builder)
 	switch tabsLayout.tabsLocation() {
 	case TopTabs:
 		builder.add(`grid-template-rows`, `auto 1fr`)

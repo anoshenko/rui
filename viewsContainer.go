@@ -155,11 +155,6 @@ func (container *viewsContainerData) ViewIndex(view View) int {
 	return -1
 }
 
-func (container *viewsContainerData) cssStyle(self View, builder cssBuilder) {
-	container.viewData.cssStyle(self, builder)
-	builder.add(`overflow`, `auto`)
-}
-
 func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Builder) {
 	if container.views != nil {
 		for _, view := range container.views {
