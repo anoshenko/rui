@@ -191,7 +191,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 	for _, tag := range []PropertyName{BackgroundClip, BackgroundOrigin, MaskClip, MaskOrigin} {
 		if value, ok := enumProperty(style, tag, session, 0); ok {
 			if data, ok := enumProperties[tag]; ok {
-				builder.add(data.cssTag, data.values[value])
+				builder.add(data.cssTag, data.cssValues[value])
 			}
 		}
 	}
