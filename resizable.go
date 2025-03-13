@@ -22,7 +22,7 @@ const (
 	//   - 4 (BottomSide) or "bottom" - Bottom frame side.
 	//   - 8 (LeftSide) or "left" - Left frame side.
 	//   - 15 (AllSides) or "all" - All frame sides.
-	Side = "side"
+	Side PropertyName = "side"
 
 	// ResizeBorderWidth is the constant for "resize-border-width" property tag.
 	//
@@ -33,7 +33,7 @@ const (
 	//
 	// Internal type is SizeUnit, other types converted to it during assignment.
 	// See SizeUnit description for more details.
-	ResizeBorderWidth = "resize-border-width"
+	ResizeBorderWidth PropertyName = "resize-border-width"
 )
 
 // Constants for values of [Resizable] "side" property. These constants can be ORed if needed.

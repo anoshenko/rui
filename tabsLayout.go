@@ -35,7 +35,7 @@ const (
 	// Defines the icon name that is displayed in the tab. The property is set for the child view of TabsLayout.
 	//
 	// Supported types: string.
-	Icon = "icon"
+	Icon PropertyName = "icon"
 
 	// TabCloseButton is the constant for "tab-close-button" property tag.
 	//

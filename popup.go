@@ -20,7 +20,7 @@ const (
 	// Set the title of the tab. The property is set for the child view of TabsLayout.
 	//
 	// Supported types: string.
-	Title = "title"
+	Title PropertyName = "title"
 
 	// TitleStyle is the constant for "title-style" property tag.
 	//
@@ -161,7 +161,7 @@ const (
 	//   - string - string representation of Transform interface. Example:
 	//
 	//	"_{ translate-x = 10px, scale-y = 1.1}"
-	ShowTransform = "show-transform"
+	ShowTransform PropertyName = "show-transform"
 
 	// ShowDuration is the constant for "show-duration" property tag.
 	//
@@ -171,7 +171,7 @@ const (
 	// Supported types: float, int, string.
 	//
 	// Internal type is float, other types converted to it during assignment.
-	ShowDuration = "show-duration"
+	ShowDuration PropertyName = "show-duration"
 
 	// ShowTiming is the constant for "show-timing" property tag.
 	//
@@ -188,7 +188,7 @@ const (
 	//   - "linear" (LinearTiming) - Constant speed.
 	//   - "step(n)" (StepTiming(n int) function) - Timing function along stepCount stops along the transition, displaying each stop for equal lengths of time.
 	//   - "cubic-bezier(x1, y1, x2, y2)" (CubicBezierTiming(x1, y1, x2, y2 float64) function) - Cubic-Bezier curve timing function. x1 and x2 must be in the range [0, 1].
-	ShowTiming = "show-timing"
+	ShowTiming PropertyName = "show-timing"
 
 	// ShowOpacity is the constant for "show-opacity" property tag.
 	//
@@ -199,7 +199,7 @@ const (
 	// Supported types: float, int, string.
 	//
 	// Internal type is float, other types converted to it during assignment.
-	ShowOpacity = "show-opacity"
+	ShowOpacity PropertyName = "show-opacity"
 
 	// ArrowOffset is the constant for "arrow-offset" property tag.
 	//
@@ -369,7 +369,7 @@ func (arrow *popupArrow) createView(popupView View) View {
 
 	params := Params{BackgroundColor: GetBackgroundColor(popupView)}
 
-	if shadow := GetShadowPropertys(popupView); shadow != nil {
+	if shadow := GetShadowProperty(popupView); shadow != nil {
 		params[Shadow] = shadow
 	}
 

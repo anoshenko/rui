@@ -1,3 +1,7 @@
+# v0.18.2
+
+* fixed typo: GetShadowPropertys -> GetShadowProperty
+
 # v0.18.0
 
 * Property name type changed from string to PropertyName. 

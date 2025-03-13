@@ -334,9 +334,9 @@ func GetOutlineOffset(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, OutlineOffset, false)
 }
 
-// GetShadowPropertys returns shadows of the subview.
+// GetShadowProperty returns shadows of the subview.
 // If the second argument (subviewID) is not specified or it is "" then shadows of the first argument (view) is returned.
-func GetShadowPropertys(view View, subviewID ...string) []ShadowProperty {
+func GetShadowProperty(view View, subviewID ...string) []ShadowProperty {
 	view = getSubview(view, subviewID)
 	if view == nil {
 		return []ShadowProperty{}

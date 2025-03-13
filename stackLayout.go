@@ -20,7 +20,7 @@ const (
 	// Conversion rules:
 	//   - TransformProperty - stored as is, no conversion performed.
 	//   - string - string representation of Transform interface. Example: "_{translate-x = 10px, scale-y = 1.1}".
-	PushTransform = "push-transform"
+	PushTransform PropertyName = "push-transform"
 
 	// PushDuration is the constant for "push-duration" property tag.
 	//
@@ -30,7 +30,7 @@ const (
 	// Supported types: float, int, string.
 	//
 	// Internal type is float, other types converted to it during assignment.
-	PushDuration = "push-duration"
+	PushDuration PropertyName = "push-duration"
 
 	// PushTiming is the constant for "push-timing" property tag.
 	//
@@ -47,7 +47,7 @@ const (
 	//   - "linear" (LinearTiming) - Constant speed.
 	//   - "step(n)" (StepTiming(n int) function) - Timing function along stepCount stops along the transition, displaying each stop for equal lengths of time.
 	//   - "cubic-bezier(x1, y1, x2, y2)" (CubicBezierTiming(x1, y1, x2, y2 float64) function) - Cubic-Bezier curve timing function. x1 and x2 must be in the range [0, 1].
-	PushTiming = "push-timing"
+	PushTiming PropertyName = "push-timing"
 
 	// MoveToFrontAnimation is the constant for "move-to-front-animation" property tag.
 	//
@@ -59,7 +59,7 @@ const (
 	// Values:
 	//   - true, 1, "true", "yes", "on", "1" - animation is used (default value).
 	//   - false, 0, "false", "no", "off", "0" - animation is not used.
-	MoveToFrontAnimation = "move-to-front-animation"
+	MoveToFrontAnimation PropertyName = "move-to-front-animation"
 
 	// PushPerspective is the constant for "push-perspective" property tag.
 	//
