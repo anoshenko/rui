@@ -1115,7 +1115,7 @@ func GetListViewCheckedItems(view View, subviewID ...string) []int {
 					return checkedItems
 
 				case SingleCheckbox:
-					if len(checkedItems) > 1 {
+					if len(checkedItems) > 0 {
 						return []int{checkedItems[0]}
 					}
 				}
