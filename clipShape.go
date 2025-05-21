@@ -506,7 +506,7 @@ func (clip *polygonClipData) points() []any {
 
 func (clip *polygonClipData) writeString(buffer *strings.Builder, indent string) {
 
-	buffer.WriteString("inset { ")
+	buffer.WriteString("polygon { ")
 
 	if points := clip.points(); points != nil {
 		buffer.WriteString(string(Points))
