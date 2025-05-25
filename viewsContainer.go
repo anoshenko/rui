@@ -64,58 +64,62 @@ func (container *viewsContainerData) Views() []View {
 	return []View{}
 }
 
-// Append appends a view to the end of the list of a view children
-func (container *viewsContainerData) Append(view View) {
+func (container *viewsContainerData) append(view View) bool {
 	if view != nil {
-		htmlID := container.htmlID()
-		view.setParentID(htmlID)
+		view.setParentID(container.htmlID())
 		if len(container.views) == 0 {
 			container.views = []View{view}
 		} else {
 			container.views = append(container.views, view)
 		}
+		return true
+	}
+	return false
+}
 
-		if container.created {
-			buffer := allocStringBuilder()
-			defer freeStringBuilder(buffer)
+// Append appends a view to the end of the list of a view children
+func (container *viewsContainerData) Append(view View) {
+	if container.append(view) && container.created {
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
 
-			viewHTML(view, buffer, "")
-			container.Session().appendToInnerHTML(htmlID, buffer.String())
+		viewHTML(view, buffer, "")
+		container.Session().appendToInnerHTML(container.htmlID(), buffer.String())
 
-			if listener, ok := container.changeListener[Content]; ok {
-				listener(container, Content)
-			}
+		if listener, ok := container.changeListener[Content]; ok {
+			listener(container, Content)
 		}
 	}
 }
 
-// Insert inserts a view to the "index" position in the list of a view children
-func (container *viewsContainerData) Insert(view View, index int) {
+func (container *viewsContainerData) insert(view View, index int) bool {
 	if view != nil {
 		if container.views == nil || index < 0 || index >= len(container.views) {
-			container.Append(view)
-			return
+			return container.append(view)
 		}
 
-		htmlID := container.htmlID()
-		view.setParentID(htmlID)
+		view.setParentID(container.htmlID())
 		if index > 0 {
 			container.views = append(container.views[:index], append([]View{view}, container.views[index:]...)...)
 		} else {
 			container.views = append([]View{view}, container.views...)
 		}
+		return true
+	}
+	return false
+}
 
-		if container.created {
-			updateInnerHTML(htmlID, container.Session())
-			if listener, ok := container.changeListener[Content]; ok {
-				listener(container, Content)
-			}
+// Insert inserts a view to the "index" position in the list of a view children
+func (container *viewsContainerData) Insert(view View, index int) {
+	if container.insert(view, index) && container.created {
+		updateInnerHTML(container.htmlID(), container.Session())
+		if listener, ok := container.changeListener[Content]; ok {
+			listener(container, Content)
 		}
 	}
 }
 
-// Remove removes view from list and return it
-func (container *viewsContainerData) RemoveView(index int) View {
+func (container *viewsContainerData) removeView(index int) View {
 	if container.views == nil {
 		container.views = []View{}
 		return nil
@@ -136,8 +140,13 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	}
 
 	view.setParentID("")
+	return view
+}
 
-	if container.created {
+// Remove removes view from list and return it
+func (container *viewsContainerData) RemoveView(index int) View {
+	view := container.removeView(index)
+	if view != nil && container.created {
 		container.Session().callFunc("removeView", view.htmlID())
 		if listener, ok := container.changeListener[Content]; ok {
 			listener(container, Content)

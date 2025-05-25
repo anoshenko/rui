@@ -546,26 +546,22 @@ func (tabsLayout *tabsLayoutData) updateTabCloseButton(view View, tag PropertyNa
 
 // Append appends view to the end of view list
 func (tabsLayout *tabsLayoutData) Append(view View) {
-	if tabsLayout.views == nil {
-		tabsLayout.views = []View{}
-	}
-	if view != nil {
-		tabsLayout.viewsContainerData.Append(view)
+	if tabsLayout.append(view) {
 		view.SetChangeListener(Title, tabsLayout.updateTitle)
 		view.SetChangeListener(Icon, tabsLayout.updateIcon)
 		view.SetChangeListener(TabCloseButton, tabsLayout.updateTabCloseButton)
-		if len(tabsLayout.views) == 1 {
-			tabsLayout.setRaw(Current, nil)
-			tabsLayout.Set(Current, 0)
+		if tabsLayout.created {
+			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
+			if listener, ok := tabsLayout.changeListener[Content]; ok {
+				listener(tabsLayout, Content)
+			}
+			tabsLayout.Set(Current, len(tabsLayout.views)-1)
 		}
 	}
 }
 
 // Insert inserts view to the "index" position in view list
 func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
-	if tabsLayout.views == nil {
-		tabsLayout.views = []View{}
-	}
 	if view != nil {
 		if current := GetCurrent(tabsLayout); current >= index {
 			tabsLayout.setRaw(Current, current+1)
@@ -600,14 +596,21 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 		newCurrent--
 	}
 
-	if view := tabsLayout.viewsContainerData.RemoveView(index); view != nil {
+	if view := tabsLayout.viewsContainerData.removeView(index); view != nil {
 		view.SetChangeListener(Title, nil)
 		view.SetChangeListener(Icon, nil)
 		view.SetChangeListener(TabCloseButton, nil)
 
-		if newCurrent != oldCurrent {
+		if tabsLayout.created {
+			if newCurrent != oldCurrent {
+				tabsLayout.Set(Current, newCurrent)
+			}
+			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
+			if listener, ok := tabsLayout.changeListener[Content]; ok {
+				listener(tabsLayout, Content)
+			}
+		} else if newCurrent != oldCurrent {
 			tabsLayout.setRaw(Current, newCurrent)
-			tabsLayout.currentChanged(newCurrent, oldCurrent)
 		}
 	}
 	return nil
