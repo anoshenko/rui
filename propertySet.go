@@ -2,6 +2,7 @@ package rui
 
 import (
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -22,15 +23,16 @@ var colorProperties = []PropertyName{
 	AccentColor,
 }
 
-func isPropertyInList(tag PropertyName, list []PropertyName) bool {
-	for _, prop := range list {
-		if prop == tag {
-			return true
+/*
+	func isPropertyInList(tag PropertyName, list []PropertyName) bool {
+		for _, prop := range list {
+			if prop == tag {
+				return true
+			}
 		}
+		return false
 	}
-	return false
-}
-
+*/
 var angleProperties = []PropertyName{
 	From,
 }
@@ -91,6 +93,8 @@ var floatProperties = map[PropertyName]struct{ min, max float64 }{
 	VideoWidth:        {min: 0, max: 10000},
 	VideoHeight:       {min: 0, max: 10000},
 	PushDuration:      {min: 0, max: math.MaxFloat64},
+	DragImageXOffset:  {min: -math.MaxFloat64, max: math.MaxFloat64},
+	DragImageYOffset:  {min: -math.MaxFloat64, max: math.MaxFloat64},
 }
 
 var sizeProperties = map[PropertyName]string{
@@ -849,19 +853,19 @@ func propertiesSet(properties Properties, tag PropertyName, value any) []Propert
 		return setFloatProperty(properties, tag, value, limits.min, limits.max)
 	}
 
-	if isPropertyInList(tag, colorProperties) {
+	if slices.Contains(colorProperties, tag) {
 		return setColorProperty(properties, tag, value)
 	}
 
-	if isPropertyInList(tag, angleProperties) {
+	if slices.Contains(angleProperties, tag) {
 		return setAngleProperty(properties, tag, value)
 	}
 
-	if isPropertyInList(tag, boolProperties) {
+	if slices.Contains(boolProperties, tag) {
 		return setBoolProperty(properties, tag, value)
 	}
 
-	if isPropertyInList(tag, intProperties) {
+	if slices.Contains(intProperties, tag) {
 		return setIntProperty(properties, tag, value)
 	}
 
@@ -873,18 +877,6 @@ func propertiesSet(properties Properties, tag PropertyName, value any) []Propert
 	notCompatibleType(tag, value)
 	return nil
 }
-
-/*
-func (properties *propertyList) Set(tag PropertyName, value any) bool {
-	tag = properties.normalize(tag)
-	if value == nil {
-		properties.remove(properties, tag)
-		return true
-	}
-
-	return properties.set(properties, tag, value) != nil
-}
-*/
 
 func (data *dataProperty) Set(tag PropertyName, value any) bool {
 	if value == nil {

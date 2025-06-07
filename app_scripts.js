@@ -2125,3 +2125,103 @@ function createPath2D(svg) {
 		return new Path2D();
 	}
 }
+
+function stringToBase64(str) {
+	const bytes = new TextEncoder().encode(str);
+	const binString = String.fromCodePoint(...bytes);
+	return btoa(binString);
+}
+
+function base64ToString(base64) {
+	const binString = atob(base64);
+  	const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+	const result = new TextDecoder().decode(bytes);
+	return result;
+}
+
+function dragAndDropEvent(element, event, tag) {
+	event.stopPropagation();
+	//event.preventDefault()
+
+	let message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event);
+	if (event.dataTransfer) {
+		if (event.target) {
+			message += ",target=" + event.target.id;
+		}
+		let dataText = ""
+		for (const item of event.dataTransfer.items) {
+			const data = event.dataTransfer.getData(item.type);
+			if (data) {
+				if (dataText != "") {
+					dataText += ";";
+				}
+				dataText += stringToBase64(item.type) + ":" + stringToBase64(data);
+			}
+		}
+		if (dataText != "") {
+			message += ',data="' + dataText + '"';
+		}
+	}
+	message += "}";
+	sendMessage(message);
+}
+
+function dragStartEvent(element, event) {
+	const data = element.getAttribute("data-drag");
+	if (data) {
+		const elements = data.split(";");
+		for (const line of elements) {
+			const pair = line.split(":");
+			if (pair.length == 2) {
+				event.dataTransfer.setData(base64ToString(pair[0]), base64ToString(pair[1]));
+			}
+		}
+	}
+
+	const image = element.getAttribute("data-drag-image");
+	if (image) {
+		let x = element.getAttribute("data-drag-image-x");
+		if (!x) {
+			x = 0;
+		}
+
+		let y = element.getAttribute("data-drag-image-y");
+		if (!y) {
+			y = 0;
+		}
+
+		let img = new Image();
+  		img.src = image;
+		event.dataTransfer.setDragImage(img, x, y);
+	}
+
+	// TODO drag effect
+
+	dragAndDropEvent(element, event, "drag-start-event");
+}
+
+function dragEndEvent(element, event) {
+	dragAndDropEvent(element, event, "drag-end-event")
+}
+
+function dragEnterEvent(element, event) {
+	dragAndDropEvent(element, event, "drag-enter-event")
+}
+
+function dragLeaveEvent(element, event) {
+	dragAndDropEvent(element, event, "drag-leave-event")
+}
+
+function dragOverEvent(element, event) {
+	event.preventDefault();
+	if (element.getAttribute("data-drag-over") == "1") {
+		dragAndDropEvent(element, event, "drag-over-event")
+	} else {
+		event.stopPropagation();
+	}
+}
+
+function dropEvent(element, event) {
+	event.preventDefault();
+	dragAndDropEvent(element, event, "drop-event")
+}

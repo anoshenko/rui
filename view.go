@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"maps"
 	"strconv"
 	"strings"
 )
@@ -399,6 +400,85 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	case ResizeEvent, ScrollEvent:
 		return setOneArgEventListener[View, Frame](view, tag, value)
+
+	case DragData:
+		switch value := value.(type) {
+		case map[string]string:
+			if len(value) == 0 {
+				view.setRaw(DragData, nil)
+			} else {
+				view.setRaw(DragData, maps.Clone(value))
+			}
+
+		case string:
+			if value == "" {
+				view.setRaw(DragData, nil)
+			} else {
+				data := map[string]string{}
+				for _, line := range strings.Split(value, ";") {
+					index := strings.IndexRune(line, ':')
+					if index < 0 {
+						invalidPropertyValue(DragData, value)
+						return nil
+					}
+					mime := line[:index]
+					val := line[index+1:]
+					if len(mime) > 0 || len(val) > 0 {
+						data[mime] = val
+					}
+				}
+
+				if len(data) == 0 {
+					view.setRaw(DragData, nil)
+				} else {
+					view.setRaw(DragData, data)
+				}
+			}
+
+		case DataObject:
+			data := map[string]string{}
+			count := value.PropertyCount()
+			for i := range count {
+				node := value.Property(i)
+				if node.Type() == TextNode {
+					data[node.Tag()] = node.Text()
+				} else {
+					invalidPropertyValue(DragData, value)
+					return nil
+				}
+			}
+			if len(data) == 0 {
+				view.setRaw(DragData, nil)
+			} else {
+				view.setRaw(DragData, data)
+			}
+
+		case DataNode:
+			switch value.Type() {
+			case TextNode:
+				return view.setFunc(DragData, value.Text())
+
+			case ObjectNode:
+				return view.setFunc(DragData, value.Object())
+			}
+			invalidPropertyValue(DragData, value)
+			return nil
+
+		case DataValue:
+			if value.IsObject() {
+				return view.setFunc(DragData, value.Object())
+			}
+			return view.setFunc(DragData, value.Value())
+
+		default:
+			notCompatibleType(DragData, value)
+		}
+
+		return []PropertyName{DragData}
+
+	case DragStartEvent, DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
+		return setOneArgEventListener[View, DragAndDropEvent](view, tag, value)
+
 	}
 
 	return viewStyleSet(view, tag, value)
@@ -724,9 +804,80 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 		PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel,
 		TouchStart, TouchEnd, TouchMove, TouchCancel,
 		TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
-		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent,
+		DragEndEvent, DragEnterEvent, DragLeaveEvent:
 
 		updateEventListenerHtml(view, tag)
+
+	case DragStartEvent:
+		if view.getRaw(DragStartEvent) != nil || view.getRaw(DragData) != nil {
+			session.updateProperty(htmlID, "ondragstart", "dragStartEvent(this, event)")
+		} else {
+			session.removeProperty(view.htmlID(), "ondragstart")
+		}
+
+	case DropEvent:
+		if view.getRaw(DropEvent) != nil {
+			session.updateProperty(htmlID, "ondrop", "dropEvent(this, event)")
+			session.updateProperty(htmlID, "ondragover", "dragOverEvent(this, event)")
+			if view.getRaw(DragOverEvent) != nil {
+				session.updateProperty(htmlID, "data-drag-over", "1")
+			} else {
+				session.removeProperty(view.htmlID(), "data-drag-over")
+			}
+		} else {
+			session.removeProperty(view.htmlID(), "ondrop")
+			session.removeProperty(view.htmlID(), "ondragover")
+		}
+
+	case DragOverEvent:
+		if view.getRaw(DragOverEvent) != nil {
+			session.updateProperty(htmlID, "data-drag-over", "1")
+		} else {
+			session.removeProperty(view.htmlID(), "data-drag-over")
+		}
+
+	case DragData:
+		if data := base64DragData(view); data != "" {
+			session.updateProperty(htmlID, "draggable", "true")
+			session.updateProperty(htmlID, "data-drag", data)
+			session.updateProperty(htmlID, "ondragstart", "dragStartEvent(this, event)")
+		} else {
+			session.removeProperty(view.htmlID(), "draggable")
+			session.removeProperty(view.htmlID(), "data-drag")
+			if view.getRaw(DragStartEvent) == nil {
+				session.removeProperty(view.htmlID(), "ondragstart")
+			}
+		}
+
+	case DragImage:
+		if img, ok := stringProperty(view, DragImage, view.session); ok && img != "" {
+			img = strings.Trim(img, " \t")
+			if img[0] == '@' {
+				img, ok = view.session.ImageConstant(img[1:])
+				if !ok {
+					session.removeProperty(view.htmlID(), "data-drag-image")
+					return
+				}
+			}
+			session.updateProperty(htmlID, "data-drag-image", img)
+		} else {
+			session.removeProperty(view.htmlID(), "data-drag-image")
+		}
+
+	case DragImageXOffset:
+		if f, ok := floatTextProperty(view, DragImageXOffset, session, 0); ok {
+			session.updateProperty(htmlID, "data-drag-image-x", f)
+		} else {
+			session.removeProperty(view.htmlID(), "data-drag-image-x")
+		}
+
+	case DragImageYOffset:
+		if f, ok := floatTextProperty(view, DragImageYOffset, session, 0); ok {
+			session.updateProperty(htmlID, "data-drag-image-y", f)
+		} else {
+			session.removeProperty(view.htmlID(), "data-drag-image-y")
+		}
 
 	case DataList:
 		updateInnerHTML(view.htmlID(), view.Session())
@@ -891,18 +1042,12 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 	keyEventsHtml(view, buffer)
 
 	viewEventsHtml[MouseEvent](view, []PropertyName{ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent}, buffer)
-	//mouseEventsHtml(view, buffer, hasTooltip)
-
 	viewEventsHtml[PointerEvent](view, []PropertyName{PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel}, buffer)
-	//pointerEventsHtml(view, buffer)
-
 	viewEventsHtml[TouchEvent](view, []PropertyName{TouchStart, TouchEnd, TouchMove, TouchCancel}, buffer)
-	//touchEventsHtml(view, buffer)
-
 	viewEventsHtml[string](view, []PropertyName{TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
 		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent}, buffer)
-	//transitionEventsHtml(view, buffer)
-	//animationEventsHtml(view, buffer)
+
+	dragAndDropHtml(view, buffer)
 
 	buffer.WriteRune('>')
 	view.htmlSubviews(view, buffer)
@@ -951,6 +1096,12 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
 		handleTouchEvents(self, command, data)
+
+	case DragStartEvent:
+		handleDragAndDropEvents(self, command, data)
+
+	case DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
+		handleDragAndDropEvents(self, command, data)
 
 	case FocusEvent:
 		view.hasFocus = true

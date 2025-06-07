@@ -33,6 +33,9 @@ var eventJsFunc = map[PropertyName]struct{ jsEvent, jsFunc string }{
 	AnimationEndEvent:       {jsEvent: "onanimationend", jsFunc: "animationEndEvent"},
 	AnimationIterationEvent: {jsEvent: "onanimationiteration", jsFunc: "animationIterationEvent"},
 	AnimationCancelEvent:    {jsEvent: "onanimationcancel", jsFunc: "animationCancelEvent"},
+	DragEndEvent:            {jsEvent: "ondragend", jsFunc: "dragEndEvent"},
+	DragEnterEvent:          {jsEvent: "ondragenter", jsFunc: "dragEnterEvent"},
+	DragLeaveEvent:          {jsEvent: "ondragleave", jsFunc: "dragLeaveEvent"},
 }
 
 func valueToNoArgEventListeners[V any](value any) ([]func(V), bool) {
