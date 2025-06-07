@@ -2193,6 +2193,11 @@ function dragStartEvent(element, event) {
 		let img = new Image();
   		img.src = image;
 		event.dataTransfer.setDragImage(img, x, y);
+
+		let effect = element.getAttribute("data-drag-effect");
+		if (effect) {
+			event.dataTransfer.effectAllowed = effect;
+		}
 	}
 
 	// TODO drag effect

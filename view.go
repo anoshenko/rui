@@ -866,17 +866,23 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 		}
 
 	case DragImageXOffset:
-		if f, ok := floatTextProperty(view, DragImageXOffset, session, 0); ok {
+		if f := GetDragImageXOffset(view); f != 0 {
 			session.updateProperty(htmlID, "data-drag-image-x", f)
 		} else {
 			session.removeProperty(view.htmlID(), "data-drag-image-x")
 		}
 
 	case DragImageYOffset:
-		if f, ok := floatTextProperty(view, DragImageYOffset, session, 0); ok {
+		if f := GetDragImageXOffset(view); f != 0 {
 			session.updateProperty(htmlID, "data-drag-image-y", f)
 		} else {
 			session.removeProperty(view.htmlID(), "data-drag-image-y")
+		}
+
+	case DragEffect:
+		effects := enumProperties[DragEffect].cssValues
+		if n := GetDragEffect(view); n > 0 && n < len(effects) {
+			session.updateProperty(htmlID, "data-drag-effect", effects[n])
 		}
 
 	case DataList:

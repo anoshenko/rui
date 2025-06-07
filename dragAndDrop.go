@@ -2,6 +2,7 @@ package rui
 
 import (
 	"encoding/base64"
+	"fmt"
 	"maps"
 	"strings"
 )
@@ -37,6 +38,29 @@ const (
 	//
 	// Supported types: float, int, string.
 	DragImageYOffset PropertyName = "drag-image-y-offset"
+
+	// DragEffect is the constant for "drag-effect" property tag.
+	//
+	// Used by View.
+	// Specifies the effect that is allowed for a drag operation.
+	// The copy operation is used to indicate that the data being dragged will be copied
+	// from its present location to the drop location.
+	// The move operation is used to indicate that the data being dragged will be moved,
+	// and the link operation is used to indicate that some form of relationship
+	// or connection will be created between the source and drop locations.
+	//
+	// Supported types: int, string.
+	//
+	// Values:
+	//   - 0 (DragEffectAll) or "all" - All operations are permitted (defaut value).
+	//   - 1 (DragEffectCopy) or "copy" - A copy of the source item may be made at the new location.
+	//   - 2 (DragEffectMove) or "move" - An item may be moved to a new location.
+	//   - 3 (DragEffectLink) or "link" - A link may be established to the source at the new location.
+	//   - 4 (DragEffectCopyMove) or "copyMove" - A copy or move operation is permitted.
+	//   - 5 (DragEffectCopyLink) or "copyLink" - A copy or link operation is permitted.
+	//   - 6 (DragEffectLinkMove) or "linkMove" - A link or move operation is permitted.
+	//   - 7 (DragEffectNone) or "none" - The item may not be dropped.
+	DragEffect PropertyName = "drag-effect"
 
 	// DragStartEvent is the constant for "drag-start-event" property tag.
 	//
@@ -91,6 +115,30 @@ const (
 	// General listener format:
 	//
 	DropEvent PropertyName = "drop-event"
+
+	// DragEffectAll - the value of the "drag-effect" property: all operations (copy, move, and link) are permitted (defaut value).
+	DragEffectAll = 0
+
+	// DragEffectCopy - the value of the "drag-effect" property: a copy of the source item may be made at the new location.
+	DragEffectCopy = 1
+
+	// DragEffectMove - the value of the "drag-effect" property: an item may be moved to a new location.
+	DragEffectMove = 2
+
+	// DragEffectLink - the value of the "drag-effect" property: a link may be established to the source at the new location.
+	DragEffectLink = 3
+
+	// DragEffectCopyMove - the value of the "drag-effect" property: a copy or move operation is permitted.
+	DragEffectCopyMove = 4
+
+	// DragEffectCopyLink - the value of the "drag-effect" property: a copy or link operation is permitted.
+	DragEffectCopyLink = 5
+
+	// DragEffectLinkMove - the value of the "drag-effect" property: a link or move operation is permitted.
+	DragEffectLinkMove = 6
+
+	// DragEffectNone - the value of the "drag-effect" property: the item may not be dropped.
+	DragEffectNone = 7
 )
 
 // MouseEvent represent a mouse event
@@ -197,15 +245,22 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 		}
 	}
 
-	if f, ok := floatTextProperty(view, DragImageXOffset, session, 0); ok {
+	if f := GetDragImageXOffset(view); f != 0 {
 		buffer.WriteString(` data-drag-image-x="`)
-		buffer.WriteString(f)
+		buffer.WriteString(fmt.Sprintf("%g", f))
 		buffer.WriteString(`" `)
 	}
 
-	if f, ok := floatTextProperty(view, DragImageYOffset, session, 0); ok {
+	if f := GetDragImageYOffset(view); f != 0 {
 		buffer.WriteString(` data-drag-image-y="`)
-		buffer.WriteString(f)
+		buffer.WriteString(fmt.Sprintf("%g", f))
+		buffer.WriteString(`" `)
+	}
+
+	effects := enumProperties[DragEffect].cssValues
+	if n := GetDragEffect(view); n > 0 && n < len(effects) {
+		buffer.WriteString(` data-drag-effect="`)
+		buffer.WriteString(effects[n])
 		buffer.WriteString(`" `)
 	}
 }
@@ -257,4 +312,35 @@ func GetDragData(view View, subviewID ...string) map[string]string {
 	}
 
 	return result
+}
+
+// GetDragImageXOffset returns the horizontal offset in pixels within the drag feedback image..
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDragImageXOffset(view View, subviewID ...string) float64 {
+	return floatStyledProperty(view, subviewID, DragImageXOffset, 0)
+}
+
+// GetDragImageYOffset returns the vertical offset in pixels within the drag feedback image..
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDragImageYOffset(view View, subviewID ...string) float64 {
+	return floatStyledProperty(view, subviewID, DragImageYOffset, 0)
+}
+
+// GetDragEffect returns the effect that is allowed for a drag operation.
+// The copy operation is used to indicate that the data being dragged will be copied from its present location to the drop location.
+// The move operation is used to indicate that the data being dragged will be moved,
+// and the link operation is used to indicate that some form of relationship
+// or connection will be created between the source and drop locations.. Returns one of next values:
+//   - 0 (DragEffectAll) or "all" - All operations are permitted (defaut value).
+//   - 1 (DragEffectCopy) or "copy" - A copy of the source item may be made at the new location.
+//   - 2 (DragEffectMove) or "move" - An item may be moved to a new location.
+//   - 3 (DragEffectLink) or "link" - A link may be established to the source at the new location.
+//   - 4 (DragEffectCopyMove) or "copyMove" - A copy or move operation is permitted.
+//   - 5 (DragEffectCopyLink) or "copyLink" - A copy or link operation is permitted.
+//   - 6 (DragEffectLinkMove) or "linkMove" - A link or move operation is permitted.
+//   - 7 (DragEffectNone) or "none" - The item may not be dropped.
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDragEffect(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, DragEffect, DragEffectAll, true)
 }
