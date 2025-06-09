@@ -261,9 +261,9 @@ func (edit *editViewData) AppendText(text string) {
 				return
 			}
 		}
-		edit.setRaw(Text, text)
+		edit.Set(Text, text)
 	} else {
-		edit.setRaw(Text, GetText(edit)+text)
+		edit.Set(Text, GetText(edit)+text)
 	}
 }
 

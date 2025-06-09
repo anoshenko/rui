@@ -39,7 +39,23 @@ const (
 	// Supported types: float, int, string.
 	DragImageYOffset PropertyName = "drag-image-y-offset"
 
-	// DragEffect is the constant for "drag-effect" property tag.
+	// DropEffect is the constant for "drag-effect" property tag.
+	//
+	// Used by View.
+	// Controls the feedback (typically visual) the user is given during a drag and drop operation.
+	// It will affect which cursor is displayed while dragging. For example, when the user hovers over a target drop element,
+	// the browser's cursor may indicate which type of operation will occur.
+	//
+	// Supported types: int, string.
+	//
+	// Values:
+	//   - 0 (DropEffectUndefined) or "undefined" - The property value is not defined (defaut value).
+	//   - 1 (DropEffectCopy) or "copy" - A copy of the source item may be made at the new location.
+	//   - 2 (DropEffectMove) or "move" - An item may be moved to a new location.
+	//   - 4 (DropEffectLink) or "link" - A link may be established to the source at the new location.
+	DropEffect PropertyName = "drag-effect"
+
+	// DropEffectAllowed is the constant for "drop-effect-allowed" property tag.
 	//
 	// Used by View.
 	// Specifies the effect that is allowed for a drag operation.
@@ -52,15 +68,15 @@ const (
 	// Supported types: int, string.
 	//
 	// Values:
-	//   - 0 (DragEffectAll) or "all" - All operations are permitted (defaut value).
-	//   - 1 (DragEffectCopy) or "copy" - A copy of the source item may be made at the new location.
-	//   - 2 (DragEffectMove) or "move" - An item may be moved to a new location.
-	//   - 3 (DragEffectLink) or "link" - A link may be established to the source at the new location.
-	//   - 4 (DragEffectCopyMove) or "copyMove" - A copy or move operation is permitted.
-	//   - 5 (DragEffectCopyLink) or "copyLink" - A copy or link operation is permitted.
-	//   - 6 (DragEffectLinkMove) or "linkMove" - A link or move operation is permitted.
-	//   - 7 (DragEffectNone) or "none" - The item may not be dropped.
-	DragEffect PropertyName = "drag-effect"
+	//   - 0 (DropEffectUndefined) or "undefined" - The property value is not defined (defaut value). Equivalent to DropEffectAll
+	//   - 1 (DropEffectCopy) or "copy" - A copy of the source item may be made at the new location.
+	//   - 2 (DropEffectMove) or "move" - An item may be moved to a new location.
+	//   - 3 (DropEffectLink) or "link" - A link may be established to the source at the new location.
+	//   - 4 (DropEffectCopyMove) or "copy|move" - A copy or move operation is permitted.
+	//   - 5 (DropEffectCopyLink) or "copy|link" - A copy or link operation is permitted.
+	//   - 6 (DropEffectLinkMove) or "link|move" - A link or move operation is permitted.
+	//   - 7 (DropEffectAll) or "all" or "copy|move|link" - All operations are permitted.
+	DropEffectAllowed PropertyName = "drag-effect-allowed"
 
 	// DragStartEvent is the constant for "drag-start-event" property tag.
 	//
@@ -116,36 +132,42 @@ const (
 	//
 	DropEvent PropertyName = "drop-event"
 
-	// DragEffectAll - the value of the "drag-effect" property: all operations (copy, move, and link) are permitted (defaut value).
-	DragEffectAll = 0
+	// DropEffectUndefined - the value of the "drop-effect" and "drop-effect-allowed" properties: the value is not defined (default value).
+	DropEffectUndefined = 0
 
-	// DragEffectCopy - the value of the "drag-effect" property: a copy of the source item may be made at the new location.
-	DragEffectCopy = 1
+	// DropEffectNone - the value of the DropEffect field of the DragEvent struct: the item may not be dropped.
+	DropEffectNone = 0
 
-	// DragEffectMove - the value of the "drag-effect" property: an item may be moved to a new location.
-	DragEffectMove = 2
+	// DropEffectCopy - the value of the "drop-effect" and "drop-effect-allowed" properties: a copy of the source item may be made at the new location.
+	DropEffectCopy = 1
 
-	// DragEffectLink - the value of the "drag-effect" property: a link may be established to the source at the new location.
-	DragEffectLink = 3
+	// DropEffectMove - the value of the "drop-effect" and "drop-effect-allowed" properties: an item may be moved to a new location.
+	DropEffectMove = 2
 
-	// DragEffectCopyMove - the value of the "drag-effect" property: a copy or move operation is permitted.
-	DragEffectCopyMove = 4
+	// DropEffectLink - the value of the "drop-effect" and "drop-effect-allowed" properties: a link may be established to the source at the new location.
+	DropEffectLink = 4
 
-	// DragEffectCopyLink - the value of the "drag-effect" property: a copy or link operation is permitted.
-	DragEffectCopyLink = 5
+	// DropEffectCopyMove - the value of the "drop-effect-allowed" property: a copy or move operation is permitted.
+	DropEffectCopyMove = DropEffectCopy + DropEffectMove
 
-	// DragEffectLinkMove - the value of the "drag-effect" property: a link or move operation is permitted.
-	DragEffectLinkMove = 6
+	// DropEffectCopyLink - the value of the "drop-effect-allowed" property: a copy or link operation is permitted.
+	DropEffectCopyLink = DropEffectCopy + DropEffectLink
 
-	// DragEffectNone - the value of the "drag-effect" property: the item may not be dropped.
-	DragEffectNone = 7
+	// DropEffectLinkMove - the value of the "drop-effect-allowed" property: a link or move operation is permitted.
+	DropEffectLinkMove = DropEffectLink + DropEffectMove
+
+	// DropEffectAll - the value of the "drop-effect-allowed" property: all operations (copy, move, and link) are permitted (defaut value).
+	DropEffectAll = DropEffectCopy + DropEffectMove + DropEffectLink
 )
 
 // MouseEvent represent a mouse event
 type DragAndDropEvent struct {
 	MouseEvent
-	Data   map[string]string
-	Target View
+	Data          map[string]string
+	Files         string
+	Target        View
+	EffectAllowed int
+	DropEffect    int
 }
 
 func (event *DragAndDropEvent) init(session Session, data DataObject) {
@@ -175,6 +197,136 @@ func (event *DragAndDropEvent) init(session Session, data DataObject) {
 	if targetId, ok := data.PropertyValue("target"); ok {
 		event.Target = session.viewByHTMLID(targetId)
 	}
+
+	if effect, ok := data.PropertyValue("effect-allowed"); ok {
+		for i, value := range []string{"undefined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"} {
+			if value == effect {
+				event.EffectAllowed = i
+				break
+			}
+		}
+	}
+
+	if effect, ok := data.PropertyValue("drop-effect"); ok && effect != "" {
+		for i, value := range []string{"none", "copy", "move", "", "link"} {
+			if value == effect {
+				event.DropEffect = i
+				break
+			}
+		}
+	}
+
+	// TODO files
+}
+
+func stringToDropEffect(text string) (int, bool) {
+	text = strings.Trim(text, " \t\n")
+	if n, ok := enumStringToInt(text, []string{"", "copy", "move", "", "link"}, false); ok {
+		switch n {
+		case DropEffectUndefined, DropEffectCopy, DropEffectMove, DropEffectLink:
+			return n, true
+		}
+	}
+	return 0, false
+}
+
+func (view *viewData) setDropEffect(value any) []PropertyName {
+	if !setSimpleProperty(view, DropEffect, value) {
+		if text, ok := value.(string); ok {
+
+			if n, ok := stringToDropEffect(text); ok {
+				if n == DropEffectUndefined {
+					view.setRaw(DropEffect, nil)
+				} else {
+					view.setRaw(DropEffect, n)
+				}
+			} else {
+				invalidPropertyValue(DropEffect, value)
+				return nil
+			}
+
+		} else if i, ok := isInt(value); ok {
+
+			switch i {
+			case DropEffectUndefined:
+				view.setRaw(DropEffect, nil)
+
+			case DropEffectCopy, DropEffectMove, DropEffectLink:
+				view.setRaw(DropEffect, i)
+
+			default:
+				invalidPropertyValue(DropEffect, value)
+				return nil
+			}
+
+		} else {
+
+			notCompatibleType(DropEffect, value)
+			return nil
+		}
+
+	}
+
+	return []PropertyName{DropEffect}
+}
+
+func stringToDropEffectAllowed(text string) (int, bool) {
+	if strings.Contains(text, "|") {
+		elements := strings.Split(text, "|")
+		result := 0
+		for _, element := range elements {
+			if n, ok := stringToDropEffect(element); ok && n != DropEffectUndefined {
+				result |= n
+			} else {
+				return 0, false
+			}
+		}
+		return result, true
+	}
+
+	text = strings.Trim(text, " \t\n")
+	if text != "" {
+		if n, ok := enumStringToInt(text, []string{"undefined", "copy", "move", "", "link", "", "", "all"}, false); ok {
+			return n, true
+		}
+	}
+	return 0, false
+}
+
+func (view *viewData) setDropEffectAllowed(value any) []PropertyName {
+	if !setSimpleProperty(view, DropEffectAllowed, value) {
+		if text, ok := value.(string); ok {
+
+			if n, ok := stringToDropEffectAllowed(text); ok {
+				if n == DropEffectUndefined {
+					view.setRaw(DropEffectAllowed, nil)
+				} else {
+					view.setRaw(DropEffectAllowed, n)
+				}
+			} else {
+				invalidPropertyValue(DropEffectAllowed, value)
+				return nil
+			}
+
+		} else {
+			n, ok := isInt(value)
+			if !ok {
+				notCompatibleType(DropEffectAllowed, value)
+				return nil
+			}
+
+			if n == DropEffectUndefined {
+				view.setRaw(DropEffectAllowed, nil)
+			} else if n > DropEffectUndefined && n <= DropEffectAll {
+				view.setRaw(DropEffectAllowed, n)
+			} else {
+				notCompatibleType(DropEffectAllowed, value)
+				return nil
+			}
+		}
+	}
+
+	return []PropertyName{DropEffectAllowed}
 }
 
 func handleDragAndDropEvents(view View, tag PropertyName, data DataObject) {
@@ -227,7 +379,26 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 		buffer.WriteString(` ondragstart="dragStartEvent(this, event)" `)
 	}
 
-	viewEventsHtml[DragAndDropEvent](view, []PropertyName{DragEndEvent, DragEnterEvent, DragLeaveEvent}, buffer)
+	enterEvent := false
+	switch GetDropEffect(view) {
+	case DropEffectCopy:
+		buffer.WriteString(` data-drop-effect="copy" ondragenter="dragEnterEvent(this, event)"`)
+		enterEvent = true
+
+	case DropEffectMove:
+		buffer.WriteString(` data-drop-effect="move" ondragenter="dragEnterEvent(this, event)"`)
+		enterEvent = true
+
+	case DropEffectLink:
+		buffer.WriteString(` data-drop-effect="link" ondragenter="dragEnterEvent(this, event)"`)
+		enterEvent = true
+	}
+
+	if enterEvent {
+		viewEventsHtml[DragAndDropEvent](view, []PropertyName{DragEndEvent, DragLeaveEvent}, buffer)
+	} else {
+		viewEventsHtml[DragAndDropEvent](view, []PropertyName{DragEndEvent, DragEnterEvent, DragLeaveEvent}, buffer)
+	}
 
 	session := view.Session()
 	if img, ok := stringProperty(view, DragImage, session); ok && img != "" {
@@ -257,9 +428,9 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 		buffer.WriteString(`" `)
 	}
 
-	effects := enumProperties[DragEffect].cssValues
-	if n := GetDragEffect(view); n > 0 && n < len(effects) {
-		buffer.WriteString(` data-drag-effect="`)
+	effects := []string{"undifined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
+	if n := GetDropEffectAllowed(view); n > 0 && n < len(effects) {
+		buffer.WriteString(` data-drop-effect-allowed="`)
 		buffer.WriteString(effects[n])
 		buffer.WriteString(`" `)
 	}
@@ -326,21 +497,84 @@ func GetDragImageYOffset(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, DragImageYOffset, 0)
 }
 
-// GetDragEffect returns the effect that is allowed for a drag operation.
+// GetDropEffect returns the effect that is allowed for a drag operation.
+// Controls the feedback (typically visual) the user is given during a drag and drop operation.
+// It will affect which cursor is displayed while dragging.
+//
+// Returns one of next values:
+//   - 0 (DropEffectUndefined) - The value is not defined (all operations are permitted).
+//   - 1 (DropEffectCopy) - A copy of the source item may be made at the new location.
+//   - 2 (DropEffectMove) - An item may be moved to a new location.
+//   - 4 (DropEffectLink) - A link may be established to the source at the new location.
+//
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDropEffect(view View, subviewID ...string) int {
+	if view = getSubview(view, subviewID); view != nil {
+		value := view.getRaw(DropEffect)
+		if value == nil {
+			value = valueFromStyle(view, DropEffect)
+		}
+
+		if value != nil {
+			switch value := value.(type) {
+			case int:
+				return value
+
+			case string:
+				if value, ok := view.Session().resolveConstants(value); ok {
+					if n, ok := stringToDropEffect(value); ok {
+						return n
+					}
+				}
+
+			default:
+				return DropEffectUndefined
+			}
+		}
+	}
+	return DropEffectUndefined
+}
+
+// GetDropEffectAllowed returns the effect that is allowed for a drag operation.
 // The copy operation is used to indicate that the data being dragged will be copied from its present location to the drop location.
 // The move operation is used to indicate that the data being dragged will be moved,
 // and the link operation is used to indicate that some form of relationship
-// or connection will be created between the source and drop locations.. Returns one of next values:
-//   - 0 (DragEffectAll) or "all" - All operations are permitted (defaut value).
-//   - 1 (DragEffectCopy) or "copy" - A copy of the source item may be made at the new location.
-//   - 2 (DragEffectMove) or "move" - An item may be moved to a new location.
-//   - 3 (DragEffectLink) or "link" - A link may be established to the source at the new location.
-//   - 4 (DragEffectCopyMove) or "copyMove" - A copy or move operation is permitted.
-//   - 5 (DragEffectCopyLink) or "copyLink" - A copy or link operation is permitted.
-//   - 6 (DragEffectLinkMove) or "linkMove" - A link or move operation is permitted.
-//   - 7 (DragEffectNone) or "none" - The item may not be dropped.
+// or connection will be created between the source and drop locations.
+//
+// Returns one of next values:
+//   - 0 (DropEffectUndefined) - The value is not defined (all operations are permitted).
+//   - 1 (DropEffectCopy) - A copy of the source item may be made at the new location.
+//   - 2 (DropEffectMove) - An item may be moved to a new location.
+//   - 4 (DropEffectLink) - A link may be established to the source at the new location.
+//   - 3 (DropEffectCopyMove) - A copy or move operation is permitted.
+//   - 5 (DropEffectCopyLink) - A copy or link operation is permitted.
+//   - 6 (DropEffectLinkMove) - A link or move operation is permitted.
+//   - 7 (DropEffectAll) - All operations are permitted.
 //
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDragEffect(view View, subviewID ...string) int {
-	return enumStyledProperty(view, subviewID, DragEffect, DragEffectAll, true)
+func GetDropEffectAllowed(view View, subviewID ...string) int {
+	if view = getSubview(view, subviewID); view != nil {
+		value := view.getRaw(DropEffectAllowed)
+		if value == nil {
+			value = valueFromStyle(view, DropEffectAllowed)
+		}
+
+		if value != nil {
+			switch value := value.(type) {
+			case int:
+				return value
+
+			case string:
+				if value, ok := view.Session().resolveConstants(value); ok {
+					if n, ok := stringToDropEffectAllowed(value); ok {
+						return n
+					}
+				}
+
+			default:
+				return DropEffectUndefined
+			}
+		}
+	}
+	return DropEffectUndefined
 }

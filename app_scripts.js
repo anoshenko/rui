@@ -2144,10 +2144,10 @@ function dragAndDropEvent(element, event, tag) {
 	//event.preventDefault()
 
 	let message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event);
+	if (event.target) {
+		message += ",target=" + event.target.id;
+	}
 	if (event.dataTransfer) {
-		if (event.target) {
-			message += ",target=" + event.target.id;
-		}
 		let dataText = ""
 		for (const item of event.dataTransfer.items) {
 			const data = event.dataTransfer.getData(item.type);
@@ -2161,7 +2161,25 @@ function dragAndDropEvent(element, event, tag) {
 		if (dataText != "") {
 			message += ',data="' + dataText + '"';
 		}
+
+		dataText = ""
+		for (const file of event.dataTransfer.files) {
+			if (dataText != "") {
+				dataText += ";";
+			}
+			dataText += file.name;
+		}
+		if (dataText != "") {
+			message += ',files="' + dataText + '"';
+		}
+		if (event.dataTransfer.effectAllowed && event.dataTransfer.effectAllowed != "uninitialized") {
+			message += ',effect-allowed="' + event.dataTransfer.effectAllowed + '"';
+		}
+		if (event.dataTransfer.dropEffect) {
+			message += ',drop-effect="' + event.dataTransfer.dropEffect + '"';
+		}
 	}
+
 	message += "}";
 	sendMessage(message);
 }
@@ -2193,14 +2211,12 @@ function dragStartEvent(element, event) {
 		let img = new Image();
   		img.src = image;
 		event.dataTransfer.setDragImage(img, x, y);
-
-		let effect = element.getAttribute("data-drag-effect");
-		if (effect) {
-			event.dataTransfer.effectAllowed = effect;
-		}
 	}
 
-	// TODO drag effect
+	let allowed = element.getAttribute("data-drop-effect-allowed");
+	if (allowed) {
+		event.dataTransfer.effectAllowed = allowed;
+	}
 
 	dragAndDropEvent(element, event, "drag-start-event");
 }
@@ -2210,6 +2226,11 @@ function dragEndEvent(element, event) {
 }
 
 function dragEnterEvent(element, event) {
+	let effect = element.getAttribute("data-drop-effect");
+	if (effect) {
+		event.dataTransfer.dropEffect = effect;
+	}
+
 	dragAndDropEvent(element, event, "drag-enter-event")
 }
 

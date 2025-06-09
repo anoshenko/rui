@@ -479,6 +479,11 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 	case DragStartEvent, DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
 		return setOneArgEventListener[View, DragAndDropEvent](view, tag, value)
 
+	case DropEffect:
+		return view.setDropEffect(value)
+
+	case DropEffectAllowed:
+		return view.setDropEffectAllowed(value)
 	}
 
 	return viewStyleSet(view, tag, value)
@@ -509,16 +514,16 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 
 	switch tag {
 	case TabIndex:
-		if value, ok := intProperty(view, TabIndex, view.Session(), 0); ok {
-			session.updateProperty(view.htmlID(), "tabindex", strconv.Itoa(value))
+		if value, ok := intProperty(view, TabIndex, session, 0); ok {
+			session.updateProperty(htmlID, "tabindex", strconv.Itoa(value))
 		} else if view.Focusable() {
-			session.updateProperty(view.htmlID(), "tabindex", "0")
+			session.updateProperty(htmlID, "tabindex", "0")
 		} else {
-			session.updateProperty(view.htmlID(), "tabindex", "-1")
+			session.updateProperty(htmlID, "tabindex", "-1")
 		}
 
 	case Style, StyleDisabled:
-		session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
+		session.updateProperty(htmlID, "class", view.htmlClass(IsDisabled(view)))
 
 	case Disabled:
 		tabIndex := GetTabIndex(view, htmlID)
@@ -775,7 +780,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 
 	case PerspectiveOriginX, PerspectiveOriginY:
 		x, y := GetPerspectiveOrigin(view)
-		session.updateCSSProperty(htmlID, "perspective-origin", transformOriginCSS(x, y, AutoSize(), view.Session()))
+		session.updateCSSProperty(htmlID, "perspective-origin", transformOriginCSS(x, y, AutoSize(), session))
 
 	case BackfaceVisible:
 		if GetBackfaceVisible(view) {
@@ -786,7 +791,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 
 	case TransformOriginX, TransformOriginY, TransformOriginZ:
 		x, y, z := getTransformOrigin(view, session)
-		session.updateCSSProperty(htmlID, "transform-origin", transformOriginCSS(x, y, z, view.Session()))
+		session.updateCSSProperty(htmlID, "transform-origin", transformOriginCSS(x, y, z, session))
 
 	case Transform:
 		css := ""
@@ -813,7 +818,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 		if view.getRaw(DragStartEvent) != nil || view.getRaw(DragData) != nil {
 			session.updateProperty(htmlID, "ondragstart", "dragStartEvent(this, event)")
 		} else {
-			session.removeProperty(view.htmlID(), "ondragstart")
+			session.removeProperty(htmlID, "ondragstart")
 		}
 
 	case DropEvent:
@@ -823,18 +828,18 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 			if view.getRaw(DragOverEvent) != nil {
 				session.updateProperty(htmlID, "data-drag-over", "1")
 			} else {
-				session.removeProperty(view.htmlID(), "data-drag-over")
+				session.removeProperty(htmlID, "data-drag-over")
 			}
 		} else {
-			session.removeProperty(view.htmlID(), "ondrop")
-			session.removeProperty(view.htmlID(), "ondragover")
+			session.removeProperty(htmlID, "ondrop")
+			session.removeProperty(htmlID, "ondragover")
 		}
 
 	case DragOverEvent:
 		if view.getRaw(DragOverEvent) != nil {
 			session.updateProperty(htmlID, "data-drag-over", "1")
 		} else {
-			session.removeProperty(view.htmlID(), "data-drag-over")
+			session.removeProperty(htmlID, "data-drag-over")
 		}
 
 	case DragData:
@@ -843,50 +848,66 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 			session.updateProperty(htmlID, "data-drag", data)
 			session.updateProperty(htmlID, "ondragstart", "dragStartEvent(this, event)")
 		} else {
-			session.removeProperty(view.htmlID(), "draggable")
-			session.removeProperty(view.htmlID(), "data-drag")
+			session.removeProperty(htmlID, "draggable")
+			session.removeProperty(htmlID, "data-drag")
 			if view.getRaw(DragStartEvent) == nil {
-				session.removeProperty(view.htmlID(), "ondragstart")
+				session.removeProperty(htmlID, "ondragstart")
 			}
 		}
 
 	case DragImage:
-		if img, ok := stringProperty(view, DragImage, view.session); ok && img != "" {
+		if img, ok := stringProperty(view, DragImage, session); ok && img != "" {
 			img = strings.Trim(img, " \t")
 			if img[0] == '@' {
-				img, ok = view.session.ImageConstant(img[1:])
+				img, ok = session.ImageConstant(img[1:])
 				if !ok {
-					session.removeProperty(view.htmlID(), "data-drag-image")
+					session.removeProperty(htmlID, "data-drag-image")
 					return
 				}
 			}
 			session.updateProperty(htmlID, "data-drag-image", img)
 		} else {
-			session.removeProperty(view.htmlID(), "data-drag-image")
+			session.removeProperty(htmlID, "data-drag-image")
 		}
 
 	case DragImageXOffset:
 		if f := GetDragImageXOffset(view); f != 0 {
 			session.updateProperty(htmlID, "data-drag-image-x", f)
 		} else {
-			session.removeProperty(view.htmlID(), "data-drag-image-x")
+			session.removeProperty(htmlID, "data-drag-image-x")
 		}
 
 	case DragImageYOffset:
 		if f := GetDragImageXOffset(view); f != 0 {
 			session.updateProperty(htmlID, "data-drag-image-y", f)
 		} else {
-			session.removeProperty(view.htmlID(), "data-drag-image-y")
+			session.removeProperty(htmlID, "data-drag-image-y")
 		}
 
-	case DragEffect:
-		effects := enumProperties[DragEffect].cssValues
-		if n := GetDragEffect(view); n > 0 && n < len(effects) {
-			session.updateProperty(htmlID, "data-drag-effect", effects[n])
+	case DropEffect:
+		effect := GetDropEffect(view)
+		switch effect {
+		case DropEffectCopy:
+			session.updateProperty(htmlID, "data-drop-effect", "copy")
+		case DropEffectMove:
+			session.updateProperty(htmlID, "data-drop-effect", "move")
+		case DropEffectLink:
+			session.updateProperty(htmlID, "data-drop-effect", "link")
+		default:
+			session.removeProperty(htmlID, "data-drop-effect")
+		}
+
+	case DropEffectAllowed:
+		effect := GetDropEffectAllowed(view)
+		if effect >= DropEffectCopy && effect >= DropEffectAll {
+			values := []string{"undifined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
+			session.updateProperty(htmlID, "data-drop-effect-allowed", values[effect])
+		} else {
+			session.removeProperty(htmlID, "data-drop-effect-allowed")
 		}
 
 	case DataList:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(htmlID, session)
 
 	case Opacity:
 		if f, ok := floatTextProperty(view, Opacity, session, 0); ok {

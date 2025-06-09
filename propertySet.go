@@ -496,11 +496,6 @@ var enumProperties = map[PropertyName]enumPropertyData{
 		string(ColumnFill),
 		[]string{"balance", "auto"},
 	},
-	DragEffect: {
-		[]string{"all", "copy", "move", "link", "copyMove", "copyLink", "linkMove", "none"},
-		"",
-		[]string{"all", "copy", "move", "link", "copyMove", "copyLink", "linkMove", "none"},
-	},
 }
 
 func notCompatibleType(tag PropertyName, value any) {
