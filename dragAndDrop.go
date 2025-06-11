@@ -400,20 +400,10 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 		viewEventsHtml[DragAndDropEvent](view, []PropertyName{DragEndEvent, DragEnterEvent, DragLeaveEvent}, buffer)
 	}
 
-	session := view.Session()
-	if img, ok := stringProperty(view, DragImage, session); ok && img != "" {
-		img = strings.Trim(img, " \t")
-		if img[0] == '@' {
-			if img, ok = session.ImageConstant(img[1:]); ok {
-				buffer.WriteString(` data-drag-image="`)
-				buffer.WriteString(img)
-				buffer.WriteString(`" `)
-			}
-		} else {
-			buffer.WriteString(` data-drag-image="`)
-			buffer.WriteString(img)
-			buffer.WriteString(`" `)
-		}
+	if img := GetDragImage(view); img != "" {
+		buffer.WriteString(` data-drag-image="`)
+		buffer.WriteString(img)
+		buffer.WriteString(`" `)
 	}
 
 	if f := GetDragImageXOffset(view); f != 0 {
@@ -492,13 +482,38 @@ func GetDragData(view View, subviewID ...string) map[string]string {
 	return result
 }
 
-// GetDragImageXOffset returns the horizontal offset in pixels within the drag feedback image..
+// GetDragImage returns the drag feedback image.
+// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+func GetDragImage(view View, subviewID ...string) string {
+	if view = getSubview(view, subviewID); view != nil {
+		value := view.getRaw(DragImage)
+		if value == nil {
+			value = valueFromStyle(view, DragImage)
+		}
+
+		if value != nil {
+			if img, ok := value.(string); ok {
+				img = strings.Trim(img, " \t")
+				if img != "" && img[0] == '@' {
+					if img, ok = view.Session().ImageConstant(img[1:]); ok {
+						return img
+					}
+				} else {
+					return img
+				}
+			}
+		}
+	}
+	return ""
+}
+
+// GetDragImageXOffset returns the horizontal offset in pixels within the drag feedback image.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDragImageXOffset(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, DragImageXOffset, 0)
 }
 
-// GetDragImageYOffset returns the vertical offset in pixels within the drag feedback image..
+// GetDragImageYOffset returns the vertical offset in pixels within the drag feedback image.
 // If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
 func GetDragImageYOffset(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, DragImageYOffset, 0)

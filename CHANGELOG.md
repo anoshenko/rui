@@ -1,3 +1,8 @@
+# v0.19.0
+
+* Added support of drag-and-drop
+* Added LoadFile method to View interface
+
 # v0.18.2
 
 * fixed typo: GetShadowPropertys -> GetShadowProperty

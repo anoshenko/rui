@@ -2265,6 +2265,197 @@ The following global functions can be used for manual scrolling
 
 which scroll the view, respectively, to the given position, start and end
 
+### Drag and drop
+
+#### "drag-data" property
+
+To make a View draggable, it is necessary to set the "drag-data" property (DragData constant).
+This property specifies a set of draggable data in the form of key:value and has the type:
+
+	map[string]string
+
+It is recommended to use the mime type of the value as keys.
+For example, if the dragged data contains text, the key should be "text/plain", if it is a jpeg image, then "image/jpg", etc.
+But this is only a recommendation, the key can be any text.
+
+Example
+
+	view.Set(rui.DragData, map[string]string {
+		"text/plain": "Drag-and-drop text",
+		"text/html" : "<b>Drag-and-drop<\b> text",
+		"my-key"    : "my-data",
+	})
+
+You can get the value of this property using the function
+
+	GetDragData(view View, subviewID ...string) map[string]string
+
+
+#### "drag-image" property
+
+By default, the entire View is moved when dragging. This is often inconvenient, for example if the View is very large.
+
+The "drag-image" string property (DragImage constant) allows to specify an image that will be displayed instead of the View when dragging.
+The "drag-image" value is set to:
+* Image name in the application resources
+* Image constant
+* Image URL
+
+Example
+
+	view.Set(rui.DragImage, "image.png")
+
+You can get the value of this property using the function
+
+	func GetDragImage(view View, subviewID ...string) string {
+
+#### The "drag-image-x-offset" and "drag-image-y-offset" properties
+
+The "drag-image-x-offset" and "drag-image-y-offset" float properties (the DragImageXOffset and DragImageXOffset constants) specify the offset in pixels of the dragged image relative to the mouse cursor.
+
+By default, the mouse cursor is anchored to the upper left corner of the image. These properties are used only if the "drag-image" property is set.
+
+Example
+
+	view.SetParams(rui.Params {
+		  rui.DragImage       : "image.png",
+		  rui.DragImageXOffset: 10,
+		  rui.DragImageYOffset: -15,
+	})
+
+You can get the value of these properties using functions
+
+	func GetDragImageXOffset(view View, subviewID ...string) float64
+	func GetDragImageYOffset(view View, subviewID ...string) float64
+
+#### Events
+
+Drag-and-drop event listeners have the following format:
+
+	func(View, DragAndDropEvent)
+
+where DragAndDropEvent extends MouseEvent and is declared as
+
+	type DragAndDropEvent struct {
+		MouseEvent
+		Data          map[string]string
+		Files         []FileInfo
+		Target        View
+		EffectAllowed int
+		DropEffect    int
+	}
+
+You can also use listeners of the following formats:
+
+* func(DragAndDropEvent)
+* func(View)
+* func()
+
+The fields of the DragAndDropEvent structure contain the following data
+
+* Data - drag data specified by the "drag-data" property of the dragged View and additional data specified by the browser (for example, Chrome adds the html code of the element). This field can be empty if files are dragged
+
+* Files - a list of files to drag. Used only by the "drop-event" event (for all other events, this list is nil). Also, if you drag a View, this list will be nil.
+
+* Target - the receiving View. Has a value different from nil if the dragged object is above a View that can accept the dragged element
+
+* EffectAllowed - shows a list of allowed mouse cursor move effects: DropEffectCopy, DropEffectMove, DropEffectLink, DropEffectCopyMove, DropEffectCopyLink, DropEffectLinkMove and DropEffectAll.
+
+* DropEffect - used only in the "drag-end" event and has a value of DropEffectCopy, DropEffectMove or DropEffectLink if the drag operation was successful and DropEffectNone otherwise.
+
+#### The "drop-event" event
+
+In order for the View to accept dragged data (Views or files), you must define a "drop-event" (DropEvent constant) event listener for it. 
+Like all drag-and-drop events, it has the following format:
+
+	func(View, DragAndDropEvent)
+
+The system itself does nothing with the dragged data. You must add code that performs some actions with the dragged data. 
+The following example adds an image from resources or from a dragged file to the ListLayout
+
+	listLayout.Set(rui.DropEvent, func(_ rui.View, event rui.DragAndDropEvent)) {
+		if len(event.Files) > 0 {
+			for _, file := range event.Files {
+				switch file.MimeType {
+				case "image/png", "image/jpeg", "image/gif", "image/svg+xml":
+					listLayout.LoadFile(file, func(file rui.FileInfo, data []byte) {
+						if data != nil {
+							listLayout.Append(rui.NewImageView(session, rui.Params{
+								rui.Source: rui.InlineFileFromData(data, file.MimeType),
+							}))
+						}
+					})
+				}
+			}
+		} else {
+			for _, mime := range []string {"image/png", "image/jpeg", "image/gif", "image/svg+xml"} {
+				if src, ok := event.Data[mime]; ok {
+					list.Append(rui.NewImageView(session, rui.Params{
+						rui.Source: src,
+					}))
+				}
+			}
+		}
+	}
+
+You can get a list of listeners for a given event using the function:
+
+	func GetDropEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+
+#### Events "drag-start-event" and "drag-end-event"
+
+Events "drag-start-event" and "drag-end-event" are generated only for the dragged View.
+Event "drag-start-event" when dragging starts, and "drag-end-event" when dragging ends.
+
+Listeners for these events, like all drag-and-drop events, have the following format:
+
+	func(View, DragAndDropEvent)
+
+For these events, the Target field of the DragAndDropEvent structure is always nil.
+
+For the "drag-end-event" event, the DropEffect field of the DragAndDropEvent structure is used.
+It will have the value DropEffectCopy, DropEffectMove or DropEffectLink if the drag operation was successful and DropEffectNone otherwise.
+
+You can get a list of listeners for these events using the function:
+
+	func GetDragStartEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+	func GetDragEndEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+
+#### Events "drag-enter-event", "drag-leave-event" and "drag-over-event"
+
+Events "drag-enter-event", "drag-leave-event" and "drag-over-event" are generated only for the receiver View of the dragged object.
+
+Event "drag-enter-event" is generated when the dragged object enters the receiver View area.
+
+Event "drag-leave-event" is generated when the dragged object leaves the receiver View area.
+
+Event "drag-over-event" is generated at a certain interval (several times per second) while the dragged object is in the receiver View area.
+
+Example, changing the border color from gray to red when the dragged object is over the receiver area
+
+	view.SetParams(rui.Params{
+		rui.DragEnterEvent: func(view rui.View, event rui.DragAndDropEvent)) {
+			view.Set(rui.Border, rui.NewBorder(rui.Params{
+				rui.Style:    rui.SolidLine,
+				rui.ColorTag: rui.Red,
+				rui.Width:    rui.Px(1),
+			}))
+		},
+		rui.DragLeaveEvent: func(view rui.View, event rui.DragAndDropEvent)) {
+			view.Set(rui.Border, rui.NewBorder(rui.Params{
+				rui.Style:    rui.SolidLine,
+				rui.ColorTag: rui.Gray,
+				rui.Width:    rui.Px(1),
+			}))
+		},
+	})
+
+You can get a list of listeners for these events using the function:
+
+	func GetDragEnterEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+	func GetDragLeaveEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+	func GetDragOverEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+
 ## ViewsContainer
 
 The ViewsContainer interface, which implements View, describes a container that contains 

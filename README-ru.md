@@ -2287,6 +2287,194 @@ radius необходимо передать nil
 
 которые прокручивают view, соответственно, в заданную позицию, начало и конец
 
+### Drag and drop
+
+#### Свойство "drag-data"
+
+Для того чтобы сделать View перетаскиваемым ему неоходимо задать свойство "drag-data" (константа DragData).
+Данное свойство задает множество перетаскиваемых данных в виде ключ:значение и имеет тип:
+
+	map[string]string
+
+В качестве ключей рекомендуется использовать mime-тип значения. 
+Например, если в перетаскиваемыми данными асляется текст, то ключем должен быть "text/plain", если jpeg-изображение, то "image/jpg" и т.п. 
+Но это только рекомендация, ключем может быть любой текст. 
+
+Пример
+
+	view.Set(rui.DragData, map[string]string {
+		"text/plain": "Drag-and-drop text",
+		"text/html" : "<b>Drag-and-drop<\b> text",
+		"my-key"    : "my-data",
+	})
+
+Получить значение данного свойства можно с помощью функции
+
+	GetDragData(view View, subviewID ...string) map[string]string
+
+
+#### Свойство "drag-image"
+
+По умолчанию при перетаскивании перемещается весь View. Часто это бывает не удобно, например если View очень большой.
+
+Свойство "drag-image" (константа DragImage) типа string позволяет задать картинку, которая будет отображаться вместо View при перетаскивании.
+В качестве значения "drag-image" задаеться:
+* Имя изображения в ресурсах приложения
+* Константа изображения
+* URL изображения
+
+Пример
+
+	view.Set(rui.DragImage, "image.png")
+
+Получить значение данного свойства можно с помощью функции
+
+	func GetDragImage(view View, subviewID ...string) string {
+
+#### Свойства "drag-image-x-offset" и "drag-image-y-offset"
+
+Свойства "drag-image-x-offset" и "drag-image-y-offset" (константы DragImageXOffset и DragImageXOffset) типа float задают смещение в пикселях перетаскиваемой картинки относительно курсора мыши. 
+По умолчанию курсор мыши привязан к верхнему левому углу картинки. Данные свойства используются только если задано свойство "drag-image".
+
+Пример
+
+	view.SetParams(rui.Params {
+		  rui.DragImage       : "image.png",
+		  rui.DragImageXOffset: 10,
+		  rui.DragImageYOffset: -15,
+	})
+
+Получить значение данных свойств можно с помощью функций
+
+	func GetDragImageXOffset(view View, subviewID ...string) float64
+	func GetDragImageYOffset(view View, subviewID ...string) float64
+
+#### События
+
+Слушатели событий drag-and-drop имеет следующий формат:
+
+	func(View, DragAndDropEvent)
+
+где DragAndDropEvent расширяет MouseEvent и описана как
+
+	type DragAndDropEvent struct {
+		MouseEvent
+		Data          map[string]string
+		Files         []FileInfo
+		Target        View
+		EffectAllowed int
+		DropEffect    int
+	}
+
+Можно также использовать слушателей следующих форматов:
+
+* func(DragAndDropEvent)
+* func(View)
+* func()
+
+Поля структуры DragAndDropEvent содержат следующие данные
+
+* Data - данные перетаскивания заданные свойством "drag-data" перетаскиваемого View и дополнительные данные заданные браузером (например, Chrome добавляет html-код элемента). Данное поле может быть пустым, если перетаскиваются файлы
+
+* Files - список перетаскиваемых файлов. Используется только событием "drop-event" (для всех других событий этот список равен nil). Также если вы перетаскиваете View, то этот список будет равным nil.
+
+* Target - принимающий View. Имеет значение отличное от nil, если перетаскиваемый объект находится над View который может принять перетаскиваемый элемент 
+
+* EffectAllowed - показывает список разрешенных эффектов перемещения для курсора мыши: DropEffectCopy, DropEffectMove, DropEffectLink, DropEffectCopyMove, DropEffectCopyLink, DropEffectLinkMove и DropEffectAll.
+
+* DropEffect - используется только в событии "drag-end" и имеет значение DropEffectCopy, DropEffectMove или DropEffectLink если операция перетаскивания завершилась успешно и DropEffectNone в противоположном случае.
+
+#### Событие "drop-event"
+
+Для того чтобы View смог принимать перетаскиваемые данные (View или файлы) вы должны определить для него слушателя события "drop-event" (константа DropEvent). Как и все событий drag-and-drop он имеет следующий формат:
+
+	func(View, DragAndDropEvent)
+
+Система сама ничего не делает с перетаскиваемыми данными. Вы должны добавить код выполняющий какие либо действия с перетаскиваемыми данными. Следующий пример добавляет картинку из ресурсов или из перетаскиваемого файла в ListLayout
+
+	listLayout.Set(rui.DropEvent, func(_ rui.View, event rui.DragAndDropEvent)) {
+		if len(event.Files) > 0 {
+			for _, file := range event.Files {
+				switch file.MimeType {
+				case "image/png", "image/jpeg", "image/gif", "image/svg+xml":
+					listLayout.LoadFile(file, func(file rui.FileInfo, data []byte) {
+						if data != nil {
+							listLayout.Append(rui.NewImageView(session, rui.Params{
+								rui.Source: rui.InlineFileFromData(data, file.MimeType),
+							}))
+						}
+					})
+				}
+			}
+		} else {
+			for _, mime := range []string {"image/png", "image/jpeg", "image/gif", "image/svg+xml"} {
+				if src, ok := event.Data[mime]; ok {
+					list.Append(rui.NewImageView(session, rui.Params{
+						rui.Source: src,
+					}))
+				}
+			}
+		}
+	}
+
+Получить список слушателей данного события можно с помощью функции:
+
+	func GetDropEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+
+#### События "drag-start-event" и "drag-end-event"
+
+События "drag-start-event" и "drag-end-event" генерируются только для перетаскиваемого View.
+Событие "drag-start-event" при старте перетаскивания, а "drag-end-event" по окончании перетаскивания.
+
+Слушатели данных событий как и всех событий drag-and-drop имеют следующий формат:
+
+	func(View, DragAndDropEvent)
+
+Для данных событий поле Target структуры DragAndDropEvent, всегда равно nil.
+
+Для события "drag-end-event" используется поле DropEffect структуры DragAndDropEvent. 
+Оно будет иметь значение DropEffectCopy, DropEffectMove или DropEffectLink если операция перетаскивания завершилась успешно и DropEffectNone в противоположном случае.
+
+Получить список слушателей данных событий можно с помощью функции:
+
+	func GetDragStartEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+	func GetDragEndEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+
+#### События "drag-enter-event", "drag-leave-event" и "drag-over-event"
+
+События "drag-enter-event", "drag-leave-event" и "drag-over-event" генерируются только для View приемника перетескиваемого объекта.
+
+Событие "drag-enter-event" генерируется когда перетаскиваемый оъект входит в область View приемника.
+
+Событие "drag-leave-event" генерируется когда перетаскиваемый оъект покидает область View приемника.
+
+Событие "drag-over-event" генерируется c определенным интервалом (несколько раз в секунду) пока перетаскиваемый оъект находится область View приемника.
+
+Пример, меняем цвет рамки с серой на красную когда перетаскиваемый оъект находится над областью приемника
+
+	view.SetParams(rui.Params{
+		rui.DragEnterEvent: func(view rui.View, event rui.DragAndDropEvent)) {
+			view.Set(rui.Border, rui.NewBorder(rui.Params{
+				rui.Style:    rui.SolidLine,
+				rui.ColorTag: rui.Red,
+				rui.Width:    rui.Px(1),
+			}))
+		},
+		rui.DragLeaveEvent: func(view rui.View, event rui.DragAndDropEvent)) {
+			view.Set(rui.Border, rui.NewBorder(rui.Params{
+				rui.Style:    rui.SolidLine,
+				rui.ColorTag: rui.Gray,
+				rui.Width:    rui.Px(1),
+			}))
+		},
+	})
+
+Получить список слушателей данных событий можно с помощью функции:
+
+	func GetDragEnterEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+	func GetDragLeaveEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+	func GetDragOverEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent)
+
 ## ViewsContainer
 
 Интерфейс ViewsContainer, реализующий View, описывает контейнер содержащий несколько
