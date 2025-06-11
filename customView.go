@@ -346,3 +346,9 @@ func (customView *CustomViewData) SetTransition(tag PropertyName, animation Anim
 		customView.superView.SetTransition(tag, animation)
 	}
 }
+
+func (customView *CustomViewData) LoadFile(file FileInfo, result func(FileInfo, []byte)) {
+	if customView.superView != nil {
+		customView.superView.LoadFile(file, result)
+	}
+}

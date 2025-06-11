@@ -740,7 +740,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 		popupCellHeight = append(popupCellHeight, AutoSize())
 		gap, _ := sizeConstant(session, "ruiPopupButtonGap")
 		cellWidth := []SizeUnit{}
-		for i := 0; i < buttonCount; i++ {
+		for range buttonCount {
 			cellWidth = append(cellWidth, Fr(1))
 		}
 

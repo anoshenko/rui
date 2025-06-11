@@ -67,7 +67,7 @@ func createBackground(obj DataObject) BackgroundElement {
 	}
 
 	count := obj.PropertyCount()
-	for i := 0; i < count; i++ {
+	for i := range count {
 		if node := obj.Property(i); node.Type() == TextNode {
 			if value := node.Text(); value != "" {
 				result.Set(PropertyName(node.Tag()), value)

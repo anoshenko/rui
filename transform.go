@@ -369,7 +369,7 @@ func valueToTransformProperty(value any) TransformProperty {
 	parseObject := func(obj DataObject) TransformProperty {
 		transform := NewTransformProperty(nil)
 		ok := true
-		for i := 0; i < obj.PropertyCount(); i++ {
+		for i := range obj.PropertyCount() {
 			if prop := obj.Property(i); prop.Type() == TextNode {
 				if !transform.Set(PropertyName(prop.Tag()), prop.Text()) {
 					ok = false

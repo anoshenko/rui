@@ -279,7 +279,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			}
 			buffer.WriteString("ellipse ")
 			shapeText = ""
-			for i := 0; i < count; i++ {
+			for i := range count {
 				buffer.WriteString(value[i].cssString("50%", session))
 				buffer.WriteString(" ")
 			}
@@ -291,7 +291,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			}
 			buffer.WriteString("ellipse ")
 			shapeText = ""
-			for i := 0; i < count; i++ {
+			for i := range count {
 				if value[i] != nil {
 					switch value := value[i].(type) {
 					case SizeUnit:

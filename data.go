@@ -222,7 +222,7 @@ func (object *dataObject) ToParams() Params {
 
 		case ArrayNode:
 			array := []any{}
-			for i := 0; i < node.ArraySize(); i++ {
+			for i := range node.ArraySize() {
 				if data := node.ArrayElement(i); data != nil {
 					if data.IsObject() {
 						if obj := data.Object(); obj != nil {
@@ -465,7 +465,7 @@ func ParseDataText(text string) DataObject {
 							return invalidEscape()
 						}
 						x := 0
-						for i := 0; i < 2; i++ {
+						for range 2 {
 							ch := data[n2]
 							if ch >= '0' && ch <= '9' {
 								x = x*16 + int(ch-'0')
@@ -485,7 +485,7 @@ func ParseDataText(text string) DataObject {
 							return invalidEscape()
 						}
 						x := 0
-						for i := 0; i < 4; i++ {
+						for range 4 {
 							ch := data[n2]
 							if ch >= '0' && ch <= '9' {
 								x = x*16 + int(ch-'0')

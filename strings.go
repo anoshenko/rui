@@ -61,7 +61,7 @@ func loadStringResources(text string) {
 			table = map[string]string{}
 		}
 
-		for i := 0; i < obj.PropertyCount(); i++ {
+		for i := range obj.PropertyCount() {
 			if prop := obj.Property(i); prop != nil && prop.Type() == TextNode {
 				table[prop.Tag()] = prop.Text()
 			}
@@ -72,7 +72,7 @@ func loadStringResources(text string) {
 
 	tag := data.Tag()
 	if tag == "strings" {
-		for i := 0; i < data.PropertyCount(); i++ {
+		for i := range data.PropertyCount() {
 			if prop := data.Property(i); prop != nil && prop.Type() == ObjectNode {
 				parseStrings(prop.Object(), prop.Tag())
 			}

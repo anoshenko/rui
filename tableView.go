@@ -739,7 +739,7 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 
 		case DataObject:
 			params := Params{}
-			for k := 0; k < value.PropertyCount(); k++ {
+			for k := range value.PropertyCount() {
 				if prop := value.Property(k); prop != nil && prop.Type() == TextNode {
 					params[PropertyName(prop.Tag())] = prop.Text()
 				}
@@ -797,7 +797,7 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 			if strings.Contains(value, ",") {
 				if values := strings.Split(value, ","); len(values) == 2 {
 					var n = []int{0, 0}
-					for i := 0; i < 2; i++ {
+					for i := range 2 {
 						var err error
 						if n[i], err = strconv.Atoi(values[i]); err != nil {
 							ErrorLog(err.Error())

@@ -1008,20 +1008,26 @@ function setInputValue(elementId, text) {
 	}
 }
 
+function filesTextForMessage(files) {
+	let message = "files=[";
+	for(let i = 0; i < files.length; i++) {
+		if (i > 0) {
+			message += ",";
+		}
+		message += "_{name=\"" + files[i].name + 
+			"\",last-modified=" + files[i].lastModified +
+			",size=" + files[i].size +
+			",mime-type=\"" + files[i].type + "\"}";
+	}
+	message += "]";
+	return message
+}
+
 function fileSelectedEvent(element) {
 	const files = element.files;
 	if (files) {
-		let message = "fileSelected{session=" + sessionID + ",id=" + element.id + ",files=[";
-		for(let i = 0; i < files.length; i++) {
-			if (i > 0) {
-				message += ",";
-			}
-			message += "_{name=\"" + files[i].name + 
-				"\",last-modified=" + files[i].lastModified +
-				",size=" + files[i].size +
-				",mime-type=\"" + files[i].type + "\"}";
-		}
-		sendMessage(message + "]}");
+		let message = "fileSelected{session=" + sessionID + ",id=" + element.id + "," + filesTextForMessage(files) + "}";
+		sendMessage(message);
 	}
 }
 
@@ -2162,19 +2168,18 @@ function dragAndDropEvent(element, event, tag) {
 			message += ',data="' + dataText + '"';
 		}
 
-		dataText = ""
-		for (const file of event.dataTransfer.files) {
-			if (dataText != "") {
-				dataText += ";";
-			}
-			dataText += file.name;
+		const files = event.dataTransfer.files
+		if (files && files.length > 0) {
+			message += "," + filesTextForMessage(files)
+			element["dragFiles"] = files;
+		} else {
+			element["dragFiles"] = null;
 		}
-		if (dataText != "") {
-			message += ',files="' + dataText + '"';
-		}
+
 		if (event.dataTransfer.effectAllowed && event.dataTransfer.effectAllowed != "uninitialized") {
 			message += ',effect-allowed="' + event.dataTransfer.effectAllowed + '"';
 		}
+		
 		if (event.dataTransfer.dropEffect) {
 			message += ',drop-effect="' + event.dataTransfer.dropEffect + '"';
 		}
@@ -2250,4 +2255,35 @@ function dragOverEvent(element, event) {
 function dropEvent(element, event) {
 	event.preventDefault();
 	dragAndDropEvent(element, event, "drop-event")
+}
+
+function loadDropFile(elementId, name, size) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		const files = element["dragFiles"];
+		if (files) {
+			for(let i = 0; i < files.length; i++) {
+				const file = files[i]
+				if (file.name == name && file.size == size) {
+					const reader = new FileReader();
+					reader.onload = function() { 
+						sendMessage("fileLoaded{session=" + sessionID + ",id=" + element.id + 
+							",name=`" + name + 
+							"`,size=" + size +
+							",last-modified=" + file.lastModified +
+							",mime-type=\"" + file.type + 
+							"\",data=`" + reader.result + "`}");
+					}
+					reader.onerror = function(error) {
+						sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",name=\"" + name + "\",size=" + size + ",error=`" + error + "`}");
+					}
+					reader.readAsDataURL(file);
+					return
+				}
+			}
+		}
+		sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",name=`" + name + "`,size=" + size + ",error=`File not found`}");
+	} else {
+		sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",name=`" + name + "`,size=" + size + ",error=`Invalid View id`}");
+	}
 }

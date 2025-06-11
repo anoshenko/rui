@@ -428,7 +428,7 @@ func (listView *listViewData) ReloadListViewData() {
 			listView.itemFrame = make([]Frame, itemCount)
 		}
 
-		for i := 0; i < itemCount; i++ {
+		for i := range itemCount {
 			listView.items[i] = adapter.ListItem(i, listView.Session())
 		}
 	} else if len(listView.items) > 0 {
@@ -632,7 +632,7 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 
 	current := GetCurrent(listView)
 	checkedItems := GetListViewCheckedItems(listView)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
 		buffer.WriteRune('-')
@@ -693,7 +693,7 @@ func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *
 	itemStyle := itemStyleBuilder.String()
 
 	current := GetCurrent(listView)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
 		buffer.WriteRune('-')

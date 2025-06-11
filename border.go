@@ -433,7 +433,7 @@ func (border *borderProperty) String() string {
 
 func (border *borderProperty) setBorderObject(obj DataObject) bool {
 	result := true
-	for i := 0; i < obj.PropertyCount(); i++ {
+	for i := range obj.PropertyCount() {
 		if node := obj.Property(i); node != nil {
 			tag := PropertyName(node.Tag())
 			switch node.Type() {

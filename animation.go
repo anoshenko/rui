@@ -243,7 +243,7 @@ func parseAnimation(obj DataObject) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
 
-	for i := 0; i < obj.PropertyCount(); i++ {
+	for i := range obj.PropertyCount() {
 		if node := obj.Property(i); node != nil {
 			tag := PropertyName(node.Tag())
 			if node.Type() == TextNode {
@@ -491,7 +491,7 @@ func animationSet(properties Properties, tag PropertyName, value any) []Property
 		case DataNode:
 			parseObject := func(obj DataObject) (AnimatedProperty, bool) {
 				result := AnimatedProperty{}
-				for i := 0; i < obj.PropertyCount(); i++ {
+				for i := range obj.PropertyCount() {
 					if node := obj.Property(i); node.Type() == TextNode {
 						propTag := strings.ToLower(node.Tag())
 						switch propTag {
@@ -1050,7 +1050,7 @@ func setAnimationProperty(properties Properties, tag PropertyName, value any) bo
 	case DataNode:
 		animations := []AnimationProperty{}
 		result := true
-		for i := 0; i < value.ArraySize(); i++ {
+		for i := range value.ArraySize() {
 			if obj := value.ArrayElement(i).Object(); obj != nil {
 				if anim := parseAnimation(obj); anim.hasAnimatedProperty() {
 					animations = append(animations, anim)

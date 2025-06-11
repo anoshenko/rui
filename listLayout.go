@@ -176,8 +176,7 @@ func (listLayout *listLayoutData) createContent() bool {
 		htmlID := listLayout.htmlID()
 		isDisabled := IsDisabled(listLayout)
 
-		count := adapter.ListSize()
-		for i := 0; i < count; i++ {
+		for i := range adapter.ListSize() {
 			if view := adapter.ListItem(i, session); view != nil {
 				view.setParentID(htmlID)
 				if isDisabled {

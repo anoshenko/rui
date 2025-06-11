@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"encoding/base64"
 	"fmt"
 	"maps"
 	"strconv"
@@ -71,6 +72,12 @@ type View interface {
 	// HasFocus returns 'true' if the view has focus
 	HasFocus() bool
 
+	// LoadFile loads the content of the dropped file by drag-and-drop mechanism for all views except FilePicker.
+	// The selected file is loaded for FilePicker view.
+	//
+	// This function is asynchronous. The "result" function will be called after loading the data.
+	LoadFile(file FileInfo, result func(FileInfo, []byte))
+
 	init(session Session)
 	handleCommand(self View, command PropertyName, data DataObject) bool
 	htmlClass(disabled bool) string
@@ -115,6 +122,7 @@ type viewData struct {
 	set              func(tag PropertyName, value any) []PropertyName
 	remove           func(tag PropertyName) []PropertyName
 	changed          func(tag PropertyName)
+	fileLoader       map[string]func(FileInfo, []byte)
 }
 
 func newView(session Session) View {
@@ -160,6 +168,7 @@ func (view *viewData) init(session Session) {
 	view.noResizeEvent = false
 	view.created = false
 	view.hasHtmlDisabled = false
+	view.fileLoader = map[string]func(FileInfo, []byte){}
 }
 
 func (view *viewData) Session() Session {
@@ -1179,6 +1188,42 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 				self.onResize(self, floatProperty("x"), floatProperty("y"), floatProperty("width"), floatProperty("height"))
 				return true
 		*/
+
+	case "fileLoaded":
+		file := dataToFileInfo(data)
+		key := file.key()
+
+		if listener := view.fileLoader[key]; listener != nil {
+			delete(view.fileLoader, key)
+
+			if base64Data, ok := data.PropertyValue("data"); ok {
+				if index := strings.LastIndex(base64Data, ","); index >= 0 {
+					base64Data = base64Data[index+1:]
+				}
+				decode, err := base64.StdEncoding.DecodeString(base64Data)
+				if err == nil {
+					listener(file, decode)
+				} else {
+					ErrorLog(err.Error())
+				}
+			}
+		}
+		return true
+
+	case "fileLoadingError":
+		file := dataToFileInfo(data)
+		key := file.key()
+
+		if error, ok := data.PropertyValue("error"); ok {
+			ErrorLogF(`Load "%s" file error: %s`, file.Name, error)
+		}
+
+		if listener := view.fileLoader[key]; listener != nil {
+			delete(view.fileLoader, key)
+			listener(file, nil)
+		}
+		return true
+
 	default:
 		return false
 	}

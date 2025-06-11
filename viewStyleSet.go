@@ -64,7 +64,7 @@ func setTransitionProperty(properties Properties, value any) bool {
 			return false
 
 		case ArrayNode:
-			for i := 0; i < value.ArraySize(); i++ {
+			for i := range value.ArraySize() {
 				if obj := value.ArrayElement(i).Object(); obj != nil {
 					if !setObject(obj) {
 						return false
@@ -133,7 +133,7 @@ func setTransitionProperty(properties Properties, value any) bool {
 
 			case ArrayNode:
 				result := true
-				for i := 0; i < value.ArraySize(); i++ {
+				for i := range value.ArraySize() {
 					if obj := value.ArrayElement(i).Object(); obj != nil {
 						result = setObject(obj) && result
 					} else {

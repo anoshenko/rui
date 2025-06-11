@@ -159,7 +159,7 @@ func NewFilterProperty(params Params) FilterProperty {
 func newFilterProperty(obj DataObject) FilterProperty {
 	filter := new(filterData)
 	filter.init()
-	for i := 0; i < obj.PropertyCount(); i++ {
+	for i := range obj.PropertyCount() {
 		if node := obj.Property(i); node != nil {
 			tag := node.Tag()
 			switch node.Type() {

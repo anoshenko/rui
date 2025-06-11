@@ -164,7 +164,7 @@ const (
 type DragAndDropEvent struct {
 	MouseEvent
 	Data          map[string]string
-	Files         string
+	Files         []FileInfo
 	Target        View
 	EffectAllowed int
 	DropEffect    int
@@ -216,7 +216,7 @@ func (event *DragAndDropEvent) init(session Session, data DataObject) {
 		}
 	}
 
-	// TODO files
+	event.Files = parseFilesTag(data)
 }
 
 func stringToDropEffect(text string) (int, bool) {
@@ -433,6 +433,13 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 		buffer.WriteString(` data-drop-effect-allowed="`)
 		buffer.WriteString(effects[n])
 		buffer.WriteString(`" `)
+	}
+}
+
+func (view *viewData) LoadFile(file FileInfo, result func(FileInfo, []byte)) {
+	if result != nil {
+		view.fileLoader[file.key()] = result
+		view.Session().callFunc("loadDropFile", view.htmlID(), file.Name, file.Size)
 	}
 }
 

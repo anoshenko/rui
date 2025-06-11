@@ -695,7 +695,7 @@ func (theme *theme) addText(themeText string) bool {
 
 	objToStyle := func(obj DataObject) ViewStyle {
 		params := Params{}
-		for i := 0; i < obj.PropertyCount(); i++ {
+		for i := range obj.PropertyCount() {
 			if node := obj.Property(i); node != nil {
 				switch node.Type() {
 				case ArrayNode:
@@ -712,14 +712,14 @@ func (theme *theme) addText(themeText string) bool {
 		return NewViewStyle(params)
 	}
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		if d := data.Property(i); d != nil {
 			switch tag := d.Tag(); tag {
 			case "constants":
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.constants[prop.Tag()] = prop.Text()
 							}
@@ -731,7 +731,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.touchConstants[prop.Tag()] = prop.Text()
 							}
@@ -743,7 +743,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.colors[prop.Tag()] = prop.Text()
 							}
@@ -755,7 +755,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.darkColors[prop.Tag()] = prop.Text()
 							}
@@ -767,7 +767,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.images[prop.Tag()] = prop.Text()
 							}
@@ -779,7 +779,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.darkImages[prop.Tag()] = prop.Text()
 							}
@@ -790,7 +790,7 @@ func (theme *theme) addText(themeText string) bool {
 			case "styles":
 				if d.Type() == ArrayNode {
 					arraySize := d.ArraySize()
-					for k := 0; k < arraySize; k++ {
+					for k := range arraySize {
 						if element := d.ArrayElement(k); element != nil && element.IsObject() {
 							if obj := element.Object(); obj != nil {
 								theme.styles[obj.Tag()] = objToStyle(obj)
@@ -803,7 +803,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ArrayNode && strings.HasPrefix(tag, "styles:") {
 					if rule, ok := parseMediaRule(tag); ok {
 						arraySize := d.ArraySize()
-						for k := 0; k < arraySize; k++ {
+						for k := range arraySize {
 							if element := d.ArrayElement(k); element != nil && element.IsObject() {
 								if obj := element.Object(); obj != nil {
 									rule.styles[obj.Tag()] = objToStyle(obj)
