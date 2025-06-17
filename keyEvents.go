@@ -434,15 +434,13 @@ func (event *KeyEvent) init(data DataObject) {
 }
 
 func keyEventsHtml(view View, buffer *strings.Builder) {
-	if len(getOneArgEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 {
+	if len(getOneArgEventListeners[View, KeyEvent](view, nil, KeyDownEvent)) > 0 ||
+		(view.Focusable() && len(getOneArgEventListeners[View, MouseEvent](view, nil, ClickEvent)) > 0) {
+
 		buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)
-	} else if view.Focusable() {
-		if len(getOneArgEventListeners[View, MouseEvent](view, nil, ClickEvent)) > 0 {
-			buffer.WriteString(`onkeydown="keyDownEvent(this, event)" `)
-		}
 	}
 
-	if listeners := getOneArgEventListeners[View, KeyEvent](view, nil, KeyUpEvent); len(listeners) > 0 {
+	if len(getOneArgEventListeners[View, KeyEvent](view, nil, KeyUpEvent)) > 0 {
 		buffer.WriteString(`onkeyup="keyUpEvent(this, event)" `)
 	}
 }
@@ -454,7 +452,7 @@ func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
-			listener(view, event)
+			listener.Run(view, event)
 		}
 		return
 	}
@@ -477,20 +475,38 @@ func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 				ScreenY:   view.Frame().Top + view.Frame().Height/2,
 			}
 			for _, listener := range listeners {
-				listener(view, clickEvent)
+				listener.Run(view, clickEvent)
 			}
 		}
 	}
 }
 
 // GetKeyDownListeners returns the "key-down-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetKeyDownListeners(view View, subviewID ...string) []func(View, KeyEvent) {
-	return getOneArgEventListeners[View, KeyEvent](view, subviewID, KeyDownEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.KeyEvent),
+//   - func(rui.View),
+//   - func(rui.KeyEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetKeyDownListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, KeyEvent](view, subviewID, KeyDownEvent)
 }
 
 // GetKeyUpListeners returns the "key-up-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetKeyUpListeners(view View, subviewID ...string) []func(View, KeyEvent) {
-	return getOneArgEventListeners[View, KeyEvent](view, subviewID, KeyUpEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.KeyEvent),
+//   - func(rui.View),
+//   - func(rui.KeyEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetKeyUpListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, KeyEvent](view, subviewID, KeyUpEvent)
 }

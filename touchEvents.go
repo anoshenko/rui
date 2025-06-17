@@ -193,30 +193,66 @@ func handleTouchEvents(view View, tag PropertyName, data DataObject) {
 	event.init(data)
 
 	for _, listener := range listeners {
-		listener(view, event)
+		listener.Run(view, event)
 	}
 }
 
 // GetTouchStartListeners returns the "touch-start" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTouchStartListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchStart)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.TouchEvent),
+//   - func(rui.View),
+//   - func(rui.TouchEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTouchStartListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, TouchEvent](view, subviewID, TouchStart)
 }
 
 // GetTouchEndListeners returns the "touch-end" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTouchEndListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchEnd)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.TouchEvent),
+//   - func(rui.View),
+//   - func(rui.TouchEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTouchEndListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, TouchEvent](view, subviewID, TouchEnd)
 }
 
 // GetTouchMoveListeners returns the "touch-move" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTouchMoveListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchMove)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.TouchEvent),
+//   - func(rui.View),
+//   - func(rui.TouchEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTouchMoveListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, TouchEvent](view, subviewID, TouchMove)
 }
 
 // GetTouchCancelListeners returns the "touch-cancel" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTouchCancelListeners(view View, subviewID ...string) []func(View, TouchEvent) {
-	return getOneArgEventListeners[View, TouchEvent](view, subviewID, TouchCancel)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.TouchEvent),
+//   - func(rui.View),
+//   - func(rui.TouchEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTouchCancelListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, TouchEvent](view, subviewID, TouchCancel)
 }

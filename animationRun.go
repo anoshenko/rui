@@ -1,5 +1,7 @@
 package rui
 
+import "slices"
+
 func (animation *animationData) Start(view View, listener func(view View, animation AnimationProperty, event PropertyName)) bool {
 	if view == nil {
 		ErrorLog("nil View in animation.Start() function")
@@ -13,28 +15,22 @@ func (animation *animationData) Start(view View, listener func(view View, animat
 	animation.listener = listener
 
 	animation.oldAnimation = nil
+
+	//if  getOneArgEventListeners[View, PropertyName](view, nil, Animation)
 	if value := view.Get(Animation); value != nil {
 		if oldAnimation, ok := value.([]AnimationProperty); ok && len(oldAnimation) > 0 {
 			animation.oldAnimation = oldAnimation
 		}
 	}
 
-	animation.oldListeners = map[PropertyName][]func(View, PropertyName){}
+	animation.oldListeners = map[PropertyName][]oneArgListener[View, PropertyName]{}
 
 	setListeners := func(event PropertyName, listener func(View, PropertyName)) {
-		var listeners []func(View, PropertyName) = nil
-		if value := view.Get(event); value != nil {
-			if oldListeners, ok := value.([]func(View, PropertyName)); ok && len(oldListeners) > 0 {
-				listeners = oldListeners
-			}
+		listeners := getOneArgEventListeners[View, PropertyName](view, nil, event)
+		if len(listeners) > 0 {
+			animation.oldListeners[event] = slices.Clone(listeners)
 		}
-
-		if listeners == nil {
-			view.Set(event, listener)
-		} else {
-			animation.oldListeners[event] = listeners
-			view.Set(event, append(listeners, listener))
-		}
+		view.Set(event, append(listeners, newOneArgListenerVE(listener)))
 	}
 
 	setListeners(AnimationStartEvent, animation.onAnimationStart)
@@ -49,7 +45,7 @@ func (animation *animationData) Start(view View, listener func(view View, animat
 func (animation *animationData) finish() {
 	if animation.view != nil {
 		for _, event := range []PropertyName{AnimationStartEvent, AnimationEndEvent, AnimationCancelEvent, AnimationIterationEvent} {
-			if listeners, ok := animation.oldListeners[event]; ok {
+			if listeners, ok := animation.oldListeners[event]; ok && len(listeners) > 0 {
 				animation.view.Set(event, listeners)
 			} else {
 				animation.view.Remove(event)
@@ -63,7 +59,7 @@ func (animation *animationData) finish() {
 			animation.view.Set(Animation, "")
 		}
 
-		animation.oldListeners = map[PropertyName][]func(View, PropertyName){}
+		animation.oldListeners = map[PropertyName][]oneArgListener[View, PropertyName]{}
 
 		animation.view = nil
 		animation.listener = nil

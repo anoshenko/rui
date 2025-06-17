@@ -282,8 +282,8 @@ func (picker *filePickerData) handleCommand(self View, command PropertyName, dat
 	case "fileSelected":
 		if files := parseFilesTag(data); files != nil {
 			picker.files = files
-			for _, listener := range GetFileSelectedListeners(picker) {
-				listener(picker, files)
+			for _, listener := range getOneArgEventListeners[FilePicker, []FileInfo](picker, nil, FileSelectedEvent) {
+				listener.Run(picker, files)
 			}
 		}
 		return true
@@ -317,13 +317,17 @@ func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(
 }
 
 // IsMultipleFilePicker returns "true" if multiple files can be selected in the FilePicker, "false" otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsMultipleFilePicker(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Multiple, false)
 }
 
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetFilePickerAccept(view View, subviewID ...string) []string {
 	if view = getSubview(view, subviewID); view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
@@ -345,7 +349,16 @@ func GetFilePickerAccept(view View, subviewID ...string) []string {
 
 // GetFileSelectedListeners returns the "file-selected-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo) {
-	return getOneArgEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, []rui.FileInfo),
+//   - func(rui.View),
+//   - func([]rui.FileInfo),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetFileSelectedListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }

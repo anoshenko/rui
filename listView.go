@@ -122,19 +122,13 @@ type ListView interface {
 	// ReloadListViewData updates ListView content
 	ReloadListViewData()
 
-	//getCheckedItems() []int
 	getItemFrames() []Frame
 }
 
 type listViewData struct {
 	viewData
-	//adapter ListAdapter
-	//clickedListeners  []func(ListView, int)
-	//selectedListeners []func(ListView, int)
-	//checkedListeners  []func(ListView, []int)
 	items     []View
 	itemFrame []Frame
-	//checkedItem       []int
 }
 
 // NewListView creates the new list view
@@ -279,7 +273,7 @@ func (listView *listViewData) propertyChanged(tag PropertyName) {
 		if listeners := getOneArgEventListeners[ListView, int](listView, nil, ListItemSelectedEvent); len(listeners) > 0 {
 			current := GetCurrent(listView)
 			for _, listener := range listeners {
-				listener(listView, current)
+				listener.Run(listView, current)
 			}
 		}
 
@@ -288,7 +282,7 @@ func (listView *listViewData) propertyChanged(tag PropertyName) {
 		if listeners := getOneArgEventListeners[ListView, []int](listView, nil, ListItemCheckedEvent); len(listeners) > 0 {
 			checked := GetListViewCheckedItems(listView)
 			for _, listener := range listeners {
-				listener(listView, checked)
+				listener.Run(listView, checked)
 			}
 		}
 
@@ -966,7 +960,7 @@ func (listView *listViewData) handleCommand(self View, command PropertyName, dat
 func (listView *listViewData) handleCurrent(number int) {
 	listView.properties[Current] = number
 	for _, listener := range getOneArgEventListeners[ListView, int](listView, nil, ListItemSelectedEvent) {
-		listener(listView, number)
+		listener.Run(listView, number)
 	}
 	if listener, ok := listView.changeListener[Current]; ok {
 		listener(listView, Current)
@@ -1032,12 +1026,12 @@ func (listView *listViewData) onItemClick(number int) {
 		}
 
 		for _, listener := range getOneArgEventListeners[ListView, []int](listView, nil, ListItemCheckedEvent) {
-			listener(listView, checkedItem)
+			listener.Run(listView, checkedItem)
 		}
 	}
 
 	for _, listener := range getOneArgEventListeners[ListView, int](listView, nil, ListItemClickedEvent) {
-		listener(listView, number)
+		listener.Run(listView, number)
 	}
 
 }
@@ -1054,58 +1048,97 @@ func (listView *listViewData) onItemResize(self View, index string, x, y, width,
 }
 
 // GetVerticalAlign return the vertical align of a list: TopAlign (0), BottomAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, VerticalAlign, TopAlign, false)
 }
 
 // GetHorizontalAlign return the vertical align of a list/checkbox: LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, HorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemClickedListeners returns a ListItemClickedListener of the ListView.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetListItemClickedListeners(view View, subviewID ...string) []func(ListView, int) {
-	return getOneArgEventListeners[ListView, int](view, subviewID, ListItemClickedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.ListView, int),
+//   - func(rui.ListView),
+//   - func(int),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetListItemClickedListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[ListView, int](view, subviewID, ListItemClickedEvent)
 }
 
 // GetListItemSelectedListeners returns a ListItemSelectedListener of the ListView.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetListItemSelectedListeners(view View, subviewID ...string) []func(ListView, int) {
-	return getOneArgEventListeners[ListView, int](view, subviewID, ListItemSelectedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.ListView, int),
+//   - func(rui.ListView),
+//   - func(int),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetListItemSelectedListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[ListView, int](view, subviewID, ListItemSelectedEvent)
 }
 
 // GetListItemCheckedListeners returns a ListItemCheckedListener of the ListView.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetListItemCheckedListeners(view View, subviewID ...string) []func(ListView, []int) {
-	return getOneArgEventListeners[ListView, []int](view, subviewID, ListItemCheckedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.ListView, []int),
+//   - func(rui.ListView),
+//   - func([]int),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetListItemCheckedListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[ListView, []int](view, subviewID, ListItemCheckedEvent)
 }
 
 // GetListItemWidth returns the width of a ListView item.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListItemWidth(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ItemWidth, false)
 }
 
 // GetListItemHeight returns the height of a ListView item.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListItemHeight(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ItemHeight, false)
 }
 
 // GetListViewCheckbox returns the ListView checkbox type: NoneCheckbox (0), SingleCheckbox (1), or MultipleCheckbox (2).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListViewCheckbox(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ItemCheckbox, 0, false)
 }
 
 // GetListViewCheckedItems returns the array of ListView checked items.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListViewCheckedItems(view View, subviewID ...string) []int {
 	if view = getSubview(view, subviewID); view != nil {
 		if value := view.getRaw(Checked); value != nil {
@@ -1138,34 +1171,44 @@ func IsListViewCheckedItem(view View, subviewID string, index int) bool {
 
 // GetListViewCheckboxVerticalAlign returns the vertical align of the ListView checkbox:
 // TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListViewCheckboxVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CheckboxVerticalAlign, TopAlign, false)
 }
 
 // GetListViewCheckboxHorizontalAlign returns the horizontal align of the ListView checkbox:
 // LeftAlign (0), RightAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListViewCheckboxHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CheckboxHorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemVerticalAlign returns the vertical align of the ListView item content:
 // TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListItemVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ItemVerticalAlign, TopAlign, false)
 }
 
 // ItemHorizontalAlign returns the horizontal align of the ListView item content:
 // LeftAlign (0), RightAlign (1), CenterAlign (2), StretchAlign (3)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListItemHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ItemHorizontalAlign, LeftAlign, false)
 }
 
 // GetListItemFrame - returns the location and size of the ListView item in pixels.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListItemFrame(view View, subviewID string, index int) Frame {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
@@ -1182,7 +1225,9 @@ func GetListItemFrame(view View, subviewID string, index int) Frame {
 }
 
 // GetListViewAdapter - returns the ListView adapter.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
 	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Items); value != nil {

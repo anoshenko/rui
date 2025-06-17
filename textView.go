@@ -111,7 +111,9 @@ func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 // GetTextOverflow returns a value of the "text-overflow" property:
 // TextOverflowClip (0) or TextOverflowEllipsis (1).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetTextOverflow(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, TextOverflow, SingleLineText, false)
 }

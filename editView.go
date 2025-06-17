@@ -451,26 +451,34 @@ func IsReadOnly(view View, subviewID ...string) bool {
 }
 
 // IsSpellcheck returns a value of the Spellcheck property of EditView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsSpellcheck(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Spellcheck, false)
 }
 
 // GetTextChangedListeners returns the TextChangedListener list of an EditView or MultiLineEditView subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string, string) {
 	return getTwoArgEventListeners[EditView, string](view, subviewID, EditTextChangedEvent)
 }
 
 // GetEditViewType returns a value of the Type property of EditView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetEditViewType(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, EditViewType, SingleLineText, false)
 }
 
 // GetEditViewPattern returns a value of the Pattern property of EditView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetEditViewPattern(view View, subviewID ...string) string {
 	if view = getSubview(view, subviewID); view != nil {
 		if pattern, ok := stringProperty(view, EditViewPattern, view.Session()); ok {
@@ -488,13 +496,17 @@ func GetEditViewPattern(view View, subviewID ...string) string {
 }
 
 // IsEditViewWrap returns a value of the EditWrap property of MultiLineEditView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsEditViewWrap(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, EditWrap, false)
 }
 
 // AppendEditText appends the text to the EditView content.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func AppendEditText(view View, subviewID string, text string) {
 	if subviewID != "" {
 		if edit := EditViewByID(view, subviewID); edit != nil {
@@ -509,7 +521,9 @@ func AppendEditText(view View, subviewID string, text string) {
 }
 
 // GetCaretColor returns the color of the text input caret.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetCaretColor(view View, subviewID ...string) Color {
 	return colorStyledProperty(view, subviewID, CaretColor, false)
 }

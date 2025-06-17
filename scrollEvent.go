@@ -25,8 +25,8 @@ func (view *viewData) onScroll(self View, x, y, width, height float64) {
 	view.scroll.Top = y
 	view.scroll.Width = width
 	view.scroll.Height = height
-	for _, listener := range GetScrollListeners(view) {
-		listener(self, view.scroll)
+	for _, listener := range getOneArgEventListeners[View, Frame](view, nil, ScrollEvent) {
+		listener.Run(self, view.scroll)
 	}
 }
 
@@ -42,7 +42,9 @@ func (view *viewData) setScroll(x, y, width, height float64) {
 }
 
 // GetViewScroll returns ...
-// If the second argument (subviewID) is not specified or it is "" then a value of the first argument (view) is returned
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetViewScroll(view View, subviewID ...string) Frame {
 	view = getSubview(view, subviewID)
 	if view == nil {
@@ -52,13 +54,24 @@ func GetViewScroll(view View, subviewID ...string) Frame {
 }
 
 // GetScrollListeners returns the list of "scroll-event" listeners. If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
-func GetScrollListeners(view View, subviewID ...string) []func(View, Frame) {
-	return getOneArgEventListeners[View, Frame](view, subviewID, ResizeEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.Frame),
+//   - func(rui.View),
+//   - func(rui.Frame),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetScrollListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, Frame](view, subviewID, ScrollEvent)
 }
 
 // ScrollTo scrolls the view's content to the given position.
-// If the second argument (subviewID) is "" then the first argument (view) is used
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func ScrollViewTo(view View, subviewID string, x, y float64) {
 	if subviewID != "" {
 		view = ViewByID(view, subviewID)
@@ -69,7 +82,9 @@ func ScrollViewTo(view View, subviewID string, x, y float64) {
 }
 
 // ScrollViewToEnd scrolls the view's content to the start of view.
-// If the second argument (subviewID) is not specified or it is "" then the first argument (view) is used
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func ScrollViewToStart(view View, subviewID ...string) {
 	if view = getSubview(view, subviewID); view != nil {
 		view.Session().callFunc("scrollToStart", view.htmlID())
@@ -77,7 +92,9 @@ func ScrollViewToStart(view View, subviewID ...string) {
 }
 
 // ScrollViewToEnd scrolls the view's content to the end of view.
-// If the second argument (subviewID) is not specified or it is "" then the first argument (view) is used
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func ScrollViewToEnd(view View, subviewID ...string) {
 	if view = getSubview(view, subviewID); view != nil {
 		view.Session().callFunc("scrollToEnd", view.htmlID())

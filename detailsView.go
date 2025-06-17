@@ -202,7 +202,9 @@ func (detailsView *detailsViewData) handleCommand(self View, command PropertyNam
 }
 
 // GetDetailsSummary returns a value of the Summary property of DetailsView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDetailsSummary(view View, subviewID ...string) View {
 	if view = getSubview(view, subviewID); view != nil {
 		if value := view.Get(Summary); value != nil {
@@ -219,13 +221,17 @@ func GetDetailsSummary(view View, subviewID ...string) View {
 }
 
 // IsDetailsExpanded returns a value of the Expanded property of DetailsView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsDetailsExpanded(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Expanded, false)
 }
 
 // IsDetailsExpanded returns a value of the HideSummaryMarker property of DetailsView.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsSummaryMarkerHidden(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, HideSummaryMarker, false)
 }

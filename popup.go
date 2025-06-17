@@ -649,7 +649,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 				}
 
 			case DismissEvent:
-				if listeners, ok := valueToNoArgEventListeners[Popup](value); ok {
+				if listeners, ok := valueToNoArgEventListeners[Popup](popup.contentView, value); ok {
 					if listeners != nil {
 						popup.dismissListener = listeners
 					}

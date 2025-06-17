@@ -101,13 +101,17 @@ func (progress *progressBarData) htmlProperties(self View, buffer *strings.Build
 }
 
 // GetProgressBarMax returns the max value of ProgressBar subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetProgressBarMax(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, ProgressBarMax, 1)
 }
 
 // GetProgressBarValue returns the value of ProgressBar subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetProgressBarValue(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, ProgressBarValue, 0)
 }

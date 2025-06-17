@@ -209,7 +209,7 @@ type animationData struct {
 	usageCounter  int
 	view          View
 	listener      func(view View, animation AnimationProperty, event PropertyName)
-	oldListeners  map[PropertyName][]func(View, PropertyName)
+	oldListeners  map[PropertyName][]oneArgListener[View, PropertyName]
 	oldAnimation  []AnimationProperty
 }
 
@@ -1083,7 +1083,9 @@ func SetAnimated(rootView View, viewID string, tag PropertyName, value any, anim
 }
 
 // IsAnimationPaused returns "true" if an animation of the subview is paused, "false" otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsAnimationPaused(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, AnimationPaused, false)
 }

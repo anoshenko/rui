@@ -268,14 +268,16 @@ func backgroundStyledPropery(view View, subviewID []string, tag PropertyName) []
 
 // GetBackground returns the view background.
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetBackground(view View, subviewID ...string) []BackgroundElement {
 	return backgroundStyledPropery(view, subviewID, Background)
 }
 
 // GetMask returns the view mask.
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetMask(view View, subviewID ...string) []BackgroundElement {
 	return backgroundStyledPropery(view, subviewID, Mask)
 }
@@ -284,7 +286,8 @@ func GetMask(view View, subviewID ...string) []BackgroundElement {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetBackgroundClip(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, BackgroundClip, 0, false)
 }
@@ -293,7 +296,8 @@ func GetBackgroundClip(view View, subviewID ...string) int {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetBackgroundOrigin(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, BackgroundOrigin, 0, false)
 }
@@ -302,7 +306,8 @@ func GetBackgroundOrigin(view View, subviewID ...string) int {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetMaskClip(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, MaskClip, 0, false)
 }
@@ -311,7 +316,8 @@ func GetMaskClip(view View, subviewID ...string) int {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetMaskOrigin(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, MaskOrigin, 0, false)
 }

@@ -205,21 +205,27 @@ func (listLayout *listLayoutData) UpdateContent() {
 
 // GetListVerticalAlign returns the vertical align of a ListLayout or ListView sibview:
 // TopAlign (0), BottomAlign (1), CenterAlign (2), or StretchAlign (3)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, VerticalAlign, TopAlign, false)
 }
 
 // GetListHorizontalAlign returns the vertical align of a ListLayout or ListView subview:
 // LeftAlign (0), RightAlign (1), CenterAlign (2), or StretchAlign (3)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, HorizontalAlign, LeftAlign, false)
 }
 
 // GetListOrientation returns the orientation of a ListLayout or ListView subview:
 // TopDownOrientation (0), StartToEndOrientation (1), BottomUpOrientation (2), or EndToStartOrientation (3)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListOrientation(view View, subviewID ...string) int {
 	if view = getSubview(view, subviewID); view != nil {
 		if orientation, ok := valueToOrientation(view.Get(Orientation), view.Session()); ok {
@@ -238,19 +244,25 @@ func GetListOrientation(view View, subviewID ...string) int {
 
 // GetListWrap returns the wrap type of a ListLayout or ListView subview:
 // ListWrapOff (0), ListWrapOn (1), or ListWrapReverse (2)
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListWrap(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ListWrap, ListWrapOff, false)
 }
 
 // GetListRowGap returns the gap between ListLayout or ListView rows.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListRowGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ListRowGap, false)
 }
 
 // GetListColumnGap returns the gap between ListLayout or ListView columns.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetListColumnGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ListColumnGap, false)
 }

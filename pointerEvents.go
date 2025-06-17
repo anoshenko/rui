@@ -192,42 +192,96 @@ func handlePointerEvents(view View, tag PropertyName, data DataObject) {
 	event.init(data)
 
 	for _, listener := range listeners {
-		listener(view, event)
+		listener.Run(view, event)
 	}
 }
 
 // GetPointerDownListeners returns the "pointer-down" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPointerDownListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerDown)
+//
+// Result elements can be of the following types:
+//   - func(View, PointerEvent),
+//   - func(View),
+//   - func(PointerEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetPointerDownListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, PointerEvent](view, subviewID, PointerDown)
 }
 
 // GetPointerUpListeners returns the "pointer-up" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPointerUpListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerUp)
+//
+// Result elements can be of the following types:
+//   - func(View, PointerEvent),
+//   - func(View),
+//   - func(PointerEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetPointerUpListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, PointerEvent](view, subviewID, PointerUp)
 }
 
 // GetPointerMoveListeners returns the "pointer-move" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPointerMoveListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerMove)
+//
+// Result elements can be of the following types:
+//   - func(View, PointerEvent),
+//   - func(View),
+//   - func(PointerEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetPointerMoveListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, PointerEvent](view, subviewID, PointerMove)
 }
 
 // GetPointerCancelListeners returns the "pointer-cancel" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPointerCancelListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerCancel)
+//
+// Result elements can be of the following types:
+//   - func(View, PointerEvent),
+//   - func(View),
+//   - func(PointerEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetPointerCancelListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, PointerEvent](view, subviewID, PointerCancel)
 }
 
 // GetPointerOverListeners returns the "pointer-over" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPointerOverListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerOver)
+//
+// Result elements can be of the following types:
+//   - func(View, PointerEvent),
+//   - func(View),
+//   - func(PointerEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetPointerOverListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, PointerEvent](view, subviewID, PointerOver)
 }
 
 // GetPointerOutListeners returns the "pointer-out" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetPointerOutListeners(view View, subviewID ...string) []func(View, PointerEvent) {
-	return getOneArgEventListeners[View, PointerEvent](view, subviewID, PointerOut)
+//
+// Result elements can be of the following types:
+//   - func(View, PointerEvent),
+//   - func(View),
+//   - func(PointerEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetPointerOutListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, PointerEvent](view, subviewID, PointerOut)
 }

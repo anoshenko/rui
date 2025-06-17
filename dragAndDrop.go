@@ -336,7 +336,7 @@ func handleDragAndDropEvents(view View, tag PropertyName, data DataObject) {
 		event.init(view.Session(), data)
 
 		for _, listener := range listeners {
-			listener(view, event)
+			listener.Run(view, event)
 		}
 	}
 }
@@ -434,41 +434,99 @@ func (view *viewData) LoadFile(file FileInfo, result func(FileInfo, []byte)) {
 }
 
 // GetDragStartEventListeners returns the "drag-start-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDragStartEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent) {
-	return getOneArgEventListeners[View, DragAndDropEvent](view, subviewID, DragStartEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.DragAndDropEvent),
+//   - func(rui.View),
+//   - func(rui.DragAndDropEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDragStartEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, DragAndDropEvent](view, subviewID, DragStartEvent)
 }
 
 // GetDragEndEventListeners returns the "drag-end-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDragEndEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent) {
-	return getOneArgEventListeners[View, DragAndDropEvent](view, subviewID, DragEndEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.DragAndDropEvent),
+//   - func(rui.View),
+//   - func(rui.DragAndDropEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDragEndEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, DragAndDropEvent](view, subviewID, DragEndEvent)
 }
 
 // GetDragEnterEventListeners returns the "drag-enter-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDragEnterEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent) {
-	return getOneArgEventListeners[View, DragAndDropEvent](view, subviewID, DragEnterEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.DragAndDropEvent),
+//   - func(rui.View),
+//   - func(rui.DragAndDropEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDragEnterEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, DragAndDropEvent](view, subviewID, DragEnterEvent)
 }
 
 // GetDragLeaveEventListeners returns the "drag-leave-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDragLeaveEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent) {
-	return getOneArgEventListeners[View, DragAndDropEvent](view, subviewID, DragLeaveEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.DragAndDropEvent),
+//   - func(rui.View),
+//   - func(rui.DragAndDropEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDragLeaveEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, DragAndDropEvent](view, subviewID, DragLeaveEvent)
 }
 
 // GetDragOverEventListeners returns the "drag-over-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDragOverEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent) {
-	return getOneArgEventListeners[View, DragAndDropEvent](view, subviewID, DragOverEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.DragAndDropEvent),
+//   - func(rui.View),
+//   - func(rui.DragAndDropEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDragOverEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, DragAndDropEvent](view, subviewID, DragOverEvent)
 }
 
 // GetDropEventListeners returns the "drag-start-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDropEventListeners(view View, subviewID ...string) []func(View, DragAndDropEvent) {
-	return getOneArgEventListeners[View, DragAndDropEvent](view, subviewID, DropEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.DragAndDropEvent),
+//   - func(rui.View),
+//   - func(rui.DragAndDropEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDropEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, DragAndDropEvent](view, subviewID, DropEvent)
 }
 
+// GetDropEventListeners returns the "drag-data" data.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDragData(view View, subviewID ...string) map[string]string {
 	result := map[string]string{}
 	if view = getSubview(view, subviewID); view != nil {
@@ -483,7 +541,9 @@ func GetDragData(view View, subviewID ...string) map[string]string {
 }
 
 // GetDragImage returns the drag feedback image.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDragImage(view View, subviewID ...string) string {
 	if view = getSubview(view, subviewID); view != nil {
 		value := view.getRaw(DragImage)
@@ -508,13 +568,17 @@ func GetDragImage(view View, subviewID ...string) string {
 }
 
 // GetDragImageXOffset returns the horizontal offset in pixels within the drag feedback image.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDragImageXOffset(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, DragImageXOffset, 0)
 }
 
 // GetDragImageYOffset returns the vertical offset in pixels within the drag feedback image.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDragImageYOffset(view View, subviewID ...string) float64 {
 	return floatStyledProperty(view, subviewID, DragImageYOffset, 0)
 }
@@ -529,7 +593,8 @@ func GetDragImageYOffset(view View, subviewID ...string) float64 {
 //   - 2 (DropEffectMove) - An item may be moved to a new location.
 //   - 4 (DropEffectLink) - A link may be established to the source at the new location.
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDropEffect(view View, subviewID ...string) int {
 	if view = getSubview(view, subviewID); view != nil {
 		value := view.getRaw(DropEffect)
@@ -573,7 +638,8 @@ func GetDropEffect(view View, subviewID ...string) int {
 //   - 6 (DropEffectLinkMove) - A link or move operation is permitted.
 //   - 7 (DropEffectAll) - All operations are permitted.
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDropEffectAllowed(view View, subviewID ...string) int {
 	if view = getSubview(view, subviewID); view != nil {
 		value := view.getRaw(DropEffectAllowed)

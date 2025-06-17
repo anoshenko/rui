@@ -592,14 +592,6 @@ func (table *tableViewData) init(session Session) {
 	table.tag = "TableView"
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
-	/*
-		table.cellSelectedListener = []func(TableView, int, int){}
-		table.cellClickedListener = []func(TableView, int, int){}
-		table.rowSelectedListener = []func(TableView, int){}
-		table.rowClickedListener = []func(TableView, int){}
-		table.current.Row = -1
-		table.current.Column = -1
-	*/
 	table.normalize = normalizeTableViewTag
 	table.set = table.setFunc
 	table.changed = table.propertyChanged
@@ -954,63 +946,6 @@ func tableViewCurrentInactiveStyle(view View) string {
 	}
 	return "ruiCurrentTableCell"
 }
-
-/*
-func (table *tableViewData) valueToCellListeners(value any) []func(TableView, int, int) {
-	if value == nil {
-		return []func(TableView, int, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TableView, int, int):
-		return []func(TableView, int, int){value}
-
-	case func(int, int):
-		fn := func(_ TableView, row, column int) {
-			value(row, column)
-		}
-		return []func(TableView, int, int){fn}
-
-	case []func(TableView, int, int):
-		return value
-
-	case []func(int, int):
-		listeners := make([]func(TableView, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ TableView, row, column int) {
-				val(row, column)
-			}
-		}
-		return listeners
-
-	case []any:
-		listeners := make([]func(TableView, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TableView, int, int):
-				listeners[i] = val
-
-			case func(int, int):
-				listeners[i] = func(_ TableView, row, column int) {
-					val(row, column)
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
-}
-*/
 
 func (table *tableViewData) htmlTag() string {
 	return "table"
@@ -1735,8 +1670,8 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 				listener(table, Current)
 			}
 
-			for _, listener := range GetTableRowSelectedListeners(table) {
-				listener(table, row)
+			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
+				listener.Run(table, row)
 			}
 		}
 
@@ -1761,8 +1696,8 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 
 	case "rowClick":
 		if row, ok := dataIntProperty(data, "row"); ok {
-			for _, listener := range GetTableRowClickedListeners(table) {
-				listener(table, row)
+			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowClickedEvent) {
+				listener.Run(table, row)
 			}
 		}
 

@@ -352,3 +352,10 @@ func (customView *CustomViewData) LoadFile(file FileInfo, result func(FileInfo, 
 		customView.superView.LoadFile(file, result)
 	}
 }
+
+func (customView *CustomViewData) binding() any {
+	if customView.superView != nil {
+		return customView.superView.binding()
+	}
+	return nil
+}

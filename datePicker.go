@@ -400,7 +400,9 @@ func getDateProperty(view View, mainTag, shortTag PropertyName) (time.Time, bool
 
 // GetDatePickerMin returns the min date of DatePicker subview and "true" as the second value if the min date is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDatePickerMin(view View, subviewID ...string) (time.Time, bool) {
 	if view = getSubview(view, subviewID); view != nil {
 		return getDateProperty(view, DatePickerMin, Min)
@@ -410,7 +412,9 @@ func GetDatePickerMin(view View, subviewID ...string) (time.Time, bool) {
 
 // GetDatePickerMax returns the max date of DatePicker subview and "true" as the second value if the min date is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDatePickerMax(view View, subviewID ...string) (time.Time, bool) {
 	if view = getSubview(view, subviewID); view != nil {
 		return getDateProperty(view, DatePickerMax, Max)
@@ -419,13 +423,17 @@ func GetDatePickerMax(view View, subviewID ...string) (time.Time, bool) {
 }
 
 // GetDatePickerStep returns the date changing step in days of DatePicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDatePickerStep(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, DatePickerStep, 0)
 }
 
 // GetDatePickerValue returns the date of DatePicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDatePickerValue(view View, subviewID ...string) time.Time {
 	if view = getSubview(view, subviewID); view == nil {
 		return time.Now()
@@ -436,7 +444,9 @@ func GetDatePickerValue(view View, subviewID ...string) time.Time {
 
 // GetDateChangedListeners returns the DateChangedListener list of an DatePicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time, time.Time) {
 	return getTwoArgEventListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
 }

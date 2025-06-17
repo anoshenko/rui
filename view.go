@@ -92,6 +92,7 @@ type View interface {
 	addToCSSStyle(addCSS map[string]string)
 	exscludeTags() []PropertyName
 	htmlDisabledProperty() bool
+	binding() any
 
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index string, x, y, width, height float64)
@@ -193,6 +194,18 @@ func (view *viewData) Tag() string {
 
 func (view *viewData) ID() string {
 	return view.viewID
+}
+
+func (view *viewData) binding() any {
+	if result := view.getRaw(Binding); result != nil {
+		return result
+	}
+
+	if parent := view.Parent(); parent != nil {
+		return parent.binding()
+	}
+
+	return nil
 }
 
 func (view *viewData) ViewByID(id string) View {
@@ -304,6 +317,14 @@ func (view *viewData) removeFunc(tag PropertyName) []PropertyName {
 			changedTags = []PropertyName{}
 		}
 
+	case Binding:
+		if view.getRaw(Binding) != nil {
+			view.setRaw(Binding, nil)
+			changedTags = []PropertyName{Binding}
+		} else {
+			changedTags = []PropertyName{}
+		}
+
 	case Animation:
 		if val := view.getRaw(Animation); val != nil {
 			if animations, ok := val.([]AnimationProperty); ok {
@@ -335,6 +356,10 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 		}
 		notCompatibleType(ID, value)
 		return nil
+
+	case Binding:
+		view.setRaw(Binding, value)
+		return []PropertyName{Binding}
 
 	case Animation:
 		oldAnimations := []AnimationProperty{}
@@ -386,20 +411,15 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
 		result := setOneArgEventListener[View, PropertyName](view, tag, value)
 		if result == nil {
-			result = setOneArgEventListener[View, string](view, tag, value)
-			if result != nil {
-				if listeners, ok := view.getRaw(tag).([]func(View, string)); ok {
-					newListeners := make([]func(View, PropertyName), len(listeners))
-					for i, listener := range listeners {
-						newListeners[i] = func(view View, name PropertyName) {
-							listener(view, string(name))
-						}
-					}
-					view.setRaw(tag, newListeners)
-					return result
+			if listeners, ok := valueToOneArgEventListeners[View, string](view); ok && len(listeners) > 0 {
+				newListeners := make([]oneArgListener[View, PropertyName], len(listeners))
+				for i, listener := range listeners {
+					newListeners[i] = newOneArgListenerVE(func(view View, name PropertyName) {
+						listener.Run(view, string(name))
+					})
 				}
-				view.setRaw(tag, nil)
-				return nil
+				view.setRaw(tag, newListeners)
+				result = []PropertyName{tag}
 			}
 		}
 		return result

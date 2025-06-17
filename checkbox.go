@@ -53,8 +53,8 @@ func (button *checkboxData) init(session Session) {
 	button.remove = button.removeFunc
 	button.changed = button.propertyChanged
 
-	button.setRaw(ClickEvent, []func(View, MouseEvent){checkboxClickListener})
-	button.setRaw(KeyDownEvent, []func(View, KeyEvent){checkboxKeyListener})
+	button.setRaw(ClickEvent, []oneArgListener[View, MouseEvent]{newOneArgListenerVE(checkboxClickListener)})
+	button.setRaw(KeyDownEvent, []oneArgListener[View, KeyEvent]{newOneArgListenerVE(checkboxKeyListener)})
 }
 
 func (button *checkboxData) Focusable() bool {
@@ -67,9 +67,9 @@ func (button *checkboxData) propertyChanged(tag PropertyName) {
 	case Checked:
 		session := button.Session()
 		checked := IsCheckboxChecked(button)
-		if listeners := GetCheckboxChangedListeners(button); len(listeners) > 0 {
+		if listeners := getOneArgEventListeners[Checkbox, bool](button, nil, CheckboxChangedEvent); len(listeners) > 0 {
 			for _, listener := range listeners {
-				listener(button, checked)
+				listener.Run(button, checked)
 			}
 		}
 
@@ -103,7 +103,7 @@ func (button *checkboxData) setFunc(tag PropertyName, value any) []PropertyName 
 	switch tag {
 	case ClickEvent:
 		if listeners, ok := valueToOneArgEventListeners[View, MouseEvent](value); ok && listeners != nil {
-			listeners = append(listeners, checkboxClickListener)
+			listeners = append(listeners, newOneArgListenerVE(checkboxClickListener))
 			button.setRaw(tag, listeners)
 			return []PropertyName{tag}
 		}
@@ -111,7 +111,7 @@ func (button *checkboxData) setFunc(tag PropertyName, value any) []PropertyName 
 
 	case KeyDownEvent:
 		if listeners, ok := valueToOneArgEventListeners[View, KeyEvent](value); ok && listeners != nil {
-			listeners = append(listeners, checkboxKeyListener)
+			listeners = append(listeners, newOneArgListenerVE(checkboxKeyListener))
 			button.setRaw(tag, listeners)
 			return []PropertyName{tag}
 		}
@@ -134,30 +134,16 @@ func (button *checkboxData) setFunc(tag PropertyName, value any) []PropertyName 
 func (button *checkboxData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case ClickEvent:
-		button.setRaw(ClickEvent, []func(View, MouseEvent){checkboxClickListener})
+		button.setRaw(ClickEvent, []oneArgListener[View, MouseEvent]{newOneArgListenerVE(checkboxClickListener)})
 		return []PropertyName{ClickEvent}
 
 	case KeyDownEvent:
-		button.setRaw(KeyDownEvent, []func(View, KeyEvent){checkboxKeyListener})
+		button.setRaw(KeyDownEvent, []oneArgListener[View, KeyEvent]{newOneArgListenerVE(checkboxKeyListener)})
 		return []PropertyName{ClickEvent}
 	}
 
 	return button.viewsContainerData.removeFunc(tag)
 }
-
-/*
-func (button *checkboxData) changedCheckboxState(state bool) {
-	for _, listener := range GetCheckboxChangedListeners(button) {
-		listener(button, state)
-	}
-
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-
-	button.htmlCheckbox(buffer, state)
-	button.Session().updateInnerHTML(button.htmlID()+"checkbox", buffer.String())
-}
-*/
 
 func checkboxClickListener(view View, _ MouseEvent) {
 	view.Set(Checked, !IsCheckboxChecked(view))
@@ -302,26 +288,41 @@ func checkboxVerticalAlignCSS(view View) string {
 }
 
 // IsCheckboxChecked returns true if the Checkbox is checked, false otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsCheckboxChecked(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Checked, false)
 }
 
 // GetCheckboxVerticalAlign return the vertical align of a Checkbox subview: TopAlign (0), BottomAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetCheckboxVerticalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CheckboxVerticalAlign, LeftAlign, false)
 }
 
 // GetCheckboxHorizontalAlign return the vertical align of a Checkbox subview: LeftAlign (0), RightAlign (1), CenterAlign (2)
-// If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetCheckboxHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, CheckboxHorizontalAlign, TopAlign, false)
 }
 
 // GetCheckboxChangedListeners returns the CheckboxChangedListener list of an Checkbox subview.
-// If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetCheckboxChangedListeners(view View, subviewID ...string) []func(Checkbox, bool) {
-	return getOneArgEventListeners[Checkbox, bool](view, subviewID, CheckboxChangedEvent)
+// If there are no listeners then the empty list is returned.
+//
+// Result elements can be of the following types:
+//   - func(Checkbox, bool),
+//   - func(Checkbox),
+//   - func(bool),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetCheckboxChangedListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[Checkbox, bool](view, subviewID, CheckboxChangedEvent)
 }

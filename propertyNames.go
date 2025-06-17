@@ -2723,4 +2723,6 @@ const (
 	//
 	// Supported types: string.
 	Tooltip PropertyName = "tooltip"
+
+	Binding PropertyName = "binding"
 )

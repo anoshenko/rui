@@ -298,13 +298,17 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 // GetNumberPickerType returns the type of NumberPicker subview. Valid values:
 // NumberEditor (0) - NumberPicker is presented by editor (default type);
 // NumberSlider (1) - NumberPicker is presented by slider.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerType(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, NumberPickerType, NumberEditor, false)
 }
 
 // GetNumberPickerMinMax returns the min and max value of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 	view = getSubview(view, subviewID)
 	pickerType := GetNumberPickerType(view)
@@ -328,7 +332,9 @@ func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 }
 
 // GetNumberPickerStep returns the value changing step of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerStep(view View, subviewID ...string) float64 {
 	view = getSubview(view, subviewID)
 	_, max := GetNumberPickerMinMax(view)
@@ -341,7 +347,9 @@ func GetNumberPickerStep(view View, subviewID ...string) float64 {
 }
 
 // GetNumberPickerValue returns the value of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerValue(view View, subviewID ...string) float64 {
 	view = getSubview(view, subviewID)
 	min, _ := GetNumberPickerMinMax(view)
@@ -350,13 +358,17 @@ func GetNumberPickerValue(view View, subviewID ...string) float64 {
 
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64) {
 	return getTwoArgEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
 }
 
 // GetNumberPickerPrecision returns the precision of displaying fractional part in editor of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerPrecision(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, NumberPickerPrecision, 0)
 }
