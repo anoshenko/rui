@@ -268,8 +268,8 @@ func (edit *editViewData) AppendText(text string) {
 }
 
 func (edit *editViewData) textChanged(newText, oldText string) {
-	for _, listener := range GetTextChangedListeners(edit) {
-		listener(edit, newText, oldText)
+	for _, listener := range getTwoArgEventListeners[EditView, string](edit, nil, EditTextChangedEvent) {
+		listener.Run(edit, newText, oldText)
 	}
 	if listener, ok := edit.changeListener[Text]; ok {
 		listener(edit, Text)
@@ -461,10 +461,19 @@ func IsSpellcheck(view View, subviewID ...string) bool {
 // GetTextChangedListeners returns the TextChangedListener list of an EditView or MultiLineEditView subview.
 // If there are no listeners then the empty list is returned
 //
+// Result elements can be of the following types:
+//   - func(rui.EditView, string, string),
+//   - func(rui.EditView, string),
+//   - func(rui.EditView),
+//   - func(string, string),
+//   - func(string),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetTextChangedListeners(view View, subviewID ...string) []func(EditView, string, string) {
-	return getTwoArgEventListeners[EditView, string](view, subviewID, EditTextChangedEvent)
+func GetTextChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[EditView, string](view, subviewID, EditTextChangedEvent)
 }
 
 // GetEditViewType returns a value of the Type property of EditView.

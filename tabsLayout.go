@@ -211,7 +211,7 @@ func (tabsLayout *tabsLayoutData) propertyChanged(tag PropertyName) {
 		if listeners := getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent); len(listeners) > 0 {
 			oldCurrent, _ := intProperty(tabsLayout, "old-current", session, -1)
 			for _, listener := range listeners {
-				listener(tabsLayout, current, oldCurrent)
+				listener.Run(tabsLayout, current, oldCurrent)
 			}
 		}
 
@@ -427,7 +427,7 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 
 func (tabsLayout *tabsLayoutData) currentChanged(newCurrent, oldCurrent int) {
 	for _, listener := range getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent) {
-		listener(tabsLayout, newCurrent, oldCurrent)
+		listener.Run(tabsLayout, newCurrent, oldCurrent)
 	}
 	if listener, ok := tabsLayout.changeListener[Current]; ok {
 		listener(tabsLayout, Current)
@@ -765,4 +765,21 @@ func (tabsLayout *tabsLayoutData) handleCommand(self View, command PropertyName,
 // If it is not specified then a value from the first argument (view) is returned.
 func GetTabCloseEventListeners(view View, subviewID ...string) []any {
 	return getOneArgEventRawListeners[TabsLayout, int](view, subviewID, TabCloseEvent)
+}
+
+// GetCurrentTabChangedEventListeners returns the "current-tab-changed" listener list. If there are no listeners then the empty list is returned.
+//
+// Result elements can be of the following types:
+//   - func(rui.TabsLayout, int, int),
+//   - func(rui.TabsLayout, int),
+//   - func(rui.TabsLayout),
+//   - func(int, int),
+//   - func(int),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetCurrentTabChangedEventListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[TabsLayout, int](view, subviewID, CurrentTabChangedEvent)
 }

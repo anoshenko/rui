@@ -274,7 +274,7 @@ func (picker *datePickerData) propertyChanged(tag PropertyName) {
 		date := GetDatePickerValue(picker)
 		session.callFunc("setInputValue", picker.htmlID(), date.Format(dateFormat))
 
-		if listeners := GetDateChangedListeners(picker); len(listeners) > 0 {
+		if listeners := getTwoArgEventListeners[DatePicker, time.Time](picker, nil, DateChangedEvent); len(listeners) > 0 {
 			oldDate := time.Now()
 			if value := picker.getRaw("old-date"); value != nil {
 				if date, ok := value.(time.Time); ok {
@@ -282,7 +282,7 @@ func (picker *datePickerData) propertyChanged(tag PropertyName) {
 				}
 			}
 			for _, listener := range listeners {
-				listener(picker, date, oldDate)
+				listener.Run(picker, date, oldDate)
 			}
 		}
 
@@ -348,8 +348,8 @@ func (picker *datePickerData) handleCommand(self View, command PropertyName, dat
 				oldValue := GetDatePickerValue(picker)
 				picker.properties[DatePickerValue] = value
 				if value != oldValue {
-					for _, listener := range GetDateChangedListeners(picker) {
-						listener(picker, value, oldValue)
+					for _, listener := range getTwoArgEventListeners[DatePicker, time.Time](picker, nil, DateChangedEvent) {
+						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[DatePickerValue]; ok {
 						listener(picker, DatePickerValue)
@@ -445,8 +445,17 @@ func GetDatePickerValue(view View, subviewID ...string) time.Time {
 // GetDateChangedListeners returns the DateChangedListener list of an DatePicker subview.
 // If there are no listeners then the empty list is returned
 //
+// Result elements can be of the following types:
+//   - func(rui.DatePicker, time.Time, time.Time),
+//   - func(rui.DatePicker, time.Time),
+//   - func(rui.DatePicker),
+//   - func(time.Time, time.Time),
+//   - func(time.Time),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetDateChangedListeners(view View, subviewID ...string) []func(DatePicker, time.Time, time.Time) {
-	return getTwoArgEventListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
+func GetDateChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[DatePicker, time.Time](view, subviewID, DateChangedEvent)
 }

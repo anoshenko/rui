@@ -246,7 +246,7 @@ func (picker *timePickerData) propertyChanged(tag PropertyName) {
 		value := GetTimePickerValue(picker)
 		session.callFunc("setInputValue", picker.htmlID(), value.Format(timeFormat))
 
-		if listeners := GetTimeChangedListeners(picker); len(listeners) > 0 {
+		if listeners := getTwoArgEventListeners[TimePicker, time.Time](picker, nil, TimeChangedEvent); len(listeners) > 0 {
 			oldTime := time.Now()
 			if val := picker.getRaw("old-time"); val != nil {
 				if time, ok := val.(time.Time); ok {
@@ -254,7 +254,7 @@ func (picker *timePickerData) propertyChanged(tag PropertyName) {
 				}
 			}
 			for _, listener := range listeners {
-				listener(picker, value, oldTime)
+				listener.Run(picker, value, oldTime)
 			}
 		}
 
@@ -320,8 +320,8 @@ func (picker *timePickerData) handleCommand(self View, command PropertyName, dat
 				oldValue := GetTimePickerValue(picker)
 				picker.properties[TimePickerValue] = value
 				if value != oldValue {
-					for _, listener := range GetTimeChangedListeners(picker) {
-						listener(picker, value, oldValue)
+					for _, listener := range getTwoArgEventListeners[TimePicker, time.Time](picker, nil, TimeChangedEvent) {
+						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[TimePickerValue]; ok {
 						listener(picker, TimePickerValue)
@@ -418,8 +418,17 @@ func GetTimePickerValue(view View, subviewID ...string) time.Time {
 // GetTimeChangedListeners returns the TimeChangedListener list of an TimePicker subview.
 // If there are no listeners then the empty list is returned
 //
+// Result elements can be of the following types:
+//   - func(rui.TimePicker, time.Time, time.Time),
+//   - func(rui.TimePicker, time.Time),
+//   - func(rui.TimePicker),
+//   - func(time.Time, time.Time),
+//   - func(time.Time),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time, time.Time) {
-	return getTwoArgEventListeners[TimePicker, time.Time](view, subviewID, TimeChangedEvent)
+func GetTimeChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[TimePicker, time.Time](view, subviewID, TimeChangedEvent)
 }

@@ -149,19 +149,37 @@ func GetTableCurrent(view View, subviewID ...string) CellIndex {
 // GetTableCellClickedListeners returns listeners of event which occurs when the user clicks on a table cell.
 // If there are no listeners then the empty list is returned.
 //
+// Result elements can be of the following types:
+//   - func(rui.TableView, int, int),
+//   - func(rui.TableView, int),
+//   - func(rui.TableView),
+//   - func(int, int),
+//   - func(int),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetTableCellClickedListeners(view View, subviewID ...string) []func(TableView, int, int) {
-	return getTwoArgEventListeners[TableView, int](view, subviewID, TableCellClickedEvent)
+func GetTableCellClickedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[TableView, int](view, subviewID, TableCellClickedEvent)
 }
 
 // GetTableCellSelectedListeners returns listeners of event which occurs when a table cell becomes selected.
 // If there are no listeners then the empty list is returned.
 //
+// Result elements can be of the following types:
+//   - func(rui.TableView, int, int),
+//   - func(rui.TableView, int),
+//   - func(rui.TableView),
+//   - func(int, int),
+//   - func(int),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetTableCellSelectedListeners(view View, subviewID ...string) []func(TableView, int, int) {
-	return getTwoArgEventListeners[TableView, int](view, subviewID, TableCellSelectedEvent)
+func GetTableCellSelectedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[TableView, int](view, subviewID, TableCellSelectedEvent)
 }
 
 // GetTableRowClickedListeners returns listeners of event which occurs when the user clicks on a table row.

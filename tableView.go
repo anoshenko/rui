@@ -845,8 +845,17 @@ func (table *tableViewData) propertyChanged(tag PropertyName) {
 			current := tableViewCurrent(table)
 			session.callFunc("setTableCellCursorByID", htmlID, current.Row, current.Column)
 
+			for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {
+				listener.Run(table, current.Row, current.Column)
+			}
+
 		case RowSelection:
-			session.callFunc("setTableRowCursorByID", htmlID, tableViewCurrent(table).Row)
+			current := tableViewCurrent(table)
+			session.callFunc("setTableRowCursorByID", htmlID, current.Row)
+
+			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
+				listener.Run(table, current.Row)
+			}
 		}
 
 	case Gap:
@@ -1687,8 +1696,8 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 						listener(table, Current)
 					}
 
-					for _, listener := range GetTableCellSelectedListeners(table) {
-						listener(table, row, column)
+					for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {
+						listener.Run(table, row, column)
 					}
 				}
 			}
@@ -1704,8 +1713,8 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 	case "cellClick":
 		if row, ok := dataIntProperty(data, "row"); ok {
 			if column, ok := dataIntProperty(data, "column"); ok {
-				for _, listener := range GetTableCellClickedListeners(table) {
-					listener(table, row, column)
+				for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellClickedEvent) {
+					listener.Run(table, row, column)
 				}
 			}
 		}

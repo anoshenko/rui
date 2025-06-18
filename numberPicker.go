@@ -201,7 +201,7 @@ func (picker *numberPickerData) propertyChanged(tag PropertyName) {
 		format := picker.numberFormat()
 		picker.Session().callFunc("setInputValue", picker.htmlID(), fmt.Sprintf(format, value))
 
-		if listeners := GetNumberChangedListeners(picker); len(listeners) > 0 {
+		if listeners := getTwoArgEventListeners[NumberPicker, float64](picker, nil, NumberChangedEvent); len(listeners) > 0 {
 			old := 0.0
 			if val := picker.getRaw("old-number"); val != nil {
 				if n, ok := val.(float64); ok {
@@ -210,7 +210,7 @@ func (picker *numberPickerData) propertyChanged(tag PropertyName) {
 			}
 			if old != value {
 				for _, listener := range listeners {
-					listener(picker, value, old)
+					listener.Run(picker, value, old)
 				}
 			}
 		}
@@ -280,8 +280,8 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 				oldValue := GetNumberPickerValue(picker)
 				picker.properties[NumberPickerValue] = text
 				if value != oldValue {
-					for _, listener := range GetNumberChangedListeners(picker) {
-						listener(picker, value, oldValue)
+					for _, listener := range getTwoArgEventListeners[NumberPicker, float64](picker, nil, NumberChangedEvent) {
+						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[NumberPickerValue]; ok {
 						listener(picker, NumberPickerValue)
@@ -359,10 +359,19 @@ func GetNumberPickerValue(view View, subviewID ...string) float64 {
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.
 // If there are no listeners then the empty list is returned
 //
+// Result elements can be of the following types:
+//   - func(rui.NumberPicker, float64, float64),
+//   - func(rui.NumberPicker, float64),
+//   - func(rui.NumberPicker),
+//   - func(float64, float64),
+//   - func(float64),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64) {
-	return getTwoArgEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
+func GetNumberChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
 }
 
 // GetNumberPickerPrecision returns the precision of displaying fractional part in editor of NumberPicker subview.

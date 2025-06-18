@@ -104,8 +104,8 @@ func (list *dropDownListData) propertyChanged(tag PropertyName) {
 		list.Session().callFunc("selectDropDownListItem", list.htmlID(), current)
 
 		oldCurrent, _ := intProperty(list, "old-current", list.Session(), -1)
-		for _, listener := range GetDropDownListeners(list) {
-			listener(list, current, oldCurrent)
+		for _, listener := range getTwoArgEventListeners[DropDownList, int](list, nil, DropDownEvent) {
+			listener.Run(list, current, oldCurrent)
 		}
 
 	default:
@@ -245,8 +245,8 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 				if GetCurrent(list) != number && number >= 0 && number < len(items) {
 					old := GetCurrent(list)
 					list.properties[Current] = number
-					for _, listener := range GetDropDownListeners(list) {
-						listener(list, number, old)
+					for _, listener := range getTwoArgEventListeners[DropDownList, int](list, nil, DropDownEvent) {
+						listener.Run(list, number, old)
 					}
 					if listener, ok := list.changeListener[Current]; ok {
 						listener(list, Current)
@@ -265,10 +265,19 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 
 // GetDropDownListeners returns the "drop-down-event" listener list. If there are no listeners then the empty list is returned.
 //
+// Result elements can be of the following types:
+//   - func(rui.DropDownList, int, int),
+//   - func(rui.DropDownList, int),
+//   - func(rui.DropDownList),
+//   - func(int, int),
+//   - func(int),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetDropDownListeners(view View, subviewID ...string) []func(DropDownList, int, int) {
-	return getTwoArgEventListeners[DropDownList, int](view, subviewID, DropDownEvent)
+func GetDropDownListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[DropDownList, int](view, subviewID, DropDownEvent)
 }
 
 // GetDropDownItems return the DropDownList items list.
