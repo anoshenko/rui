@@ -67,6 +67,96 @@ func updateEventListenerHtml(view View, tag PropertyName) {
 	}
 }
 
+type noArgListener[V View] interface {
+	Run(V)
+	rawListener() any
+}
+
+type noArgListener0[V View] struct {
+	fn func()
+}
+
+type noArgListenerV[V View] struct {
+	fn func(V)
+}
+
+type noArgListenerBinding[V View] struct {
+	name string
+}
+
+func newNoArgListener0[V View](fn func()) noArgListener[V] {
+	obj := new(noArgListener0[V])
+	obj.fn = fn
+	return obj
+}
+
+func (data *noArgListener0[V]) Run(_ V) {
+	data.fn()
+}
+
+func (data *noArgListener0[V]) rawListener() any {
+	return data.fn
+}
+
+func newNoArgListenerV[V View](fn func(V)) noArgListener[V] {
+	obj := new(noArgListenerV[V])
+	obj.fn = fn
+	return obj
+}
+
+func (data *noArgListenerV[V]) Run(view V) {
+	data.fn(view)
+}
+
+func (data *noArgListenerV[V]) rawListener() any {
+	return data.fn
+}
+
+func newNoArgListenerBinding[V View](name string) noArgListener[V] {
+	obj := new(noArgListenerBinding[V])
+	obj.name = name
+	return obj
+}
+
+func (data *noArgListenerBinding[V]) Run(view V) {
+	bind := view.binding()
+	if bind == nil {
+		ErrorLogF(`There is no a binding object for call "%s"`, data.name)
+		return
+	}
+
+	val := reflect.ValueOf(bind)
+	method := val.MethodByName(data.name)
+	if !method.IsValid() {
+		ErrorLogF(`The "%s" method is not valid`, data.name)
+		return
+	}
+
+	methodType := method.Type()
+	var args []reflect.Value = nil
+	switch methodType.NumIn() {
+	case 0:
+		args = []reflect.Value{}
+
+	case 1:
+		inType := methodType.In(0)
+		if inType == reflect.TypeOf(view) {
+			args = []reflect.Value{reflect.ValueOf(view)}
+		}
+	}
+
+	if args != nil {
+		method.Call(args)
+	} else {
+		ErrorLogF(`Unsupported prototype of "%s" method`, data.name)
+	}
+}
+
+func (data *noArgListenerBinding[V]) rawListener() any {
+	return data.name
+}
+
+/*
 func valueToNoArgEventListeners[V any](view View, value any) ([]func(V), bool) {
 	if value == nil {
 		return nil, true
@@ -173,20 +263,74 @@ func valueToNoArgEventListeners[V any](view View, value any) ([]func(V), bool) {
 
 	return nil, false
 }
+*/
 
-func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []func(V) {
-	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(V)); ok {
-				return result
+func valueToNoArgEventListeners[V View](value any) ([]noArgListener[V], bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case []noArgListener[V]:
+		return value, true
+
+	case noArgListener[V]:
+		return []noArgListener[V]{value}, true
+
+	case string:
+		return []noArgListener[V]{newNoArgListenerBinding[V](value)}, true
+
+	case func(V):
+		return []noArgListener[V]{newNoArgListenerV(value)}, true
+
+	case func():
+		return []noArgListener[V]{newNoArgListener0[V](value)}, true
+
+	case []func(V):
+		result := make([]noArgListener[V], 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newNoArgListenerV(fn))
 			}
 		}
+		return result, len(result) > 0
+
+	case []func():
+		result := make([]noArgListener[V], 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newNoArgListener0[V](fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []any:
+		result := make([]noArgListener[V], 0, len(value))
+		for _, v := range value {
+			if v != nil {
+				switch v := v.(type) {
+				case func(V):
+					result = append(result, newNoArgListenerV(v))
+
+				case func():
+					result = append(result, newNoArgListener0[V](v))
+
+				case string:
+					result = append(result, newNoArgListenerBinding[V](v))
+
+				default:
+					return nil, false
+				}
+			}
+		}
+		return result, len(result) > 0
 	}
-	return []func(V){}
+
+	return nil, false
 }
 
 func setNoArgEventListener[V View](view View, tag PropertyName, value any) []PropertyName {
-	if listeners, ok := valueToNoArgEventListeners[V](view, value); ok {
+	if listeners, ok := valueToNoArgEventListeners[V](value); ok {
 		if len(listeners) > 0 {
 			view.setRaw(tag, listeners)
 		} else if view.getRaw(tag) != nil {
@@ -198,4 +342,24 @@ func setNoArgEventListener[V View](view View, tag PropertyName, value any) []Pro
 	}
 	notCompatibleType(tag, value)
 	return nil
+}
+
+func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []noArgListener[V] {
+	if view = getSubview(view, subviewID); view != nil {
+		if value := view.Get(tag); value != nil {
+			if result, ok := value.([]noArgListener[V]); ok {
+				return result
+			}
+		}
+	}
+	return []noArgListener[V]{}
+}
+
+func getNoArgEventRawListeners[V View](view View, subviewID []string, tag PropertyName) []any {
+	listeners := getNoArgEventListeners[V](view, subviewID, tag)
+	result := make([]any, len(listeners))
+	for i, l := range listeners {
+		result[i] = l.rawListener()
+	}
+	return result
 }

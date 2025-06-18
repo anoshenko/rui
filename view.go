@@ -1162,13 +1162,13 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 	case FocusEvent:
 		view.hasFocus = true
 		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
-			listener(self)
+			listener.Run(self)
 		}
 
 	case LostFocusEvent:
 		view.hasFocus = false
 		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
-			listener(self)
+			listener.Run(self)
 		}
 
 	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:

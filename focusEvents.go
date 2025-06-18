@@ -50,16 +50,26 @@ func focusEventsHtml(view View, buffer *strings.Builder) {
 
 // GetFocusListeners returns a FocusListener list. If there are no listeners then the empty list is returned
 //
+// Result elements can be of the following types:
+//   - func(rui.View),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetFocusListeners(view View, subviewID ...string) []func(View) {
-	return getNoArgEventListeners[View](view, subviewID, FocusEvent)
+func GetFocusListeners(view View, subviewID ...string) []any {
+	return getNoArgEventRawListeners[View](view, subviewID, FocusEvent)
 }
 
 // GetLostFocusListeners returns a LostFocusListener list. If there are no listeners then the empty list is returned
 //
+// Result elements can be of the following types:
+//   - func(rui.View),
+//   - func(),
+//   - string.
+//
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
-func GetLostFocusListeners(view View, subviewID ...string) []func(View) {
-	return getNoArgEventListeners[View](view, subviewID, LostFocusEvent)
+func GetLostFocusListeners(view View, subviewID ...string) []any {
+	return getNoArgEventRawListeners[View](view, subviewID, LostFocusEvent)
 }

@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -281,13 +282,30 @@ type Popup interface {
 	dissmissAnimation(listener func(PropertyName)) bool
 }
 
+type popupListener interface {
+	Run(Popup)
+	rawListener() any
+}
+
+type popupListener0 struct {
+	fn func()
+}
+
+type popupListener1 struct {
+	fn func(Popup)
+}
+
+type popupListenerBinding struct {
+	name string
+}
+
 type popupData struct {
 	layerView       GridLayout
 	popupView       GridLayout
 	contentView     View
 	buttons         []PopupButton
 	cancelable      bool
-	dismissListener []func(Popup)
+	dismissListener []popupListener
 	showTransform   TransformProperty
 	showOpacity     float64
 	showDuration    float64
@@ -649,7 +667,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 				}
 
 			case DismissEvent:
-				if listeners, ok := valueToNoArgEventListeners[Popup](popup.contentView, value); ok {
+				if listeners, ok := valueToPopupEventListeners(value); ok {
 					if listeners != nil {
 						popup.dismissListener = listeners
 					}
@@ -887,7 +905,7 @@ func (popup *popupData) onDismiss() {
 	popup.Session().callFunc("removeView", popup.layerView.htmlID())
 
 	for _, listener := range popup.dismissListener {
-		listener(popup)
+		listener.Run(popup)
 	}
 }
 
@@ -1013,4 +1031,140 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 	if !popup.dissmissAnimation(listener) {
 		listener("")
 	}
+}
+
+func newPopupListener0(fn func()) popupListener {
+	obj := new(popupListener0)
+	obj.fn = fn
+	return obj
+}
+
+func (data *popupListener0) Run(_ Popup) {
+	data.fn()
+}
+
+func (data *popupListener0) rawListener() any {
+	return data.fn
+}
+
+func newPopupListener1(fn func(Popup)) popupListener {
+	obj := new(popupListener1)
+	obj.fn = fn
+	return obj
+}
+
+func (data *popupListener1) Run(popup Popup) {
+	data.fn(popup)
+}
+
+func (data *popupListener1) rawListener() any {
+	return data.fn
+}
+
+func newPopupListenerBinding(name string) popupListener {
+	obj := new(popupListenerBinding)
+	obj.name = name
+	return obj
+}
+
+func (data *popupListenerBinding) Run(popup Popup) {
+	bind := popup.View().binding()
+	if bind == nil {
+		ErrorLogF(`There is no a binding object for call "%s"`, data.name)
+		return
+	}
+
+	val := reflect.ValueOf(bind)
+	method := val.MethodByName(data.name)
+	if !method.IsValid() {
+		ErrorLogF(`The "%s" method is not valid`, data.name)
+		return
+	}
+
+	methodType := method.Type()
+	var args []reflect.Value = nil
+	switch methodType.NumIn() {
+	case 0:
+		args = []reflect.Value{}
+
+	case 1:
+		inType := methodType.In(0)
+		if inType == reflect.TypeOf(popup) {
+			args = []reflect.Value{reflect.ValueOf(popup)}
+		}
+	}
+
+	if args != nil {
+		method.Call(args)
+	} else {
+		ErrorLogF(`Unsupported prototype of "%s" method`, data.name)
+	}
+}
+
+func (data *popupListenerBinding) rawListener() any {
+	return data.name
+}
+
+func valueToPopupEventListeners(value any) ([]popupListener, bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case []popupListener:
+		return value, true
+
+	case popupListener:
+		return []popupListener{value}, true
+
+	case string:
+		return []popupListener{newPopupListenerBinding(value)}, true
+
+	case func(Popup):
+		return []popupListener{newPopupListener1(value)}, true
+
+	case func():
+		return []popupListener{newPopupListener0(value)}, true
+
+	case []func(Popup):
+		result := make([]popupListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newPopupListener1(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func():
+		result := make([]popupListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newPopupListener0(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []any:
+		result := make([]popupListener, 0, len(value))
+		for _, v := range value {
+			if v != nil {
+				switch v := v.(type) {
+				case func(Popup):
+					result = append(result, newPopupListener1(v))
+
+				case func():
+					result = append(result, newPopupListener0(v))
+
+				case string:
+					result = append(result, newPopupListenerBinding(v))
+
+				default:
+					return nil, false
+				}
+			}
+		}
+		return result, len(result) > 0
+	}
+
+	return nil, false
 }

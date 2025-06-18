@@ -300,7 +300,7 @@ func (imageView *imageViewData) handleCommand(self View, command PropertyName, d
 	switch command {
 	case "imageViewError":
 		for _, listener := range getNoArgEventListeners[ImageView](imageView, nil, ErrorEvent) {
-			listener(imageView)
+			listener.Run(imageView)
 		}
 
 	case "imageViewLoaded":
@@ -309,7 +309,7 @@ func (imageView *imageViewData) handleCommand(self View, command PropertyName, d
 		imageView.currentSrc, _ = data.PropertyValue("current-src")
 
 		for _, listener := range getNoArgEventListeners[ImageView](imageView, nil, LoadedEvent) {
-			listener(imageView)
+			listener.Run(imageView)
 		}
 
 	default:
@@ -369,4 +369,32 @@ func GetImageViewVerticalAlign(view View, subviewID ...string) int {
 // If the second argument (subviewID) is not specified or it is "" then a left position of the first argument (view) is returned
 func GetImageViewHorizontalAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, ImageHorizontalAlign, LeftAlign, false)
+}
+
+// GetImageViewErrorEventListeners returns the list of "error-event" event listeners.
+// If there are no listeners then the empty list is returned
+//
+// Result elements can be of the following types:
+//   - func(rui.ImageView)
+//   - func()
+//   - string
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetImageViewErrorEventListeners(view View, subviewID ...string) []any {
+	return getNoArgEventRawListeners[View](view, subviewID, ErrorEvent)
+}
+
+// GetImageViewLoadedEventListeners returns the list of "loaded-event" event listeners.
+// If there are no listeners then the empty list is returned
+//
+// Result elements can be of the following types:
+//   - func(rui.ImageView)
+//   - func()
+//   - string
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetImageViewLoadedEventListeners(view View, subviewID ...string) []any {
+	return getNoArgEventRawListeners[View](view, subviewID, LoadedEvent)
 }
