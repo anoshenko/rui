@@ -232,14 +232,7 @@ func valueToOneArgEventListeners[V View, E any](value any) ([]oneArgListener[V, 
 
 func setOneArgEventListener[V View, T any](view View, tag PropertyName, value any) []PropertyName {
 	if listeners, ok := valueToOneArgEventListeners[V, T](value); ok {
-		if len(listeners) > 0 {
-			view.setRaw(tag, listeners)
-		} else if view.getRaw(tag) != nil {
-			view.setRaw(tag, nil)
-		} else {
-			return []PropertyName{}
-		}
-		return []PropertyName{tag}
+		return setArrayPropertyValue(view, tag, listeners)
 	}
 	notCompatibleType(tag, value)
 	return nil
