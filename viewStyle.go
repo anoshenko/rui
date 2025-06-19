@@ -733,8 +733,8 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 					writeString(text)
 					buffer.WriteString(",\n")
 				}
+				buffer.WriteString(indent)
 			}
-			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
 
