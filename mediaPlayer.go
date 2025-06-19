@@ -1628,3 +1628,13 @@ func valueToMediaPlayerErrorListeners(value any) ([]mediaPlayerErrorListener, bo
 
 	return nil, false
 }
+
+func getMediaPlayerErrorListenerBinding(listeners []mediaPlayerErrorListener) string {
+	for _, listener := range listeners {
+		raw := listener.rawListener()
+		if text, ok := raw.(string); ok && text != "" {
+			return text
+		}
+	}
+	return ""
+}

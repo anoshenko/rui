@@ -84,7 +84,16 @@ const (
 	// Fired when the user starts dragging an element or text selection.
 	//
 	// General listener format:
+	//  func(view rui.View, event rui.DragAndDropEvent).
 	//
+	// where:
+	//   - view - Interface of a view which generated this event,
+	//   - event - event parameters.
+	//
+	// Allowed listener formats:
+	//  func(view rui.View)
+	//  func(rui.DragAndDropEvent)
+	//  func()
 	DragStartEvent PropertyName = "drag-start-event"
 
 	// DragEndEvent is the constant for "drag-end-event" property tag.
@@ -93,7 +102,16 @@ const (
 	// Fired when a drag operation ends (by releasing a mouse button or hitting the escape key).
 	//
 	// General listener format:
+	//  func(view rui.View, event rui.DragAndDropEvent).
 	//
+	// where:
+	//   - view - Interface of a view which generated this event,
+	//   - event - event parameters.
+	//
+	// Allowed listener formats:
+	//  func(view rui.View)
+	//  func(rui.DragAndDropEvent)
+	//  func()
 	DragEndEvent PropertyName = "drag-end-event"
 
 	// DragEnterEvent is the constant for "drag-enter-event" property tag.
@@ -102,7 +120,16 @@ const (
 	// Fired when a dragged element or text selection enters a valid drop target.
 	//
 	// General listener format:
+	//  func(view rui.View, event rui.DragAndDropEvent).
 	//
+	// where:
+	//   - view - Interface of a view which generated this event,
+	//   - event - event parameters.
+	//
+	// Allowed listener formats:
+	//  func(view rui.View)
+	//  func(rui.DragAndDropEvent)
+	//  func()
 	DragEnterEvent PropertyName = "drag-enter-event"
 
 	// DragLeaveEvent is the constant for "drag-leave-event" property tag.
@@ -111,7 +138,16 @@ const (
 	// Fired when a dragged element or text selection leaves a valid drop target.
 	//
 	// General listener format:
+	//  func(view rui.View, event rui.DragAndDropEvent).
 	//
+	// where:
+	//   - view - Interface of a view which generated this event,
+	//   - event - event parameters.
+	//
+	// Allowed listener formats:
+	//  func(view rui.View)
+	//  func(rui.DragAndDropEvent)
+	//  func()
 	DragLeaveEvent PropertyName = "drag-leave-event"
 
 	// DragOverEvent is the constant for "drag-over-event" property tag.
@@ -120,7 +156,16 @@ const (
 	// Fired when an element or text selection is being dragged over a valid drop target (every few hundred milliseconds).
 	//
 	// General listener format:
+	//  func(view rui.View, event rui.DragAndDropEvent).
 	//
+	// where:
+	//   - view - Interface of a view which generated this event,
+	//   - event - event parameters.
+	//
+	// Allowed listener formats:
+	//  func(view rui.View)
+	//  func(rui.DragAndDropEvent)
+	//  func()
 	DragOverEvent PropertyName = "drag-over-event"
 
 	// DropEvent is the constant for "drop-event" property tag.
@@ -129,7 +174,16 @@ const (
 	// Fired when an element or text selection is dropped on a valid drop target.
 	//
 	// General listener format:
+	//  func(view rui.View, event rui.DragAndDropEvent).
 	//
+	// where:
+	//   - view - Interface of a view which generated this event,
+	//   - event - event parameters.
+	//
+	// Allowed listener formats:
+	//  func(view rui.View)
+	//  func(rui.DragAndDropEvent)
+	//  func()
 	DropEvent PropertyName = "drop-event"
 
 	// DropEffectUndefined - the value of the "drop-effect" and "drop-effect-allowed" properties: the value is not defined (default value).

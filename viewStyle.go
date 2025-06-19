@@ -2,9 +2,10 @@ package rui
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ViewStyle interface of the style of view
@@ -551,26 +552,118 @@ func viewStyleGet(style Properties, tag PropertyName) any {
 }
 
 func supportedPropertyValue(value any) bool {
-	switch value.(type) {
-	case string:
+	switch value := value.(type) {
+	case string, bool, float32, float64, int, stringWriter, fmt.Stringer:
+		return true
+
 	case []string:
-	case bool:
-	case float32:
-	case float64:
-	case int:
-	case stringWriter:
-	case fmt.Stringer:
+		return len(value) > 0
+
 	case []ShadowProperty:
+		return len(value) > 0
+
 	case []View:
+		return len(value) > 0
+
 	case []any:
+		return len(value) > 0
+
 	case []BackgroundElement:
+		return len(value) > 0
+
 	case []BackgroundGradientPoint:
+		return len(value) > 0
+
 	case []BackgroundGradientAngle:
+		return len(value) > 0
+
 	case map[PropertyName]AnimationProperty:
+		return len(value) > 0
+
+	case []noArgListener[View]:
+		return getNoArgBinding(value) != ""
+
+	case []noArgListener[ImageView]:
+		return getNoArgBinding(value) != ""
+
+	case []noArgListener[MediaPlayer]:
+		return getNoArgBinding(value) != ""
+
+	case []oneArgListener[View, KeyEvent]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, MouseEvent]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, TouchEvent]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, PointerEvent]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, PropertyName]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, string]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, Frame]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[View, DragAndDropEvent]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[Checkbox, bool]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[FilePicker, []FileInfo]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[ListView, int]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[ListView, []int]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[MediaPlayer, float64]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[TableView, int]:
+		return getOneArgBinding(value) != ""
+
+	case []oneArgListener[TabsLayout, int]:
+		return getOneArgBinding(value) != ""
+
+	case []twoArgListener[ColorPicker, Color]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[DatePicker, time.Time]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[TimePicker, time.Time]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[DropDownList, int]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[EditView, string]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[NumberPicker, float64]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[TableView, int]:
+		return getTwoArgBinding(value) != ""
+
+	case []twoArgListener[TabsLayout, int]:
+		return getTwoArgBinding(value) != ""
+
+	case []mediaPlayerErrorListener:
+		return getMediaPlayerErrorListenerBinding(value) != ""
+
 	default:
 		return false
 	}
-	return true
 }
 
 func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, indent string) {
@@ -791,9 +884,7 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			for tag := range value {
 				tags = append(tags, tag)
 			}
-			sort.Slice(tags, func(i, j int) bool {
-				return tags[i] < tags[j]
-			})
+			slices.Sort(tags)
 			buffer.WriteString("[\n")
 			indent2 := indent + "\t"
 			for _, tag := range tags {
@@ -806,6 +897,87 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
+
+	case []noArgListener[View]:
+		buffer.WriteString(getNoArgBinding(value))
+
+	case []noArgListener[ImageView]:
+		buffer.WriteString(getNoArgBinding(value))
+
+	case []noArgListener[MediaPlayer]:
+		buffer.WriteString(getNoArgBinding(value))
+
+	case []oneArgListener[View, KeyEvent]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, MouseEvent]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, TouchEvent]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, PointerEvent]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, PropertyName]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, string]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, Frame]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[View, DragAndDropEvent]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[Checkbox, bool]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[FilePicker, []FileInfo]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[ListView, int]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[ListView, []int]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[MediaPlayer, float64]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[TableView, int]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []oneArgListener[TabsLayout, int]:
+		buffer.WriteString(getOneArgBinding(value))
+
+	case []twoArgListener[ColorPicker, Color]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[DatePicker, time.Time]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[TimePicker, time.Time]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[DropDownList, int]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[EditView, string]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[NumberPicker, float64]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[TableView, int]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []twoArgListener[TabsLayout, int]:
+		buffer.WriteString(getTwoArgBinding(value))
+
+	case []mediaPlayerErrorListener:
+		buffer.WriteString(getMediaPlayerErrorListenerBinding(value))
 	}
 }
 
@@ -815,18 +987,14 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 	indent += "\t"
 
 	writeProperty := func(tag PropertyName, value any) {
-		for _, exclude := range excludeTags {
-			if exclude == tag {
-				return
+		if !slices.Contains(excludeTags, tag) {
+			if supportedPropertyValue(value) {
+				buffer.WriteString(indent)
+				buffer.WriteString(string(tag))
+				buffer.WriteString(" = ")
+				writePropertyValue(buffer, tag, value, indent)
+				buffer.WriteString(",\n")
 			}
-		}
-
-		if supportedPropertyValue(value) {
-			buffer.WriteString(indent)
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			buffer.WriteString(",\n")
 		}
 	}
 

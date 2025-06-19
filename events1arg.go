@@ -257,3 +257,13 @@ func getOneArgEventRawListeners[V View, E any](view View, subviewID []string, ta
 	}
 	return result
 }
+
+func getOneArgBinding[V View, E any](listeners []oneArgListener[V, E]) string {
+	for _, listener := range listeners {
+		raw := listener.rawListener()
+		if text, ok := raw.(string); ok && text != "" {
+			return text
+		}
+	}
+	return ""
+}

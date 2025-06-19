@@ -156,115 +156,6 @@ func (data *noArgListenerBinding[V]) rawListener() any {
 	return data.name
 }
 
-/*
-func valueToNoArgEventListeners[V any](view View, value any) ([]func(V), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case string:
-		fn := func(arg V) {
-			bind := view.binding()
-			if bind == nil {
-				ErrorLogF(`There is no a binding object for call "%s"`, value)
-				return
-			}
-
-			val := reflect.ValueOf(bind)
-			method := val.MethodByName(value)
-			if !method.IsValid() {
-				ErrorLogF(`The "%s" method is not valid`, value)
-				return
-			}
-
-			methodType := method.Type()
-			var args []reflect.Value = nil
-			switch methodType.NumIn() {
-			case 0:
-				args = []reflect.Value{}
-
-			case 1:
-				inType := methodType.In(0)
-				if inType == reflect.TypeOf(arg) {
-					args = []reflect.Value{reflect.ValueOf(arg)}
-				}
-			}
-
-			if args != nil {
-				method.Call(args)
-			} else {
-				ErrorLogF(`Unsupported prototype of "%s" method`, value)
-			}
-		}
-		return []func(V){fn}, true
-
-	case func(V):
-		return []func(V){value}, true
-
-	case func():
-		fn := func(V) {
-			value()
-		}
-		return []func(V){fn}, true
-
-	case []func(V):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(V) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(V):
-				listeners[i] = v
-
-			case func():
-				listeners[i] = func(V) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-*/
-
 func valueToNoArgEventListeners[V View](value any) ([]noArgListener[V], bool) {
 	if value == nil {
 		return nil, true
@@ -355,4 +246,14 @@ func getNoArgEventRawListeners[V View](view View, subviewID []string, tag Proper
 		result[i] = l.rawListener()
 	}
 	return result
+}
+
+func getNoArgBinding[V View](listeners []noArgListener[V]) string {
+	for _, listener := range listeners {
+		raw := listener.rawListener()
+		if text, ok := raw.(string); ok && text != "" {
+			return text
+		}
+	}
+	return ""
 }
