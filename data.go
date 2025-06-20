@@ -384,7 +384,8 @@ func ParseDataText(text string) DataObject {
 	parseTag := func() (string, bool) {
 		skipSpaces(true)
 		startPos := pos
-		if data[pos] == '`' {
+		switch data[pos] {
+		case '`':
 			pos++
 			startPos++
 			for data[pos] != '`' {
@@ -398,8 +399,7 @@ func ParseDataText(text string) DataObject {
 			pos++
 			return str, true
 
-		} else if data[pos] == '\'' || data[pos] == '"' {
-
+		case '\'', '"':
 			stopSymbol := data[pos]
 			pos++
 			startPos++

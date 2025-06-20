@@ -131,11 +131,12 @@ func (container *viewsContainerData) removeView(index int) View {
 	}
 
 	view := container.views[index]
-	if index == 0 {
+	switch index {
+	case 0:
 		container.views = container.views[1:]
-	} else if index == count-1 {
+	case count - 1:
 		container.views = container.views[:index]
-	} else {
+	default:
 		container.views = append(container.views[:index], container.views[index+1:]...)
 	}
 

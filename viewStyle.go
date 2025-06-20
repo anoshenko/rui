@@ -746,10 +746,10 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 		}
 
 	case float32:
-		buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+		fmt.Fprintf(buffer, "%g", float64(value))
 
 	case float64:
-		buffer.WriteString(fmt.Sprintf("%g", value))
+		fmt.Fprintf(buffer, "%g", value)
 
 	case int:
 		if prop, ok := enumProperties[tag]; ok && value >= 0 && value < len(prop.values) {

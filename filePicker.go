@@ -147,7 +147,7 @@ func (picker *filePickerData) Files() []FileInfo {
 func (picker *filePickerData) LoadFile(file FileInfo, result func(FileInfo, []byte)) {
 	if result != nil {
 		for i, info := range picker.files {
-			if info.Name == file.Name && info.Size == file.Size && info.LastModified == file.LastModified {
+			if info.Name == file.Name && info.Size == file.Size && info.LastModified.Equal(file.LastModified) {
 				if info.data != nil {
 					result(info, info.data)
 				} else {
