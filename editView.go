@@ -272,7 +272,7 @@ func (edit *editViewData) textChanged(newText, oldText string) {
 		listener.Run(edit, newText, oldText)
 	}
 	if listener, ok := edit.changeListener[Text]; ok {
-		listener(edit, Text)
+		listener.Run(edit, Text)
 	}
 }
 

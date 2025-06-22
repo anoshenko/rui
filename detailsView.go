@@ -193,7 +193,7 @@ func (detailsView *detailsViewData) handleCommand(self View, command PropertyNam
 		if n, ok := dataIntProperty(data, "open"); ok {
 			detailsView.properties[Expanded] = (n != 0)
 			if listener, ok := detailsView.changeListener[Expanded]; ok {
-				listener(detailsView, Expanded)
+				listener.Run(detailsView, Expanded)
 			}
 		}
 		return true

@@ -30,6 +30,8 @@ func (frame Frame) Bottom() float64 {
 	return frame.Top + frame.Height
 }
 
+const changeListeners PropertyName = "change-listeners"
+
 // View represents a base view interface
 type View interface {
 	ViewStyle
@@ -66,8 +68,18 @@ type View interface {
 	// a description of the error is written to the log
 	SetAnimated(tag PropertyName, value any, animation AnimationProperty) bool
 
-	// SetChangeListener set the function to track the change of the View property
-	SetChangeListener(tag PropertyName, listener func(View, PropertyName))
+	// SetChangeListener set the function (the second argument) to track the change of the View property (the first argument).
+	//
+	// Allowed listener function formats:
+	//
+	//  func(view rui.View, property rui.PropertyName)
+	//  func(view rui.View)
+	//  func(property rui.PropertyName)
+	//  func()
+	//  string
+	//
+	// If the second argument is given as a string, it specifies the name of the binding function.
+	SetChangeListener(tag PropertyName, listener any) bool
 
 	// HasFocus returns 'true' if the view has focus
 	HasFocus() bool
@@ -110,7 +122,7 @@ type viewData struct {
 	_htmlID          string
 	parentID         string
 	systemClass      string
-	changeListener   map[PropertyName]func(View, PropertyName)
+	changeListener   map[PropertyName]oneArgListener[View, PropertyName]
 	singleTransition map[PropertyName]AnimationProperty
 	addCSS           map[string]string
 	frame            Frame
@@ -162,7 +174,7 @@ func (view *viewData) init(session Session) {
 	view.changed = view.propertyChanged
 	view.tag = "View"
 	view.session = session
-	view.changeListener = map[PropertyName]func(View, PropertyName){}
+	view.changeListener = map[PropertyName]oneArgListener[View, PropertyName]{}
 	view.addCSS = map[string]string{}
 	//view.animation = map[string]AnimationEndListener{}
 	view.singleTransition = map[PropertyName]AnimationProperty{}
@@ -242,11 +254,8 @@ func (view *viewData) Remove(tag PropertyName) {
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
 			view.changed(tag)
-		}
-
-		for _, tag := range changedTags {
 			if listener, ok := view.changeListener[tag]; ok {
-				listener(view, tag)
+				listener.Run(view, tag)
 			}
 		}
 	}
@@ -273,11 +282,8 @@ func (view *viewData) Set(tag PropertyName, value any) bool {
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
 			view.changed(tag)
-		}
-
-		for _, tag := range changedTags {
 			if listener, ok := view.changeListener[tag]; ok {
-				listener(view, tag)
+				listener.Run(view, tag)
 			}
 		}
 	}
@@ -295,7 +301,8 @@ func normalizeViewTag(tag PropertyName) PropertyName {
 }
 
 func (view *viewData) getFunc(tag PropertyName) any {
-	if tag == ID {
+	switch tag {
+	case ID:
 		if id := view.ID(); id != "" {
 			return id
 		} else {
@@ -360,6 +367,29 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 	case Binding:
 		view.setRaw(Binding, value)
 		return []PropertyName{Binding}
+
+	case changeListeners:
+		switch value := value.(type) {
+		case DataObject:
+			for i := range value.PropertyCount() {
+				node := value.Property(i)
+				if node.Type() == TextNode {
+					if text := node.Text(); text != "" {
+						view.changeListener[PropertyName(node.Tag())] = newOneArgListenerBinding[View, PropertyName](text)
+					}
+				}
+			}
+			if len(view.changeListener) > 0 {
+				view.setRaw(changeListeners, view.changeListener)
+			}
+			return []PropertyName{tag}
+
+		case DataNode:
+			if value.Type() == ObjectNode {
+				return view.setFunc(tag, value.Object())
+			}
+		}
+		return []PropertyName{}
 
 	case Animation:
 		oldAnimations := []AnimationProperty{}
@@ -1251,12 +1281,33 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 
 }
 
-func (view *viewData) SetChangeListener(tag PropertyName, listener func(View, PropertyName)) {
+func (view *viewData) SetChangeListener(tag PropertyName, listener any) bool {
 	if listener == nil {
 		delete(view.changeListener, tag)
 	} else {
-		view.changeListener[tag] = listener
+		switch listener := listener.(type) {
+		case func():
+			view.changeListener[tag] = newOneArgListener0[View, PropertyName](listener)
+
+		case func(View):
+			view.changeListener[tag] = newOneArgListenerV[View, PropertyName](listener)
+
+		case func(PropertyName):
+			view.changeListener[tag] = newOneArgListenerE[View](listener)
+
+		case func(View, PropertyName):
+			view.changeListener[tag] = newOneArgListenerVE(listener)
+
+		case string:
+			view.changeListener[tag] = newOneArgListenerBinding[View, PropertyName](listener)
+
+		default:
+			return false
+		}
+
+		view.setRaw(changeListeners, view.changeListener)
 	}
+	return true
 }
 
 func (view *viewData) HasFocus() bool {

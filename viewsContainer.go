@@ -85,10 +85,13 @@ func (container *viewsContainerData) Append(view View) {
 
 		viewHTML(view, buffer, "")
 		container.Session().appendToInnerHTML(container.htmlID(), buffer.String())
+		container.contentChanged()
+	}
+}
 
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
-		}
+func (container *viewsContainerData) contentChanged() {
+	if listener, ok := container.changeListener[Content]; ok {
+		listener.Run(container, Content)
 	}
 }
 
@@ -113,9 +116,7 @@ func (container *viewsContainerData) insert(view View, index int) bool {
 func (container *viewsContainerData) Insert(view View, index int) {
 	if container.insert(view, index) && container.created {
 		updateInnerHTML(container.htmlID(), container.Session())
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
-		}
+		container.contentChanged()
 	}
 }
 
@@ -149,9 +150,7 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	view := container.removeView(index)
 	if view != nil && container.created {
 		container.Session().callFunc("removeView", view.htmlID())
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
-		}
+		container.contentChanged()
 	}
 	return view
 }

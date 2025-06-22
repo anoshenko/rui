@@ -1676,7 +1676,7 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 			current.Row = row
 			table.setRaw(Current, current.Row)
 			if listener, ok := table.changeListener[Current]; ok {
-				listener(table, Current)
+				listener.Run(table, Current)
 			}
 
 			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
@@ -1693,7 +1693,7 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 					current.Column = column
 					table.setRaw(Current, current.Row)
 					if listener, ok := table.changeListener[Current]; ok {
-						listener(table, Current)
+						listener.Run(table, Current)
 					}
 
 					for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {

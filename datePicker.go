@@ -352,7 +352,7 @@ func (picker *datePickerData) handleCommand(self View, command PropertyName, dat
 						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[DatePickerValue]; ok {
-						listener(picker, DatePickerValue)
+						listener.Run(picker, DatePickerValue)
 					}
 				}
 			}

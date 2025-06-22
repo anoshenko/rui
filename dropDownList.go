@@ -249,7 +249,7 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 						listener.Run(list, number, old)
 					}
 					if listener, ok := list.changeListener[Current]; ok {
-						listener(list, Current)
+						listener.Run(list, Current)
 					}
 				}
 			} else {

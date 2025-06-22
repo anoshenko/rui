@@ -49,14 +49,17 @@ type DataObject interface {
 	ToParams() Params
 }
 
+// DataNodeType defines the type of DataNode
+type DataNodeType int
+
 // Constants which are used to describe a node type, see [DataNode]
 const (
 	// TextNode - node is the pair "tag - text value". Syntax: <tag> = <text>
-	TextNode = 0
+	TextNode DataNodeType = 0
 	// ObjectNode - node is the pair "tag - object". Syntax: <tag> = <object name>{...}
-	ObjectNode = 1
+	ObjectNode DataNodeType = 1
 	// ArrayNode - node is the pair "tag - object". Syntax: <tag> = [...]
-	ArrayNode = 2
+	ArrayNode DataNodeType = 2
 )
 
 // DataNode interface of a data node
@@ -65,7 +68,7 @@ type DataNode interface {
 	Tag() string
 
 	// Type returns a node type. Possible values are TextNode, ObjectNode and ArrayNode
-	Type() int
+	Type() DataNodeType
 
 	// Text returns node text
 	Text() string
@@ -253,7 +256,7 @@ func (node *dataNode) Tag() string {
 	return node.tag
 }
 
-func (node *dataNode) Type() int {
+func (node *dataNode) Type() DataNodeType {
 	if node.array != nil {
 		return ArrayNode
 	}

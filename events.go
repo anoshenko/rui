@@ -139,8 +139,7 @@ func (data *noArgListenerBinding[V]) Run(view V) {
 		args = []reflect.Value{}
 
 	case 1:
-		inType := methodType.In(0)
-		if inType == reflect.TypeOf(view) {
+		if equalType(methodType.In(0), reflect.TypeOf(view)) {
 			args = []reflect.Value{reflect.ValueOf(view)}
 		}
 	}
@@ -150,6 +149,10 @@ func (data *noArgListenerBinding[V]) Run(view V) {
 	} else {
 		ErrorLogF(`Unsupported prototype of "%s" method`, data.name)
 	}
+}
+
+func equalType(inType reflect.Type, argType reflect.Type) bool {
+	return inType == argType || (inType.Kind() == reflect.Interface && argType.Implements(inType))
 }
 
 func (data *noArgListenerBinding[V]) rawListener() any {

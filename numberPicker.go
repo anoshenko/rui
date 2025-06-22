@@ -284,7 +284,7 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[NumberPickerValue]; ok {
-						listener(picker, NumberPickerValue)
+						listener.Run(picker, NumberPickerValue)
 					}
 				}
 			}

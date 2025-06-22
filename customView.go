@@ -98,8 +98,8 @@ func (customView *CustomViewData) SetParams(params Params) bool {
 }
 
 // SetChangeListener set the function to track the change of the View property
-func (customView *CustomViewData) SetChangeListener(tag PropertyName, listener func(View, PropertyName)) {
-	customView.superView.SetChangeListener(tag, listener)
+func (customView *CustomViewData) SetChangeListener(tag PropertyName, listener any) bool {
+	return customView.superView.SetChangeListener(tag, listener)
 }
 
 // Remove removes the property with name defined by the argument

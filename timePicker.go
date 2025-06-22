@@ -324,7 +324,7 @@ func (picker *timePickerData) handleCommand(self View, command PropertyName, dat
 						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[TimePickerValue]; ok {
-						listener(picker, TimePickerValue)
+						listener.Run(picker, TimePickerValue)
 					}
 
 				}

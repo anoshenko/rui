@@ -458,10 +458,7 @@ func (gridLayout *gridLayoutData) UpdateGridContent() {
 		if gridLayout.created {
 			updateInnerHTML(gridLayout.htmlID(), gridLayout.session)
 		}
-
-		if listener, ok := gridLayout.changeListener[Content]; ok {
-			listener(gridLayout, Content)
-		}
+		gridLayout.contentChanged()
 	}
 }
 

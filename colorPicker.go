@@ -160,7 +160,7 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 						listener.Run(picker, color, oldColor)
 					}
 					if listener, ok := picker.changeListener[ColorPickerValue]; ok {
-						listener(picker, ColorPickerValue)
+						listener.Run(picker, ColorPickerValue)
 					}
 				}
 			}

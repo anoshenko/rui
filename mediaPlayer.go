@@ -1430,32 +1430,32 @@ func (data *mediaPlayerErrorListenerBinding) Run(player MediaPlayer, code int, m
 		args = []reflect.Value{}
 
 	case 1:
-		switch methodType.In(0) {
-		case reflect.TypeOf(player):
+		inType := methodType.In(0)
+		if equalType(inType, reflect.TypeOf(player)) {
 			args = []reflect.Value{reflect.ValueOf(player)}
-		case reflect.TypeOf(code):
+		} else if equalType(inType, reflect.TypeOf(code)) {
 			args = []reflect.Value{reflect.ValueOf(code)}
-		case reflect.TypeOf(message):
+		} else if equalType(inType, reflect.TypeOf(message)) {
 			args = []reflect.Value{reflect.ValueOf(message)}
 		}
 
 	case 2:
 		in0 := methodType.In(0)
 		in1 := methodType.In(1)
-		if in0 == reflect.TypeOf(player) {
-			if in1 == reflect.TypeOf(code) {
+		if equalType(in0, reflect.TypeOf(player)) {
+			if equalType(in1, reflect.TypeOf(code)) {
 				args = []reflect.Value{reflect.ValueOf(player), reflect.ValueOf(code)}
-			} else if in1 == reflect.TypeOf(message) {
+			} else if equalType(in1, reflect.TypeOf(message)) {
 				args = []reflect.Value{reflect.ValueOf(player), reflect.ValueOf(message)}
 			}
-		} else if in0 == reflect.TypeOf(code) && in1 == reflect.TypeOf(message) {
+		} else if equalType(in0, reflect.TypeOf(code)) && equalType(in1, reflect.TypeOf(message)) {
 			args = []reflect.Value{reflect.ValueOf(code), reflect.ValueOf(message)}
 		}
 
 	case 3:
-		if methodType.In(0) == reflect.TypeOf(player) &&
-			methodType.In(1) == reflect.TypeOf(code) &&
-			methodType.In(2) == reflect.TypeOf(message) {
+		if equalType(methodType.In(0), reflect.TypeOf(player)) &&
+			equalType(methodType.In(1), reflect.TypeOf(code)) &&
+			equalType(methodType.In(2), reflect.TypeOf(message)) {
 			args = []reflect.Value{
 				reflect.ValueOf(player),
 				reflect.ValueOf(code),

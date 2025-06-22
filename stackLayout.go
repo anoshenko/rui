@@ -610,12 +610,6 @@ func (layout *stackLayoutData) moveToFrontByIndex(index int, onShow []func(View)
 	session.updateCSSProperty(peekPageID, "transform", transformCSS)
 }
 
-func (layout *stackLayoutData) contentChanged() {
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
-	}
-}
-
 func (layout *stackLayoutData) RemovePeek() View {
 	return layout.RemoveView(len(layout.views) - 1)
 }
@@ -683,9 +677,7 @@ func (layout *stackLayoutData) Append(view View) {
 		}
 		session.appendToInnerHTML(stackID, buffer.String())
 
-		if listener, ok := layout.changeListener[Content]; ok {
-			listener(layout, Content)
-		}
+		layout.contentChanged()
 	}
 }
 
@@ -721,9 +713,7 @@ func (layout *stackLayoutData) Insert(view View, index int) {
 	session := layout.Session()
 	session.appendToInnerHTML(stackID, buffer.String())
 
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
-	}
+	layout.contentChanged()
 }
 
 // Remove removes view from list and return it
@@ -754,10 +744,7 @@ func (layout *stackLayoutData) RemoveView(index int) View {
 	}
 
 	layout.Session().callFunc("removeView", view.htmlID()+"page")
-
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
-	}
+	layout.contentChanged()
 	return view
 }
 

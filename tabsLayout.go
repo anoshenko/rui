@@ -403,9 +403,7 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 		view.SetChangeListener(TabCloseButton, tabsLayout.updateTabCloseButton)
 		if tabsLayout.created {
 			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
-			if listener, ok := tabsLayout.changeListener[Content]; ok {
-				listener(tabsLayout, Content)
-			}
+			tabsLayout.contentChanged()
 			tabsLayout.Set(Current, len(tabsLayout.views)-1)
 		}
 	}
@@ -429,9 +427,7 @@ func (tabsLayout *tabsLayoutData) currentChanged(newCurrent, oldCurrent int) {
 	for _, listener := range getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent) {
 		listener.Run(tabsLayout, newCurrent, oldCurrent)
 	}
-	if listener, ok := tabsLayout.changeListener[Current]; ok {
-		listener(tabsLayout, Current)
-	}
+	tabsLayout.contentChanged()
 }
 
 // Remove removes view from list and return it
@@ -457,9 +453,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 				tabsLayout.Set(Current, newCurrent)
 			}
 			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
-			if listener, ok := tabsLayout.changeListener[Content]; ok {
-				listener(tabsLayout, Content)
-			}
+			tabsLayout.contentChanged()
 		} else if newCurrent != oldCurrent {
 			tabsLayout.setRaw(Current, newCurrent)
 		}

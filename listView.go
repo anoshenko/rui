@@ -963,7 +963,7 @@ func (listView *listViewData) handleCurrent(number int) {
 		listener.Run(listView, number)
 	}
 	if listener, ok := listView.changeListener[Current]; ok {
-		listener(listView, Current)
+		listener.Run(listView, Current)
 	}
 }
 
@@ -1022,7 +1022,7 @@ func (listView *listViewData) onItemClick(number int) {
 
 		setArrayPropertyValue(listView, Checked, checkedItem)
 		if listener, ok := listView.changeListener[Checked]; ok {
-			listener(listView, Checked)
+			listener.Run(listView, Checked)
 		}
 
 		for _, listener := range getOneArgEventListeners[ListView, []int](listView, nil, ListItemCheckedEvent) {

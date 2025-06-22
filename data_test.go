@@ -75,7 +75,7 @@ func TestParseDataText(t *testing.T) {
 			t.Errorf(`obj.PropertyValue("key5") result: ("%s",%v)`, val, ok)
 		}
 
-		testKey := func(obj DataObject, index int, tag string, nodeType int) DataNode {
+		testKey := func(obj DataObject, index int, tag string, nodeType DataNodeType) DataNode {
 			key := obj.Property(index)
 			if key == nil {
 				t.Errorf(`%s.Property(%d) == nil`, obj.Tag(), index)
@@ -118,7 +118,7 @@ func TestParseDataText(t *testing.T) {
 
 				type testKeyData struct {
 					tag      string
-					nodeType int
+					nodeType DataNodeType
 				}
 
 				data := []testKeyData{

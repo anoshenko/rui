@@ -661,6 +661,14 @@ func supportedPropertyValue(value any) bool {
 	case []mediaPlayerErrorListener:
 		return getMediaPlayerErrorListenerBinding(value) != ""
 
+	case map[PropertyName]oneArgListener[View, PropertyName]:
+		for _, listener := range value {
+			if text, ok := listener.rawListener().(string); ok && text != "" {
+				return true
+			}
+		}
+		return false
+
 	default:
 		return false
 	}
@@ -978,6 +986,23 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 
 	case []mediaPlayerErrorListener:
 		buffer.WriteString(getMediaPlayerErrorListenerBinding(value))
+
+	case map[PropertyName]oneArgListener[View, PropertyName]:
+		buffer.WriteString("_{")
+		for key, listener := range value {
+			if text, ok := listener.rawListener().(string); ok && text != "" {
+				buffer.WriteRune('\n')
+				buffer.WriteString(indent)
+				buffer.WriteRune('\t')
+				writeString(string(key))
+				buffer.WriteString(" = ")
+				writeString(text)
+				buffer.WriteRune(',')
+			}
+			buffer.WriteRune('\n')
+			buffer.WriteString(indent)
+			buffer.WriteRune('}')
+		}
 	}
 }
 

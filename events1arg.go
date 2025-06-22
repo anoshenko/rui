@@ -106,6 +106,7 @@ func (data *oneArgListenerBinding[V, E]) Run(view V, event E) {
 	}
 
 	methodType := method.Type()
+
 	var args []reflect.Value = nil
 	switch methodType.NumIn() {
 	case 0:
@@ -113,14 +114,15 @@ func (data *oneArgListenerBinding[V, E]) Run(view V, event E) {
 
 	case 1:
 		inType := methodType.In(0)
-		if inType == reflect.TypeOf(view) {
-			args = []reflect.Value{reflect.ValueOf(view)}
-		} else if inType == reflect.TypeOf(event) {
+		if equalType(inType, reflect.TypeOf(event)) {
 			args = []reflect.Value{reflect.ValueOf(event)}
+		} else if equalType(inType, reflect.TypeOf(view)) {
+			args = []reflect.Value{reflect.ValueOf(view)}
 		}
 
 	case 2:
-		if methodType.In(0) == reflect.TypeOf(view) && methodType.In(1) == reflect.TypeOf(event) {
+		if equalType(methodType.In(0), reflect.TypeOf(view)) &&
+			equalType(methodType.In(1), reflect.TypeOf(event)) {
 			args = []reflect.Value{reflect.ValueOf(view), reflect.ValueOf(event)}
 		}
 	}

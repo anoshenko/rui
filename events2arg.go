@@ -140,6 +140,7 @@ func (data *twoArgListenerBinding[V, E]) Run(view V, arg1 E, arg2 E) {
 	}
 
 	methodType := method.Type()
+
 	var args []reflect.Value = nil
 	switch methodType.NumIn() {
 	case 0:
@@ -147,23 +148,25 @@ func (data *twoArgListenerBinding[V, E]) Run(view V, arg1 E, arg2 E) {
 
 	case 1:
 		inType := methodType.In(0)
-		if inType == reflect.TypeOf(view) {
-			args = []reflect.Value{reflect.ValueOf(view)}
-		} else if inType == reflect.TypeOf(arg1) {
+		if equalType(inType, reflect.TypeOf(arg1)) {
 			args = []reflect.Value{reflect.ValueOf(arg1)}
+		} else if equalType(inType, reflect.TypeOf(view)) {
+			args = []reflect.Value{reflect.ValueOf(view)}
 		}
 
 	case 2:
-		valType := reflect.TypeOf(arg1)
-		if methodType.In(0) == reflect.TypeOf(view) && methodType.In(1) == valType {
+		inType0 := methodType.In(0)
+		inType1 := methodType.In(1)
+		if equalType(inType0, reflect.TypeOf(view)) && equalType(inType1, reflect.TypeOf(arg1)) {
 			args = []reflect.Value{reflect.ValueOf(view), reflect.ValueOf(arg1)}
-		} else if methodType.In(0) == valType && methodType.In(1) == valType {
+		} else if equalType(inType0, reflect.TypeOf(arg1)) && equalType(inType1, reflect.TypeOf(arg2)) {
 			args = []reflect.Value{reflect.ValueOf(arg1), reflect.ValueOf(arg2)}
 		}
 
 	case 3:
-		valType := reflect.TypeOf(arg1)
-		if methodType.In(0) == reflect.TypeOf(view) && methodType.In(1) == valType && methodType.In(2) == valType {
+		if equalType(methodType.In(0), reflect.TypeOf(view)) &&
+			equalType(methodType.In(1), reflect.TypeOf(arg1)) &&
+			equalType(methodType.In(2), reflect.TypeOf(arg2)) {
 			args = []reflect.Value{reflect.ValueOf(view), reflect.ValueOf(arg1), reflect.ValueOf(arg2)}
 		}
 	}
