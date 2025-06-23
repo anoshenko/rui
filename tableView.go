@@ -1270,10 +1270,10 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 							buffer.WriteString(string(value))
 
 						case float32:
-							buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+							fmt.Fprintf(buffer, "%g", float64(value))
 
 						case float64:
-							buffer.WriteString(fmt.Sprintf("%g", value))
+							fmt.Fprintf(buffer, "%g", value)
 
 						case bool:
 							if value {
@@ -1284,7 +1284,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 						default:
 							if n, ok := isInt(value); ok {
-								buffer.WriteString(fmt.Sprintf("%d", n))
+								fmt.Fprintf(buffer, "%d", n)
 							} else {
 								buffer.WriteString("<Unsupported value>")
 							}
@@ -1537,10 +1537,10 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 		buffer.WriteString(string(value))
 
 	case float32:
-		buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+		fmt.Fprintf(buffer, "%g", float64(value))
 
 	case float64:
-		buffer.WriteString(fmt.Sprintf("%g", value))
+		fmt.Fprintf(buffer, "%g", value)
 
 	case bool:
 		accentColor := Color(0)
@@ -1555,7 +1555,7 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 
 	default:
 		if n, ok := isInt(value); ok {
-			buffer.WriteString(fmt.Sprintf("%d", n))
+			fmt.Fprintf(buffer, "%d", n)
 		} else {
 			buffer.WriteString("<Unsupported value>")
 		}

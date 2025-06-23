@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"maps"
 	"math"
 	"strconv"
 	"strings"
@@ -661,7 +662,7 @@ func (animation *animationData) animationCSS(session Session) string {
 	buffer.WriteString(animation.keyFramesName)
 
 	if duration, ok := floatProperty(animation, Duration, session, 1); ok && duration > 0 {
-		buffer.WriteString(fmt.Sprintf(" %gs ", duration))
+		fmt.Fprintf(buffer, " %gs ", duration)
 	} else {
 		buffer.WriteString(" 1s ")
 	}
@@ -669,7 +670,7 @@ func (animation *animationData) animationCSS(session Session) string {
 	buffer.WriteString(timingFunctionCSS(animation, TimingFunction, session))
 
 	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
-		buffer.WriteString(fmt.Sprintf(" %gs", delay))
+		fmt.Fprintf(buffer, " %gs", delay)
 	} else {
 		buffer.WriteString(" 0s")
 	}
@@ -678,7 +679,7 @@ func (animation *animationData) animationCSS(session Session) string {
 		if iterationCount == 0 {
 			iterationCount = 1
 		}
-		buffer.WriteString(fmt.Sprintf(" %d ", iterationCount))
+		fmt.Fprintf(buffer, " %d ", iterationCount)
 	} else {
 		buffer.WriteString(" infinite ")
 	}
@@ -699,7 +700,7 @@ func (animation *animationData) animationCSS(session Session) string {
 func (animation *animationData) transitionCSS(buffer *strings.Builder, session Session) {
 
 	if duration, ok := floatProperty(animation, Duration, session, 1); ok && duration > 0 {
-		buffer.WriteString(fmt.Sprintf(" %gs ", duration))
+		fmt.Fprintf(buffer, " %gs ", duration)
 	} else {
 		buffer.WriteString(" 1s ")
 	}
@@ -707,7 +708,7 @@ func (animation *animationData) transitionCSS(buffer *strings.Builder, session S
 	buffer.WriteString(timingFunctionCSS(animation, TimingFunction, session))
 
 	if delay, ok := floatProperty(animation, Delay, session, 0); ok && delay > 0 {
-		buffer.WriteString(fmt.Sprintf(" %gs", delay))
+		fmt.Fprintf(buffer, " %gs", delay)
 	}
 }
 
@@ -979,11 +980,10 @@ func (style *viewStyle) Transition(tag PropertyName) AnimationProperty {
 }
 
 func (style *viewStyle) Transitions() map[PropertyName]AnimationProperty {
-	result := map[PropertyName]AnimationProperty{}
-	for tag, animation := range getTransitionProperty(style) {
-		result[tag] = animation
+	if transitions := getTransitionProperty(style); transitions != nil {
+		return maps.Clone(transitions)
 	}
-	return result
+	return map[PropertyName]AnimationProperty{}
 }
 
 func (style *viewStyle) SetTransition(tag PropertyName, animation AnimationProperty) {

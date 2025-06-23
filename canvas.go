@@ -575,7 +575,7 @@ func (canvas *canvasData) SetLineDash(dash []float64, offset float64) {
 	for _, val := range dash {
 		buffer.WriteRune(lead)
 		lead = ','
-		buffer.WriteString(fmt.Sprintf("%g", val))
+		fmt.Fprintf(buffer, "%g", val))
 	}
 	buffer.WriteRune(']')
 

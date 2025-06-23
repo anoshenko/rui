@@ -208,7 +208,7 @@ func (data *sizeFuncData) writeString(topFunc string, buffer *strings.Builder) {
 			buffer.WriteString(arg.String())
 
 		case float64:
-			buffer.WriteString(fmt.Sprintf("%g", arg))
+			fmt.Fprintf(buffer, "%g", arg)
 		}
 
 	}
@@ -302,7 +302,7 @@ func (data *sizeFuncData) writeCSS(topFunc string, buffer *strings.Builder, sess
 			buffer.WriteString(arg.String())
 
 		case float64:
-			buffer.WriteString(fmt.Sprintf("%g", arg))
+			fmt.Fprintf(buffer, "%g", arg)
 		}
 
 	}

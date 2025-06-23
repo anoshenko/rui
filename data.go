@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -321,8 +322,8 @@ func (node *dataNode) ArrayAsParams() []Params {
 func ParseDataText(text string) DataObject {
 
 	if strings.ContainsAny(text, "\r") {
-		text = strings.Replace(text, "\r\n", "\n", -1)
-		text = strings.Replace(text, "\r", "\n", -1)
+		text = strings.ReplaceAll(text, "\r\n", "\n")
+		text = strings.ReplaceAll(text, "\r", "\n")
 	}
 	data := append([]rune(text), rune(0))
 	pos := 0
@@ -518,15 +519,8 @@ func ParseDataText(text string) DataObject {
 		}
 
 		stopSymbol := func(symbol rune) bool {
-			if unicode.IsSpace(symbol) {
-				return true
-			}
-			for _, sym := range []rune{'=', '{', '}', '[', ']', ',', ' ', '\t', '\n', '\'', '"', '`', '/'} {
-				if sym == symbol {
-					return true
-				}
-			}
-			return false
+			return unicode.IsSpace(symbol) ||
+				slices.Contains([]rune{'=', '{', '}', '[', ']', ',', ' ', '\t', '\n', '\'', '"', '`', '/'}, symbol)
 		}
 
 		for pos < size && !stopSymbol(data[pos]) {

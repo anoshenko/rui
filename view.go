@@ -1066,8 +1066,8 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	}
 
 	if view.frame.Left != 0 || view.frame.Top != 0 || view.frame.Width != 0 || view.frame.Height != 0 {
-		buffer.WriteString(fmt.Sprintf(` data-left="%g" data-top="%g" data-width="%g" data-height="%g"`,
-			view.frame.Left, view.frame.Top, view.frame.Width, view.frame.Height))
+		fmt.Fprintf(buffer, ` data-left="%g" data-top="%g" data-width="%g" data-height="%g"`,
+			view.frame.Left, view.frame.Top, view.frame.Width, view.frame.Height)
 	}
 }
 

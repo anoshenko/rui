@@ -975,10 +975,10 @@ func (theme *theme) String() string {
 			buffer.WriteString(":landscape")
 		}
 		if maxWidth > 0 {
-			buffer.WriteString(fmt.Sprintf(":width%d", maxWidth))
+			fmt.Fprintf(buffer, ":width%d", maxWidth)
 		}
 		if maxHeight > 0 {
-			buffer.WriteString(fmt.Sprintf(":height%d", maxHeight))
+			fmt.Fprintf(buffer, ":height%d", maxHeight)
 		}
 		buffer.WriteString(" = [\n")
 
@@ -1014,21 +1014,21 @@ func (theme *theme) String() string {
 			}
 
 			if media.MinWidth > 0 {
-				buffer.WriteString(fmt.Sprintf(":width%d-", media.MinWidth))
+				fmt.Fprintf(buffer, ":width%d-", media.MinWidth)
 				if media.MaxWidth > 0 {
 					buffer.WriteString(strconv.Itoa(media.MaxWidth))
 				}
 			} else if media.MaxWidth > 0 {
-				buffer.WriteString(fmt.Sprintf(":width%d", media.MaxWidth))
+				fmt.Fprintf(buffer, ":width%d", media.MaxWidth)
 			}
 
 			if media.MinHeight > 0 {
-				buffer.WriteString(fmt.Sprintf(":height%d-", media.MinHeight))
+				fmt.Fprintf(buffer, ":height%d-", media.MinHeight)
 				if media.MaxHeight > 0 {
 					buffer.WriteString(strconv.Itoa(media.MaxHeight))
 				}
 			} else if media.MaxHeight > 0 {
-				buffer.WriteString(fmt.Sprintf(":height%d", media.MaxHeight))
+				fmt.Fprintf(buffer, ":height%d", media.MaxHeight)
 			}
 
 			buffer.WriteString(" = [\n")

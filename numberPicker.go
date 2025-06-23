@@ -244,27 +244,27 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 	min, max := GetNumberPickerMinMax(picker)
 	if min != math.Inf(-1) {
 		buffer.WriteString(` min="`)
-		buffer.WriteString(fmt.Sprintf(format, min))
+		fmt.Fprintf(buffer, format, min)
 		buffer.WriteByte('"')
 	}
 
 	if max != math.Inf(1) {
 		buffer.WriteString(` max="`)
-		buffer.WriteString(fmt.Sprintf(format, max))
+		fmt.Fprintf(buffer, format, max)
 		buffer.WriteByte('"')
 	}
 
 	step := GetNumberPickerStep(picker)
 	if step != 0 {
 		buffer.WriteString(` step="`)
-		buffer.WriteString(fmt.Sprintf(format, step))
+		fmt.Fprintf(buffer, format, step)
 		buffer.WriteByte('"')
 	} else {
 		buffer.WriteString(` step="any"`)
 	}
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(fmt.Sprintf(format, GetNumberPickerValue(picker)))
+	fmt.Fprintf(buffer, format, GetNumberPickerValue(picker))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)

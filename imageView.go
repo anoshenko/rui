@@ -205,7 +205,7 @@ func imageViewSrcSet(view View, path string) string {
 				buffer.WriteString(", ")
 			}
 			buffer.WriteString(src.path)
-			buffer.WriteString(fmt.Sprintf(" %gx", src.scale))
+			fmt.Fprintf(buffer, " %gx", src.scale)
 		}
 		return buffer.String()
 	}

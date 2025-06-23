@@ -462,13 +462,13 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 
 	if f := GetDragImageXOffset(view); f != 0 {
 		buffer.WriteString(` data-drag-image-x="`)
-		buffer.WriteString(fmt.Sprintf("%g", f))
+		fmt.Fprintf(buffer, "%g", f)
 		buffer.WriteString(`" `)
 	}
 
 	if f := GetDragImageYOffset(view); f != 0 {
 		buffer.WriteString(` data-drag-image-y="`)
-		buffer.WriteString(fmt.Sprintf("%g", f))
+		fmt.Fprintf(buffer, "%g", f)
 		buffer.WriteString(`" `)
 	}
 
