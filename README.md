@@ -520,7 +520,7 @@ For the "edit-text-changed" event, this
 * func(newText string)
 * []func(editor EditView, newText string)
 * []func(newText string)
-* []any содержащий только func(editor EditView, newText string) и func(newText string)
+* []any containing only func(editor EditView, newText string) и func(newText string)
 
 And the "edit-text-changed" property always stores and returns []func(EditView, string).
 
@@ -1062,7 +1062,7 @@ The ShadowProperty text representation has the following format:
 
 You can get the value of "shadow" property using the function
 
-	func GetShadowPropertys(view View, subviewID ...string) []ShadowProperty
+	func GetShadowProperties(view View, subviewID ...string) []ShadowProperty
 
 If no shadow is specified, then this function will return an empty array
 
@@ -5720,6 +5720,71 @@ using the SetResourcePath function before creating the Application:
 		app.Start("localhost:8000")
 	}
 
+## Binding
+
+The binding mechanism is designed to set event handlers and listeners for changes in application resources.
+
+Let's look at an example:
+
+Resource file ("button.rui") describing the button 
+
+	Button {
+		click-event = ButtonClick,
+	}
+
+Code to create this button from resources
+
+	type button struct {
+		view rui.View
+	}
+
+	func createButton(session rui.Session) rui.View {
+		b := new(button)
+		b.view = rui.CreateViewFromResources(session, "button.rui", b)
+		return b.view
+	}
+
+	func (button *button) ButtonClick() {
+		rui.DebugLog("Button clicked")
+	}
+
+In this example, the resource file specifies that a function named "ButtonClick" should be used as the click handler.
+When creating a View from resources using the CreateViewFromResources function, the binding object is specified as the third parameter.
+When a "click-event" occurs, the system will look for one of the following methods in the binding object
+
+	ButtonClick()
+	ButtonClick(rui.View)
+	ButtonClick(rui.MouseEvent)
+	ButtonClick(rui.View, rui.MouseEvent)
+
+The system will find the ButtonClick() method and call it.
+
+Now let's look at how to add property change tracking.
+
+To do this, let's add a property change listener "background-color" to the property "change-listeners" in the example.
+
+	Button {
+		click-event = ButtonClick,
+		change-listeners = {
+			background-color = BackgroundColorChanged,
+		},
+	}
+
+And we will add the corresponding method
+
+	func (button *button) BackgroundColorChanged() {
+		rui.DebugLog("Background color changed")
+	}
+
+This method can have one of the following descriptions
+
+	BackgroundColorChanged()
+	BackgroundColorChanged(rui.View)
+	BackgroundColorChanged(rui.PropertyName)
+	BackgroundColorChanged(rui.View, rui.PropertyName)
+
+Important note: All methods called via binding must be public (start with a capital letter)
+
 ## Images for screens with different pixel densities
 
 If you need to add separate images to the resources for screens with different pixel densities, 
@@ -5919,7 +5984,7 @@ The library defines a number of constants and styles. You can override them in y
 
 System styles that you can override:
 
-| Style name          | Описание                                                            |
+| Style name          | Description                                                         |
 |---------------------|---------------------------------------------------------------------|
 | ruiApp              | This style is used to set the default text style (font, size, etc.) |
 | ruiView             | Default View Style                                                  |
@@ -6011,7 +6076,7 @@ Translation files must have the "rui" extension and the following format
 			<text 2> = <translation 2>,
 			…
 		},
-		<язык 2> = _{
+		<language 2> = _{
 			<text 1> = <translation 1>,
 			<text 2> = <translation 2>,
 			…

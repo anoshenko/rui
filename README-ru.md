@@ -5704,6 +5704,70 @@ Safari и Firefox.
 Для получения объекта используется метод Object.
 Для получения элементов массива используются методы ArraySize, ArrayElement и ArrayElements
 
+## Связывание (binding)
+
+Механизм связывания предназначен для задания обработчиков событий и слушателей изменений в ресурсах приложений.
+
+Рассмотрим пример:
+
+Файл ресурсов описывающий кнопку button.rui
+
+	Button {
+		click-event = ButtonClick,
+	}
+
+Код для создания этой кнопки из ресурсов
+
+	type button struct {
+		view rui.View
+	}
+
+	func createButton(session rui.Session) rui.View {
+		b := new(button)
+		b.view = rui.CreateViewFromResources(session, "button.rui", b)
+		return b.view
+	}
+
+	func (button *button) ButtonClick() {
+		rui.DebugLog("Button clicked")
+	}
+
+В данном примере в файле ресурсов указано, что в качестве обработчика клика надо использовать функцию с именем "ButtonClick".
+При создании View из ресeрсов с помощью функции CreateViewFromResources в качестве третьего параметра задается объект связывания.
+При возникновении события "click-event" система будет искать в связанном объекте один из следующих методов
+
+	ButtonClick()
+	ButtonClick(rui.View)
+	ButtonClick(rui.MouseEvent)
+	ButtonClick(rui.View, rui.MouseEvent)
+
+Система найдет метод ButtonClick() и вызовет его.
+
+Теперь рассотрим как добавить отслеживание изменения свойств. 
+Для этого добавим в пример слушателя изменения свойства "background-color" в свойство "change-listeners"
+
+	Button {
+		click-event = ButtonClick,
+		change-listeners = {
+			background-color = BackgroundColorChanged,
+		},
+	}
+
+И добавим соответствующий метод
+
+	func (button *button) BackgroundColorChanged() {
+		rui.DebugLog("Background color changed")
+	}
+
+Данный метод может иметь одно из следующих описаний
+
+	BackgroundColorChanged()
+	BackgroundColorChanged(rui.View)
+	BackgroundColorChanged(rui.PropertyName)
+	BackgroundColorChanged(rui.View, rui.PropertyName)
+
+Важное замечание: Все методы вызываемые через связывание должны быть публичными (начинаться с большой буквы)
+
 ## Ресурсы
 
 Ресурсы (картинки, темы, переводы и т.д.) с которыми работает приложение должны размещаться по

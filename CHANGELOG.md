@@ -10,7 +10,7 @@
 
 # v0.18.2
 
-* fixed typo: GetShadowPropertys -> GetShadowProperty
+* fixed typo: GetShadowProperties -> GetShadowProperty
 
 # v0.18.0
 
