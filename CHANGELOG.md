@@ -1,3 +1,8 @@
+# v0.20.0
+
+* Added support of binding
+* Added "binding" argument to CreateViewFromResources, CreateViewFromText, and CreateViewFromObject functions
+
 # v0.19.0
 
 * Added support of drag-and-drop
