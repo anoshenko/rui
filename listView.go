@@ -336,7 +336,7 @@ func (listView *listViewData) setItems(value any) []PropertyName {
 			items := make([]View, len(value))
 			for i, val := range value {
 				if val.IsObject() {
-					if view := CreateViewFromObject(session, val.Object()); view != nil {
+					if view := CreateViewFromObject(session, val.Object(), nil); view != nil {
 						items[i] = view
 					} else {
 						return nil

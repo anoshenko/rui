@@ -118,7 +118,7 @@ func (resizable *resizableData) setFunc(tag PropertyName, value any) []PropertyN
 			newContent = value
 
 		case DataObject:
-			if newContent = CreateViewFromObject(resizable.Session(), value); newContent == nil {
+			if newContent = CreateViewFromObject(resizable.Session(), value, nil); newContent == nil {
 				return nil
 			}
 

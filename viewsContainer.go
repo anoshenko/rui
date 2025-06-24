@@ -174,9 +174,8 @@ func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Bui
 
 func viewFromTextValue(text string, session Session) View {
 	if strings.Contains(text, "{") && strings.Contains(text, "}") {
-		data := ParseDataText(text)
-		if data != nil {
-			if view := CreateViewFromObject(session, data); view != nil {
+		if data := ParseDataText(text); data != nil {
+			if view := CreateViewFromObject(session, data, nil); view != nil {
 				return view
 			}
 		}
@@ -277,7 +276,7 @@ func (container *viewsContainerData) setContent(value any) bool {
 		container.views = views
 
 	case DataObject:
-		if view := CreateViewFromObject(session, value); view != nil {
+		if view := CreateViewFromObject(session, value, nil); view != nil {
 			container.views = []View{view}
 		} else {
 			return false
@@ -287,7 +286,7 @@ func (container *viewsContainerData) setContent(value any) bool {
 		views := []View{}
 		for _, data := range value {
 			if data.IsObject() {
-				if view := CreateViewFromObject(session, data.Object()); view != nil {
+				if view := CreateViewFromObject(session, data.Object(), nil); view != nil {
 					views = append(views, view)
 				}
 			} else {

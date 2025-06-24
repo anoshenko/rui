@@ -92,7 +92,7 @@ func (detailsView *detailsViewData) setFunc(tag PropertyName, value any) []Prope
 			value.setParentID(detailsView.htmlID())
 
 		case DataObject:
-			if view := CreateViewFromObject(detailsView.Session(), value); view != nil {
+			if view := CreateViewFromObject(detailsView.Session(), value, nil); view != nil {
 				detailsView.setRaw(Summary, view)
 				view.setParentID(detailsView.htmlID())
 			} else {
