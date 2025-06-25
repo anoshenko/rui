@@ -151,7 +151,7 @@ const (
 	//
 	// Used by Popup.
 	// Specify start translation, scale and rotation over x, y and z axes as well as a distortion
-	// for an animated Popup showing/hidding.
+	// for an animated Popup showing/hiding.
 	//
 	// Supported types: TransformProperty, string.
 	//
@@ -279,7 +279,7 @@ type Popup interface {
 	viewByHTMLID(id string) View
 	keyEvent(event KeyEvent) bool
 	showAnimation()
-	dissmissAnimation(listener func(PropertyName)) bool
+	dismissAnimation(listener func(PropertyName)) bool
 }
 
 type popupListener interface {
@@ -849,7 +849,7 @@ func (popup *popupData) showAnimation() {
 	}
 }
 
-func (popup *popupData) dissmissAnimation(listener func(PropertyName)) bool {
+func (popup *popupData) dismissAnimation(listener func(PropertyName)) bool {
 	if popup.showOpacity != 1 || popup.showTransform != nil {
 		session := popup.Session()
 		popup.popupView.Set(TransitionEndEvent, listener)
@@ -1012,23 +1012,26 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 
 	session := popup.Session()
 	listener := func(PropertyName) {
-		if index == count-1 {
+		switch index {
+		case 0:
 			if count == 1 {
 				manager.popups = []Popup{}
 				session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
 				session.updateCSSProperty("ruiPopupLayer", "visibility", "hidden")
 			} else {
-				manager.popups = manager.popups[:count-1]
+				manager.popups = manager.popups[1:]
 			}
-		} else if index == 0 {
-			manager.popups = manager.popups[1:]
-		} else {
+
+		case count - 1:
+			manager.popups = manager.popups[:count-1]
+
+		default:
 			manager.popups = append(manager.popups[:index], manager.popups[index+1:]...)
 		}
 		popup.onDismiss()
 	}
 
-	if !popup.dissmissAnimation(listener) {
+	if !popup.dismissAnimation(listener) {
 		listener("")
 	}
 }

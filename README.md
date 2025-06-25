@@ -2135,7 +2135,7 @@ You can get lists of pointer event listeners using the functions:
 
 ### Touch events
 
-These events are used to track multipoint touches. Single touches emulate mouse events.
+These events are used to track multi point touches. Single touches emulate mouse events.
 If you do not need to track multi-point touches, then it is easier to use mouse events
 
 | Event          | Constant    | Description                          |
@@ -5726,22 +5726,24 @@ The binding mechanism is designed to set event handlers and listeners for change
 
 Let's look at an example:
 
-Resource file ("button.rui") describing the button 
+The resource file ("button.rui") describing the button: 
 
 	Button {
 		click-event = ButtonClick,
 	}
 
-Code to create this button from resources
+The code to create this button from resources
 
 	type button struct {
 		view rui.View
 	}
 
 	func createButton(session rui.Session) rui.View {
-		b := new(button)
-		b.view = rui.CreateViewFromResources(session, "button.rui", b)
-		return b.view
+		return rui.CreateViewFromResources(session, "button.rui", new(button))
+	}
+
+	func (button *button) OnCreate(view rui.View) {
+		button.view = view
 	}
 
 	func (button *button) ButtonClick() {
@@ -5758,6 +5760,13 @@ When a "click-event" occurs, the system will look for one of the following metho
 	ButtonClick(rui.View, rui.MouseEvent)
 
 The system will find the ButtonClick() method and call it.
+
+The optional method OnCreate can also be specified for the associated object
+
+	OnCreate(view rui.View)
+
+This method is called by the CreateViewFromText, CreateViewFromResources, and CreateViewFromObject functions after the View has been created.
+In this example, this method is used to save a pointer to the created View.
 
 Now let's look at how to add property change tracking.
 

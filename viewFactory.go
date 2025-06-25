@@ -36,6 +36,13 @@ var systemViewCreators = map[string]func(Session) View{
 	"VideoPlayer":    newVideoPlayer,
 }
 
+// ViewCreateListener is the listener interface of a view create event
+type ViewCreateListener interface {
+	// OnCreate is a function of binding object that is called by the CreateViewFromText, CreateViewFromResources,
+	// and CreateViewFromObject functions after the creation of a view
+	OnCreate(view View)
+}
+
 var viewCreate map[string]func(Session) View = nil
 
 func viewCreators() map[string]func(Session) View {
@@ -64,7 +71,7 @@ func RegisterViewCreator(tag string, creator func(Session) View) bool {
 
 // CreateViewFromObject create new View and initialize it by DataObject data. Parameters:
 //   - session - the session to which the view will be attached (should not be nil);
-//   - object - datas describing View;
+//   - object - data describing View;
 //   - binding - object assigned to the Binding property (may be nil).
 //
 // If the function fails, it returns nil and an error message is written to the log.
@@ -96,6 +103,9 @@ func CreateViewFromObject(session Session, object DataObject, binding any) View 
 	parseProperties(view, object)
 	if binding != nil {
 		view.setRaw(Binding, binding)
+		if listener, ok := binding.(ViewCreateListener); ok {
+			listener.OnCreate(view)
+		}
 	}
 	return view
 }
