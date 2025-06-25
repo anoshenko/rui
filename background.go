@@ -78,6 +78,16 @@ func createBackground(obj DataObject) BackgroundElement {
 	return result
 }
 
+func parseBackgroundText(text string) BackgroundElement {
+	obj, err := ParseDataText(text)
+	if err != nil {
+		ErrorLog(err.Error())
+		return nil
+	}
+
+	return createBackground(obj)
+}
+
 func parseBackgroundValue(value any) []BackgroundElement {
 
 	switch value := value.(type) {
@@ -96,12 +106,8 @@ func parseBackgroundValue(value any) []BackgroundElement {
 				} else {
 					return nil
 				}
-			} else if obj := ParseDataText(el.Value()); obj != nil {
-				if element := createBackground(obj); element != nil {
-					background = append(background, element)
-				} else {
-					return nil
-				}
+			} else if element := parseBackgroundText(el.Value()); element != nil {
+				background = append(background, element)
 			} else {
 				return nil
 			}
@@ -125,21 +131,15 @@ func parseBackgroundValue(value any) []BackgroundElement {
 		return background
 
 	case string:
-		if obj := ParseDataText(value); obj != nil {
-			if element := createBackground(obj); element != nil {
-				return []BackgroundElement{element}
-			}
+		if element := parseBackgroundText(value); element != nil {
+			return []BackgroundElement{element}
 		}
 
 	case []string:
 		elements := make([]BackgroundElement, 0, len(value))
-		for _, element := range value {
-			if obj := ParseDataText(element); obj != nil {
-				if element := createBackground(obj); element != nil {
-					elements = append(elements, element)
-				} else {
-					return nil
-				}
+		for _, text := range value {
+			if element := parseBackgroundText(text); element != nil {
+				elements = append(elements, element)
 			} else {
 				return nil
 			}
@@ -148,18 +148,14 @@ func parseBackgroundValue(value any) []BackgroundElement {
 
 	case []any:
 		elements := make([]BackgroundElement, 0, len(value))
-		for _, element := range value {
-			switch element := element.(type) {
+		for _, val := range value {
+			switch val := val.(type) {
 			case BackgroundElement:
-				elements = append(elements, element)
+				elements = append(elements, val)
 
 			case string:
-				if obj := ParseDataText(element); obj != nil {
-					if element := createBackground(obj); element != nil {
-						elements = append(elements, element)
-					} else {
-						return nil
-					}
+				if element := parseBackgroundText(val); element != nil {
+					elements = append(elements, element)
 				} else {
 					return nil
 				}

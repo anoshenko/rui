@@ -398,7 +398,10 @@ func valueToTransformProperty(value any) TransformProperty {
 		}
 
 	case string:
-		if obj := ParseDataText(value); obj != nil {
+		obj, err := ParseDataText(value)
+		if err != nil {
+			ErrorLog(err.Error())
+		} else {
 			return parseObject(obj)
 		}
 	}

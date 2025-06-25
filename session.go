@@ -266,7 +266,8 @@ func (session *sessionData) setBridge(events chan DataObject, bridge bridge) {
 
 func (session *sessionData) close() {
 	if session.events != nil {
-		session.events <- ParseDataText(`session-close{session="` + strconv.Itoa(session.sessionID) + `"}`)
+		obj, _ := ParseDataText(`session-close{session="` + strconv.Itoa(session.sessionID) + `"}`)
+		session.events <- obj
 	}
 }
 

@@ -164,64 +164,68 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 			DebugLog(message)
 		}
 
-		if obj := ParseDataText(message); obj != nil {
-			var session Session = nil
-			var response chan string = nil
+		obj, err := ParseDataText(message)
+		if err != nil {
+			ErrorLog(err.Error())
+			return
+		}
 
-			if cookie, err := req.Cookie("session"); err == nil {
-				sessionID, err := strconv.Atoi(cookie.Value)
-				if err != nil {
-					ErrorLog(err.Error())
-				} else if info, ok := app.sessions[sessionID]; ok && info.response != nil {
-					response = info.response
-					session = info.session
+		var session Session = nil
+		var response chan string = nil
+
+		if cookie, err := req.Cookie("session"); err == nil {
+			sessionID, err := strconv.Atoi(cookie.Value)
+			if err != nil {
+				ErrorLog(err.Error())
+			} else if info, ok := app.sessions[sessionID]; ok && info.response != nil {
+				response = info.response
+				session = info.session
+			}
+		}
+
+		command := obj.Tag()
+		startSession := false
+
+		if session == nil || command == "startSession" {
+			events := make(chan DataObject, 1024)
+			bridge := createHttpBridge(req)
+			response = bridge.response
+			answer := ""
+			session, answer = app.startSession(obj, events, bridge, response)
+
+			bridge.writeMessage(answer)
+			session.onStart()
+			if command == "session-resume" {
+				session.onResume()
+			}
+			bridge.sendResponse()
+
+			setSessionIDCookie(w, session.ID())
+			startSession = true
+
+			go sessionEventHandler(session, events, bridge)
+		}
+
+		if !startSession {
+			switch command {
+			case "nop":
+				session.sendResponse()
+
+			case "session-close":
+				session.onFinish()
+				session.App().removeSession(session.ID())
+				return
+
+			default:
+				if !session.handleAnswer(command, obj) {
+					session.addToEventsQueue(obj)
 				}
 			}
+		}
 
-			command := obj.Tag()
-			startSession := false
-
-			if session == nil || command == "startSession" {
-				events := make(chan DataObject, 1024)
-				bridge := createHttpBridge(req)
-				response = bridge.response
-				answer := ""
-				session, answer = app.startSession(obj, events, bridge, response)
-
-				bridge.writeMessage(answer)
-				session.onStart()
-				if command == "session-resume" {
-					session.onResume()
-				}
-				bridge.sendResponse()
-
-				setSessionIDCookie(w, session.ID())
-				startSession = true
-
-				go sessionEventHandler(session, events, bridge)
-			}
-
-			if !startSession {
-				switch command {
-				case "nop":
-					session.sendResponse()
-
-				case "session-close":
-					session.onFinish()
-					session.App().removeSession(session.ID())
-					return
-
-				default:
-					if !session.handleAnswer(command, obj) {
-						session.addToEventsQueue(obj)
-					}
-				}
-			}
-
+		io.WriteString(w, <-response)
+		for len(response) > 0 {
 			io.WriteString(w, <-response)
-			for len(response) > 0 {
-				io.WriteString(w, <-response)
-			}
 		}
 	}
 }
@@ -241,58 +245,61 @@ func (app *application) socketReader(bridge *wsBridge) {
 			DebugLog("🖥️ -> " + message)
 		}
 
-		if obj := ParseDataText(message); obj != nil {
-			command := obj.Tag()
-			switch command {
-			case "startSession":
-				answer := ""
+		obj, err := ParseDataText(message)
+		if err != nil {
+			ErrorLog(err.Error())
+			return
+		}
+
+		switch command := obj.Tag(); command {
+		case "startSession":
+			answer := ""
+			if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
+				if !bridge.writeMessage(answer) {
+					return
+				}
+				session.onStart()
+				go sessionEventHandler(session, events, bridge)
+			}
+
+		case "reconnect":
+			session = nil
+			if sessionText, ok := obj.PropertyValue("session"); ok {
+				if sessionID, err := strconv.Atoi(sessionText); err == nil {
+					if info, ok := app.sessions[sessionID]; ok {
+						session = info.session
+						session.setBridge(events, bridge)
+
+						go sessionEventHandler(session, events, bridge)
+						session.onReconnect()
+					} else {
+						DebugLogF("Session #%d not exists", sessionID)
+					}
+				} else {
+					ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
+				}
+			} else {
+				ErrorLog(`"session" key not found`)
+			}
+
+			if session == nil {
+				/* answer := ""
 				if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
 					if !bridge.writeMessage(answer) {
 						return
 					}
 					session.onStart()
 					go sessionEventHandler(session, events, bridge)
+					bridge.writeMessage("restartSession();")
 				}
+				*/
+				bridge.writeMessage("reloadPage();")
+				return
+			}
 
-			case "reconnect":
-				session = nil
-				if sessionText, ok := obj.PropertyValue("session"); ok {
-					if sessionID, err := strconv.Atoi(sessionText); err == nil {
-						if info, ok := app.sessions[sessionID]; ok {
-							session = info.session
-							session.setBridge(events, bridge)
-
-							go sessionEventHandler(session, events, bridge)
-							session.onReconnect()
-						} else {
-							DebugLogF("Session #%d not exists", sessionID)
-						}
-					} else {
-						ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
-					}
-				} else {
-					ErrorLog(`"session" key not found`)
-				}
-
-				if session == nil {
-					/* answer := ""
-					if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
-						if !bridge.writeMessage(answer) {
-							return
-						}
-						session.onStart()
-						go sessionEventHandler(session, events, bridge)
-						bridge.writeMessage("restartSession();")
-					}
-					*/
-					bridge.writeMessage("reloadPage();")
-					return
-				}
-
-			default:
-				if !session.handleAnswer(command, obj) {
-					events <- obj
-				}
+		default:
+			if !session.handleAnswer(command, obj) {
+				events <- obj
 			}
 		}
 	}

@@ -610,7 +610,10 @@ func borderSet(properties Properties, tag PropertyName, value any) []PropertyNam
 	case Left, Right, Top, Bottom:
 		switch value := value.(type) {
 		case string:
-			if obj := ParseDataText(value); obj != nil {
+			obj, err := ParseDataText(value)
+			if err != nil {
+				ErrorLog(err.Error())
+			} else {
 				return setSingleBorderObject(tag, obj)
 			}
 

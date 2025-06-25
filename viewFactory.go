@@ -117,14 +117,17 @@ func CreateViewFromObject(session Session, object DataObject, binding any) View 
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreateViewFromText(session Session, text string, binding ...any) View {
-	if data := ParseDataText(text); data != nil {
-		var b any = nil
-		if len(binding) > 0 {
-			b = binding[0]
-		}
-		return CreateViewFromObject(session, data, b)
+	data, err := ParseDataText(text)
+	if err != nil {
+		ErrorLog(err.Error())
+		return nil
 	}
-	return nil
+
+	var b any = nil
+	if len(binding) > 0 {
+		b = binding[0]
+	}
+	return CreateViewFromObject(session, data, b)
 }
 
 // CreateViewFromResources create new View and initialize it by the content of
@@ -153,14 +156,20 @@ func CreateViewFromResources(session Session, name string, binding ...any) View 
 
 			case viewDir:
 				if data, err := fs.ReadFile(dir + "/" + name); err == nil {
-					if data := ParseDataText(string(data)); data != nil {
+					data, err := ParseDataText(string(data))
+					if err != nil {
+						ErrorLog(err.Error())
+					} else {
 						return CreateViewFromObject(session, data, b)
 					}
 				}
 
 			default:
 				if data, err := fs.ReadFile(dir + "/" + viewDir + "/" + name); err == nil {
-					if data := ParseDataText(string(data)); data != nil {
+					data, err := ParseDataText(string(data))
+					if err != nil {
+						ErrorLog(err.Error())
+					} else {
 						return CreateViewFromObject(session, data, b)
 					}
 				}
@@ -170,7 +179,10 @@ func CreateViewFromResources(session Session, name string, binding ...any) View 
 
 	if resources.path != "" {
 		if data, err := os.ReadFile(resources.path + viewDir + "/" + name); err == nil {
-			if data := ParseDataText(string(data)); data != nil {
+			data, err := ParseDataText(string(data))
+			if err != nil {
+				ErrorLog(err.Error())
+			} else {
 				return CreateViewFromObject(session, data, b)
 			}
 		}

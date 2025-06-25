@@ -50,8 +50,9 @@ func (resources *resourceManager) scanStringsDir(path string) {
 }
 
 func loadStringResources(text string) {
-	data := ParseDataText(text)
-	if data == nil {
+	data, err := ParseDataText(text)
+	if err != nil {
+		ErrorLog(err.Error())
 		return
 	}
 

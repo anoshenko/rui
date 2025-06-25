@@ -173,11 +173,9 @@ func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Bui
 }
 
 func viewFromTextValue(text string, session Session) View {
-	if strings.Contains(text, "{") && strings.Contains(text, "}") {
-		if data := ParseDataText(text); data != nil {
-			if view := CreateViewFromObject(session, data, nil); view != nil {
-				return view
-			}
+	if data, err := ParseDataText(text); err == nil {
+		if view := CreateViewFromObject(session, data, nil); view != nil {
+			return view
 		}
 	}
 	return NewTextView(session, Params{Text: text})

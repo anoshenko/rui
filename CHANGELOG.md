@@ -2,6 +2,7 @@
 
 * Added support of binding
 * Added "binding" argument to CreateViewFromResources, CreateViewFromText, and CreateViewFromObject functions
+* Changed ParseDataText function return values
 
 # v0.19.0
 

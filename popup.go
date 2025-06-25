@@ -941,6 +941,25 @@ func NewPopup(view View, param Params) Popup {
 	return popup
 }
 
+/*
+func CreatePopupFromObject(session Session, object DataObject, binding any) Popup {
+	node := object.RemovePropertyByTag(string(Content))
+	if node == nil {
+		ErrorLog(`"content" property not found`)
+		return nil
+	}
+
+	switch node.Type() {
+	case ObjectNode:
+
+	case TextNode:
+
+	default:
+		ErrorLog(`Unsupported data of "content" property`)
+		return nil
+	}
+}
+*/
 // ShowPopup creates a new Popup and shows it
 func ShowPopup(view View, param Params) Popup {
 	popup := NewPopup(view, param)

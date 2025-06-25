@@ -686,8 +686,11 @@ func (theme *theme) addText(themeText string) bool {
 		theme.init()
 	}
 
-	data := ParseDataText(themeText)
-	if data == nil || !data.IsObject() || data.Tag() != "theme" {
+	data, err := ParseDataText(themeText)
+	if err != nil {
+		ErrorLog(err.Error())
+		return false
+	} else if !data.IsObject() || data.Tag() != "theme" {
 		return false
 	}
 
