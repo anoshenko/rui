@@ -102,7 +102,7 @@ type View interface {
 	htmlProperties(self View, buffer *strings.Builder)
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
-	exscludeTags() []PropertyName
+	excludeTags() []PropertyName
 	htmlDisabledProperty() bool
 	binding() any
 
@@ -959,7 +959,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case DropEffectAllowed:
 		effect := GetDropEffectAllowed(view)
 		if effect >= DropEffectCopy && effect >= DropEffectAll {
-			values := []string{"undifined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
+			values := []string{"undefined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
 			session.updateProperty(htmlID, "data-drop-effect-allowed", values[effect])
 		} else {
 			session.removeProperty(htmlID, "data-drop-effect-allowed")
@@ -1321,6 +1321,6 @@ func (view *viewData) String() string {
 	return buffer.String()
 }
 
-func (view *viewData) exscludeTags() []PropertyName {
+func (view *viewData) excludeTags() []PropertyName {
 	return nil
 }

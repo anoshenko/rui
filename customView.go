@@ -292,15 +292,15 @@ func (customView *CustomViewData) ViewIndex(view View) int {
 	return -1
 }
 
-func (customView *CustomViewData) exscludeTags() []PropertyName {
+func (customView *CustomViewData) excludeTags() []PropertyName {
 	if customView.superView != nil {
-		exsclude := []PropertyName{}
+		exclude := []PropertyName{}
 		for tag, value := range customView.defaultParams {
 			if value == customView.superView.getRaw(tag) {
-				exsclude = append(exsclude, tag)
+				exclude = append(exclude, tag)
 			}
 		}
-		return exsclude
+		return exclude
 	}
 	return nil
 }
@@ -310,7 +310,7 @@ func (customView *CustomViewData) String() string {
 	if customView.superView != nil {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
-		writeViewStyle(customView.tag, customView, buffer, "", customView.exscludeTags())
+		writeViewStyle(customView.tag, customView, buffer, "", customView.excludeTags())
 		return buffer.String()
 	}
 	return customView.tag + " { }"

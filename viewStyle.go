@@ -799,14 +799,14 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString("[]")
 
 		case 1:
-			writeViewStyle(value[0].Tag(), value[0], buffer, indent, value[0].exscludeTags())
+			writeViewStyle(value[0].Tag(), value[0], buffer, indent, value[0].excludeTags())
 
 		default:
 			buffer.WriteString("[\n")
 			indent2 := indent + "\t"
 			for _, v := range value {
 				buffer.WriteString(indent2)
-				writeViewStyle(v.Tag(), v, buffer, indent2, v.exscludeTags())
+				writeViewStyle(v.Tag(), v, buffer, indent2, v.excludeTags())
 				buffer.WriteString(",\n")
 			}
 

@@ -93,12 +93,12 @@ func NewColumnSeparator(style int, color Color, width SizeUnit) ColumnSeparatorP
 
 func (separator *columnSeparatorProperty) init() {
 	separator.dataProperty.init()
-	separator.normalize = normalizeVolumnSeparatorTag
+	separator.normalize = normalizeColumnSeparatorTag
 	separator.set = columnSeparatorSet
 	separator.supportedProperties = []PropertyName{Style, Width, ColorTag}
 }
 
-func normalizeVolumnSeparatorTag(tag PropertyName) PropertyName {
+func normalizeColumnSeparatorTag(tag PropertyName) PropertyName {
 	tag = defaultNormalize(tag)
 	switch tag {
 	case ColumnSeparatorStyle, "separator-style":

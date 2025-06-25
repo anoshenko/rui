@@ -43,7 +43,7 @@ type backgroundRadialGradient struct {
 //
 // The following properties can be used:
 //   - "gradient" (Gradient) - Describes gradient stop points. This is a mandatory property while describing background gradients.
-//   - "center-x" (CenterX), "center-y" (CenterY) - Defines the gradient center point cooordinates.
+//   - "center-x" (CenterX), "center-y" (CenterY) - Defines the gradient center point coordinates.
 //   - "radial-gradient-radius" (RadialGradientRadius) - Defines radius of the radial gradient.
 //   - "radial-gradient-shape" (RadialGradientShape) - Defines shape of the radial gradient.
 //   - "repeating" (Repeating) - Defines whether stop points needs to be repeated after the last one.

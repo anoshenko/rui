@@ -200,7 +200,7 @@ func (listLayout *listLayoutData) UpdateContent() {
 	}
 }
 
-// GetListVerticalAlign returns the vertical align of a ListLayout or ListView sibview:
+// GetListVerticalAlign returns the vertical align of a ListLayout or ListView subview:
 // TopAlign (0), BottomAlign (1), CenterAlign (2), or StretchAlign (3)
 //
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.

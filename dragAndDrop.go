@@ -49,7 +49,7 @@ const (
 	// Supported types: int, string.
 	//
 	// Values:
-	//   - 0 (DropEffectUndefined) or "undefined" - The property value is not defined (defaut value).
+	//   - 0 (DropEffectUndefined) or "undefined" - The property value is not defined (default value).
 	//   - 1 (DropEffectCopy) or "copy" - A copy of the source item may be made at the new location.
 	//   - 2 (DropEffectMove) or "move" - An item may be moved to a new location.
 	//   - 4 (DropEffectLink) or "link" - A link may be established to the source at the new location.
@@ -68,7 +68,7 @@ const (
 	// Supported types: int, string.
 	//
 	// Values:
-	//   - 0 (DropEffectUndefined) or "undefined" - The property value is not defined (defaut value). Equivalent to DropEffectAll
+	//   - 0 (DropEffectUndefined) or "undefined" - The property value is not defined (default value). Equivalent to DropEffectAll
 	//   - 1 (DropEffectCopy) or "copy" - A copy of the source item may be made at the new location.
 	//   - 2 (DropEffectMove) or "move" - An item may be moved to a new location.
 	//   - 3 (DropEffectLink) or "link" - A link may be established to the source at the new location.
@@ -210,7 +210,7 @@ const (
 	// DropEffectLinkMove - the value of the "drop-effect-allowed" property: a link or move operation is permitted.
 	DropEffectLinkMove = DropEffectLink + DropEffectMove
 
-	// DropEffectAll - the value of the "drop-effect-allowed" property: all operations (copy, move, and link) are permitted (defaut value).
+	// DropEffectAll - the value of the "drop-effect-allowed" property: all operations (copy, move, and link) are permitted (default value).
 	DropEffectAll = DropEffectCopy + DropEffectMove + DropEffectLink
 )
 
@@ -472,7 +472,7 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 		buffer.WriteString(`" `)
 	}
 
-	effects := []string{"undifined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
+	effects := []string{"undefined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
 	if n := GetDropEffectAllowed(view); n > 0 && n < len(effects) {
 		buffer.WriteString(` data-drop-effect-allowed="`)
 		buffer.WriteString(effects[n])

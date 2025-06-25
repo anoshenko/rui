@@ -534,7 +534,7 @@ func (listView *listViewData) getDivs(checkbox, hCheckboxAlign, vCheckboxAlign i
 	return onDivBuilder.String(), offDivBuilder.String(), contentBuilder.String()
 }
 
-func (listView *listViewData) checkboxItemDiv(checkbox, hCheckboxAlign, vCheckboxAlign int) string {
+func (listView *listViewData) checkboxItemDiv(hCheckboxAlign, vCheckboxAlign int) string {
 	itemStyleBuilder := allocStringBuilder()
 	defer freeStringBuilder(itemStyleBuilder)
 
@@ -621,7 +621,7 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
 	vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView)
 
-	itemDiv := listView.checkboxItemDiv(checkbox, hCheckboxAlign, vCheckboxAlign)
+	itemDiv := listView.checkboxItemDiv(hCheckboxAlign, vCheckboxAlign)
 	onDiv, offDiv, contentDiv := listView.getDivs(checkbox, hCheckboxAlign, vCheckboxAlign)
 
 	current := GetCurrent(listView)
@@ -728,7 +728,7 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(listView.checkboxItemDiv(checkbox, hCheckboxAlign, vCheckboxAlign))
+	buffer.WriteString(listView.checkboxItemDiv(hCheckboxAlign, vCheckboxAlign))
 	if checked {
 		buffer.WriteString(onDiv)
 	} else {

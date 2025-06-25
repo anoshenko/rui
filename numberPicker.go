@@ -166,8 +166,8 @@ func (picker *numberPickerData) setFunc(tag PropertyName, value any) []PropertyN
 }
 
 func (picker *numberPickerData) numberFormat() string {
-	if precission := GetNumberPickerPrecision(picker); precission > 0 {
-		return fmt.Sprintf("%%.%df", precission)
+	if precision := GetNumberPickerPrecision(picker); precision > 0 {
+		return fmt.Sprintf("%%.%df", precision)
 	}
 	return "%g"
 }

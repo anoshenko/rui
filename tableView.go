@@ -1303,7 +1303,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	if columnStyle := GetTableColumnStyle(table); columnStyle != nil {
 		buffer.WriteString("<colgroup>")
-		for column := 0; column < columnCount; column++ {
+		for column := range columnCount {
 			cssBuilder.buffer.Reset()
 			if styles := columnStyle.ColumnStyle(column); styles != nil {
 				view.Clear()
