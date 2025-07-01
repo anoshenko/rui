@@ -118,7 +118,7 @@ func (resizable *resizableData) setFunc(tag PropertyName, value any) []PropertyN
 			newContent = value
 
 		case DataObject:
-			if newContent = CreateViewFromObject(resizable.Session(), value); newContent == nil {
+			if newContent = CreateViewFromObject(resizable.Session(), value, nil); newContent == nil {
 				return nil
 			}
 
@@ -354,7 +354,7 @@ func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder)
 	}
 
 	writePos := func(x1, x2, y1, y2 int) {
-		buffer.WriteString(fmt.Sprintf(` grid-column-start: %d; grid-column-end: %d; grid-row-start: %d;  grid-row-end: %d;"></div>`, x1, x2, y1, y2))
+		fmt.Fprintf(buffer, ` grid-column-start: %d; grid-column-end: %d; grid-row-start: %d;  grid-row-end: %d;"></div>`, x1, x2, y1, y2)
 	}
 	//htmlID := resizable.htmlID()
 

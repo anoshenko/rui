@@ -280,56 +280,128 @@ func handleMouseEvents(view View, tag PropertyName, data DataObject) {
 		event.init(data)
 
 		for _, listener := range listeners {
-			listener(view, event)
+			listener.Run(view, event)
 		}
 	}
 }
 
 // GetClickListeners returns the "click-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetClickListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, ClickEvent)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetClickListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, ClickEvent)
 }
 
 // GetDoubleClickListeners returns the "double-click-event" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetDoubleClickListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, DoubleClickEvent)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetDoubleClickListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, DoubleClickEvent)
 }
 
 // GetContextMenuListeners returns the "context-menu" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetContextMenuListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, ContextMenuEvent)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetContextMenuListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, ContextMenuEvent)
 }
 
 // GetMouseDownListeners returns the "mouse-down" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetMouseDownListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseDown)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetMouseDownListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, MouseDown)
 }
 
 // GetMouseUpListeners returns the "mouse-up" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetMouseUpListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseUp)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetMouseUpListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, MouseUp)
 }
 
 // GetMouseMoveListeners returns the "mouse-move" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetMouseMoveListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseMove)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetMouseMoveListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, MouseMove)
 }
 
 // GetMouseOverListeners returns the "mouse-over" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetMouseOverListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseOver)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetMouseOverListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, MouseOver)
 }
 
 // GetMouseOutListeners returns the "mouse-out" listener list. If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetMouseOutListeners(view View, subviewID ...string) []func(View, MouseEvent) {
-	return getOneArgEventListeners[View, MouseEvent](view, subviewID, MouseOut)
+//
+// Result elements can be of the following types:
+//   - func(View, MouseEvent),
+//   - func(View),
+//   - func(MouseEvent),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetMouseOutListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, MouseEvent](view, subviewID, MouseOut)
 }

@@ -401,7 +401,7 @@ func OpenRawResource(filename string) fs.File {
 	return nil
 }
 
-// AllRawResources returns the list of all raw resouces
+// AllRawResources returns the list of all raw resources
 func AllRawResources() []string {
 	result := []string{}
 
@@ -448,7 +448,7 @@ func AllRawResources() []string {
 	return result
 }
 
-// AllImageResources returns the list of all image resouces
+// AllImageResources returns the list of all image resources
 func AllImageResources() []string {
 	result := make([]string, 0, len(resources.images))
 	for image := range resources.images {

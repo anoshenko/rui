@@ -4,34 +4,44 @@ import (
 	"strconv"
 )
 
+// ImageLoadingStatus defines type of status of the image loading
+type ImageLoadingStatus int
+
 // Constants which represent return values of the LoadingStatus function of an [Image] view
 const (
 	// ImageLoading is the image loading status: in the process of loading
-	ImageLoading = 0
+	ImageLoading ImageLoadingStatus = 0
 	// ImageReady is the image loading status: the image is loaded successfully
-	ImageReady = 1
+	ImageReady ImageLoadingStatus = 1
 	// ImageLoadingError is the image loading status: an error occurred while loading
-	ImageLoadingError = 2
+	ImageLoadingError ImageLoadingStatus = 2
 )
 
 // Image defines the image that is used for drawing operations on the Canvas.
 type Image interface {
 	// URL returns the url of the image
 	URL() string
-	// LoadingStatus returns the status of the image loading: ImageLoading (0), ImageReady (1), ImageLoadingError (2)
-	LoadingStatus() int
+
+	// LoadingStatus returns the status of the image loading:
+	//  - ImageLoading (0) - in the process of loading;
+	//  - ImageReady (1) - the image is loaded successfully;
+	//  - ImageLoadingError (2) - an error occurred while loading.
+	LoadingStatus() ImageLoadingStatus
+
 	// LoadingError: if LoadingStatus() == ImageLoadingError then returns the error text, "" otherwise
 	LoadingError() string
 	setLoadingError(err string)
+
 	// Width returns the width of the image in pixels. While LoadingStatus() != ImageReady returns 0
 	Width() float64
+
 	// Height returns the height of the image in pixels. While LoadingStatus() != ImageReady returns 0
 	Height() float64
 }
 
 type imageData struct {
 	url           string
-	loadingStatus int
+	loadingStatus ImageLoadingStatus
 	loadingError  string
 	width, height float64
 	listener      func(Image)
@@ -45,7 +55,7 @@ func (image *imageData) URL() string {
 	return image.url
 }
 
-func (image *imageData) LoadingStatus() int {
+func (image *imageData) LoadingStatus() ImageLoadingStatus {
 	return image.loadingStatus
 }
 

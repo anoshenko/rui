@@ -266,7 +266,8 @@ func (session *sessionData) setBridge(events chan DataObject, bridge bridge) {
 
 func (session *sessionData) close() {
 	if session.events != nil {
-		session.events <- ParseDataText(`session-close{session="` + strconv.Itoa(session.sessionID) + `"}`)
+		obj, _ := ParseDataText(`session-close{session="` + strconv.Itoa(session.sessionID) + `"}`)
+		session.events <- obj
 	}
 }
 
@@ -734,7 +735,7 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 
 	if node := params.PropertyByTag("storage"); node != nil && node.Type() == ObjectNode {
 		if obj := node.Object(); obj != nil {
-			for i := 0; i < obj.PropertyCount(); i++ {
+			for i := range obj.PropertyCount() {
 				if element := obj.Property(i); element.Type() == TextNode {
 					session.clientStorage[element.Tag()] = element.Text()
 				}

@@ -1008,20 +1008,26 @@ function setInputValue(elementId, text) {
 	}
 }
 
+function filesTextForMessage(files) {
+	let message = "files=[";
+	for(let i = 0; i < files.length; i++) {
+		if (i > 0) {
+			message += ",";
+		}
+		message += "_{name=\"" + files[i].name + 
+			"\",last-modified=" + files[i].lastModified +
+			",size=" + files[i].size +
+			",mime-type=\"" + files[i].type + "\"}";
+	}
+	message += "]";
+	return message
+}
+
 function fileSelectedEvent(element) {
 	const files = element.files;
 	if (files) {
-		let message = "fileSelected{session=" + sessionID + ",id=" + element.id + ",files=[";
-		for(let i = 0; i < files.length; i++) {
-			if (i > 0) {
-				message += ",";
-			}
-			message += "_{name=\"" + files[i].name + 
-				"\",last-modified=" + files[i].lastModified +
-				",size=" + files[i].size +
-				",mime-type=\"" + files[i].type + "\"}";
-		}
-		sendMessage(message + "]}");
+		let message = "fileSelected{session=" + sessionID + ",id=" + element.id + "," + filesTextForMessage(files) + "}";
+		sendMessage(message);
 	}
 }
 
@@ -2123,5 +2129,161 @@ function createPath2D(svg) {
 		return new Path2D(svg);
 	} else {
 		return new Path2D();
+	}
+}
+
+function stringToBase64(str) {
+	const bytes = new TextEncoder().encode(str);
+	const binString = String.fromCodePoint(...bytes);
+	return btoa(binString);
+}
+
+function base64ToString(base64) {
+	const binString = atob(base64);
+  	const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+	const result = new TextDecoder().decode(bytes);
+	return result;
+}
+
+function dragAndDropEvent(element, event, tag) {
+	event.stopPropagation();
+	//event.preventDefault()
+
+	let message = tag + "{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event);
+	if (event.target) {
+		message += ",target=" + event.target.id;
+	}
+	if (event.dataTransfer) {
+		let dataText = ""
+		for (const item of event.dataTransfer.items) {
+			const data = event.dataTransfer.getData(item.type);
+			if (data) {
+				if (dataText != "") {
+					dataText += ";";
+				}
+				dataText += stringToBase64(item.type) + ":" + stringToBase64(data);
+			}
+		}
+		if (dataText != "") {
+			message += ',data="' + dataText + '"';
+		}
+
+		const files = event.dataTransfer.files
+		if (files && files.length > 0) {
+			message += "," + filesTextForMessage(files)
+			element["dragFiles"] = files;
+		} else {
+			element["dragFiles"] = null;
+		}
+
+		if (event.dataTransfer.effectAllowed && event.dataTransfer.effectAllowed != "uninitialized") {
+			message += ',effect-allowed="' + event.dataTransfer.effectAllowed + '"';
+		}
+		
+		if (event.dataTransfer.dropEffect) {
+			message += ',drop-effect="' + event.dataTransfer.dropEffect + '"';
+		}
+	}
+
+	message += "}";
+	sendMessage(message);
+}
+
+function dragStartEvent(element, event) {
+	const data = element.getAttribute("data-drag");
+	if (data) {
+		const elements = data.split(";");
+		for (const line of elements) {
+			const pair = line.split(":");
+			if (pair.length == 2) {
+				event.dataTransfer.setData(base64ToString(pair[0]), base64ToString(pair[1]));
+			}
+		}
+	}
+
+	const image = element.getAttribute("data-drag-image");
+	if (image) {
+		let x = element.getAttribute("data-drag-image-x");
+		if (!x) {
+			x = 0;
+		}
+
+		let y = element.getAttribute("data-drag-image-y");
+		if (!y) {
+			y = 0;
+		}
+
+		let img = new Image();
+  		img.src = image;
+		event.dataTransfer.setDragImage(img, x, y);
+	}
+
+	let allowed = element.getAttribute("data-drop-effect-allowed");
+	if (allowed) {
+		event.dataTransfer.effectAllowed = allowed;
+	}
+
+	dragAndDropEvent(element, event, "drag-start-event");
+}
+
+function dragEndEvent(element, event) {
+	dragAndDropEvent(element, event, "drag-end-event")
+}
+
+function dragEnterEvent(element, event) {
+	let effect = element.getAttribute("data-drop-effect");
+	if (effect) {
+		event.dataTransfer.dropEffect = effect;
+	}
+
+	dragAndDropEvent(element, event, "drag-enter-event")
+}
+
+function dragLeaveEvent(element, event) {
+	dragAndDropEvent(element, event, "drag-leave-event")
+}
+
+function dragOverEvent(element, event) {
+	event.preventDefault();
+	if (element.getAttribute("data-drag-over") == "1") {
+		dragAndDropEvent(element, event, "drag-over-event")
+	} else {
+		event.stopPropagation();
+	}
+}
+
+function dropEvent(element, event) {
+	event.preventDefault();
+	dragAndDropEvent(element, event, "drop-event")
+}
+
+function loadDropFile(elementId, name, size) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		const files = element["dragFiles"];
+		if (files) {
+			for(let i = 0; i < files.length; i++) {
+				const file = files[i]
+				if (file.name == name && file.size == size) {
+					const reader = new FileReader();
+					reader.onload = function() { 
+						sendMessage("fileLoaded{session=" + sessionID + ",id=" + element.id + 
+							",name=`" + name + 
+							"`,size=" + size +
+							",last-modified=" + file.lastModified +
+							",mime-type=\"" + file.type + 
+							"\",data=`" + reader.result + "`}");
+					}
+					reader.onerror = function(error) {
+						sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",name=\"" + name + "\",size=" + size + ",error=`" + error + "`}");
+					}
+					reader.readAsDataURL(file);
+					return
+				}
+			}
+		}
+		sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",name=`" + name + "`,size=" + size + ",error=`File not found`}");
+	} else {
+		sendMessage("fileLoadingError{session=" + sessionID + ",id=" + element.id + ",name=`" + name + "`,size=" + size + ",error=`Invalid View id`}");
 	}
 }

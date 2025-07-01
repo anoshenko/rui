@@ -592,14 +592,6 @@ func (table *tableViewData) init(session Session) {
 	table.tag = "TableView"
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
-	/*
-		table.cellSelectedListener = []func(TableView, int, int){}
-		table.cellClickedListener = []func(TableView, int, int){}
-		table.rowSelectedListener = []func(TableView, int){}
-		table.rowClickedListener = []func(TableView, int){}
-		table.current.Row = -1
-		table.current.Column = -1
-	*/
 	table.normalize = normalizeTableViewTag
 	table.set = table.setFunc
 	table.changed = table.propertyChanged
@@ -739,7 +731,7 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 
 		case DataObject:
 			params := Params{}
-			for k := 0; k < value.PropertyCount(); k++ {
+			for k := range value.PropertyCount() {
 				if prop := value.Property(k); prop != nil && prop.Type() == TextNode {
 					params[PropertyName(prop.Tag())] = prop.Text()
 				}
@@ -797,7 +789,7 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 			if strings.Contains(value, ",") {
 				if values := strings.Split(value, ","); len(values) == 2 {
 					var n = []int{0, 0}
-					for i := 0; i < 2; i++ {
+					for i := range 2 {
 						var err error
 						if n[i], err = strconv.Atoi(values[i]); err != nil {
 							ErrorLog(err.Error())
@@ -853,8 +845,17 @@ func (table *tableViewData) propertyChanged(tag PropertyName) {
 			current := tableViewCurrent(table)
 			session.callFunc("setTableCellCursorByID", htmlID, current.Row, current.Column)
 
+			for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {
+				listener.Run(table, current.Row, current.Column)
+			}
+
 		case RowSelection:
-			session.callFunc("setTableRowCursorByID", htmlID, tableViewCurrent(table).Row)
+			current := tableViewCurrent(table)
+			session.callFunc("setTableRowCursorByID", htmlID, current.Row)
+
+			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
+				listener.Run(table, current.Row)
+			}
 		}
 
 	case Gap:
@@ -954,63 +955,6 @@ func tableViewCurrentInactiveStyle(view View) string {
 	}
 	return "ruiCurrentTableCell"
 }
-
-/*
-func (table *tableViewData) valueToCellListeners(value any) []func(TableView, int, int) {
-	if value == nil {
-		return []func(TableView, int, int){}
-	}
-
-	switch value := value.(type) {
-	case func(TableView, int, int):
-		return []func(TableView, int, int){value}
-
-	case func(int, int):
-		fn := func(_ TableView, row, column int) {
-			value(row, column)
-		}
-		return []func(TableView, int, int){fn}
-
-	case []func(TableView, int, int):
-		return value
-
-	case []func(int, int):
-		listeners := make([]func(TableView, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			listeners[i] = func(_ TableView, row, column int) {
-				val(row, column)
-			}
-		}
-		return listeners
-
-	case []any:
-		listeners := make([]func(TableView, int, int), len(value))
-		for i, val := range value {
-			if val == nil {
-				return nil
-			}
-			switch val := val.(type) {
-			case func(TableView, int, int):
-				listeners[i] = val
-
-			case func(int, int):
-				listeners[i] = func(_ TableView, row, column int) {
-					val(row, column)
-				}
-
-			default:
-				return nil
-			}
-		}
-		return listeners
-	}
-
-	return nil
-}
-*/
 
 func (table *tableViewData) htmlTag() string {
 	return "table"
@@ -1326,10 +1270,10 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 							buffer.WriteString(string(value))
 
 						case float32:
-							buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+							fmt.Fprintf(buffer, "%g", float64(value))
 
 						case float64:
-							buffer.WriteString(fmt.Sprintf("%g", value))
+							fmt.Fprintf(buffer, "%g", value)
 
 						case bool:
 							if value {
@@ -1340,7 +1284,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 						default:
 							if n, ok := isInt(value); ok {
-								buffer.WriteString(fmt.Sprintf("%d", n))
+								fmt.Fprintf(buffer, "%d", n)
 							} else {
 								buffer.WriteString("<Unsupported value>")
 							}
@@ -1359,7 +1303,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	if columnStyle := GetTableColumnStyle(table); columnStyle != nil {
 		buffer.WriteString("<colgroup>")
-		for column := 0; column < columnCount; column++ {
+		for column := range columnCount {
 			cssBuilder.buffer.Reset()
 			if styles := columnStyle.ColumnStyle(column); styles != nil {
 				view.Clear()
@@ -1593,10 +1537,10 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 		buffer.WriteString(string(value))
 
 	case float32:
-		buffer.WriteString(fmt.Sprintf("%g", float64(value)))
+		fmt.Fprintf(buffer, "%g", float64(value))
 
 	case float64:
-		buffer.WriteString(fmt.Sprintf("%g", value))
+		fmt.Fprintf(buffer, "%g", value)
 
 	case bool:
 		accentColor := Color(0)
@@ -1611,7 +1555,7 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 
 	default:
 		if n, ok := isInt(value); ok {
-			buffer.WriteString(fmt.Sprintf("%d", n))
+			fmt.Fprintf(buffer, "%d", n)
 		} else {
 			buffer.WriteString("<Unsupported value>")
 		}
@@ -1732,11 +1676,11 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 			current.Row = row
 			table.setRaw(Current, current.Row)
 			if listener, ok := table.changeListener[Current]; ok {
-				listener(table, Current)
+				listener.Run(table, Current)
 			}
 
-			for _, listener := range GetTableRowSelectedListeners(table) {
-				listener(table, row)
+			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
+				listener.Run(table, row)
 			}
 		}
 
@@ -1749,11 +1693,11 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 					current.Column = column
 					table.setRaw(Current, current.Row)
 					if listener, ok := table.changeListener[Current]; ok {
-						listener(table, Current)
+						listener.Run(table, Current)
 					}
 
-					for _, listener := range GetTableCellSelectedListeners(table) {
-						listener(table, row, column)
+					for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {
+						listener.Run(table, row, column)
 					}
 				}
 			}
@@ -1761,16 +1705,16 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 
 	case "rowClick":
 		if row, ok := dataIntProperty(data, "row"); ok {
-			for _, listener := range GetTableRowClickedListeners(table) {
-				listener(table, row)
+			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowClickedEvent) {
+				listener.Run(table, row)
 			}
 		}
 
 	case "cellClick":
 		if row, ok := dataIntProperty(data, "row"); ok {
 			if column, ok := dataIntProperty(data, "column"); ok {
-				for _, listener := range GetTableCellClickedListeners(table) {
-					listener(table, row, column)
+				for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellClickedEvent) {
+					listener.Run(table, row, column)
 				}
 			}
 		}

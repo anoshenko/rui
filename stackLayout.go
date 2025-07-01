@@ -334,7 +334,9 @@ func (layout *stackLayoutData) init(session Session) {
 	layout.remove = layout.removeFunc
 	layout.changed = layout.propertyChanged
 
-	layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.transitionFinished})
+	layout.setRaw(TransitionEndEvent, []oneArgListener[View, PropertyName]{
+		newOneArgListenerVE(layout.transitionFinished),
+	})
 	if session.TextDirection() == RightToLeftDirection {
 		layout.setRaw(PushTransform, NewTransformProperty(Params{TranslateX: Percent(-100)}))
 	} else {
@@ -434,7 +436,7 @@ func (layout *stackLayoutData) setFunc(tag PropertyName, value any) []PropertyNa
 		// TODO
 		listeners, ok := valueToOneArgEventListeners[View, PropertyName](value)
 		if ok && listeners != nil {
-			listeners = append(listeners, layout.transitionFinished)
+			listeners = append(listeners, newOneArgListenerVE(layout.transitionFinished))
 			layout.setRaw(TransitionEndEvent, listeners)
 			return []PropertyName{tag}
 		}
@@ -464,7 +466,9 @@ func (layout *stackLayoutData) propertyChanged(tag PropertyName) {
 func (layout *stackLayoutData) removeFunc(tag PropertyName) []PropertyName {
 	switch tag {
 	case TransitionEndEvent:
-		layout.setRaw(TransitionEndEvent, []func(View, PropertyName){layout.transitionFinished})
+		layout.setRaw(TransitionEndEvent, []oneArgListener[View, PropertyName]{
+			newOneArgListenerVE(layout.transitionFinished),
+		})
 		return []PropertyName{tag}
 	}
 	return layout.viewsContainerData.removeFunc(tag)
@@ -606,12 +610,6 @@ func (layout *stackLayoutData) moveToFrontByIndex(index int, onShow []func(View)
 	session.updateCSSProperty(peekPageID, "transform", transformCSS)
 }
 
-func (layout *stackLayoutData) contentChanged() {
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
-	}
-}
-
 func (layout *stackLayoutData) RemovePeek() View {
 	return layout.RemoveView(len(layout.views) - 1)
 }
@@ -679,9 +677,7 @@ func (layout *stackLayoutData) Append(view View) {
 		}
 		session.appendToInnerHTML(stackID, buffer.String())
 
-		if listener, ok := layout.changeListener[Content]; ok {
-			listener(layout, Content)
-		}
+		layout.contentChanged()
 	}
 }
 
@@ -717,9 +713,7 @@ func (layout *stackLayoutData) Insert(view View, index int) {
 	session := layout.Session()
 	session.appendToInnerHTML(stackID, buffer.String())
 
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
-	}
+	layout.contentChanged()
 }
 
 // Remove removes view from list and return it
@@ -750,10 +744,7 @@ func (layout *stackLayoutData) RemoveView(index int) View {
 	}
 
 	layout.Session().callFunc("removeView", view.htmlID()+"page")
-
-	if listener, ok := layout.changeListener[Content]; ok {
-		listener(layout, Content)
-	}
+	layout.contentChanged()
 	return view
 }
 
@@ -914,7 +905,9 @@ func (layout *stackLayoutData) htmlSubviews(self View, buffer *strings.Builder) 
 }
 
 // IsMoveToFrontAnimation returns "true" if an animation is used when calling the MoveToFront/MoveToFrontByID method of StackLayout interface.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsMoveToFrontAnimation(view View, subviewID ...string) bool {
 	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := boolProperty(view, MoveToFrontAnimation, view.Session()); ok {
@@ -950,7 +943,9 @@ func GetPushTiming(view View, subviewID ...string) string {
 // GetPushTransform returns the start transform (translation, scale and rotation over x, y and z axes as well as a distortion)
 // for an animated pushing of a child view.
 // The default value is nil (no transform).
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetPushTransform(view View, subviewID ...string) TransformProperty {
 	return transformStyledProperty(view, subviewID, PushTransform)
 }

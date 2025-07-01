@@ -211,7 +211,7 @@ func (tabsLayout *tabsLayoutData) propertyChanged(tag PropertyName) {
 		if listeners := getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent); len(listeners) > 0 {
 			oldCurrent, _ := intProperty(tabsLayout, "old-current", session, -1)
 			for _, listener := range listeners {
-				listener(tabsLayout, current, oldCurrent)
+				listener.Run(tabsLayout, current, oldCurrent)
 			}
 		}
 
@@ -237,155 +237,6 @@ func (tabsLayout *tabsLayoutData) propertyChanged(tag PropertyName) {
 		tabsLayout.viewsContainerData.propertyChanged(tag)
 	}
 }
-
-/*
-	func (tabsLayout *tabsLayoutData) valueToTabListeners(value any) []func(TabsLayout, int, int) {
-		if value == nil {
-			return []func(TabsLayout, int, int){}
-		}
-
-		switch value := value.(type) {
-		case func(TabsLayout, int, int):
-			return []func(TabsLayout, int, int){value}
-
-		case func(TabsLayout, int):
-			fn := func(view TabsLayout, current, _ int) {
-				value(view, current)
-			}
-			return []func(TabsLayout, int, int){fn}
-
-		case func(TabsLayout):
-			fn := func(view TabsLayout, _, _ int) {
-				value(view)
-			}
-			return []func(TabsLayout, int, int){fn}
-
-		case func(int, int):
-			fn := func(_ TabsLayout, current, old int) {
-				value(current, old)
-			}
-			return []func(TabsLayout, int, int){fn}
-
-		case func(int):
-			fn := func(_ TabsLayout, current, _ int) {
-				value(current)
-			}
-			return []func(TabsLayout, int, int){fn}
-
-		case func():
-			fn := func(TabsLayout, int, int) {
-				value()
-			}
-			return []func(TabsLayout, int, int){fn}
-
-		case []func(TabsLayout, int, int):
-			return value
-
-		case []func(TabsLayout, int):
-			listeners := make([]func(TabsLayout, int, int), len(value))
-			for i, val := range value {
-				if val == nil {
-					return nil
-				}
-				listeners[i] = func(view TabsLayout, current, _ int) {
-					val(view, current)
-				}
-			}
-			return listeners
-
-		case []func(TabsLayout):
-			listeners := make([]func(TabsLayout, int, int), len(value))
-			for i, val := range value {
-				if val == nil {
-					return nil
-				}
-				listeners[i] = func(view TabsLayout, _, _ int) {
-					val(view)
-				}
-			}
-			return listeners
-
-		case []func(int, int):
-			listeners := make([]func(TabsLayout, int, int), len(value))
-			for i, val := range value {
-				if val == nil {
-					return nil
-				}
-				listeners[i] = func(_ TabsLayout, current, old int) {
-					val(current, old)
-				}
-			}
-			return listeners
-
-		case []func(int):
-			listeners := make([]func(TabsLayout, int, int), len(value))
-			for i, val := range value {
-				if val == nil {
-					return nil
-				}
-				listeners[i] = func(_ TabsLayout, current, _ int) {
-					val(current)
-				}
-			}
-			return listeners
-
-		case []func():
-			listeners := make([]func(TabsLayout, int, int), len(value))
-			for i, val := range value {
-				if val == nil {
-					return nil
-				}
-				listeners[i] = func(TabsLayout, int, int) {
-					val()
-				}
-			}
-			return listeners
-
-		case []any:
-			listeners := make([]func(TabsLayout, int, int), len(value))
-			for i, val := range value {
-				if val == nil {
-					return nil
-				}
-				switch val := val.(type) {
-				case func(TabsLayout, int, int):
-					listeners[i] = val
-
-				case func(TabsLayout, int):
-					listeners[i] = func(view TabsLayout, current, _ int) {
-						val(view, current)
-					}
-
-				case func(TabsLayout):
-					listeners[i] = func(view TabsLayout, _, _ int) {
-						val(view)
-					}
-
-				case func(int, int):
-					listeners[i] = func(_ TabsLayout, current, old int) {
-						val(current, old)
-					}
-
-				case func(int):
-					listeners[i] = func(_ TabsLayout, current, _ int) {
-						val(current)
-					}
-
-				case func():
-					listeners[i] = func(TabsLayout, int, int) {
-						val()
-					}
-
-				default:
-					return nil
-				}
-			}
-			return listeners
-		}
-
-		return nil
-	}
-*/
 
 func (tabsLayout *tabsLayoutData) tabsLocation() int {
 	tabs, _ := enumProperty(tabsLayout, Tabs, tabsLayout.session, 0)
@@ -504,7 +355,7 @@ func (tabsLayout *tabsLayoutData) ListItem(index int, session Session) View {
 			Content: "✕",
 			ClickEvent: func() {
 				for _, listener := range getOneArgEventListeners[TabsLayout, int](tabsLayout, nil, TabCloseEvent) {
-					listener(tabsLayout, index)
+					listener.Run(tabsLayout, index)
 				}
 			},
 		}))
@@ -552,9 +403,7 @@ func (tabsLayout *tabsLayoutData) Append(view View) {
 		view.SetChangeListener(TabCloseButton, tabsLayout.updateTabCloseButton)
 		if tabsLayout.created {
 			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
-			if listener, ok := tabsLayout.changeListener[Content]; ok {
-				listener(tabsLayout, Content)
-			}
+			tabsLayout.contentChanged()
 			tabsLayout.Set(Current, len(tabsLayout.views)-1)
 		}
 	}
@@ -576,11 +425,9 @@ func (tabsLayout *tabsLayoutData) Insert(view View, index int) {
 
 func (tabsLayout *tabsLayoutData) currentChanged(newCurrent, oldCurrent int) {
 	for _, listener := range getTwoArgEventListeners[TabsLayout, int](tabsLayout, nil, CurrentTabChangedEvent) {
-		listener(tabsLayout, newCurrent, oldCurrent)
+		listener.Run(tabsLayout, newCurrent, oldCurrent)
 	}
-	if listener, ok := tabsLayout.changeListener[Current]; ok {
-		listener(tabsLayout, Current)
-	}
+	tabsLayout.contentChanged()
 }
 
 // Remove removes view from list and return it
@@ -606,9 +453,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 				tabsLayout.Set(Current, newCurrent)
 			}
 			updateInnerHTML(tabsLayout.htmlID(), tabsLayout.Session())
-			if listener, ok := tabsLayout.changeListener[Content]; ok {
-				listener(tabsLayout, Content)
-			}
+			tabsLayout.contentChanged()
 		} else if newCurrent != oldCurrent {
 			tabsLayout.setRaw(Current, newCurrent)
 		}
@@ -892,11 +737,43 @@ func (tabsLayout *tabsLayoutData) handleCommand(self View, command PropertyName,
 		if numberText, ok := data.PropertyValue("number"); ok {
 			if number, err := strconv.Atoi(numberText); err == nil {
 				for _, listener := range getOneArgEventListeners[TabsLayout, int](tabsLayout, nil, TabCloseEvent) {
-					listener(tabsLayout, number)
+					listener.Run(tabsLayout, number)
 				}
 			}
 		}
 		return true
 	}
 	return tabsLayout.viewsContainerData.handleCommand(self, command, data)
+}
+
+// GetTabCloseEventListeners returns the "tab-close-event" listener list. If there are no listeners then the empty list is returned.
+//
+// Result elements can be of the following types:
+//   - func(rui.TabsLayout, int),
+//   - func(rui.TabsLayout),
+//   - func(int),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTabCloseEventListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[TabsLayout, int](view, subviewID, TabCloseEvent)
+}
+
+// GetCurrentTabChangedEventListeners returns the "current-tab-changed" listener list. If there are no listeners then the empty list is returned.
+//
+// Result elements can be of the following types:
+//   - func(rui.TabsLayout, int, int),
+//   - func(rui.TabsLayout, int),
+//   - func(rui.TabsLayout),
+//   - func(int, int),
+//   - func(int),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetCurrentTabChangedEventListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[TabsLayout, int](view, subviewID, CurrentTabChangedEvent)
 }

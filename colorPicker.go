@@ -106,13 +106,13 @@ func (picker *colorPickerData) propertyChanged(tag PropertyName) {
 		color := GetColorPickerValue(picker)
 		picker.Session().callFunc("setInputValue", picker.htmlID(), color.rgbString())
 
-		if listeners := GetColorChangedListeners(picker); len(listeners) > 0 {
+		if listeners := getTwoArgEventListeners[ColorPicker, Color](picker, nil, ColorChangedEvent); len(listeners) > 0 {
 			oldColor := Color(0)
 			if value := picker.getRaw("old-color"); value != nil {
 				oldColor = value.(Color)
 			}
 			for _, listener := range listeners {
-				listener(picker, color, oldColor)
+				listener.Run(picker, color, oldColor)
 			}
 		}
 
@@ -156,11 +156,11 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 				oldColor := GetColorPickerValue(picker)
 				picker.properties[ColorPickerValue] = color
 				if color != oldColor {
-					for _, listener := range GetColorChangedListeners(picker) {
-						listener(picker, color, oldColor)
+					for _, listener := range getTwoArgEventListeners[ColorPicker, Color](picker, nil, ColorChangedEvent) {
+						listener.Run(picker, color, oldColor)
 					}
 					if listener, ok := picker.changeListener[ColorPickerValue]; ok {
-						listener(picker, ColorPickerValue)
+						listener.Run(picker, ColorPickerValue)
 					}
 				}
 			}
@@ -172,7 +172,9 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 }
 
 // GetColorPickerValue returns the value of ColorPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetColorPickerValue(view View, subviewID ...string) Color {
 	if view = getSubview(view, subviewID); view != nil {
 		if value, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
@@ -191,7 +193,18 @@ func GetColorPickerValue(view View, subviewID ...string) Color {
 
 // GetColorChangedListeners returns the ColorChangedListener list of an ColorPicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetColorChangedListeners(view View, subviewID ...string) []func(ColorPicker, Color, Color) {
-	return getTwoArgEventListeners[ColorPicker, Color](view, subviewID, ColorChangedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.ColorPicker, rui.Color, rui.Color),
+//   - func(rui.ColorPicker, rui.Color),
+//   - func(rui.ColorPicker),
+//   - func(rui.Color, rui.Color),
+//   - func(rui.Color),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetColorChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[ColorPicker, Color](view, subviewID, ColorChangedEvent)
 }

@@ -1,7 +1,9 @@
 package rui
 
 import (
+	"encoding/base64"
 	"fmt"
+	"maps"
 	"strconv"
 	"strings"
 )
@@ -27,6 +29,8 @@ func (frame Frame) Right() float64 {
 func (frame Frame) Bottom() float64 {
 	return frame.Top + frame.Height
 }
+
+const changeListeners PropertyName = "change-listeners"
 
 // View represents a base view interface
 type View interface {
@@ -64,11 +68,27 @@ type View interface {
 	// a description of the error is written to the log
 	SetAnimated(tag PropertyName, value any, animation AnimationProperty) bool
 
-	// SetChangeListener set the function to track the change of the View property
-	SetChangeListener(tag PropertyName, listener func(View, PropertyName))
+	// SetChangeListener set the function (the second argument) to track the change of the View property (the first argument).
+	//
+	// Allowed listener function formats:
+	//
+	//  func(view rui.View, property rui.PropertyName)
+	//  func(view rui.View)
+	//  func(property rui.PropertyName)
+	//  func()
+	//  string
+	//
+	// If the second argument is given as a string, it specifies the name of the binding function.
+	SetChangeListener(tag PropertyName, listener any) bool
 
 	// HasFocus returns 'true' if the view has focus
 	HasFocus() bool
+
+	// LoadFile loads the content of the dropped file by drag-and-drop mechanism for all views except FilePicker.
+	// The selected file is loaded for FilePicker view.
+	//
+	// This function is asynchronous. The "result" function will be called after loading the data.
+	LoadFile(file FileInfo, result func(FileInfo, []byte))
 
 	init(session Session)
 	handleCommand(self View, command PropertyName, data DataObject) bool
@@ -82,8 +102,9 @@ type View interface {
 	htmlProperties(self View, buffer *strings.Builder)
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
-	exscludeTags() []PropertyName
+	excludeTags() []PropertyName
 	htmlDisabledProperty() bool
+	binding() any
 
 	onResize(self View, x, y, width, height float64)
 	onItemResize(self View, index string, x, y, width, height float64)
@@ -101,7 +122,7 @@ type viewData struct {
 	_htmlID          string
 	parentID         string
 	systemClass      string
-	changeListener   map[PropertyName]func(View, PropertyName)
+	changeListener   map[PropertyName]oneArgListener[View, PropertyName]
 	singleTransition map[PropertyName]AnimationProperty
 	addCSS           map[string]string
 	frame            Frame
@@ -114,6 +135,7 @@ type viewData struct {
 	set              func(tag PropertyName, value any) []PropertyName
 	remove           func(tag PropertyName) []PropertyName
 	changed          func(tag PropertyName)
+	fileLoader       map[string]func(FileInfo, []byte)
 }
 
 func newView(session Session) View {
@@ -152,13 +174,14 @@ func (view *viewData) init(session Session) {
 	view.changed = view.propertyChanged
 	view.tag = "View"
 	view.session = session
-	view.changeListener = map[PropertyName]func(View, PropertyName){}
+	view.changeListener = map[PropertyName]oneArgListener[View, PropertyName]{}
 	view.addCSS = map[string]string{}
 	//view.animation = map[string]AnimationEndListener{}
 	view.singleTransition = map[PropertyName]AnimationProperty{}
 	view.noResizeEvent = false
 	view.created = false
 	view.hasHtmlDisabled = false
+	view.fileLoader = map[string]func(FileInfo, []byte){}
 }
 
 func (view *viewData) Session() Session {
@@ -183,6 +206,18 @@ func (view *viewData) Tag() string {
 
 func (view *viewData) ID() string {
 	return view.viewID
+}
+
+func (view *viewData) binding() any {
+	if result := view.getRaw(Binding); result != nil {
+		return result
+	}
+
+	if parent := view.Parent(); parent != nil {
+		return parent.binding()
+	}
+
+	return nil
 }
 
 func (view *viewData) ViewByID(id string) View {
@@ -219,11 +254,8 @@ func (view *viewData) Remove(tag PropertyName) {
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
 			view.changed(tag)
-		}
-
-		for _, tag := range changedTags {
 			if listener, ok := view.changeListener[tag]; ok {
-				listener(view, tag)
+				listener.Run(view, tag)
 			}
 		}
 	}
@@ -250,11 +282,8 @@ func (view *viewData) Set(tag PropertyName, value any) bool {
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
 			view.changed(tag)
-		}
-
-		for _, tag := range changedTags {
 			if listener, ok := view.changeListener[tag]; ok {
-				listener(view, tag)
+				listener.Run(view, tag)
 			}
 		}
 	}
@@ -272,7 +301,8 @@ func normalizeViewTag(tag PropertyName) PropertyName {
 }
 
 func (view *viewData) getFunc(tag PropertyName) any {
-	if tag == ID {
+	switch tag {
+	case ID:
 		if id := view.ID(); id != "" {
 			return id
 		} else {
@@ -290,6 +320,14 @@ func (view *viewData) removeFunc(tag PropertyName) []PropertyName {
 		if view.viewID != "" {
 			view.viewID = ""
 			changedTags = []PropertyName{ID}
+		} else {
+			changedTags = []PropertyName{}
+		}
+
+	case Binding:
+		if view.getRaw(Binding) != nil {
+			view.setRaw(Binding, nil)
+			changedTags = []PropertyName{Binding}
 		} else {
 			changedTags = []PropertyName{}
 		}
@@ -325,6 +363,33 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 		}
 		notCompatibleType(ID, value)
 		return nil
+
+	case Binding:
+		view.setRaw(Binding, value)
+		return []PropertyName{Binding}
+
+	case changeListeners:
+		switch value := value.(type) {
+		case DataObject:
+			for i := range value.PropertyCount() {
+				node := value.Property(i)
+				if node.Type() == TextNode {
+					if text := node.Text(); text != "" {
+						view.changeListener[PropertyName(node.Tag())] = newOneArgListenerBinding[View, PropertyName](text)
+					}
+				}
+			}
+			if len(view.changeListener) > 0 {
+				view.setRaw(changeListeners, view.changeListener)
+			}
+			return []PropertyName{tag}
+
+		case DataNode:
+			if value.Type() == ObjectNode {
+				return view.setFunc(tag, value.Object())
+			}
+		}
+		return []PropertyName{}
 
 	case Animation:
 		oldAnimations := []AnimationProperty{}
@@ -376,20 +441,15 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
 		result := setOneArgEventListener[View, PropertyName](view, tag, value)
 		if result == nil {
-			result = setOneArgEventListener[View, string](view, tag, value)
-			if result != nil {
-				if listeners, ok := view.getRaw(tag).([]func(View, string)); ok {
-					newListeners := make([]func(View, PropertyName), len(listeners))
-					for i, listener := range listeners {
-						newListeners[i] = func(view View, name PropertyName) {
-							listener(view, string(name))
-						}
-					}
-					view.setRaw(tag, newListeners)
-					return result
+			if listeners, ok := valueToOneArgEventListeners[View, string](view); ok && len(listeners) > 0 {
+				newListeners := make([]oneArgListener[View, PropertyName], len(listeners))
+				for i, listener := range listeners {
+					newListeners[i] = newOneArgListenerVE(func(view View, name PropertyName) {
+						listener.Run(view, string(name))
+					})
 				}
-				view.setRaw(tag, nil)
-				return nil
+				view.setRaw(tag, newListeners)
+				result = []PropertyName{tag}
 			}
 		}
 		return result
@@ -399,6 +459,90 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 
 	case ResizeEvent, ScrollEvent:
 		return setOneArgEventListener[View, Frame](view, tag, value)
+
+	case DragData:
+		switch value := value.(type) {
+		case map[string]string:
+			if len(value) == 0 {
+				view.setRaw(DragData, nil)
+			} else {
+				view.setRaw(DragData, maps.Clone(value))
+			}
+
+		case string:
+			if value == "" {
+				view.setRaw(DragData, nil)
+			} else {
+				data := map[string]string{}
+				for _, line := range strings.Split(value, ";") {
+					index := strings.IndexRune(line, ':')
+					if index < 0 {
+						invalidPropertyValue(DragData, value)
+						return nil
+					}
+					mime := line[:index]
+					val := line[index+1:]
+					if len(mime) > 0 || len(val) > 0 {
+						data[mime] = val
+					}
+				}
+
+				if len(data) == 0 {
+					view.setRaw(DragData, nil)
+				} else {
+					view.setRaw(DragData, data)
+				}
+			}
+
+		case DataObject:
+			data := map[string]string{}
+			count := value.PropertyCount()
+			for i := range count {
+				node := value.Property(i)
+				if node.Type() == TextNode {
+					data[node.Tag()] = node.Text()
+				} else {
+					invalidPropertyValue(DragData, value)
+					return nil
+				}
+			}
+			if len(data) == 0 {
+				view.setRaw(DragData, nil)
+			} else {
+				view.setRaw(DragData, data)
+			}
+
+		case DataNode:
+			switch value.Type() {
+			case TextNode:
+				return view.setFunc(DragData, value.Text())
+
+			case ObjectNode:
+				return view.setFunc(DragData, value.Object())
+			}
+			invalidPropertyValue(DragData, value)
+			return nil
+
+		case DataValue:
+			if value.IsObject() {
+				return view.setFunc(DragData, value.Object())
+			}
+			return view.setFunc(DragData, value.Value())
+
+		default:
+			notCompatibleType(DragData, value)
+		}
+
+		return []PropertyName{DragData}
+
+	case DragStartEvent, DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
+		return setOneArgEventListener[View, DragAndDropEvent](view, tag, value)
+
+	case DropEffect:
+		return view.setDropEffect(value)
+
+	case DropEffectAllowed:
+		return view.setDropEffectAllowed(value)
 	}
 
 	return viewStyleSet(view, tag, value)
@@ -429,16 +573,16 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 
 	switch tag {
 	case TabIndex:
-		if value, ok := intProperty(view, TabIndex, view.Session(), 0); ok {
-			session.updateProperty(view.htmlID(), "tabindex", strconv.Itoa(value))
+		if value, ok := intProperty(view, TabIndex, session, 0); ok {
+			session.updateProperty(htmlID, "tabindex", strconv.Itoa(value))
 		} else if view.Focusable() {
-			session.updateProperty(view.htmlID(), "tabindex", "0")
+			session.updateProperty(htmlID, "tabindex", "0")
 		} else {
-			session.updateProperty(view.htmlID(), "tabindex", "-1")
+			session.updateProperty(htmlID, "tabindex", "-1")
 		}
 
 	case Style, StyleDisabled:
-		session.updateProperty(view.htmlID(), "class", view.htmlClass(IsDisabled(view)))
+		session.updateProperty(htmlID, "class", view.htmlClass(IsDisabled(view)))
 
 	case Disabled:
 		tabIndex := GetTabIndex(view, htmlID)
@@ -695,7 +839,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 
 	case PerspectiveOriginX, PerspectiveOriginY:
 		x, y := GetPerspectiveOrigin(view)
-		session.updateCSSProperty(htmlID, "perspective-origin", transformOriginCSS(x, y, AutoSize(), view.Session()))
+		session.updateCSSProperty(htmlID, "perspective-origin", transformOriginCSS(x, y, AutoSize(), session))
 
 	case BackfaceVisible:
 		if GetBackfaceVisible(view) {
@@ -706,7 +850,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 
 	case TransformOriginX, TransformOriginY, TransformOriginZ:
 		x, y, z := getTransformOrigin(view, session)
-		session.updateCSSProperty(htmlID, "transform-origin", transformOriginCSS(x, y, z, view.Session()))
+		session.updateCSSProperty(htmlID, "transform-origin", transformOriginCSS(x, y, z, session))
 
 	case Transform:
 		css := ""
@@ -724,12 +868,105 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 		PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel,
 		TouchStart, TouchEnd, TouchMove, TouchCancel,
 		TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
-		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent,
+		DragEndEvent, DragEnterEvent, DragLeaveEvent:
 
 		updateEventListenerHtml(view, tag)
 
+	case DragStartEvent:
+		if view.getRaw(DragStartEvent) != nil || view.getRaw(DragData) != nil {
+			session.updateProperty(htmlID, "ondragstart", "dragStartEvent(this, event)")
+		} else {
+			session.removeProperty(htmlID, "ondragstart")
+		}
+
+	case DropEvent:
+		if view.getRaw(DropEvent) != nil {
+			session.updateProperty(htmlID, "ondrop", "dropEvent(this, event)")
+			session.updateProperty(htmlID, "ondragover", "dragOverEvent(this, event)")
+			if view.getRaw(DragOverEvent) != nil {
+				session.updateProperty(htmlID, "data-drag-over", "1")
+			} else {
+				session.removeProperty(htmlID, "data-drag-over")
+			}
+		} else {
+			session.removeProperty(htmlID, "ondrop")
+			session.removeProperty(htmlID, "ondragover")
+		}
+
+	case DragOverEvent:
+		if view.getRaw(DragOverEvent) != nil {
+			session.updateProperty(htmlID, "data-drag-over", "1")
+		} else {
+			session.removeProperty(htmlID, "data-drag-over")
+		}
+
+	case DragData:
+		if data := base64DragData(view); data != "" {
+			session.updateProperty(htmlID, "draggable", "true")
+			session.updateProperty(htmlID, "data-drag", data)
+			session.updateProperty(htmlID, "ondragstart", "dragStartEvent(this, event)")
+		} else {
+			session.removeProperty(htmlID, "draggable")
+			session.removeProperty(htmlID, "data-drag")
+			if view.getRaw(DragStartEvent) == nil {
+				session.removeProperty(htmlID, "ondragstart")
+			}
+		}
+
+	case DragImage:
+		if img, ok := stringProperty(view, DragImage, session); ok && img != "" {
+			img = strings.Trim(img, " \t")
+			if img[0] == '@' {
+				img, ok = session.ImageConstant(img[1:])
+				if !ok {
+					session.removeProperty(htmlID, "data-drag-image")
+					return
+				}
+			}
+			session.updateProperty(htmlID, "data-drag-image", img)
+		} else {
+			session.removeProperty(htmlID, "data-drag-image")
+		}
+
+	case DragImageXOffset:
+		if f := GetDragImageXOffset(view); f != 0 {
+			session.updateProperty(htmlID, "data-drag-image-x", f)
+		} else {
+			session.removeProperty(htmlID, "data-drag-image-x")
+		}
+
+	case DragImageYOffset:
+		if f := GetDragImageXOffset(view); f != 0 {
+			session.updateProperty(htmlID, "data-drag-image-y", f)
+		} else {
+			session.removeProperty(htmlID, "data-drag-image-y")
+		}
+
+	case DropEffect:
+		effect := GetDropEffect(view)
+		switch effect {
+		case DropEffectCopy:
+			session.updateProperty(htmlID, "data-drop-effect", "copy")
+		case DropEffectMove:
+			session.updateProperty(htmlID, "data-drop-effect", "move")
+		case DropEffectLink:
+			session.updateProperty(htmlID, "data-drop-effect", "link")
+		default:
+			session.removeProperty(htmlID, "data-drop-effect")
+		}
+
+	case DropEffectAllowed:
+		effect := GetDropEffectAllowed(view)
+		if effect >= DropEffectCopy && effect >= DropEffectAll {
+			values := []string{"undefined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
+			session.updateProperty(htmlID, "data-drop-effect-allowed", values[effect])
+		} else {
+			session.removeProperty(htmlID, "data-drop-effect-allowed")
+		}
+
 	case DataList:
-		updateInnerHTML(view.htmlID(), view.Session())
+		updateInnerHTML(htmlID, session)
 
 	case Opacity:
 		if f, ok := floatTextProperty(view, Opacity, session, 0); ok {
@@ -829,8 +1066,8 @@ func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	}
 
 	if view.frame.Left != 0 || view.frame.Top != 0 || view.frame.Width != 0 || view.frame.Height != 0 {
-		buffer.WriteString(fmt.Sprintf(` data-left="%g" data-top="%g" data-width="%g" data-height="%g"`,
-			view.frame.Left, view.frame.Top, view.frame.Width, view.frame.Height))
+		fmt.Fprintf(buffer, ` data-left="%g" data-top="%g" data-width="%g" data-height="%g"`,
+			view.frame.Left, view.frame.Top, view.frame.Width, view.frame.Height)
 	}
 }
 
@@ -891,18 +1128,12 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 	keyEventsHtml(view, buffer)
 
 	viewEventsHtml[MouseEvent](view, []PropertyName{ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent}, buffer)
-	//mouseEventsHtml(view, buffer, hasTooltip)
-
 	viewEventsHtml[PointerEvent](view, []PropertyName{PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel}, buffer)
-	//pointerEventsHtml(view, buffer)
-
 	viewEventsHtml[TouchEvent](view, []PropertyName{TouchStart, TouchEnd, TouchMove, TouchCancel}, buffer)
-	//touchEventsHtml(view, buffer)
-
 	viewEventsHtml[string](view, []PropertyName{TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent,
 		AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent}, buffer)
-	//transitionEventsHtml(view, buffer)
-	//animationEventsHtml(view, buffer)
+
+	dragAndDropHtml(view, buffer)
 
 	buffer.WriteRune('>')
 	view.htmlSubviews(view, buffer)
@@ -952,16 +1183,22 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 	case TouchStart, TouchEnd, TouchMove, TouchCancel:
 		handleTouchEvents(self, command, data)
 
+	case DragStartEvent:
+		handleDragAndDropEvents(self, command, data)
+
+	case DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
+		handleDragAndDropEvents(self, command, data)
+
 	case FocusEvent:
 		view.hasFocus = true
 		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
-			listener(self)
+			listener.Run(self)
 		}
 
 	case LostFocusEvent:
 		view.hasFocus = false
 		for _, listener := range getNoArgEventListeners[View](view, nil, command) {
-			listener(self)
+			listener.Run(self)
 		}
 
 	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
@@ -1001,6 +1238,42 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 				self.onResize(self, floatProperty("x"), floatProperty("y"), floatProperty("width"), floatProperty("height"))
 				return true
 		*/
+
+	case "fileLoaded":
+		file := dataToFileInfo(data)
+		key := file.key()
+
+		if listener := view.fileLoader[key]; listener != nil {
+			delete(view.fileLoader, key)
+
+			if base64Data, ok := data.PropertyValue("data"); ok {
+				if index := strings.LastIndex(base64Data, ","); index >= 0 {
+					base64Data = base64Data[index+1:]
+				}
+				decode, err := base64.StdEncoding.DecodeString(base64Data)
+				if err == nil {
+					listener(file, decode)
+				} else {
+					ErrorLog(err.Error())
+				}
+			}
+		}
+		return true
+
+	case "fileLoadingError":
+		file := dataToFileInfo(data)
+		key := file.key()
+
+		if error, ok := data.PropertyValue("error"); ok {
+			ErrorLogF(`Load "%s" file error: %s`, file.Name, error)
+		}
+
+		if listener := view.fileLoader[key]; listener != nil {
+			delete(view.fileLoader, key)
+			listener(file, nil)
+		}
+		return true
+
 	default:
 		return false
 	}
@@ -1008,12 +1281,33 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 
 }
 
-func (view *viewData) SetChangeListener(tag PropertyName, listener func(View, PropertyName)) {
+func (view *viewData) SetChangeListener(tag PropertyName, listener any) bool {
 	if listener == nil {
 		delete(view.changeListener, tag)
 	} else {
-		view.changeListener[tag] = listener
+		switch listener := listener.(type) {
+		case func():
+			view.changeListener[tag] = newOneArgListener0[View, PropertyName](listener)
+
+		case func(View):
+			view.changeListener[tag] = newOneArgListenerV[View, PropertyName](listener)
+
+		case func(PropertyName):
+			view.changeListener[tag] = newOneArgListenerE[View](listener)
+
+		case func(View, PropertyName):
+			view.changeListener[tag] = newOneArgListenerVE(listener)
+
+		case string:
+			view.changeListener[tag] = newOneArgListenerBinding[View, PropertyName](listener)
+
+		default:
+			return false
+		}
+
+		view.setRaw(changeListeners, view.changeListener)
 	}
+	return true
 }
 
 func (view *viewData) HasFocus() bool {
@@ -1027,6 +1321,6 @@ func (view *viewData) String() string {
 	return buffer.String()
 }
 
-func (view *viewData) exscludeTags() []PropertyName {
+func (view *viewData) excludeTags() []PropertyName {
 	return nil
 }

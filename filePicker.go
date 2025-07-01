@@ -1,7 +1,7 @@
 package rui
 
 import (
-	"encoding/base64"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -67,6 +67,8 @@ type FileInfo struct {
 
 	// MimeType - the file's MIME type.
 	MimeType string
+
+	data []byte
 }
 
 // FilePicker represents the FilePicker view
@@ -82,11 +84,12 @@ type FilePicker interface {
 
 type filePickerData struct {
 	viewData
-	files  []FileInfo
-	loader map[int]func(FileInfo, []byte)
+	files []FileInfo
+	//loader map[int]func(FileInfo, []byte)
 }
 
-func (file *FileInfo) initBy(node DataValue) {
+func dataToFileInfo(node DataValue) FileInfo {
+	var file FileInfo
 	if obj := node.Object(); obj != nil {
 		file.Name, _ = obj.PropertyValue("name")
 		file.MimeType, _ = obj.PropertyValue("mime-type")
@@ -103,6 +106,11 @@ func (file *FileInfo) initBy(node DataValue) {
 			}
 		}
 	}
+	return file
+}
+
+func (file FileInfo) key() string {
+	return fmt.Sprintf("%s:%d", file.Name, int(file.Size))
 }
 
 // NewFilePicker create new FilePicker object and return it
@@ -122,7 +130,7 @@ func (picker *filePickerData) init(session Session) {
 	picker.tag = "FilePicker"
 	picker.hasHtmlDisabled = true
 	picker.files = []FileInfo{}
-	picker.loader = map[int]func(FileInfo, []byte){}
+	//picker.loader = map[int]func(FileInfo, []byte){}
 	picker.set = picker.setFunc
 	picker.changed = picker.propertyChanged
 
@@ -137,16 +145,23 @@ func (picker *filePickerData) Files() []FileInfo {
 }
 
 func (picker *filePickerData) LoadFile(file FileInfo, result func(FileInfo, []byte)) {
-	if result == nil {
-		return
-	}
-
-	for i, info := range picker.files {
-		if info.Name == file.Name && info.Size == file.Size && info.LastModified == file.LastModified {
-			picker.loader[i] = result
-			picker.Session().callFunc("loadSelectedFile", picker.htmlID(), i)
-			return
+	if result != nil {
+		for i, info := range picker.files {
+			if info.Name == file.Name && info.Size == file.Size && info.LastModified.Equal(file.LastModified) {
+				if info.data != nil {
+					result(info, info.data)
+				} else {
+					picker.fileLoader[info.key()] = func(file FileInfo, data []byte) {
+						picker.files[i].data = data
+						result(file, data)
+					}
+					picker.Session().callFunc("loadSelectedFile", picker.htmlID(), i)
+				}
+				return
+			}
 		}
+
+		picker.viewData.LoadFile(file, result)
 	}
 }
 
@@ -248,62 +263,27 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	}
 }
 
+func parseFilesTag(data DataObject) []FileInfo {
+	if node := data.PropertyByTag("files"); node != nil && node.Type() == ArrayNode {
+		count := node.ArraySize()
+		files := make([]FileInfo, count)
+		for i := range count {
+			if value := node.ArrayElement(i); value != nil {
+				files[i] = dataToFileInfo(value)
+			}
+		}
+		return files
+	}
+	return nil
+}
+
 func (picker *filePickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "fileSelected":
-		if node := data.PropertyByTag("files"); node != nil && node.Type() == ArrayNode {
-			count := node.ArraySize()
-			files := make([]FileInfo, count)
-			for i := 0; i < count; i++ {
-				if value := node.ArrayElement(i); value != nil {
-					files[i].initBy(value)
-				}
-			}
+		if files := parseFilesTag(data); files != nil {
 			picker.files = files
-
-			for _, listener := range GetFileSelectedListeners(picker) {
-				listener(picker, files)
-			}
-		}
-		return true
-
-	case "fileLoaded":
-		if index, ok := dataIntProperty(data, "index"); ok {
-			if result, ok := picker.loader[index]; ok {
-				var file FileInfo
-				file.initBy(data)
-
-				var fileData []byte = nil
-				if base64Data, ok := data.PropertyValue("data"); ok {
-					if index := strings.LastIndex(base64Data, ","); index >= 0 {
-						base64Data = base64Data[index+1:]
-					}
-					decode, err := base64.StdEncoding.DecodeString(base64Data)
-					if err == nil {
-						fileData = decode
-					} else {
-						ErrorLog(err.Error())
-					}
-				}
-
-				result(file, fileData)
-				delete(picker.loader, index)
-			}
-		}
-		return true
-
-	case "fileLoadingError":
-		if error, ok := data.PropertyValue("error"); ok {
-			ErrorLog(error)
-		}
-		if index, ok := dataIntProperty(data, "index"); ok {
-			if result, ok := picker.loader[index]; ok {
-				if index >= 0 && index < len(picker.files) {
-					result(picker.files[index], nil)
-				} else {
-					result(FileInfo{}, nil)
-				}
-				delete(picker.loader, index)
+			for _, listener := range getOneArgEventListeners[FilePicker, []FileInfo](picker, nil, FileSelectedEvent) {
+				listener.Run(picker, files)
 			}
 		}
 		return true
@@ -337,13 +317,17 @@ func LoadFilePickerFile(view View, subviewID string, file FileInfo, result func(
 }
 
 // IsMultipleFilePicker returns "true" if multiple files can be selected in the FilePicker, "false" otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func IsMultipleFilePicker(view View, subviewID ...string) bool {
 	return boolStyledProperty(view, subviewID, Multiple, false)
 }
 
 // GetFilePickerAccept returns sets the list of allowed file extensions or MIME types.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetFilePickerAccept(view View, subviewID ...string) []string {
 	if view = getSubview(view, subviewID); view != nil {
 		accept, ok := stringProperty(view, Accept, view.Session())
@@ -354,7 +338,7 @@ func GetFilePickerAccept(view View, subviewID ...string) []string {
 		}
 		if ok {
 			result := strings.Split(accept, ",")
-			for i := 0; i < len(result); i++ {
+			for i := range len(result) {
 				result[i] = strings.Trim(result[i], " \t\n")
 			}
 			return result
@@ -365,7 +349,16 @@ func GetFilePickerAccept(view View, subviewID ...string) []string {
 
 // GetFileSelectedListeners returns the "file-selected-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetFileSelectedListeners(view View, subviewID ...string) []func(FilePicker, []FileInfo) {
-	return getOneArgEventListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, []rui.FileInfo),
+//   - func(rui.View),
+//   - func([]rui.FileInfo),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetFileSelectedListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[FilePicker, []FileInfo](view, subviewID, FileSelectedEvent)
 }

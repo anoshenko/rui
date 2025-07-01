@@ -166,8 +166,8 @@ func (picker *numberPickerData) setFunc(tag PropertyName, value any) []PropertyN
 }
 
 func (picker *numberPickerData) numberFormat() string {
-	if precission := GetNumberPickerPrecision(picker); precission > 0 {
-		return fmt.Sprintf("%%.%df", precission)
+	if precision := GetNumberPickerPrecision(picker); precision > 0 {
+		return fmt.Sprintf("%%.%df", precision)
 	}
 	return "%g"
 }
@@ -201,7 +201,7 @@ func (picker *numberPickerData) propertyChanged(tag PropertyName) {
 		format := picker.numberFormat()
 		picker.Session().callFunc("setInputValue", picker.htmlID(), fmt.Sprintf(format, value))
 
-		if listeners := GetNumberChangedListeners(picker); len(listeners) > 0 {
+		if listeners := getTwoArgEventListeners[NumberPicker, float64](picker, nil, NumberChangedEvent); len(listeners) > 0 {
 			old := 0.0
 			if val := picker.getRaw("old-number"); val != nil {
 				if n, ok := val.(float64); ok {
@@ -210,7 +210,7 @@ func (picker *numberPickerData) propertyChanged(tag PropertyName) {
 			}
 			if old != value {
 				for _, listener := range listeners {
-					listener(picker, value, old)
+					listener.Run(picker, value, old)
 				}
 			}
 		}
@@ -244,27 +244,27 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 	min, max := GetNumberPickerMinMax(picker)
 	if min != math.Inf(-1) {
 		buffer.WriteString(` min="`)
-		buffer.WriteString(fmt.Sprintf(format, min))
+		fmt.Fprintf(buffer, format, min)
 		buffer.WriteByte('"')
 	}
 
 	if max != math.Inf(1) {
 		buffer.WriteString(` max="`)
-		buffer.WriteString(fmt.Sprintf(format, max))
+		fmt.Fprintf(buffer, format, max)
 		buffer.WriteByte('"')
 	}
 
 	step := GetNumberPickerStep(picker)
 	if step != 0 {
 		buffer.WriteString(` step="`)
-		buffer.WriteString(fmt.Sprintf(format, step))
+		fmt.Fprintf(buffer, format, step)
 		buffer.WriteByte('"')
 	} else {
 		buffer.WriteString(` step="any"`)
 	}
 
 	buffer.WriteString(` value="`)
-	buffer.WriteString(fmt.Sprintf(format, GetNumberPickerValue(picker)))
+	fmt.Fprintf(buffer, format, GetNumberPickerValue(picker))
 	buffer.WriteByte('"')
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
@@ -280,11 +280,11 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 				oldValue := GetNumberPickerValue(picker)
 				picker.properties[NumberPickerValue] = text
 				if value != oldValue {
-					for _, listener := range GetNumberChangedListeners(picker) {
-						listener(picker, value, oldValue)
+					for _, listener := range getTwoArgEventListeners[NumberPicker, float64](picker, nil, NumberChangedEvent) {
+						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[NumberPickerValue]; ok {
-						listener(picker, NumberPickerValue)
+						listener.Run(picker, NumberPickerValue)
 					}
 				}
 			}
@@ -298,13 +298,17 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 // GetNumberPickerType returns the type of NumberPicker subview. Valid values:
 // NumberEditor (0) - NumberPicker is presented by editor (default type);
 // NumberSlider (1) - NumberPicker is presented by slider.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerType(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, NumberPickerType, NumberEditor, false)
 }
 
 // GetNumberPickerMinMax returns the min and max value of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 	view = getSubview(view, subviewID)
 	pickerType := GetNumberPickerType(view)
@@ -328,7 +332,9 @@ func GetNumberPickerMinMax(view View, subviewID ...string) (float64, float64) {
 }
 
 // GetNumberPickerStep returns the value changing step of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerStep(view View, subviewID ...string) float64 {
 	view = getSubview(view, subviewID)
 	_, max := GetNumberPickerMinMax(view)
@@ -341,7 +347,9 @@ func GetNumberPickerStep(view View, subviewID ...string) float64 {
 }
 
 // GetNumberPickerValue returns the value of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerValue(view View, subviewID ...string) float64 {
 	view = getSubview(view, subviewID)
 	min, _ := GetNumberPickerMinMax(view)
@@ -350,13 +358,26 @@ func GetNumberPickerValue(view View, subviewID ...string) float64 {
 
 // GetNumberChangedListeners returns the NumberChangedListener list of an NumberPicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetNumberChangedListeners(view View, subviewID ...string) []func(NumberPicker, float64, float64) {
-	return getTwoArgEventListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.NumberPicker, float64, float64),
+//   - func(rui.NumberPicker, float64),
+//   - func(rui.NumberPicker),
+//   - func(float64, float64),
+//   - func(float64),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetNumberChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[NumberPicker, float64](view, subviewID, NumberChangedEvent)
 }
 
 // GetNumberPickerPrecision returns the precision of displaying fractional part in editor of NumberPicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetNumberPickerPrecision(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, NumberPickerPrecision, 0)
 }

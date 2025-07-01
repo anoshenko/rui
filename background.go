@@ -67,7 +67,7 @@ func createBackground(obj DataObject) BackgroundElement {
 	}
 
 	count := obj.PropertyCount()
-	for i := 0; i < count; i++ {
+	for i := range count {
 		if node := obj.Property(i); node.Type() == TextNode {
 			if value := node.Text(); value != "" {
 				result.Set(PropertyName(node.Tag()), value)
@@ -76,6 +76,16 @@ func createBackground(obj DataObject) BackgroundElement {
 	}
 
 	return result
+}
+
+func parseBackgroundText(text string) BackgroundElement {
+	obj, err := ParseDataText(text)
+	if err != nil {
+		ErrorLog(err.Error())
+		return nil
+	}
+
+	return createBackground(obj)
 }
 
 func parseBackgroundValue(value any) []BackgroundElement {
@@ -96,12 +106,8 @@ func parseBackgroundValue(value any) []BackgroundElement {
 				} else {
 					return nil
 				}
-			} else if obj := ParseDataText(el.Value()); obj != nil {
-				if element := createBackground(obj); element != nil {
-					background = append(background, element)
-				} else {
-					return nil
-				}
+			} else if element := parseBackgroundText(el.Value()); element != nil {
+				background = append(background, element)
 			} else {
 				return nil
 			}
@@ -125,21 +131,15 @@ func parseBackgroundValue(value any) []BackgroundElement {
 		return background
 
 	case string:
-		if obj := ParseDataText(value); obj != nil {
-			if element := createBackground(obj); element != nil {
-				return []BackgroundElement{element}
-			}
+		if element := parseBackgroundText(value); element != nil {
+			return []BackgroundElement{element}
 		}
 
 	case []string:
 		elements := make([]BackgroundElement, 0, len(value))
-		for _, element := range value {
-			if obj := ParseDataText(element); obj != nil {
-				if element := createBackground(obj); element != nil {
-					elements = append(elements, element)
-				} else {
-					return nil
-				}
+		for _, text := range value {
+			if element := parseBackgroundText(text); element != nil {
+				elements = append(elements, element)
 			} else {
 				return nil
 			}
@@ -148,18 +148,14 @@ func parseBackgroundValue(value any) []BackgroundElement {
 
 	case []any:
 		elements := make([]BackgroundElement, 0, len(value))
-		for _, element := range value {
-			switch element := element.(type) {
+		for _, val := range value {
+			switch val := val.(type) {
 			case BackgroundElement:
-				elements = append(elements, element)
+				elements = append(elements, val)
 
 			case string:
-				if obj := ParseDataText(element); obj != nil {
-					if element := createBackground(obj); element != nil {
-						elements = append(elements, element)
-					} else {
-						return nil
-					}
+				if element := parseBackgroundText(val); element != nil {
+					elements = append(elements, element)
 				} else {
 					return nil
 				}
@@ -268,14 +264,16 @@ func backgroundStyledPropery(view View, subviewID []string, tag PropertyName) []
 
 // GetBackground returns the view background.
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetBackground(view View, subviewID ...string) []BackgroundElement {
 	return backgroundStyledPropery(view, subviewID, Background)
 }
 
 // GetMask returns the view mask.
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetMask(view View, subviewID ...string) []BackgroundElement {
 	return backgroundStyledPropery(view, subviewID, Mask)
 }
@@ -284,7 +282,8 @@ func GetMask(view View, subviewID ...string) []BackgroundElement {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetBackgroundClip(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, BackgroundClip, 0, false)
 }
@@ -293,7 +292,8 @@ func GetBackgroundClip(view View, subviewID ...string) int {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetBackgroundOrigin(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, BackgroundOrigin, 0, false)
 }
@@ -302,7 +302,8 @@ func GetBackgroundOrigin(view View, subviewID ...string) int {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetMaskClip(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, MaskClip, 0, false)
 }
@@ -311,7 +312,8 @@ func GetMaskClip(view View, subviewID ...string) int {
 //
 //	BorderBox (0), PaddingBox (1), ContentBox (2)
 //
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetMaskOrigin(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, MaskOrigin, 0, false)
 }

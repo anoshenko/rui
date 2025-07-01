@@ -201,7 +201,7 @@ type Canvas interface {
 
 	// SetConicGradientFillStyle sets a conic gradient around a point
 	// to use inside shapes
-	//   * x, y - coordinates of the center of the conic gradient in pilels;
+	//   * x, y - coordinates of the center of the conic gradient in piles;
 	//   * startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
 	//   * startColor - the start color;
 	//   * endColor - the end color;
@@ -210,7 +210,7 @@ type Canvas interface {
 
 	// SetConicGradientFillStyle sets a conic gradient around a point
 	// to use inside shapes
-	//   * x, y - coordinates of the center of the conic gradient in pilels;
+	//   * x, y - coordinates of the center of the conic gradient in piles;
 	//   * startAngle - the angle at which to begin the gradient, in radians. The angle starts from a line going horizontally right from the center, and proceeds clockwise.
 	//   * startColor - the start color;
 	//   * endColor - the end color;
@@ -575,7 +575,7 @@ func (canvas *canvasData) SetLineDash(dash []float64, offset float64) {
 	for _, val := range dash {
 		buffer.WriteRune(lead)
 		lead = ','
-		buffer.WriteString(fmt.Sprintf("%g", val))
+		fmt.Fprintf(buffer, "%g", val))
 	}
 	buffer.WriteRune(']')
 

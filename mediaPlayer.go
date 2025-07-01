@@ -3,6 +3,7 @@ package rui
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -488,7 +489,7 @@ const (
 	//   - player - Interface of a player which generated this event,
 	//   - code - Error code. See below,
 	//   - message - Error message,
-
+	//
 	// Error codes:
 	//   - 0 (PlayerErrorUnknown) - Unknown error,
 	//   - 1 (PlayerErrorAborted) - Fetching the associated resource was interrupted by a user request,
@@ -610,7 +611,7 @@ func (player *mediaPlayerData) setFunc(tag PropertyName, value any) []PropertyNa
 		return setOneArgEventListener[MediaPlayer, float64](player, tag, value)
 
 	case PlayerErrorEvent:
-		if listeners, ok := valueToPlayerErrorListeners(value); ok {
+		if listeners, ok := valueToMediaPlayerErrorListeners(value); ok {
 			return setArrayPropertyValue(player, tag, listeners)
 		}
 		notCompatibleType(tag, value)
@@ -677,131 +678,132 @@ func setMediaPlayerSource(properties Properties, value any) []PropertyName {
 	return []PropertyName{Source}
 }
 
-func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(MediaPlayer, int, string):
-		return []func(MediaPlayer, int, string){value}, true
-
-	case func(int, string):
-		fn := func(_ MediaPlayer, code int, message string) {
-			value(code, message)
-		}
-		return []func(MediaPlayer, int, string){fn}, true
-
-	case func(MediaPlayer):
-		fn := func(player MediaPlayer, _ int, _ string) {
-			value(player)
-		}
-		return []func(MediaPlayer, int, string){fn}, true
-
-	case func():
-		fn := func(MediaPlayer, int, string) {
-			value()
-		}
-		return []func(MediaPlayer, int, string){fn}, true
-
-	case []func(MediaPlayer, int, string):
-		if len(value) == 0 {
+/*
+	func valueToPlayerErrorListeners(value any) ([]func(MediaPlayer, int, string), bool) {
+		if value == nil {
 			return nil, true
 		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
 
-	case []func(int, string):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, int, string), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ MediaPlayer, code int, message string) {
-				v(code, message)
-			}
-		}
-		return listeners, true
+		switch value := value.(type) {
+		case func(MediaPlayer, int, string):
+			return []func(MediaPlayer, int, string){value}, true
 
-	case []func(MediaPlayer):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, int, string), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
+		case func(int, string):
+			fn := func(_ MediaPlayer, code int, message string) {
+				value(code, message)
 			}
-			listeners[i] = func(player MediaPlayer, _ int, _ string) {
-				v(player)
-			}
-		}
-		return listeners, true
+			return []func(MediaPlayer, int, string){fn}, true
 
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, int, string), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
+		case func(MediaPlayer):
+			fn := func(player MediaPlayer, _ int, _ string) {
+				value(player)
 			}
-			listeners[i] = func(MediaPlayer, int, string) {
-				v()
-			}
-		}
-		return listeners, true
+			return []func(MediaPlayer, int, string){fn}, true
 
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(MediaPlayer, int, string), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
+		case func():
+			fn := func(MediaPlayer, int, string) {
+				value()
 			}
-			switch v := v.(type) {
-			case func(MediaPlayer, int, string):
-				listeners[i] = v
+			return []func(MediaPlayer, int, string){fn}, true
 
-			case func(int, string):
+		case []func(MediaPlayer, int, string):
+			if len(value) == 0 {
+				return nil, true
+			}
+			for _, fn := range value {
+				if fn == nil {
+					return nil, false
+				}
+			}
+			return value, true
+
+		case []func(int, string):
+			count := len(value)
+			if count == 0 {
+				return nil, true
+			}
+			listeners := make([]func(MediaPlayer, int, string), count)
+			for i, v := range value {
+				if v == nil {
+					return nil, false
+				}
 				listeners[i] = func(_ MediaPlayer, code int, message string) {
 					v(code, message)
 				}
+			}
+			return listeners, true
 
-			case func(MediaPlayer):
+		case []func(MediaPlayer):
+			count := len(value)
+			if count == 0 {
+				return nil, true
+			}
+			listeners := make([]func(MediaPlayer, int, string), count)
+			for i, v := range value {
+				if v == nil {
+					return nil, false
+				}
 				listeners[i] = func(player MediaPlayer, _ int, _ string) {
 					v(player)
 				}
+			}
+			return listeners, true
 
-			case func():
+		case []func():
+			count := len(value)
+			if count == 0 {
+				return nil, true
+			}
+			listeners := make([]func(MediaPlayer, int, string), count)
+			for i, v := range value {
+				if v == nil {
+					return nil, false
+				}
 				listeners[i] = func(MediaPlayer, int, string) {
 					v()
 				}
-
-			default:
-				return nil, false
 			}
+			return listeners, true
+
+		case []any:
+			count := len(value)
+			if count == 0 {
+				return nil, true
+			}
+			listeners := make([]func(MediaPlayer, int, string), count)
+			for i, v := range value {
+				if v == nil {
+					return nil, false
+				}
+				switch v := v.(type) {
+				case func(MediaPlayer, int, string):
+					listeners[i] = v
+
+				case func(int, string):
+					listeners[i] = func(_ MediaPlayer, code int, message string) {
+						v(code, message)
+					}
+
+				case func(MediaPlayer):
+					listeners[i] = func(player MediaPlayer, _ int, _ string) {
+						v(player)
+					}
+
+				case func():
+					listeners[i] = func(MediaPlayer, int, string) {
+						v()
+					}
+
+				default:
+					return nil, false
+				}
+			}
+			return listeners, true
 		}
-		return listeners, true
+
+		return nil, false
 	}
-
-	return nil, false
-}
-
+*/
 func mediaPlayerEvents() map[PropertyName]string {
 	return map[PropertyName]string{
 		AbortEvent:          "onabort",
@@ -981,31 +983,23 @@ func (player *mediaPlayerData) handleCommand(self View, command PropertyName, da
 		PlayingEvent, ProgressEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent,
 		WaitingEvent:
 
-		if value := player.getRaw(command); value != nil {
-			if listeners, ok := value.([]func(MediaPlayer)); ok {
-				for _, listener := range listeners {
-					listener(player)
-				}
-			}
+		for _, listener := range getNoArgEventListeners[MediaPlayer](player, nil, command) {
+			listener.Run(player)
 		}
 
 	case TimeUpdateEvent, DurationChangedEvent, RateChangedEvent, VolumeChangedEvent:
-		if value := player.getRaw(command); value != nil {
-			if listeners, ok := value.([]func(MediaPlayer, float64)); ok {
-				time := dataFloatProperty(data, "value")
-				for _, listener := range listeners {
-					listener(player, time)
-				}
-			}
+		time := dataFloatProperty(data, "value")
+		for _, listener := range getOneArgEventListeners[MediaPlayer, float64](player, nil, command) {
+			listener.Run(player, time)
 		}
 
 	case PlayerErrorEvent:
 		if value := player.getRaw(command); value != nil {
-			if listeners, ok := value.([]func(MediaPlayer, int, string)); ok {
+			if listeners, ok := value.([]mediaPlayerErrorListener); ok {
 				code, _ := dataIntProperty(data, "code")
 				message, _ := data.PropertyValue("message")
 				for _, listener := range listeners {
-					listener(player, code, message)
+					listener.Run(player, code, message)
 				}
 			}
 		}
@@ -1253,4 +1247,394 @@ func IsMediaPlayerPaused(view View, playerID string) bool {
 
 	ErrorLog(`The found View is not MediaPlayer`)
 	return false
+}
+
+type mediaPlayerErrorListener interface {
+	Run(MediaPlayer, int, string)
+	rawListener() any
+}
+
+type mediaPlayerErrorListener0 struct {
+	fn func()
+}
+
+type mediaPlayerErrorListenerP struct {
+	fn func(MediaPlayer)
+}
+
+type mediaPlayerErrorListenerI struct {
+	fn func(int)
+}
+
+type mediaPlayerErrorListenerS struct {
+	fn func(string)
+}
+
+type mediaPlayerErrorListenerPI struct {
+	fn func(MediaPlayer, int)
+}
+
+type mediaPlayerErrorListenerPS struct {
+	fn func(MediaPlayer, string)
+}
+
+type mediaPlayerErrorListenerIS struct {
+	fn func(int, string)
+}
+
+type mediaPlayerErrorListenerPIS struct {
+	fn func(MediaPlayer, int, string)
+}
+
+type mediaPlayerErrorListenerBinding struct {
+	name string
+}
+
+func newMediaPlayerErrorListener0(fn func()) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListener0)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListener0) Run(_ MediaPlayer, _ int, _ string) {
+	data.fn()
+}
+
+func (data *mediaPlayerErrorListener0) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerP(fn func(MediaPlayer)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerP)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerP) Run(player MediaPlayer, _ int, _ string) {
+	data.fn(player)
+}
+
+func (data *mediaPlayerErrorListenerP) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerI(fn func(int)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerI)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerI) Run(_ MediaPlayer, code int, _ string) {
+	data.fn(code)
+}
+
+func (data *mediaPlayerErrorListenerI) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerS(fn func(string)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerS)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerS) Run(_ MediaPlayer, _ int, message string) {
+	data.fn(message)
+}
+
+func (data *mediaPlayerErrorListenerS) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerPI(fn func(MediaPlayer, int)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerPI)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerPI) Run(player MediaPlayer, code int, _ string) {
+	data.fn(player, code)
+}
+
+func (data *mediaPlayerErrorListenerPI) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerPS(fn func(MediaPlayer, string)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerPS)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerPS) Run(player MediaPlayer, _ int, message string) {
+	data.fn(player, message)
+}
+
+func (data *mediaPlayerErrorListenerPS) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerIS(fn func(int, string)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerIS)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerIS) Run(_ MediaPlayer, code int, message string) {
+	data.fn(code, message)
+}
+
+func (data *mediaPlayerErrorListenerIS) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerPIS(fn func(MediaPlayer, int, string)) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerPIS)
+	obj.fn = fn
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerPIS) Run(player MediaPlayer, code int, message string) {
+	data.fn(player, code, message)
+}
+
+func (data *mediaPlayerErrorListenerPIS) rawListener() any {
+	return data.fn
+}
+
+func newMediaPlayerErrorListenerBinding(name string) mediaPlayerErrorListener {
+	obj := new(mediaPlayerErrorListenerBinding)
+	obj.name = name
+	return obj
+}
+
+func (data *mediaPlayerErrorListenerBinding) Run(player MediaPlayer, code int, message string) {
+	bind := player.binding()
+	if bind == nil {
+		ErrorLogF(`There is no a binding object for call "%s"`, data.name)
+		return
+	}
+
+	val := reflect.ValueOf(bind)
+	method := val.MethodByName(data.name)
+	if !method.IsValid() {
+		ErrorLogF(`The "%s" method is not valid`, data.name)
+		return
+	}
+
+	methodType := method.Type()
+	var args []reflect.Value = nil
+
+	switch methodType.NumIn() {
+	case 0:
+		args = []reflect.Value{}
+
+	case 1:
+		inType := methodType.In(0)
+		if equalType(inType, reflect.TypeOf(player)) {
+			args = []reflect.Value{reflect.ValueOf(player)}
+		} else if equalType(inType, reflect.TypeOf(code)) {
+			args = []reflect.Value{reflect.ValueOf(code)}
+		} else if equalType(inType, reflect.TypeOf(message)) {
+			args = []reflect.Value{reflect.ValueOf(message)}
+		}
+
+	case 2:
+		in0 := methodType.In(0)
+		in1 := methodType.In(1)
+		if equalType(in0, reflect.TypeOf(player)) {
+			if equalType(in1, reflect.TypeOf(code)) {
+				args = []reflect.Value{reflect.ValueOf(player), reflect.ValueOf(code)}
+			} else if equalType(in1, reflect.TypeOf(message)) {
+				args = []reflect.Value{reflect.ValueOf(player), reflect.ValueOf(message)}
+			}
+		} else if equalType(in0, reflect.TypeOf(code)) && equalType(in1, reflect.TypeOf(message)) {
+			args = []reflect.Value{reflect.ValueOf(code), reflect.ValueOf(message)}
+		}
+
+	case 3:
+		if equalType(methodType.In(0), reflect.TypeOf(player)) &&
+			equalType(methodType.In(1), reflect.TypeOf(code)) &&
+			equalType(methodType.In(2), reflect.TypeOf(message)) {
+			args = []reflect.Value{
+				reflect.ValueOf(player),
+				reflect.ValueOf(code),
+				reflect.ValueOf(message),
+			}
+		}
+	}
+
+	if args != nil {
+		method.Call(args)
+	} else {
+		ErrorLogF(`Unsupported prototype of "%s" method`, data.name)
+	}
+}
+
+func (data *mediaPlayerErrorListenerBinding) rawListener() any {
+	return data.name
+}
+
+func valueToMediaPlayerErrorListeners(value any) ([]mediaPlayerErrorListener, bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case []mediaPlayerErrorListener:
+		return value, true
+
+	case mediaPlayerErrorListener:
+		return []mediaPlayerErrorListener{value}, true
+
+	case string:
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerBinding(value)}, true
+
+	case func():
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListener0(value)}, true
+
+	case func(MediaPlayer):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerP(value)}, true
+
+	case func(int):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerI(value)}, true
+
+	case func(string):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerS(value)}, true
+
+	case func(MediaPlayer, int):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerPI(value)}, true
+
+	case func(MediaPlayer, string):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerPS(value)}, true
+
+	case func(int, string):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerIS(value)}, true
+
+	case func(MediaPlayer, int, string):
+		return []mediaPlayerErrorListener{newMediaPlayerErrorListenerPIS(value)}, true
+
+	case []func():
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListener0(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(MediaPlayer):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerP(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(int):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerI(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(string):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerS(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(MediaPlayer, int):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerPI(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(MediaPlayer, string):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerPS(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(int, string):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerIS(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func(MediaPlayer, int, string):
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newMediaPlayerErrorListenerPIS(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []any:
+		result := make([]mediaPlayerErrorListener, 0, len(value))
+		for _, v := range value {
+			if v != nil {
+				switch v := v.(type) {
+				case func():
+					result = append(result, newMediaPlayerErrorListener0(v))
+
+				case func(MediaPlayer):
+					result = append(result, newMediaPlayerErrorListenerP(v))
+
+				case func(int):
+					result = append(result, newMediaPlayerErrorListenerI(v))
+
+				case func(string):
+					result = append(result, newMediaPlayerErrorListenerS(v))
+
+				case func(MediaPlayer, int):
+					result = append(result, newMediaPlayerErrorListenerPI(v))
+
+				case func(MediaPlayer, string):
+					result = append(result, newMediaPlayerErrorListenerPS(v))
+
+				case func(int, string):
+					result = append(result, newMediaPlayerErrorListenerIS(v))
+
+				case func(MediaPlayer, int, string):
+					result = append(result, newMediaPlayerErrorListenerPIS(v))
+
+				case string:
+					result = append(result, newMediaPlayerErrorListenerBinding(v))
+
+				default:
+					return nil, false
+				}
+			}
+		}
+		return result, len(result) > 0
+	}
+
+	return nil, false
+}
+
+func getMediaPlayerErrorListenerBinding(listeners []mediaPlayerErrorListener) string {
+	for _, listener := range listeners {
+		raw := listener.rawListener()
+		if text, ok := raw.(string); ok && text != "" {
+			return text
+		}
+	}
+	return ""
 }

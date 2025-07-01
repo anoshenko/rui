@@ -686,8 +686,11 @@ func (theme *theme) addText(themeText string) bool {
 		theme.init()
 	}
 
-	data := ParseDataText(themeText)
-	if data == nil || !data.IsObject() || data.Tag() != "theme" {
+	data, err := ParseDataText(themeText)
+	if err != nil {
+		ErrorLog(err.Error())
+		return false
+	} else if !data.IsObject() || data.Tag() != "theme" {
 		return false
 	}
 
@@ -695,7 +698,7 @@ func (theme *theme) addText(themeText string) bool {
 
 	objToStyle := func(obj DataObject) ViewStyle {
 		params := Params{}
-		for i := 0; i < obj.PropertyCount(); i++ {
+		for i := range obj.PropertyCount() {
 			if node := obj.Property(i); node != nil {
 				switch node.Type() {
 				case ArrayNode:
@@ -712,14 +715,14 @@ func (theme *theme) addText(themeText string) bool {
 		return NewViewStyle(params)
 	}
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		if d := data.Property(i); d != nil {
 			switch tag := d.Tag(); tag {
 			case "constants":
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.constants[prop.Tag()] = prop.Text()
 							}
@@ -731,7 +734,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.touchConstants[prop.Tag()] = prop.Text()
 							}
@@ -743,7 +746,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.colors[prop.Tag()] = prop.Text()
 							}
@@ -755,7 +758,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.darkColors[prop.Tag()] = prop.Text()
 							}
@@ -767,7 +770,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.images[prop.Tag()] = prop.Text()
 							}
@@ -779,7 +782,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ObjectNode {
 					if obj := d.Object(); obj != nil {
 						objCount := obj.PropertyCount()
-						for k := 0; k < objCount; k++ {
+						for k := range objCount {
 							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
 								theme.darkImages[prop.Tag()] = prop.Text()
 							}
@@ -790,7 +793,7 @@ func (theme *theme) addText(themeText string) bool {
 			case "styles":
 				if d.Type() == ArrayNode {
 					arraySize := d.ArraySize()
-					for k := 0; k < arraySize; k++ {
+					for k := range arraySize {
 						if element := d.ArrayElement(k); element != nil && element.IsObject() {
 							if obj := element.Object(); obj != nil {
 								theme.styles[obj.Tag()] = objToStyle(obj)
@@ -803,7 +806,7 @@ func (theme *theme) addText(themeText string) bool {
 				if d.Type() == ArrayNode && strings.HasPrefix(tag, "styles:") {
 					if rule, ok := parseMediaRule(tag); ok {
 						arraySize := d.ArraySize()
-						for k := 0; k < arraySize; k++ {
+						for k := range arraySize {
 							if element := d.ArrayElement(k); element != nil && element.IsObject() {
 								if obj := element.Object(); obj != nil {
 									rule.styles[obj.Tag()] = objToStyle(obj)
@@ -975,10 +978,10 @@ func (theme *theme) String() string {
 			buffer.WriteString(":landscape")
 		}
 		if maxWidth > 0 {
-			buffer.WriteString(fmt.Sprintf(":width%d", maxWidth))
+			fmt.Fprintf(buffer, ":width%d", maxWidth)
 		}
 		if maxHeight > 0 {
-			buffer.WriteString(fmt.Sprintf(":height%d", maxHeight))
+			fmt.Fprintf(buffer, ":height%d", maxHeight)
 		}
 		buffer.WriteString(" = [\n")
 
@@ -1014,21 +1017,21 @@ func (theme *theme) String() string {
 			}
 
 			if media.MinWidth > 0 {
-				buffer.WriteString(fmt.Sprintf(":width%d-", media.MinWidth))
+				fmt.Fprintf(buffer, ":width%d-", media.MinWidth)
 				if media.MaxWidth > 0 {
 					buffer.WriteString(strconv.Itoa(media.MaxWidth))
 				}
 			} else if media.MaxWidth > 0 {
-				buffer.WriteString(fmt.Sprintf(":width%d", media.MaxWidth))
+				fmt.Fprintf(buffer, ":width%d", media.MaxWidth)
 			}
 
 			if media.MinHeight > 0 {
-				buffer.WriteString(fmt.Sprintf(":height%d-", media.MinHeight))
+				fmt.Fprintf(buffer, ":height%d-", media.MinHeight)
 				if media.MaxHeight > 0 {
 					buffer.WriteString(strconv.Itoa(media.MaxHeight))
 				}
 			} else if media.MaxHeight > 0 {
-				buffer.WriteString(fmt.Sprintf(":height%d", media.MaxHeight))
+				fmt.Fprintf(buffer, ":height%d", media.MaxHeight)
 			}
 
 			buffer.WriteString(" = [\n")

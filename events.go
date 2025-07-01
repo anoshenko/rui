@@ -1,6 +1,9 @@
 package rui
 
-import "strings"
+import (
+	"reflect"
+	"strings"
+)
 
 var eventJsFunc = map[PropertyName]struct{ jsEvent, jsFunc string }{
 	FocusEvent:              {jsEvent: "onfocus", jsFunc: "focusEvent"},
@@ -33,471 +36,19 @@ var eventJsFunc = map[PropertyName]struct{ jsEvent, jsFunc string }{
 	AnimationEndEvent:       {jsEvent: "onanimationend", jsFunc: "animationEndEvent"},
 	AnimationIterationEvent: {jsEvent: "onanimationiteration", jsFunc: "animationIterationEvent"},
 	AnimationCancelEvent:    {jsEvent: "onanimationcancel", jsFunc: "animationCancelEvent"},
-}
-
-func valueToNoArgEventListeners[V any](value any) ([]func(V), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(V):
-		return []func(V){value}, true
-
-	case func():
-		fn := func(V) {
-			value()
-		}
-		return []func(V){fn}, true
-
-	case []func(V):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(V) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(V):
-				listeners[i] = v
-
-			case func():
-				listeners[i] = func(V) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
-func valueToOneArgEventListeners[V View, E any](value any) ([]func(V, E), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(V, E):
-		return []func(V, E){value}, true
-
-	case func(E):
-		fn := func(_ V, event E) {
-			value(event)
-		}
-		return []func(V, E){fn}, true
-
-	case func(V):
-		fn := func(view V, _ E) {
-			value(view)
-		}
-		return []func(V, E){fn}, true
-
-	case func():
-		fn := func(V, E) {
-			value()
-		}
-		return []func(V, E){fn}, true
-
-	case []func(V, E):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ V, event E) {
-				v(event)
-			}
-		}
-		return listeners, true
-
-	case []func(V):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(view V, _ E) {
-				v(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			listeners[i] = func(V, E) {
-				v()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch v := v.(type) {
-			case func(V, E):
-				listeners[i] = v
-
-			case func(E):
-				listeners[i] = func(_ V, event E) {
-					v(event)
-				}
-
-			case func(V):
-				listeners[i] = func(view V, _ E) {
-					v(view)
-				}
-
-			case func():
-				listeners[i] = func(V, E) {
-					v()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
-func valueToTwoArgEventListeners[V View, E any](value any) ([]func(V, E, E), bool) {
-	if value == nil {
-		return nil, true
-	}
-
-	switch value := value.(type) {
-	case func(V, E, E):
-		return []func(V, E, E){value}, true
-
-	case func(V, E):
-		fn := func(v V, val, _ E) {
-			value(v, val)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func(E, E):
-		fn := func(_ V, val, old E) {
-			value(val, old)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func(E):
-		fn := func(_ V, val, _ E) {
-			value(val)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func(V):
-		fn := func(v V, _, _ E) {
-			value(v)
-		}
-		return []func(V, E, E){fn}, true
-
-	case func():
-		fn := func(V, E, E) {
-			value()
-		}
-		return []func(V, E, E){fn}, true
-
-	case []func(V, E, E):
-		if len(value) == 0 {
-			return nil, true
-		}
-		for _, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-		}
-		return value, true
-
-	case []func(V, E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(view V, val, _ E) {
-				fn(view, val)
-			}
-		}
-		return listeners, true
-
-	case []func(E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ V, val, _ E) {
-				fn(val)
-			}
-		}
-		return listeners, true
-
-	case []func(E, E):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(_ V, val, old E) {
-				fn(val, old)
-			}
-		}
-		return listeners, true
-
-	case []func(V):
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(view V, _, _ E) {
-				fn(view)
-			}
-		}
-		return listeners, true
-
-	case []func():
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, fn := range value {
-			if fn == nil {
-				return nil, false
-			}
-			listeners[i] = func(V, E, E) {
-				fn()
-			}
-		}
-		return listeners, true
-
-	case []any:
-		count := len(value)
-		if count == 0 {
-			return nil, true
-		}
-		listeners := make([]func(V, E, E), count)
-		for i, v := range value {
-			if v == nil {
-				return nil, false
-			}
-			switch fn := v.(type) {
-			case func(V, E, E):
-				listeners[i] = fn
-
-			case func(V, E):
-				listeners[i] = func(view V, val, _ E) {
-					fn(view, val)
-				}
-
-			case func(E, E):
-				listeners[i] = func(_ V, val, old E) {
-					fn(val, old)
-				}
-
-			case func(E):
-				listeners[i] = func(_ V, val, _ E) {
-					fn(val)
-				}
-
-			case func(V):
-				listeners[i] = func(view V, _, _ E) {
-					fn(view)
-				}
-
-			case func():
-				listeners[i] = func(V, E, E) {
-					fn()
-				}
-
-			default:
-				return nil, false
-			}
-		}
-		return listeners, true
-	}
-
-	return nil, false
-}
-
-func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []func(V) {
-	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(V)); ok {
-				return result
-			}
-		}
-	}
-	return []func(V){}
-}
-
-func getOneArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E) {
-	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(V, E)); ok {
-				return result
-			}
-		}
-	}
-	return []func(V, E){}
-}
-
-func getTwoArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []func(V, E, E) {
-	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
-			if result, ok := value.([]func(V, E, E)); ok {
-				return result
-			}
-		}
-	}
-	return []func(V, E, E){}
-}
-
-func setNoArgEventListener[V View](properties Properties, tag PropertyName, value any) []PropertyName {
-	if listeners, ok := valueToNoArgEventListeners[V](value); ok {
-		if len(listeners) > 0 {
-			properties.setRaw(tag, listeners)
-		} else if properties.getRaw(tag) != nil {
-			properties.setRaw(tag, nil)
-		} else {
-			return []PropertyName{}
-		}
-		return []PropertyName{tag}
-	}
-	notCompatibleType(tag, value)
-	return nil
-}
-
-func setOneArgEventListener[V View, T any](properties Properties, tag PropertyName, value any) []PropertyName {
-	if listeners, ok := valueToOneArgEventListeners[V, T](value); ok {
-		if len(listeners) > 0 {
-			properties.setRaw(tag, listeners)
-		} else if properties.getRaw(tag) != nil {
-			properties.setRaw(tag, nil)
-		} else {
-			return []PropertyName{}
-		}
-		return []PropertyName{tag}
-	}
-	notCompatibleType(tag, value)
-	return nil
-}
-
-func setTwoArgEventListener[V View, T any](properties Properties, tag PropertyName, value any) []PropertyName {
-	listeners, ok := valueToTwoArgEventListeners[V, T](value)
-	if !ok {
-		notCompatibleType(tag, value)
-		return nil
-	} else if len(listeners) > 0 {
-		properties.setRaw(tag, listeners)
-	} else if properties.getRaw(tag) != nil {
-		properties.setRaw(tag, nil)
-	} else {
-		return []PropertyName{}
-	}
-	return []PropertyName{tag}
+	DragEndEvent:            {jsEvent: "ondragend", jsFunc: "dragEndEvent"},
+	DragEnterEvent:          {jsEvent: "ondragenter", jsFunc: "dragEnterEvent"},
+	DragLeaveEvent:          {jsEvent: "ondragleave", jsFunc: "dragLeaveEvent"},
 }
 
 func viewEventsHtml[T any](view View, events []PropertyName, buffer *strings.Builder) {
 	for _, tag := range events {
-		if value := view.getRaw(tag); value != nil {
-			if js, ok := eventJsFunc[tag]; ok {
-				if listeners, ok := value.([]func(View, T)); ok && len(listeners) > 0 {
-					buffer.WriteString(js.jsEvent)
-					buffer.WriteString(`="`)
-					buffer.WriteString(js.jsFunc)
-					buffer.WriteString(`(this, event)" `)
-				}
+		if js, ok := eventJsFunc[tag]; ok {
+			if value := getOneArgEventListeners[View, T](view, nil, tag); len(value) > 0 {
+				buffer.WriteString(js.jsEvent)
+				buffer.WriteString(`="`)
+				buffer.WriteString(js.jsFunc)
+				buffer.WriteString(`(this, event)" `)
 			}
 		}
 	}
@@ -514,4 +65,198 @@ func updateEventListenerHtml(view View, tag PropertyName) {
 			session.updateProperty(htmlID, js.jsEvent, js.jsFunc+"(this, event)")
 		}
 	}
+}
+
+type noArgListener[V View] interface {
+	Run(V)
+	rawListener() any
+}
+
+type noArgListener0[V View] struct {
+	fn func()
+}
+
+type noArgListenerV[V View] struct {
+	fn func(V)
+}
+
+type noArgListenerBinding[V View] struct {
+	name string
+}
+
+func newNoArgListener0[V View](fn func()) noArgListener[V] {
+	obj := new(noArgListener0[V])
+	obj.fn = fn
+	return obj
+}
+
+func (data *noArgListener0[V]) Run(_ V) {
+	data.fn()
+}
+
+func (data *noArgListener0[V]) rawListener() any {
+	return data.fn
+}
+
+func newNoArgListenerV[V View](fn func(V)) noArgListener[V] {
+	obj := new(noArgListenerV[V])
+	obj.fn = fn
+	return obj
+}
+
+func (data *noArgListenerV[V]) Run(view V) {
+	data.fn(view)
+}
+
+func (data *noArgListenerV[V]) rawListener() any {
+	return data.fn
+}
+
+func newNoArgListenerBinding[V View](name string) noArgListener[V] {
+	obj := new(noArgListenerBinding[V])
+	obj.name = name
+	return obj
+}
+
+func (data *noArgListenerBinding[V]) Run(view V) {
+	bind := view.binding()
+	if bind == nil {
+		ErrorLogF(`There is no a binding object for call "%s"`, data.name)
+		return
+	}
+
+	val := reflect.ValueOf(bind)
+	method := val.MethodByName(data.name)
+	if !method.IsValid() {
+		ErrorLogF(`The "%s" method is not valid`, data.name)
+		return
+	}
+
+	methodType := method.Type()
+	var args []reflect.Value = nil
+	switch methodType.NumIn() {
+	case 0:
+		args = []reflect.Value{}
+
+	case 1:
+		if equalType(methodType.In(0), reflect.TypeOf(view)) {
+			args = []reflect.Value{reflect.ValueOf(view)}
+		}
+	}
+
+	if args != nil {
+		method.Call(args)
+	} else {
+		ErrorLogF(`Unsupported prototype of "%s" method`, data.name)
+	}
+}
+
+func equalType(inType reflect.Type, argType reflect.Type) bool {
+	return inType == argType || (inType.Kind() == reflect.Interface && argType.Implements(inType))
+}
+
+func (data *noArgListenerBinding[V]) rawListener() any {
+	return data.name
+}
+
+func valueToNoArgEventListeners[V View](value any) ([]noArgListener[V], bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case []noArgListener[V]:
+		return value, true
+
+	case noArgListener[V]:
+		return []noArgListener[V]{value}, true
+
+	case string:
+		return []noArgListener[V]{newNoArgListenerBinding[V](value)}, true
+
+	case func(V):
+		return []noArgListener[V]{newNoArgListenerV(value)}, true
+
+	case func():
+		return []noArgListener[V]{newNoArgListener0[V](value)}, true
+
+	case []func(V):
+		result := make([]noArgListener[V], 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newNoArgListenerV(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func():
+		result := make([]noArgListener[V], 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newNoArgListener0[V](fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []any:
+		result := make([]noArgListener[V], 0, len(value))
+		for _, v := range value {
+			if v != nil {
+				switch v := v.(type) {
+				case func(V):
+					result = append(result, newNoArgListenerV(v))
+
+				case func():
+					result = append(result, newNoArgListener0[V](v))
+
+				case string:
+					result = append(result, newNoArgListenerBinding[V](v))
+
+				default:
+					return nil, false
+				}
+			}
+		}
+		return result, len(result) > 0
+	}
+
+	return nil, false
+}
+
+func setNoArgEventListener[V View](view View, tag PropertyName, value any) []PropertyName {
+	if listeners, ok := valueToNoArgEventListeners[V](value); ok {
+		return setArrayPropertyValue(view, tag, listeners)
+	}
+	notCompatibleType(tag, value)
+	return nil
+}
+
+func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []noArgListener[V] {
+	if view = getSubview(view, subviewID); view != nil {
+		if value := view.Get(tag); value != nil {
+			if result, ok := value.([]noArgListener[V]); ok {
+				return result
+			}
+		}
+	}
+	return []noArgListener[V]{}
+}
+
+func getNoArgEventRawListeners[V View](view View, subviewID []string, tag PropertyName) []any {
+	listeners := getNoArgEventListeners[V](view, subviewID, tag)
+	result := make([]any, len(listeners))
+	for i, l := range listeners {
+		result[i] = l.rawListener()
+	}
+	return result
+}
+
+func getNoArgBinding[V View](listeners []noArgListener[V]) string {
+	for _, listener := range listeners {
+		raw := listener.rawListener()
+		if text, ok := raw.(string); ok && text != "" {
+			return text
+		}
+	}
+	return ""
 }

@@ -25,8 +25,8 @@ func (view *viewData) onResize(self View, x, y, width, height float64) {
 	view.frame.Top = y
 	view.frame.Width = width
 	view.frame.Height = height
-	for _, listener := range GetResizeListeners(view) {
-		listener(self, view.frame)
+	for _, listener := range getOneArgEventListeners[View, Frame](view, nil, ResizeEvent) {
+		listener.Run(self, view.frame)
 	}
 }
 
@@ -73,7 +73,9 @@ func (view *viewData) Frame() Frame {
 }
 
 // GetViewFrame returns the size and location of view's viewport.
-// If the second argument (subviewID) is not specified or it is "" then the value of the first argument (view) is returned
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetViewFrame(view View, subviewID ...string) Frame {
 	view = getSubview(view, subviewID)
 	if view == nil {
@@ -83,7 +85,16 @@ func GetViewFrame(view View, subviewID ...string) Frame {
 }
 
 // GetResizeListeners returns the list of "resize-event" listeners. If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then the listeners list of the first argument (view) is returned
-func GetResizeListeners(view View, subviewID ...string) []func(View, Frame) {
-	return getOneArgEventListeners[View, Frame](view, subviewID, ResizeEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, rui.Frame),
+//   - func(rui.View),
+//   - func(rui.Frame),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetResizeListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, Frame](view, subviewID, ResizeEvent)
 }

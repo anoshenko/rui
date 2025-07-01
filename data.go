@@ -1,6 +1,9 @@
 package rui
 
 import (
+	"errors"
+	"fmt"
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -47,16 +50,22 @@ type DataObject interface {
 
 	// ToParams create a params(map) representation of a data object
 	ToParams() Params
+
+	// PropertyByTag removes a data node corresponding to a property tag and returns it
+	RemovePropertyByTag(tag string) DataNode
 }
+
+// DataNodeType defines the type of DataNode
+type DataNodeType int
 
 // Constants which are used to describe a node type, see [DataNode]
 const (
 	// TextNode - node is the pair "tag - text value". Syntax: <tag> = <text>
-	TextNode = 0
+	TextNode DataNodeType = 0
 	// ObjectNode - node is the pair "tag - object". Syntax: <tag> = <object name>{...}
-	ObjectNode = 1
+	ObjectNode DataNodeType = 1
 	// ArrayNode - node is the pair "tag - object". Syntax: <tag> = [...]
-	ArrayNode = 2
+	ArrayNode DataNodeType = 2
 )
 
 // DataNode interface of a data node
@@ -65,7 +74,7 @@ type DataNode interface {
 	Tag() string
 
 	// Type returns a node type. Possible values are TextNode, ObjectNode and ArrayNode
-	Type() int
+	Type() DataNodeType
 
 	// Text returns node text
 	Text() string
@@ -158,6 +167,28 @@ func (object *dataObject) PropertyByTag(tag string) DataNode {
 	return nil
 }
 
+func (object *dataObject) RemovePropertyByTag(tag string) DataNode {
+	if object.property != nil {
+		for i, node := range object.property {
+			if node.Tag() == tag {
+				switch i {
+				case 0:
+					object.property = object.property[1:]
+
+				case len(object.property) - 1:
+					object.property = object.property[:len(object.property)-1]
+
+				default:
+					object.property = append(object.property[:i], object.property[i+1:]...)
+				}
+
+				return node
+			}
+		}
+	}
+	return nil
+}
+
 func (object *dataObject) PropertyValue(tag string) (string, bool) {
 	if node := object.PropertyByTag(tag); node != nil && node.Type() == TextNode {
 		return node.Text(), true
@@ -222,7 +253,7 @@ func (object *dataObject) ToParams() Params {
 
 		case ArrayNode:
 			array := []any{}
-			for i := 0; i < node.ArraySize(); i++ {
+			for i := range node.ArraySize() {
 				if data := node.ArrayElement(i); data != nil {
 					if data.IsObject() {
 						if obj := data.Object(); obj != nil {
@@ -253,7 +284,7 @@ func (node *dataNode) Tag() string {
 	return node.tag
 }
 
-func (node *dataNode) Type() int {
+func (node *dataNode) Type() DataNodeType {
 	if node.array != nil {
 		return ArrayNode
 	}
@@ -314,411 +345,402 @@ func (node *dataNode) ArrayAsParams() []Params {
 	return result
 }
 
-// ParseDataText - parse text and return DataNode
-func ParseDataText(text string) DataObject {
+type dataParser struct {
+	data      []rune
+	size      int
+	pos       int
+	line      int
+	lineStart int
+}
 
-	if strings.ContainsAny(text, "\r") {
-		text = strings.Replace(text, "\r\n", "\n", -1)
-		text = strings.Replace(text, "\r", "\n", -1)
-	}
-	data := append([]rune(text), rune(0))
-	pos := 0
-	size := len(data) - 1
-	line := 1
-	lineStart := 0
+func (parser *dataParser) skipSpaces(skipNewLine bool) {
+	for parser.pos < parser.size {
+		switch parser.data[parser.pos] {
+		case '\n':
+			if !skipNewLine {
+				return
+			}
+			parser.line++
+			parser.lineStart = parser.pos + 1
 
-	skipSpaces := func(skipNewLine bool) {
-		for pos < size {
-			switch data[pos] {
-			case '\n':
-				if !skipNewLine {
-					return
-				}
-				line++
-				lineStart = pos + 1
-
-			case '/':
-				if pos+1 < size {
-					switch data[pos+1] {
-					case '/':
-						pos += 2
-						for pos < size && data[pos] != '\n' {
-							pos++
-						}
-						pos--
-
-					case '*':
-						pos += 3
-						for {
-							if pos >= size {
-								ErrorLog("Unexpected end of file")
-								return
-							}
-							if data[pos-1] == '*' && data[pos] == '/' {
-								break
-							}
-							if data[pos-1] == '\n' {
-								line++
-								lineStart = pos
-							}
-							pos++
-						}
-
-					default:
-						return
+		case '/':
+			if parser.pos+1 < parser.size {
+				switch parser.data[parser.pos+1] {
+				case '/':
+					parser.pos += 2
+					for parser.pos < parser.size && parser.data[parser.pos] != '\n' {
+						parser.pos++
 					}
-				}
+					parser.pos--
 
-			case ' ', '\t':
-				// do nothing
+				case '*':
+					parser.pos += 3
+					for {
+						if parser.pos >= parser.size {
+							ErrorLog("Unexpected end of file")
+							return
+						}
+						if parser.data[parser.pos-1] == '*' && parser.data[parser.pos] == '/' {
+							break
+						}
+						if parser.data[parser.pos-1] == '\n' {
+							parser.line++
+							parser.lineStart = parser.pos
+						}
+						parser.pos++
+					}
 
-			default:
-				if !unicode.IsSpace(data[pos]) {
+				default:
 					return
 				}
 			}
-			pos++
-		}
-	}
 
-	parseTag := func() (string, bool) {
-		skipSpaces(true)
-		startPos := pos
-		if data[pos] == '`' {
-			pos++
-			startPos++
-			for data[pos] != '`' {
-				pos++
-				if pos >= size {
-					ErrorLog("Unexpected end of text")
-					return string(data[startPos:size]), false
-				}
-			}
-			str := string(data[startPos:pos])
-			pos++
-			return str, true
-
-		} else if data[pos] == '\'' || data[pos] == '"' {
-
-			stopSymbol := data[pos]
-			pos++
-			startPos++
-			slash := false
-			for stopSymbol != data[pos] {
-				if data[pos] == '\\' {
-					pos += 2
-					slash = true
-				} else {
-					pos++
-				}
-				if pos >= size {
-					ErrorLog("Unexpected end of text")
-					return string(data[startPos:size]), false
-				}
-			}
-
-			if !slash {
-				str := string(data[startPos:pos])
-				pos++
-				skipSpaces(false)
-				return str, true
-			}
-
-			buffer := make([]rune, pos-startPos+1)
-			n1 := 0
-			n2 := startPos
-
-			invalidEscape := func() (string, bool) {
-				str := string(data[startPos:pos])
-				pos++
-				ErrorLogF("Invalid escape sequence in \"%s\" (position %d)", str, n2-2-startPos)
-				return str, false
-			}
-
-			for n2 < pos {
-				if data[n2] != '\\' {
-					buffer[n1] = data[n2]
-					n2++
-				} else {
-					n2 += 2
-					switch data[n2-1] {
-					case 'n':
-						buffer[n1] = '\n'
-
-					case 'r':
-						buffer[n1] = '\r'
-
-					case 't':
-						buffer[n1] = '\t'
-
-					case '"':
-						buffer[n1] = '"'
-
-					case '\'':
-						buffer[n1] = '\''
-
-					case '\\':
-						buffer[n1] = '\\'
-
-					case 'x', 'X':
-						if n2+2 > pos {
-							return invalidEscape()
-						}
-						x := 0
-						for i := 0; i < 2; i++ {
-							ch := data[n2]
-							if ch >= '0' && ch <= '9' {
-								x = x*16 + int(ch-'0')
-							} else if ch >= 'a' && ch <= 'f' {
-								x = x*16 + int(ch-'a'+10)
-							} else if ch >= 'A' && ch <= 'F' {
-								x = x*16 + int(ch-'A'+10)
-							} else {
-								return invalidEscape()
-							}
-							n2++
-						}
-						buffer[n1] = rune(x)
-
-					case 'u', 'U':
-						if n2+4 > pos {
-							return invalidEscape()
-						}
-						x := 0
-						for i := 0; i < 4; i++ {
-							ch := data[n2]
-							if ch >= '0' && ch <= '9' {
-								x = x*16 + int(ch-'0')
-							} else if ch >= 'a' && ch <= 'f' {
-								x = x*16 + int(ch-'a'+10)
-							} else if ch >= 'A' && ch <= 'F' {
-								x = x*16 + int(ch-'A'+10)
-							} else {
-								return invalidEscape()
-							}
-							n2++
-						}
-						buffer[n1] = rune(x)
-
-					default:
-						str := string(data[startPos:pos])
-						ErrorLogF("Invalid escape sequence in \"%s\" (position %d)", str, n2-2-startPos)
-						return str, false
-					}
-				}
-				n1++
-			}
-
-			pos++
-			skipSpaces(false)
-			return string(buffer[0:n1]), true
-		}
-
-		stopSymbol := func(symbol rune) bool {
-			if unicode.IsSpace(symbol) {
-				return true
-			}
-			for _, sym := range []rune{'=', '{', '}', '[', ']', ',', ' ', '\t', '\n', '\'', '"', '`', '/'} {
-				if sym == symbol {
-					return true
-				}
-			}
-			return false
-		}
-
-		for pos < size && !stopSymbol(data[pos]) {
-			pos++
-		}
-
-		endPos := pos
-		skipSpaces(false)
-		if startPos == endPos {
-			//ErrorLog("empty tag")
-			return "", true
-		}
-		return string(data[startPos:endPos]), true
-	}
-
-	var parseObject func(tag string) DataObject
-	var parseArray func() []DataValue
-
-	parseNode := func() DataNode {
-		var tag string
-		var ok bool
-
-		if tag, ok = parseTag(); !ok {
-			return nil
-		}
-
-		skipSpaces(true)
-		if data[pos] != '=' {
-			ErrorLogF("expected '=' after a tag name (line: %d, position: %d)", line, pos-lineStart)
-			return nil
-		}
-
-		pos++
-		skipSpaces(true)
-		switch data[pos] {
-		case '[':
-			node := new(dataNode)
-			node.tag = tag
-
-			if node.array = parseArray(); node.array == nil {
-				return nil
-			}
-			return node
-
-		case '{':
-			node := new(dataNode)
-			node.tag = tag
-			if node.value = parseObject("_"); node.value == nil {
-				return nil
-			}
-			return node
-
-		case '}', ']', '=':
-			ErrorLogF("Expected '[', '{' or a tag name after '=' (line: %d, position: %d)", line, pos-lineStart)
-			return nil
+		case ' ', '\t':
+			// do nothing
 
 		default:
-			var str string
-			if str, ok = parseTag(); !ok {
-				return nil
+			if !unicode.IsSpace(parser.data[parser.pos]) {
+				return
 			}
+		}
+		parser.pos++
+	}
+}
 
-			node := new(dataNode)
-			node.tag = tag
+func (parser *dataParser) parseTag() (string, error) {
+	parser.skipSpaces(true)
+	startPos := parser.pos
+	switch parser.data[parser.pos] {
+	case '`':
+		parser.pos++
+		startPos++
+		for parser.data[parser.pos] != '`' {
+			parser.pos++
+			if parser.pos >= parser.size {
+				return string(parser.data[startPos:parser.size]), errors.New("unexpected end of text")
+			}
+		}
+		str := string(parser.data[startPos:parser.pos])
+		parser.pos++
+		return str, nil
 
-			if data[pos] == '{' {
-				if node.value = parseObject(str); node.value == nil {
-					return nil
-				}
+	case '\'', '"':
+		stopSymbol := parser.data[parser.pos]
+		parser.pos++
+		startPos++
+		slash := false
+		for stopSymbol != parser.data[parser.pos] {
+			if parser.data[parser.pos] == '\\' {
+				parser.pos += 2
+				slash = true
 			} else {
-				val := new(dataStringValue)
-				val.value = str
-				node.value = val
+				parser.pos++
 			}
+			if parser.pos >= parser.size {
+				return string(parser.data[startPos:parser.size]), errors.New("unexpected end of text")
+			}
+		}
 
-			return node
+		if !slash {
+			str := string(parser.data[startPos:parser.pos])
+			parser.pos++
+			parser.skipSpaces(false)
+			return str, nil
+		}
+
+		buffer := make([]rune, parser.pos-startPos+1)
+		n1 := 0
+		n2 := startPos
+
+		invalidEscape := func() (string, error) {
+			str := string(parser.data[startPos:parser.pos])
+			parser.pos++
+			return str, fmt.Errorf(`invalid escape sequence in "%s" (position %d)`, str, n2-2-startPos)
+		}
+
+		for n2 < parser.pos {
+			if parser.data[n2] != '\\' {
+				buffer[n1] = parser.data[n2]
+				n2++
+			} else {
+				n2 += 2
+				switch parser.data[n2-1] {
+				case 'n':
+					buffer[n1] = '\n'
+
+				case 'r':
+					buffer[n1] = '\r'
+
+				case 't':
+					buffer[n1] = '\t'
+
+				case '"':
+					buffer[n1] = '"'
+
+				case '\'':
+					buffer[n1] = '\''
+
+				case '\\':
+					buffer[n1] = '\\'
+
+				case 'x', 'X':
+					if n2+2 > parser.pos {
+						return invalidEscape()
+					}
+					x := 0
+					for range 2 {
+						ch := parser.data[n2]
+						if ch >= '0' && ch <= '9' {
+							x = x*16 + int(ch-'0')
+						} else if ch >= 'a' && ch <= 'f' {
+							x = x*16 + int(ch-'a'+10)
+						} else if ch >= 'A' && ch <= 'F' {
+							x = x*16 + int(ch-'A'+10)
+						} else {
+							return invalidEscape()
+						}
+						n2++
+					}
+					buffer[n1] = rune(x)
+
+				case 'u', 'U':
+					if n2+4 > parser.pos {
+						return invalidEscape()
+					}
+					x := 0
+					for range 4 {
+						ch := parser.data[n2]
+						if ch >= '0' && ch <= '9' {
+							x = x*16 + int(ch-'0')
+						} else if ch >= 'a' && ch <= 'f' {
+							x = x*16 + int(ch-'a'+10)
+						} else if ch >= 'A' && ch <= 'F' {
+							x = x*16 + int(ch-'A'+10)
+						} else {
+							return invalidEscape()
+						}
+						n2++
+					}
+					buffer[n1] = rune(x)
+
+				default:
+					str := string(parser.data[startPos:parser.pos])
+					return str, fmt.Errorf(`invalid escape sequence in "%s" (position %d)`, str, n2-2-startPos)
+				}
+			}
+			n1++
+		}
+
+		parser.pos++
+		parser.skipSpaces(false)
+		return string(buffer[0:n1]), nil
+	}
+
+	for parser.pos < parser.size && !parser.stopSymbol(parser.data[parser.pos]) {
+		parser.pos++
+	}
+
+	endPos := parser.pos
+	parser.skipSpaces(false)
+	if startPos == endPos {
+		//ErrorLog("empty tag")
+		return "", nil
+	}
+	return string(parser.data[startPos:endPos]), nil
+}
+
+func (parser *dataParser) stopSymbol(symbol rune) bool {
+	return unicode.IsSpace(symbol) ||
+		slices.Contains([]rune{'=', '{', '}', '[', ']', ',', ' ', '\t', '\n', '\'', '"', '`', '/'}, symbol)
+}
+
+func (parser *dataParser) parseNode() (DataNode, error) {
+	var tag string
+	var err error
+
+	if tag, err = parser.parseTag(); err != nil {
+		return nil, err
+	}
+
+	parser.skipSpaces(true)
+	if parser.data[parser.pos] != '=' {
+		return nil, fmt.Errorf("expected '=' after a tag name (line: %d, position: %d)", parser.line, parser.pos-parser.lineStart)
+	}
+
+	parser.pos++
+	parser.skipSpaces(true)
+	switch parser.data[parser.pos] {
+	case '[':
+		node := new(dataNode)
+		node.tag = tag
+
+		if node.array, err = parser.parseArray(); err != nil {
+			return nil, err
+		}
+		return node, nil
+
+	case '{':
+		node := new(dataNode)
+		node.tag = tag
+		if node.value, err = parser.parseObject("_"); err != nil {
+			return nil, err
+		}
+		return node, nil
+
+	case '}', ']', '=':
+		return nil, fmt.Errorf(`expected '[', '{' or a tag name after '=' (line: %d, position: %d)`, parser.line, parser.pos-parser.lineStart)
+
+	default:
+		var str string
+		if str, err = parser.parseTag(); err != nil {
+			return nil, err
+		}
+
+		node := new(dataNode)
+		node.tag = tag
+
+		if parser.data[parser.pos] == '{' {
+			if node.value, err = parser.parseObject(str); err != nil {
+				return nil, err
+			}
+		} else {
+			val := new(dataStringValue)
+			val.value = str
+			node.value = val
+		}
+
+		return node, nil
+	}
+}
+
+func (parser *dataParser) parseObject(tag string) (DataObject, error) {
+	if parser.data[parser.pos] != '{' {
+		return nil, fmt.Errorf(`expected '{' (line: %d, position: %d)`, parser.line, parser.pos-parser.lineStart)
+	}
+	parser.pos++
+
+	obj := new(dataObject)
+	obj.tag = tag
+	obj.property = []DataNode{}
+
+	for parser.pos < parser.size {
+		parser.skipSpaces(true)
+		if parser.data[parser.pos] == '}' {
+			parser.pos++
+			parser.skipSpaces(false)
+			return obj, nil
+		}
+
+		node, err := parser.parseNode()
+		if err != nil {
+			return nil, err
+		}
+
+		obj.property = append(obj.property, node)
+		if parser.data[parser.pos] == '}' {
+			parser.pos++
+			parser.skipSpaces(true)
+			return obj, nil
+		} else if parser.data[parser.pos] != ',' && parser.data[parser.pos] != '\n' {
+			return nil, fmt.Errorf(`expected '}', '\n' or ',' (line: %d, position: %d)`, parser.line, parser.pos-parser.lineStart)
+		}
+
+		if parser.data[parser.pos] != '\n' {
+			parser.pos++
+		}
+
+		parser.skipSpaces(true)
+		for parser.data[parser.pos] == ',' {
+			parser.pos++
+			parser.skipSpaces(true)
 		}
 	}
 
-	parseObject = func(tag string) DataObject {
-		if data[pos] != '{' {
-			ErrorLogF("Expected '{' (line: %d, position: %d)", line, pos-lineStart)
-			return nil
-		}
-		pos++
+	return nil, errors.New("unexpected end of text")
+}
 
-		obj := new(dataObject)
-		obj.tag = tag
-		obj.property = []DataNode{}
+func (parser *dataParser) parseArray() ([]DataValue, error) {
+	parser.pos++
+	parser.skipSpaces(true)
 
-		for pos < size {
-			var node DataNode
+	array := []DataValue{}
 
-			skipSpaces(true)
-			if data[pos] == '}' {
-				pos++
-				skipSpaces(false)
-				return obj
-			}
-
-			if node = parseNode(); node == nil {
-				return nil
-			}
-			obj.property = append(obj.property, node)
-			if data[pos] == '}' {
-				pos++
-				skipSpaces(true)
-				return obj
-			} else if data[pos] != ',' && data[pos] != '\n' {
-				ErrorLogF(`Expected '}', '\n' or ',' (line: %d, position: %d)`, line, pos-lineStart)
-				return nil
-			}
-			if data[pos] != '\n' {
-				pos++
-			}
-			skipSpaces(true)
-			for data[pos] == ',' {
-				pos++
-				skipSpaces(true)
-			}
+	for parser.pos < parser.size {
+		parser.skipSpaces(true)
+		for parser.data[parser.pos] == ',' && parser.pos < parser.size {
+			parser.pos++
+			parser.skipSpaces(true)
 		}
 
-		ErrorLog("Unexpected end of text")
-		return nil
-	}
+		if parser.pos >= parser.size {
+			break
+		}
 
-	parseArray = func() []DataValue {
-		pos++
-		skipSpaces(true)
+		if parser.data[parser.pos] == ']' {
+			parser.pos++
+			parser.skipSpaces(true)
+			return array, nil
+		}
 
-		array := []DataValue{}
+		tag, err := parser.parseTag()
+		if err != nil {
+			return nil, err
+		}
 
-		for pos < size {
-			var tag string
-			var ok bool
-
-			skipSpaces(true)
-			for data[pos] == ',' && pos < size {
-				pos++
-				skipSpaces(true)
+		if parser.data[parser.pos] == '{' {
+			obj, err := parser.parseObject(tag)
+			if err != nil {
+				return nil, err
 			}
+			array = append(array, obj)
+		} else {
+			val := new(dataStringValue)
+			val.value = tag
+			array = append(array, val)
+		}
 
-			if pos >= size {
-				break
-			}
+		switch parser.data[parser.pos] {
+		case ']', ',', '\n':
 
+		default:
+			return nil, fmt.Errorf(`expected ']' or ',' (line: %d, position: %d)`, parser.line, parser.pos-parser.lineStart)
+		}
+
+		/*
 			if data[pos] == ']' {
 				pos++
-				skipSpaces(true)
-				return array
-			}
-
-			if tag, ok = parseTag(); !ok {
-				return nil
-			}
-
-			if data[pos] == '{' {
-				obj := parseObject(tag)
-				if obj == nil {
-					return nil
-				}
-				array = append(array, obj)
-			} else {
-				val := new(dataStringValue)
-				val.value = tag
-				array = append(array, val)
-			}
-
-			switch data[pos] {
-			case ']', ',', '\n':
-
-			default:
-				ErrorLogF("Expected ']' or ',' (line: %d, position: %d)", line, pos-lineStart)
-				return nil
-			}
-
-			/*
-				if data[pos] == ']' {
-					pos++
-					skipSpaces()
-					return array, nil
-				} else if data[pos] != ',' {
-					return nil, fmt.Errorf("Expected ']' or ',' (line: %d, position: %d)", line, pos-lineStart)
-				}
-				pos++
 				skipSpaces()
-			*/
-		}
-
-		ErrorLog("Unexpected end of text")
-		return nil
+				return array, nil
+			} else if data[pos] != ',' {
+				return nil, fmt.Errorf("Expected ']' or ',' (line: %d, position: %d)", line, pos-lineStart)
+			}
+			pos++
+			skipSpaces()
+		*/
 	}
 
-	if tag, ok := parseTag(); ok {
-		return parseObject(tag)
+	return nil, errors.New("unexpected end of text")
+}
+
+// ParseDataText - parse text and return DataNode
+func ParseDataText(text string) (DataObject, error) {
+
+	if strings.ContainsAny(text, "\r") {
+		text = strings.ReplaceAll(text, "\r\n", "\n")
+		text = strings.ReplaceAll(text, "\r", "\n")
 	}
-	return nil
+
+	parser := dataParser{
+		data:      append([]rune(text), rune(0)),
+		pos:       0,
+		line:      1,
+		lineStart: 0,
+	}
+	parser.size = len(parser.data) - 1
+
+	tag, err := parser.parseTag()
+	if err != nil {
+		return nil, err
+	}
+	return parser.parseObject(tag)
 }

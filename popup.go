@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -150,7 +151,7 @@ const (
 	//
 	// Used by Popup.
 	// Specify start translation, scale and rotation over x, y and z axes as well as a distortion
-	// for an animated Popup showing/hidding.
+	// for an animated Popup showing/hiding.
 	//
 	// Supported types: TransformProperty, string.
 	//
@@ -278,7 +279,24 @@ type Popup interface {
 	viewByHTMLID(id string) View
 	keyEvent(event KeyEvent) bool
 	showAnimation()
-	dissmissAnimation(listener func(PropertyName)) bool
+	dismissAnimation(listener func(PropertyName)) bool
+}
+
+type popupListener interface {
+	Run(Popup)
+	rawListener() any
+}
+
+type popupListener0 struct {
+	fn func()
+}
+
+type popupListener1 struct {
+	fn func(Popup)
+}
+
+type popupListenerBinding struct {
+	name string
 }
 
 type popupData struct {
@@ -287,7 +305,7 @@ type popupData struct {
 	contentView     View
 	buttons         []PopupButton
 	cancelable      bool
-	dismissListener []func(Popup)
+	dismissListener []popupListener
 	showTransform   TransformProperty
 	showOpacity     float64
 	showDuration    float64
@@ -649,7 +667,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 				}
 
 			case DismissEvent:
-				if listeners, ok := valueToNoArgEventListeners[Popup](value); ok {
+				if listeners, ok := valueToPopupEventListeners(value); ok {
 					if listeners != nil {
 						popup.dismissListener = listeners
 					}
@@ -740,7 +758,7 @@ func (popup *popupData) init(view View, popupParams Params) {
 		popupCellHeight = append(popupCellHeight, AutoSize())
 		gap, _ := sizeConstant(session, "ruiPopupButtonGap")
 		cellWidth := []SizeUnit{}
-		for i := 0; i < buttonCount; i++ {
+		for range buttonCount {
 			cellWidth = append(cellWidth, Fr(1))
 		}
 
@@ -831,7 +849,7 @@ func (popup *popupData) showAnimation() {
 	}
 }
 
-func (popup *popupData) dissmissAnimation(listener func(PropertyName)) bool {
+func (popup *popupData) dismissAnimation(listener func(PropertyName)) bool {
 	if popup.showOpacity != 1 || popup.showTransform != nil {
 		session := popup.Session()
 		popup.popupView.Set(TransitionEndEvent, listener)
@@ -887,7 +905,7 @@ func (popup *popupData) onDismiss() {
 	popup.Session().callFunc("removeView", popup.layerView.htmlID())
 
 	for _, listener := range popup.dismissListener {
-		listener(popup)
+		listener.Run(popup)
 	}
 }
 
@@ -923,6 +941,25 @@ func NewPopup(view View, param Params) Popup {
 	return popup
 }
 
+/*
+func CreatePopupFromObject(session Session, object DataObject, binding any) Popup {
+	node := object.RemovePropertyByTag(string(Content))
+	if node == nil {
+		ErrorLog(`"content" property not found`)
+		return nil
+	}
+
+	switch node.Type() {
+	case ObjectNode:
+
+	case TextNode:
+
+	default:
+		ErrorLog(`Unsupported data of "content" property`)
+		return nil
+	}
+}
+*/
 // ShowPopup creates a new Popup and shows it
 func ShowPopup(view View, param Params) Popup {
 	popup := NewPopup(view, param)
@@ -994,23 +1031,162 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 
 	session := popup.Session()
 	listener := func(PropertyName) {
-		if index == count-1 {
+		switch index {
+		case 0:
 			if count == 1 {
 				manager.popups = []Popup{}
 				session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
 				session.updateCSSProperty("ruiPopupLayer", "visibility", "hidden")
 			} else {
-				manager.popups = manager.popups[:count-1]
+				manager.popups = manager.popups[1:]
 			}
-		} else if index == 0 {
-			manager.popups = manager.popups[1:]
-		} else {
+
+		case count - 1:
+			manager.popups = manager.popups[:count-1]
+
+		default:
 			manager.popups = append(manager.popups[:index], manager.popups[index+1:]...)
 		}
 		popup.onDismiss()
 	}
 
-	if !popup.dissmissAnimation(listener) {
+	if !popup.dismissAnimation(listener) {
 		listener("")
 	}
+}
+
+func newPopupListener0(fn func()) popupListener {
+	obj := new(popupListener0)
+	obj.fn = fn
+	return obj
+}
+
+func (data *popupListener0) Run(_ Popup) {
+	data.fn()
+}
+
+func (data *popupListener0) rawListener() any {
+	return data.fn
+}
+
+func newPopupListener1(fn func(Popup)) popupListener {
+	obj := new(popupListener1)
+	obj.fn = fn
+	return obj
+}
+
+func (data *popupListener1) Run(popup Popup) {
+	data.fn(popup)
+}
+
+func (data *popupListener1) rawListener() any {
+	return data.fn
+}
+
+func newPopupListenerBinding(name string) popupListener {
+	obj := new(popupListenerBinding)
+	obj.name = name
+	return obj
+}
+
+func (data *popupListenerBinding) Run(popup Popup) {
+	bind := popup.View().binding()
+	if bind == nil {
+		ErrorLogF(`There is no a binding object for call "%s"`, data.name)
+		return
+	}
+
+	val := reflect.ValueOf(bind)
+	method := val.MethodByName(data.name)
+	if !method.IsValid() {
+		ErrorLogF(`The "%s" method is not valid`, data.name)
+		return
+	}
+
+	methodType := method.Type()
+	var args []reflect.Value = nil
+	switch methodType.NumIn() {
+	case 0:
+		args = []reflect.Value{}
+
+	case 1:
+		inType := methodType.In(0)
+		if inType == reflect.TypeOf(popup) {
+			args = []reflect.Value{reflect.ValueOf(popup)}
+		}
+	}
+
+	if args != nil {
+		method.Call(args)
+	} else {
+		ErrorLogF(`Unsupported prototype of "%s" method`, data.name)
+	}
+}
+
+func (data *popupListenerBinding) rawListener() any {
+	return data.name
+}
+
+func valueToPopupEventListeners(value any) ([]popupListener, bool) {
+	if value == nil {
+		return nil, true
+	}
+
+	switch value := value.(type) {
+	case []popupListener:
+		return value, true
+
+	case popupListener:
+		return []popupListener{value}, true
+
+	case string:
+		return []popupListener{newPopupListenerBinding(value)}, true
+
+	case func(Popup):
+		return []popupListener{newPopupListener1(value)}, true
+
+	case func():
+		return []popupListener{newPopupListener0(value)}, true
+
+	case []func(Popup):
+		result := make([]popupListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newPopupListener1(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []func():
+		result := make([]popupListener, 0, len(value))
+		for _, fn := range value {
+			if fn != nil {
+				result = append(result, newPopupListener0(fn))
+			}
+		}
+		return result, len(result) > 0
+
+	case []any:
+		result := make([]popupListener, 0, len(value))
+		for _, v := range value {
+			if v != nil {
+				switch v := v.(type) {
+				case func(Popup):
+					result = append(result, newPopupListener1(v))
+
+				case func():
+					result = append(result, newPopupListener0(v))
+
+				case string:
+					result = append(result, newPopupListenerBinding(v))
+
+				default:
+					return nil, false
+				}
+			}
+		}
+		return result, len(result) > 0
+	}
+
+	return nil, false
 }

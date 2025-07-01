@@ -190,7 +190,7 @@ func (bridge *webBridge) argToString(arg any) (string, bool) {
 		for _, val := range arg {
 			buffer.WriteRune(lead)
 			lead = ','
-			buffer.WriteString(fmt.Sprintf("%g", val))
+			fmt.Fprintf(buffer, "%g", val)
 		}
 		buffer.WriteRune(']')
 		return buffer.String(), true

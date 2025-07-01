@@ -121,7 +121,7 @@ func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 
 func parseProperties(properties Properties, object DataObject) {
 	count := object.PropertyCount()
-	for i := 0; i < count; i++ {
+	for i := range count {
 		if node := object.Property(i); node != nil {
 			switch node.Type() {
 			case TextNode:

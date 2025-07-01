@@ -1,5 +1,7 @@
 package rui
 
+import "reflect"
+
 // DrawFunction is the constant for "draw-function" property tag.
 //
 // Used by `CanvasView`.
@@ -55,7 +57,7 @@ func (canvasView *canvasViewData) removeFunc(tag PropertyName) []PropertyName {
 	if tag == DrawFunction {
 		if canvasView.getRaw(DrawFunction) != nil {
 			canvasView.setRaw(DrawFunction, nil)
-			canvasView.Redraw()
+			//canvasView.Redraw()
 			return []PropertyName{DrawFunction}
 		}
 		return []PropertyName{}
@@ -66,9 +68,14 @@ func (canvasView *canvasViewData) removeFunc(tag PropertyName) []PropertyName {
 
 func (canvasView *canvasViewData) setFunc(tag PropertyName, value any) []PropertyName {
 	if tag == DrawFunction {
-		if fn, ok := value.(func(Canvas)); ok {
-			canvasView.setRaw(DrawFunction, fn)
-		} else {
+		switch value := value.(type) {
+		case func(Canvas):
+			canvasView.setRaw(DrawFunction, value)
+
+		case string:
+			canvasView.setRaw(DrawFunction, value)
+
+		default:
 			notCompatibleType(tag, value)
 			return nil
 		}
@@ -94,8 +101,30 @@ func (canvasView *canvasViewData) Redraw() {
 	canvas := newCanvas(canvasView)
 	canvas.ClearRect(0, 0, canvasView.frame.Width, canvasView.frame.Height)
 	if value := canvasView.getRaw(DrawFunction); value != nil {
-		if drawer, ok := value.(func(Canvas)); ok {
+		switch drawer := value.(type) {
+		case func(Canvas):
 			drawer(canvas)
+
+		case string:
+			bind := canvasView.binding()
+			if bind == nil {
+				ErrorLogF(`There is no a binding object for call "%s"`, drawer)
+				break
+			}
+
+			val := reflect.ValueOf(bind)
+			method := val.MethodByName(drawer)
+			if !method.IsValid() {
+				ErrorLogF(`The "%s" method is not valid`, drawer)
+				break
+			}
+
+			methodType := method.Type()
+			if methodType.NumIn() == 1 && equalType(methodType.In(0), reflect.TypeOf(canvas)) {
+				method.Call([]reflect.Value{reflect.ValueOf(canvas)})
+			} else {
+				ErrorLogF(`Unsupported prototype of "%s" method`, drawer)
+			}
 		}
 	}
 	canvas.finishDraw()

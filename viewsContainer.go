@@ -85,10 +85,13 @@ func (container *viewsContainerData) Append(view View) {
 
 		viewHTML(view, buffer, "")
 		container.Session().appendToInnerHTML(container.htmlID(), buffer.String())
+		container.contentChanged()
+	}
+}
 
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
-		}
+func (container *viewsContainerData) contentChanged() {
+	if listener, ok := container.changeListener[Content]; ok {
+		listener.Run(container, Content)
 	}
 }
 
@@ -113,9 +116,7 @@ func (container *viewsContainerData) insert(view View, index int) bool {
 func (container *viewsContainerData) Insert(view View, index int) {
 	if container.insert(view, index) && container.created {
 		updateInnerHTML(container.htmlID(), container.Session())
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
-		}
+		container.contentChanged()
 	}
 }
 
@@ -131,11 +132,12 @@ func (container *viewsContainerData) removeView(index int) View {
 	}
 
 	view := container.views[index]
-	if index == 0 {
+	switch index {
+	case 0:
 		container.views = container.views[1:]
-	} else if index == count-1 {
+	case count - 1:
 		container.views = container.views[:index]
-	} else {
+	default:
 		container.views = append(container.views[:index], container.views[index+1:]...)
 	}
 
@@ -148,9 +150,7 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	view := container.removeView(index)
 	if view != nil && container.created {
 		container.Session().callFunc("removeView", view.htmlID())
-		if listener, ok := container.changeListener[Content]; ok {
-			listener(container, Content)
-		}
+		container.contentChanged()
 	}
 	return view
 }
@@ -173,12 +173,9 @@ func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Bui
 }
 
 func viewFromTextValue(text string, session Session) View {
-	if strings.Contains(text, "{") && strings.Contains(text, "}") {
-		data := ParseDataText(text)
-		if data != nil {
-			if view := CreateViewFromObject(session, data); view != nil {
-				return view
-			}
+	if data, err := ParseDataText(text); err == nil {
+		if view := CreateViewFromObject(session, data, nil); view != nil {
+			return view
 		}
 	}
 	return NewTextView(session, Params{Text: text})
@@ -277,7 +274,7 @@ func (container *viewsContainerData) setContent(value any) bool {
 		container.views = views
 
 	case DataObject:
-		if view := CreateViewFromObject(session, value); view != nil {
+		if view := CreateViewFromObject(session, value, nil); view != nil {
 			container.views = []View{view}
 		} else {
 			return false
@@ -287,7 +284,7 @@ func (container *viewsContainerData) setContent(value any) bool {
 		views := []View{}
 		for _, data := range value {
 			if data.IsObject() {
-				if view := CreateViewFromObject(session, data.Object()); view != nil {
+				if view := CreateViewFromObject(session, data.Object(), nil); view != nil {
 					views = append(views, view)
 				}
 			} else {

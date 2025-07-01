@@ -156,45 +156,6 @@ const (
 	AnimationIterationEvent PropertyName = "animation-iteration-event"
 )
 
-/*
-func setTransitionListener(properties Properties, tag PropertyName, value any) bool {
-	if listeners, ok := valueToOneArgEventListeners[View, string](value); ok {
-		if len(listeners) == 0 {
-			properties.setRaw(tag, nil)
-		} else {
-			properties.setRaw(tag, listeners)
-		}
-		return true
-	}
-	notCompatibleType(tag, value)
-	return false
-}
-
-func (view *viewData) removeTransitionListener(tag PropertyName) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := eventJsFunc[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func transitionEventsHtml(view View, buffer *strings.Builder) {
-	for _, tag := range []PropertyName{TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent} {
-		if value := view.getRaw(tag); value != nil {
-			if js, ok := eventJsFunc[tag]; ok {
-				if listeners, ok := value.([]func(View, string)); ok && len(listeners) > 0 {
-					buffer.WriteString(js.jsEvent)
-					buffer.WriteString(`="`)
-					buffer.WriteString(js.jsFunc)
-					buffer.WriteString(`(this, event)" `)
-				}
-			}
-		}
-	}
-}
-*/
-
 func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) {
 	if propertyName, ok := data.PropertyValue("property"); ok {
 		property := PropertyName(propertyName)
@@ -208,49 +169,10 @@ func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) 
 		}
 
 		for _, listener := range getOneArgEventListeners[View, PropertyName](view, nil, tag) {
-			listener(view, property)
+			listener.Run(view, property)
 		}
 	}
 }
-
-/*
-	func setAnimationListener(properties Properties, tag PropertyName, value any) bool {
-		if listeners, ok := valueToOneArgEventListeners[View, string](value); ok {
-			if len(listeners) == 0 {
-				properties.setRaw(tag, nil)
-			} else {
-				properties.setRaw(tag, listeners)
-			}
-			return true
-		}
-		notCompatibleType(tag, value)
-		return false
-	}
-
-func (view *viewData) removeAnimationListener(tag PropertyName) {
-	delete(view.properties, tag)
-	if view.created {
-		if js, ok := eventJsFunc[tag]; ok {
-			view.session.removeProperty(view.htmlID(), js.jsEvent)
-		}
-	}
-}
-
-func animationEventsHtml(view View, buffer *strings.Builder) {
-	for _, tag := range []PropertyName{AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent} {
-		if value := view.getRaw(tag); value != nil {
-			if js, ok := eventJsFunc[tag]; ok {
-				if listeners, ok := value.([]func(View, string)); ok && len(listeners) > 0 {
-					buffer.WriteString(js.jsEvent)
-					buffer.WriteString(`="`)
-					buffer.WriteString(js.jsFunc)
-					buffer.WriteString(`(this, event)" `)
-				}
-			}
-		}
-	}
-}
-*/
 
 func (view *viewData) handleAnimationEvents(tag PropertyName, data DataObject) {
 	if listeners := getOneArgEventListeners[View, string](view, nil, tag); len(listeners) > 0 {
@@ -263,63 +185,135 @@ func (view *viewData) handleAnimationEvents(tag PropertyName, data DataObject) {
 			}
 		}
 		for _, listener := range listeners {
-			listener(view, id)
+			listener.Run(view, id)
 		}
 	}
 }
 
 // GetTransitionRunListeners returns the "transition-run-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTransitionRunListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, TransitionRunEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTransitionRunListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, TransitionRunEvent)
 }
 
 // GetTransitionStartListeners returns the "transition-start-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTransitionStartListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, TransitionStartEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTransitionStartListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, TransitionStartEvent)
 }
 
 // GetTransitionEndListeners returns the "transition-end-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTransitionEndListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, TransitionEndEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTransitionEndListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, TransitionEndEvent)
 }
 
 // GetTransitionCancelListeners returns the "transition-cancel-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTransitionCancelListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, TransitionCancelEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTransitionCancelListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, TransitionCancelEvent)
 }
 
 // GetAnimationStartListeners returns the "animation-start-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetAnimationStartListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, AnimationStartEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetAnimationStartListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, AnimationStartEvent)
 }
 
 // GetAnimationEndListeners returns the "animation-end-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetAnimationEndListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, AnimationEndEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetAnimationEndListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, AnimationEndEvent)
 }
 
 // GetAnimationCancelListeners returns the "animation-cancel-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetAnimationCancelListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, AnimationCancelEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetAnimationCancelListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, AnimationCancelEvent)
 }
 
 // GetAnimationIterationListeners returns the "animation-iteration-event" listener list.
 // If there are no listeners then the empty list is returned.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetAnimationIterationListeners(view View, subviewID ...string) []func(View, string) {
-	return getOneArgEventListeners[View, string](view, subviewID, AnimationIterationEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.View, string),
+//   - func(rui.View),
+//   - func(string),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetAnimationIterationListeners(view View, subviewID ...string) []any {
+	return getOneArgEventRawListeners[View, string](view, subviewID, AnimationIterationEvent)
 }

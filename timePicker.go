@@ -246,7 +246,7 @@ func (picker *timePickerData) propertyChanged(tag PropertyName) {
 		value := GetTimePickerValue(picker)
 		session.callFunc("setInputValue", picker.htmlID(), value.Format(timeFormat))
 
-		if listeners := GetTimeChangedListeners(picker); len(listeners) > 0 {
+		if listeners := getTwoArgEventListeners[TimePicker, time.Time](picker, nil, TimeChangedEvent); len(listeners) > 0 {
 			oldTime := time.Now()
 			if val := picker.getRaw("old-time"); val != nil {
 				if time, ok := val.(time.Time); ok {
@@ -254,7 +254,7 @@ func (picker *timePickerData) propertyChanged(tag PropertyName) {
 				}
 			}
 			for _, listener := range listeners {
-				listener(picker, value, oldTime)
+				listener.Run(picker, value, oldTime)
 			}
 		}
 
@@ -320,11 +320,11 @@ func (picker *timePickerData) handleCommand(self View, command PropertyName, dat
 				oldValue := GetTimePickerValue(picker)
 				picker.properties[TimePickerValue] = value
 				if value != oldValue {
-					for _, listener := range GetTimeChangedListeners(picker) {
-						listener(picker, value, oldValue)
+					for _, listener := range getTwoArgEventListeners[TimePicker, time.Time](picker, nil, TimeChangedEvent) {
+						listener.Run(picker, value, oldValue)
 					}
 					if listener, ok := picker.changeListener[TimePickerValue]; ok {
-						listener(picker, TimePickerValue)
+						listener.Run(picker, TimePickerValue)
 					}
 
 				}
@@ -373,7 +373,9 @@ func getTimeProperty(view View, mainTag, shortTag PropertyName) (time.Time, bool
 
 // GetTimePickerMin returns the min time of TimePicker subview and "true" as the second value if the min time is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool) {
 	if view = getSubview(view, subviewID); view != nil {
 		return getTimeProperty(view, TimePickerMin, Min)
@@ -383,7 +385,9 @@ func GetTimePickerMin(view View, subviewID ...string) (time.Time, bool) {
 
 // GetTimePickerMax returns the max time of TimePicker subview and "true" as the second value if the min time is set,
 // "false" as the second value otherwise.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool) {
 	if view = getSubview(view, subviewID); view != nil {
 		return getTimeProperty(view, TimePickerMax, Max)
@@ -392,13 +396,17 @@ func GetTimePickerMax(view View, subviewID ...string) (time.Time, bool) {
 }
 
 // GetTimePickerStep returns the time changing step in seconds of TimePicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetTimePickerStep(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, TimePickerStep, 60)
 }
 
 // GetTimePickerValue returns the time of TimePicker subview.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetTimePickerValue(view View, subviewID ...string) time.Time {
 	if view = getSubview(view, subviewID); view == nil {
 		return time.Now()
@@ -409,7 +417,18 @@ func GetTimePickerValue(view View, subviewID ...string) time.Time {
 
 // GetTimeChangedListeners returns the TimeChangedListener list of an TimePicker subview.
 // If there are no listeners then the empty list is returned
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
-func GetTimeChangedListeners(view View, subviewID ...string) []func(TimePicker, time.Time, time.Time) {
-	return getTwoArgEventListeners[TimePicker, time.Time](view, subviewID, TimeChangedEvent)
+//
+// Result elements can be of the following types:
+//   - func(rui.TimePicker, time.Time, time.Time),
+//   - func(rui.TimePicker, time.Time),
+//   - func(rui.TimePicker),
+//   - func(time.Time, time.Time),
+//   - func(time.Time),
+//   - func(),
+//   - string.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetTimeChangedListeners(view View, subviewID ...string) []any {
+	return getTwoArgEventRawListeners[TimePicker, time.Time](view, subviewID, TimeChangedEvent)
 }

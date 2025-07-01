@@ -433,7 +433,7 @@ func (border *borderProperty) String() string {
 
 func (border *borderProperty) setBorderObject(obj DataObject) bool {
 	result := true
-	for i := 0; i < obj.PropertyCount(); i++ {
+	for i := range obj.PropertyCount() {
 		if node := obj.Property(i); node != nil {
 			tag := PropertyName(node.Tag())
 			switch node.Type() {
@@ -610,7 +610,10 @@ func borderSet(properties Properties, tag PropertyName, value any) []PropertyNam
 	case Left, Right, Top, Bottom:
 		switch value := value.(type) {
 		case string:
-			if obj := ParseDataText(value); obj != nil {
+			obj, err := ParseDataText(value)
+			if err != nil {
+				ErrorLog(err.Error())
+			} else {
 				return setSingleBorderObject(tag, obj)
 			}
 

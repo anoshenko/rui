@@ -6,10 +6,6 @@ import (
 
 func TestParseDataText(t *testing.T) {
 
-	SetErrorLog(func(text string) {
-		t.Error(text)
-	})
-
 	text := `obj1 {
 	key1 = val1,
 	key2=obj2{
@@ -27,8 +23,10 @@ func TestParseDataText(t *testing.T) {
 	key3 = "\n \t \\ \r \" ' \X4F\x4e \U01Ea",` +
 		"key4=`" + `\n \t \\ \r \" ' \x8F \UF80a` + "`\r}"
 
-	obj := ParseDataText(text)
-	if obj != nil {
+	obj, err := ParseDataText(text)
+	if err != nil {
+		t.Error(err)
+	} else {
 		if obj.Tag() != "obj1" {
 			t.Error(`obj.Tag() != "obj1"`)
 		}
@@ -75,7 +73,7 @@ func TestParseDataText(t *testing.T) {
 			t.Errorf(`obj.PropertyValue("key5") result: ("%s",%v)`, val, ok)
 		}
 
-		testKey := func(obj DataObject, index int, tag string, nodeType int) DataNode {
+		testKey := func(obj DataObject, index int, tag string, nodeType DataNodeType) DataNode {
 			key := obj.Property(index)
 			if key == nil {
 				t.Errorf(`%s.Property(%d) == nil`, obj.Tag(), index)
@@ -118,7 +116,7 @@ func TestParseDataText(t *testing.T) {
 
 				type testKeyData struct {
 					tag      string
-					nodeType int
+					nodeType DataNodeType
 				}
 
 				data := []testKeyData{
@@ -173,9 +171,6 @@ func TestParseDataText(t *testing.T) {
 		}
 	}
 
-	SetErrorLog(func(text string) {
-	})
-
 	failText := []string{
 		" ",
 		"obj[]",
@@ -204,7 +199,7 @@ func TestParseDataText(t *testing.T) {
 	}
 
 	for _, txt := range failText {
-		if obj := ParseDataText(txt); obj != nil {
+		if _, err := ParseDataText(txt); err == nil {
 			t.Errorf("result ParseDataText(\"%s\") must be fail", txt)
 		}
 	}

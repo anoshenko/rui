@@ -105,3 +105,12 @@ func InlineImageFromResource(filename string) (string, bool) {
 
 	return "", false
 }
+
+// InlineFileFromData creates inline image from the image data and mimetype.
+func InlineFileFromData(data []byte, mimeType string) string {
+	if data == nil {
+		return ""
+	}
+
+	return "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(data)
+}

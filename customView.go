@@ -98,8 +98,8 @@ func (customView *CustomViewData) SetParams(params Params) bool {
 }
 
 // SetChangeListener set the function to track the change of the View property
-func (customView *CustomViewData) SetChangeListener(tag PropertyName, listener func(View, PropertyName)) {
-	customView.superView.SetChangeListener(tag, listener)
+func (customView *CustomViewData) SetChangeListener(tag PropertyName, listener any) bool {
+	return customView.superView.SetChangeListener(tag, listener)
 }
 
 // Remove removes the property with name defined by the argument
@@ -292,15 +292,15 @@ func (customView *CustomViewData) ViewIndex(view View) int {
 	return -1
 }
 
-func (customView *CustomViewData) exscludeTags() []PropertyName {
+func (customView *CustomViewData) excludeTags() []PropertyName {
 	if customView.superView != nil {
-		exsclude := []PropertyName{}
+		exclude := []PropertyName{}
 		for tag, value := range customView.defaultParams {
 			if value == customView.superView.getRaw(tag) {
-				exsclude = append(exsclude, tag)
+				exclude = append(exclude, tag)
 			}
 		}
-		return exsclude
+		return exclude
 	}
 	return nil
 }
@@ -310,7 +310,7 @@ func (customView *CustomViewData) String() string {
 	if customView.superView != nil {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
-		writeViewStyle(customView.tag, customView, buffer, "", customView.exscludeTags())
+		writeViewStyle(customView.tag, customView, buffer, "", customView.excludeTags())
 		return buffer.String()
 	}
 	return customView.tag + " { }"
@@ -345,4 +345,17 @@ func (customView *CustomViewData) SetTransition(tag PropertyName, animation Anim
 	if customView.superView != nil {
 		customView.superView.SetTransition(tag, animation)
 	}
+}
+
+func (customView *CustomViewData) LoadFile(file FileInfo, result func(FileInfo, []byte)) {
+	if customView.superView != nil {
+		customView.superView.LoadFile(file, result)
+	}
+}
+
+func (customView *CustomViewData) binding() any {
+	if customView.superView != nil {
+		return customView.superView.binding()
+	}
+	return nil
 }

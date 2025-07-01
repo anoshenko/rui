@@ -312,7 +312,9 @@ func dataListHtmlProperties(view View, buffer *strings.Builder) {
 }
 
 // GetDataList returns the data list of an editor.
-// If the second argument (subviewID) is not specified or it is "" then a value from the first argument (view) is returned.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
 func GetDataList(view View, subviewID ...string) []string {
 	if view = getSubview(view, subviewID); view != nil {
 		return getDataListProperty(view)

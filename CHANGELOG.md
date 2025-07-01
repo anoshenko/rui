@@ -1,6 +1,17 @@
+# v0.20.0
+
+* Added support of binding
+* Added "binding" argument to CreateViewFromResources, CreateViewFromText, and CreateViewFromObject functions
+* Changed ParseDataText function return values
+
+# v0.19.0
+
+* Added support of drag-and-drop
+* Added LoadFile method to View interface
+
 # v0.18.2
 
-* fixed typo: GetShadowPropertys -> GetShadowProperty
+* fixed typo: GetShadowProperties -> GetShadowProperty
 
 # v0.18.0
 
