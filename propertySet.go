@@ -84,6 +84,7 @@ var intProperties = []PropertyName{
 
 var floatProperties = map[PropertyName]struct{ min, max float64 }{
 	Opacity:           {min: 0, max: 1},
+	ShowOpacity:       {min: 0, max: 1},
 	NumberPickerMax:   {min: -math.MaxFloat64, max: math.MaxFloat64},
 	NumberPickerMin:   {min: -math.MaxFloat64, max: math.MaxFloat64},
 	NumberPickerStep:  {min: -math.MaxFloat64, max: math.MaxFloat64},
@@ -93,6 +94,7 @@ var floatProperties = map[PropertyName]struct{ min, max float64 }{
 	VideoWidth:        {min: 0, max: 10000},
 	VideoHeight:       {min: 0, max: 10000},
 	PushDuration:      {min: 0, max: math.MaxFloat64},
+	ShowDuration:      {min: 0, max: math.MaxFloat64},
 	DragImageXOffset:  {min: -math.MaxFloat64, max: math.MaxFloat64},
 	DragImageYOffset:  {min: -math.MaxFloat64, max: math.MaxFloat64},
 }
@@ -167,6 +169,9 @@ var sizeProperties = map[PropertyName]string{
 	ItemHeight:         string(ItemHeight),
 	CenterX:            string(CenterX),
 	CenterY:            string(CenterX),
+	ArrowSize:          "",
+	ArrowWidth:         "",
+	ArrowOffset:        "",
 }
 
 type enumPropertyData struct {
@@ -885,10 +890,8 @@ func (data *dataProperty) Set(tag PropertyName, value any) bool {
 	}
 
 	tag = data.normalize(tag)
-	for _, supported := range data.supportedProperties {
-		if tag == supported {
-			return data.set(data, tag, value) != nil
-		}
+	if slices.Contains(data.supportedProperties, tag) {
+		return data.set(data, tag, value) != nil
 	}
 
 	ErrorLogF(`"%s" property is not supported`, string(tag))

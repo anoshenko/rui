@@ -1,6 +1,8 @@
 package rui
 
-import "sort"
+import (
+	"slices"
+)
 
 // Params defines a type of a parameters list
 type Params map[PropertyName]any
@@ -51,9 +53,7 @@ func (params Params) AllTags() []PropertyName {
 	for t := range params {
 		tags = append(tags, t)
 	}
-	sort.Slice(tags, func(i, j int) bool {
-		return tags[i] < tags[j]
-	})
+	slices.Sort(tags)
 	return tags
 }
 

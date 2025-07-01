@@ -976,7 +976,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 		}
 
 	default:
-		if cssTag, ok := sizeProperties[tag]; ok {
+		if cssTag, ok := sizeProperties[tag]; ok && cssTag != "" {
 			if size, ok := sizeProperty(view, tag, session); ok {
 				session.updateCSSProperty(htmlID, cssTag, size.cssString("", session))
 			} else {

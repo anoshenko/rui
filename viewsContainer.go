@@ -22,6 +22,9 @@ type ViewsContainer interface {
 	// Remove removes a view from the list of a view children and return it
 	RemoveView(index int) View
 
+	// Remove removes a view from the list of a view children and return it
+	RemoveViewByID(id string) View
+
 	// ViewIndex returns the index of view, -1 overwise
 	ViewIndex(view View) int
 
@@ -153,6 +156,15 @@ func (container *viewsContainerData) RemoveView(index int) View {
 		container.contentChanged()
 	}
 	return view
+}
+
+func (container *viewsContainerData) RemoveViewByID(id string) View {
+	for index, view := range container.views {
+		if view.ID() == id {
+			return container.RemoveView(index)
+		}
+	}
+	return nil
 }
 
 func (container *viewsContainerData) ViewIndex(view View) int {
