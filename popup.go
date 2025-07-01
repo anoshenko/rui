@@ -331,187 +331,173 @@ type popupManager struct {
 	popups []Popup
 }
 
-type popupArrow struct {
-	column, row      int
-	location, align  int
-	size, width, off SizeUnit
-}
+func (popup *popupData) createArrowView(location int) View {
 
-func popupArrowInit(popup Popup) popupArrow {
 	session := popup.Session()
 
-	var arrow popupArrow
-
-	arrow.size, _ = sizeProperty(popup, ArrowSize, session)
-	arrow.size, _ = sizeProperty(popup, ArrowWidth, session)
-	arrow.off, _ = sizeProperty(popup, ArrowOffset, session)
-	arrow.align, _ = enumProperty(popup, ArrowAlign, session, CenterAlign)
-	arrow.row = 1
-	arrow.column = 1
-	arrow.location, _ = enumProperty(popup, Arrow, session, NoneArrow)
-
-	switch arrow.location {
-	case BottomArrow:
-		arrow.row = 2
-
-	case RightArrow:
-		arrow.column = 2
-	}
-
-	return arrow
-}
-
-func (arrow *popupArrow) fixOff(popupView View) {
-	if arrow.align == CenterAlign && arrow.off.Type == Auto {
-		r := GetRadius(popupView)
-		switch arrow.location {
-		case TopArrow:
-			switch arrow.align {
-			case LeftAlign:
-				arrow.off = r.TopLeftX
-
-			case RightAlign:
-				arrow.off = r.TopRightX
-			}
-
-		case BottomArrow:
-			switch arrow.align {
-			case LeftAlign:
-				arrow.off = r.BottomLeftX
-
-			case RightAlign:
-				arrow.off = r.BottomRightX
-			}
-
-		case RightArrow:
-			switch arrow.align {
-			case TopAlign:
-				arrow.off = r.TopRightY
-
-			case BottomAlign:
-				arrow.off = r.BottomRightY
-			}
-
-		case LeftArrow:
-			switch arrow.align {
-			case TopAlign:
-				arrow.off = r.TopLeftY
-
-			case BottomAlign:
-				arrow.off = r.BottomLeftY
-			}
+	getSize := func(tag PropertyName, constTag string) SizeUnit {
+		size, _ := sizeProperty(popup, tag, session)
+		if size.Type != Auto && size.Value > 0 {
+			return size
 		}
-	}
-}
 
-func (arrow *popupArrow) createView(popupView View) View {
-	session := popupView.Session()
-
-	defaultSize := func(constTag string) SizeUnit {
 		if value, ok := session.Constant(constTag); ok {
-			if size, ok := StringToSizeUnit(value); ok && size.Type != Auto && size.Value != 0 {
+			if size, ok := StringToSizeUnit(value); ok && size.Type != Auto && size.Value > 0 {
 				return size
 			}
 		}
 		return Px(16)
 	}
 
-	if arrow.size.Type == Auto || arrow.size.Value == 0 {
-		arrow.size = defaultSize("ruiArrowSize")
-	}
+	size := getSize(ArrowSize, "ruiArrowSize")
+	width := getSize(ArrowWidth, "ruiArrowWidth")
 
-	if arrow.width.Type == Auto || arrow.width.Value == 0 {
-		arrow.width = defaultSize("ruiArrowWidth")
-	}
+	params := Params{BackgroundColor: GetBackgroundColor(popup.popupView)}
 
-	params := Params{BackgroundColor: GetBackgroundColor(popupView)}
-
-	if shadow := GetShadowProperty(popupView); shadow != nil {
+	if shadow := GetShadowProperty(popup.popupView); shadow != nil {
 		params[Shadow] = shadow
 	}
 
-	if filter := GetBackdropFilter(popupView); filter != nil {
+	if filter := GetBackdropFilter(popup.popupView); filter != nil {
 		params[BackdropFilter] = filter
 	}
 
-	switch arrow.location {
+	switch location {
 	case TopArrow:
 		params[Row] = 0
 		params[Column] = 1
 		params[Clip] = NewPolygonClip([]any{"0%", "100%", "50%", "0%", "100%", "100%"})
-		params[Width] = arrow.width
-		params[Height] = arrow.size
+		params[Width] = width
+		params[Height] = size
 
 	case RightArrow:
 		params[Row] = 1
 		params[Column] = 0
 		params[Clip] = NewPolygonClip([]any{"0%", "0%", "100%", "50%", "0%", "100%"})
-		params[Width] = arrow.size
-		params[Height] = arrow.width
+		params[Width] = size
+		params[Height] = width
 
 	case BottomArrow:
 		params[Row] = 0
 		params[Column] = 1
 		params[Clip] = NewPolygonClip([]any{"0%", "0%", "50%", "100%", "100%", "0%"})
-		params[Width] = arrow.width
-		params[Height] = arrow.size
+		params[Width] = width
+		params[Height] = size
 
 	case LeftArrow:
 		params[Row] = 1
 		params[Column] = 0
 		params[Clip] = NewPolygonClip([]any{"100%", "0%", "0%", "50%", "100%", "100%"})
-		params[Width] = arrow.size
-		params[Height] = arrow.width
+		params[Width] = size
+		params[Height] = width
 	}
 
 	arrowView := NewView(session, params)
 
 	params = Params{
 		ID:      popupArrowID,
-		Row:     arrow.row,
-		Column:  arrow.column,
 		Content: arrowView,
 	}
 
-	arrow.fixOff(popupView)
+	switch location {
+	case TopArrow:
+		params[Row] = 1
+		params[Column] = 2
 
-	switch arrow.location {
+	case BottomArrow:
+		params[Row] = 3
+		params[Column] = 2
+
+	case LeftArrow:
+		params[Row] = 2
+		params[Column] = 1
+
+	case RightArrow:
+		params[Row] = 2
+		params[Column] = 3
+	}
+
+	off, _ := sizeProperty(popup, ArrowOffset, session)
+	align, _ := enumProperty(popup, ArrowAlign, session, CenterAlign)
+
+	if align != CenterAlign && off.Type == Auto {
+		r := GetRadius(popup.popupView)
+		switch location {
+		case TopArrow:
+			switch align {
+			case LeftAlign:
+				off = r.TopLeftX
+
+			case RightAlign:
+				off = r.TopRightX
+			}
+
+		case BottomArrow:
+			switch align {
+			case LeftAlign:
+				off = r.BottomLeftX
+
+			case RightAlign:
+				off = r.BottomRightX
+			}
+
+		case RightArrow:
+			switch align {
+			case TopAlign:
+				off = r.TopRightY
+
+			case BottomAlign:
+				off = r.BottomRightY
+			}
+
+		case LeftArrow:
+			switch align {
+			case TopAlign:
+				off = r.TopLeftY
+
+			case BottomAlign:
+				off = r.BottomLeftY
+			}
+		}
+	}
+
+	switch location {
 	case TopArrow, BottomArrow:
 		cellWidth := make([]SizeUnit, 3)
-		switch arrow.align {
+		switch align {
 		case LeftAlign:
-			cellWidth[0] = arrow.off
+			cellWidth[0] = off
 			cellWidth[2] = Fr(1)
 
 		case RightAlign:
 			cellWidth[0] = Fr(1)
-			cellWidth[2] = arrow.off
+			cellWidth[2] = off
 
 		default:
 			cellWidth[0] = Fr(1)
 			cellWidth[2] = Fr(1)
-			if arrow.off.Type != Auto && arrow.off.Value != 0 {
-				arrowView.Set(MarginLeft, arrow.off)
+			if off.Type != Auto && off.Value != 0 {
+				arrowView.Set(MarginLeft, off)
 			}
 		}
 		params[CellWidth] = cellWidth
 
 	case RightArrow, LeftArrow:
 		cellHeight := make([]SizeUnit, 3)
-		switch arrow.align {
+		switch align {
 		case TopAlign:
-			cellHeight[0] = arrow.off
+			cellHeight[0] = off
 			cellHeight[2] = Fr(1)
 
 		case BottomAlign:
 			cellHeight[0] = Fr(1)
-			cellHeight[2] = arrow.off
+			cellHeight[2] = off
 
 		default:
 			cellHeight[0] = Fr(1)
 			cellHeight[2] = Fr(1)
-			if arrow.off.Type != Auto && arrow.off.Value != 0 {
-				arrowView.Set(MarginTop, arrow.off)
+			if off.Type != Auto && off.Value != 0 {
+				arrowView.Set(MarginTop, off)
 			}
 		}
 		params[CellHeight] = cellHeight
@@ -520,54 +506,34 @@ func (arrow *popupArrow) createView(popupView View) View {
 	return NewGridLayout(session, params)
 }
 
-func (popup *popupData) layerCellWidth(arrowLocation int) []SizeUnit {
-
-	var columnCount int
-	switch arrowLocation {
-	case LeftArrow, RightArrow:
-		columnCount = 4
-
-	default:
-		columnCount = 3
-	}
-
-	cellWidth := make([]SizeUnit, columnCount)
+func (popup *popupData) layerCellWidth() []SizeUnit {
+	cellWidth := make([]SizeUnit, 5)
 	switch hAlign, _ := enumProperty(popup, HorizontalAlign, popup.session, CenterAlign); hAlign {
 	case LeftAlign:
-		cellWidth[columnCount-1] = Fr(1)
+		cellWidth[4] = Fr(1)
 
 	case RightAlign:
 		cellWidth[0] = Fr(1)
 
 	default:
 		cellWidth[0] = Fr(1)
-		cellWidth[columnCount-1] = Fr(1)
+		cellWidth[4] = Fr(1)
 	}
 	return cellWidth
 }
 
-func (popup *popupData) layerCellHeight(arrowLocation int) []SizeUnit {
-
-	var rowCount int
-	switch arrowLocation {
-	case TopArrow, BottomArrow:
-		rowCount = 4
-
-	default:
-		rowCount = 3
-	}
-
-	cellHeight := make([]SizeUnit, rowCount)
+func (popup *popupData) layerCellHeight() []SizeUnit {
+	cellHeight := make([]SizeUnit, 5)
 	switch vAlign, _ := enumProperty(popup, VerticalAlign, popup.session, CenterAlign); vAlign {
 	case LeftAlign:
-		cellHeight[rowCount-1] = Fr(1)
+		cellHeight[4] = Fr(1)
 
 	case RightAlign:
 		cellHeight[0] = Fr(1)
 
 	default:
 		cellHeight[0] = Fr(1)
-		cellHeight[rowCount-1] = Fr(1)
+		cellHeight[4] = Fr(1)
 	}
 
 	return cellHeight
@@ -587,6 +553,11 @@ func (popup *popupData) Get(tag PropertyName) any {
 	}
 
 	return popup.properties[tag]
+}
+
+func (popup *popupData) arrowLocation() int {
+	result, _ := enumProperty(popup, Arrow, popup.session, NoneArrow)
+	return result
 }
 
 func (popup *popupData) supported(tag PropertyName) bool {
@@ -1110,23 +1081,12 @@ func (popup *popupData) createContentContainer() ColumnLayout {
 func (popup *popupData) createLayerView() GridLayout {
 
 	session := popup.session
-	popupRow := 1
-	popupColumn := 1
-	arrow := popupArrowInit(popup)
-
-	switch arrow.location {
-	case TopArrow:
-		popupRow = 2
-
-	case LeftArrow:
-		popupColumn = 2
-	}
 
 	params := Params{
 		Style:               "ruiPopup",
 		ID:                  popupID,
-		Row:                 popupRow,
-		Column:              popupColumn,
+		Row:                 2,
+		Column:              2,
 		MaxWidth:            Percent(100),
 		MaxHeight:           Percent(100),
 		CellVerticalAlign:   StretchAlign,
@@ -1194,16 +1154,16 @@ func (popup *popupData) createLayerView() GridLayout {
 		Style:      popupLayerID,
 		MaxWidth:   Percent(100),
 		MaxHeight:  Percent(100),
-		CellWidth:  popup.layerCellWidth(arrow.location),
-		CellHeight: popup.layerCellHeight(arrow.location),
+		CellWidth:  popup.layerCellWidth(),
+		CellHeight: popup.layerCellHeight(),
 	}
 
 	if margin, ok := getBounds(popup, Margin, session); ok {
-		layerParams[Margin] = margin
+		layerParams[Padding] = margin
 	}
 
-	if arrow.location != NoneArrow {
-		layerParams[Content] = []View{popup.popupView, arrow.createView(popup.popupView)}
+	if location := popup.arrowLocation(); location != NoneArrow {
+		layerParams[Content] = []View{popup.popupView, popup.createArrowView(location)}
 	} else {
 		layerParams[Content] = []View{popup.popupView}
 	}
