@@ -282,6 +282,15 @@ func (customView *CustomViewData) RemoveView(index int) View {
 	return nil
 }
 
+func (customView *CustomViewData) RemoveViewByID(id string) View {
+	if customView.superView != nil {
+		if container, ok := customView.superView.(ViewsContainer); ok {
+			return container.RemoveViewByID(id)
+		}
+	}
+	return nil
+}
+
 // Remove removes a view from the list of a view children and return it
 func (customView *CustomViewData) ViewIndex(view View) int {
 	if customView.superView != nil {

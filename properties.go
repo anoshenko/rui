@@ -1,7 +1,7 @@
 package rui
 
 import (
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -33,9 +33,6 @@ type Properties interface {
 type propertyList struct {
 	properties map[PropertyName]any
 	normalize  func(PropertyName) PropertyName
-	//getFunc    func(PropertyName) any
-	//set        func(Properties, PropertyName, any) []PropertyName
-	//remove     func(Properties, PropertyName) []PropertyName
 }
 
 type dataProperty struct {
@@ -91,9 +88,7 @@ func (properties *propertyList) AllTags() []PropertyName {
 	for tag := range properties.properties {
 		tags = append(tags, tag)
 	}
-	sort.Slice(tags, func(i, j int) bool {
-		return tags[i] < tags[j]
-	})
+	slices.Sort(tags)
 	return tags
 }
 
@@ -157,7 +152,7 @@ func (data *dataProperty) init() {
 }
 
 func (data *dataProperty) Get(tag PropertyName) any {
-	return propertiesGet(data, data.normalize(tag))
+	return data.get(data, data.normalize(tag))
 }
 
 func (data *dataProperty) Remove(tag PropertyName) {
