@@ -580,8 +580,8 @@ func supportedPropertyValue(value any) bool {
 	case map[PropertyName]AnimationProperty:
 		return len(value) > 0
 
- 	case []AnimationProperty:
-    return len(value) > 0
+	case []AnimationProperty:
+		return len(value) > 0
 
 	case []noArgListener[View]:
 		return getNoArgBinding(value) != ""
@@ -924,6 +924,7 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			}
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
+		}
 
 	case []noArgListener[View]:
 		buffer.WriteString(getNoArgBinding(value))
