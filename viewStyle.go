@@ -567,6 +567,7 @@ func supportedPropertyValue(value any) bool {
 	case []BackgroundGradientPoint:
 	case []BackgroundGradientAngle:
 	case map[PropertyName]AnimationProperty:
+	case []AnimationProperty:
 	default:
 		return false
 	}
@@ -806,6 +807,22 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
+	case []AnimationProperty:
+		switch count := len(value); count {
+		case 0:
+			buffer.WriteString("[]")
+
+		default:
+			buffer.WriteString("[\n")
+			indent2 := indent + "\t"
+			for _, anim := range value {
+				if anim != nil {
+					anim.writeAnimationString(Animation, buffer, indent2)
+				}
+			}
+			buffer.WriteString(indent)
+			buffer.WriteRune(']')
+		}
 	}
 }
 
@@ -871,7 +888,7 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 	finalTags := []PropertyName{
 		PerspectiveOriginX, PerspectiveOriginY, BackfaceVisible,
 		TransformOriginX, TransformOriginY, TransformOriginZ,
-		Transform, Clip, Filter, BackdropFilter, Summary, Content, Transition}
+		Transform, Clip, Filter, BackdropFilter, Summary, Content, Transition, Animation}
 	for _, tag := range finalTags {
 		removeTag(tag)
 	}

@@ -231,6 +231,7 @@ type AnimationProperty interface {
 	Resume()
 
 	writeTransitionString(tag PropertyName, buffer *strings.Builder)
+	writeAnimationString(tag PropertyName, buffer *strings.Builder, indent string)
 	animationCSS(session Session) string
 	transitionCSS(buffer *strings.Builder, session Session)
 	hasAnimatedProperty() bool
@@ -521,6 +522,11 @@ func animationSet(properties Properties, tag PropertyName, value any) []Property
 						}
 					}
 				}
+
+				if len(obj.Tag()) > 0 {
+					result.Tag = PropertyName(obj.Tag())
+				}
+
 				if result.From != nil && result.To != nil {
 					return result, true
 				}
@@ -751,6 +757,72 @@ func (animation *animationData) writeTransitionString(tag PropertyName, buffer *
 	}
 
 	buffer.WriteString(" }")
+}
+
+func (animation *animationData) writeAnimationString(tag PropertyName, buffer *strings.Builder, indent string) {
+	buffer.WriteString(indent)
+
+	writeAnimation := func(animation AnimationProperty, buffer *strings.Builder, indent string) {
+		buffer.WriteString("_{")
+
+		indent2 := indent + "\t"
+		for _, tag := range animation.AllTags() {
+			if tag != PropertyTag {
+				if value := animation.Get(tag); value != nil {
+					buffer.WriteString("\n" + indent2)
+					buffer.WriteString(string(tag))
+					buffer.WriteString(" = ")
+					writePropertyValue(buffer, tag, value, indent2)
+					buffer.WriteRune(',')
+				}
+			}
+		}
+
+		writeProperty := func(prop AnimatedProperty, indent string) {
+			buffer.WriteString(string(prop.Tag))
+			buffer.WriteString("{\n")
+			indent2 := indent + "\t"
+			buffer.WriteString(indent2)
+			buffer.WriteString("from = ")
+			writePropertyValue(buffer, "from", prop.From, indent2)
+			buffer.WriteString(",\n")
+			buffer.WriteString(indent2)
+			buffer.WriteString("to = ")
+			writePropertyValue(buffer, "to", prop.To, indent2)
+			for key, value := range prop.KeyFrames {
+				buffer.WriteString(",\n")
+				buffer.WriteString(indent2)
+				tag := strconv.Itoa(key) + "%"
+				buffer.WriteString(tag)
+				buffer.WriteString(" = ")
+				writePropertyValue(buffer, PropertyName(tag), value, indent2)
+			}
+			buffer.WriteString(",\n")
+			buffer.WriteString(indent)
+			buffer.WriteString("},")
+		}
+
+		if props, ok := animation.Get(PropertyTag).([]AnimatedProperty); ok && props != nil && len(props) > 0 {
+			buffer.WriteString("\n" + indent2)
+			buffer.WriteString(string(PropertyTag))
+			buffer.WriteString(" = ")
+			if len(props) > 1 {
+				buffer.WriteString("[\n")
+				for _, prop := range props {
+					buffer.WriteString(indent2)
+					writeProperty(prop, indent2+"\t")
+					buffer.WriteString("\n")
+				}
+				buffer.WriteString(indent2 + "],")
+			} else {
+				writeProperty(props[0], indent2)
+			}
+		}
+		buffer.WriteRune('\n')
+		buffer.WriteString(indent + "},\n")
+	}
+
+	writeAnimation(animation, buffer, indent)
 }
 
 func timingFunctionCSS(properties Properties, tag PropertyName, session Session) string {
