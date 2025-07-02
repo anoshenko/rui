@@ -555,7 +555,7 @@ func (popup *popupData) Get(tag PropertyName) any {
 	return popup.properties[tag]
 }
 
-func (popup *popupData) arrowLocation() int {
+func (popup *popupData) arrowType() int {
 	result, _ := enumProperty(popup, Arrow, popup.session, NoneArrow)
 	return result
 }
@@ -691,9 +691,90 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 
 	switch tag {
 	case Content:
-		popup.layerView.RemoveViewByID(popupID)
-		// TODO
+		popup.contentContainer.Set(Content, popup.contentView)
+
+	case Arrow, ArrowWidth, ArrowSize, ArrowAlign, ArrowOffset:
+		popup.layerView.RemoveViewByID(popupArrowID)
+		if location := popup.arrowType(); location != NoneArrow {
+			popup.layerView.Append(popup.createArrowView(location))
+		}
+
+	case Buttons:
+		popup.popupView.RemoveViewByID(popupButtonsID)
+		if view := popup.createButtonsPanel(); view != nil {
+			popup.popupView.Append(view)
+		}
+
+	case Margin:
+		if margin, ok := getBounds(popup, Margin, popup.session); ok {
+			popup.layerView.Set(Padding, margin)
+		} else {
+			popup.layerView.Remove(Padding)
+		}
+
+	case Title, CloseButton:
+		popup.popupView.RemoveViewByID(popupTitleID)
+		if view := popup.createTitleView(); view != nil {
+			popup.popupView.Append(view)
+		}
+
+	case TitleStyle:
+		if title := ViewByID(popup.popupView, popupTitleID); title != nil {
+			titleStyle := "ruiPopupTitle"
+			if style, ok := stringProperty(popup, TitleStyle, popup.session); ok {
+				titleStyle = style
+			}
+			title.Set(Style, titleStyle)
+		}
+
+	case OutsideClose:
+		outsideClose, _ := boolProperty(popup, OutsideClose, popup.session)
+		if outsideClose {
+			popup.layerView.Set(ClickEvent, popup.cancel)
+		} else {
+			popup.layerView.Set(ClickEvent, func() {})
+		}
+
+	case ShowDuration, ShowTiming:
+		animation := popup.animationProperty()
+		opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
+		if opacity != 1 {
+			popup.popupView.SetTransition(Opacity, animation)
+		}
+		transform := getTransformProperty(popup, ShowTransform)
+		if transform != nil {
+			popup.popupView.SetTransition(Transform, animation)
+		}
+
+	case ShowOpacity:
+		opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
+		if opacity != 1 {
+			popup.popupView.SetTransition(Opacity, popup.animationProperty())
+		}
+
+	case ShowTransform:
+		transform := getTransformProperty(popup, ShowTransform)
+		if transform != nil {
+			popup.popupView.SetTransition(Transform, popup.animationProperty())
+		}
+
+	default:
+		if popup.supported(tag) {
+			popup.popupView.Set(tag, popup.getRaw(tag))
+		}
 	}
+}
+
+func (popup *popupData) animationProperty() AnimationProperty {
+	duration, _ := floatProperty(popup, ShowDuration, popup.session, 1)
+	timing, ok := stringProperty(popup, ShowTiming, popup.session)
+	if !ok {
+		timing = EaseTiming
+	}
+	return NewAnimationProperty(Params{
+		Duration:       duration,
+		TimingFunction: timing,
+	})
 }
 
 func (popup *popupData) AllTags() []PropertyName {
@@ -737,24 +818,25 @@ func (popup *popupData) setButtons(value any) bool {
 		return button
 	}
 
+	buttonConvert := func(button PopupButton) popupButton {
+		result := popupButton{
+			title:      button.Title,
+			buttonType: button.Type,
+		}
+		if button.OnClick != nil {
+			result.onClick = newPopupListener1(button.OnClick)
+		}
+		return result
+	}
+
 	switch value := value.(type) {
 	case PopupButton:
-		popup.setRaw(Buttons, []popupButton{
-			{
-				title:      value.Title,
-				buttonType: value.Type,
-				onClick:    newPopupListener1(value.OnClick),
-			},
-		})
+		popup.setRaw(Buttons, []popupButton{buttonConvert(value)})
 
 	case []PopupButton:
 		buttons := make([]popupButton, 0, len(value))
 		for _, button := range value {
-			buttons = append(buttons, popupButton{
-				title:      button.Title,
-				buttonType: button.Type,
-				onClick:    newPopupListener1(button.OnClick),
-			})
+			buttons = append(buttons, buttonConvert(button))
 		}
 		popup.setRaw(Buttons, buttons)
 
@@ -1162,26 +1244,22 @@ func (popup *popupData) createLayerView() GridLayout {
 		layerParams[Padding] = margin
 	}
 
-	if location := popup.arrowLocation(); location != NoneArrow {
+	if location := popup.arrowType(); location != NoneArrow {
 		layerParams[Content] = []View{popup.popupView, popup.createArrowView(location)}
 	} else {
 		layerParams[Content] = []View{popup.popupView}
 	}
 
+	if outsideClose, _ := boolProperty(popup, OutsideClose, session); outsideClose {
+		layerParams[ClickEvent] = popup.cancel
+	}
+
 	popup.layerView = NewGridLayout(session, layerParams)
 
-	opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
+	opacity, _ := floatProperty(popup, ShowOpacity, session, 1)
 	transform := getTransformProperty(popup, ShowTransform)
 	if opacity != 1 || transform != nil {
-		duration, _ := floatProperty(popup, ShowDuration, session, 1)
-		timing, ok := stringProperty(popup, ShowTiming, session)
-		if !ok {
-			timing = EaseTiming
-		}
-		animation := NewAnimationProperty(Params{
-			Duration:       duration,
-			TimingFunction: timing,
-		})
+		animation := popup.animationProperty()
 		if opacity != 1 {
 			popup.popupView.Set(Opacity, opacity)
 			popup.popupView.SetTransition(Opacity, animation)
@@ -1190,13 +1268,6 @@ func (popup *popupData) createLayerView() GridLayout {
 			popup.popupView.Set(Transform, transform)
 			popup.popupView.SetTransition(Transform, animation)
 		}
-	} else {
-		session.updateCSSProperty(popupLayerID, "transition", "")
-	}
-
-	outsideClose, _ := boolProperty(popup, OutsideClose, session)
-	if outsideClose {
-		popup.layerView.Set(ClickEvent, popup.cancel)
 	}
 
 	return popup.layerView
