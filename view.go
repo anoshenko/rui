@@ -371,8 +371,7 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 	case changeListeners:
 		switch value := value.(type) {
 		case DataObject:
-			for i := range value.PropertyCount() {
-				node := value.Property(i)
+			for node := range value.Properties() {
 				if node.Type() == TextNode {
 					if text := node.Text(); text != "" {
 						view.changeListener[PropertyName(node.Tag())] = newOneArgListenerBinding[View, PropertyName](text)
@@ -496,9 +495,7 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 
 		case DataObject:
 			data := map[string]string{}
-			count := value.PropertyCount()
-			for i := range count {
-				node := value.Property(i)
+			for node := range value.Properties() {
 				if node.Type() == TextNode {
 					data[node.Tag()] = node.Text()
 				} else {

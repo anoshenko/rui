@@ -735,8 +735,8 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 
 	if node := params.PropertyByTag("storage"); node != nil && node.Type() == ObjectNode {
 		if obj := node.Object(); obj != nil {
-			for i := range obj.PropertyCount() {
-				if element := obj.Property(i); element.Type() == TextNode {
+			for element := range obj.Properties() {
+				if element.Type() == TextNode {
 					session.clientStorage[element.Tag()] = element.Text()
 				}
 			}

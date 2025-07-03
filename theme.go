@@ -694,127 +694,115 @@ func (theme *theme) addText(themeText string) bool {
 		return false
 	}
 
-	count := data.PropertyCount()
-
 	objToStyle := func(obj DataObject) ViewStyle {
 		params := Params{}
-		for i := range obj.PropertyCount() {
-			if node := obj.Property(i); node != nil {
-				switch node.Type() {
-				case ArrayNode:
-					params[PropertyName(node.Tag())] = node.ArrayElements()
+		for node := range obj.Properties() {
+			switch node.Type() {
+			case ArrayNode:
+				params[PropertyName(node.Tag())] = node.ArrayElements()
 
-				case ObjectNode:
-					params[PropertyName(node.Tag())] = node.Object()
+			case ObjectNode:
+				params[PropertyName(node.Tag())] = node.Object()
 
-				default:
-					params[PropertyName(node.Tag())] = node.Text()
-				}
+			default:
+				params[PropertyName(node.Tag())] = node.Text()
 			}
 		}
 		return NewViewStyle(params)
 	}
 
-	for i := range count {
-		if d := data.Property(i); d != nil {
-			switch tag := d.Tag(); tag {
-			case "constants":
-				if d.Type() == ObjectNode {
-					if obj := d.Object(); obj != nil {
-						objCount := obj.PropertyCount()
-						for k := range objCount {
-							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-								theme.constants[prop.Tag()] = prop.Text()
-							}
+	for d := range data.Properties() {
+		switch tag := d.Tag(); tag {
+		case "constants":
+			if d.Type() == ObjectNode {
+				if obj := d.Object(); obj != nil {
+					for prop := range obj.Properties() {
+						if prop.Type() == TextNode {
+							theme.constants[prop.Tag()] = prop.Text()
 						}
 					}
 				}
+			}
 
-			case "constants:touch":
-				if d.Type() == ObjectNode {
-					if obj := d.Object(); obj != nil {
-						objCount := obj.PropertyCount()
-						for k := range objCount {
-							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-								theme.touchConstants[prop.Tag()] = prop.Text()
-							}
+		case "constants:touch":
+			if d.Type() == ObjectNode {
+				if obj := d.Object(); obj != nil {
+					for prop := range obj.Properties() {
+						if prop.Type() == TextNode {
+							theme.touchConstants[prop.Tag()] = prop.Text()
 						}
 					}
 				}
+			}
 
-			case "colors":
-				if d.Type() == ObjectNode {
-					if obj := d.Object(); obj != nil {
-						objCount := obj.PropertyCount()
-						for k := range objCount {
-							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-								theme.colors[prop.Tag()] = prop.Text()
-							}
+		case "colors":
+			if d.Type() == ObjectNode {
+				if obj := d.Object(); obj != nil {
+					for prop := range obj.Properties() {
+						if prop.Type() == TextNode {
+							theme.colors[prop.Tag()] = prop.Text()
 						}
 					}
 				}
+			}
 
-			case "colors:dark":
-				if d.Type() == ObjectNode {
-					if obj := d.Object(); obj != nil {
-						objCount := obj.PropertyCount()
-						for k := range objCount {
-							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-								theme.darkColors[prop.Tag()] = prop.Text()
-							}
+		case "colors:dark":
+			if d.Type() == ObjectNode {
+				if obj := d.Object(); obj != nil {
+					for prop := range obj.Properties() {
+						if prop.Type() == TextNode {
+							theme.darkColors[prop.Tag()] = prop.Text()
 						}
 					}
 				}
+			}
 
-			case "images":
-				if d.Type() == ObjectNode {
-					if obj := d.Object(); obj != nil {
-						objCount := obj.PropertyCount()
-						for k := range objCount {
-							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-								theme.images[prop.Tag()] = prop.Text()
-							}
+		case "images":
+			if d.Type() == ObjectNode {
+				if obj := d.Object(); obj != nil {
+					for prop := range obj.Properties() {
+						if prop.Type() == TextNode {
+							theme.images[prop.Tag()] = prop.Text()
 						}
 					}
 				}
+			}
 
-			case "images:dark":
-				if d.Type() == ObjectNode {
-					if obj := d.Object(); obj != nil {
-						objCount := obj.PropertyCount()
-						for k := range objCount {
-							if prop := obj.Property(k); prop != nil && prop.Type() == TextNode {
-								theme.darkImages[prop.Tag()] = prop.Text()
-							}
+		case "images:dark":
+			if d.Type() == ObjectNode {
+				if obj := d.Object(); obj != nil {
+					for prop := range obj.Properties() {
+						if prop.Type() == TextNode {
+							theme.darkImages[prop.Tag()] = prop.Text()
 						}
 					}
 				}
+			}
 
-			case "styles":
-				if d.Type() == ArrayNode {
+		case "styles":
+			if d.Type() == ArrayNode {
+				arraySize := d.ArraySize()
+				for k := range arraySize {
+					if element := d.ArrayElement(k); element != nil && element.IsObject() {
+						if obj := element.Object(); obj != nil {
+							theme.styles[obj.Tag()] = objToStyle(obj)
+						}
+					}
+				}
+			}
+
+		default:
+			if d.Type() == ArrayNode && strings.HasPrefix(tag, "styles:") {
+				if rule, ok := parseMediaRule(tag); ok {
 					arraySize := d.ArraySize()
 					for k := range arraySize {
 						if element := d.ArrayElement(k); element != nil && element.IsObject() {
 							if obj := element.Object(); obj != nil {
-								theme.styles[obj.Tag()] = objToStyle(obj)
+								rule.styles[obj.Tag()] = objToStyle(obj)
 							}
 						}
 					}
-				}
-
-			default:
-				if d.Type() == ArrayNode && strings.HasPrefix(tag, "styles:") {
-					if rule, ok := parseMediaRule(tag); ok {
-						arraySize := d.ArraySize()
-						for k := range arraySize {
-							if element := d.ArrayElement(k); element != nil && element.IsObject() {
-								if obj := element.Object(); obj != nil {
-									rule.styles[obj.Tag()] = objToStyle(obj)
-								}
-							}
-						}
-						theme.mediaStyles = append(theme.mediaStyles, rule)
-					}
+					theme.mediaStyles = append(theme.mediaStyles, rule)
 				}
 			}
 		}

@@ -3,6 +3,7 @@ package rui
 import (
 	"errors"
 	"fmt"
+	"iter"
 	"slices"
 	"strings"
 	"unicode"
@@ -26,6 +27,9 @@ type DataObject interface {
 
 	// Tag returns data object tag
 	Tag() string
+
+	// Properties() returns an iterator to access the properties
+	Properties() iter.Seq[DataNode]
 
 	// PropertyCount returns properties count
 	PropertyCount() int
@@ -142,6 +146,16 @@ func (object *dataObject) Tag() string {
 	return object.tag
 }
 
+func (object *dataObject) Properties() iter.Seq[DataNode] {
+	return func(yield func(DataNode) bool) {
+		for _, node := range object.property {
+			if !yield(node) {
+				return
+			}
+		}
+	}
+}
+
 func (object *dataObject) PropertyCount() int {
 	if object.property != nil {
 		return len(object.property)
@@ -231,10 +245,14 @@ func (object *dataObject) SetPropertyValue(tag, value string) {
 
 // SetPropertyObject - set a property with tag by object
 func (object *dataObject) SetPropertyObject(tag string, obj DataObject) {
-	node := new(dataNode)
-	node.tag = tag
-	node.value = obj
-	object.setNode(node)
+	if obj != nil {
+		node := new(dataNode)
+		node.tag = tag
+		node.value = obj
+		object.setNode(node)
+	} else {
+		object.RemovePropertyByTag(tag)
+	}
 }
 
 func (object *dataObject) ToParams() Params {

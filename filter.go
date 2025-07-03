@@ -159,23 +159,21 @@ func NewFilterProperty(params Params) FilterProperty {
 func newFilterProperty(obj DataObject) FilterProperty {
 	filter := new(filterData)
 	filter.init()
-	for i := range obj.PropertyCount() {
-		if node := obj.Property(i); node != nil {
-			tag := node.Tag()
-			switch node.Type() {
-			case TextNode:
-				filter.Set(PropertyName(tag), node.Text())
+	for node := range obj.Properties() {
+		tag := node.Tag()
+		switch node.Type() {
+		case TextNode:
+			filter.Set(PropertyName(tag), node.Text())
 
-			case ObjectNode:
-				if tag == string(HueRotate) {
-					// TODO
-				} else {
-					ErrorLog(`Invalid value of "` + tag + `"`)
-				}
-
-			default:
+		case ObjectNode:
+			if tag == string(HueRotate) {
+				// TODO
+			} else {
 				ErrorLog(`Invalid value of "` + tag + `"`)
 			}
+
+		default:
+			ErrorLog(`Invalid value of "` + tag + `"`)
 		}
 	}
 

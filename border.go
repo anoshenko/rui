@@ -436,24 +436,20 @@ func (border *borderProperty) String() string {
 
 func (border *borderProperty) setBorderObject(obj DataObject) bool {
 	result := true
-	for i := range obj.PropertyCount() {
-		if node := obj.Property(i); node != nil {
-			tag := PropertyName(node.Tag())
-			switch node.Type() {
-			case TextNode:
-				if borderSet(border, tag, node.Text()) == nil {
-					result = false
-				}
-
-			case ObjectNode:
-				if borderSet(border, tag, node.Object()) == nil {
-					result = false
-				}
-
-			default:
+	for node := range obj.Properties() {
+		tag := PropertyName(node.Tag())
+		switch node.Type() {
+		case TextNode:
+			if borderSet(border, tag, node.Text()) == nil {
 				result = false
 			}
-		} else {
+
+		case ObjectNode:
+			if borderSet(border, tag, node.Object()) == nil {
+				result = false
+			}
+
+		default:
 			result = false
 		}
 	}

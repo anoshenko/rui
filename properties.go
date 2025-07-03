@@ -118,19 +118,16 @@ func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 }
 
 func parseProperties(properties Properties, object DataObject) {
-	count := object.PropertyCount()
-	for i := range count {
-		if node := object.Property(i); node != nil {
-			switch node.Type() {
-			case TextNode:
-				properties.Set(PropertyName(node.Tag()), node.Text())
+	for node := range object.Properties() {
+		switch node.Type() {
+		case TextNode:
+			properties.Set(PropertyName(node.Tag()), node.Text())
 
-			case ObjectNode:
-				properties.Set(PropertyName(node.Tag()), node.Object())
+		case ObjectNode:
+			properties.Set(PropertyName(node.Tag()), node.Object())
 
-			case ArrayNode:
-				properties.Set(PropertyName(node.Tag()), node.ArrayElements())
-			}
+		case ArrayNode:
+			properties.Set(PropertyName(node.Tag()), node.ArrayElements())
 		}
 	}
 }

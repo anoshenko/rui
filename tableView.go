@@ -731,8 +731,8 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 
 		case DataObject:
 			params := Params{}
-			for k := range value.PropertyCount() {
-				if prop := value.Property(k); prop != nil && prop.Type() == TextNode {
+			for prop := range value.Properties() {
+				if prop.Type() == TextNode {
 					params[PropertyName(prop.Tag())] = prop.Text()
 				}
 			}

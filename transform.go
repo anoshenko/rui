@@ -352,8 +352,8 @@ func valueToTransformProperty(value any) TransformProperty {
 	parseObject := func(obj DataObject) TransformProperty {
 		transform := NewTransformProperty(nil)
 		ok := true
-		for i := range obj.PropertyCount() {
-			if prop := obj.Property(i); prop.Type() == TextNode {
+		for prop := range obj.Properties() {
+			if prop.Type() == TextNode {
 				if !transform.Set(PropertyName(prop.Tag()), prop.Text()) {
 					ok = false
 				}
