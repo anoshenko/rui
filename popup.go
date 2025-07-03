@@ -1,7 +1,10 @@
 package rui
 
 import (
+	"embed"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -783,19 +786,6 @@ func (popup *popupData) animationProperty() AnimationProperty {
 	})
 }
 
-/*
-	func (popup *popupData) AllTags() []PropertyName {
-		tags := make([]PropertyName, 0, len(popup.properties)+1)
-		for tag := range popup.properties {
-			tags = append(tags, tag)
-		}
-		if popup.contentView != nil {
-			tags = append(tags, Content)
-		}
-		slices.Sort(tags)
-		return tags
-	}
-*/
 func (popup *popupData) View() View {
 	return popup.contentView
 }
@@ -1310,6 +1300,21 @@ func NewPopup(view View, param Params) Popup {
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromObject(session Session, object DataObject, binding any) Popup {
+	if session == nil {
+		ErrorLog(`"session" argument is nil`)
+		return nil
+	}
+
+	if object == nil {
+		ErrorLog(`"object" argument is nil`)
+		return nil
+	}
+
+	if strings.ToLower(object.Tag()) != "popup" {
+		ErrorLog(`the object name must be "Popup"`)
+		return nil
+	}
+
 	popup := new(popupData)
 	popup.session = session
 	popup.properties = map[PropertyName]any{}
@@ -1339,6 +1344,79 @@ func CreatePopupFromText(session Session, text string, binding any) Popup {
 	}
 
 	return CreatePopupFromObject(session, data, binding)
+}
+
+// CreatePopupFromResources create new Popup and initialize it by the content of
+// the resource file from "popups" directory. Parameters:
+//   - session - the session to which the view will be attached (should not be nil);
+//   - text - file name in the "popups" folder of the application resources (it is not necessary to specify the .rui extension, it is added automatically);
+//   - binding - object assigned to the Binding property (optional parameter).
+//
+// If the function fails, it returns nil and an error message is written to the log.
+func CreatePopupFromResources(session Session, name string, binding any) Popup {
+	if strings.ToLower(filepath.Ext(name)) != ".rui" {
+		name += ".rui"
+	}
+
+	createEmbed := func(fs *embed.FS, path string) Popup {
+		if data, err := fs.ReadFile(path); err == nil {
+			data, err := ParseDataText(string(data))
+			if err == nil {
+				return CreatePopupFromObject(session, data, binding)
+			}
+			ErrorLog(err.Error())
+		}
+		return nil
+	}
+
+	for _, fs := range resources.embedFS {
+		rootDirs := resources.embedRootDirs(fs)
+		for _, dir := range rootDirs {
+			switch dir {
+			case imageDir, themeDir, rawDir:
+				// do nothing
+
+			case viewDir:
+				if result := createEmbed(fs, dir+"/"+name); result != nil {
+					return result
+				}
+
+			case popupDir:
+				if result := createEmbed(fs, dir+"/"+name); result != nil {
+					return result
+				}
+
+			default:
+				if result := createEmbed(fs, dir+"/"+popupDir+"/"+name); result != nil {
+					return result
+				}
+				if result := createEmbed(fs, dir+"/"+viewDir+"/"+name); result != nil {
+					return result
+				}
+			}
+		}
+	}
+
+	if resources.path == "" {
+		return nil
+	}
+
+	createFromFile := func(path string) Popup {
+		if data, err := os.ReadFile(path); err == nil {
+			data, err := ParseDataText(string(data))
+			if err == nil {
+				return CreatePopupFromObject(session, data, binding)
+			}
+			ErrorLog(err.Error())
+		}
+		return nil
+	}
+
+	if result := createFromFile(resources.path + popupDir + "/" + name); result != nil {
+		return result
+	}
+
+	return createFromFile(resources.path + viewDir + "/" + name)
 }
 
 // ShowPopup creates a new Popup and shows it

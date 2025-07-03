@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"embed"
 	"os"
 	"path/filepath"
 	"strings"
@@ -133,7 +134,7 @@ func CreateViewFromText(session Session, text string, binding ...any) View {
 // CreateViewFromResources create new View and initialize it by the content of
 // the resource file from "views" directory. Parameters:
 //   - session - the session to which the view will be attached (should not be nil);
-//   - name - file name in the views folder of the application resources (it is not necessary to specify the .rui extension, it is added automatically);
+//   - name - file name in the "views" directory of the application resources (it is not necessary to specify the .rui extension, it is added automatically);
 //   - binding - object assigned to the Binding property (optional parameter).
 //
 // If the function fails, it returns nil and an error message is written to the log.
@@ -147,6 +148,17 @@ func CreateViewFromResources(session Session, name string, binding ...any) View 
 		b = binding[0]
 	}
 
+	createEmbed := func(fs *embed.FS, path string) View {
+		if data, err := fs.ReadFile(path); err == nil {
+			data, err := ParseDataText(string(data))
+			if err == nil {
+				return CreateViewFromObject(session, data, b)
+			}
+			ErrorLog(err.Error())
+		}
+		return nil
+	}
+
 	for _, fs := range resources.embedFS {
 		rootDirs := resources.embedRootDirs(fs)
 		for _, dir := range rootDirs {
@@ -155,23 +167,13 @@ func CreateViewFromResources(session Session, name string, binding ...any) View 
 				// do nothing
 
 			case viewDir:
-				if data, err := fs.ReadFile(dir + "/" + name); err == nil {
-					data, err := ParseDataText(string(data))
-					if err != nil {
-						ErrorLog(err.Error())
-					} else {
-						return CreateViewFromObject(session, data, b)
-					}
+				if result := createEmbed(fs, dir+"/"+name); result != nil {
+					return result
 				}
 
 			default:
-				if data, err := fs.ReadFile(dir + "/" + viewDir + "/" + name); err == nil {
-					data, err := ParseDataText(string(data))
-					if err != nil {
-						ErrorLog(err.Error())
-					} else {
-						return CreateViewFromObject(session, data, b)
-					}
+				if result := createEmbed(fs, dir+"/"+viewDir+"/"+name); result != nil {
+					return result
 				}
 			}
 		}

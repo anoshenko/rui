@@ -16,6 +16,7 @@ const (
 	imageDir   = "images"
 	themeDir   = "themes"
 	viewDir    = "views"
+	popupDir   = "popups"
 	rawDir     = "raw"
 	stringsDir = "strings"
 )
