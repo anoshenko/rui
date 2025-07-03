@@ -1296,7 +1296,7 @@ func NewPopup(view View, param Params) Popup {
 // CreatePopupFromObject create new Popup and initialize it by content of object. Parameters:
 //   - session - the session to which the view will be attached (should not be nil);
 //   - text - text describing Popup;
-//   - binding - object assigned to the Binding property (optional parameter).
+//   - binding - object assigned to the Binding property (may be nil).
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromObject(session Session, object DataObject, binding any) Popup {
@@ -1333,7 +1333,7 @@ func CreatePopupFromObject(session Session, object DataObject, binding any) Popu
 // CreatePopupFromText create new Popup and initialize it by content of text. Parameters:
 //   - session - the session to which the view will be attached (should not be nil);
 //   - text - text describing Popup;
-//   - binding - object assigned to the Binding property (optional parameter).
+//   - binding - object assigned to the Binding property (may be nil).
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromText(session Session, text string, binding any) Popup {
@@ -1350,7 +1350,7 @@ func CreatePopupFromText(session Session, text string, binding any) Popup {
 // the resource file from "popups" directory. Parameters:
 //   - session - the session to which the view will be attached (should not be nil);
 //   - text - file name in the "popups" folder of the application resources (it is not necessary to specify the .rui extension, it is added automatically);
-//   - binding - object assigned to the Binding property (optional parameter).
+//   - binding - object assigned to the Binding property (may be nil).
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromResources(session Session, name string, binding any) Popup {

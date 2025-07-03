@@ -2,6 +2,8 @@
 
 * Added support of binding
 * Added "binding" argument to CreateViewFromResources, CreateViewFromText, and CreateViewFromObject functions
+* Added CreatePopupFromResources, CreatePopupFromText, and CreatePopupFromObject functions
+* Added implementation of Properties interface to Popup
 * Changed ParseDataText function return values
 
 # v0.19.0
