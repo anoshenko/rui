@@ -699,7 +699,7 @@ func (theme *theme) addText(themeText string) bool {
 		for node := range obj.Properties() {
 			switch node.Type() {
 			case ArrayNode:
-				params[PropertyName(node.Tag())] = node.ArrayElements()
+				params[PropertyName(node.Tag())] = node.Array()
 
 			case ObjectNode:
 				params[PropertyName(node.Tag())] = node.Object()

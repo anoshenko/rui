@@ -93,7 +93,10 @@ type DataNode interface {
 	ArrayElement(index int) DataValue
 
 	// ArrayElements returns an array of objects if that node is an array
-	ArrayElements() []DataValue
+	Array() []DataValue
+
+	// ArrayElements returns an iterator to access the array elements of objects if that node is an array
+	ArrayElements() iter.Seq[DataValue]
 
 	// ArrayAsParams returns an array of a params(map) if that node is an array
 	ArrayAsParams() []Params
@@ -340,11 +343,25 @@ func (node *dataNode) ArrayElement(index int) DataValue {
 	return nil
 }
 
-func (node *dataNode) ArrayElements() []DataValue {
+func (node *dataNode) Array() []DataValue {
 	if node.array != nil {
-		return node.array
+		return slices.Clone(node.array)
 	}
-	return []DataValue{}
+	return []DataValue{node.value}
+}
+
+func (node *dataNode) ArrayElements() iter.Seq[DataValue] {
+	return func(yield func(DataValue) bool) {
+		if node.array != nil {
+			for _, element := range node.array {
+				if !yield(element) {
+					return
+				}
+			}
+		} else {
+			yield(node.value)
+		}
+	}
 }
 
 func (node *dataNode) ArrayAsParams() []Params {

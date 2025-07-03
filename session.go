@@ -658,7 +658,7 @@ func (session *sessionData) handleRootSize(data DataObject) {
 
 func (session *sessionData) handleResize(data DataObject) {
 	if node := data.PropertyByTag("views"); node != nil && node.Type() == ArrayNode {
-		for _, el := range node.ArrayElements() {
+		for el := range node.ArrayElements() {
 			if el.IsObject() {
 				obj := el.Object()
 				getFloat := func(tag string) float64 {

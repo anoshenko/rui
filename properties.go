@@ -127,7 +127,7 @@ func parseProperties(properties Properties, object DataObject) {
 			properties.Set(PropertyName(node.Tag()), node.Object())
 
 		case ArrayNode:
-			properties.Set(PropertyName(node.Tag()), node.ArrayElements())
+			properties.Set(PropertyName(node.Tag()), node.Array())
 		}
 	}
 }

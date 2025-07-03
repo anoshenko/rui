@@ -541,7 +541,7 @@ func animationSet(properties Properties, tag PropertyName, value any) []Property
 
 			case ArrayNode:
 				props := []AnimatedProperty{}
-				for _, val := range value.ArrayElements() {
+				for val := range value.ArrayElements() {
 					if val.IsObject() {
 						if prop, ok := parseObject(val.Object()); ok {
 							props = append(props, prop)
