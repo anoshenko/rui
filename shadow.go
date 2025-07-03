@@ -281,23 +281,6 @@ func (shadow *shadowPropertyData) String() string {
 	return runStringWriter(shadow)
 }
 
-func (shadow *shadowPropertyData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range shadow.AllTags() {
-		if value, ok := shadow.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
-		}
-	}
-	buffer.WriteString(" }")
-}
-
 func setShadowProperty(properties Properties, tag PropertyName, value any) bool {
 
 	if value == nil {

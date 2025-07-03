@@ -279,6 +279,7 @@ type popupButton struct {
 // Popup represents a Popup view
 type Popup interface {
 	Properties
+	fmt.Stringer
 
 	// View returns a content view of the popup
 	View() View
@@ -600,6 +601,7 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 		switch value := value.(type) {
 		case View:
 			popup.contentView = value
+			popup.setRaw(Content, popup.contentView)
 
 		case DataObject:
 			view := CreateViewFromObject(popup.session, value, nil)
@@ -607,6 +609,7 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 				return false
 			}
 			popup.contentView = view
+			popup.setRaw(Content, popup.contentView)
 
 		case string:
 			if len(value) > 0 && value[0] == '@' {
@@ -617,6 +620,7 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 				}
 			}
 			popup.contentView = NewTextView(popup.session, Params{Text: value})
+			popup.setRaw(Content, value)
 
 		default:
 			notCompatibleType(Buttons, value)
@@ -626,12 +630,14 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 		if binding := popup.getRaw(Binding); binding != nil {
 			popup.contentView.Set(Binding, binding)
 		}
-		popup.setRaw(Content, popup.contentView)
+
 		popup.propertyChanged(Content)
 		return true
 
 	case Binding:
-		popup.contentView.Set(Binding, value)
+		if popup.contentView != nil {
+			popup.contentView.Set(Binding, value)
+		}
 		popup.setRaw(Binding, value)
 		popup.propertyChanged(Binding)
 		return true
@@ -777,24 +783,32 @@ func (popup *popupData) animationProperty() AnimationProperty {
 	})
 }
 
-func (popup *popupData) AllTags() []PropertyName {
-	tags := make([]PropertyName, 0, len(popup.properties)+1)
-	for tag := range popup.properties {
-		tags = append(tags, tag)
+/*
+	func (popup *popupData) AllTags() []PropertyName {
+		tags := make([]PropertyName, 0, len(popup.properties)+1)
+		for tag := range popup.properties {
+			tags = append(tags, tag)
+		}
+		if popup.contentView != nil {
+			tags = append(tags, Content)
+		}
+		slices.Sort(tags)
+		return tags
 	}
-	if popup.contentView != nil {
-		tags = append(tags, Content)
-	}
-	slices.Sort(tags)
-	return tags
-}
-
+*/
 func (popup *popupData) View() View {
 	return popup.contentView
 }
 
 func (popup *popupData) Session() Session {
 	return popup.session
+}
+
+func (popup *popupData) String() string {
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+	writeViewStyle("Popup", popup, buffer, "", nil)
+	return buffer.String()
 }
 
 func (popup *popupData) setButtons(value any) bool {
@@ -1569,4 +1583,14 @@ func valueToPopupEventListeners(value any) ([]popupListener, bool) {
 	}
 
 	return nil, false
+}
+
+func getPopupListenerBinding(listeners []popupListener) string {
+	for _, listener := range listeners {
+		raw := listener.rawListener()
+		if text, ok := raw.(string); ok && text != "" {
+			return text
+		}
+	}
+	return ""
 }

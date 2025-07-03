@@ -475,24 +475,6 @@ func (radius *radiusPropertyData) init() {
 	}
 }
 
-func (radius *radiusPropertyData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range radius.supportedProperties {
-		if value, ok := radius.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
-		}
-	}
-
-	buffer.WriteString(" }")
-}
-
 func (radius *radiusPropertyData) String() string {
 	return runStringWriter(radius)
 }

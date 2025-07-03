@@ -102,11 +102,14 @@ func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 
 	for _, tag := range tags {
 		if value, ok := properties.properties[tag]; ok {
-			buffer.WriteString(indent2)
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent2)
-			buffer.WriteString(",\n")
+			text := propertyValueToString(tag, value, indent2)
+			if text != "" {
+				buffer.WriteString(indent2)
+				buffer.WriteString(string(tag))
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+				buffer.WriteString(",\n")
+			}
 		}
 	}
 
@@ -157,4 +160,29 @@ func (data *dataProperty) Get(tag PropertyName) any {
 
 func (data *dataProperty) Remove(tag PropertyName) {
 	data.remove(data, data.normalize(tag))
+}
+
+func (data *dataProperty) writeToBuffer(buffer *strings.Builder, indent string, objectName string, tags []PropertyName) {
+	buffer.WriteString(objectName)
+	buffer.WriteString("{ ")
+	comma := false
+	for _, tag := range tags {
+		if value, ok := data.properties[tag]; ok {
+			text := propertyValueToString(tag, value, indent)
+			if text != "" {
+				if comma {
+					buffer.WriteString(", ")
+				}
+				buffer.WriteString(string(tag))
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+				comma = true
+			}
+		}
+	}
+	buffer.WriteString(" }")
+}
+
+func (data *dataProperty) writeString(buffer *strings.Builder, indent string) {
+	data.writeToBuffer(buffer, indent, "_", data.AllTags())
 }

@@ -230,13 +230,16 @@ func (clip *insetClipData) writeString(buffer *strings.Builder, indent string) {
 	comma := false
 	for _, tag := range []PropertyName{Top, Right, Bottom, Left, Radius} {
 		if value, ok := clip.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
+			text := propertyValueToString(tag, value, indent)
+			if text != "" {
+				if comma {
+					buffer.WriteString(", ")
+				}
+				buffer.WriteString(string(tag))
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+				comma = true
 			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
 		}
 	}
 
@@ -303,13 +306,16 @@ func (clip *circleClipData) writeString(buffer *strings.Builder, indent string) 
 	comma := false
 	for _, tag := range []PropertyName{Radius, X, Y} {
 		if value, ok := clip.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
+			text := propertyValueToString(tag, value, indent)
+			if text != "" {
+				if comma {
+					buffer.WriteString(", ")
+				}
+				buffer.WriteString(string(tag))
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+				comma = true
 			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
 		}
 	}
 
@@ -380,13 +386,16 @@ func (clip *ellipseClipData) writeString(buffer *strings.Builder, indent string)
 	comma := false
 	for _, tag := range []PropertyName{RadiusX, RadiusY, X, Y} {
 		if value, ok := clip.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
+			text := propertyValueToString(tag, value, indent)
+			if text != "" {
+				if comma {
+					buffer.WriteString(", ")
+				}
+				buffer.WriteString(string(tag))
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+				comma = true
 			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
 		}
 	}
 
@@ -511,11 +520,16 @@ func (clip *polygonClipData) writeString(buffer *strings.Builder, indent string)
 	if points := clip.points(); points != nil {
 		buffer.WriteString(string(Points))
 		buffer.WriteString(` = "`)
-		for i, value := range points {
-			if i > 0 {
-				buffer.WriteString(", ")
+		comma := false
+		for _, value := range points {
+			text := propertyValueToString("", value, indent)
+			if text != "" {
+				if comma {
+					buffer.WriteString(", ")
+				}
+				buffer.WriteString(text)
+				comma = true
 			}
-			writePropertyValue(buffer, "", value, indent)
 		}
 
 		buffer.WriteString(`" `)

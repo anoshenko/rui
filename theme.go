@@ -902,19 +902,9 @@ func (theme *theme) String() string {
 	defer freeStringBuilder(buffer)
 
 	writeString := func(text string) {
-		if strings.ContainsAny(text, " \t\n\r\\\"'`,;{}[]()") {
-			replace := []struct{ old, new string }{
-				{old: "\\", new: `\\`},
-				{old: "\t", new: `\t`},
-				{old: "\r", new: `\r`},
-				{old: "\n", new: `\n`},
-				{old: "\"", new: `\"`},
-			}
-			for _, s := range replace {
-				text = strings.Replace(text, s.old, s.new, -1)
-			}
+		if isQuotesNeeded(text) {
 			buffer.WriteRune('"')
-			buffer.WriteString(text)
+			buffer.WriteString(replaceEscapeSymbols(text))
 			buffer.WriteRune('"')
 		} else {
 			buffer.WriteString(text)

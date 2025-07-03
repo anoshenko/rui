@@ -2,7 +2,6 @@ package rui
 
 import (
 	"fmt"
-	"strings"
 )
 
 // ColumnSeparatorProperty is the interface of a view separator data
@@ -112,24 +111,6 @@ func normalizeColumnSeparatorTag(tag PropertyName) PropertyName {
 	}
 
 	return tag
-}
-
-func (separator *columnSeparatorProperty) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range []PropertyName{Style, Width, ColorTag} {
-		if value, ok := separator.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, BorderStyle, value, indent)
-			comma = true
-		}
-	}
-
-	buffer.WriteString(" }")
 }
 
 func (separator *columnSeparatorProperty) String() string {

@@ -383,13 +383,16 @@ func (border *borderProperty) writeString(buffer *strings.Builder, indent string
 	comma := false
 
 	write := func(tag PropertyName, value any) {
-		if comma {
-			buffer.WriteString(", ")
+		text := propertyValueToString(tag, value, indent)
+		if text != "" {
+			if comma {
+				buffer.WriteString(", ")
+			}
+			buffer.WriteString(string(tag))
+			buffer.WriteString(" = ")
+			buffer.WriteString(text)
+			comma = true
 		}
-		buffer.WriteString(string(tag))
-		buffer.WriteString(" = ")
-		writePropertyValue(buffer, BorderStyle, value, indent)
-		comma = true
 	}
 
 	for _, tag := range []PropertyName{Style, Width, ColorTag} {

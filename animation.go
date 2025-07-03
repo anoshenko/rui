@@ -599,11 +599,14 @@ func (animation *animationData) String() string {
 	for _, tag := range animation.AllTags() {
 		if tag != PropertyTag {
 			if value, ok := animation.properties[tag]; ok && value != nil {
-				buffer.WriteString("\n\t")
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				writePropertyValue(buffer, tag, value, "\t")
-				buffer.WriteRune(',')
+				text := propertyValueToString(tag, value, "\t")
+				if text != "" {
+					buffer.WriteString("\n\t")
+					buffer.WriteString(string(tag))
+					buffer.WriteString(" = ")
+					buffer.WriteString(text)
+					buffer.WriteRune(',')
+				}
 			}
 		}
 	}
@@ -613,18 +616,21 @@ func (animation *animationData) String() string {
 		buffer.WriteString("{\n")
 		buffer.WriteString(indent)
 		buffer.WriteString("from = ")
-		writePropertyValue(buffer, "from", prop.From, indent)
+		buffer.WriteString(propertyValueToString("from", prop.From, indent))
 		buffer.WriteString(",\n")
 		buffer.WriteString(indent)
 		buffer.WriteString("to = ")
-		writePropertyValue(buffer, "to", prop.To, indent)
+		buffer.WriteString(propertyValueToString("to", prop.To, indent))
 		for key, value := range prop.KeyFrames {
-			buffer.WriteString(",\n")
-			buffer.WriteString(indent)
 			tag := strconv.Itoa(key) + "%"
-			buffer.WriteString(tag)
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, PropertyName(tag), value, indent)
+			text := propertyValueToString(PropertyName(tag), value, indent)
+			if text != "" {
+				buffer.WriteString(",\n")
+				buffer.WriteString(indent)
+				buffer.WriteString(tag)
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+			}
 		}
 		buffer.WriteString("\n")
 		buffer.WriteString(indent[1:])
@@ -725,12 +731,15 @@ func (animation *animationData) writeTransitionString(tag PropertyName, buffer *
 
 	writeFloatProperty := func(name PropertyName) bool {
 		if value := animation.getRaw(name); value != nil {
-			buffer.WriteString(lead)
-			buffer.WriteString(string(name))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, name, value, "")
-			lead = ", "
-			return true
+			text := propertyValueToString(name, value, "")
+			if text != "" {
+				buffer.WriteString(lead)
+				buffer.WriteString(string(name))
+				buffer.WriteString(" = ")
+				buffer.WriteString(text)
+				lead = ", "
+				return true
+			}
 		}
 		return false
 	}
@@ -770,11 +779,14 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 		for _, tag := range animation.AllTags() {
 			if tag != PropertyTag {
 				if value := animation.Get(tag); value != nil {
-					buffer.WriteString("\n" + indent2)
-					buffer.WriteString(string(tag))
-					buffer.WriteString(" = ")
-					writePropertyValue(buffer, tag, value, indent2)
-					buffer.WriteRune(',')
+					text := propertyValueToString(tag, value, indent2)
+					if text != "" {
+						buffer.WriteString("\n" + indent2)
+						buffer.WriteString(string(tag))
+						buffer.WriteString(" = ")
+						buffer.WriteString(text)
+						buffer.WriteRune(',')
+					}
 				}
 			}
 		}
@@ -785,18 +797,21 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 			indent2 := indent + "\t"
 			buffer.WriteString(indent2)
 			buffer.WriteString("from = ")
-			writePropertyValue(buffer, "from", prop.From, indent2)
+			buffer.WriteString(propertyValueToString("from", prop.From, indent2))
 			buffer.WriteString(",\n")
 			buffer.WriteString(indent2)
 			buffer.WriteString("to = ")
-			writePropertyValue(buffer, "to", prop.To, indent2)
+			buffer.WriteString(propertyValueToString("to", prop.To, indent2))
 			for key, value := range prop.KeyFrames {
-				buffer.WriteString(",\n")
-				buffer.WriteString(indent2)
-				tag := strconv.Itoa(key) + "%"
-				buffer.WriteString(tag)
-				buffer.WriteString(" = ")
-				writePropertyValue(buffer, PropertyName(tag), value, indent2)
+				text := propertyValueToString(PropertyName(tag), value, indent2)
+				if text != "" {
+					buffer.WriteString(",\n")
+					buffer.WriteString(indent2)
+					tag := strconv.Itoa(key) + "%"
+					buffer.WriteString(tag)
+					buffer.WriteString(" = ")
+					buffer.WriteString(text)
+				}
 			}
 			buffer.WriteString(",\n")
 			buffer.WriteString(indent)

@@ -328,23 +328,6 @@ func (transform *transformPropertyData) String() string {
 	return buffer.String()
 }
 
-func (transform *transformPropertyData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range transform.supportedProperties {
-		if value, ok := transform.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
-		}
-	}
-	buffer.WriteString(" }")
-}
-
 func transformSet(properties Properties, tag PropertyName, value any) []PropertyName {
 	switch tag {
 

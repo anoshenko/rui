@@ -815,40 +815,6 @@ func (canvas *canvasData) FillAndStrokeEllipse(x, y, radiusX, radiusY, rotation 
 	}
 }
 
-/*
-func (canvas *canvasData) writePointArgs(x, y float64) {
-	canvas.script.WriteString(strconv.FormatFloat(x, 'g', -1, 64))
-	canvas.script.WriteRune(',')
-	canvas.script.WriteString(strconv.FormatFloat(y, 'g', -1, 64))
-}
-
-func (canvas *canvasData) writeStringArgs(text string, script *strings.Builder) {
-	//rText := []rune(text)
-	for _, ch := range text {
-		switch ch {
-		case '\t':
-			script.WriteString(`\t`)
-		case '\n':
-			script.WriteString(`\n`)
-		case '\r':
-			script.WriteString(`\r`)
-		case '\\':
-			script.WriteString(`\\`)
-		case '"':
-			script.WriteString(`\"`)
-		case '\'':
-			script.WriteString(`\'`)
-		default:
-			if ch < ' ' {
-				script.WriteString(fmt.Sprintf("\\x%02X", int(ch)))
-			} else {
-				script.WriteRune(ch)
-			}
-		}
-	}
-}
-*/
-
 func (canvas *canvasData) FillText(x, y float64, text string) {
 	canvas.session.callCanvasFunc("fillText", text, x, y)
 }

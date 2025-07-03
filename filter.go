@@ -218,21 +218,7 @@ func (filter *filterData) String() string {
 }
 
 func (filter *filterData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("filter { ")
-	comma := false
-	tags := filter.AllTags()
-	for _, tag := range tags {
-		if value, ok := filter.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
-		}
-	}
-	buffer.WriteString(" }")
+	filter.writeToBuffer(buffer, indent, "filter", filter.AllTags())
 }
 
 func (filter *filterData) cssStyle(session Session) string {

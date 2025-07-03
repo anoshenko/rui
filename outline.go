@@ -40,24 +40,6 @@ func (outline *outlinePropertyData) init() {
 	outline.supportedProperties = []PropertyName{Style, Width, ColorTag}
 }
 
-func (outline *outlinePropertyData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range []PropertyName{Style, Width, ColorTag} {
-		if value, ok := outline.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, BorderStyle, value, indent)
-			comma = true
-		}
-	}
-
-	buffer.WriteString(" }")
-}
-
 func (outline *outlinePropertyData) String() string {
 	return runStringWriter(outline)
 }

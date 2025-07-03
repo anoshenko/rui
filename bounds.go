@@ -84,23 +84,6 @@ func (bounds *boundsPropertyData) String() string {
 	return runStringWriter(bounds)
 }
 
-func (bounds *boundsPropertyData) writeString(buffer *strings.Builder, indent string) {
-	buffer.WriteString("_{ ")
-	comma := false
-	for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
-		if value, ok := bounds.properties[tag]; ok {
-			if comma {
-				buffer.WriteString(", ")
-			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			writePropertyValue(buffer, tag, value, indent)
-			comma = true
-		}
-	}
-	buffer.WriteString(" }")
-}
-
 func (bounds *boundsPropertyData) Bounds(session Session) Bounds {
 	top, _ := sizeProperty(bounds, Top, session)
 	right, _ := sizeProperty(bounds, Right, session)

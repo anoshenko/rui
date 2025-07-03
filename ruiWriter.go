@@ -59,7 +59,7 @@ func (writer *ruiWriterData) writeString(str string) {
 				{old: "\"", new: `\"`},
 			}
 			for _, s := range replace {
-				str = strings.Replace(str, s.old, s.new, -1)
+				str = strings.ReplaceAll(str, s.old, s.new)
 			}
 			writer.buffer.WriteRune('"')
 			writer.buffer.WriteString(str)

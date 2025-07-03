@@ -551,235 +551,134 @@ func viewStyleGet(style Properties, tag PropertyName) any {
 	return style.getRaw(tag)
 }
 
-func supportedPropertyValue(value any) bool {
-	switch value := value.(type) {
-	case string, bool, float32, float64, int, stringWriter, fmt.Stringer:
-		return true
-
-	case []string:
-		return len(value) > 0
-
-	case []ShadowProperty:
-		return len(value) > 0
-
-	case []View:
-		return len(value) > 0
-
-	case []any:
-		return len(value) > 0
-
-	case []BackgroundElement:
-		return len(value) > 0
-
-	case []BackgroundGradientPoint:
-		return len(value) > 0
-
-	case []BackgroundGradientAngle:
-		return len(value) > 0
-
-	case map[PropertyName]AnimationProperty:
-		return len(value) > 0
-
-	case []AnimationProperty:
-		return len(value) > 0
-
-	case []noArgListener[View]:
-		return getNoArgBinding(value) != ""
-
-	case []noArgListener[ImageView]:
-		return getNoArgBinding(value) != ""
-
-	case []noArgListener[MediaPlayer]:
-		return getNoArgBinding(value) != ""
-
-	case []oneArgListener[View, KeyEvent]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, MouseEvent]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, TouchEvent]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, PointerEvent]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, PropertyName]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, string]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, Frame]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[View, DragAndDropEvent]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[Checkbox, bool]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[FilePicker, []FileInfo]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[ListView, int]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[ListView, []int]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[MediaPlayer, float64]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[TableView, int]:
-		return getOneArgBinding(value) != ""
-
-	case []oneArgListener[TabsLayout, int]:
-		return getOneArgBinding(value) != ""
-
-	case []twoArgListener[ColorPicker, Color]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[DatePicker, time.Time]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[TimePicker, time.Time]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[DropDownList, int]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[EditView, string]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[NumberPicker, float64]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[TableView, int]:
-		return getTwoArgBinding(value) != ""
-
-	case []twoArgListener[TabsLayout, int]:
-		return getTwoArgBinding(value) != ""
-
-	case []mediaPlayerErrorListener:
-		return getMediaPlayerErrorListenerBinding(value) != ""
-
-	case map[PropertyName]oneArgListener[View, PropertyName]:
-		for _, listener := range value {
-			if text, ok := listener.rawListener().(string); ok && text != "" {
+func isQuotesNeeded(text string) bool {
+	if len(text) == 1 {
+		simple := (text[0] >= '0' && text[0] <= '9') || (text[0] >= 'A' && text[0] <= 'Z') || (text[0] >= 'a' && text[0] <= 'z')
+		return !simple
+	} else {
+		for _, ch := range text {
+			if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+				ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == '.' ||
+				ch == ':' || ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
+			} else {
 				return true
 			}
 		}
-		return false
-
-	default:
-		return false
 	}
+	return false
 }
 
-func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, indent string) {
+func replaceEscapeSymbols(text string) string {
+	replace := []struct{ old, new string }{
+		{old: "\\", new: `\\`},
+		{old: "\t", new: `\t`},
+		{old: "\r", new: `\r`},
+		{old: "\n", new: `\n`},
+		{old: "\"", new: `\"`},
+	}
+	for _, s := range replace {
+		text = strings.ReplaceAll(text, s.old, s.new)
+	}
+	return text
+}
 
-	writeString := func(text string) {
-		simple := (tag != Text && tag != Title && tag != Summary)
-		if simple {
-			if len(text) == 1 {
-				simple = (text[0] >= '0' && text[0] <= '9') || (text[0] >= 'A' && text[0] <= 'Z') || (text[0] >= 'a' && text[0] <= 'z')
-			} else {
-				for _, ch := range text {
-					if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-						ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == '.' ||
-						ch == ':' || ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
-					} else {
-						simple = false
-						break
-					}
-				}
-			}
-		}
+func propertyValueToString(tag PropertyName, value any, indent string) string {
 
-		if !simple {
-			replace := []struct{ old, new string }{
-				{old: "\\", new: `\\`},
-				{old: "\t", new: `\t`},
-				{old: "\r", new: `\r`},
-				{old: "\n", new: `\n`},
-				{old: "\"", new: `\"`},
-			}
-			for _, s := range replace {
-				text = strings.Replace(text, s.old, s.new, -1)
-			}
+	writeString := func(buffer *strings.Builder, text string) string {
+		if isQuotesNeeded(text) {
 			buffer.WriteRune('"')
-			buffer.WriteString(text)
+			buffer.WriteString(replaceEscapeSymbols(text))
 			buffer.WriteRune('"')
 		} else {
 			buffer.WriteString(text)
 		}
+		return text
 	}
 
 	switch value := value.(type) {
 	case string:
-		writeString(value)
+		if tag == Text || tag == Title || tag == Summary || isQuotesNeeded(value) {
+			return `"` + replaceEscapeSymbols(value) + `"`
+		}
+		return value
 
 	case []string:
 		if len(value) == 0 {
-			buffer.WriteString("[]")
-		} else {
-			size := 0
-			for _, text := range value {
-				size += len(text) + 2
-			}
-
-			if size < 80 {
-				lead := "["
-				for _, text := range value {
-					buffer.WriteString(lead)
-					writeString(text)
-					lead = ", "
-				}
-			} else {
-				buffer.WriteString("[\n")
-				for _, text := range value {
-					buffer.WriteString(indent)
-					buffer.WriteRune('\t')
-					writeString(text)
-					buffer.WriteString(",\n")
-				}
-				buffer.WriteString(indent)
-			}
-			buffer.WriteRune(']')
+			return "[]"
 		}
+
+		size := 0
+		for _, text := range value {
+			size += len(text) + 2
+		}
+
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		if size < 80 {
+			lead := "["
+			for _, text := range value {
+				buffer.WriteString(lead)
+				writeString(buffer, text)
+				lead = ", "
+			}
+		} else {
+			buffer.WriteString("[\n")
+			for _, text := range value {
+				buffer.WriteString(indent)
+				buffer.WriteRune('\t')
+				writeString(buffer, text)
+				buffer.WriteString(",\n")
+			}
+			buffer.WriteString(indent)
+		}
+		buffer.WriteRune(']')
+		return buffer.String()
 
 	case bool:
 		if value {
-			buffer.WriteString("true")
-		} else {
-			buffer.WriteString("false")
+			return "true"
 		}
+		return "false"
 
 	case float32:
-		fmt.Fprintf(buffer, "%g", float64(value))
+		return fmt.Sprintf("%g", float64(value))
 
 	case float64:
-		fmt.Fprintf(buffer, "%g", value)
+		return fmt.Sprintf("%g", value)
 
 	case int:
 		if prop, ok := enumProperties[tag]; ok && value >= 0 && value < len(prop.values) {
-			buffer.WriteString(prop.values[value])
-		} else {
-			buffer.WriteString(strconv.Itoa(value))
+			return prop.values[value]
 		}
+		return strconv.Itoa(value)
 
 	case stringWriter:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
 		value.writeString(buffer, indent+"\t")
+		return buffer.String()
+
+	case View:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		writeViewStyle(value.Tag(), value, buffer, indent, value.excludeTags())
+		return buffer.String()
 
 	case fmt.Stringer:
-		writeString(value.String())
+		return value.String()
 
 	case []ShadowProperty:
-		switch len(value) {
-		case 0:
-			// do nothing
+		size := len(value)
+		if size == 0 {
+			return ""
+		}
 
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		switch len(value) {
 		case 1:
 			value[0].writeString(buffer, indent)
 
@@ -795,58 +694,73 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
+		return buffer.String()
 
 	case []View:
-		switch len(value) {
-		case 0:
-			buffer.WriteString("[]")
+		size := len(value)
+		if size == 0 {
+			return "[]"
+		}
 
-		case 1:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		if size == 1 {
 			writeViewStyle(value[0].Tag(), value[0], buffer, indent, value[0].excludeTags())
-
-		default:
+		} else {
 			buffer.WriteString("[\n")
 			indent2 := indent + "\t"
-			for _, v := range value {
+			for _, view := range value {
 				buffer.WriteString(indent2)
-				writeViewStyle(v.Tag(), v, buffer, indent2, v.excludeTags())
+				writeViewStyle(view.Tag(), view, buffer, indent2, view.excludeTags())
 				buffer.WriteString(",\n")
 			}
 
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
+		return buffer.String()
 
 	case []any:
-		switch count := len(value); count {
-		case 0:
-			buffer.WriteString("[]")
+		size := len(value)
+		if size == 0 {
+			return "[]"
+		}
 
-		case 1:
-			writePropertyValue(buffer, tag, value[0], indent)
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
 
-		default:
+		if size == 1 {
+			return propertyValueToString(tag, value[0], indent)
+		} else {
 			buffer.WriteString("[ ")
 			comma := false
 			for _, v := range value {
-				if comma {
-					buffer.WriteString(", ")
+				text := propertyValueToString(tag, v, indent)
+				if text != "" {
+					if comma {
+						buffer.WriteString(", ")
+					}
+					buffer.WriteString(text)
+					comma = true
 				}
-				writePropertyValue(buffer, tag, v, indent)
-				comma = true
 			}
 			buffer.WriteString(" ]")
 		}
+		return buffer.String()
 
 	case []BackgroundElement:
-		switch len(value) {
-		case 0:
-			buffer.WriteString("[]\n")
+		size := len(value)
+		if size == 0 {
+			return "[]"
+		}
 
-		case 1:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		if size == 1 {
 			value[0].writeString(buffer, indent)
-
-		default:
+		} else {
 			buffer.WriteString("[\n")
 			indent2 := indent + "\t"
 			for _, element := range value {
@@ -858,8 +772,12 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
+		return buffer.String()
 
 	case []BackgroundGradientPoint:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
 		buffer.WriteRune('"')
 		for i, point := range value {
 			if i > 0 {
@@ -868,8 +786,12 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(point.String())
 		}
 		buffer.WriteRune('"')
+		return buffer.String()
 
 	case []BackgroundGradientAngle:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
 		buffer.WriteRune('"')
 		for i, point := range value {
 			if i > 0 {
@@ -878,19 +800,23 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(point.String())
 		}
 		buffer.WriteRune('"')
+		return buffer.String()
 
 	case map[PropertyName]AnimationProperty:
-		switch count := len(value); count {
-		case 0:
-			buffer.WriteString("[]")
+		size := len(value)
+		if size == 0 {
+			return "[]"
+		}
 
-		case 1:
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		if size == 1 {
 			for tag, animation := range value {
 				animation.writeTransitionString(tag, buffer)
 				break
 			}
-
-		default:
+		} else {
 			tags := make([]PropertyName, 0, len(value))
 			for tag := range value {
 				tags = append(tags, tag)
@@ -908,121 +834,171 @@ func writePropertyValue(buffer *strings.Builder, tag PropertyName, value any, in
 			buffer.WriteString(indent)
 			buffer.WriteRune(']')
 		}
+		return buffer.String()
 
 	case []AnimationProperty:
-		switch count := len(value); count {
-		case 0:
-			buffer.WriteString("[]")
-
-		default:
-			buffer.WriteString("[\n")
-			indent2 := indent + "\t"
-			for _, anim := range value {
-				if anim != nil {
-					anim.writeAnimationString(Animation, buffer, indent2)
-				}
-			}
-			buffer.WriteString(indent)
-			buffer.WriteRune(']')
+		size := len(value)
+		if size == 0 {
+			return "[]"
 		}
 
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		buffer.WriteString("[\n")
+		indent2 := indent + "\t"
+		for _, anim := range value {
+			if anim != nil {
+				anim.writeAnimationString(Animation, buffer, indent2)
+			}
+		}
+		buffer.WriteString(indent)
+		buffer.WriteRune(']')
+
+		return buffer.String()
+
 	case []noArgListener[View]:
-		buffer.WriteString(getNoArgBinding(value))
+		return getNoArgBinding(value)
 
 	case []noArgListener[ImageView]:
-		buffer.WriteString(getNoArgBinding(value))
+		return getNoArgBinding(value)
 
 	case []noArgListener[MediaPlayer]:
-		buffer.WriteString(getNoArgBinding(value))
+		return getNoArgBinding(value)
 
 	case []oneArgListener[View, KeyEvent]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, MouseEvent]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, TouchEvent]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, PointerEvent]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, PropertyName]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, string]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, Frame]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[View, DragAndDropEvent]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[Checkbox, bool]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[FilePicker, []FileInfo]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[ListView, int]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[ListView, []int]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[MediaPlayer, float64]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[TableView, int]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []oneArgListener[TabsLayout, int]:
-		buffer.WriteString(getOneArgBinding(value))
+		return getOneArgBinding(value)
 
 	case []twoArgListener[ColorPicker, Color]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[DatePicker, time.Time]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[TimePicker, time.Time]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[DropDownList, int]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[EditView, string]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[NumberPicker, float64]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[TableView, int]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []twoArgListener[TabsLayout, int]:
-		buffer.WriteString(getTwoArgBinding(value))
+		return getTwoArgBinding(value)
 
 	case []mediaPlayerErrorListener:
-		buffer.WriteString(getMediaPlayerErrorListenerBinding(value))
+		return getMediaPlayerErrorListenerBinding(value)
+
+	case []popupListener:
+		return getPopupListenerBinding(value)
 
 	case map[PropertyName]oneArgListener[View, PropertyName]:
-		buffer.WriteString("_{")
+		if len(value) == 0 {
+			return ""
+		}
+
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		indent2 := indent + "\t"
+		buffer.WriteString("_{\n")
 		for key, listener := range value {
 			if text, ok := listener.rawListener().(string); ok && text != "" {
-				buffer.WriteRune('\n')
-				buffer.WriteString(indent)
-				buffer.WriteRune('\t')
-				writeString(string(key))
+				buffer.WriteString(indent2)
+				writeString(buffer, string(key))
 				buffer.WriteString(" = ")
-				writeString(text)
-				buffer.WriteRune(',')
+				writeString(buffer, text)
+				buffer.WriteString(",\n")
 			}
-			buffer.WriteRune('\n')
 			buffer.WriteString(indent)
 			buffer.WriteRune('}')
 		}
+		return buffer.String()
+
+	case []popupButton:
+		if len(value) == 0 {
+			return ""
+		}
+
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		lead := indent + "\t_{ title = "
+
+		buffer.WriteString("[\n")
+		for _, button := range value {
+			buffer.WriteString(lead)
+			writeString(buffer, button.title)
+			switch button.buttonType {
+			case CancelButton:
+				buffer.WriteString(`, type = cancel`)
+
+			case DefaultButton:
+				buffer.WriteString(`, type = default`)
+			}
+			if button.onClick != nil {
+				if text, ok := button.onClick.rawListener().(string); ok {
+					buffer.WriteString(`, click = `)
+					writeString(buffer, text)
+				}
+			}
+			buffer.WriteString(" },\n")
+		}
+		buffer.WriteString(indent)
+		buffer.WriteRune(']')
+		return buffer.String()
+
+	default:
+		return ""
 	}
 }
 
@@ -1033,11 +1009,12 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 
 	writeProperty := func(tag PropertyName, value any) {
 		if !slices.Contains(excludeTags, tag) {
-			if supportedPropertyValue(value) {
+			text := propertyValueToString(tag, value, indent)
+			if text != "" {
 				buffer.WriteString(indent)
 				buffer.WriteString(string(tag))
 				buffer.WriteString(" = ")
-				writePropertyValue(buffer, tag, value, indent)
+				buffer.WriteString(text)
 				buffer.WriteString(",\n")
 			}
 		}
