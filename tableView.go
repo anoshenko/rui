@@ -1328,7 +1328,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	footHeight := GetTableFootHeight(table)
 	cellBorder := table.getCellBorder()
 	cellPadding := getBoundsProperty(table, CellPadding)
-	if cellPadding == nil || len(cellPadding.AllTags()) == 0 {
+	if cellPadding == nil || cellPadding.IsEmpty() {
 		cellPadding = nil
 		if style, ok := stringProperty(table, Style, table.Session()); ok {
 			if style, ok := table.Session().resolveConstants(style); ok {

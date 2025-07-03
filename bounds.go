@@ -263,7 +263,7 @@ func removeBoundsPropertySide(properties Properties, mainTag, sideTag PropertyNa
 	if bounds := getBoundsProperty(properties, mainTag); bounds != nil {
 		if bounds.getRaw(sideTag) != nil {
 			bounds.Remove(sideTag)
-			if bounds.empty() {
+			if bounds.IsEmpty() {
 				bounds = nil
 			}
 			properties.setRaw(mainTag, bounds)

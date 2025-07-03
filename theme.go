@@ -964,7 +964,7 @@ func (theme *theme) String() string {
 		buffer.WriteString(" = [\n")
 
 		for _, tag := range tags {
-			if style, ok := styles[tag]; ok && len(style.AllTags()) > 0 {
+			if style, ok := styles[tag]; ok && !style.IsEmpty() {
 				buffer.WriteString("\t\t")
 				writeViewStyle(tag, style, buffer, "\t\t", nil)
 				buffer.WriteString(",\n")
@@ -1015,7 +1015,7 @@ func (theme *theme) String() string {
 			buffer.WriteString(" = [\n")
 
 			for _, tag := range tags {
-				if style, ok := media.styles[tag]; ok && len(style.AllTags()) > 0 {
+				if style, ok := media.styles[tag]; ok && !style.IsEmpty() {
 					buffer.WriteString("\t\t")
 					writeViewStyle(tag, style, buffer, "\t\t", nil)
 					buffer.WriteString(",\n")

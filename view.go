@@ -157,10 +157,8 @@ func setInitParams(view View, params Params) {
 			session.setIgnoreViewUpdates(true)
 			defer session.setIgnoreViewUpdates(false)
 		}
-		for _, tag := range params.AllTags() {
-			if value, ok := params[tag]; ok {
-				view.Set(tag, value)
-			}
+		for tag, value := range params.All() {
+			view.Set(tag, value)
 		}
 	}
 }
@@ -554,10 +552,8 @@ func (view *viewData) SetParams(params Params) bool {
 	session := view.Session()
 	session.startUpdateScript(view.htmlID())
 	result := true
-	for _, tag := range params.AllTags() {
-		if value, ok := params[tag]; ok {
-			result = view.Set(tag, value) && result
-		}
+	for tag, value := range params.All() {
+		result = view.Set(tag, value) && result
 	}
 	session.finishUpdateScript(view.htmlID())
 	return result

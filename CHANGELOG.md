@@ -3,12 +3,12 @@
 * Added support of binding
 * Added "binding" argument to CreateViewFromResources, CreateViewFromText, and CreateViewFromObject functions
 * Added CreatePopupFromResources, CreatePopupFromText, and CreatePopupFromObject functions
+* Added All() iterator and IsEmpty() method to Properties interface
 * Added implementation of Properties interface to Popup
 * Changed ParseDataText function return values
 * Added `Properties() iter.Seq[DataNode]` iterator to DataObject interface
 * Renamed `ArrayElements() []DataValue` method of DataNode interface to `Array() []DataValue` 
 * Added `ArrayElements() iter.Seq[DataValue]` iterator to DataNode interface
-
 
 # v0.19.0
 

@@ -362,7 +362,7 @@ func valueToTransformProperty(value any) TransformProperty {
 			}
 		}
 
-		if !ok && transform.empty() {
+		if !ok && transform.IsEmpty() {
 			return nil
 		}
 		return transform

@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"iter"
 	"slices"
 	"strings"
 )
@@ -24,10 +25,13 @@ type Properties interface {
 	// Clear removes all properties
 	Clear()
 
+	// All returns an iterator to access the properties
+	All() iter.Seq2[PropertyName, any]
+
 	// AllTags returns an array of the set properties
 	AllTags() []PropertyName
 
-	empty() bool
+	IsEmpty() bool
 }
 
 type propertyList struct {
@@ -55,7 +59,7 @@ func (properties *propertyList) init() {
 	//properties.remove = propertiesRemove
 }
 
-func (properties *propertyList) empty() bool {
+func (properties *propertyList) IsEmpty() bool {
 	return len(properties.properties) == 0
 }
 
@@ -81,6 +85,16 @@ func (properties *propertyList) setRaw(tag PropertyName, value any) {
 */
 func (properties *propertyList) Clear() {
 	properties.properties = map[PropertyName]any{}
+}
+
+func (properties *propertyList) All() iter.Seq2[PropertyName, any] {
+	return func(yield func(PropertyName, any) bool) {
+		for tag, value := range properties.properties {
+			if !yield(tag, value) {
+				return
+			}
+		}
+	}
 }
 
 func (properties *propertyList) AllTags() []PropertyName {

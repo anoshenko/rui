@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"iter"
 	"slices"
 )
 
@@ -47,6 +48,16 @@ func (params Params) Clear() {
 	}
 }
 
+func (params Params) All() iter.Seq2[PropertyName, any] {
+	return func(yield func(PropertyName, any) bool) {
+		for tag, value := range params {
+			if !yield(tag, value) {
+				return
+			}
+		}
+	}
+}
+
 // AllTags returns a sorted slice of all properties.
 func (params Params) AllTags() []PropertyName {
 	tags := make([]PropertyName, 0, len(params))
@@ -57,6 +68,6 @@ func (params Params) AllTags() []PropertyName {
 	return tags
 }
 
-func (params Params) empty() bool {
+func (params Params) IsEmpty() bool {
 	return len(params) == 0
 }

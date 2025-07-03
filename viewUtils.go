@@ -64,13 +64,9 @@ func SetParams(rootView View, viewID string, params Params) bool {
 	session := rootView.Session()
 	session.startUpdateScript(rootView.htmlID())
 	result := true
-	//for tag, value := range params {
-	//	result = rootView.Set(tag, value) && result
-	//}
-	for _, tag := range params.AllTags() {
-		if value, ok := params[tag]; ok {
-			result = rootView.Set(tag, value) && result
-		}
+
+	for tag, value := range params.All() {
+		result = rootView.Set(tag, value) && result
 	}
 
 	session.finishUpdateScript(rootView.htmlID())

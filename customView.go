@@ -1,6 +1,9 @@
 package rui
 
-import "strings"
+import (
+	"iter"
+	"strings"
+)
 
 // CustomView defines a custom view interface
 type CustomView interface {
@@ -47,8 +50,8 @@ func (customView *CustomViewData) SuperView() View {
 func (customView *CustomViewData) setSuperView(view View) {
 	customView.superView = view
 	customView.defaultParams = Params{}
-	for _, tag := range view.AllTags() {
-		if value := view.getRaw(tag); value != nil {
+	for tag, value := range view.All() {
+		if value != nil {
 			customView.defaultParams[tag] = value
 		}
 	}
@@ -107,13 +110,17 @@ func (customView *CustomViewData) Remove(tag PropertyName) {
 	customView.superView.Remove(tag)
 }
 
-// AllTags returns an array of the set properties
 func (customView *CustomViewData) AllTags() []PropertyName {
 	return customView.superView.AllTags()
 }
 
-func (customView *CustomViewData) empty() bool {
-	return customView.superView.empty()
+// AllTags returns an array of the set properties
+func (customView *CustomViewData) All() iter.Seq2[PropertyName, any] {
+	return customView.superView.All()
+}
+
+func (customView *CustomViewData) IsEmpty() bool {
+	return customView.superView.IsEmpty()
 }
 
 // Clear removes all properties

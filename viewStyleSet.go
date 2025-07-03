@@ -190,7 +190,7 @@ func viewStyleRemove(properties Properties, tag PropertyName) []PropertyName {
 	case OutlineStyle, OutlineWidth, OutlineColor:
 		if outline := getOutlineProperty(properties); outline != nil {
 			outline.Remove(tag)
-			if outline.empty() {
+			if outline.IsEmpty() {
 				properties.setRaw(Outline, nil)
 			}
 			return []PropertyName{Outline, tag}

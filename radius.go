@@ -1023,7 +1023,7 @@ func removeRadiusPropertyElement(properties Properties, tag PropertyName) bool {
 	if value := properties.getRaw(Radius); value != nil {
 		radius := getRadiusProperty(properties)
 		radius.Remove(tag)
-		if radius.empty() {
+		if radius.IsEmpty() {
 			properties.setRaw(Radius, nil)
 		} else {
 			properties.setRaw(Radius, radius)
