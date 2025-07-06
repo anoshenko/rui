@@ -513,22 +513,11 @@ func invalidPropertyValue(tag PropertyName, value any) {
 
 func isConstantName(text string) (bool, string) {
 	len := len(text)
-	if len <= 1 || text[0] != '@' {
+	if len <= 1 || text[0] != '@' ||
+		strings.ContainsAny(text, ",;|\"'`+(){}[]<>/\\*&%! \t\n\r") {
 		return false, ""
 	}
 
-	if len > 2 {
-		last := len - 1
-		if (text[1] == '`' && text[last] == '`') ||
-			(text[1] == '"' && text[last] == '"') ||
-			(text[1] == '\'' && text[last] == '\'') {
-			return true, text[2:last]
-		}
-	}
-
-	if strings.ContainsAny(text, ",;|\"'`+(){}[]<>/\\*&%! \t\n\r") {
-		return false, ""
-	}
 	return true, text[1:]
 }
 

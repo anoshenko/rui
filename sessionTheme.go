@@ -61,7 +61,7 @@ func (session *sessionData) resolveConstants(value string) (string, bool) {
 }
 
 func (session *sessionData) resolveConstantsNext(value string, prevTags []string) (string, bool) {
-	if !strings.Contains(value, "@") {
+	if !strings.ContainsRune(value, '@') {
 		return value, true
 	}
 
