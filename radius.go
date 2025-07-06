@@ -649,7 +649,7 @@ func radiusPropertySet(radius Properties, tag PropertyName, value any) []Propert
 			deleteRadiusUnusedTags(radius, result)
 
 		case string:
-			if strings.Contains(value, "/") {
+			if strings.ContainsRune(value, '/') {
 				if values := strings.Split(value, "/"); len(values) == 2 {
 					if result = radiusPropertySet(radius, tag+"-x", values[0]); result != nil {
 						if resultY := radiusPropertySet(radius, tag+"-y", values[1]); resultY != nil {
@@ -973,7 +973,7 @@ func setRadiusProperty(properties Properties, value any) []PropertyName {
 		properties.setRaw(Radius, radius)
 
 	case string:
-		if strings.Contains(value, "/") {
+		if strings.ContainsRune(value, '/') {
 			values := strings.Split(value, "/")
 			if len(values) == 2 {
 				if setRadiusPropertyElement(properties, RadiusX, values[0]) {

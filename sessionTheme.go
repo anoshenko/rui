@@ -35,10 +35,8 @@ func (session *sessionData) constant(tag string, prevTags []string) (string, boo
 			return result, true
 		}
 
-		for _, separator := range []string{",", " ", ":", ";", "|", "/"} {
-			if strings.Contains(result, separator) {
-				return session.resolveConstantsNext(result, tags)
-			}
+		if strings.ContainsAny(result, ", :;|/") {
+			return session.resolveConstantsNext(result, tags)
 		}
 
 		if result[0] != '@' {

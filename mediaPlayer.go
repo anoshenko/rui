@@ -945,13 +945,11 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 
 	for tag, cssTag := range mediaPlayerEvents() {
 		if value := player.getRaw(tag); value != nil {
-			if listeners, ok := value.([]func(MediaPlayer)); ok && len(listeners) > 0 {
-				buffer.WriteString(` `)
-				buffer.WriteString(cssTag)
-				buffer.WriteString(`="playerEvent(this, '`)
-				buffer.WriteString(string(tag))
-				buffer.WriteString(`')"`)
-			}
+			buffer.WriteString(` `)
+			buffer.WriteString(cssTag)
+			buffer.WriteString(`="playerEvent(this, '`)
+			buffer.WriteString(string(tag))
+			buffer.WriteString(`')"`)
 		}
 	}
 

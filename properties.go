@@ -106,6 +106,7 @@ func (properties *propertyList) AllTags() []PropertyName {
 	return tags
 }
 
+/*
 func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 	indent string, objectTag string, tags []PropertyName) {
 
@@ -130,6 +131,7 @@ func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 	buffer.WriteString(indent)
 	buffer.WriteString("}")
 }
+*/
 
 func parseProperties(properties Properties, object DataObject) {
 	for node := range object.Properties() {

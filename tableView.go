@@ -786,7 +786,7 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 			}
 
 		case string:
-			if strings.Contains(value, ",") {
+			if strings.ContainsRune(value, ',') {
 				if values := strings.Split(value, ","); len(values) == 2 {
 					var n = []int{0, 0}
 					for i := range 2 {
@@ -1465,7 +1465,7 @@ func (table *tableViewData) cellPaddingFromStyle(style string) BoundsProperty {
 
 		case string:
 			if value, ok := table.Session().resolveConstants(value); ok {
-				if strings.Contains(value, ",") {
+				if strings.ContainsRune(value, ',') {
 					values := split4Values(value)
 					switch len(values) {
 					case 1:

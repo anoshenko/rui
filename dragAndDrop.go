@@ -325,7 +325,7 @@ func (view *viewData) setDropEffect(value any) []PropertyName {
 }
 
 func stringToDropEffectAllowed(text string) (int, bool) {
-	if strings.Contains(text, "|") {
+	if strings.ContainsRune(text, '|') {
 		elements := strings.Split(text, "|")
 		result := 0
 		for _, element := range elements {

@@ -161,7 +161,7 @@ func backgroundConicGradientSet(properties Properties, tag PropertyName, value a
 				return propertiesRemove(properties, tag)
 			}
 
-			if strings.Contains(value, ",") || strings.Contains(value, " ") {
+			if strings.ContainsAny(value, ", ") {
 				if vector := parseGradientText(value); vector != nil {
 					properties.setRaw(Gradient, vector)
 					return []PropertyName{tag}

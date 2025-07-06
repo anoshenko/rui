@@ -232,7 +232,7 @@ func acceptPropertyCSS(view View) string {
 				if buffer.Len() > 0 {
 					buffer.WriteString(", ")
 				}
-				if value[0] != '.' && !strings.Contains(value, "/") {
+				if value[0] != '.' && !strings.ContainsRune(value, '/') {
 					buffer.WriteRune('.')
 				}
 				buffer.WriteString(value)

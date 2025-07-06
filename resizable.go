@@ -174,7 +174,7 @@ func resizableSide(view View) int {
 					"all":    AllSides,
 				}
 
-				if strings.Contains(value, "|") {
+				if strings.ContainsRune(value, '|') {
 					values := strings.Split(value, "|")
 					sides := 0
 					for _, val := range values {
@@ -226,7 +226,7 @@ func resizableSetSide(properties Properties, value any) []PropertyName {
 			"left":   LeftSide,
 			"all":    AllSides,
 		}
-		if strings.Contains(value, "|") {
+		if strings.ContainsRune(value, '|') {
 			values := strings.Split(value, "|")
 			sides := 0
 			hasConst := false

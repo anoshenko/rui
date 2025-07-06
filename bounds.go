@@ -182,7 +182,7 @@ func setBoundsProperty(properties Properties, tag PropertyName, value any) []Pro
 	if !setSimpleProperty(properties, tag, value) {
 		switch value := value.(type) {
 		case string:
-			if strings.Contains(value, ",") {
+			if strings.ContainsRune(value, ',') {
 				values := split4Values(value)
 				count := len(values)
 				switch count {

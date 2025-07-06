@@ -587,28 +587,6 @@ func (canvas *canvasData) SetLineDash(dash []float64, offset float64) {
 	}
 }
 
-/*
-	func (canvas *canvasData) convertFont(name string) string {
-		buffer := allocStringBuilder()
-		defer freeStringBuilder(buffer)
-
-		for i, font := range strings.Split(name, ",") {
-			font = strings.Trim(font, " \n\"'")
-			if i > 0 {
-				buffer.WriteRune(',')
-			}
-			if strings.Contains(font, " ") {
-				buffer.WriteRune('"')
-				buffer.WriteString(font)
-				buffer.WriteRune('"')
-			} else {
-				buffer.WriteString(font)
-			}
-		}
-
-		return buffer.String()
-	}
-*/
 func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params FontParams) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
@@ -658,7 +636,7 @@ func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params Font
 		font = strings.Trim(font, " \n\"'")
 		buffer.WriteString(lead)
 		lead = ","
-		if strings.Contains(font, " ") {
+		if strings.ContainsRune(font, ' ') {
 			buffer.WriteRune('"')
 			buffer.WriteString(font)
 			buffer.WriteRune('"')

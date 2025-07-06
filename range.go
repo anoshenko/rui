@@ -21,7 +21,7 @@ func (r Range) String() string {
 
 func (r *Range) setValue(value string) bool {
 	var err error
-	if strings.Contains(value, ":") {
+	if strings.ContainsRune(value, ':') {
 		values := strings.Split(value, ":")
 		if len(values) != 2 {
 			ErrorLog("Invalid range value: " + value)
