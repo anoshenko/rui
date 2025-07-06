@@ -176,7 +176,7 @@ func (picker *timePickerData) setFunc(tag PropertyName, value any) []PropertyNam
 			return []PropertyName{tag}
 
 		case string:
-			if isConstantName(value) {
+			if ok, _ := isConstantName(value); ok {
 				picker.setRaw(tag, value)
 				return []PropertyName{tag}
 			}
@@ -323,10 +323,7 @@ func (picker *timePickerData) handleCommand(self View, command PropertyName, dat
 					for _, listener := range getTwoArgEventListeners[TimePicker, time.Time](picker, nil, TimeChangedEvent) {
 						listener.Run(picker, value, oldValue)
 					}
-					if listener, ok := picker.changeListener[TimePickerValue]; ok {
-						listener.Run(picker, TimePickerValue)
-					}
-
+					picker.runChangeListener(TimePickerValue)
 				}
 			}
 		}

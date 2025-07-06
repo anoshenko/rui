@@ -150,7 +150,7 @@ func setGridCellSize(properties Properties, tag PropertyName, value any) []Prope
 			sizes := make([]any, count)
 			for i, val := range values {
 				val = strings.Trim(val, " \t\n\r")
-				if isConstantName(val) {
+				if ok, _ := isConstantName(val); ok {
 					sizes[i] = val
 				} else if fn := parseSizeFunc(val); fn != nil {
 					sizes[i] = SizeUnit{Type: SizeFunction, Function: fn}
@@ -162,7 +162,7 @@ func setGridCellSize(properties Properties, tag PropertyName, value any) []Prope
 				}
 			}
 			properties.setRaw(tag, sizes)
-		} else if isConstantName(values[0]) {
+		} else if ok, _ := isConstantName(values[0]); ok {
 			properties.setRaw(tag, values[0])
 		} else if size, err := stringToSizeUnit(values[0]); err == nil {
 			properties.setRaw(tag, size)
@@ -220,7 +220,7 @@ func setGridCellSize(properties Properties, tag PropertyName, value any) []Prope
 					sizes[i] = val
 
 				case string:
-					if isConstantName(val) {
+					if ok, _ := isConstantName(val); ok {
 						sizes[i] = val
 					} else if size, err := stringToSizeUnit(val); err == nil {
 						sizes[i] = size
@@ -458,7 +458,7 @@ func (gridLayout *gridLayoutData) UpdateGridContent() {
 		if gridLayout.created {
 			updateInnerHTML(gridLayout.htmlID(), gridLayout.session)
 		}
-		gridLayout.contentChanged()
+		gridLayout.runChangeListener(Content)
 	}
 }
 

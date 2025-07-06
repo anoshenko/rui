@@ -103,14 +103,14 @@ func backgroundGradientSet(properties Properties, tag PropertyName, value any) [
 	case Gradient:
 		switch value := value.(type) {
 		case string:
-			if value != "" {
-				if strings.Contains(value, " ") || strings.Contains(value, ",") {
-					if points := parseGradientText(value); len(points) >= 2 {
-						properties.setRaw(Gradient, points)
-						return []PropertyName{tag}
-					}
-				} else if value[0] == '@' {
-					properties.setRaw(Gradient, value)
+			if ok, _ := isConstantName(value); ok {
+				properties.setRaw(Gradient, value)
+				return []PropertyName{tag}
+			}
+
+			if strings.ContainsAny(value, " ,") {
+				if points := parseGradientText(value); len(points) >= 2 {
+					properties.setRaw(Gradient, points)
 					return []PropertyName{tag}
 				}
 			}
@@ -168,7 +168,7 @@ func (point *BackgroundGradientPoint) setValue(text string) bool {
 		return false
 	}
 
-	if colorText[0] == '@' {
+	if ok, _ := isConstantName(colorText); ok {
 		point.Color = colorText
 	} else if color, ok := StringToColor(colorText); ok {
 		point.Color = color
@@ -178,7 +178,7 @@ func (point *BackgroundGradientPoint) setValue(text string) bool {
 
 	if pointText == "" {
 		point.Pos = nil
-	} else if pointText[0] == '@' {
+	} else if ok, _ := isConstantName(pointText); ok {
 		point.Pos = pointText
 	} else if pos, ok := StringToSizeUnit(pointText); ok {
 		point.Pos = pos
@@ -193,17 +193,10 @@ func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
 	if point.Color != nil {
 		switch color := point.Color.(type) {
 		case string:
-			if color != "" {
-				if color[0] == '@' {
-					if clr, ok := session.Color(color[1:]); ok {
-						return clr, true
-					}
-				} else {
-					if clr, ok := StringToColor(color); ok {
-						return clr, true
-					}
-				}
+			if ok, constName := isConstantName(color); ok {
+				return session.Color(constName)
 			}
+			return StringToColor(color)
 
 		case Color:
 			return color, true
@@ -256,8 +249,8 @@ func (gradient *backgroundGradient) writeGradient(session Session, buffer *strin
 
 	switch value := value.(type) {
 	case string:
-		if value != "" && value[0] == '@' {
-			if text, ok := session.Constant(value[1:]); ok {
+		if ok, constName := isConstantName(value); ok {
+			if text, ok := session.Constant(constName); ok {
 				points = parseGradientText(text)
 			}
 		}

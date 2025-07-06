@@ -615,8 +615,8 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 			popup.setRaw(Content, popup.contentView)
 
 		case string:
-			if len(value) > 0 && value[0] == '@' {
-				view := CreateViewFromResources(popup.session, value[1:])
+			if ok, constName := isConstantName(value); ok {
+				view := CreateViewFromResources(popup.session, constName)
 				if view != nil {
 					popup.contentView = view
 					break
@@ -1107,8 +1107,8 @@ func (popup *popupData) createTitleView() GridLayout {
 	if value := popup.getRaw(Title); value != nil {
 		switch value := value.(type) {
 		case string:
-			if len(value) > 0 && value[0] == '@' {
-				title = CreateViewFromResources(session, value[1:])
+			if ok, constName := isConstantName(value); ok {
+				title = CreateViewFromResources(session, constName)
 				if title != nil {
 					break
 				}

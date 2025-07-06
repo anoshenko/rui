@@ -139,7 +139,7 @@ func parseIndicesArray(value any) ([]any, bool) {
 			if val != nil {
 				switch val := val.(type) {
 				case string:
-					if isConstantName(val) {
+					if ok, _ := isConstantName(val); ok {
 						items = append(items, val)
 					} else if n, err := strconv.Atoi(val); err == nil {
 						items = append(items, n)
@@ -162,7 +162,7 @@ func parseIndicesArray(value any) ([]any, bool) {
 		items := make([]any, 0, len(value))
 		for _, str := range value {
 			if str = strings.Trim(str, " \t"); str != "" {
-				if isConstantName(str) {
+				if ok, _ := isConstantName(str); ok {
 					items = append(items, str)
 				} else if n, err := strconv.Atoi(str); err == nil {
 					items = append(items, n)
@@ -248,9 +248,7 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 					for _, listener := range getTwoArgEventListeners[DropDownList, int](list, nil, DropDownEvent) {
 						listener.Run(list, number, old)
 					}
-					if listener, ok := list.changeListener[Current]; ok {
-						listener.Run(list, Current)
-					}
+					list.runChangeListener(Current)
 				}
 			} else {
 				ErrorLog(err.Error())
@@ -308,8 +306,8 @@ func getIndicesArray(view View, tag PropertyName) []int {
 							result = append(result, value)
 
 						case string:
-							if value != "" && value[0] == '@' {
-								if val, ok := view.Session().Constant(value[1:]); ok {
+							if ok, constName := isConstantName(value); ok {
+								if val, ok := view.Session().Constant(constName); ok {
 									if n, err := strconv.Atoi(val); err == nil {
 										result = append(result, n)
 									}

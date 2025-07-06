@@ -217,11 +217,11 @@ func (imageView *imageViewData) htmlTag() string {
 }
 
 func imageViewSrc(view View, src string) (string, string) {
-	if src != "" && src[0] == '@' {
-		if image, ok := view.Session().ImageConstant(src[1:]); ok {
+	if ok, constName := isConstantName(src); ok {
+		if image, ok := view.Session().ImageConstant(constName); ok {
 			src = image
 		} else {
-			src = ""
+			return "", ""
 		}
 	}
 

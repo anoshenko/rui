@@ -130,7 +130,7 @@ func (data *sizeFuncData) parseArgs(args []any, allowNumber bool) bool {
 				return false
 			}
 
-			if arg[0] == '@' {
+			if ok, _ := isConstantName(arg); ok {
 				data.args = append(data.args, arg)
 			} else if val, err := strconv.ParseFloat(arg, 64); err == nil {
 				return numberArg(i, val)

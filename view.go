@@ -246,15 +246,19 @@ func (view *viewData) Focusable() bool {
 	return false
 }
 
+func (view *viewData) runChangeListener(tag PropertyName) {
+	if listener, ok := view.changeListener[tag]; ok {
+		listener.Run(view, tag)
+	}
+}
+
 func (view *viewData) Remove(tag PropertyName) {
 	changedTags := view.removeFunc(view.normalize(tag))
 
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
 			view.changed(tag)
-			if listener, ok := view.changeListener[tag]; ok {
-				listener.Run(view, tag)
-			}
+			view.runChangeListener(tag)
 		}
 	}
 }
@@ -280,9 +284,7 @@ func (view *viewData) Set(tag PropertyName, value any) bool {
 	if view.created && len(changedTags) > 0 {
 		for _, tag := range changedTags {
 			view.changed(tag)
-			if listener, ok := view.changeListener[tag]; ok {
-				listener.Run(view, tag)
-			}
+			view.runChangeListener(tag)
 		}
 	}
 
@@ -910,8 +912,8 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 	case DragImage:
 		if img, ok := stringProperty(view, DragImage, session); ok && img != "" {
 			img = strings.Trim(img, " \t")
-			if img[0] == '@' {
-				img, ok = session.ImageConstant(img[1:])
+			if ok, constName := isConstantName(img); ok {
+				img, ok = session.ImageConstant(constName)
 				if !ok {
 					session.removeProperty(htmlID, "data-drag-image")
 					return

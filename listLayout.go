@@ -196,7 +196,7 @@ func (listLayout *listLayoutData) UpdateContent() {
 		if listLayout.created {
 			updateInnerHTML(listLayout.htmlID(), listLayout.session)
 		}
-		listLayout.contentChanged()
+		listLayout.runChangeListener(Content)
 	}
 }
 

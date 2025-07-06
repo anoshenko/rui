@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -85,6 +86,10 @@ func StringToAngleUnit(value string) (AngleUnit, bool) {
 
 func stringToAngleUnit(value string) (AngleUnit, error) {
 	value = strings.ToLower(strings.Trim(value, " \t\n\r"))
+
+	if value == "" {
+		return AngleUnit{}, errors.New(`invalid AngleUnit value: ""`)
+	}
 
 	setValue := func(suffix string, unitType AngleUnitType) (AngleUnit, error) {
 		val, err := strconv.ParseFloat(value[:len(value)-len(suffix)], 64)

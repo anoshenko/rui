@@ -159,9 +159,7 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 					for _, listener := range getTwoArgEventListeners[ColorPicker, Color](picker, nil, ColorChangedEvent) {
 						listener.Run(picker, color, oldColor)
 					}
-					if listener, ok := picker.changeListener[ColorPickerValue]; ok {
-						listener.Run(picker, ColorPickerValue)
-					}
+					picker.runChangeListener(ColorPickerValue)
 				}
 			}
 		}

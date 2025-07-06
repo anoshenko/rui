@@ -608,8 +608,8 @@ func GetDragImage(view View, subviewID ...string) string {
 		if value != nil {
 			if img, ok := value.(string); ok {
 				img = strings.Trim(img, " \t")
-				if img != "" && img[0] == '@' {
-					if img, ok = view.Session().ImageConstant(img[1:]); ok {
+				if ok, constName := isConstantName(img); ok {
+					if img, ok = view.Session().ImageConstant(constName); ok {
 						return img
 					}
 				} else {

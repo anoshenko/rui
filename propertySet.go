@@ -511,10 +511,10 @@ func invalidPropertyValue(tag PropertyName, value any) {
 	ErrorLogF(`Invalid value "%v" of "%s" property`, value, string(tag))
 }
 
-func isConstantName(text string) bool {
+func isConstantName(text string) (bool, string) {
 	len := len(text)
 	if len <= 1 || text[0] != '@' {
-		return false
+		return false, ""
 	}
 
 	if len > 2 {
@@ -522,11 +522,14 @@ func isConstantName(text string) bool {
 		if (text[1] == '`' && text[last] == '`') ||
 			(text[1] == '"' && text[last] == '"') ||
 			(text[1] == '\'' && text[last] == '\'') {
-			return true
+			return true, text[2:last]
 		}
 	}
 
-	return !strings.ContainsAny(text, ",;|\"'`+(){}[]<>/\\*&%! \t\n\r")
+	if strings.ContainsAny(text, ",;|\"'`+(){}[]<>/\\*&%! \t\n\r") {
+		return false, ""
+	}
+	return true, text[1:]
 }
 
 func isInt(value any) (int, bool) {
@@ -579,7 +582,7 @@ func setSimpleProperty(properties Properties, tag PropertyName, value any) bool 
 			properties.setRaw(tag, nil)
 			return true
 		}
-		if isConstantName(text) {
+		if ok, _ := isConstantName(text); ok {
 			properties.setRaw(tag, text)
 			return true
 		}

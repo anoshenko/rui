@@ -283,9 +283,7 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 					for _, listener := range getTwoArgEventListeners[NumberPicker, float64](picker, nil, NumberChangedEvent) {
 						listener.Run(picker, value, oldValue)
 					}
-					if listener, ok := picker.changeListener[NumberPickerValue]; ok {
-						listener.Run(picker, NumberPickerValue)
-					}
+					picker.runChangeListener(NumberPickerValue)
 				}
 			}
 		}

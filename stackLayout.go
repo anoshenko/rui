@@ -377,7 +377,7 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 					}
 				}
 				delete(layout.onPushFinished, viewID)
-				layout.contentChanged()
+				layout.runChangeListener(Content)
 			}
 
 		case "pop":
@@ -416,7 +416,7 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 			session.removeProperty(pageID, "ontransitionend")
 			session.removeProperty(pageID, "ontransitioncancel")
 			session.finishUpdateScript(pageID)
-			layout.contentChanged()
+			layout.runChangeListener(Content)
 
 			if finished, ok := layout.onMoveFinished[viewID]; ok {
 				for _, listener := range finished.listener {
@@ -566,7 +566,7 @@ func (layout *stackLayoutData) moveToFrontByIndex(index int, onShow []func(View)
 	if transform == nil {
 		session.updateCSSProperty(peekPageID, "visibility", "hidden")
 		session.updateCSSProperty(pageID, "visibility", "visible")
-		layout.contentChanged()
+		layout.runChangeListener(Content)
 		for _, listener := range onShow {
 			if listener != nil {
 				listener(view)
@@ -677,7 +677,7 @@ func (layout *stackLayoutData) Append(view View) {
 		}
 		session.appendToInnerHTML(stackID, buffer.String())
 
-		layout.contentChanged()
+		layout.runChangeListener(Content)
 	}
 }
 
@@ -713,7 +713,7 @@ func (layout *stackLayoutData) Insert(view View, index int) {
 	session := layout.Session()
 	session.appendToInnerHTML(stackID, buffer.String())
 
-	layout.contentChanged()
+	layout.runChangeListener(Content)
 }
 
 // Remove removes view from list and return it
@@ -744,7 +744,7 @@ func (layout *stackLayoutData) RemoveView(index int) View {
 	}
 
 	layout.Session().callFunc("removeView", view.htmlID()+"page")
-	layout.contentChanged()
+	layout.runChangeListener(Content)
 	return view
 }
 
@@ -839,7 +839,7 @@ func (layout *stackLayoutData) Pop(onPopFinished ...func(View)) bool {
 	view.setParentID("")
 
 	layout.views = layout.views[:peek]
-	layout.contentChanged()
+	layout.runChangeListener(Content)
 
 	layout.onPopFinished[view.htmlID()] = popFinished{
 		view:     view,

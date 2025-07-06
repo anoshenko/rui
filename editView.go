@@ -271,9 +271,7 @@ func (edit *editViewData) textChanged(newText, oldText string) {
 	for _, listener := range getTwoArgEventListeners[EditView, string](edit, nil, EditTextChangedEvent) {
 		listener.Run(edit, newText, oldText)
 	}
-	if listener, ok := edit.changeListener[Text]; ok {
-		listener.Run(edit, Text)
-	}
+	edit.runChangeListener(Text)
 }
 
 func (edit *editViewData) htmlTag() string {

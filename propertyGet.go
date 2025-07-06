@@ -18,8 +18,8 @@ func stringProperty(properties Properties, tag PropertyName, session Session) (s
 func imageProperty(properties Properties, tag PropertyName, session Session) (string, bool) {
 	if value := properties.getRaw(tag); value != nil {
 		if text, ok := value.(string); ok {
-			if text != "" && text[0] == '@' {
-				if image, ok := session.ImageConstant(text[1:]); ok {
+			if ok, constName := isConstantName(text); ok {
+				if image, ok := session.ImageConstant(constName); ok {
 					return image, true
 				} else {
 					return "", false
@@ -88,8 +88,8 @@ func valueToColor(value any, session Session) (Color, bool) {
 			return value, true
 
 		case string:
-			if len(value) > 1 && value[0] == '@' {
-				return session.Color(value[1:])
+			if ok, constName := isConstantName(value); ok {
+				return session.Color(constName)
 			}
 			return StringToColor(value)
 		}

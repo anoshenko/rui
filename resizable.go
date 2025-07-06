@@ -234,7 +234,7 @@ func resizableSetSide(properties Properties, value any) []PropertyName {
 				val := strings.Trim(val, " \t\r\n")
 				values[i] = val
 
-				if val[0] == '@' {
+				if ok, _ := isConstantName(val); ok {
 					hasConst = true
 				} else if n, err := strconv.Atoi(val); err == nil {
 					if n < 1 || n > AllSides {
@@ -262,7 +262,7 @@ func resizableSetSide(properties Properties, value any) []PropertyName {
 				return []PropertyName{Side}
 			}
 
-		} else if value[0] == '@' {
+		} else if ok, _ := isConstantName(value); ok {
 			properties.setRaw(Side, value)
 			return []PropertyName{Side}
 		} else if n, ok := validValues[value]; ok {

@@ -65,16 +65,12 @@ func (point *BackgroundGradientAngle) color(session Session) (Color, bool) {
 	if point.Color != nil {
 		switch color := point.Color.(type) {
 		case string:
-			if color != "" {
-				if color[0] == '@' {
-					if clr, ok := session.Color(color[1:]); ok {
-						return clr, true
-					}
-				} else {
-					if clr, ok := StringToColor(color); ok {
-						return clr, true
-					}
+			if ok, constName := isConstantName(color); ok {
+				if clr, ok := session.Color(constName); ok {
+					return clr, true
 				}
+			} else if clr, ok := StringToColor(color); ok {
+				return clr, true
 			}
 
 		case Color:
@@ -104,19 +100,15 @@ func (point *BackgroundGradientAngle) cssString(session Session, buffer *strings
 	if point.Angle != nil {
 		switch value := point.Angle.(type) {
 		case string:
-			if value != "" {
-				if value[0] == '@' {
-					if val, ok := session.Constant(value[1:]); ok {
-						value = val
-					} else {
-						return
-					}
+			if ok, constName := isConstantName(value); ok {
+				if value, ok = session.Constant(constName); !ok {
+					return
 				}
+			}
 
-				if angle, ok := StringToAngleUnit(value); ok {
-					buffer.WriteRune(' ')
-					buffer.WriteString(angle.cssString())
-				}
+			if angle, ok := StringToAngleUnit(value); ok {
+				buffer.WriteRune(' ')
+				buffer.WriteString(angle.cssString())
 			}
 
 		case AngleUnit:
@@ -174,7 +166,7 @@ func backgroundConicGradientSet(properties Properties, tag PropertyName, value a
 					properties.setRaw(Gradient, vector)
 					return []PropertyName{tag}
 				}
-			} else if isConstantName(value) {
+			} else if ok, _ := isConstantName(value); ok {
 				properties.setRaw(Gradient, value)
 				return []PropertyName{tag}
 			}
@@ -206,15 +198,6 @@ func backgroundConicGradientSet(properties Properties, tag PropertyName, value a
 	return propertiesSet(properties, tag, value)
 }
 
-func (gradient *backgroundConicGradient) stringToAngle(text string) (any, bool) {
-	if text == "" {
-		return nil, false
-	} else if text[0] == '@' {
-		return text, true
-	}
-	return StringToAngleUnit(text)
-}
-
 func (gradient *backgroundConicGradient) stringToGradientPoint(text string) (BackgroundGradientAngle, bool) {
 	var result BackgroundGradientAngle
 	colorText := ""
@@ -231,7 +214,7 @@ func (gradient *backgroundConicGradient) stringToGradientPoint(text string) (Bac
 		return result, false
 	}
 
-	if colorText[0] == '@' {
+	if ok, _ := isConstantName(colorText); ok {
 		result.Color = colorText
 	} else if color, ok := StringToColor(colorText); ok {
 		result.Color = color
@@ -240,7 +223,9 @@ func (gradient *backgroundConicGradient) stringToGradientPoint(text string) (Bac
 	}
 
 	if pointText != "" {
-		if angle, ok := gradient.stringToAngle(pointText); ok {
+		if ok, _ := isConstantName(pointText); ok {
+			result.Angle = pointText
+		} else if angle, ok := StringToAngleUnit(text); ok {
 			result.Angle = angle
 		} else {
 			return result, false

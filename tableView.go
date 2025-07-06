@@ -695,7 +695,7 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 	case HeadHeight, FootHeight:
 		switch value := value.(type) {
 		case string:
-			if isConstantName(value) {
+			if ok, _ := isConstantName(value); ok {
 				table.setRaw(tag, value)
 			} else if n, err := strconv.Atoi(value); err == nil {
 				table.setRaw(tag, n)
@@ -1675,13 +1675,10 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 		if row, ok := dataIntProperty(data, "row"); ok && row != current.Row {
 			current.Row = row
 			table.setRaw(Current, current.Row)
-			if listener, ok := table.changeListener[Current]; ok {
-				listener.Run(table, Current)
-			}
-
 			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
 				listener.Run(table, row)
 			}
+			table.runChangeListener(Current)
 		}
 
 	case "currentCell":
@@ -1692,13 +1689,11 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 					current.Row = row
 					current.Column = column
 					table.setRaw(Current, current.Row)
-					if listener, ok := table.changeListener[Current]; ok {
-						listener.Run(table, Current)
-					}
 
 					for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {
 						listener.Run(table, row, column)
 					}
+					table.runChangeListener(Current)
 				}
 			}
 		}

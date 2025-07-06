@@ -88,13 +88,7 @@ func (container *viewsContainerData) Append(view View) {
 
 		viewHTML(view, buffer, "")
 		container.Session().appendToInnerHTML(container.htmlID(), buffer.String())
-		container.contentChanged()
-	}
-}
-
-func (container *viewsContainerData) contentChanged() {
-	if listener, ok := container.changeListener[Content]; ok {
-		listener.Run(container, Content)
+		container.runChangeListener(Content)
 	}
 }
 
@@ -119,7 +113,7 @@ func (container *viewsContainerData) insert(view View, index int) bool {
 func (container *viewsContainerData) Insert(view View, index int) {
 	if container.insert(view, index) && container.created {
 		updateInnerHTML(container.htmlID(), container.Session())
-		container.contentChanged()
+		container.runChangeListener(Content)
 	}
 }
 
@@ -153,7 +147,7 @@ func (container *viewsContainerData) RemoveView(index int) View {
 	view := container.removeView(index)
 	if view != nil && container.created {
 		container.Session().callFunc("removeView", view.htmlID())
-		container.contentChanged()
+		container.runChangeListener(Content)
 	}
 	return view
 }
@@ -187,6 +181,11 @@ func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Bui
 func viewFromTextValue(text string, session Session) View {
 	if data, err := ParseDataText(text); err == nil {
 		if view := CreateViewFromObject(session, data, nil); view != nil {
+			return view
+		}
+	}
+	if ok, constName := isConstantName(text); ok {
+		if view := CreateViewFromResources(session, constName); view != nil {
 			return view
 		}
 	}

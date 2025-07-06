@@ -207,7 +207,7 @@ func (picker *datePickerData) setFunc(tag PropertyName, value any) []PropertyNam
 			return []PropertyName{tag}
 
 		case string:
-			if isConstantName(value) {
+			if ok, _ := isConstantName(value); ok {
 				picker.setRaw(tag, value)
 				return []PropertyName{tag}
 			}
@@ -351,9 +351,7 @@ func (picker *datePickerData) handleCommand(self View, command PropertyName, dat
 					for _, listener := range getTwoArgEventListeners[DatePicker, time.Time](picker, nil, DateChangedEvent) {
 						listener.Run(picker, value, oldValue)
 					}
-					if listener, ok := picker.changeListener[DatePickerValue]; ok {
-						listener.Run(picker, DatePickerValue)
-					}
+					picker.runChangeListener(DatePickerValue)
 				}
 			}
 		}

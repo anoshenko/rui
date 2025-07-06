@@ -450,7 +450,7 @@ func polygonClipDataSet(properties Properties, tag PropertyName, value any) []Pr
 			for i, val := range value {
 				switch val := val.(type) {
 				case string:
-					if isConstantName(val) {
+					if ok, _ := isConstantName(val); ok {
 						points[i] = val
 					} else if size, ok := StringToSizeUnit(val); ok {
 						points[i] = size
@@ -484,7 +484,7 @@ func polygonClipDataSet(properties Properties, tag PropertyName, value any) []Pr
 			points := make([]any, len(values))
 			for i, val := range values {
 				val = strings.Trim(val, " \t\n\r")
-				if isConstantName(val) {
+				if ok, _ := isConstantName(val); ok {
 					points[i] = val
 				} else if size, ok := StringToSizeUnit(val); ok {
 					points[i] = size
@@ -634,7 +634,7 @@ func setClipShapePropertyProperty(properties Properties, tag PropertyName, value
 		return []PropertyName{tag}
 
 	case string:
-		if isConstantName(value) {
+		if ok, _ := isConstantName(value); ok {
 			properties.setRaw(tag, value)
 			return []PropertyName{tag}
 		}
