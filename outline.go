@@ -34,7 +34,7 @@ func NewOutlineProperty(params Params) OutlineProperty {
 }
 
 func (outline *outlinePropertyData) init() {
-	outline.propertyList.init()
+	outline.dataProperty.init()
 	outline.normalize = normalizeOutlineTag
 	outline.set = outlineSet
 	outline.supportedProperties = []PropertyName{Style, Width, ColorTag}
