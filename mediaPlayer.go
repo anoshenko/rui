@@ -589,12 +589,46 @@ type MediaSource struct {
 func (player *mediaPlayerData) init(session Session) {
 	player.viewData.init(session)
 	player.tag = "MediaPlayer"
+	player.get = player.getFunc
 	player.set = player.setFunc
 	player.changed = player.propertyChanged
 }
 
 func (player *mediaPlayerData) Focusable() bool {
 	return true
+}
+
+func (player *mediaPlayerData) getFunc(tag PropertyName) any {
+	switch tag {
+	case AbortEvent, CanPlayEvent, CanPlayThroughEvent, CompleteEvent, EmptiedEvent, LoadStartEvent,
+		EndedEvent, LoadedDataEvent, LoadedMetadataEvent, PauseEvent, PlayEvent, PlayingEvent,
+		ProgressEvent, SeekedEvent, SeekingEvent, StalledEvent, SuspendEvent, WaitingEvent:
+
+		if listeners := getNoArgEventRawListeners[MediaPlayer](player, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+
+	case DurationChangedEvent, RateChangedEvent, TimeUpdateEvent, VolumeChangedEvent:
+		if listeners := getOneArgEventRawListeners[MediaPlayer, float64](player, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+
+	case PlayerErrorEvent:
+		if value := player.getRaw(tag); value != nil {
+			if listeners, ok := value.([]mediaPlayerErrorListener); ok && len(listeners) > 0 {
+				result := make([]any, 0, len(listeners))
+				for _, listener := range listeners {
+					result = append(result, listener.rawListener())
+				}
+				return result
+			}
+		}
+		return nil
+	}
+
+	return player.viewData.getFunc(tag)
 }
 
 func (player *mediaPlayerData) setFunc(tag PropertyName, value any) []PropertyName {

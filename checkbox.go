@@ -49,6 +49,7 @@ func (button *checkboxData) init(session Session) {
 	button.viewsContainerData.init(session)
 	button.tag = "Checkbox"
 	button.systemClass = "ruiGridLayout ruiCheckbox"
+	button.get = button.getFunc
 	button.set = button.setFunc
 	button.remove = button.removeFunc
 	button.changed = button.propertyChanged
@@ -97,6 +98,17 @@ func (button *checkboxData) propertyChanged(tag PropertyName) {
 	default:
 		button.viewsContainerData.propertyChanged(tag)
 	}
+}
+
+func (button *checkboxData) getFunc(tag PropertyName) any {
+	switch tag {
+	case CheckboxChangedEvent:
+		if listeners := getOneArgEventRawListeners[Checkbox, bool](button, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return button.viewData.getFunc(tag)
 }
 
 func (button *checkboxData) setFunc(tag PropertyName, value any) []PropertyName {

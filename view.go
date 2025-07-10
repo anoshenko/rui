@@ -308,8 +308,57 @@ func (view *viewData) getFunc(tag PropertyName) any {
 		} else {
 			return nil
 		}
+
+	case FocusEvent, LostFocusEvent:
+		if listeners := getNoArgEventRawListeners[View](view, nil, tag); len(listeners) > 0 {
+
+		}
+
+	case KeyDownEvent, KeyUpEvent:
+		if listeners := getOneArgEventRawListeners[View, KeyEvent](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case ClickEvent, DoubleClickEvent, MouseDown, MouseUp, MouseMove, MouseOut, MouseOver, ContextMenuEvent:
+		if listeners := getOneArgEventRawListeners[View, MouseEvent](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case PointerDown, PointerUp, PointerMove, PointerOut, PointerOver, PointerCancel:
+		if listeners := getOneArgEventRawListeners[View, PointerEvent](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case TouchStart, TouchEnd, TouchMove, TouchCancel:
+		if listeners := getOneArgEventRawListeners[View, TouchEvent](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case TransitionRunEvent, TransitionStartEvent, TransitionEndEvent, TransitionCancelEvent:
+		if listeners := getOneArgEventRawListeners[View, PropertyName](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case AnimationStartEvent, AnimationEndEvent, AnimationIterationEvent, AnimationCancelEvent:
+		if listeners := getOneArgEventRawListeners[View, string](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case ResizeEvent, ScrollEvent:
+		if listeners := getOneArgEventRawListeners[View, Frame](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	case DragStartEvent, DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
+		if listeners := getOneArgEventRawListeners[View, DragAndDropEvent](view, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+
+	default:
+		return viewStyleGet(view, tag)
 	}
-	return viewStyleGet(view, tag)
+
+	return nil
 }
 
 func (view *viewData) removeFunc(tag PropertyName) []PropertyName {

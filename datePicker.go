@@ -139,6 +139,7 @@ func (picker *datePickerData) init(session Session) {
 	picker.hasHtmlDisabled = true
 	picker.normalize = normalizeDatePickerTag
 	picker.set = picker.setFunc
+	picker.get = picker.getFunc
 	picker.changed = picker.propertyChanged
 }
 
@@ -196,6 +197,17 @@ func stringToDate(value string) (time.Time, bool) {
 		return date, true
 	}
 	return time.Now(), false
+}
+
+func (picker *datePickerData) getFunc(tag PropertyName) any {
+	switch tag {
+	case DateChangedEvent:
+		if listeners := getTwoArgEventRawListeners[DatePicker, time.Time](picker, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return picker.viewData.getFunc(tag)
 }
 
 func (picker *datePickerData) setFunc(tag PropertyName, value any) []PropertyName {

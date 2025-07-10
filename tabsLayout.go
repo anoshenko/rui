@@ -163,6 +163,7 @@ func (tabsLayout *tabsLayoutData) init(session Session) {
 	tabsLayout.viewsContainerData.init(session)
 	tabsLayout.tag = "TabsLayout"
 	tabsLayout.systemClass = "ruiTabsLayout"
+	tabsLayout.get = tabsLayout.getFunc
 	tabsLayout.set = tabsLayout.setFunc
 	tabsLayout.changed = tabsLayout.propertyChanged
 }
@@ -170,6 +171,23 @@ func (tabsLayout *tabsLayoutData) init(session Session) {
 func tabsLayoutCurrent(view View, defaultValue int) int {
 	result, _ := intProperty(view, Current, view.Session(), defaultValue)
 	return result
+}
+
+func (tabsLayout *tabsLayoutData) getFunc(tag PropertyName) any {
+	switch tag {
+	case CurrentTabChangedEvent:
+		if listeners := getTwoArgEventRawListeners[TabsLayout, int](tabsLayout, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+
+	case TabCloseEvent:
+		if listeners := getOneArgEventRawListeners[TabsLayout, int](tabsLayout, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return tabsLayout.viewsContainerData.getFunc(tag)
 }
 
 func (tabsLayout *tabsLayoutData) setFunc(tag PropertyName, value any) []PropertyName {

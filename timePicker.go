@@ -120,6 +120,7 @@ func (picker *timePickerData) init(session Session) {
 	picker.tag = "TimePicker"
 	picker.hasHtmlDisabled = true
 	picker.normalize = normalizeTimePickerTag
+	picker.get = picker.getFunc
 	picker.set = picker.setFunc
 	picker.changed = picker.propertyChanged
 }
@@ -165,6 +166,17 @@ func stringToTime(value string) (time.Time, bool) {
 		return time.Now(), false
 	}
 	return result, true
+}
+
+func (picker *timePickerData) getFunc(tag PropertyName) any {
+	switch tag {
+	case TimeChangedEvent:
+		if listeners := getTwoArgEventRawListeners[TimePicker, time.Time](picker, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return picker.viewData.getFunc(tag)
 }
 
 func (picker *timePickerData) setFunc(tag PropertyName, value any) []PropertyName {

@@ -131,6 +131,7 @@ func (picker *filePickerData) init(session Session) {
 	picker.hasHtmlDisabled = true
 	picker.files = []FileInfo{}
 	//picker.loader = map[int]func(FileInfo, []byte){}
+	picker.get = picker.getFunc
 	picker.set = picker.setFunc
 	picker.changed = picker.propertyChanged
 
@@ -163,6 +164,17 @@ func (picker *filePickerData) LoadFile(file FileInfo, result func(FileInfo, []by
 
 		picker.viewData.LoadFile(file, result)
 	}
+}
+
+func (picker *filePickerData) getFunc(tag PropertyName) any {
+	switch tag {
+	case FileSelectedEvent:
+		if listeners := getOneArgEventRawListeners[FilePicker, []FileInfo](picker, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return picker.viewData.getFunc(tag)
 }
 
 func (picker *filePickerData) setFunc(tag PropertyName, value any) []PropertyName {

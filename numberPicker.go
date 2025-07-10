@@ -129,6 +129,7 @@ func (picker *numberPickerData) init(session Session) {
 	picker.tag = "NumberPicker"
 	picker.hasHtmlDisabled = true
 	picker.normalize = normalizeNumberPickerTag
+	picker.get = picker.getFunc
 	picker.set = picker.setFunc
 	picker.changed = picker.propertyChanged
 }
@@ -145,6 +146,17 @@ func normalizeNumberPickerTag(tag PropertyName) PropertyName {
 	}
 
 	return normalizeDataListTag(tag)
+}
+
+func (picker *numberPickerData) getFunc(tag PropertyName) any {
+	switch tag {
+	case NumberChangedEvent:
+		if listeners := getTwoArgEventRawListeners[NumberPicker, float64](picker, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return picker.viewData.getFunc(tag)
 }
 
 func (picker *numberPickerData) setFunc(tag PropertyName, value any) []PropertyName {

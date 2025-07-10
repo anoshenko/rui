@@ -51,6 +51,7 @@ func (list *dropDownListData) init(session Session) {
 	list.tag = "DropDownList"
 	list.hasHtmlDisabled = true
 	list.normalize = normalizeDropDownListTag
+	list.get = list.getFunc
 	list.set = list.setFunc
 	list.changed = list.propertyChanged
 }
@@ -65,6 +66,17 @@ func normalizeDropDownListTag(tag PropertyName) PropertyName {
 		return ItemSeparators
 	}
 	return tag
+}
+
+func (list *dropDownListData) getFunc(tag PropertyName) any {
+	switch tag {
+	case DropDownEvent:
+		if listeners := getTwoArgEventRawListeners[DropDownList, int](list, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return list.viewData.getFunc(tag)
 }
 
 func (list *dropDownListData) setFunc(tag PropertyName, value any) []PropertyName {

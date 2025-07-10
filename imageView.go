@@ -97,6 +97,7 @@ func (imageView *imageViewData) init(session Session) {
 	imageView.tag = "ImageView"
 	imageView.systemClass = "ruiImageView"
 	imageView.normalize = normalizeImageViewTag
+	imageView.get = imageView.getFunc
 	imageView.set = imageView.setFunc
 	imageView.changed = imageView.propertyChanged
 }
@@ -120,6 +121,17 @@ func normalizeImageViewTag(tag PropertyName) PropertyName {
 		tag = AltText
 	}
 	return tag
+}
+
+func (imageView *imageViewData) getFunc(tag PropertyName) any {
+	switch tag {
+	case LoadedEvent, ErrorEvent:
+		if listeners := getNoArgEventRawListeners[ImageView](imageView, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return imageView.viewData.getFunc(tag)
 }
 
 func (imageView *imageViewData) setFunc(tag PropertyName, value any) []PropertyName {

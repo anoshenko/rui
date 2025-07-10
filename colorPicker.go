@@ -66,6 +66,7 @@ func (picker *colorPickerData) init(session Session) {
 	picker.hasHtmlDisabled = true
 	picker.properties[Padding] = Px(0)
 	picker.normalize = normalizeColorPickerTag
+	picker.get = picker.getFunc
 	picker.set = picker.setFunc
 	picker.changed = picker.propertyChanged
 }
@@ -78,6 +79,17 @@ func normalizeColorPickerTag(tag PropertyName) PropertyName {
 	}
 
 	return normalizeDataListTag(tag)
+}
+
+func (picker *colorPickerData) getFunc(tag PropertyName) any {
+	switch tag {
+	case ColorChangedEvent:
+		if listeners := getTwoArgEventRawListeners[ColorPicker, Color](picker, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return picker.viewData.getFunc(tag)
 }
 
 func (picker *colorPickerData) setFunc(tag PropertyName, value any) []PropertyName {

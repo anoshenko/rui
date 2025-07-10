@@ -242,7 +242,7 @@ func setOneArgEventListener[V View, T any](view View, tag PropertyName, value an
 
 func getOneArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []oneArgListener[V, E] {
 	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
+		if value := view.getRaw(tag); value != nil {
 			if result, ok := value.([]oneArgListener[V, E]); ok {
 				return result
 			}

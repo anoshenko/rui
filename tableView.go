@@ -593,6 +593,7 @@ func (table *tableViewData) init(session Session) {
 	table.cellViews = []View{}
 	table.cellFrame = []Frame{}
 	table.normalize = normalizeTableViewTag
+	table.get = table.getFunc
 	table.set = table.setFunc
 	table.changed = table.propertyChanged
 }
@@ -616,6 +617,23 @@ func normalizeTableViewTag(tag PropertyName) PropertyName {
 
 func (table *tableViewData) Focusable() bool {
 	return GetTableSelectionMode(table) != NoneSelection
+}
+
+func (table *tableViewData) getFunc(tag PropertyName) any {
+	switch tag {
+	case TableCellClickedEvent, TableCellSelectedEvent:
+		if listeners := getTwoArgEventRawListeners[TableView, int](table, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+
+	case TableRowClickedEvent, TableRowSelectedEvent:
+		if listeners := getOneArgEventRawListeners[TableView, int](table, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return table.viewData.getFunc(tag)
 }
 
 func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName {

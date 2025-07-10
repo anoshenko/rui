@@ -233,7 +233,7 @@ func setNoArgEventListener[V View](view View, tag PropertyName, value any) []Pro
 
 func getNoArgEventListeners[V View](view View, subviewID []string, tag PropertyName) []noArgListener[V] {
 	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
+		if value := view.getRaw(tag); value != nil {
 			if result, ok := value.([]noArgListener[V]); ok {
 				return result
 			}

@@ -121,6 +121,7 @@ func (edit *editViewData) init(session Session) {
 	edit.hasHtmlDisabled = true
 	edit.tag = "EditView"
 	edit.normalize = normalizeEditViewTag
+	edit.get = edit.getFunc
 	edit.set = edit.setFunc
 	edit.changed = edit.propertyChanged
 }
@@ -146,6 +147,17 @@ func normalizeEditViewTag(tag PropertyName) PropertyName {
 	}
 
 	return normalizeDataListTag(tag)
+}
+
+func (edit *editViewData) getFunc(tag PropertyName) any {
+	switch tag {
+	case EditTextChangedEvent:
+		if listeners := getTwoArgEventRawListeners[EditView, string](edit, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+	}
+	return edit.viewData.getFunc(tag)
 }
 
 func (edit *editViewData) setFunc(tag PropertyName, value any) []PropertyName {

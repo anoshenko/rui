@@ -316,7 +316,7 @@ func setTwoArgEventListener[V View, T any](view View, tag PropertyName, value an
 
 func getTwoArgEventListeners[V View, E any](view View, subviewID []string, tag PropertyName) []twoArgListener[V, E] {
 	if view = getSubview(view, subviewID); view != nil {
-		if value := view.Get(tag); value != nil {
+		if value := view.getRaw(tag); value != nil {
 			if result, ok := value.([]twoArgListener[V, E]); ok {
 				return result
 			}

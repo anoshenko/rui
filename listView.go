@@ -310,6 +310,18 @@ func (listView *listViewData) getFunc(tag PropertyName) any {
 			return rowGap
 		}
 		return AutoSize()
+
+	case ListItemClickedEvent, ListItemSelectedEvent:
+		if listeners := getOneArgEventRawListeners[ListView, int](listView, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
+
+	case ListItemCheckedEvent:
+		if listeners := getOneArgEventRawListeners[ListView, []int](listView, nil, tag); len(listeners) > 0 {
+			return listeners
+		}
+		return nil
 	}
 	return listView.viewData.getFunc(tag)
 }
