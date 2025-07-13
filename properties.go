@@ -143,7 +143,20 @@ func parseProperties(properties Properties, object DataObject) {
 			properties.Set(PropertyName(node.Tag()), node.Object())
 
 		case ArrayNode:
-			properties.Set(PropertyName(node.Tag()), node.Array())
+			switch node.ArraySize() {
+			case 0:
+				// do nothing
+
+			case 1:
+				if v := node.ArrayElement(0); v.IsObject() {
+					properties.Set(PropertyName(node.Tag()), v.Object())
+				} else {
+					properties.Set(PropertyName(node.Tag()), v.Value())
+				}
+
+			default:
+				properties.Set(PropertyName(node.Tag()), node.Array())
+			}
 		}
 	}
 }

@@ -421,6 +421,11 @@ func (listView *listViewData) getAdapter() ListAdapter {
 			return adapter
 		}
 	}
+	if obj := listView.binding(); obj != nil {
+		if adapter, ok := obj.(ListAdapter); ok {
+			return adapter
+		}
+	}
 	return nil
 }
 

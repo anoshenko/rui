@@ -604,7 +604,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 
 	case []string:
 		if len(value) == 0 {
-			return "[]"
+			return ""
 		}
 
 		size := 0
@@ -699,7 +699,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 	case []View:
 		size := len(value)
 		if size == 0 {
-			return "[]"
+			return ""
 		}
 
 		buffer := allocStringBuilder()
@@ -724,35 +724,29 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 	case []any:
 		size := len(value)
 		if size == 0 {
-			return "[]"
+			return ""
 		}
 
-		buffer := allocStringBuilder()
-		defer freeStringBuilder(buffer)
-
-		if size == 1 {
-			return propertyValueToString(tag, value[0], indent)
-		} else {
-			buffer.WriteString("[ ")
-			comma := false
-			for _, v := range value {
-				text := propertyValueToString(tag, v, indent)
-				if text != "" {
-					if comma {
-						buffer.WriteString(", ")
-					}
-					buffer.WriteString(text)
-					comma = true
-				}
+		text := make([]string, 0, size)
+		for _, v := range value {
+			if txt := propertyValueToString(tag, v, indent); txt != "" {
+				text = append(text, txt)
 			}
-			buffer.WriteString(" ]")
 		}
-		return buffer.String()
+
+		switch len(text) {
+		case 0:
+			return ""
+		case 1:
+			return text[0]
+		default:
+			return propertyValueToString(tag, text, indent)
+		}
 
 	case []BackgroundElement:
 		size := len(value)
 		if size == 0 {
-			return "[]"
+			return ""
 		}
 
 		buffer := allocStringBuilder()
@@ -805,7 +799,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 	case map[PropertyName]AnimationProperty:
 		size := len(value)
 		if size == 0 {
-			return "[]"
+			return ""
 		}
 
 		buffer := allocStringBuilder()
@@ -839,7 +833,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 	case []AnimationProperty:
 		size := len(value)
 		if size == 0 {
-			return "[]"
+			return ""
 		}
 
 		buffer := allocStringBuilder()

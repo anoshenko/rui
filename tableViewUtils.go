@@ -36,6 +36,11 @@ func GetTableContent(view View, subviewID ...string) TableAdapter {
 				return adapter
 			}
 		}
+		if obj := view.binding(); obj != nil {
+			if adapter, ok := obj.(TableAdapter); ok {
+				return adapter
+			}
+		}
 	}
 
 	return nil
