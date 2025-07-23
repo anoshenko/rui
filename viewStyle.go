@@ -935,7 +935,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 	case []popupListener:
 		return getPopupListenerBinding(value)
 
-	case map[PropertyName]oneArgListener[View, PropertyName]:
+	case map[PropertyName]any:
 		if len(value) == 0 {
 			return ""
 		}
@@ -946,7 +946,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		indent2 := indent + "\t"
 		buffer.WriteString("_{\n")
 		for key, listener := range value {
-			if text, ok := listener.rawListener().(string); ok && text != "" {
+			if text, ok := listener.(string); ok && text != "" {
 				buffer.WriteString(indent2)
 				writeString(buffer, string(key))
 				buffer.WriteString(" = ")

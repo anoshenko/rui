@@ -311,7 +311,7 @@ func (view *viewData) getFunc(tag PropertyName) any {
 
 	case FocusEvent, LostFocusEvent:
 		if listeners := getNoArgEventRawListeners[View](view, nil, tag); len(listeners) > 0 {
-
+			return listeners
 		}
 
 	case KeyDownEvent, KeyUpEvent:
@@ -352,6 +352,15 @@ func (view *viewData) getFunc(tag PropertyName) any {
 	case DragStartEvent, DragEndEvent, DragEnterEvent, DragLeaveEvent, DragOverEvent, DropEvent:
 		if listeners := getOneArgEventRawListeners[View, DragAndDropEvent](view, nil, tag); len(listeners) > 0 {
 			return listeners
+		}
+
+	case changeListeners:
+		if len(view.changeListener) > 0 {
+			result := map[PropertyName]any{}
+			for tag, listener := range view.changeListener {
+				result[tag] = listener.rawListener()
+			}
+			return result
 		}
 
 	default:
@@ -1328,6 +1337,11 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 func (view *viewData) SetChangeListener(tag PropertyName, listener any) bool {
 	if listener == nil {
 		delete(view.changeListener, tag)
+		if len(view.changeListener) > 0 {
+			view.setRaw(changeListeners, view.changeListener)
+		} else {
+			view.setRaw(changeListeners, nil)
+		}
 	} else {
 		switch listener := listener.(type) {
 		case func():
@@ -1343,6 +1357,9 @@ func (view *viewData) SetChangeListener(tag PropertyName, listener any) bool {
 			view.changeListener[tag] = newOneArgListenerVE(listener)
 
 		case string:
+			if listener == "" {
+				return view.SetChangeListener(tag, nil)
+			}
 			view.changeListener[tag] = newOneArgListenerBinding[View, PropertyName](listener)
 
 		default:
