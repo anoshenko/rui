@@ -681,7 +681,7 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 			session.callFunc("hideTooltip")
 
 		default:
-			session.updateCSSProperty(htmlID, string(Visibility), "visible")
+			session.updateCSSProperty(htmlID, string(Visibility), "")
 			session.updateCSSProperty(htmlID, "display", "")
 		}
 
