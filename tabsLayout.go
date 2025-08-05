@@ -475,6 +475,7 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 		} else if newCurrent != oldCurrent {
 			tabsLayout.setRaw(Current, newCurrent)
 		}
+		return view
 	}
 	return nil
 
