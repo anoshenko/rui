@@ -106,12 +106,12 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	switch req.Method {
-	case "POST":
+	case http.MethodPost:
 		if req.URL.Path == "/" {
 			app.postHandler(w, req)
 		}
 
-	case "GET":
+	case http.MethodGet:
 		switch req.URL.Path {
 		case "/":
 			w.WriteHeader(http.StatusOK)

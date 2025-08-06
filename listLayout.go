@@ -67,7 +67,6 @@ func (listLayout *listLayoutData) init(session Session) {
 	listLayout.set = listLayout.setFunc
 	listLayout.remove = listLayout.removeFunc
 	listLayout.changed = listLayout.propertyChanged
-
 }
 
 func normalizeListLayoutTag(tag PropertyName) PropertyName {
@@ -115,9 +114,12 @@ func (listLayout *listLayoutData) removeFunc(tag PropertyName) []PropertyName {
 		return result
 
 	case Content:
-		listLayout.viewsContainerData.removeFunc(Content)
-		listLayout.adapter = nil
-		return []PropertyName{Content}
+		result := listLayout.viewsContainerData.removeFunc(Content)
+		if listLayout.adapter != nil {
+			listLayout.adapter = nil
+			return []PropertyName{Content}
+		}
+		return result
 	}
 
 	return listLayout.viewsContainerData.removeFunc(tag)
