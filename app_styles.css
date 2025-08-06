@@ -151,6 +151,14 @@ ul:focus {
   overflow: auto;
 }
 
+.ruiButton {
+  display: flex;
+  overflow: auto;
+  justify-content: center;
+	align-items: center;
+  flex-flow: row;
+}
+
 .ruiColumnLayout {
   overflow: auto;
 }

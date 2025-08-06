@@ -238,7 +238,7 @@ func GetListOrientation(view View, subviewID ...string) int {
 		}
 	}
 
-	return 0
+	return TopDownOrientation
 }
 
 // GetListWrap returns the wrap type of a ListLayout or ListView subview:

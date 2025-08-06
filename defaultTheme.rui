@@ -82,8 +82,7 @@ theme {
 			background-color = @ruiBackgroundColor,
 			accent-color = @ruiHighlightColor,
 		},
-		ruiButton {
-			align = center,
+		ruiEnabledButton {
 			padding = "@ruiButtonVerticalPadding, @ruiButtonHorizontalPadding, @ruiButtonVerticalPadding, @ruiButtonHorizontalPadding",
 			margin = @ruiButtonMargin,
 			radius = @ruiButtonRadius,
@@ -92,7 +91,6 @@ theme {
 			border = _{width = 1px, style = solid, color = @ruiButtonTextColor}
 		},
 		ruiDisabledButton {
-			align = center,
 			padding = "@ruiButtonVerticalPadding, @ruiButtonHorizontalPadding, @ruiButtonVerticalPadding, @ruiButtonHorizontalPadding",
 			margin = @ruiButtonMargin,
 			radius = @ruiButtonRadius,
@@ -100,14 +98,14 @@ theme {
 			text-color = @ruiButtonDisabledTextColor,
 			border = _{width = 1px, style = solid, color = @ruiButtonDisabledTextColor}
 		},
-		ruiButton:hover {
+		ruiEnabledButton:hover {
 			text-color = @ruiTextColor,
 			background-color = @ruiBackgroundColor,
 		},
-		ruiButton:focus {
+		ruiEnabledButton:focus {
 			shadow = _{spread-radius = @ruiButtonHighlightDilation, blur = @ruiButtonHighlightBlur, color = @ruiHighlightColor },
 		},
-		ruiButton:active {
+		ruiEnabledButton:active {
 			background-color = @ruiButtonActiveColor
 		},
 		ruiDefaultButton {

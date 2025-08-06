@@ -109,6 +109,86 @@ func split4Values(text string) []string {
 	return []string{}
 }
 
+func (style *viewStyle) cssListStyle(builder cssBuilder, session Session) {
+	wrap, _ := enumProperty(style, ListWrap, session, 0)
+	orientation, ok := valueToOrientation(style.Get(Orientation), session)
+	if ok || wrap > 0 {
+		cssText := enumProperties[Orientation].cssValues[orientation]
+		switch wrap {
+		case ListWrapOn:
+			cssText += " wrap"
+
+		case ListWrapReverse:
+			cssText += " wrap-reverse"
+		}
+		builder.add(`flex-flow`, cssText)
+	}
+
+	rows := (orientation == StartToEndOrientation || orientation == EndToStartOrientation)
+
+	var hAlignTag, vAlignTag string
+	if rows {
+		hAlignTag = `justify-content`
+		vAlignTag = `align-items`
+	} else {
+		hAlignTag = `align-items`
+		vAlignTag = `justify-content`
+	}
+
+	if align, ok := enumProperty(style, HorizontalAlign, session, LeftAlign); ok {
+		switch align {
+		case LeftAlign:
+			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
+				builder.add(hAlignTag, `flex-end`)
+			} else {
+				builder.add(hAlignTag, `flex-start`)
+			}
+		case RightAlign:
+			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
+				builder.add(hAlignTag, `flex-start`)
+			} else {
+				builder.add(hAlignTag, `flex-end`)
+			}
+		case CenterAlign:
+			builder.add(hAlignTag, `center`)
+
+		case StretchAlign:
+			if rows {
+				builder.add(hAlignTag, `space-between`)
+			} else {
+				builder.add(hAlignTag, `stretch`)
+			}
+		}
+	}
+
+	if align, ok := enumProperty(style, VerticalAlign, session, LeftAlign); ok {
+		switch align {
+		case TopAlign:
+			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
+				builder.add(vAlignTag, `flex-end`)
+			} else {
+				builder.add(vAlignTag, `flex-start`)
+			}
+		case BottomAlign:
+			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
+				builder.add(vAlignTag, `flex-start`)
+			} else {
+				builder.add(vAlignTag, `flex-end`)
+			}
+		case CenterAlign:
+			builder.add(vAlignTag, `center`)
+
+		case StretchAlign:
+			if rows {
+				builder.add(vAlignTag, `stretch`)
+			} else {
+				builder.add(vAlignTag, `space-between`)
+			}
+		}
+	}
+
+}
+
 func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 
 	if visibility, ok := enumProperty(style, Visibility, session, Visible); ok {
@@ -291,82 +371,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	wrap, _ := enumProperty(style, ListWrap, session, 0)
-	orientation, ok := valueToOrientation(style.Get(Orientation), session)
-	if ok || wrap > 0 {
-		cssText := enumProperties[Orientation].cssValues[orientation]
-		switch wrap {
-		case ListWrapOn:
-			cssText += " wrap"
-
-		case ListWrapReverse:
-			cssText += " wrap-reverse"
-		}
-		builder.add(`flex-flow`, cssText)
-	}
-
-	rows := (orientation == StartToEndOrientation || orientation == EndToStartOrientation)
-
-	var hAlignTag, vAlignTag string
-	if rows {
-		hAlignTag = `justify-content`
-		vAlignTag = `align-items`
-	} else {
-		hAlignTag = `align-items`
-		vAlignTag = `justify-content`
-	}
-
-	if align, ok := enumProperty(style, HorizontalAlign, session, LeftAlign); ok {
-		switch align {
-		case LeftAlign:
-			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
-				builder.add(hAlignTag, `flex-end`)
-			} else {
-				builder.add(hAlignTag, `flex-start`)
-			}
-		case RightAlign:
-			if (!rows && wrap == ListWrapReverse) || orientation == EndToStartOrientation {
-				builder.add(hAlignTag, `flex-start`)
-			} else {
-				builder.add(hAlignTag, `flex-end`)
-			}
-		case CenterAlign:
-			builder.add(hAlignTag, `center`)
-
-		case StretchAlign:
-			if rows {
-				builder.add(hAlignTag, `space-between`)
-			} else {
-				builder.add(hAlignTag, `stretch`)
-			}
-		}
-	}
-
-	if align, ok := enumProperty(style, VerticalAlign, session, LeftAlign); ok {
-		switch align {
-		case TopAlign:
-			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
-				builder.add(vAlignTag, `flex-end`)
-			} else {
-				builder.add(vAlignTag, `flex-start`)
-			}
-		case BottomAlign:
-			if (rows && wrap == ListWrapReverse) || orientation == BottomUpOrientation {
-				builder.add(vAlignTag, `flex-start`)
-			} else {
-				builder.add(vAlignTag, `flex-end`)
-			}
-		case CenterAlign:
-			builder.add(vAlignTag, `center`)
-
-		case StretchAlign:
-			if rows {
-				builder.add(vAlignTag, `stretch`)
-			} else {
-				builder.add(vAlignTag, `space-between`)
-			}
-		}
-	}
+	style.cssListStyle(builder, session)
 
 	if r, ok := rangeProperty(style, Row, session); ok {
 		builder.add("grid-row", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))

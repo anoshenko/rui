@@ -457,7 +457,14 @@ func handleKeyEvents(view View, tag PropertyName, data DataObject) {
 		return
 	}
 
-	if tag == KeyDownEvent && view.Focusable() && (event.Key == " " || event.Key == "Enter") && !IsDisabled(view) {
+	if tag == KeyDownEvent && view.Focusable() && (event.Key == " " || event.Key == "Enter") &&
+		!IsDisabled(view) && GetSemantics(view) != ButtonSemantics {
+
+		switch view.Tag() {
+		case "EditView", "ListView", "TableView", "TabsLayout", "TimePicker", "DatePicker", "AudioPlayer", "VideoPlayer":
+			return
+		}
+
 		if listeners := getOneArgEventListeners[View, MouseEvent](view, nil, ClickEvent); len(listeners) > 0 {
 			clickEvent := MouseEvent{
 				TimeStamp: event.TimeStamp,

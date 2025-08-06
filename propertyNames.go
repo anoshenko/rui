@@ -2235,7 +2235,7 @@ const (
 
 	// VerticalAlign is the constant for "vertical-align" property tag.
 	//
-	// Used by Checkbox, ListLayout, ListView, Popup, SvgImageView.
+	// Used by Button, Checkbox, ListLayout, ListView, Popup, SvgImageView.
 	//
 	// # Usage in Checkbox
 	//
@@ -2249,7 +2249,7 @@ const (
 	//   - 2 (CenterAlign) or "center" - Content aligned in the center of the content area.
 	//   - 3 (StretchAlign) or "stretch" - Content relaxed to fill all content area.
 	//
-	// # Usage in ListLayout and ListView
+	// # Usage in Button, ListLayout and ListView
 	//
 	// Sets the vertical alignment of the content inside a block element.
 	//
@@ -2287,7 +2287,7 @@ const (
 
 	// HorizontalAlign is the constant for "horizontal-align" property tag.
 	//
-	// Used by Checkbox, ListLayout, ListView, Popup, SvgImageView.
+	// Used by Button, Checkbox, ListLayout, ListView, Popup, SvgImageView.
 	//
 	// # Usage in Checkbox
 	//
@@ -2305,7 +2305,7 @@ const (
 	//
 	// Sets the horizontal alignment of the content inside a block element.
 	//
-	// Supported types: int, string.
+	// Supported types: Button, int, string.
 	//
 	// Values:
 	//   - 0 (LeftAlign) or "left" - Left alignment.
