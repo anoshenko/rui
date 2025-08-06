@@ -556,7 +556,7 @@ func (transform *transformPropertyData) transformCSS(session Session) string {
 	return result[:length-1]
 }
 
-func (style *viewStyle) writeViewTransformCSS(builder cssBuilder, session Session) {
+func writeViewTransformCSS(style Properties, builder cssBuilder, session Session) {
 	x, y := getPerspectiveOrigin(style, session)
 	z := AutoSize()
 	if css := transformOriginCSS(x, y, z, session); css != "" {

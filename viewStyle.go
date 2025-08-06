@@ -22,8 +22,6 @@ type ViewStyle interface {
 	// removes the transition animation of the property if "animation" argument  is nil.
 	// The "tag" argument is the property name.
 	SetTransition(tag PropertyName, animation AnimationProperty)
-
-	cssViewStyle(buffer cssBuilder, session Session)
 }
 
 type viewStyle struct {
@@ -109,7 +107,7 @@ func split4Values(text string) []string {
 	return []string{}
 }
 
-func (style *viewStyle) cssListStyle(builder cssBuilder, session Session) {
+func writeListStyleCSS(style Properties, builder cssBuilder, session Session) {
 	wrap, _ := enumProperty(style, ListWrap, session, 0)
 	orientation, ok := valueToOrientation(style.Get(Orientation), session)
 	if ok || wrap > 0 {
@@ -189,7 +187,7 @@ func (style *viewStyle) cssListStyle(builder cssBuilder, session Session) {
 
 }
 
-func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
+func writeViewStyleCSS(style Properties, builder cssBuilder, session Session) {
 
 	if visibility, ok := enumProperty(style, Visibility, session, Visible); ok {
 		switch visibility {
@@ -355,7 +353,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		builder.add("text-shadow", css)
 	}
 
-	if value, ok := style.properties[ColumnSeparator]; ok {
+	if value := style.getRaw(ColumnSeparator); value != nil {
 		if separator, ok := value.(ColumnSeparatorProperty); ok {
 			if css := separator.cssValue(session); css != "" {
 				builder.add("column-rule", css)
@@ -371,7 +369,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		}
 	}
 
-	style.cssListStyle(builder, session)
+	writeListStyleCSS(style, builder, session)
 
 	if r, ok := rangeProperty(style, Row, session); ok {
 		builder.add("grid-row", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))
@@ -386,7 +384,7 @@ func (style *viewStyle) cssViewStyle(builder cssBuilder, session Session) {
 		builder.add(`grid-template-rows`, text)
 	}
 
-	style.writeViewTransformCSS(builder, session)
+	writeViewTransformCSS(style, builder, session)
 
 	if clip := getClipShapeProperty(style, Clip, session); clip != nil && clip.valid(session) {
 		builder.add(`clip-path`, clip.cssStyle(session))

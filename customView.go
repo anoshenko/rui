@@ -128,10 +128,6 @@ func (customView *CustomViewData) Clear() {
 	customView.superView.Clear()
 }
 
-func (customView *CustomViewData) cssViewStyle(buffer cssBuilder, session Session) {
-	customView.superView.cssViewStyle(buffer, session)
-}
-
 // Session returns a current Session interface
 func (customView *CustomViewData) Session() Session {
 	return customView.superView.Session()

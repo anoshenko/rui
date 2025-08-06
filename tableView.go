@@ -1616,7 +1616,7 @@ func tableViewCurrent(view View) CellIndex {
 
 func (table *tableViewData) cssStyle(self View, builder cssBuilder) {
 	session := table.Session()
-	table.viewData.cssViewStyle(builder, session)
+	writeViewStyleCSS(table, builder, session)
 
 	gap, ok := sizeProperty(table, Gap, session)
 	if !ok || gap.Type == Auto || gap.Value <= 0 {

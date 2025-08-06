@@ -1,5 +1,7 @@
 package rui
 
+import "strings"
+
 // Button represent a Button view
 type Button interface {
 	ListLayout
@@ -33,6 +35,15 @@ func (button *buttonData) init(session Session) {
 
 func (button *buttonData) Focusable() bool {
 	return true
+}
+
+func (button *buttonData) htmlSubviews(self View, buffer *strings.Builder) {
+	if button.views != nil {
+		for _, view := range button.views {
+			view.addToCSSStyle(map[string]string{`flex`: `0 0 auto`})
+			viewHTML(view, buffer, "")
+		}
+	}
 }
 
 // GetButtonVerticalAlign returns the vertical align of a Button subview:

@@ -802,21 +802,7 @@ func (listView *listViewData) cssStyle(self View, builder cssBuilder) {
 }
 */
 
-func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
-	adapter := listView.getAdapter()
-	if adapter == nil {
-		return
-	}
-
-	if listSize := adapter.ListSize(); listSize == 0 {
-		return
-	}
-
-	if !listView.session.ignoreViewUpdates() {
-		listView.session.setIgnoreViewUpdates(true)
-		defer listView.session.setIgnoreViewUpdates(false)
-	}
-
+func listDiv(listView View, buffer *strings.Builder) {
 	buffer.WriteString(`<div style="display: flex; align-content: stretch;`)
 
 	if gap := GetListRowGap(listView); gap.Type != Auto {
@@ -939,6 +925,24 @@ func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	buffer.WriteString(`">`)
+}
+
+func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
+	adapter := listView.getAdapter()
+	if adapter == nil {
+		return
+	}
+
+	if listSize := adapter.ListSize(); listSize == 0 {
+		return
+	}
+
+	if !listView.session.ignoreViewUpdates() {
+		listView.session.setIgnoreViewUpdates(true)
+		defer listView.session.setIgnoreViewUpdates(false)
+	}
+
+	listDiv(listView, buffer)
 
 	checkbox := GetListViewCheckbox(listView)
 	if checkbox == NoneCheckbox {
