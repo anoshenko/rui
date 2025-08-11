@@ -956,9 +956,9 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 				writeString(buffer, text)
 				buffer.WriteString(",\n")
 			}
-			buffer.WriteString(indent)
-			buffer.WriteRune('}')
 		}
+		buffer.WriteString(indent)
+		buffer.WriteRune('}')
 		return buffer.String()
 
 	case []popupButton:
