@@ -926,7 +926,7 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 	}
 
 	cssBuilder.startAnimationFrame("from")
-	writeViewStyleCSS(NewViewStyle(fromParams), &cssBuilder, session)
+	writeViewStyleCSS(NewViewStyle(fromParams), &cssBuilder, session, false)
 	cssBuilder.endAnimationFrame()
 
 	if len(frames) > 0 {
@@ -942,14 +942,14 @@ func (session *sessionData) registerAnimation(props []AnimatedProperty) string {
 
 			if len(params) > 0 {
 				cssBuilder.startAnimationFrame(strconv.Itoa(frame) + "%")
-				writeViewStyleCSS(NewViewStyle(params), &cssBuilder, session)
+				writeViewStyleCSS(NewViewStyle(params), &cssBuilder, session, false)
 				cssBuilder.endAnimationFrame()
 			}
 		}
 	}
 
 	cssBuilder.startAnimationFrame("to")
-	writeViewStyleCSS(NewViewStyle(toParams), &cssBuilder, session)
+	writeViewStyleCSS(NewViewStyle(toParams), &cssBuilder, session, false)
 	cssBuilder.endAnimationFrame()
 
 	cssBuilder.endAnimation()

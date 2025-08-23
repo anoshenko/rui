@@ -18,7 +18,7 @@ func (cell *tableCellView) init(session Session) {
 
 func (cell *tableCellView) cssStyle(self View, builder cssBuilder) {
 	session := cell.Session()
-	writeViewStyleCSS(cell, builder, session)
+	writeViewStyleCSS(cell, builder, session, false)
 
 	if value, ok := enumProperty(cell, TableVerticalAlign, session, 0); ok {
 		builder.add("vertical-align", enumProperties[TableVerticalAlign].values[value])

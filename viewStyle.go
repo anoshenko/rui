@@ -187,7 +187,7 @@ func writeListStyleCSS(style Properties, builder cssBuilder, session Session) {
 
 }
 
-func writeViewStyleCSS(style Properties, builder cssBuilder, session Session) {
+func writeViewStyleCSS(style Properties, builder cssBuilder, session Session, ignoreListStyle bool) {
 
 	if visibility, ok := enumProperty(style, Visibility, session, Visible); ok {
 		switch visibility {
@@ -369,7 +369,9 @@ func writeViewStyleCSS(style Properties, builder cssBuilder, session Session) {
 		}
 	}
 
-	writeListStyleCSS(style, builder, session)
+	if !ignoreListStyle {
+		writeListStyleCSS(style, builder, session)
+	}
 
 	if r, ok := rangeProperty(style, Row, session); ok {
 		builder.add("grid-row", fmt.Sprintf("%d / %d", r.First+1, r.Last+2))

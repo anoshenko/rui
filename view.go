@@ -1094,7 +1094,7 @@ func (view *viewData) addToCSSStyle(addCSS map[string]string) {
 }
 
 func (view *viewData) cssStyle(self View, builder cssBuilder) {
-	writeViewStyleCSS(view, builder, view.session)
+	writeViewStyleCSS(view, builder, view.session, view.tag == "ListView")
 	if view.addCSS != nil {
 		for tag, value := range view.addCSS {
 			builder.add(tag, value)

@@ -661,7 +661,7 @@ func (theme *theme) cssText(session Session) string {
 	for _, tag := range styleList(theme.styles) {
 		if style := theme.styles[tag]; style != nil {
 			builder.startStyle(tag)
-			writeViewStyleCSS(style, &builder, session)
+			writeViewStyleCSS(style, &builder, session, false)
 			builder.endStyle()
 		}
 	}
@@ -671,7 +671,7 @@ func (theme *theme) cssText(session Session) string {
 		for _, tag := range styleList(media.styles) {
 			if style := media.styles[tag]; style != nil {
 				builder.startStyle(tag)
-				writeViewStyleCSS(style, &builder, session)
+				writeViewStyleCSS(style, &builder, session, false)
 				builder.endStyle()
 			}
 		}
