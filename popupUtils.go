@@ -161,7 +161,7 @@ func (popup *popupMenuData) IsListItemEnabled(index int) bool {
 // Set the function to be called when the menu item of popup menu is selected.
 //
 // Supported types: `func(index int)`.
-const PopupMenuResult = "popup-menu-result"
+const PopupMenuResult PropertyName = "popup-menu-result"
 
 // ShowMenu displays the menu. Menu items are set using the Items property.
 // The "popup-menu-result" property sets the function (format: func(int)) to be called when a menu item is selected.
