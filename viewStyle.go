@@ -3,9 +3,11 @@ package rui
 import (
 	"fmt"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // ViewStyle interface of the style of view
@@ -573,6 +575,16 @@ func isQuotesNeeded(text string) bool {
 	return false
 }
 
+func isQuotesNeededForObjectName(name string) bool {
+	for _, char := range name {
+		if unicode.IsSpace(char) ||
+			slices.Contains([]rune{'=', '{', '}', '[', ']', ',', ' ', '\t', '\n', '\'', '"', '`', '/'}, char) {
+			return true
+		}
+	}
+	return false
+}
+
 func replaceEscapeSymbols(text string) string {
 	replace := []struct{ old, new string }{
 		{old: "\\", new: `\\`},
@@ -593,6 +605,18 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		if isQuotesNeeded(text) {
 			buffer.WriteRune('"')
 			buffer.WriteString(replaceEscapeSymbols(text))
+			buffer.WriteRune('"')
+		} else {
+			buffer.WriteString(text)
+		}
+		return text
+	}
+
+	writeObjectNameString := func(buffer *strings.Builder, text string) string {
+		textEscaped := replaceEscapeSymbols(text)
+		if isQuotesNeededForObjectName(textEscaped) {
+			buffer.WriteRune('"')
+			buffer.WriteString(textEscaped)
 			buffer.WriteRune('"')
 		} else {
 			buffer.WriteString(text)
@@ -640,6 +664,31 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		buffer.WriteRune(']')
 		return buffer.String()
 
+	case map[string]string:
+		if len(value) > 0 {
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
+
+			keys := make([]string, 0, len(value))
+			for key := range value {
+				keys = append(keys, key)
+			}
+			sort.Strings(keys)
+
+			buffer.WriteString("{\n")
+			for _, key := range keys {
+				buffer.WriteString(indent)
+				buffer.WriteRune('\t')
+				writeObjectNameString(buffer, key)
+				buffer.WriteString(" = ")
+				writeString(buffer, value[key])
+				buffer.WriteString(",\n")
+			}
+			buffer.WriteString(indent)
+			buffer.WriteString("}")
+			return buffer.String()
+		}
+		return ""
 	case bool:
 		if value {
 			return "true"
