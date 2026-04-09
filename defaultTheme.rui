@@ -6,8 +6,6 @@ theme {
 		ruiButtonColor = #FFE0E0E0,
 		ruiButtonActiveColor = #FFC0C0C0,
 		ruiButtonTextColor = #FF000000,
-		ruiButtonDisabledColor = #FFE0E0E0,
-		ruiButtonDisabledTextColor = #FF808080,
 		ruiHighlightColor = #FF1A74E8,
 		ruiHighlightTextColor = #FFFFFFFF,
 		ruiSelectedColor = #FFE0E0E0,
@@ -33,8 +31,6 @@ theme {
 		ruiBackgroundColor = #FF080808,
 		ruiButtonColor = #FF404040,
 		ruiButtonTextColor = #FFE0E0E0,
-		ruiButtonDisabledColor = #FF404040,
-		ruiButtonDisabledTextColor = #FFA0A0A0,
 		ruiHighlightColor = #FF1A74E8,
 		ruiHighlightTextColor = #FFFFFFFF,
 		ruiPopupBackgroundColor = #FF424242,
@@ -89,14 +85,6 @@ theme {
 			background-color = @ruiButtonColor,
 			text-color = @ruiButtonTextColor,
 			border = _{width = 1px, style = solid, color = @ruiButtonTextColor}
-		},
-		ruiDisabledButton {
-			padding = "@ruiButtonVerticalPadding, @ruiButtonHorizontalPadding, @ruiButtonVerticalPadding, @ruiButtonHorizontalPadding",
-			margin = @ruiButtonMargin,
-			radius = @ruiButtonRadius,
-			background-color = @ruiButtonDisabledColor,
-			text-color = @ruiButtonDisabledTextColor,
-			border = _{width = 1px, style = solid, color = @ruiButtonDisabledTextColor}
 		},
 		ruiEnabledButton:hover {
 			text-color = @ruiTextColor,

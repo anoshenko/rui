@@ -128,7 +128,6 @@ func newFilePicker(session Session) View {
 func (picker *filePickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "FilePicker"
-	picker.hasHtmlDisabled = true
 	picker.files = []FileInfo{}
 	//picker.loader = map[int]func(FileInfo, []byte){}
 	picker.get = picker.getFunc

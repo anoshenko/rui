@@ -286,7 +286,7 @@ func (listView *listViewData) propertyChanged(tag PropertyName) {
 			}
 		}
 
-	case Items, Orientation, ListWrap, ListRowGap, ListColumnGap, VerticalAlign, HorizontalAlign, Style, StyleDisabled, ItemWidth, ItemHeight,
+	case Items, Orientation, ListWrap, ListRowGap, ListColumnGap, VerticalAlign, HorizontalAlign, Style, ItemWidth, ItemHeight,
 		ItemHorizontalAlign, ItemVerticalAlign, ItemCheckbox, CheckboxHorizontalAlign, CheckboxVerticalAlign, ListItemStyle, AccentColor:
 		updateInnerHTML(listView.htmlID(), listView.Session())
 
@@ -631,6 +631,13 @@ func listViewCurrentInactiveStyle(view View) string {
 	return listViewItemStyle(view, CurrentInactiveStyle, "ruiListItemSelected")
 }
 
+func (listView *listViewData) itemEnabledAdapter(adapter ListAdapter) ListItemEnabled {
+	if ext, ok := adapter.(ListItemEnabled); ok {
+		return ext
+	}
+	return nil
+}
+
 func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *strings.Builder, checkbox int) {
 	count := adapter.ListSize()
 	listViewID := listView.htmlID()
@@ -643,6 +650,8 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 
 	current := GetCurrent(listView)
 	checkedItems := GetListViewCheckedItems(listView)
+	enabledItems := listView.itemEnabledAdapter(adapter)
+
 	for i := range count {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
@@ -654,14 +663,14 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 			buffer.WriteRune(' ')
 			buffer.WriteString(listViewCurrentInactiveStyle(listView))
 		}
+
 		buffer.WriteString(`" onclick="listItemClickEvent(this, event)" data-left="0" data-top="0" data-width="0" data-height="0" style="display: grid; justify-items: stretch; align-items: stretch;`)
 		listView.itemSize(buffer)
-		if ext, ok := adapter.(ListItemEnabled); ok {
-			if !ext.IsListItemEnabled(i) {
-				buffer.WriteString(`" data-disabled="1`)
-			}
+		if enabledItems != nil && !enabledItems.IsListItemEnabled(i) {
+			buffer.WriteString(`" inert>`)
+		} else {
+			buffer.WriteString(`">`)
 		}
-		buffer.WriteString(`">`)
 		buffer.WriteString(itemDiv)
 
 		checked := false
@@ -704,6 +713,8 @@ func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *
 	itemStyle := itemStyleBuilder.String()
 
 	current := GetCurrent(listView)
+	enabledItems := listView.itemEnabledAdapter(adapter)
+
 	for i := range count {
 		buffer.WriteString(`<div id="`)
 		buffer.WriteString(listViewID)
@@ -717,10 +728,8 @@ func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *
 		}
 		buffer.WriteString(`" `)
 		buffer.WriteString(itemStyle)
-		if ext, ok := adapter.(ListItemEnabled); ok {
-			if !ext.IsListItemEnabled(i) {
-				buffer.WriteString(` data-disabled="1"`)
-			}
+		if enabledItems != nil && !enabledItems.IsListItemEnabled(i) {
+			buffer.WriteString(` inert`)
 		}
 		buffer.WriteString(`>`)
 

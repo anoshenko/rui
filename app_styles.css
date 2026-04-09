@@ -41,6 +41,11 @@ div:focus {
 }
 */
 
+[inert] > * {
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+
 input {
   box-sizing: border-box;
   margin: 2px;

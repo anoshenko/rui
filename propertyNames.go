@@ -71,14 +71,6 @@ const (
 	//   - 4 (DoubleLine) or "double" - Double line as an outline.
 	Style PropertyName = "style"
 
-	// StyleDisabled is the constant for "style-disabled" property tag.
-	//
-	// Used by View.
-	// Sets the name of the style that is applied to the view when the "disabled" property is set to true.
-	//
-	// Supported types: string.
-	StyleDisabled PropertyName = "style-disabled"
-
 	// Disabled is the constant for "disabled" property tag.
 	//
 	// Used by ViewsContainer.

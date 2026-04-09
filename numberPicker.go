@@ -127,7 +127,6 @@ func newNumberPicker(session Session) View {
 func (picker *numberPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "NumberPicker"
-	picker.hasHtmlDisabled = true
 	picker.normalize = normalizeNumberPickerTag
 	picker.get = picker.getFunc
 	picker.set = picker.setFunc

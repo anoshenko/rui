@@ -230,18 +230,6 @@ function removeView(elementId) {
 	}
 }
 
-function setDisabled(elementId, disabled) {
-	const element = document.getElementById(elementId);
-	if (element) {
-		if ('disabled' in element) {
-			element.disabled = disabled
-		} else {
-			element.setAttribute("data-disabled", disabled ? "1" : "0");
-		}
-		scanElementsSize();
-	}
-}
-
 function focusEvent(element, event) {
 	event.stopPropagation();
 	sendMessage("focus-event{session=" + sessionID + ",id=" + element.id + "}");
@@ -626,7 +614,7 @@ function selectDropDownListItem(elementId, number) {
 function listItemClickEvent(element, event) {
 	event.stopPropagation();
 	
-	if (element.getAttribute("data-disabled") == "1") {
+	if (element.getAttribute("inert") != null) {
 		return
 	}
 
@@ -707,11 +695,19 @@ function selectListItem(element, item) {
 	scanElementsSize();
 }
 
+function isListItemDisabled(item) {
+	let inert = item.getAttribute("inert");
+	if (inert != null) {
+		return true;
+	}
+	return false;
+}
+
 function findRightListItem(list, x, y) {
 	list = list.childNodes[0];
 	let result;
 	for (const item of list.childNodes) {
-		if (item.getAttribute("data-disabled") == "1") {
+		if (isListItemDisabled(item)) {
 			continue;
 		}
 		if (item.offsetLeft >= x) {
@@ -733,7 +729,7 @@ function findLeftListItem(list, x, y) {
 	list = list.childNodes[0];
 	let result;
 	for (const item of list.childNodes) {
-		if (item.getAttribute("data-disabled") == "1") {
+		if (isListItemDisabled(item)) {
 			continue;
 		}
 		if (item.offsetLeft < x) {
@@ -755,7 +751,7 @@ function findTopListItem(list, x, y) {
 	list = list.childNodes[0];
 	let result;
 	for (const item of list.childNodes) {
-		if (item.getAttribute("data-disabled") == "1") {
+		if (isListItemDisabled(item)) {
 			continue;
 		}
 		if (item.offsetTop < y) {
@@ -777,7 +773,7 @@ function findBottomListItem(list, x, y) {
 	list = list.childNodes[0];
 	let result;
 	for (const item of list.childNodes) {
-		if (item.getAttribute("data-disabled") == "1") {
+		if (isListItemDisabled(item)) {
 			continue;
 		}
 		if (item.offsetTop >= y) {
@@ -851,11 +847,22 @@ function listViewKeyDownEvent(element, event) {
 					break;
 
 				case "Home":
-					item = element.childNodes[0];
+					for (const i of list.childNodes) {
+						if (!isListItemDisabled(i)) {
+							item = i;
+							break;
+						}
+					}
 					break;
 
 				case "End":
-					item = element.childNodes[element.childNodes.length - 1];
+					for (var i = element.childNodes.length-1; i >= 0; i--) {
+						const itm = element.childNodes[i]
+						if (!isListItemDisabled(itm)) {
+							item = itm;
+							break;
+						}
+					}
 					break;
 
 				case "PageUp":
@@ -886,11 +893,10 @@ function listViewKeyDownEvent(element, event) {
 				case "PageDown":
 					const list = element.childNodes[0];
 					for (const item of list.childNodes) {
-						if (item.getAttribute("data-disabled") == "1") {
-							continue;
+						if (!isListItemDisabled(item)) {
+							selectListItem(element, item);
+							return;
 						}
-						selectListItem(element, item);
-						return;
 					}
 					break;
 
@@ -1484,7 +1490,7 @@ function setTableCellCursorByID(tableID, row, column) {
 function setTableCellCursor(element, row, column) {
 	const cellID = element.id + "-" + row + "-" + column;
 	const cell = document.getElementById(cellID);
-	if (!cell || cell.getAttribute("data-disabled")) {
+	if (!cell || cell.getAttribute("inert") != null) {
 		return false;
 	}
 
@@ -1675,7 +1681,7 @@ function setTableRowCursorByID(tableID, row) {
 function setTableRowCursor(element, row) {
 	const tableRowID = element.id + "-" + row;
 	const tableRow = document.getElementById(tableRowID);
-	if (!tableRow || tableRow.getAttribute("data-disabled")) {
+	if (!tableRow || tableRow.getAttribute("inert") != null) {
 		return false;
 	}
 

@@ -28,7 +28,7 @@ func (button *buttonData) init(session Session) {
 	button.tag = "Button"
 	button.systemClass = "ruiButton"
 	button.setRaw(Style, "ruiEnabledButton")
-	button.setRaw(StyleDisabled, "ruiDisabledButton")
+	//button.setRaw(StyleDisabled, "ruiDisabledButton")
 	button.setRaw(Semantics, ButtonSemantics)
 	button.setRaw(TabIndex, 0)
 }

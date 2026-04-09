@@ -203,8 +203,8 @@ func (customView *CustomViewData) handleCommand(self View, command PropertyName,
 	return customView.superView.handleCommand(customView.superView, command, data)
 }
 
-func (customView *CustomViewData) htmlClass(disabled bool) string {
-	return customView.superView.htmlClass(disabled)
+func (customView *CustomViewData) htmlClass() string {
+	return customView.superView.htmlClass()
 }
 
 func (customView *CustomViewData) htmlTag() string {
@@ -225,10 +225,6 @@ func (customView *CustomViewData) htmlSubviews(self View, buffer *strings.Builde
 
 func (customView *CustomViewData) htmlProperties(self View, buffer *strings.Builder) {
 	customView.superView.htmlProperties(customView.superView, buffer)
-}
-
-func (customView *CustomViewData) htmlDisabledProperty() bool {
-	return customView.superView.htmlDisabledProperty()
 }
 
 func (customView *CustomViewData) cssStyle(self View, builder cssBuilder) {

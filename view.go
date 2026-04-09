@@ -92,7 +92,7 @@ type View interface {
 
 	init(session Session)
 	handleCommand(self View, command PropertyName, data DataObject) bool
-	htmlClass(disabled bool) string
+	htmlClass() string
 	htmlTag() string
 	closeHTMLTag() bool
 	htmlID() string
@@ -103,7 +103,6 @@ type View interface {
 	cssStyle(self View, builder cssBuilder)
 	addToCSSStyle(addCSS map[string]string)
 	excludeTags() []PropertyName
-	htmlDisabledProperty() bool
 	binding() any
 
 	onResize(self View, x, y, width, height float64)
@@ -130,7 +129,6 @@ type viewData struct {
 	noResizeEvent    bool
 	created          bool
 	hasFocus         bool
-	hasHtmlDisabled  bool
 	get              func(tag PropertyName) any
 	set              func(tag PropertyName, value any) []PropertyName
 	remove           func(tag PropertyName) []PropertyName
@@ -178,7 +176,6 @@ func (view *viewData) init(session Session) {
 	view.singleTransition = map[PropertyName]AnimationProperty{}
 	view.noResizeEvent = false
 	view.created = false
-	view.hasHtmlDisabled = false
 	view.fileLoader = map[string]func(FileInfo, []byte){}
 }
 
@@ -472,7 +469,7 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 		view.setRaw(tag, value)
 		return []PropertyName{UserData}
 
-	case Style, StyleDisabled:
+	case Style:
 		if text, ok := value.(string); ok {
 			view.setRaw(tag, text)
 			return []PropertyName{tag}
@@ -634,39 +631,15 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 			session.updateProperty(htmlID, "tabindex", "-1")
 		}
 
-	case Style, StyleDisabled:
-		session.updateProperty(htmlID, "class", view.htmlClass(IsDisabled(view)))
+	case Style:
+		session.updateProperty(htmlID, "class", view.htmlClass())
 
 	case Disabled:
-		tabIndex := GetTabIndex(view, htmlID)
-		enabledClass := view.htmlClass(false)
-		disabledClass := view.htmlClass(true)
-		session.startUpdateScript(htmlID)
-		if IsDisabled(view) {
-			session.updateProperty(htmlID, "data-disabled", "1")
-			if view.htmlDisabledProperty() {
-				session.updateProperty(htmlID, "disabled", true)
-			}
-			if tabIndex >= 0 {
-				session.updateProperty(htmlID, "tabindex", -1)
-			}
-			if enabledClass != disabledClass {
-				session.updateProperty(htmlID, "class", disabledClass)
-			}
+		if disabled, ok := boolProperty(view, Disabled, session); ok && disabled {
+			session.updateProperty(htmlID, "inert", true)
 		} else {
-			session.updateProperty(htmlID, "data-disabled", "0")
-			if view.htmlDisabledProperty() {
-				session.removeProperty(htmlID, "disabled")
-			}
-			if tabIndex >= 0 {
-				session.updateProperty(htmlID, "tabindex", tabIndex)
-			}
-			if enabledClass != disabledClass {
-				session.updateProperty(htmlID, "class", enabledClass)
-			}
+			session.removeProperty(htmlID, "inert")
 		}
-		session.finishUpdateScript(htmlID)
-		updateInnerHTML(htmlID, session)
 
 	case Visibility:
 		switch GetVisibility(view) {
@@ -1102,20 +1075,11 @@ func (view *viewData) cssStyle(self View, builder cssBuilder) {
 	}
 }
 
-func (view *viewData) htmlDisabledProperty() bool {
-	return view.hasHtmlDisabled
-}
-
 func (view *viewData) htmlProperties(self View, buffer *strings.Builder) {
 	view.created = true
 
-	if IsDisabled(self) {
-		buffer.WriteString(` data-disabled="1"`)
-		if view.hasHtmlDisabled {
-			buffer.WriteString(`  disabled`)
-		}
-	} else {
-		buffer.WriteString(` data-disabled="0"`)
+	if disabled, ok := boolProperty(view, Disabled, view.Session()); ok && disabled {
+		buffer.WriteString(` inert`)
 	}
 
 	if view.frame.Left != 0 || view.frame.Top != 0 || view.frame.Width != 0 || view.frame.Height != 0 {
@@ -1135,9 +1099,7 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 	buffer.WriteString(view.htmlID())
 	buffer.WriteRune('"')
 
-	disabled := IsDisabled(view)
-
-	if cls := view.htmlClass(disabled); cls != "" {
+	if cls := view.htmlClass(); cls != "" {
 		buffer.WriteString(` class="`)
 		buffer.WriteString(cls)
 		buffer.WriteRune('"')
@@ -1161,12 +1123,10 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 		buffer.WriteRune(' ')
 	}
 
-	if !disabled {
-		if tabIndex := GetTabIndex(view); tabIndex >= 0 {
-			buffer.WriteString(`tabindex="`)
-			buffer.WriteString(strconv.Itoa(tabIndex))
-			buffer.WriteString(`" `)
-		}
+	if tabIndex := GetTabIndex(view); tabIndex >= 0 {
+		buffer.WriteString(`tabindex="`)
+		buffer.WriteString(strconv.Itoa(tabIndex))
+		buffer.WriteString(`" `)
 	}
 
 	if tooltip := GetTooltip(view); tooltip != "" {
@@ -1197,19 +1157,10 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 	}
 }
 
-func (view *viewData) htmlClass(disabled bool) string {
+func (view *viewData) htmlClass() string {
 	cls := "ruiView"
-	disabledStyle := false
-	if disabled {
-		if value, ok := stringProperty(view, StyleDisabled, view.Session()); ok && value != "" {
-			cls += " " + value
-			disabledStyle = true
-		}
-	}
-	if !disabledStyle {
-		if value, ok := stringProperty(view, Style, view.Session()); ok {
-			cls += " " + value
-		}
+	if value, ok := stringProperty(view, Style, view.Session()); ok {
+		cls += " " + value
 	}
 
 	if view.systemClass != "" {

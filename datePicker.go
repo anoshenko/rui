@@ -136,7 +136,6 @@ func newDatePicker(session Session) View {
 func (picker *datePickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "DatePicker"
-	picker.hasHtmlDisabled = true
 	picker.normalize = normalizeDatePickerTag
 	picker.set = picker.setFunc
 	picker.get = picker.getFunc

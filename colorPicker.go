@@ -63,7 +63,6 @@ func newColorPicker(session Session) View {
 func (picker *colorPickerData) init(session Session) {
 	picker.viewData.init(session)
 	picker.tag = "ColorPicker"
-	picker.hasHtmlDisabled = true
 	picker.properties[Padding] = Px(0)
 	picker.normalize = normalizeColorPickerTag
 	picker.get = picker.getFunc

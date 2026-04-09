@@ -128,17 +128,6 @@ func GetStyle(view View, subviewID ...string) string {
 	return ""
 }
 
-// GetDisabledStyle returns the disabled subview style id.
-// If the second argument (subviewID) is not specified or it is "" then a style of the first argument (view) is returned
-func GetDisabledStyle(view View, subviewID ...string) string {
-	if view = getSubview(view, subviewID); view != nil {
-		if style, ok := stringProperty(view, StyleDisabled, view.Session()); ok {
-			return style
-		}
-	}
-	return ""
-}
-
 // GetVisibility returns the subview visibility. One of the following values is returned:
 // Visible (0), Invisible (1), or Gone (2)
 // If the second argument (subviewID) is not specified or it is "" then a visibility of the first argument (view) is returned
@@ -615,21 +604,13 @@ func GetNotTranslate(view View, subviewID ...string) bool {
 
 func valueFromStyle(view View, tag PropertyName) any {
 	session := view.Session()
-	getValue := func(styleTag PropertyName) any {
-		if style, ok := stringProperty(view, styleTag, session); ok {
-			if style, ok := session.resolveConstants(style); ok {
-				return session.styleProperty(style, tag)
-			}
-		}
-		return nil
-	}
 
-	if IsDisabled(view) {
-		if value := getValue(StyleDisabled); value != nil {
-			return value
+	if style, ok := stringProperty(view, Style, session); ok {
+		if style, ok := session.resolveConstants(style); ok {
+			return session.styleProperty(style, tag)
 		}
 	}
-	return getValue(Style)
+	return nil
 }
 
 func stringStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) string {

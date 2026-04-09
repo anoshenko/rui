@@ -49,7 +49,6 @@ func newDropDownList(session Session) View {
 func (list *dropDownListData) init(session Session) {
 	list.viewData.init(session)
 	list.tag = "DropDownList"
-	list.hasHtmlDisabled = true
 	list.normalize = normalizeDropDownListTag
 	list.get = list.getFunc
 	list.set = list.setFunc

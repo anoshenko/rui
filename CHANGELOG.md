@@ -1,3 +1,7 @@
+# v0.21.0
+
+* Removed "style-disabled" property and GetDisabledStyle function
+
 # v0.20.0
 
 * Added support of binding

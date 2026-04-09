@@ -118,7 +118,6 @@ func newEditView(session Session) View {
 
 func (edit *editViewData) init(session Session) {
 	edit.viewData.init(session)
-	edit.hasHtmlDisabled = true
 	edit.tag = "EditView"
 	edit.normalize = normalizeEditViewTag
 	edit.get = edit.getFunc
