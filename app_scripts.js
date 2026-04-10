@@ -2011,15 +2011,23 @@ function showTooltip(element, tooltip) {
 		tooltipBox.innerHTML = tooltip;
 	}
 
-	let left = element.offsetLeft;
-	let top = element.offsetTop;
+	let scrollLeft = element.parentElement.scrollLeft;
+	let scrollTop = element.parentElement.scrollTop;
+	let left = element.offsetLeft - scrollLeft;
+	let top = element.offsetTop - scrollTop;
 	let width = element.offsetWidth;
 	let height = element.offsetHeight;
 	let parent = element.offsetParent;
 
 	while (parent) {
+
 		left += parent.offsetLeft;
 		top += parent.offsetTop;
+		if (parent.parentElement) {
+			left -= parent.parentElement.scrollLeft;
+			top -= parent.parentElement.scrollTop;
+		}
+
 		width = parent.offsetWidth;
 		height = parent.offsetHeight;
 		parent = parent.offsetParent;

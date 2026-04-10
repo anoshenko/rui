@@ -92,10 +92,10 @@ func getStartPage(buffer *strings.Builder, params AppParams) {
 	</head>
 	<body id="body" onkeydown="keyDownEvent(this, event)">
 		<div class="ruiRoot" id="ruiRootView"></div>
-		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate;"></div>
-		<div class="ruiTooltipLayer" id="ruiTooltipLayer" style="visibility: hidden; opacity: 0;">
-		<div id="ruiTooltipText" class="ruiTooltipText"></div>
-		<div id="ruiTooltipTopArrow" class="ruiTooltipTopArrow"></div>
+		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate; z-index: 10001;"></div>
+		<div class="ruiTooltipLayer" id="ruiTooltipLayer" style="visibility: hidden; opacity: 0; z-index: 10002;">
+			<div id="ruiTooltipText" class="ruiTooltipText"></div>
+			<div id="ruiTooltipTopArrow" class="ruiTooltipTopArrow"></div>
 			<div id="ruiTooltipBottomArrow" class="ruiTooltipBottomArrow"></div>
 		</div>
 		
