@@ -360,6 +360,7 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 					session.updateCSSProperty(pageID, "transform", "")
 					session.removeProperty(pageID, "ontransitionend")
 					session.removeProperty(pageID, "ontransitioncancel")
+					session.updateCSSProperty(pageID, "z-index", "auto")
 					session.finishUpdateScript(pageID)
 				}
 
@@ -403,6 +404,7 @@ func (layout *stackLayoutData) transitionFinished(view View, tag PropertyName) {
 			if count := len(layout.views); count > 1 {
 				pageID := layout.views[count-2].htmlID() + "page"
 				session.startUpdateScript(pageID)
+				session.updateCSSProperty(pageID, "z-index", "auto")
 				session.updateCSSProperty(pageID, "visibility", "hidden")
 				session.updateCSSProperty(pageID, "transition", "")
 				session.updateCSSProperty(pageID, "transform", "")
