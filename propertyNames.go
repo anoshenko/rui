@@ -649,20 +649,20 @@ const (
 	//   - 14 or "move" - Move cursor.
 	//   - 15 or "no-drop" - No drop cursor.
 	//   - 16 or "not-allowed" - Not allowed cursor.
-	//   - 17 or "e-resize" - Resize cursor.
-	//   - 18 or "n-resize" - Resize cursor.
-	//   - 19 or "ne-resize" - Resize cursor.
-	//   - 20 or "nw-resize" - Resize cursor.
-	//   - 21 or "s-resize" - Resize cursor.
-	//   - 22 or "se-resize" - Resize cursor.
-	//   - 23 or "sw-resize" - Resize cursor.
-	//   - 24 or "w-resize" - Resize cursor.
-	//   - 25 or "ew-resize" - Resize cursor.
-	//   - 26 or "ns-resize" - Resize cursor.
-	//   - 27 or "nesw-resize" - Resize cursor.
-	//   - 28 or "nwse-resize" - Resize cursor.
+	//   - 17 or "e-resize" - Resize cursor →
+	//   - 18 or "n-resize" - Resize cursor ↑
+	//   - 19 or "ne-resize" - Resize cursor ↗
+	//   - 20 or "nw-resize" - Resize cursor ↖
+	//   - 21 or "s-resize" - Resize cursor ↓
+	//   - 22 or "se-resize" - Resize cursor ↘
+	//   - 23 or "sw-resize" - Resize cursor ↙
+	//   - 24 or "w-resize" - Resize cursor ←
+	//   - 25 or "ew-resize" - Resize cursor ↔
+	//   - 26 or "ns-resize" - Resize cursor ↕
+	//   - 27 or "nesw-resize" - Resize cursor ⤢.
+	//   - 28 or "nwse-resize" - Resize cursor ⤡
 	//   - 29 or "col-resize" - Col resize cursor.
-	//   - 30 or "row-resize" - Row resize cursor.
+	//   - 30 or "row-resize" - Row resize cursor ⇼
 	//   - 31 or "all-scroll" - All scroll cursor.
 	//   - 32 or "zoom-in" - Zoom in cursor.
 	//   - 33 or "zoom-out" - Zoom out cursor.
