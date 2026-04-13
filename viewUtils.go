@@ -385,6 +385,32 @@ func GetTabSize(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, TabSize, 8)
 }
 
+// GetWhiteSpace returns how whitespace is handled within the View. Returns one of next values:
+//   - 0 (WhiteSpaceNormal) - Sequences of spaces are concatenated into one space. Newlines in the source are treated as a single space. Applying this value optionally splits lines to fill inline boxes.
+//   - 1 (WhiteSpaceNowrap) - Concatenates sequences of spaces into one space, like a normal value, but does not wrap lines(text wrapping) within the text.
+//   - 2 (WhiteSpacePre) - Sequences of spaces are saved as they are specified in the source. Lines are wrapped only where newlines are specified in the source and where "br" elements are specified in the source.
+//   - 3 (WhiteSpacePreWrap) - Sequences of spaces are saved as they are indicated in the source. Lines are wrapped only where newlines are specified in the source and there, where "br" elements are specified in the source, and optionally to fill inline boxes.
+//   - 4 (WhiteSpacePreLine) - Sequences of spaces are concatenated into one space. Lines are split on newlines, on "br" elements, and optionally to fill inline boxes.
+//   - 5 (WhiteSpaceBreakSpaces) - The behavior is identical to WhiteSpacePreWrap with the some differences.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetWhiteSpace(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, WhiteSpace, WhiteSpaceNormal, true)
+}
+
+// GetWordBreak returns value which determines where the newline will be set if the text exceeds the block boundaries. Returns one of next values:
+//   - 0 (WordBreakNormal) - default behavior for linefeed placement.
+//   - 1 (WordBreakAll constant, "break-all" name) - if the block boundaries are exceeded, a line break will be inserted between any two characters (except for Chinese/Japanese/Korean text).
+//   - 2 (WordBreakKeepAll constant, "keep-all" name) - Line break will not be used in Chinese/Japanese/ Korean text. For text in other languages, the default behavior (normal) will be applied.
+//   - 3 (WordBreakWord constant, "break-word" name) - when the block boundaries are exceeded, the remaining whole words can be broken in an arbitrary place, if a more suitable place for line break is not found.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetWordBreak(view View, subviewID ...string) int {
+	return enumStyledProperty(view, subviewID, WordBreak, WordBreakNormal, true)
+}
+
 // GetTextWeight returns a text weight of the subview. Returns one of next values:
 // 1, 2, 3, 4 (normal text), 5, 6, 7 (bold text), 8 and 9
 //
@@ -404,7 +430,7 @@ func GetTextAlign(view View, subviewID ...string) int {
 	return enumStyledProperty(view, subviewID, TextAlign, LeftAlign, true)
 }
 
-// GetTextAlign returns how text inside of the subview is wrapped. Returns one of next values:
+// GetTextWrap returns how text inside of the subview is wrapped. Returns one of next values:
 //
 //	TextWrapOn = 0, TextWrapOff = 1, TextWrapBalance = 3
 //

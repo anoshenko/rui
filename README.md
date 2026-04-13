@@ -1596,7 +1596,7 @@ You can get the value of this property using the function
 The "word-break" int property (WordBreak constant) determines where the newline will be set if the text exceeds the block boundaries.
 The "white-space" property can take the following values:
 
-0 (WordBreak constant, "normal" name) - default behavior for linefeed placement.
+0 (WordBreakNormal constant, "normal" name) - default behavior for linefeed placement.
 
 1 (WordBreakAll constant, "break-all" name) - if the block boundaries are exceeded, 
 a line break will be inserted between any two characters (except for Chinese/Japanese/Korean text).
