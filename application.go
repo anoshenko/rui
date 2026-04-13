@@ -59,6 +59,11 @@ type AppParams struct {
 	// The countdown begins after the OnPause event arrives.
 	// If the value of this property is less than or equal to 0 then the socket is not closed.
 	SocketAutoClose int
+
+	// GoogleFonts - url of Google fonts included in the application. For example, adding two fonts: "Open Sans" and "Roboto"
+	//
+	//   GoogleFonts : "https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+	GoogleFonts string
 }
 
 func getStartPage(buffer *strings.Builder, params AppParams) {
@@ -83,7 +88,18 @@ func getStartPage(buffer *strings.Builder, params AppParams) {
 
 	buffer.WriteString(`
 		<base target="_blank" rel="noopener">
-		<meta name="viewport" content="width=device-width">
+		<meta name="viewport" content="width=device-width">`)
+
+	if params.GoogleFonts != "" {
+		buffer.WriteString(`
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="`)
+		buffer.WriteString(params.GoogleFonts)
+		buffer.WriteString(`" rel="stylesheet">`)
+	}
+
+	buffer.WriteString(`
 		<style>`)
 	buffer.WriteString(appStyles)
 	buffer.WriteString(`</style>
