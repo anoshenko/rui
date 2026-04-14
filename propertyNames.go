@@ -1883,8 +1883,8 @@ const (
 	// Conversion rules:
 	//   - []BackgroundGradientPoint - stored as is, no conversion performed. Used to set gradient stop points for linear and radial gradients.
 	//   - []BackgroundGradientAngle - stored as is, no conversion performed. Used to set gradient stop points for conic gradient.
-	//   - []GradientPoint - converted to []BackgroundGradientPoint. Used to set gradient stop points for linear and radial gradients. Since GradientPoint contains values from 0 to 1.0 they will be converted to precent values.
-	//   - []Color - converted to []BackgroundGradientPoint. Used for setting gradient stop points which are uniformly distributed across gradient diretion.
+	//   - []GradientPoint - converted to []BackgroundGradientPoint. Used to set gradient stop points for linear and radial gradients. Since GradientPoint contains values from 0 to 1.0 they will be converted to percent values.
+	//   - []Color - converted to []BackgroundGradientPoint. Used for setting gradient stop points which are uniformly distributed across gradient direction.
 	//   - string - string representation of stop points or color values. Format: "color1 pos1,color2 pos2"... . Position of stop points can be described either in SizeUnit or AngleUnit string representations. Examples: "white 0deg, black 90deg, gray 360deg", "white 0%, black 100%".
 	Gradient PropertyName = "gradient"
 
