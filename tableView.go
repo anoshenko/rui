@@ -1692,7 +1692,8 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 		current := tableViewCurrent(table)
 		if row, ok := dataIntProperty(data, "row"); ok && row != current.Row {
 			current.Row = row
-			table.setRaw(Current, current.Row)
+			current.Column = -1
+			table.setRaw(Current, current)
 			for _, listener := range getOneArgEventListeners[TableView, int](table, nil, TableRowSelectedEvent) {
 				listener.Run(table, row)
 			}
@@ -1706,7 +1707,7 @@ func (table *tableViewData) handleCommand(self View, command PropertyName, data 
 				if row != current.Row || column != current.Column {
 					current.Row = row
 					current.Column = column
-					table.setRaw(Current, current.Row)
+					table.setRaw(Current, current)
 
 					for _, listener := range getTwoArgEventListeners[TableView, int](table, nil, TableCellSelectedEvent) {
 						listener.Run(table, row, column)
