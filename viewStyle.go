@@ -303,7 +303,7 @@ func writeViewStyleCSS(style Properties, builder cssBuilder, session Session, ig
 		if data, ok := enumProperties[tag]; ok {
 			if tag != VerticalTextOrientation || (writingMode != VerticalLeftToRight && writingMode != VerticalRightToLeft) {
 				if value, ok := enumProperty(style, tag, session, 0); ok {
-					cssValue := data.values[value]
+					cssValue := data.cssValues[value]
 					if cssValue != "" {
 						builder.add(data.cssTag, cssValue)
 					}
