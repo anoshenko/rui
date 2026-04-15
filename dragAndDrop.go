@@ -39,7 +39,7 @@ const (
 	// Supported types: float, int, string.
 	DragImageYOffset PropertyName = "drag-image-y-offset"
 
-	// DropEffect is the constant for "drag-effect" property tag.
+	// DropEffect is the constant for "drop-effect" property tag.
 	//
 	// Used by View.
 	// Controls the feedback (typically visual) the user is given during a drag and drop operation.
@@ -53,7 +53,7 @@ const (
 	//   - 1 (DropEffectCopy) or "copy" - A copy of the source item may be made at the new location.
 	//   - 2 (DropEffectMove) or "move" - An item may be moved to a new location.
 	//   - 4 (DropEffectLink) or "link" - A link may be established to the source at the new location.
-	DropEffect PropertyName = "drag-effect"
+	DropEffect PropertyName = "drop-effect"
 
 	// DropEffectAllowed is the constant for "drop-effect-allowed" property tag.
 	//
@@ -76,7 +76,7 @@ const (
 	//   - 5 (DropEffectCopyLink) or "copy|link" - A copy or link operation is permitted.
 	//   - 6 (DropEffectLinkMove) or "link|move" - A link or move operation is permitted.
 	//   - 7 (DropEffectAll) or "all" or "copy|move|link" - All operations are permitted.
-	DropEffectAllowed PropertyName = "drag-effect-allowed"
+	DropEffectAllowed PropertyName = "drop-effect-allowed"
 
 	// DragStartEvent is the constant for "drag-start-event" property tag.
 	//
