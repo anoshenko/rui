@@ -100,3 +100,14 @@ func ScrollViewToEnd(view View, subviewID ...string) {
 		view.Session().callFunc("scrollToEnd", view.htmlID())
 	}
 }
+
+// ScrollIntoViewIfNeeded scrolls the current view into the visible area of the browser window if it's not already within the visible area of the browser window.
+// If the element is already within the visible area of the browser window, then no scrolling takes place.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func ScrollIntoViewIfNeeded(view View, subviewID ...string) {
+	if view = getSubview(view, subviewID); view != nil {
+		view.Session().callFunc("scrollIntoViewIfNeeded", view.htmlID())
+	}
+}

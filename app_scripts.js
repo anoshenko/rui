@@ -1280,6 +1280,17 @@ function scrollToEnd(elementId) {
 	}
 }
 
+function scrollIntoViewIfNeeded(elementId) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		if (element.scrollIntoViewIfNeeded) {
+			element.scrollIntoViewIfNeeded()
+		} else {
+			element.scrollIntoView({block: "nearest", inline: "nearest"});
+		}
+	}
+}
+
 function focus(elementId) {
 	const element = document.getElementById(elementId);
 	if (element) {

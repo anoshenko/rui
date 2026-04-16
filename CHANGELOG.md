@@ -2,7 +2,7 @@
 
 * Removed "style-disabled" property and GetDisabledStyle function
 * Added GoogleFonts field to AppParams
-* Added functions: GetWhiteSpace, GetWordBreak
+* Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded
 
 # v0.20.0
 
