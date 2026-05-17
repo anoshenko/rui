@@ -658,6 +658,18 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 
 	case ShowTransform:
 		return setTransformProperty(popup, tag, value)
+
+	case ShowOpacity:
+		return len(setFloatProperty(popup, ShowOpacity, value, 0, 1)) > 0
+
+	case ShowDuration:
+		return len(setFloatProperty(popup, ShowDuration, value, 0, 60)) > 0
+
+	case ShowTiming:
+		if timing, ok := value.(string); ok && isTimingFunctionValid(timing) {
+			popup.setRaw(ShowTiming, timing)
+			return true
+		}
 	}
 
 	if popup.supported(tag) {
@@ -775,10 +787,12 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 }
 
 func (popup *popupData) animationProperty() AnimationProperty {
-	duration, _ := floatProperty(popup, ShowDuration, popup.session, 1)
+	_, _, defaultDuration, defaultTiming := popup.session.PopupShowAnimation()
+
+	duration, _ := floatProperty(popup, ShowDuration, popup.session, defaultDuration)
 	timing, ok := stringProperty(popup, ShowTiming, popup.session)
 	if !ok {
-		timing = EaseTiming
+		timing = defaultTiming
 	}
 	return NewAnimationProperty(Params{
 		Duration:       duration,
@@ -926,12 +940,31 @@ func (popup *popupData) Show() {
 	popup.Session().popupManager().showPopup(popup)
 }
 
-func (popup *popupData) showAnimation() {
-	opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
-	transform := getTransformProperty(popup, ShowTransform)
+func (popup *popupData) showTransformAndOpacity() (TransformProperty, float64) {
+	defaultTransform, defaultOpacity, _, _ := popup.session.PopupShowAnimation()
 
+	opacity, _ := floatProperty(popup, ShowOpacity, popup.session, defaultOpacity)
+	transform := getTransformProperty(popup, ShowTransform)
+	if transform == nil {
+		transform = defaultTransform
+	}
+
+	return transform, opacity
+}
+
+func (popup *popupData) showAnimation() {
+	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
 		htmlID := popup.popupView.htmlID()
+
+		animation := popup.animationProperty()
+		if opacity != 1 {
+			popup.popupView.SetTransition(Opacity, animation)
+		}
+		if transform != nil {
+			popup.popupView.SetTransition(Transform, animation)
+		}
+
 		session := popup.Session()
 		if opacity != 1 {
 			session.updateCSSProperty(htmlID, string(Opacity), "1")
@@ -943,9 +976,7 @@ func (popup *popupData) showAnimation() {
 }
 
 func (popup *popupData) dismissAnimation(listener func(PropertyName)) bool {
-	opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
-	transform := getTransformProperty(popup, ShowTransform)
-
+	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
 		session := popup.Session()
 		popup.popupView.Set(TransitionEndEvent, listener)
@@ -1287,6 +1318,38 @@ func NewPopup(view View, param Params) Popup {
 	popup.session = view.Session()
 	popup.contentView = view
 	popup.properties = map[PropertyName]any{}
+
+	defaultTransform, defaultOpacity, duration, timing := popup.session.PopupShowAnimation()
+
+	if value, ok := param[ShowTransform]; ok {
+		if transform := valueToTransformProperty(value); transform != nil {
+			defaultTransform = transform
+		} else {
+			param[ShowTransform] = defaultTransform
+		}
+	} else if defaultTransform != nil {
+		param[ShowTransform] = defaultTransform
+	}
+
+	if value, ok := param[ShowOpacity]; ok {
+		if opacity, _ := valueToFloat(value, popup.session, 1); opacity >= 0 && opacity < 1 {
+			defaultOpacity = opacity
+		} else {
+			param[ShowOpacity] = defaultOpacity
+		}
+	} else if defaultOpacity != 1 {
+		param[ShowOpacity] = defaultOpacity
+	}
+
+	if defaultTransform != nil || defaultOpacity != 1 {
+		if _, ok := param[ShowDuration]; !ok {
+			param[ShowDuration] = duration
+		}
+		if _, ok := param[ShowTiming]; !ok {
+			param[ShowTiming] = timing
+		}
+	}
+
 	for tag, value := range param {
 		popup.Set(tag, value)
 	}

@@ -3,6 +3,7 @@
 * Removed "style-disabled" property and GetDisabledStyle function
 * Added GoogleFonts field to AppParams
 * Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded
+* Added PopupShowAnimation and SetPopupShowAnimation methods to Session interface
 
 # v0.20.0
 

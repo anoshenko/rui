@@ -45,34 +45,47 @@ type SessionContent interface {
 type Session interface {
 	// App return the current application interface
 	App() Application
+
 	// ID return the id of the session
 	ID() int
 
 	// DarkTheme returns "true" if the dark theme is used
 	DarkTheme() bool
+
 	// Mobile returns "true" if current session is displayed on a touch screen device
 	TouchScreen() bool
+
 	// PixelRatio returns the ratio of the resolution in physical pixels to the resolution
 	// in logical pixels for the current display device.
 	PixelRatio() float64
+
 	// TextDirection returns the default text direction (LeftToRightDirection (1) or RightToLeftDirection (2))
 	TextDirection() int
+
 	// Constant returns the constant with "tag" name or "" if it is not exists
 	Constant(tag string) (string, bool)
+
 	// Color returns the color with "tag" name or 0 if it is not exists
 	Color(tag string) (Color, bool)
+
 	// ImageConstant returns the image constant with "tag" name or "" if it is not exists
 	ImageConstant(tag string) (string, bool)
+
 	// SetCustomTheme set the custom theme
 	SetCustomTheme(name string) bool
+
 	// UserAgent returns the "user-agent" text of the client browser
 	UserAgent() string
+
 	// RemoteAddr returns the client address.
 	RemoteAddr() string
+
 	// Language returns the current session language
 	Language() string
+
 	// SetLanguage set the current session language
 	SetLanguage(lang string)
+
 	// GetString returns the text for the current language
 	GetString(tag string) (string, bool)
 
@@ -82,32 +95,48 @@ type Session interface {
 
 	// SetTitle sets the text of the browser title/tab
 	SetTitle(title string)
+
 	// SetTitleColor sets the color of the browser navigation bar. Supported only in Safari and Chrome for android
 	SetTitleColor(color Color)
 
 	// RootView returns the root view of the session
 	RootView() View
+
 	// Get returns a value of the view (with id defined by the first argument) property with name defined by the second argument.
 	// The type of return value depends on the property. If the property is not set then nil is returned.
 	Get(viewID string, tag PropertyName) any
+
 	// Set sets the value (third argument) of the property (second argument) of the view with id defined by the first argument.
 	// Return "true" if the value has been set, in the opposite case "false" are returned and
 	// a description of the error is written to the log
 	Set(viewID string, tag PropertyName, value any) bool
 
+	// PopupShowAnimation returns default popup animation parameters.
+	// Returns the default value for the properties: "show-transform", "show-opacity", "show-duration" and "show-timing".
+	PopupShowAnimation() (transform TransformProperty, opacity, duration float64, timing string)
+
+	// SetPopupShowAnimation sets default popup animation parameters.
+	// Sets the default value for the properties: "show-transform", "show-opacity", "show-duration" and "show-timing".
+	SetPopupShowAnimation(transform TransformProperty, opacity, duration float64, timing string)
+
 	// DownloadFile downloads (saves) on the client side the file located at the specified path on the server.
 	DownloadFile(path string)
+
 	//DownloadFileData downloads (saves) on the client side a file with a specified name and specified content.
 	DownloadFileData(filename string, data []byte)
+
 	// OpenURL opens the url in the new browser tab
 	OpenURL(url string)
 
 	// ClientItem reads value by key from the client-side storage
 	ClientItem(key string) (string, bool)
+
 	// SetClientItem stores a key-value pair in the client-side storage
 	SetClientItem(key, value string)
+
 	// RemoveClientItem removes a key-value pair in the client-side storage
 	RemoveClientItem(key string)
+
 	// RemoveAllClientItems removes all key-value pair from the client-side storage
 	RemoveAllClientItems()
 
@@ -120,6 +149,7 @@ type Session interface {
 	// The second argument specifies a function that will be called on each timer event.
 	// The result is the id of the timer, which is used to stop the timer
 	StartTimer(ms int, timerFunc func(Session)) int
+
 	// StopTimer the timer with the given id
 	StopTimer(timerID int)
 
@@ -216,6 +246,10 @@ type sessionData struct {
 	timers           map[int]func(Session)
 	nextTimerID      int
 	pauseTime        int64
+	popupTransform   TransformProperty
+	popupOpacity     float64
+	popupDuration    float64
+	popupTiming      string
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -236,6 +270,9 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.hotkeys = map[string]func(Session){}
 	session.timers = map[int]func(Session){}
 	session.nextTimerID = 1
+	session.popupOpacity = 1
+	session.popupDuration = 1
+	session.popupTiming = EaseTiming
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {
@@ -923,4 +960,21 @@ func (session *sessionData) StopTimer(timerID int) {
 		session.bridge.callFunc("stopTimer", timerID)
 		delete(session.timers, timerID)
 	}
+}
+
+func (session *sessionData) SetPopupShowAnimation(transform TransformProperty, opacity, duration float64, timing string) {
+	session.popupTransform = transform
+	if opacity >= 0 && opacity <= 1 {
+		session.popupOpacity = opacity
+	}
+	if duration > 0 {
+		session.popupDuration = duration
+	}
+	if isTimingFunctionValid(timing) {
+		session.popupTiming = timing
+	}
+}
+
+func (session *sessionData) PopupShowAnimation() (transform TransformProperty, opacity, duration float64, timing string) {
+	return session.popupTransform, session.popupOpacity, session.popupDuration, session.popupTiming
 }
