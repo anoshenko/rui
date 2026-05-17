@@ -989,6 +989,8 @@ func (popup *popupData) dismissAnimation(listener func(PropertyName)) bool {
 		if transform != nil {
 			session.updateCSSProperty(htmlID, string(Transform), transform.transformCSS(session))
 		}
+
+		Set(popup.layerView, popupArrowID, Visibility, Invisible)
 		return true
 	}
 	return false
