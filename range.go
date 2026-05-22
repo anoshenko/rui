@@ -47,29 +47,30 @@ func (r *Range) setValue(value string) bool {
 }
 
 func setRangeProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
+	}
+
+	var r Range
 	switch value := value.(type) {
 	case string:
-		if setSimpleProperty(properties, tag, value) {
-			return []PropertyName{tag}
-		}
-
-		var r Range
 		if !r.setValue(value) {
 			invalidPropertyValue(tag, value)
 			return nil
 		}
-		properties.setRaw(tag, r)
 
 	case Range:
-		properties.setRaw(tag, value)
+		r = value
 
 	default:
 		if n, ok := isInt(value); ok {
-			properties.setRaw(tag, Range{First: n, Last: n})
+			r.First = n
+			r.Last = n
 		} else {
 			notCompatibleType(tag, value)
 			return nil
 		}
 	}
-	return []PropertyName{tag}
+
+	return setPropertyValue(properties, tag, r)
 }

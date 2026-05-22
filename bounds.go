@@ -107,6 +107,26 @@ func DefaultBounds() Bounds {
 	}
 }
 
+// ToBoundsProperty() convert Bounds to BoundsProperty.
+// The fields with Auto value will not be set in the result BoundsProperty.
+func (bounds *Bounds) ToBoundsProperty() BoundsProperty {
+	result := NewBoundsProperty(nil)
+	if bounds.Top.Type != Auto {
+		result.setRaw(Top, bounds.Top)
+	}
+	if bounds.Right.Type != Auto {
+		result.setRaw(Right, bounds.Right)
+	}
+	if bounds.Bottom.Type != Auto {
+		result.setRaw(Bottom, bounds.Bottom)
+	}
+	if bounds.Left.Type != Auto {
+		result.setRaw(Left, bounds.Left)
+	}
+
+	return result
+}
+
 // SetAll set the Top, Right, Bottom and Left field to the equal value
 func (bounds *Bounds) SetAll(value SizeUnit) {
 	bounds.Top = value
@@ -179,80 +199,90 @@ func (bounds *Bounds) cssString(session Session) string {
 }
 
 func setBoundsProperty(properties Properties, tag PropertyName, value any) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		switch value := value.(type) {
-		case string:
-			if strings.ContainsRune(value, ',') {
-				values := split4Values(value)
-				count := len(values)
-				switch count {
-				case 1:
-					value = values[0]
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
+	}
 
-				case 4:
-					bounds := NewBoundsProperty(nil)
-					for i, tag := range []PropertyName{Top, Right, Bottom, Left} {
-						if !bounds.Set(tag, values[i]) {
-							return nil
-						}
+	switch value := value.(type) {
+	case string:
+		if strings.ContainsRune(value, ',') {
+			values := split4Values(value)
+			switch count := len(values); count {
+			case 1:
+				return setSizeProperty(properties, tag, value[0])
+
+			case 5:
+				text := strings.Trim(values[4], " \t\n\r")
+				if text != "" {
+					notCompatibleType(tag, value)
+					return nil
+				}
+				fallthrough
+
+			case 4:
+				bounds := NewBoundsProperty(nil)
+				for i, tag := range []PropertyName{Top, Right, Bottom, Left} {
+					if !bounds.Set(tag, values[i]) {
+						return nil
 					}
-					properties.setRaw(tag, bounds)
-					return []PropertyName{tag}
+				}
 
-				default:
+				if bounds.IsEmpty() {
+					return removeProperty(properties, tag)
+				}
+				properties.setRaw(tag, bounds)
+				return []PropertyName{tag}
+
+			default:
+				notCompatibleType(tag, value)
+				return nil
+			}
+		}
+		return setSizeProperty(properties, tag, value)
+
+	case SizeUnit:
+		return setPropertyValue(properties, tag, value)
+
+	case float32:
+		return setPropertyValue(properties, tag, Px(float64(value)))
+
+	case float64:
+		return setPropertyValue(properties, tag, Px(value))
+
+	case Bounds:
+		bounds := value.ToBoundsProperty()
+		if bounds.IsEmpty() {
+			return removeProperty(properties, tag)
+		}
+		properties.setRaw(tag, bounds)
+
+	case BoundsProperty:
+		if value.IsEmpty() {
+			return removeProperty(properties, tag)
+		}
+		properties.setRaw(tag, value)
+
+	case DataObject:
+		bounds := NewBoundsProperty(nil)
+		for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
+			if text, ok := value.PropertyValue(string(tag)); ok {
+				if !bounds.Set(tag, text) {
 					notCompatibleType(tag, value)
 					return nil
 				}
 			}
-			return setSizeProperty(properties, tag, value)
+		}
+		if bounds.IsEmpty() {
+			return removeProperty(properties, tag)
+		}
+		properties.setRaw(tag, bounds)
 
-		case SizeUnit:
-			properties.setRaw(tag, value)
-
-		case float32:
-			properties.setRaw(tag, Px(float64(value)))
-
-		case float64:
-			properties.setRaw(tag, Px(value))
-
-		case Bounds:
-			bounds := NewBoundsProperty(nil)
-			if value.Top.Type != Auto {
-				bounds.setRaw(Top, value.Top)
-			}
-			if value.Right.Type != Auto {
-				bounds.setRaw(Right, value.Right)
-			}
-			if value.Bottom.Type != Auto {
-				bounds.setRaw(Bottom, value.Bottom)
-			}
-			if value.Left.Type != Auto {
-				bounds.setRaw(Left, value.Left)
-			}
-			properties.setRaw(tag, bounds)
-
-		case BoundsProperty:
-			properties.setRaw(tag, value)
-
-		case DataObject:
-			bounds := NewBoundsProperty(nil)
-			for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
-				if text, ok := value.PropertyValue(string(tag)); ok {
-					if !bounds.Set(tag, text) {
-						notCompatibleType(tag, value)
-						return nil
-					}
-				}
-			}
-			properties.setRaw(tag, bounds)
-
-		default:
-			if n, ok := isInt(value); ok {
-				properties.setRaw(tag, Px(float64(n)))
-			} else {
-				notCompatibleType(tag, value)
-				return nil
-			}
+	default:
+		if n, ok := isInt(value); ok {
+			return setPropertyValue(properties, tag, Px(float64(n)))
+		} else {
+			notCompatibleType(tag, value)
+			return nil
 		}
 	}
 

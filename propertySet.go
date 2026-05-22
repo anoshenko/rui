@@ -561,280 +561,309 @@ func isInt(value any) (int, bool) {
 	return n, true
 }
 
-func setSimpleProperty(properties Properties, tag PropertyName, value any) bool {
-	if value == nil {
-		properties.setRaw(tag, nil)
-		return true
-	} else if text, ok := value.(string); ok {
-		text = strings.Trim(text, " \t\n\r")
-		if text == "" {
-			properties.setRaw(tag, nil)
-			return true
-		}
-		if ok, _ := isConstantName(text); ok {
-			properties.setRaw(tag, text)
-			return true
+func setPropertyValue[T comparable](properties Properties, tag PropertyName, value T) []PropertyName {
+	if oldValue := properties.getRaw(tag); oldValue != nil {
+		if oldTypedValue, ok := oldValue.(T); ok && oldTypedValue == value {
+			return []PropertyName{}
 		}
 	}
-	return false
-}
 
-func setStringPropertyValue(properties Properties, tag PropertyName, text any) []PropertyName {
-	if text != "" {
-		properties.setRaw(tag, text)
-	} else if properties.getRaw(tag) != nil {
-		properties.setRaw(tag, nil)
-	} else {
-		return []PropertyName{}
-	}
+	properties.setRaw(tag, value)
 	return []PropertyName{tag}
 }
 
-func setArrayPropertyValue[T any](properties Properties, tag PropertyName, value []T) []PropertyName {
-	if len(value) > 0 {
-		properties.setRaw(tag, value)
-	} else if properties.getRaw(tag) != nil {
+func removeProperty(properties Properties, tag PropertyName) []PropertyName {
+	if properties.getRaw(tag) != nil {
 		properties.setRaw(tag, nil)
-	} else {
-		return []PropertyName{}
+		return []PropertyName{tag}
 	}
+	return []PropertyName{}
+}
+
+func setSimpleProperty(properties Properties, tag PropertyName, value any) []PropertyName {
+	if value == nil {
+		return removeProperty(properties, tag)
+	}
+
+	if text, ok := value.(string); ok {
+		text = strings.Trim(text, " \t\n\r")
+		if text == "" {
+			return removeProperty(properties, tag)
+		}
+
+		if oldValue := properties.getRaw(tag); oldValue != nil {
+			if oldText, ok := oldValue.(string); ok && oldText == text {
+				return []PropertyName{}
+			}
+		}
+
+		if ok, _ := isConstantName(text); ok {
+			properties.setRaw(tag, text)
+			return []PropertyName{tag}
+		}
+	}
+	return nil
+}
+
+func setStringPropertyValue(properties Properties, tag PropertyName, text string) []PropertyName {
+	if text == "" {
+		return removeProperty(properties, tag)
+	}
+
+	return setPropertyValue(properties, tag, text)
+}
+
+func setArrayPropertyValue[T any](properties Properties, tag PropertyName, value []T) []PropertyName {
+	if len(value) == 0 {
+		return removeProperty(properties, tag)
+	}
+	/*
+		oldValue := properties.getRaw(tag)
+		if oldValue != nil {
+			if oldArray, ok := oldValue.([]T); ok && slices.Equal(oldArray, value) {
+				return []PropertyName{}
+			}
+		}
+	*/
+	properties.setRaw(tag, value)
 	return []PropertyName{tag}
 }
 
 func setSizeProperty(properties Properties, tag PropertyName, value any) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		var size SizeUnit
-		switch value := value.(type) {
-		case string:
-			var ok bool
-			if fn := parseSizeFunc(value); fn != nil {
-				size.Type = SizeFunction
-				size.Function = fn
-			} else if size, ok = StringToSizeUnit(value); !ok {
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-		case SizeUnit:
-			size = value
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
+	}
 
-		case SizeFunc:
+	var size SizeUnit
+	switch value := value.(type) {
+	case string:
+		var ok bool
+		if fn := parseSizeFunc(value); fn != nil {
 			size.Type = SizeFunction
-			size.Function = value
-
-		case float32:
-			size.Type = SizeInPixel
-			size.Value = float64(value)
-
-		case float64:
-			size.Type = SizeInPixel
-			size.Value = value
-
-		default:
-			if n, ok := isInt(value); ok {
-				size.Type = SizeInPixel
-				size.Value = float64(n)
-			} else {
-				notCompatibleType(tag, value)
-				return nil
-			}
+			size.Function = fn
+		} else if size, ok = StringToSizeUnit(value); !ok {
+			invalidPropertyValue(tag, value)
+			return nil
 		}
+	case SizeUnit:
+		size = value
 
-		if size.Type == Auto {
-			properties.setRaw(tag, nil)
+	case SizeFunc:
+		size.Type = SizeFunction
+		size.Function = value
+
+	case float32:
+		size.Type = SizeInPixel
+		size.Value = float64(value)
+
+	case float64:
+		size.Type = SizeInPixel
+		size.Value = value
+
+	default:
+		if n, ok := isInt(value); ok {
+			size.Type = SizeInPixel
+			size.Value = float64(n)
 		} else {
-			properties.setRaw(tag, size)
+			notCompatibleType(tag, value)
+			return nil
 		}
 	}
 
-	return []PropertyName{tag}
+	if size.Type == Auto {
+		return removeProperty(properties, tag)
+	}
+	return setPropertyValue(properties, tag, size)
 }
 
 func setAngleProperty(properties Properties, tag PropertyName, value any) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		var angle AngleUnit
-		switch value := value.(type) {
-		case string:
-			var ok bool
-			if angle, ok = StringToAngleUnit(value); !ok {
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-		case AngleUnit:
-			angle = value
-
-		case float32:
-			angle = Rad(float64(value))
-
-		case float64:
-			angle = Rad(value)
-
-		default:
-			if n, ok := isInt(value); ok {
-				angle = Rad(float64(n))
-			} else {
-				notCompatibleType(tag, value)
-				return nil
-			}
-		}
-		properties.setRaw(tag, angle)
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
 	}
 
-	return []PropertyName{tag}
+	var angle AngleUnit
+	switch value := value.(type) {
+	case string:
+		var ok bool
+		if angle, ok = StringToAngleUnit(value); !ok {
+			invalidPropertyValue(tag, value)
+			return nil
+		}
+	case AngleUnit:
+		angle = value
+
+	case float32:
+		angle = Rad(float64(value))
+
+	case float64:
+		angle = Rad(value)
+
+	default:
+		if n, ok := isInt(value); ok {
+			angle = Rad(float64(n))
+		} else {
+			notCompatibleType(tag, value)
+			return nil
+		}
+	}
+
+	return setPropertyValue(properties, tag, angle)
 }
 
 func setColorProperty(properties Properties, tag PropertyName, value any) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		var result Color
-		switch value := value.(type) {
-		case string:
-			var err error
-			if result, err = stringToColor(value); err != nil {
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-		case Color:
-			result = value
-
-		default:
-			if color, ok := isInt(value); ok {
-				result = Color(color)
-			} else {
-				notCompatibleType(tag, value)
-				return nil
-			}
-		}
-
-		properties.setRaw(tag, result)
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
 	}
 
-	return []PropertyName{tag}
+	var result Color
+	switch value := value.(type) {
+	case string:
+		var err error
+		if result, err = stringToColor(value); err != nil {
+			invalidPropertyValue(tag, value)
+			return nil
+		}
+	case Color:
+		result = value
+
+	default:
+		if color, ok := isInt(value); ok {
+			result = Color(color)
+		} else {
+			notCompatibleType(tag, value)
+			return nil
+		}
+	}
+
+	return setPropertyValue(properties, tag, result)
 }
 
 func setEnumProperty(properties Properties, tag PropertyName, value any, values []string) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		var n int
-		if text, ok := value.(string); ok {
-			if n, ok = enumStringToInt(text, values, false); !ok {
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-		} else if i, ok := isInt(value); ok {
-			if i < 0 || i >= len(values) {
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-			n = i
-		} else {
-			notCompatibleType(tag, value)
-			return nil
-		}
-
-		properties.setRaw(tag, n)
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
 	}
 
-	return []PropertyName{tag}
+	var n int
+	if text, ok := value.(string); ok {
+		if n, ok = enumStringToInt(text, values, false); !ok {
+			invalidPropertyValue(tag, value)
+			return nil
+		}
+	} else if i, ok := isInt(value); ok {
+		if i < 0 || i >= len(values) {
+			invalidPropertyValue(tag, value)
+			return nil
+		}
+		n = i
+	} else {
+		notCompatibleType(tag, value)
+		return nil
+	}
+
+	return setPropertyValue(properties, tag, n)
 }
 
 func setBoolProperty(properties Properties, tag PropertyName, value any) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		if text, ok := value.(string); ok {
-			switch strings.ToLower(strings.Trim(text, " \t")) {
-			case "true", "yes", "on", "1":
-				properties.setRaw(tag, true)
-
-			case "false", "no", "off", "0":
-				properties.setRaw(tag, false)
-
-			default:
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-		} else if n, ok := isInt(value); ok {
-			switch n {
-			case 1:
-				properties.setRaw(tag, true)
-
-			case 0:
-				properties.setRaw(tag, false)
-
-			default:
-				invalidPropertyValue(tag, value)
-				return nil
-			}
-		} else if b, ok := value.(bool); ok {
-			properties.setRaw(tag, b)
-		} else {
-			notCompatibleType(tag, value)
-			return nil
-		}
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
 	}
 
-	return []PropertyName{tag}
+	var flag bool
+	if text, ok := value.(string); ok {
+		switch strings.ToLower(strings.Trim(text, " \t")) {
+		case "true", "yes", "on", "1":
+			flag = true
+
+		case "false", "no", "off", "0":
+			flag = false
+
+		default:
+			invalidPropertyValue(tag, value)
+			return nil
+		}
+	} else if n, ok := isInt(value); ok {
+		switch n {
+		case 1:
+			flag = true
+
+		case 0:
+			flag = false
+
+		default:
+			invalidPropertyValue(tag, value)
+			return nil
+		}
+	} else if b, ok := value.(bool); ok {
+		flag = b
+	} else {
+		notCompatibleType(tag, value)
+		return nil
+	}
+
+	return setPropertyValue(properties, tag, flag)
 }
 
 func setIntProperty(properties Properties, tag PropertyName, value any) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		if text, ok := value.(string); ok {
-			n, err := strconv.Atoi(strings.Trim(text, " \t"))
-			if err != nil {
-				invalidPropertyValue(tag, value)
-				ErrorLog(err.Error())
-				return nil
-			}
-			properties.setRaw(tag, n)
-		} else if n, ok := isInt(value); ok {
-			properties.setRaw(tag, n)
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
+	}
+
+	var result int
+	if text, ok := value.(string); ok {
+		n, err := strconv.Atoi(strings.Trim(text, " \t"))
+		if err != nil {
+			invalidPropertyValue(tag, value)
+			ErrorLog(err.Error())
+			return nil
+		}
+		result = n
+	} else if n, ok := isInt(value); ok {
+		result = n
+	} else {
+		notCompatibleType(tag, value)
+		return nil
+	}
+
+	return setPropertyValue(properties, tag, result)
+}
+
+func setFloatProperty(properties Properties, tag PropertyName, value any, min, max float64) []PropertyName {
+	if result := setSimpleProperty(properties, tag, value); result != nil {
+		return result
+	}
+
+	var result float64
+	switch value := value.(type) {
+	case string:
+		f, err := strconv.ParseFloat(strings.Trim(value, " \t"), 64)
+		if err != nil {
+			invalidPropertyValue(tag, value)
+			ErrorLog(err.Error())
+			return nil
+		}
+		result = f
+
+	case float32:
+		result = float64(value)
+
+	case float64:
+		result = value
+
+	default:
+		if n, ok := isInt(value); ok {
+			result = float64(n)
 		} else {
 			notCompatibleType(tag, value)
 			return nil
 		}
 	}
 
-	return []PropertyName{tag}
-}
-
-func setFloatProperty(properties Properties, tag PropertyName, value any, min, max float64) []PropertyName {
-	if !setSimpleProperty(properties, tag, value) {
-		f := float64(0)
-		switch value := value.(type) {
-		case string:
-			var err error
-			if f, err = strconv.ParseFloat(strings.Trim(value, " \t"), 64); err != nil {
-				invalidPropertyValue(tag, value)
-				ErrorLog(err.Error())
-				return nil
-			}
-			if f < min || f > max {
-				ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
-				return nil
-			}
-			properties.setRaw(tag, value)
-			return nil
-
-		case float32:
-			f = float64(value)
-
-		case float64:
-			f = value
-
-		default:
-			if n, ok := isInt(value); ok {
-				f = float64(n)
-			} else {
-				notCompatibleType(tag, value)
-				return nil
-			}
-		}
-
-		if f >= min && f <= max {
-			properties.setRaw(tag, f)
-		} else {
-			ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
-			return nil
-		}
+	if result < min || result > max {
+		ErrorLogF(`"%T" out of range of "%s" property`, value, tag)
+		return nil
 	}
 
-	return []PropertyName{tag}
+	return setPropertyValue(properties, tag, result)
 }
 
 func propertiesSet(properties Properties, tag PropertyName, value any) []PropertyName {

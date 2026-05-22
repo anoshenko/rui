@@ -104,8 +104,7 @@ func backgroundGradientSet(properties Properties, tag PropertyName, value any) [
 		switch value := value.(type) {
 		case string:
 			if ok, _ := isConstantName(value); ok {
-				properties.setRaw(Gradient, value)
-				return []PropertyName{tag}
+				return setPropertyValue(properties, tag, value)
 			}
 
 			if strings.ContainsAny(value, " ,") {
@@ -319,16 +318,14 @@ func backgroundLinearGradientSet(properties Properties, tag PropertyName, value 
 	if tag == Direction {
 		switch value := value.(type) {
 		case AngleUnit:
-			properties.setRaw(Direction, value)
-			return []PropertyName{tag}
+			return setPropertyValue(properties, tag, value)
 
 		case string:
-			if setSimpleProperty(properties, tag, value) {
-				return []PropertyName{tag}
+			if result := setSimpleProperty(properties, tag, value); result != nil {
+				return result
 			}
 			if angle, ok := StringToAngleUnit(value); ok {
-				properties.setRaw(Direction, angle)
-				return []PropertyName{tag}
+				return setPropertyValue(properties, tag, angle)
 			}
 
 		case LinearGradientDirectionType:

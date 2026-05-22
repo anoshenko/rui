@@ -214,18 +214,15 @@ func (picker *datePickerData) setFunc(tag PropertyName, value any) []PropertyNam
 	setDateValue := func(tag PropertyName) []PropertyName {
 		switch value := value.(type) {
 		case time.Time:
-			picker.setRaw(tag, value)
-			return []PropertyName{tag}
+			return setPropertyValue(picker, tag, value)
 
 		case string:
 			if ok, _ := isConstantName(value); ok {
-				picker.setRaw(tag, value)
-				return []PropertyName{tag}
+				return setPropertyValue(picker, tag, value)
 			}
 
 			if date, ok := stringToDate(value); ok {
-				picker.setRaw(tag, date)
-				return []PropertyName{tag}
+				return setPropertyValue(picker, tag, date)
 			}
 		}
 

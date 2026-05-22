@@ -285,43 +285,39 @@ func stringToDropEffect(text string) (int, bool) {
 }
 
 func (view *viewData) setDropEffect(value any) []PropertyName {
-	if !setSimpleProperty(view, DropEffect, value) {
-		if text, ok := value.(string); ok {
+	if result := setSimpleProperty(view, DropEffect, value); result != nil {
+		return result
+	}
 
-			if n, ok := stringToDropEffect(text); ok {
-				if n == DropEffectUndefined {
-					view.setRaw(DropEffect, nil)
-				} else {
-					view.setRaw(DropEffect, n)
-				}
-			} else {
-				invalidPropertyValue(DropEffect, value)
-				return nil
-			}
+	var newValue int
+	if text, ok := value.(string); ok {
 
-		} else if i, ok := isInt(value); ok {
-
-			switch i {
-			case DropEffectUndefined:
-				view.setRaw(DropEffect, nil)
-
-			case DropEffectCopy, DropEffectMove, DropEffectLink:
-				view.setRaw(DropEffect, i)
-
-			default:
-				invalidPropertyValue(DropEffect, value)
-				return nil
-			}
-
-		} else {
-
-			notCompatibleType(DropEffect, value)
+		if newValue, ok = stringToDropEffect(text); !ok {
+			invalidPropertyValue(DropEffect, value)
 			return nil
 		}
 
+	} else if i, ok := isInt(value); ok {
+
+		newValue = i
+
+	} else {
+
+		notCompatibleType(DropEffect, value)
+		return nil
 	}
 
-	return []PropertyName{DropEffect}
+	switch newValue {
+	case DropEffectUndefined:
+		return removeProperty(view, DropEffect)
+
+	case DropEffectCopy, DropEffectMove, DropEffectLink:
+		return setPropertyValue(view, DropEffect, newValue)
+
+	default:
+		invalidPropertyValue(DropEffect, value)
+		return nil
+	}
 }
 
 func stringToDropEffectAllowed(text string) (int, bool) {
@@ -348,39 +344,35 @@ func stringToDropEffectAllowed(text string) (int, bool) {
 }
 
 func (view *viewData) setDropEffectAllowed(value any) []PropertyName {
-	if !setSimpleProperty(view, DropEffectAllowed, value) {
-		if text, ok := value.(string); ok {
 
-			if n, ok := stringToDropEffectAllowed(text); ok {
-				if n == DropEffectUndefined {
-					view.setRaw(DropEffectAllowed, nil)
-				} else {
-					view.setRaw(DropEffectAllowed, n)
-				}
-			} else {
-				invalidPropertyValue(DropEffectAllowed, value)
-				return nil
-			}
+	if result := setSimpleProperty(view, DropEffectAllowed, value); result != nil {
+		return result
+	}
 
-		} else {
-			n, ok := isInt(value)
-			if !ok {
-				notCompatibleType(DropEffectAllowed, value)
-				return nil
-			}
-
-			if n == DropEffectUndefined {
-				view.setRaw(DropEffectAllowed, nil)
-			} else if n > DropEffectUndefined && n <= DropEffectAll {
-				view.setRaw(DropEffectAllowed, n)
-			} else {
-				notCompatibleType(DropEffectAllowed, value)
-				return nil
-			}
+	var newValue int
+	if text, ok := value.(string); ok {
+		if newValue, ok = stringToDropEffectAllowed(text); !ok {
+			invalidPropertyValue(DropEffectAllowed, value)
+			return nil
+		}
+	} else {
+		var ok bool
+		if newValue, ok = isInt(value); !ok {
+			notCompatibleType(DropEffectAllowed, value)
+			return nil
 		}
 	}
 
-	return []PropertyName{DropEffectAllowed}
+	if newValue == DropEffectUndefined {
+		return removeProperty(view, DropEffectAllowed)
+	}
+
+	if newValue < DropEffectUndefined || newValue > DropEffectAll {
+		notCompatibleType(DropEffectAllowed, value)
+		return nil
+	}
+
+	return setPropertyValue(view, DropEffectAllowed, newValue)
 }
 
 func handleDragAndDropEvents(view View, tag PropertyName, data DataObject) {

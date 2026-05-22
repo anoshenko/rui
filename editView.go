@@ -166,6 +166,9 @@ func (edit *editViewData) setFunc(tag PropertyName, value any) []PropertyName {
 			old := ""
 			if val := edit.getRaw(Text); val != nil {
 				if txt, ok := val.(string); ok {
+					if txt == text {
+						return []PropertyName{}
+					}
 					old = txt
 				}
 			}

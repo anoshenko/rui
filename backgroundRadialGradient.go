@@ -141,25 +141,23 @@ func backgroundRadialGradientSet(properties Properties, tag PropertyName, value 
 		case []SizeUnit:
 			switch len(value) {
 			case 0:
-				properties.setRaw(RadialGradientRadius, nil)
+				return removeProperty(properties, tag)
 
 			case 1:
 				if value[0].Type == Auto {
-					properties.setRaw(RadialGradientRadius, nil)
-				} else {
-					properties.setRaw(RadialGradientRadius, value[0])
+					return removeProperty(properties, tag)
 				}
+				return setPropertyValue(properties, tag, value[0])
 
 			default:
 				properties.setRaw(RadialGradientRadius, value)
+				return []PropertyName{tag}
 			}
-			return []PropertyName{tag}
 
 		case []any:
 			switch len(value) {
 			case 0:
-				properties.setRaw(RadialGradientRadius, nil)
-				return []PropertyName{tag}
+				return removeProperty(properties, tag)
 
 			case 1:
 				return backgroundRadialGradientSet(properties, RadialGradientRadius, value[0])
@@ -170,26 +168,24 @@ func backgroundRadialGradientSet(properties Properties, tag PropertyName, value 
 			}
 
 		case string:
-			if setSimpleProperty(properties, RadialGradientRadius, value) {
-				return []PropertyName{tag}
+			if result := setSimpleProperty(properties, tag, value); result != nil {
+				return result
 			}
 			if size, err := stringToSizeUnit(value); err == nil {
 				if size.Type == Auto {
-					properties.setRaw(RadialGradientRadius, nil)
+					return removeProperty(properties, tag)
 				} else {
-					properties.setRaw(RadialGradientRadius, size)
+					return setPropertyValue(properties, tag, size)
 				}
-				return []PropertyName{tag}
 			}
 			return setEnumProperty(properties, RadialGradientRadius, value, enumProperties[RadialGradientRadius].values)
 
 		case SizeUnit:
 			if value.Type == Auto {
-				properties.setRaw(RadialGradientRadius, nil)
+				return removeProperty(properties, tag)
 			} else {
-				properties.setRaw(RadialGradientRadius, value)
+				return setPropertyValue(properties, tag, value)
 			}
-			return []PropertyName{tag}
 
 		case RadialGradientRadiusType:
 			return setEnumProperty(properties, RadialGradientRadius, int(value), enumProperties[RadialGradientRadius].values)

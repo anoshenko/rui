@@ -635,8 +635,7 @@ func setClipShapePropertyProperty(properties Properties, tag PropertyName, value
 
 	case string:
 		if ok, _ := isConstantName(value); ok {
-			properties.setRaw(tag, value)
-			return []PropertyName{tag}
+			return setPropertyValue(properties, tag, value)
 		}
 
 		if obj := NewDataObject(value); obj == nil {

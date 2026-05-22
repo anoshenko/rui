@@ -423,11 +423,9 @@ func animationSet(properties Properties, tag PropertyName, value any) []Property
 		if text, ok := value.(string); ok {
 			text = strings.Trim(text, " \t\n\r")
 			if text == "" {
-				properties.setRaw(tag, nil)
-			} else {
-				properties.setRaw(tag, text)
+				return removeProperty(properties, tag)
 			}
-			return []PropertyName{tag}
+			return setPropertyValue(properties, tag, text)
 		}
 		notCompatibleType(tag, value)
 		return nil
@@ -571,8 +569,7 @@ func animationSet(properties Properties, tag PropertyName, value any) []Property
 
 	case TimingFunction:
 		if text, ok := value.(string); ok {
-			properties.setRaw(tag, text)
-			return []PropertyName{tag}
+			return setPropertyValue(properties, tag, text)
 		}
 
 	case IterationCount:

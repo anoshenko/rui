@@ -167,8 +167,7 @@ func backgroundConicGradientSet(properties Properties, tag PropertyName, value a
 					return []PropertyName{tag}
 				}
 			} else if ok, _ := isConstantName(value); ok {
-				properties.setRaw(Gradient, value)
-				return []PropertyName{tag}
+				return setPropertyValue(properties, Gradient, value)
 			}
 
 			ErrorLogF(`Invalid conic gradient: "%s"`, value)

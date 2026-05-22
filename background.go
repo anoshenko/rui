@@ -178,14 +178,11 @@ func setBackgroundProperty(properties Properties, tag PropertyName, value any) [
 		return nil
 	}
 
-	if len(background) > 0 {
-		properties.setRaw(tag, background)
-	} else if properties.getRaw(tag) != nil {
-		properties.setRaw(tag, nil)
-	} else {
-		return []PropertyName{}
+	if len(background) == 0 {
+		return removeProperty(properties, tag)
 	}
 
+	properties.setRaw(tag, background)
 	return []PropertyName{tag}
 }
 
