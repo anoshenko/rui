@@ -296,6 +296,9 @@ type Popup interface {
 	// Dismiss closes a popup
 	Dismiss()
 
+	// DismissWithoutAnimation closes a popup without animation
+	DismissWithoutAnimation()
+
 	onDismiss()
 	html(buffer *strings.Builder)
 	viewByHTMLID(id string) View
@@ -933,7 +936,11 @@ func (popup *popupData) cancel() {
 }
 
 func (popup *popupData) Dismiss() {
-	popup.Session().popupManager().dismissPopup(popup)
+	popup.Session().popupManager().dismissPopup(popup, true)
+}
+
+func (popup *popupData) DismissWithoutAnimation() {
+	popup.Session().popupManager().dismissPopup(popup, false)
 }
 
 func (popup *popupData) Show() {
@@ -1530,7 +1537,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 	popup.showAnimation()
 }
 
-func (manager *popupManager) dismissPopup(popup Popup) {
+func (manager *popupManager) dismissPopup(popup Popup, animation bool) {
 	if manager.popups == nil {
 		manager.popups = []Popup{}
 		return
@@ -1574,7 +1581,7 @@ func (manager *popupManager) dismissPopup(popup Popup) {
 		popup.onDismiss()
 	}
 
-	if !popup.dismissAnimation(listener) {
+	if !animation || !popup.dismissAnimation(listener) {
 		listener("")
 	}
 }

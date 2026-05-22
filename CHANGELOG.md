@@ -4,6 +4,7 @@
 * Added GoogleFonts field to AppParams
 * Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded
 * Added PopupShowAnimation and SetPopupShowAnimation methods to Session interface
+* Added DismissWithoutAnimation methos to Popup interface
 * Added ToBoundsProperty method to Bounds struct
 
 # v0.20.0
