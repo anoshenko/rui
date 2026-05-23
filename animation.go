@@ -776,7 +776,8 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 				if value := animation.Get(tag); value != nil {
 					text := propertyValueToString(tag, value, indent2)
 					if text != "" {
-						buffer.WriteString("\n" + indent2)
+						buffer.WriteRune('\n')
+						buffer.WriteString(indent2)
 						buffer.WriteString(string(tag))
 						buffer.WriteString(" = ")
 						buffer.WriteString(text)
@@ -814,7 +815,8 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 		}
 
 		if props, ok := animation.Get(PropertyTag).([]AnimatedProperty); ok && props != nil && len(props) > 0 {
-			buffer.WriteString("\n" + indent2)
+			buffer.WriteRune('\n')
+			buffer.WriteString(indent2)
 			buffer.WriteString(string(PropertyTag))
 			buffer.WriteString(" = ")
 			if len(props) > 1 {
@@ -824,13 +826,15 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 					writeProperty(prop, indent2+"\t")
 					buffer.WriteString("\n")
 				}
-				buffer.WriteString(indent2 + "],")
+				buffer.WriteString(indent2)
+				buffer.WriteString("],")
 			} else {
 				writeProperty(props[0], indent2)
 			}
 		}
 		buffer.WriteRune('\n')
-		buffer.WriteString(indent + "},\n")
+		buffer.WriteString(indent)
+		buffer.WriteString("},\n")
 	}
 
 	writeAnimation(animation, buffer, indent)
