@@ -299,6 +299,10 @@ type Popup interface {
 	// DismissWithoutAnimation closes a popup without animation
 	DismissWithoutAnimation()
 
+	// SetHotKey sets the function that will be called when the given hotkey is pressed.
+	// Invoke SetHotKey(..., ..., nil) for remove hotkey function.
+	SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Popup))
+
 	onDismiss()
 	html(buffer *strings.Builder)
 	viewByHTMLID(id string) View
@@ -332,6 +336,7 @@ type popupData struct {
 	popupView        GridLayout
 	contentContainer ColumnLayout
 	contentView      View
+	hotkeys          map[string]func(Popup)
 }
 
 type popupManager struct {
@@ -935,6 +940,16 @@ func (popup *popupData) cancel() {
 	popup.Dismiss()
 }
 
+func (popup *popupData) SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Popup)) {
+	hotkey := hotkeyCode(keyCode, controlKeys)
+	if fn == nil {
+		delete(popup.hotkeys, hotkey)
+	} else {
+		popup.hotkeys[hotkey] = fn
+	}
+
+}
+
 func (popup *popupData) Dismiss() {
 	popup.Session().popupManager().dismissPopup(popup, true)
 }
@@ -1032,7 +1047,22 @@ func (popup *popupData) onDismiss() {
 }
 
 func (popup *popupData) keyEvent(event KeyEvent) bool {
-	if !event.AltKey && !event.CtrlKey && !event.ShiftKey && !event.MetaKey {
+
+	var controlKeys ControlKeyMask = 0
+	if event.AltKey {
+		controlKeys |= AltKey
+	}
+	if event.CtrlKey {
+		controlKeys |= CtrlKey
+	}
+	if event.MetaKey {
+		controlKeys |= MetaKey
+	}
+	if event.ShiftKey {
+		controlKeys |= ShiftKey
+	}
+
+	if controlKeys == 0 {
 		switch event.Code {
 		case EnterKey:
 			for _, button := range popup.buttons() {
@@ -1043,26 +1073,34 @@ func (popup *popupData) keyEvent(event KeyEvent) bool {
 			}
 
 		case EscapeKey:
-			cancelable := func() bool {
-				if closeButton, _ := boolProperty(popup, CloseButton, popup.session); closeButton {
-					return true
-				}
-				if outsideClose, _ := boolProperty(popup, OutsideClose, popup.session); outsideClose {
-					return true
-				}
-
-				for _, button := range popup.buttons() {
-					if button.buttonType == CancelButton {
-						return true
-					}
-				}
-				return false
-			}
-
-			if cancelable() {
+			if popup.isCancelable() {
 				popup.cancel()
 				return true
 			}
+		}
+	}
+
+	key := hotkeyCode(KeyCode(event.Code), controlKeys)
+	if fn, ok := popup.hotkeys[key]; ok && fn != nil {
+		fn(popup)
+		return true
+	}
+
+	return false
+}
+
+func (popup *popupData) isCancelable() bool {
+	if closeButton, _ := boolProperty(popup, CloseButton, popup.session); closeButton {
+		return true
+	}
+
+	if outsideClose, _ := boolProperty(popup, OutsideClose, popup.session); outsideClose {
+		return true
+	}
+
+	for _, button := range popup.buttons() {
+		if button.buttonType == CancelButton {
+			return true
 		}
 	}
 	return false
@@ -1327,6 +1365,7 @@ func NewPopup(view View, param Params) Popup {
 	popup.session = view.Session()
 	popup.contentView = view
 	popup.properties = map[PropertyName]any{}
+	popup.hotkeys = map[string]func(Popup){}
 
 	defaultTransform, defaultOpacity, duration, timing := popup.session.PopupShowAnimation()
 
@@ -1390,6 +1429,7 @@ func CreatePopupFromObject(session Session, object DataObject, binding any) Popu
 	popup := new(popupData)
 	popup.session = session
 	popup.properties = map[PropertyName]any{}
+	popup.hotkeys = map[string]func(Popup){}
 
 	for key, value := range object.ToParams() {
 		popup.Set(key, value)
