@@ -296,7 +296,7 @@ func dataListHtmlSubviews(view View, buffer *strings.Builder, normalizeItem func
 				text = strings.ReplaceAll(text, "\n", `\n`)
 			}
 			buffer.WriteString(`<option value="`)
-			buffer.WriteString(text)
+			buffer.WriteString(textToHtml(text))
 			buffer.WriteString(`"></option>`)
 		}
 		buffer.WriteString(`</datalist>`)

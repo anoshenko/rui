@@ -100,11 +100,11 @@ func (textView *textViewData) setFunc(tag PropertyName, value any) []PropertyNam
 
 func (textView *textViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if value := textView.getRaw(Text); value != nil {
-		if text, ok := value.(string); ok {
+		if text, ok := value.(string); ok && text != "" {
 			if !GetNotTranslate(textView) {
 				text, _ = textView.session.GetString(text)
 			}
-			buffer.WriteString(text)
+			buffer.WriteString(textToHtml(text))
 		}
 	}
 }

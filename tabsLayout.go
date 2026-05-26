@@ -671,7 +671,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 			buffer.WriteString(view.htmlID())
 			buffer.WriteString(`-title"`)
 			buffer.WriteString(titleStyle)
-			buffer.WriteString(title)
+			buffer.WriteString(textToHtml(title))
 			buffer.WriteString(`</div>`)
 
 			close, ok := boolProperty(view, TabCloseButton, tabsLayout.session)

@@ -298,7 +298,7 @@ func (edit *editViewData) htmlTag() string {
 func (edit *editViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	if GetEditViewType(edit) == MultiLineText {
 		if text := GetText(edit); text != "" {
-			buffer.WriteString(text)
+			buffer.WriteString(textToHtml(text))
 		}
 	}
 	dataListHtmlSubviews(self, buffer, func(text string, session Session) string {

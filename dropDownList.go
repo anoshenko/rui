@@ -230,7 +230,7 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 				item, _ = list.session.GetString(item)
 			}
 
-			buffer.WriteString(item)
+			buffer.WriteString(textToHtml(item))
 			buffer.WriteString("</option>")
 			for _, index := range separators {
 				if i == index {

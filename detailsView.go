@@ -157,7 +157,7 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 			} else {
 				buffer.WriteString("<summary>")
 			}
-			buffer.WriteString(value)
+			buffer.WriteString(textToHtml(value))
 			buffer.WriteString("</summary>")
 			summary = true
 

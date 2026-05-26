@@ -114,3 +114,19 @@ func InlineFileFromData(data []byte, mimeType string) string {
 
 	return "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(data)
 }
+
+func textToHtml(text string) string {
+	replace := []struct{ old, new string }{
+		{old: "&", new: "&amp;"},
+		{old: "\"", new: "&quot;"},
+		{old: "'", new: "&apos;"},
+		{old: "<", new: "&lt;"},
+		{old: ">", new: "&gt;"},
+	}
+
+	for _, r := range replace {
+		text = strings.ReplaceAll(text, r.old, r.new)
+	}
+
+	return text
+}
