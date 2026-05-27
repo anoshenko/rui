@@ -120,8 +120,8 @@ func textToHtml(text string) string {
 		{old: "&", new: "&amp;"},
 		{old: "\"", new: "&quot;"},
 		{old: "'", new: "&apos;"},
-		{old: "<", new: "&lt;"},
-		{old: ">", new: "&gt;"},
+		//{old: "<", new: "&lt;"},
+		//{old: ">", new: "&gt;"},
 	}
 
 	for _, r := range replace {
