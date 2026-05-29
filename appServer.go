@@ -242,7 +242,7 @@ func (app *application) socketReader(bridge *wsBridge) {
 		}
 
 		if ProtocolInDebugLog {
-			DebugLog("🖥️ -> " + message)
+			DebugLog("🖥️ → " + message)
 		}
 
 		obj, err := ParseDataText(message)

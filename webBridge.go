@@ -60,7 +60,7 @@ func createSocketBridge(w http.ResponseWriter, req *http.Request) *wsBridge {
 	bridge.conn = conn
 	bridge.writeMessage = func(script string) bool {
 		if ProtocolInDebugLog {
-			DebugLog("🖥️ <- " + script)
+			DebugLog("🖥️ ← " + script)
 		}
 
 		if bridge.conn == nil {
