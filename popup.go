@@ -981,6 +981,10 @@ func (popup *popupData) showAnimation() {
 	if opacity != 1 || transform != nil {
 		htmlID := popup.popupView.htmlID()
 
+		session := popup.Session()
+		session.updateProperty(htmlID, "ontransitionend", "scanElementsSize()")
+		session.updateProperty(htmlID, "ontransitioncancel", "scanElementsSize()")
+
 		animation := popup.animationProperty()
 		if opacity != 1 {
 			popup.popupView.SetTransition(Opacity, animation)
@@ -989,7 +993,6 @@ func (popup *popupData) showAnimation() {
 			popup.popupView.SetTransition(Transform, animation)
 		}
 
-		session := popup.Session()
 		if opacity != 1 {
 			session.updateCSSProperty(htmlID, string(Opacity), "1")
 		}
