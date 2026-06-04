@@ -308,7 +308,7 @@ type Popup interface {
 	viewByHTMLID(id string) View
 	keyEvent(event KeyEvent) bool
 	showAnimation()
-	dismissAnimation(listener func(PropertyName)) bool
+	dismissAnimation(listener func(View, PropertyName)) bool
 }
 
 type popupListener interface {
@@ -331,16 +331,18 @@ type popupListenerBinding struct {
 
 type popupData struct {
 	propertyList
-	session          Session
-	layerView        GridLayout
-	popupView        GridLayout
-	contentContainer ColumnLayout
-	contentView      View
-	hotkeys          map[string]func(Popup)
+	session                 Session
+	layerView               GridLayout
+	popupView               GridLayout
+	contentContainer        ColumnLayout
+	contentView             View
+	hotkeys                 map[string]func(Popup)
+	dismissAnimationRunning bool
 }
 
 type popupManager struct {
-	popups []Popup
+	popups           []Popup
+	dismissAnimation []Popup
 }
 
 func (popup *popupData) createArrowView(location int) View {
@@ -997,7 +999,7 @@ func (popup *popupData) showAnimation() {
 	}
 }
 
-func (popup *popupData) dismissAnimation(listener func(PropertyName)) bool {
+func (popup *popupData) dismissAnimation(listener func(View, PropertyName)) bool {
 	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
 		session := popup.Session()
@@ -1013,6 +1015,7 @@ func (popup *popupData) dismissAnimation(listener func(PropertyName)) bool {
 		}
 
 		Set(popup.layerView, popupArrowID, Visibility, Invisible)
+		popup.dismissAnimationRunning = true
 		return true
 	}
 	return false
@@ -1035,6 +1038,7 @@ func (popup *popupData) viewByHTMLID(id string) View {
 func (popup *popupData) onDismiss() {
 	if popup.layerView != nil {
 		popup.Session().callFunc("removeView", popup.layerView.htmlID())
+		popup.layerView = nil
 
 		if value := popup.getRaw(DismissEvent); value != nil {
 			if listeners, ok := value.([]popupListener); ok {
@@ -1043,6 +1047,8 @@ func (popup *popupData) onDismiss() {
 				}
 			}
 		}
+
+		popup.session.popupManager().dismissAnimationFinished(popup)
 	}
 }
 
@@ -1561,6 +1567,13 @@ func (manager *popupManager) showPopup(popup Popup) {
 		return
 	}
 
+	for len(manager.dismissAnimation) > 0 {
+		p := manager.dismissAnimation[0]
+		manager.dismissAnimation = manager.dismissAnimation[1:]
+		p.onDismiss()
+		manager.removePopup(p)
+	}
+
 	session := popup.Session()
 	if len(manager.popups) == 0 {
 		manager.popups = []Popup{popup}
@@ -1588,41 +1601,52 @@ func (manager *popupManager) dismissPopup(popup Popup, animation bool) {
 		return
 	}
 
-	index := -1
-	for n, p := range manager.popups {
-		if p == popup {
-			index = n
-			break
-		}
-	}
-
+	index := slices.Index(manager.popups, popup)
 	if index < 0 {
 		return
 	}
 
-	session := popup.Session()
-	listener := func(PropertyName) {
-		switch index {
-		case 0:
-			if count == 1 {
-				manager.popups = []Popup{}
-				session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
-				session.updateCSSProperty(popupLayerID, "visibility", "hidden")
-			} else {
-				manager.popups = manager.popups[1:]
-			}
-
-		case count - 1:
-			manager.popups = manager.popups[:count-1]
-
-		default:
-			manager.popups = append(manager.popups[:index], manager.popups[index+1:]...)
-		}
+	listener := func(View, PropertyName) {
+		manager.removePopup(popup)
 		popup.onDismiss()
 	}
 
-	if !animation || !popup.dismissAnimation(listener) {
-		listener("")
+	if animation && popup.dismissAnimation(listener) {
+		if len(manager.dismissAnimation) == 0 {
+			manager.dismissAnimation = []Popup{popup}
+		} else {
+			manager.dismissAnimation = append(manager.dismissAnimation, popup)
+		}
+	} else {
+		manager.removePopup(popup)
+		popup.onDismiss()
+	}
+}
+
+func (manager *popupManager) removePopup(popup Popup) {
+	if manager.popups == nil {
+		manager.popups = []Popup{}
+		return
+	}
+
+	index := slices.Index(manager.popups, popup)
+	if index < 0 {
+		return
+	}
+
+	manager.popups = append(manager.popups[:index], manager.popups[index+1:]...)
+	if len(manager.popups) == 0 {
+		session := popup.Session()
+		session.updateCSSProperty("ruiRoot", "pointer-events", "auto")
+		session.updateCSSProperty(popupLayerID, "visibility", "hidden")
+	}
+}
+
+func (manager *popupManager) dismissAnimationFinished(popup Popup) {
+	if manager.dismissAnimation != nil {
+		if i := slices.Index(manager.dismissAnimation, popup); i >= 0 {
+			manager.dismissAnimation = append(manager.dismissAnimation[:i], manager.dismissAnimation[i+1:]...)
+		}
 	}
 }
 
