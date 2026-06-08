@@ -528,7 +528,7 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 				view.setRaw(DragData, nil)
 			} else {
 				data := map[string]string{}
-				for _, line := range strings.Split(value, ";") {
+				for line := range strings.SplitSeq(value, ";") {
 					index := strings.IndexRune(line, ':')
 					if index < 0 {
 						invalidPropertyValue(DragData, value)

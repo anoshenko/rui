@@ -238,7 +238,7 @@ func acceptPropertyCSS(view View) string {
 	if ok {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
-		for _, value := range strings.Split(accept, ",") {
+		for value := range strings.SplitSeq(accept, ",") {
 			if value = strings.Trim(value, " \t\n"); value != "" {
 				if buffer.Len() > 0 {
 					buffer.WriteString(", ")
