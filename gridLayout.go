@@ -414,8 +414,8 @@ func (gridLayout *gridLayoutData) createGridContent() bool {
 
 	width := adapter.GridColumnCount()
 	height := adapter.GridRowCount()
-	for column := 0; column < width; column++ {
-		for row := 0; row < height; row++ {
+	for column := range width {
+		for row := range height {
 			if view := adapter.GridCellContent(row, column, session); view != nil {
 				view.setParentID(htmlID)
 

@@ -1135,7 +1135,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 			}
 			buffer.WriteString(">")
 
-			for column := 0; column < columnCount; column++ {
+			for column := range columnCount {
 				ignore := false
 				for _, cell := range ignoreCells {
 					if cell.row == row && cell.column == column {
