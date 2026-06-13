@@ -3,6 +3,7 @@ package rui
 import (
 	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -114,6 +115,9 @@ type Session interface {
 	// PopupShowAnimation returns default popup animation parameters.
 	// Returns the default value for the properties: "show-transform", "show-opacity", "show-duration" and "show-timing".
 	PopupShowAnimation() (transform TransformProperty, opacity, duration float64, timing string)
+
+	// PopupShowAnimation returns a list of displayed popups or nil if there are no displayed popups.
+	Popups() []Popup
 
 	// SetPopupShowAnimation sets default popup animation parameters.
 	// Sets the default value for the properties: "show-transform", "show-opacity", "show-duration" and "show-timing".
@@ -434,6 +438,17 @@ func (session *sessionData) popupManager() *popupManager {
 		session.popups.popups = []Popup{}
 	}
 	return session.popups
+}
+
+func (session *sessionData) Popups() []Popup {
+	popups := session.popupManager()
+
+	count := len(popups.popups)
+	if count == 0 {
+		return nil
+	}
+
+	return slices.Clone(popups.popups)
 }
 
 func (session *sessionData) imageManager() *imageManager {
