@@ -229,15 +229,13 @@ func (event *DragAndDropEvent) init(session Session, data DataObject) {
 
 	event.Data = map[string]string{}
 	if value, ok := data.PropertyValue("data"); ok {
-		data := strings.Split(value, ";")
-		for _, line := range data {
-			pair := strings.Split(line, ":")
-			if len(pair) == 2 {
-				mime, err := base64.StdEncoding.DecodeString(pair[0])
+		for line := range strings.SplitSeq(value, ";") {
+			if mimeData, data, ok := strings.Cut(line, ":"); ok {
+				mime, err := base64.StdEncoding.DecodeString(mimeData)
 				if err != nil {
 					ErrorLog(err.Error())
 				} else {
-					val, err := base64.StdEncoding.DecodeString(pair[1])
+					val, err := base64.StdEncoding.DecodeString(data)
 					if err == nil {
 						event.Data[string(mime)] = string(val)
 					} else {
@@ -322,9 +320,8 @@ func (view *viewData) setDropEffect(value any) []PropertyName {
 
 func stringToDropEffectAllowed(text string) (int, bool) {
 	if strings.ContainsRune(text, '|') {
-		elements := strings.Split(text, "|")
 		result := 0
-		for _, element := range elements {
+		for element := range strings.SplitSeq(text, "|") {
 			if n, ok := stringToDropEffect(element); ok && n != DropEffectUndefined {
 				result |= n
 			} else {

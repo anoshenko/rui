@@ -20,30 +20,34 @@ func (r Range) String() string {
 }
 
 func (r *Range) setValue(value string) bool {
+
 	var err error
-	if strings.ContainsRune(value, ':') {
-		values := strings.Split(value, ":")
-		if len(values) != 2 {
-			ErrorLog("Invalid range value: " + value)
+
+	switch strings.Count(value, ":") {
+	case 0:
+		if r.First, err = strconv.Atoi(value); err != nil {
+			ErrorLog(`Invalid range value "` + value + `" (` + err.Error() + ")")
 			return false
 		}
-		if r.First, err = strconv.Atoi(strings.Trim(values[0], " \t\n\r")); err != nil {
-			ErrorLog(`Invalid first range value "` + value + `" (` + err.Error() + ")")
-			return false
-		}
-		if r.Last, err = strconv.Atoi(strings.Trim(values[1], " \t\n\r")); err != nil {
-			ErrorLog(`Invalid last range value "` + value + `" (` + err.Error() + ")")
-			return false
-		}
+		r.Last = r.First
 		return true
+
+	case 1:
+		if first, last, ok := strings.Cut(value, ":"); ok {
+			if r.First, err = strconv.Atoi(strings.Trim(first, " \t\n\r")); err != nil {
+				ErrorLog(`Invalid first range value "` + value + `" (` + err.Error() + ")")
+				return false
+			}
+			if r.Last, err = strconv.Atoi(strings.Trim(last, " \t\n\r")); err != nil {
+				ErrorLog(`Invalid last range value "` + value + `" (` + err.Error() + ")")
+				return false
+			}
+			return true
+		}
 	}
 
-	if r.First, err = strconv.Atoi(value); err != nil {
-		ErrorLog(`Invalid range value "` + value + `" (` + err.Error() + ")")
-		return false
-	}
-	r.Last = r.First
-	return true
+	ErrorLog("Invalid range value: " + value)
+	return false
 }
 
 func setRangeProperty(properties Properties, tag PropertyName, value any) []PropertyName {

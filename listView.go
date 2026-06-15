@@ -220,9 +220,8 @@ func (listView *listViewData) setFunc(tag PropertyName, value any) []PropertyNam
 		var checked []int
 		switch value := value.(type) {
 		case string:
-			elements := strings.Split(value, ",")
-			checked = make([]int, 0, len(elements))
-			for _, val := range elements {
+			checked = make([]int, 0, strings.Count(value, ",")+1)
+			for val := range strings.SplitSeq(value, ",") {
 				if val = strings.Trim(val, " \t"); val != "" {
 					n, err := strconv.Atoi(val)
 					if err != nil {

@@ -175,9 +175,8 @@ func resizableSide(view View) int {
 				}
 
 				if strings.ContainsRune(value, '|') {
-					values := strings.Split(value, "|")
 					sides := 0
-					for _, val := range values {
+					for val := range strings.SplitSeq(value, "|") {
 						if n, err := strconv.Atoi(val); err == nil {
 							if n < 1 || n > AllSides {
 								return AllSides

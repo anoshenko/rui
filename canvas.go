@@ -630,9 +630,8 @@ func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params Font
 		buffer.WriteString(params.LineHeight.cssString("", canvas.View().Session()))
 	}
 
-	names := strings.Split(name, ",")
 	lead := " "
-	for _, font := range names {
+	for font := range strings.SplitSeq(name, ",") {
 		font = strings.Trim(font, " \n\"'")
 		buffer.WriteString(lead)
 		lead = ","

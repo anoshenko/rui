@@ -480,14 +480,13 @@ func polygonClipDataSet(properties Properties, tag PropertyName, value any) []Pr
 			return []PropertyName{tag}
 
 		case string:
-			values := strings.Split(value, ",")
-			points := make([]any, len(values))
-			for i, val := range values {
+			points := make([]any, 0, strings.Count(value, ",")+1)
+			for val := range strings.SplitSeq(value, ",") {
 				val = strings.Trim(val, " \t\n\r")
 				if ok, _ := isConstantName(val); ok {
-					points[i] = val
+					points = append(points, val)
 				} else if size, ok := StringToSizeUnit(val); ok {
-					points[i] = size
+					points = append(points, size)
 				} else {
 					notCompatibleType(tag, val)
 					return nil

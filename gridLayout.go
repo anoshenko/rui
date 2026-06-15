@@ -489,10 +489,13 @@ func gridCellSizes(properties Properties, tag PropertyName, session Session) []S
 
 		case string:
 			if text, ok := session.resolveConstants(value); ok {
-				values := strings.Split(text, ",")
-				result := make([]SizeUnit, len(values))
-				for i, val := range values {
-					result[i], _ = stringToSizeUnit(val)
+				result := make([]SizeUnit, 0, strings.Count(text, ",")+1)
+				for val := range strings.SplitSeq(text, ",") {
+					size, err := stringToSizeUnit(val)
+					if err != nil {
+						ErrorLog(err.Error())
+					}
+					result = append(result, size)
 				}
 				return result
 			}

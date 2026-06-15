@@ -804,29 +804,37 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 			}
 
 		case string:
-			if strings.ContainsRune(value, ',') {
-				if values := strings.Split(value, ","); len(values) == 2 {
-					var n = []int{0, 0}
-					for i := range 2 {
-						var err error
-						if n[i], err = strconv.Atoi(values[i]); err != nil {
-							ErrorLog(err.Error())
-							return nil
-						}
-					}
-					current.Row = n[0]
-					current.Column = n[1]
-				} else {
-					notCompatibleType(tag, value)
-					return nil
-				}
-			} else {
+			switch strings.Count(value, ",") {
+			case 0:
 				n, err := strconv.Atoi(value)
 				if err != nil {
 					ErrorLog(err.Error())
 					return nil
 				}
 				current.Row = n
+
+			case 1:
+				n := make([]int, 0, 2)
+				for val := range strings.SplitSeq(value, ",") {
+					if i, err := strconv.Atoi(val); err != nil {
+						ErrorLog(err.Error())
+						return nil
+					} else {
+						n = append(n, i)
+					}
+				}
+
+				if len(n) == 2 {
+					current.Row = n[0]
+					current.Column = n[1]
+				} else {
+					notCompatibleType(tag, value)
+					return nil
+				}
+
+			default:
+				notCompatibleType(tag, value)
+				return nil
 			}
 
 		default:

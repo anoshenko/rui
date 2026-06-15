@@ -866,8 +866,8 @@ func isTimingFunctionValid(timingFunction string) bool {
 				}
 
 			case "cubic-bezier":
-				if params := strings.Split(args, ","); len(params) == 4 {
-					for _, param := range params {
+				if strings.Count(args, ",") == 3 {
+					for param := range strings.SplitSeq(args, ",") {
 						if _, err := strconv.ParseFloat(strings.Trim(param, " \t\n"), 64); err != nil {
 							return false
 						}

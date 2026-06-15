@@ -143,8 +143,8 @@ func stringToTime(value string) (time.Time, bool) {
 	pm := strings.HasSuffix(lowText, "PM") || strings.HasSuffix(lowText, "AM")
 
 	var format string
-	switch len(strings.Split(value, ":")) {
-	case 2:
+	switch strings.Count(value, ":") {
+	case 1:
 		if pm {
 			format = "3:04 PM"
 		} else {

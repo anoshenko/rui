@@ -649,22 +649,25 @@ func radiusPropertySet(radius Properties, tag PropertyName, value any) []Propert
 			deleteRadiusUnusedTags(radius, result)
 
 		case string:
-			if strings.ContainsRune(value, '/') {
-				if values := strings.Split(value, "/"); len(values) == 2 {
-					if result = radiusPropertySet(radius, tag+"-x", values[0]); result != nil {
-						if resultY := radiusPropertySet(radius, tag+"-y", values[1]); resultY != nil {
-							result = append(result, resultY...)
-						}
-
-					}
-				} else {
-					notCompatibleType(tag, value)
-				}
-			} else {
+			switch strings.Count(value, "/") {
+			case 0:
 				if result = setSizeProperty(radius, tag, value); result != nil {
 					deleteTags([]PropertyName{tag + "-x", tag + "-y"})
 					deleteRadiusUnusedTags(radius, result)
 				}
+
+			case 1:
+				if x, y, ok := strings.Cut(value, "/"); ok {
+					if result = radiusPropertySet(radius, tag+"-x", x); result != nil {
+						if resultY := radiusPropertySet(radius, tag+"-y", y); resultY != nil {
+							result = append(result, resultY...)
+						}
+					}
+				} else {
+					notCompatibleType(tag, value)
+				}
+			default:
+				notCompatibleType(tag, value)
 			}
 		}
 

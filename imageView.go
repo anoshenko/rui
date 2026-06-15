@@ -187,12 +187,15 @@ func (imageView *imageViewData) propertyChanged(tag PropertyName) {
 func imageViewSrcSet(view View, path string) string {
 	if value := view.getRaw(SrcSet); value != nil {
 		if text, ok := value.(string); ok {
-			srcset := strings.Split(text, ",")
 			buffer := allocStringBuilder()
 			defer freeStringBuilder(buffer)
-			for i, src := range srcset {
-				if i > 0 {
+
+			comma := false
+			for src := range strings.SplitSeq(text, ",") {
+				if comma {
 					buffer.WriteString(", ")
+				} else {
+					comma = true
 				}
 				src = strings.Trim(src, " \t\n")
 				buffer.WriteString(src)
