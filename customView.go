@@ -246,11 +246,31 @@ func (customView *CustomViewData) isNoResizeEvent() bool {
 // Views return a list of child views
 func (customView *CustomViewData) Views() []View {
 	if customView.superView != nil {
-		if container, ok := customView.superView.(ViewsContainer); ok {
+		if container, ok := customView.superView.(ParentView); ok {
 			return container.Views()
 		}
 	}
 	return []View{}
+}
+
+func (customView *CustomViewData) ViewSeq() iter.Seq[View] {
+	if customView.superView != nil {
+		if container, ok := customView.superView.(ParentView); ok {
+			return container.ViewSeq()
+		}
+	}
+
+	return func(yield func(View) bool) {
+	}
+}
+
+func (customView *CustomViewData) ViewCount() int {
+	if customView.superView != nil {
+		if container, ok := customView.superView.(ParentView); ok {
+			return container.ViewCount()
+		}
+	}
+	return 0
 }
 
 // Append appends a view to the end of the list of a view children
