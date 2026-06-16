@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"iter"
 	"strconv"
 	"strings"
 )
@@ -159,6 +160,20 @@ func (listView *listViewData) init(session Session) {
 
 func (listView *listViewData) Views() []View {
 	return listView.items
+}
+
+func (listView *listViewData) ViewSeq() iter.Seq[View] {
+	return func(yield func(View) bool) {
+		for _, view := range listView.items {
+			if !yield(view) {
+				return
+			}
+		}
+	}
+}
+
+func (listView *listViewData) ViewCount() int {
+	return len(listView.items)
 }
 
 func normalizeListViewTag(tag PropertyName) PropertyName {

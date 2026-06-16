@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"iter"
 	"strconv"
 	"strings"
 )
@@ -1692,6 +1693,20 @@ func (table *tableViewData) ReloadCell(row, column int) {
 
 func (table *tableViewData) Views() []View {
 	return table.cellViews
+}
+
+func (table *tableViewData) ViewSeq() iter.Seq[View] {
+	return func(yield func(View) bool) {
+		for _, view := range table.cellViews {
+			if !yield(view) {
+				return
+			}
+		}
+	}
+}
+
+func (table *tableViewData) ViewCount() int {
+	return len(table.cellViews)
 }
 
 func (table *tableViewData) handleCommand(self View, command PropertyName, data DataObject) bool {

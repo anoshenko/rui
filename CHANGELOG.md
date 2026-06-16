@@ -5,6 +5,7 @@
 * Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded
 * Added Popups, PopupShowAnimation, and SetPopupShowAnimation methods to Session interface
 * Added DismissWithoutAnimation add SetHotKey methods to Popup interface
+* Added ViewSeq add ViewCount methods to ParentView interface
 * Added ToBoundsProperty method to Bounds struct
 
 # v0.20.0

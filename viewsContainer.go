@@ -1,11 +1,20 @@
 package rui
 
-import "strings"
+import (
+	"iter"
+	"strings"
+)
 
 // ParentView describe a view which can have a child views
 type ParentView interface {
-	// Views return a list of child views
+	// Views returns a list of child views
 	Views() []View
+
+	// ViewSeq returns an iterator over all child views
+	ViewSeq() iter.Seq[View]
+
+	// ViewCount returns a number of child views
+	ViewCount() int
 }
 
 // ViewsContainer represent a mutable list-container of views
@@ -65,6 +74,24 @@ func (container *viewsContainerData) Views() []View {
 		return views
 	}
 	return []View{}
+}
+
+func (container *viewsContainerData) ViewSeq() iter.Seq[View] {
+	if container.views == nil {
+		container.views = []View{}
+	}
+
+	return func(yield func(View) bool) {
+		for _, view := range container.views {
+			if !yield(view) {
+				return
+			}
+		}
+	}
+}
+
+func (container *viewsContainerData) ViewCount() int {
+	return len(container.views)
 }
 
 func (container *viewsContainerData) append(view View) bool {

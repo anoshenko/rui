@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"iter"
 	"strconv"
 	"strings"
 )
@@ -89,6 +90,21 @@ func (resizable *resizableData) Views() []View {
 		return []View{view}
 	}
 	return []View{}
+}
+
+func (resizable *resizableData) ViewSeq() iter.Seq[View] {
+	return func(yield func(View) bool) {
+		if view := resizable.content(); view != nil {
+			yield(view)
+		}
+	}
+}
+
+func (resizable *resizableData) ViewCount() int {
+	if resizable.content() != nil {
+		return 1
+	}
+	return 0
 }
 
 func (resizable *resizableData) content() View {
