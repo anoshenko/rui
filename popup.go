@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"sync"
 )
 
 // Constants for [Popup] specific properties and events
@@ -304,7 +305,7 @@ type Popup interface {
 	SetHotKey(keyCode KeyCode, controlKeys ControlKeyMask, fn func(Popup))
 
 	onDismiss()
-	html(buffer *strings.Builder)
+	html(hidden bool) string
 	viewByHTMLID(id string) View
 	keyEvent(event KeyEvent) bool
 	showAnimation()
@@ -343,6 +344,7 @@ type popupData struct {
 type popupManager struct {
 	popups           []Popup
 	dismissAnimation []Popup
+	mutex            sync.Mutex
 }
 
 func (popup *popupData) createArrowView(location int) View {
@@ -770,23 +772,23 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 		animation := popup.animationProperty()
 		opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
 		if opacity != 1 {
-			popup.popupView.SetTransition(Opacity, animation)
+			popup.layerView.SetTransition(Opacity, animation)
 		}
 		transform := getTransformProperty(popup, ShowTransform)
 		if transform != nil {
-			popup.popupView.SetTransition(Transform, animation)
+			popup.layerView.SetTransition(Transform, animation)
 		}
 
 	case ShowOpacity:
 		opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
 		if opacity != 1 {
-			popup.popupView.SetTransition(Opacity, popup.animationProperty())
+			popup.layerView.SetTransition(Opacity, popup.animationProperty())
 		}
 
 	case ShowTransform:
 		transform := getTransformProperty(popup, ShowTransform)
 		if transform != nil {
-			popup.popupView.SetTransition(Transform, popup.animationProperty())
+			popup.layerView.SetTransition(Transform, popup.animationProperty())
 		}
 
 	default:
@@ -979,7 +981,7 @@ func (popup *popupData) showTransformAndOpacity() (TransformProperty, float64) {
 func (popup *popupData) showAnimation() {
 	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
-		htmlID := popup.popupView.htmlID()
+		htmlID := popup.layerView.htmlID()
 
 		session := popup.Session()
 		session.updateProperty(htmlID, "ontransitionend", "scanElementsSize()")
@@ -987,10 +989,10 @@ func (popup *popupData) showAnimation() {
 
 		animation := popup.animationProperty()
 		if opacity != 1 {
-			popup.popupView.SetTransition(Opacity, animation)
+			popup.layerView.SetTransition(Opacity, animation)
 		}
 		if transform != nil {
-			popup.popupView.SetTransition(Transform, animation)
+			popup.layerView.SetTransition(Transform, animation)
 		}
 
 		if opacity != 1 {
@@ -1006,10 +1008,10 @@ func (popup *popupData) dismissAnimation(listener func(View, PropertyName)) bool
 	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
 		session := popup.Session()
-		popup.popupView.Set(TransitionEndEvent, listener)
-		popup.popupView.Set(TransitionCancelEvent, listener)
+		popup.layerView.Set(TransitionEndEvent, listener)
+		popup.layerView.Set(TransitionCancelEvent, listener)
 
-		htmlID := popup.popupView.htmlID()
+		htmlID := popup.layerView.htmlID()
 		if opacity != 1 {
 			session.updateCSSProperty(htmlID, string(Opacity), fmt.Sprintf("%.2f", opacity))
 		}
@@ -1017,18 +1019,27 @@ func (popup *popupData) dismissAnimation(listener func(View, PropertyName)) bool
 			session.updateCSSProperty(htmlID, string(Transform), transform.transformCSS(session))
 		}
 
-		Set(popup.layerView, popupArrowID, Visibility, Invisible)
+		//Set(popup.layerView, popupArrowID, Visibility, Invisible)
 		popup.dismissAnimationRunning = true
 		return true
 	}
 	return false
 }
 
-func (popup *popupData) html(buffer *strings.Builder) {
+func (popup *popupData) html(hidden bool) string {
 	if popup.layerView == nil {
 		popup.layerView = popup.createLayerView()
 	}
+
+	if hidden {
+		popup.layerView.Set(Visibility, Invisible)
+	}
+
+	buffer := allocStringBuilder()
+	defer freeStringBuilder(buffer)
+
 	viewHTML(popup.layerView, buffer, "")
+	return buffer.String()
 }
 
 func (popup *popupData) viewByHTMLID(id string) View {
@@ -1352,12 +1363,12 @@ func (popup *popupData) createLayerView() GridLayout {
 	if opacity != 1 || transform != nil {
 		animation := popup.animationProperty()
 		if opacity != 1 {
-			popup.popupView.Set(Opacity, opacity)
-			popup.popupView.SetTransition(Opacity, animation)
+			popup.layerView.Set(Opacity, opacity)
+			popup.layerView.SetTransition(Opacity, animation)
 		}
 		if transform != nil {
-			popup.popupView.Set(Transform, transform)
-			popup.popupView.SetTransition(Transform, animation)
+			popup.layerView.Set(Transform, transform)
+			popup.layerView.SetTransition(Transform, animation)
 		}
 	}
 
@@ -1549,43 +1560,33 @@ func ShowPopup(view View, param Params) Popup {
 	return popup
 }
 
-func (manager *popupManager) updatePopupLayerInnerHTML(session Session) {
-	if manager.popups == nil {
-		manager.popups = []Popup{}
-		session.updateInnerHTML(popupLayerID, "")
-		return
-	}
-
-	buffer := allocStringBuilder()
-	defer freeStringBuilder(buffer)
-
-	for _, popup := range manager.popups {
-		popup.html(buffer)
-	}
-	session.updateInnerHTML(popupLayerID, buffer.String())
-}
-
 func (manager *popupManager) showPopup(popup Popup) {
 	if popup == nil {
 		return
 	}
 
-	for len(manager.dismissAnimation) > 0 {
-		p := manager.dismissAnimation[0]
-		manager.dismissAnimation = manager.dismissAnimation[1:]
-		p.onDismiss()
+	manager.mutex.Lock()
+	dismissAnimation := manager.dismissAnimation
+	manager.dismissAnimation = nil
+	manager.mutex.Unlock()
+
+	for _, p := range dismissAnimation {
 		manager.removePopup(p)
+		p.onDismiss()
 	}
 
-	session := popup.Session()
+	manager.mutex.Lock()
 	if len(manager.popups) == 0 {
 		manager.popups = []Popup{popup}
 	} else {
 		manager.popups = append(manager.popups, popup)
 	}
+	manager.mutex.Unlock()
 
+	session := popup.Session()
 	session.callFunc("blurCurrent")
-	manager.updatePopupLayerInnerHTML(session)
+	session.appendToInnerHTML(popupLayerID, popup.html(false))
+
 	session.updateCSSProperty("ruiTooltipLayer", "visibility", "hidden")
 	session.updateCSSProperty("ruiTooltipLayer", "opacity", "0")
 	session.updateCSSProperty(popupLayerID, "visibility", "visible")
@@ -1594,13 +1595,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 }
 
 func (manager *popupManager) dismissPopup(popup Popup, animation bool) {
-	if manager.popups == nil {
-		manager.popups = []Popup{}
-		return
-	}
-
-	count := len(manager.popups)
-	if count <= 0 || popup == nil {
+	if len(manager.popups) <= 0 || popup == nil {
 		return
 	}
 
@@ -1615,11 +1610,13 @@ func (manager *popupManager) dismissPopup(popup Popup, animation bool) {
 	}
 
 	if animation && popup.dismissAnimation(listener) {
+		manager.mutex.Lock()
 		if len(manager.dismissAnimation) == 0 {
 			manager.dismissAnimation = []Popup{popup}
 		} else {
 			manager.dismissAnimation = append(manager.dismissAnimation, popup)
 		}
+		manager.mutex.Unlock()
 	} else {
 		manager.removePopup(popup)
 		popup.onDismiss()
@@ -1627,10 +1624,8 @@ func (manager *popupManager) dismissPopup(popup Popup, animation bool) {
 }
 
 func (manager *popupManager) removePopup(popup Popup) {
-	if manager.popups == nil {
-		manager.popups = []Popup{}
-		return
-	}
+	manager.mutex.Lock()
+	defer manager.mutex.Unlock()
 
 	index := slices.Index(manager.popups, popup)
 	if index < 0 {
@@ -1646,6 +1641,9 @@ func (manager *popupManager) removePopup(popup Popup) {
 }
 
 func (manager *popupManager) dismissAnimationFinished(popup Popup) {
+	manager.mutex.Lock()
+	defer manager.mutex.Unlock()
+
 	if manager.dismissAnimation != nil {
 		if i := slices.Index(manager.dismissAnimation, popup); i >= 0 {
 			manager.dismissAnimation = append(manager.dismissAnimation[:i], manager.dismissAnimation[i+1:]...)
