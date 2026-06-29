@@ -713,6 +713,12 @@ func (theme *theme) addText(themeText string) bool {
 
 	for d := range data.Properties() {
 		switch tag := d.Tag(); tag {
+		case "name":
+			if d.Type() == TextNode {
+				if text := d.Text(); text != "" {
+					theme.name = text
+				}
+			}
 		case "constants":
 			if d.Type() == ObjectNode {
 				if obj := d.Object(); obj != nil {
@@ -928,6 +934,13 @@ func (theme *theme) String() string {
 	}
 
 	buffer.WriteString("theme {\n")
+
+	if theme.name != "" {
+		buffer.WriteString("\tname = ")
+		writeString(theme.name)
+		buffer.WriteString(",\n")
+	}
+
 	writeConstants("colors", theme.colors)
 	writeConstants("colors:dark", theme.darkColors)
 	writeConstants("images", theme.images)
