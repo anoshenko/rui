@@ -369,6 +369,15 @@ func (theme *theme) RemoveStyle(tag string) {
 	for _, mediaStyle := range theme.mediaStyles {
 		remove(mediaStyle.styles)
 	}
+
+	// Remove empty media styles
+	newMediaStyles := make([]mediaStyle, 0)
+	for _, mediaStyle := range theme.mediaStyles {
+		if len(mediaStyle.styles) > 0 {
+			newMediaStyles = append(newMediaStyles, mediaStyle)
+		}
+	}
+	theme.mediaStyles = newMediaStyles
 }
 
 func (theme *theme) MediaStyle(tag string, params MediaStyleParams) ViewStyle {
@@ -420,14 +429,24 @@ func (theme *theme) SetMediaStyle(tag string, params MediaStyleParams, style Vie
 			styles.MinHeight == params.MinHeight {
 			if style != nil {
 				theme.mediaStyles[i].styles[tag] = style
+				return
 			} else {
 				delete(theme.mediaStyles[i].styles, tag)
+				// Remove empty media styles
+				newMediaStyles := make([]mediaStyle, 0)
+				for _, mediaStyle := range theme.mediaStyles {
+					if len(mediaStyle.styles) > 0 {
+						newMediaStyles = append(newMediaStyles, mediaStyle)
+					}
+				}
+				theme.mediaStyles = newMediaStyles
+				return
 			}
-			break
 		}
 	}
 
 	if style != nil {
+		// New media style, append and sort media styles
 		theme.mediaStyles = append(theme.mediaStyles, mediaStyle{
 			MediaStyleParams: params,
 			styles:           map[string]ViewStyle{tag: style},
@@ -964,7 +983,7 @@ func (theme *theme) String() string {
 		buffer.WriteString(" = [\n")
 
 		for _, tag := range tags {
-			if style, ok := styles[tag]; ok && !style.IsEmpty() {
+			if style, ok := styles[tag]; ok {
 				buffer.WriteString("\t\t")
 				writeViewStyle(tag, style, buffer, "\t\t", nil)
 				buffer.WriteString(",\n")
@@ -1015,7 +1034,7 @@ func (theme *theme) String() string {
 			buffer.WriteString(" = [\n")
 
 			for _, tag := range tags {
-				if style, ok := media.styles[tag]; ok && !style.IsEmpty() {
+				if style, ok := media.styles[tag]; ok {
 					buffer.WriteString("\t\t")
 					writeViewStyle(tag, style, buffer, "\t\t", nil)
 					buffer.WriteString(",\n")
