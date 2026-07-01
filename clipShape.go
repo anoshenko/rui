@@ -5,12 +5,26 @@ import (
 	"strings"
 )
 
+// ClipShape defines the type of a clipping region that sets what part of an element should be shown. Parts that are inside the region are shown, while those outside are hidden.
+//
+// Possible values:
+//   - InsetClip - an inset rectangle;
+//   - CircleClip - a circle using a radius and a position;
+//   - EllipseClip - an ellipse using two radii and a position;
+//   - PolygonClip - a polygon by providing one or more pairs of coordinates, each of which represents a vertex of the shape.
 type ClipShape string
 
 const (
-	InsetClip   ClipShape = "inset"
-	CircleClip  ClipShape = "circle"
+	// InsetClip is the type of a clipping region: an inset rectangle.
+	InsetClip ClipShape = "inset"
+
+	// CircleClip is the type of a clipping region: a circle using a radius and a position.
+	CircleClip ClipShape = "circle"
+
+	// EllipseClip is the type of a clipping region: an ellipse using two radii and a position.
 	EllipseClip ClipShape = "ellipse"
+
+	// PolygonClip is the type of a clipping region: a polygon by providing one or more pairs of coordinates, each of which represents a vertex of the shape.
 	PolygonClip ClipShape = "polygon"
 )
 
@@ -46,26 +60,26 @@ type polygonClipData struct {
 //
 // The following properties can be used for shapes:
 //
-// InsetClip:
-//   - "top" (Top) - offset (SizeUnit) from the top border of a View;
-//   - "right" (Right) - offset (SizeUnit) from the right border of a View;
-//   - "bottom" (Bottom) - offset (SizeUnit) from the bottom border of a View;
-//   - "left" (Left) - offset (SizeUnit) from the left border of a View;
-//   - "radius" (Radius) - corner radius (RadiusProperty).
+// [InsetClip]:
+//   - "top" ([Top]) - offset (SizeUnit) from the top border of a View;
+//   - "right" ([Right]) - offset (SizeUnit) from the right border of a View;
+//   - "bottom" ([Bottom]) - offset (SizeUnit) from the bottom border of a View;
+//   - "left" ([Left]) - offset (SizeUnit) from the left border of a View;
+//   - "radius" ([Radius]) - corner radius (RadiusProperty).
 //
-// CircleClip:
-//   - "x" (X) - x-axis position (SizeUnit) of the circle clip center;
-//   - "y" (Y) - y-axis position (SizeUnit) of the circle clip center;
-//   - "radius" (Radius) - radius (SizeUnit) of the circle clip center.
+// [CircleClip]:
+//   - "x" ([X]) - x-axis position (SizeUnit) of the circle clip center;
+//   - "y" ([Y]) - y-axis position (SizeUnit) of the circle clip center;
+//   - "radius" ([Radius]) - radius (SizeUnit) of the circle clip center.
 //
-// EllipseClip:
-//   - "x" (X) - x-axis position (SizeUnit) of the ellipse clip center;
-//   - "y" (Y) - y-axis position (SizeUnit) of the ellipse clip center;
-//   - "radius-x" (RadiusX) - x-axis radius (SizeUnit) of the ellipse clip center;
-//   - "radius-y" (RadiusY) - y-axis radius (SizeUnit) of the ellipse clip center.
+// [EllipseClip]:
+//   - "x" ([X]) - x-axis position (SizeUnit) of the ellipse clip center;
+//   - "y" ([Y]) - y-axis position (SizeUnit) of the ellipse clip center;
+//   - "radius-x" ([RadiusX]) - x-axis radius (SizeUnit) of the ellipse clip center;
+//   - "radius-y" ([RadiusY]) - y-axis radius (SizeUnit) of the ellipse clip center.
 //
-// PolygonClip:
-//   - "points" (Points) - an array ([]SizeUnit) of corner points of the polygon in the following order: x1, y1, x2, y2, ….
+// [PolygonClip]:
+//   - "points" ([Points]) - an array ([]SizeUnit) of corner points of the polygon in the following order: x1, y1, x2, y2, ….
 //
 // The function will return nil if no properties are specified, unsupported properties are specified, or at least one property has an invalid value.
 func NewClipShapeProperty(shape ClipShape, params Params) ClipShapeProperty {

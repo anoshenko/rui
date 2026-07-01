@@ -144,16 +144,16 @@ type filterData struct {
 // NewFilterProperty creates the new FilterProperty
 //
 // The argument lists the effects to apply. The following effects are possible:
-//   - "blur" (Blur) - Gaussian blur in pixels (type: float64, value: 0…10000);
-//   - "brightness" (Brightness) - Brightness change in percents (type: float64, value: 0…10000);
-//   - "contrast" (Contrast) - Contrast change in percents (type: float64, value: 0…10000);
-//   - "drop-shadow" (DropShadow) - Adding shadow (type: []ShadowProperty);
-//   - "grayscale" (Grayscale) - Converting to grayscale in percents (type: float64, value: 0…100%);
-//   - "hue-rotate" (HueRotate) - Hue rotation (type: AngleUnit);
-//   - "invert" (Invert) - Invert colors in percents (type: float64, value: 0…100);
-//   - "opacity" (Opacity) - Changing transparency in percents (type: float64, value: 0…100);
-//   - "saturate" (Saturate) - Saturation change in percents (type: float64, value: 0…10000);
-//   - "sepia" (Sepia) - Conversion to sepia in percents (type: float64, value: 0…100).
+//   - "blur" ([Blur]) - Gaussian blur in pixels (type: float64, value: 0…10000);
+//   - "brightness" ([Brightness]) - Brightness change in percents (type: float64, value: 0…10000);
+//   - "contrast" ([Contrast]) - Contrast change in percents (type: float64, value: 0…10000);
+//   - "drop-shadow" ([DropShadow]) - Adding shadow (type: []ShadowProperty);
+//   - "grayscale" ([Grayscale]) - Converting to grayscale in percents (type: float64, value: 0…100);
+//   - "hue-rotate" ([HueRotate]) - Hue rotation (type: AngleUnit);
+//   - "invert" ([Invert]) - Invert colors in percents (type: float64, value: 0…100);
+//   - "opacity" ([Opacity]) - Changing transparency in percents (type: float64, value: 0…100);
+//   - "saturate" ([Saturate]) - Saturation change in percents (type: float64, value: 0…10000);
+//   - "sepia" ([Sepia]) - Conversion to sepia in percents (type: float64, value: 0…100).
 func NewFilterProperty(params Params) FilterProperty {
 	if len(params) > 0 {
 		filter := new(filterData)

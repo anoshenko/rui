@@ -261,13 +261,11 @@ func newBorderProperty(value any) BorderProperty {
 }
 
 // NewBorder creates the new BorderProperty.
+//
 // The following properties can be used:
-//
-// "style" (Style). Determines the line style (int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
-//
-// "color" (ColorTag). Determines the line color (Color);
-//
-// "width" (Width). Determines the line thickness (SizeUnit).
+//   - "style" ([Style]). Determines the line style (int). Valid values: 0 ([NoneLine]), 1 ([SolidLine]), 2 ([DashedLine]), 3 ([DottedLine]), or 4 ([DoubleLine]);
+//   - "color" ([ColorTag]). Determines the line color (Color);
+//   - "width" ([Width]). Determines the line thickness (SizeUnit).
 func NewBorder(params Params) BorderProperty {
 	border := new(borderProperty)
 	border.init()

@@ -171,12 +171,12 @@ func NewTextShadow[xOffsetType SizeUnit | int | float64, yOffsetType SizeUnit | 
 // NewShadowProperty create the new shadow property for a view.
 //
 // The following properties can be used:
-//   - "color" (ColorTag). Determines the color of the shadow (Color);
-//   - "x-offset" (XOffset). Determines the shadow horizontal offset (SizeUnit);
-//   - "y-offset" (YOffset). Determines the shadow vertical offset (SizeUnit);
-//   - "blur" (BlurRadius). Determines the radius of the blur effect (SizeUnit);
-//   - "spread-radius" (SpreadRadius). Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
-//   - "inset" (Inset). Controls (bool) whether to draw shadow inside the frame or outside.
+//   - "color" ([ColorTag]) - Determines the color of the shadow (Color);
+//   - "x-offset" ([XOffset]) - Determines the shadow horizontal offset (SizeUnit);
+//   - "y-offset" ([YOffset]) - Determines the shadow vertical offset (SizeUnit);
+//   - "blur" ([BlurRadius]) - Determines the radius of the blur effect (SizeUnit);
+//   - "spread-radius" ([SpreadRadius]) - Positive values (SizeUnit) will cause the shadow to expand and grow bigger, negative values will cause the shadow to shrink;
+//   - "inset" ([Inset]) - Controls (bool) whether to draw shadow inside the frame or outside.
 func NewShadowProperty(params Params) ShadowProperty {
 	shadow := new(shadowPropertyData)
 	shadow.init()

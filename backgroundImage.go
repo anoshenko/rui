@@ -74,14 +74,14 @@ type backgroundImage struct {
 // NewBackgroundImage creates the new background image
 //
 // The following properties can be used:
-//   - "src" [Source] - the name of the image in the "images" folder of the resources, or the URL of the image or inline-image.
-//   - "width" [Width] - the width of the image.
-//   - "height" [Height] - the height of the image.
-//   - "image-horizontal-align" [ImageHorizontalAlign] - the horizontal alignment of the image relative to view's bounds.
-//   - "image-vertical-align" [ImageVerticalAlign] - the vertical alignment of the image relative to view's  bounds.
-//   - "repeat" [Repeat] - the repetition of the image.
-//   - "fit" [Fit] - the image scaling parameters.
-//   - "attachment" [Attachment] - defines whether a background image's position is fixed within the viewport or scrolls with its containing block.
+//   - "src" ([Source]) - the name of the image in the "images" folder of the resources, or the URL of the image or inline-image.
+//   - "width" ([Width]) - the width of the image.
+//   - "height" ([Height]) - the height of the image.
+//   - "image-horizontal-align" ([ImageHorizontalAlign]) - the horizontal alignment of the image relative to view's bounds.
+//   - "image-vertical-align" ([ImageVerticalAlign]) - the vertical alignment of the image relative to view's  bounds.
+//   - "repeat" ([Repeat]) - the repetition of the image.
+//   - "fit" ([Fit]) - the image scaling parameters.
+//   - "attachment" ([Attachment]) - defines whether a background image's position is fixed within the viewport or scrolls with its containing block.
 func NewBackgroundImage(params Params) BackgroundElement {
 	result := new(backgroundImage)
 	result.init()

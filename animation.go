@@ -259,15 +259,15 @@ func parseAnimation(obj DataObject) AnimationProperty {
 // NewAnimationProperty creates a new animation object and return its interface
 //
 // The following properties can be used:
-//   - "id" (ID) - specifies the animation identifier. Used only for animation script.
-//   - "duration" (Duration) - specifies the length of time in seconds that an animation takes to complete one cycle;
-//   - "delay" (Delay) - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
+//   - "id" ([ID]) - specifies the animation identifier. Used only for animation script.
+//   - "duration" ([Duration]) - specifies the length of time in seconds that an animation takes to complete one cycle;
+//   - "delay" ([Delay]) - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
 //     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation;
-//   - "timing-function" (TimingFunction) - specifies how an animation progresses through the duration of each cycle;
-//   - "iteration-count" (IterationCount) - specifies the number of times an animation sequence should be played before stopping. Used only for animation script;
-//   - "animation-direction" (AnimationDirection) - specifies whether an animation should play forward, backward,
+//   - "timing-function" ([TimingFunction]) - specifies how an animation progresses through the duration of each cycle;
+//   - "iteration-count" ([IterationCount]) - specifies the number of times an animation sequence should be played before stopping. Used only for animation script;
+//   - "animation-direction" ([AnimationDirection]) - specifies whether an animation should play forward, backward,
 //     or alternate back and forth between playing the sequence forward and backward. Used only for animation script;
-//   - "property" (PropertyTag) - describes a scenario for changing a View's property. Used only for animation script.
+//   - "property" ([PropertyTag]) - describes a scenario for changing a View's property. Used only for animation script.
 func NewAnimationProperty(params Params) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
@@ -279,7 +279,7 @@ func NewAnimationProperty(params Params) AnimationProperty {
 }
 
 // NewTransitionAnimation creates animation data for the transition.
-//   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used;
+//   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used (see [TimingFunction]);
 //   - duration - specifies the length of time in seconds that an animation takes to complete one cycle. Must be > 0;
 //   - delay - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
 //     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation.
@@ -311,7 +311,7 @@ func NewTransitionAnimation(timingFunc string, duration float64, delay float64) 
 
 // NewTransitionAnimation creates the animation scenario.
 //   - id - specifies the animation identifier.
-//   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used;
+//   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used (see [TimingFunction]);
 //   - duration - specifies the length of time in seconds that an animation takes to complete one cycle. Must be > 0;
 //   - delay - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
 //     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation.

@@ -60,9 +60,9 @@ func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 // NewColumnSeparatorProperty creates the new ColumnSeparatorProperty.
 //
 // The following properties can be used:
-//   - "style" (Style) - Determines the line style (type is int). Valid values: 0 (NoneLine), 1 (SolidLine), 2 (DashedLine), 3 (DottedLine), or 4 (DoubleLine);
-//   - "color" (ColorTag) - Determines the line color (type is [Color]);
-//   - "width" (Width) - Determines the line thickness (type is [SizeUnit]).
+//   - "style" ([Style]) - Determines the line style (type is int). Valid values: 0 ([NoneLine]), 1 ([SolidLine]), 2 ([DashedLine]), 3 ([DottedLine]), or 4 ([DoubleLine]);
+//   - "color" ([ColorTag]) - Determines the line color (type is [Color]);
+//   - "width" ([Width]) - Determines the line thickness (type is [SizeUnit]).
 func NewColumnSeparatorProperty(params Params) ColumnSeparatorProperty {
 	separator := new(columnSeparatorProperty)
 	separator.init()
@@ -79,7 +79,7 @@ func NewColumnSeparatorProperty(params Params) ColumnSeparatorProperty {
 // NewColumnSeparator creates the new ColumnSeparatorProperty.
 //
 // Arguments:
-//   - style - determines the line style. Valid values: 0 [NoneLine], 1 [SolidLine], 2 [DashedLine], 3 [DottedLine], or 4 [DoubleLine];
+//   - style - determines the line style. Valid values: 0 ([NoneLine]), 1 ([SolidLine]), 2 ([DashedLine]), 3 ([DottedLine]), or 4 ([DoubleLine]);
 //   - color - determines the line color;
 //   - width - determines the line thickness.
 func NewColumnSeparator(style int, color Color, width SizeUnit) ColumnSeparatorProperty {

@@ -21,7 +21,7 @@ type boundsPropertyData struct {
 
 // NewBoundsProperty creates the new BoundsProperty object.
 //
-// The following SizeUnit properties can be used: "left" (Left), "right" (Right), "top" (Top), and "bottom" (Bottom).
+// The following SizeUnit properties can be used: "left" ([Left]), "right" ([Right]), "top" ([Top]), and "bottom" ([Bottom]).
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
 	bounds.init()
