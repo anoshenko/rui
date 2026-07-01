@@ -152,6 +152,17 @@ const (
 	// See SizeUnit description for more details.
 	ArrowWidth PropertyName = "arrow-width"
 
+	// ArrowOffset is the constant for "arrow-offset" property tag.
+	//
+	// Used by Popup.
+	// Set the offset of the popup arrow.
+	//
+	// Supported types: SizeUnit, SizeFunc, string, float, int.
+	//
+	// Internal type is SizeUnit, other types converted to it during assignment.
+	// See SizeUnit description for more details.
+	ArrowOffset PropertyName = "arrow-offset"
+
 	// ShowTransform is the constant for "show-transform" property tag.
 	//
 	// Used by Popup.
@@ -207,16 +218,27 @@ const (
 	// Internal type is float, other types converted to it during assignment.
 	ShowOpacity PropertyName = "show-opacity"
 
-	// ArrowOffset is the constant for "arrow-offset" property tag.
+	// OutsideColor is the constant for "outside-color" property tag.
 	//
 	// Used by Popup.
-	// Set the offset of the popup arrow.
+	// Specifies the color used to paint the space outside and below the Popup.
 	//
-	// Supported types: SizeUnit, SizeFunc, string, float, int.
+	// Supported types: Color, string.
 	//
-	// Internal type is SizeUnit, other types converted to it during assignment.
-	// See SizeUnit description for more details.
-	ArrowOffset PropertyName = "arrow-offset"
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
+	OutsideColor PropertyName = "outside-color"
+
+	// OutsideFilter is the constant for "outside-filter" property tag.
+	//
+	// Used by Popup.
+	// Applies graphical effects to the area outside and below a popup, such as blurring, color shifting, changing brightness/contrast,
+	// etc.
+	//
+	// Supported types: FilterProperty.
+	//
+	// See FilterProperty description for more details.
+	OutsideFilter PropertyName = "outside-filter"
 
 	// NoneArrow is value of the popup "arrow" property: no arrow
 	NoneArrow = 0
@@ -682,6 +704,24 @@ func (popup *popupData) Set(tag PropertyName, value any) bool {
 			popup.setRaw(ShowTiming, timing)
 			return true
 		}
+
+	case OutsideColor:
+		if len(setColorProperty(popup, OutsideColor, value)) > 0 {
+			popup.propertyChanged(OutsideColor)
+			return true
+		}
+		return false
+
+	case OutsideFilter:
+		if len(setFilterProperty(popup, OutsideFilter, value)) > 0 {
+			popup.propertyChanged(OutsideColor)
+			return true
+		}
+		return false
+
+		//if filter := GetBackdropFilter(popup.popupView); filter != nil {
+		//params[BackdropFilter] = filter
+
 	}
 
 	if popup.supported(tag) {
@@ -790,6 +830,12 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 		if transform != nil {
 			popup.layerView.SetTransition(Transform, popup.animationProperty())
 		}
+
+	case OutsideColor:
+		popup.layerView.Set(BackgroundColor, popup.Get(OutsideColor))
+
+	case OutsideFilter:
+		popup.layerView.Set(BackdropFilter, popup.Get(OutsideFilter))
 
 	default:
 		if popup.supported(tag) {
@@ -1313,6 +1359,8 @@ func (popup *popupData) createLayerView() GridLayout {
 		TitleStyle,
 		CloseButton,
 		OutsideClose,
+		OutsideColor,
+		OutsideFilter,
 		Buttons,
 		ButtonsAlign,
 		DismissEvent,
@@ -1377,6 +1425,16 @@ func (popup *popupData) createLayerView() GridLayout {
 
 	if outsideClose, _ := boolProperty(popup, OutsideClose, session); outsideClose {
 		layerParams[ClickEvent] = popup.cancel
+	}
+
+	if color, ok := colorProperty(popup, OutsideColor, session); ok {
+		layerParams[BackgroundColor] = color
+	}
+
+	if value := popup.getRaw(OutsideFilter); value != nil {
+		if filter, ok := value.(FilterProperty); ok {
+			layerParams[BackdropFilter] = filter
+		}
 	}
 
 	popup.layerView = NewGridLayout(session, layerParams)

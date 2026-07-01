@@ -163,7 +163,10 @@ func (popup *popupMenuData) IsListItemEnabled(index int) bool {
 // Supported types: `func(index int)`.
 const PopupMenuResult PropertyName = "popup-menu-result"
 
-// ShowMenu displays the menu. Menu items are set using the Items property.
+// ShowMenu displays the menu.
+//
+// Menu items are set using the Items property.
+//
 // The "popup-menu-result" property sets the function (format: func(int)) to be called when a menu item is selected.
 func ShowMenu(session Session, params Params) Popup {
 	value, ok := params[Items]
