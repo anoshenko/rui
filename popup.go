@@ -798,14 +798,34 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 	}
 }
 
-func (popup *popupData) animationProperty() AnimationProperty {
-	_, _, defaultDuration, defaultTiming := popup.session.PopupShowAnimation()
-
-	duration, _ := floatProperty(popup, ShowDuration, popup.session, defaultDuration)
-	timing, ok := stringProperty(popup, ShowTiming, popup.session)
-	if !ok {
-		timing = defaultTiming
+func (popup *popupData) defaultPopupFloat(tag PropertyName, defaultValue float64) float64 {
+	if value := popup.session.PopupDefault(tag); value != nil {
+		if f, ok := valueToFloat(value, popup.session, defaultValue); ok {
+			return f
+		} else {
+			DebugLogF(`"%v" is an invalid float64 value`, value)
+		}
 	}
+	return defaultValue
+}
+
+func (popup *popupData) animationProperty() AnimationProperty {
+	timing, ok := stringProperty(popup, ShowTiming, popup.session)
+	if ok && !isTimingFunctionValid(timing) {
+		DebugLog(`"` + timing + `" is an invalid timing function`)
+		ok = false
+	}
+
+	if !ok {
+		timing = EaseTiming
+		if value := popup.session.PopupDefault(ShowTiming); value != nil {
+			if text, ok := value.(string); ok && text != "" && isTimingFunctionValid(text) {
+				timing = text
+			}
+		}
+	}
+	duration, _ := floatProperty(popup, ShowDuration, popup.session, popup.defaultPopupFloat(ShowDuration, 1))
+
 	return NewAnimationProperty(Params{
 		Duration:       duration,
 		TimingFunction: timing,
@@ -967,12 +987,15 @@ func (popup *popupData) Show() {
 }
 
 func (popup *popupData) showTransformAndOpacity() (TransformProperty, float64) {
-	defaultTransform, defaultOpacity, _, _ := popup.session.PopupShowAnimation()
 
-	opacity, _ := floatProperty(popup, ShowOpacity, popup.session, defaultOpacity)
+	opacity, _ := floatProperty(popup, ShowOpacity, popup.session, popup.defaultPopupFloat(ShowOpacity, 1))
 	transform := getTransformProperty(popup, ShowTransform)
 	if transform == nil {
-		transform = defaultTransform
+		if value := popup.session.PopupDefault(ShowTransform); value != nil {
+			if t, ok := value.(TransformProperty); ok {
+				transform = t
+			}
+		}
 	}
 
 	return transform, opacity
@@ -1387,34 +1410,9 @@ func NewPopup(view View, param Params) Popup {
 	popup.properties = map[PropertyName]any{}
 	popup.hotkeys = map[string]func(Popup){}
 
-	defaultTransform, defaultOpacity, duration, timing := popup.session.PopupShowAnimation()
-
-	if value, ok := param[ShowTransform]; ok {
-		if transform := valueToTransformProperty(value); transform != nil {
-			defaultTransform = transform
-		} else {
-			param[ShowTransform] = defaultTransform
-		}
-	} else if defaultTransform != nil {
-		param[ShowTransform] = defaultTransform
-	}
-
-	if value, ok := param[ShowOpacity]; ok {
-		if opacity, _ := valueToFloat(value, popup.session, 1); opacity >= 0 && opacity < 1 {
-			defaultOpacity = opacity
-		} else {
-			param[ShowOpacity] = defaultOpacity
-		}
-	} else if defaultOpacity != 1 {
-		param[ShowOpacity] = defaultOpacity
-	}
-
-	if defaultTransform != nil || defaultOpacity != 1 {
-		if _, ok := param[ShowDuration]; !ok {
-			param[ShowDuration] = duration
-		}
-		if _, ok := param[ShowTiming]; !ok {
-			param[ShowTiming] = timing
+	for tag, value := range popup.session.PopupDefaultsSeq() {
+		if _, ok := param[tag]; !ok && value != nil {
+			param[tag] = value
 		}
 	}
 

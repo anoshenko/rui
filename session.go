@@ -2,6 +2,8 @@ package rui
 
 import (
 	"fmt"
+	"iter"
+	"maps"
 	"net/url"
 	"slices"
 	"strconv"
@@ -112,16 +114,17 @@ type Session interface {
 	// a description of the error is written to the log
 	Set(viewID string, tag PropertyName, value any) bool
 
-	// PopupShowAnimation returns default popup animation parameters.
-	// Returns the default value for the properties: "show-transform", "show-opacity", "show-duration" and "show-timing".
-	PopupShowAnimation() (transform TransformProperty, opacity, duration float64, timing string)
-
 	// PopupShowAnimation returns a list of displayed popups or nil if there are no displayed popups.
 	Popups() []Popup
 
-	// SetPopupShowAnimation sets default popup animation parameters.
-	// Sets the default value for the properties: "show-transform", "show-opacity", "show-duration" and "show-timing".
-	SetPopupShowAnimation(transform TransformProperty, opacity, duration float64, timing string)
+	// PopupDefault returns default values ​​for the Popup property
+	PopupDefault(tag PropertyName) any
+
+	// PopupDefaultsSeq returns an iterator over all default values ​​for Popup properties
+	PopupDefaultsSeq() iter.Seq2[PropertyName, any]
+
+	// SetPopupDefaults sets default values ​​for Popup properties
+	SetPopupDefaults(params Params)
 
 	// DownloadFile downloads (saves) on the client side the file located at the specified path on the server.
 	DownloadFile(path string)
@@ -250,10 +253,7 @@ type sessionData struct {
 	timers           map[int]func(Session)
 	nextTimerID      int
 	pauseTime        int64
-	popupTransform   TransformProperty
-	popupOpacity     float64
-	popupDuration    float64
-	popupTiming      string
+	popupDefaults    Params
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -274,9 +274,6 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.hotkeys = map[string]func(Session){}
 	session.timers = map[int]func(Session){}
 	session.nextTimerID = 1
-	session.popupOpacity = 1
-	session.popupDuration = 1
-	session.popupTiming = EaseTiming
 
 	if customTheme != "" {
 		if theme, ok := CreateThemeFromText(customTheme); ok {
@@ -977,19 +974,27 @@ func (session *sessionData) StopTimer(timerID int) {
 	}
 }
 
-func (session *sessionData) SetPopupShowAnimation(transform TransformProperty, opacity, duration float64, timing string) {
-	session.popupTransform = transform
-	if opacity >= 0 && opacity <= 1 {
-		session.popupOpacity = opacity
+func (session *sessionData) PopupDefault(tag PropertyName) any {
+	if value, ok := session.popupDefaults[tag]; ok {
+		return value
 	}
-	if duration > 0 {
-		session.popupDuration = duration
-	}
-	if isTimingFunctionValid(timing) {
-		session.popupTiming = timing
+	return nil
+}
+
+func (session *sessionData) PopupDefaultsSeq() iter.Seq2[PropertyName, any] {
+	return func(yield func(PropertyName, any) bool) {
+		for tag, value := range session.popupDefaults {
+			if !yield(tag, value) {
+				return
+			}
+		}
 	}
 }
 
-func (session *sessionData) PopupShowAnimation() (transform TransformProperty, opacity, duration float64, timing string) {
-	return session.popupTransform, session.popupOpacity, session.popupDuration, session.popupTiming
+func (session *sessionData) SetPopupDefaults(params Params) {
+	if len(params) > 0 {
+		session.popupDefaults = maps.Clone(params)
+	} else {
+		session.popupDefaults = nil
+	}
 }
