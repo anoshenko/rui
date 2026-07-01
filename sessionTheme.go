@@ -2,6 +2,7 @@ package rui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -44,11 +45,9 @@ func (session *sessionData) constant(tag string, prevTags []string) (string, boo
 		}
 
 		tag = result[1:]
-		for _, t := range tags {
-			if t == tag {
-				ErrorLogF(`"%v" constant is cyclic`, tag)
-				return "", false
-			}
+		if slices.Contains(tags, tag) {
+			ErrorLogF(`"%v" constant is cyclic`, tag)
+			return "", false
 		}
 		tags = append(tags, tag)
 	}
@@ -146,11 +145,9 @@ func (session *sessionData) Color(tag string) (Color, bool) {
 		}
 
 		tag = result[1:]
-		for _, t := range tags {
-			if t == tag {
-				ErrorLogF(`"%v" color is cyclic`, tag)
-				return 0, false
-			}
+		if slices.Contains(tags, tag) {
+			ErrorLogF(`"%v" color is cyclic`, tag)
+			return 0, false
 		}
 
 		tags = append(tags, tag)
@@ -172,11 +169,9 @@ func (session *sessionData) ImageConstant(tag string) (string, bool) {
 		}
 
 		tag = result[1:]
-		for _, t := range tags {
-			if t == tag {
-				ErrorLogF(`"%v" image is cyclic`, tag)
-				return "", false
-			}
+		if slices.Contains(tags, tag) {
+			ErrorLogF(`"%v" image is cyclic`, tag)
+			return "", false
 		}
 
 		tags = append(tags, tag)
