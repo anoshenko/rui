@@ -135,17 +135,8 @@ type Session interface {
 	// OpenURL opens the url in the new browser tab
 	OpenURL(url string)
 
-	// ClientItem reads value by key from the client-side storage
-	ClientItem(key string) (string, bool)
-
-	// SetClientItem stores a key-value pair in the client-side storage
-	SetClientItem(key, value string)
-
-	// RemoveClientItem removes a key-value pair in the client-side storage
-	RemoveClientItem(key string)
-
-	// RemoveAllClientItems removes all key-value pair from the client-side storage
-	RemoveAllClientItems()
+	// ClientStorage returns an interface for accessing client-side key-value storage.
+	ClientStorage() ClientStorage
 
 	// SetHotKey sets the function that will be called when the given hotkey is pressed.
 	// Invoke SetHotKey(..., ..., nil) for remove hotkey function.
@@ -248,12 +239,12 @@ type sessionData struct {
 	animationCounter int
 	animationCSS     string
 	updateScripts    map[string]*strings.Builder
-	clientStorage    map[string]string
 	hotkeys          map[string]func(Session)
 	timers           map[int]func(Session)
 	nextTimerID      int
 	pauseTime        int64
 	popupDefaults    Params
+	clientStorage    ClientStorage
 }
 
 func newSession(app Application, id int, customTheme string, params DataObject) Session {
@@ -270,7 +261,6 @@ func newSession(app Application, id int, customTheme string, params DataObject) 
 	session.animationCounter = 0
 	session.animationCSS = ""
 	session.updateScripts = map[string]*strings.Builder{}
-	session.clientStorage = map[string]string{}
 	session.hotkeys = map[string]func(Session){}
 	session.timers = map[int]func(Session){}
 	session.nextTimerID = 1
@@ -781,16 +771,6 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 			session.pixelRatio = f
 		}
 	}
-
-	if node := params.PropertyByTag("storage"); node != nil && node.Type() == ObjectNode {
-		if obj := node.Object(); obj != nil {
-			for element := range obj.Properties() {
-				if element.Type() == TextNode {
-					session.clientStorage[element.Tag()] = element.Text()
-				}
-			}
-		}
-	}
 }
 
 func (session *sessionData) handleEvent(command string, data DataObject) {
@@ -826,9 +806,9 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 	case "sessionInfo":
 		session.handleSessionInfo(data)
 
-	case "storageError":
-		if text, ok := data.PropertyValue("error"); ok {
-			ErrorLog(text)
+	case "storageError", "storageSuccess", "storageValues":
+		if session.clientStorage != nil {
+			session.clientStorage.handleEvent(command, data)
 		}
 
 	default:
@@ -930,26 +910,6 @@ func (session *sessionData) OpenURL(urlStr string) {
 		return
 	}
 	session.callFunc("openURL", urlStr)
-}
-
-func (session *sessionData) ClientItem(key string) (string, bool) {
-	value, ok := session.clientStorage[key]
-	return value, ok
-}
-
-func (session *sessionData) SetClientItem(key, value string) {
-	session.clientStorage[key] = value
-	session.bridge.callFunc("localStorageSet", key, value)
-}
-
-func (session *sessionData) RemoveClientItem(key string) {
-	delete(session.clientStorage, key)
-	session.bridge.callFunc("localStorageRemove", key)
-}
-
-func (session *sessionData) RemoveAllClientItems() {
-	session.clientStorage = map[string]string{}
-	session.bridge.callFunc("localStorageClear")
 }
 
 func (session *sessionData) addToEventsQueue(data DataObject) {

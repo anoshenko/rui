@@ -56,6 +56,7 @@ function sessionInfo() {
 		message += ",pixel-ratio=" + pixelRatio;
 	}
 
+	/*
 	if (localStorage.length > 0) {
 		message += ",storage="
 		lead = "_{"
@@ -73,7 +74,8 @@ function sessionInfo() {
 		}
 		message += "}"
 	}
-
+	*/
+	
 	return message + "}";
 }
 
@@ -1982,6 +1984,38 @@ function getCanvasContext(elementId) {
 		}
 	}
 	return null;
+}
+
+function localStorageGet(request, keys) {
+	const key_set = keys.split(",");
+	var result = "";
+	for (const key of key_set) {
+		result += key;
+		result += ":";
+		try {
+			let value = localStorage.getItem(key);
+			if (value) {
+				result += value;
+			}
+		} catch (err) {}
+		result += ";";
+	}
+	sendMessage("storageValues{session=" + sessionID + ", request=" + request + ", values=`" + result + "`}")
+}
+
+function localStorageGetAll(request) {
+	var result = "";
+	for (let i = 0; i < localStorage.length; i++) {
+		let key = localStorage.key(i);
+		let value = localStorage.getItem(key);
+		if (value) {
+			result += key;
+			result += ":";
+			result += value;
+			result += ";";
+		}
+	}
+	sendMessage("storageValues{session=" + sessionID + ", request=" + request + ", values=`" + result + "`}")
 }
 
 function localStorageSet(key, value) {
