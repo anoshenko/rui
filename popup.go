@@ -223,7 +223,7 @@ const (
 	// Used by Popup.
 	// Specifies the color used to paint the space outside and below the Popup.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See [Color] description for more details.

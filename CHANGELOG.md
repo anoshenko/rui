@@ -10,6 +10,7 @@
 * Added "outside-color" add "outside-filter" properties to Popup interface
 * Added ViewSeq add ViewCount methods to ParentView interface
 * Added ToBoundsProperty method to Bounds struct
+* Added ColorPair type
 
 # v0.20.0
 

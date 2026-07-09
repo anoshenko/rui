@@ -163,15 +163,20 @@ func (point *BackgroundGradientPoint) setValue(text string) bool {
 		pointText = strings.Trim(text[index+1:], " ")
 	}
 
-	if colorText == "" {
-		return false
+	if colorText != "" {
+		if ok, _ := isConstantName(colorText); ok {
+			point.Color = colorText
+		} else if color, err := stringToColor(colorText); err == nil {
+			point.Color = color
+		} else if obj, err := ParseDataText(colorText); err == nil {
+			if colorPair, ok := parseColorPair(obj); ok {
+				point.Color = colorPair
+			}
+		}
 	}
 
-	if ok, _ := isConstantName(colorText); ok {
-		point.Color = colorText
-	} else if color, ok := StringToColor(colorText); ok {
-		point.Color = color
-	} else {
+	if point.Color == nil {
+		ErrorLogF(`Invalid color value: "%s"`, colorText)
 		return false
 	}
 
@@ -200,6 +205,12 @@ func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
 		case Color:
 			return color, true
 
+		case ColorPair:
+			if session.DarkTheme() {
+				return color.Dark, true
+			}
+			return color.Light, true
+
 		default:
 			if n, ok := isInt(point.Color); ok {
 				return Color(n), true
@@ -218,6 +229,9 @@ func (point *BackgroundGradientPoint) String() string {
 			result = color
 
 		case Color:
+			result = color.String()
+
+		case ColorPair:
 			result = color.String()
 		}
 	}

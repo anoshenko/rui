@@ -83,7 +83,7 @@ const (
 	// Used by ColumnLayout.
 	// Set the color of the line drawn between columns in a multi-column layout.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.

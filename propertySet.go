@@ -23,16 +23,6 @@ var colorProperties = []PropertyName{
 	AccentColor,
 }
 
-/*
-	func isPropertyInList(tag PropertyName, list []PropertyName) bool {
-		for _, prop := range list {
-			if prop == tag {
-				return true
-			}
-		}
-		return false
-	}
-*/
 var angleProperties = []PropertyName{
 	From,
 }
@@ -720,11 +710,27 @@ func setColorProperty(properties Properties, tag PropertyName, value any) []Prop
 	case string:
 		var err error
 		if result, err = stringToColor(value); err != nil {
+			if obj, err := ParseDataText(value); err == nil {
+				if colorPair, ok := parseColorPair(obj); ok {
+					return setPropertyValue(properties, tag, colorPair)
+				}
+			}
 			invalidPropertyValue(tag, value)
 			return nil
 		}
+
 	case Color:
 		result = value
+
+	case ColorPair:
+		return setPropertyValue(properties, tag, value)
+
+	case DataObject:
+		if colorPair, ok := parseColorPair(value); ok {
+			return setPropertyValue(properties, tag, colorPair)
+		}
+		invalidPropertyValue(tag, value)
+		return nil
 
 	default:
 		if color, ok := isInt(value); ok {

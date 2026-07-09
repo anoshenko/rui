@@ -134,7 +134,7 @@ const (
 	// Used by BorderProperty.
 	// Left border line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See [Color] description for more details.
@@ -145,7 +145,7 @@ const (
 	// Used by BorderProperty.
 	// Right border line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See [Color] description for more details.
@@ -156,7 +156,7 @@ const (
 	// Used by BorderProperty.
 	// Top border line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See [Color] description for more details.
@@ -167,7 +167,7 @@ const (
 	// Used by BorderProperty.
 	// Bottom border line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See [Color] description for more details.

@@ -15,7 +15,7 @@ const (
 	//
 	// Line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -24,7 +24,7 @@ const (
 	//
 	// Border line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -33,7 +33,7 @@ const (
 	//
 	// Outline line color.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -42,7 +42,7 @@ const (
 	//
 	// Color property of the shadow.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.

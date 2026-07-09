@@ -45,6 +45,9 @@ func (point *BackgroundGradientAngle) String() string {
 
 		case Color:
 			result = color.String()
+
+		case ColorPair:
+			result = color.String()
 		}
 	}
 
@@ -65,16 +68,21 @@ func (point *BackgroundGradientAngle) color(session Session) (Color, bool) {
 	if point.Color != nil {
 		switch color := point.Color.(type) {
 		case string:
-			if ok, constName := isConstantName(color); ok {
-				if clr, ok := session.Color(constName); ok {
-					return clr, true
+			if lightColor, darkColor, ok := valueToColor(color, session); ok {
+				if session.DarkTheme() {
+					return darkColor, true
 				}
-			} else if clr, ok := StringToColor(color); ok {
-				return clr, true
+				return lightColor, true
 			}
 
 		case Color:
 			return color, true
+
+		case ColorPair:
+			if session.DarkTheme() {
+				return color.Dark, true
+			}
+			return color.Light, true
 
 		default:
 			if n, ok := isInt(color); ok {
@@ -198,7 +206,7 @@ func backgroundConicGradientSet(properties Properties, tag PropertyName, value a
 }
 
 func (gradient *backgroundConicGradient) stringToGradientPoint(text string) (BackgroundGradientAngle, bool) {
-	var result BackgroundGradientAngle
+	result := BackgroundGradientAngle{Color: nil}
 	colorText := ""
 	pointText := ""
 
@@ -209,15 +217,20 @@ func (gradient *backgroundConicGradient) stringToGradientPoint(text string) (Bac
 		colorText = text
 	}
 
-	if colorText == "" {
-		return result, false
+	if colorText != "" {
+		if ok, _ := isConstantName(colorText); ok {
+			result.Color = colorText
+		} else if color, err := stringToColor(colorText); err == nil {
+			result.Color = color
+		} else if obj, err := ParseDataText(colorText); err == nil {
+			if colorPair, ok := parseColorPair(obj); ok {
+				result.Color = colorPair
+			}
+		}
 	}
 
-	if ok, _ := isConstantName(colorText); ok {
-		result.Color = colorText
-	} else if color, ok := StringToColor(colorText); ok {
-		result.Color = color
-	} else {
+	if result.Color == nil {
+		ErrorLogF(`Invalid color value: "%s"`, colorText)
 		return result, false
 	}
 

@@ -386,7 +386,7 @@ const (
 	// Used by TableView.
 	// Set the line color for all four sides of a table cell's border.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -397,7 +397,7 @@ const (
 	// Used by TableView.
 	// Set the line color of a table cell's left border.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -408,7 +408,7 @@ const (
 	// Used by TableView.
 	// Set the line color of a table cell's right border.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -419,7 +419,7 @@ const (
 	// Used by TableView.
 	// Set the line color of a table cell's top border.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.
@@ -430,7 +430,7 @@ const (
 	// Used by TableView.
 	// Set the line color of a table cell's bottom border.
 	//
-	// Supported types: Color, string.
+	// Supported types: Color, ColorPair, string.
 	//
 	// Internal type is Color, other types converted to it during assignment.
 	// See Color description for more details.

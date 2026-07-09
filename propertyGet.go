@@ -87,18 +87,29 @@ func valueToColor(value any, session Session) (Color, Color, bool) {
 		case Color:
 			return value, value, true
 
+		case ColorPair:
+			return value.Light, value.Dark, true
+
 		case string:
 			if ok, constName := isConstantName(value); ok {
 				lightColor, ok1 := session.getColor(constName, false)
 				darkColor, ok2 := session.getColor(constName, true)
 				return lightColor, darkColor, ok1 && ok2
 			}
-			if color, ok := StringToColor(value); ok {
+
+			if color, err := stringToColor(value); err == nil {
 				return color, color, true
+			}
+
+			if obj, err := ParseDataText(value); err == nil {
+				if colorPair, ok := parseColorPair(obj); ok {
+					return colorPair.Light, colorPair.Dark, true
+				}
 			}
 		}
 	}
 
+	ErrorLogF(`Invalid color value: "%v"`, value)
 	return Color(0), Color(0), false
 }
 

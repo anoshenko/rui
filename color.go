@@ -8,8 +8,17 @@ import (
 	"strings"
 )
 
-// Color - represent color in argb format
+// Color represents the color in argb format
 type Color uint32
+
+// ColorPair represents the color pair in argb format
+type ColorPair struct {
+	// Light is the color used in the light theme
+	Light Color
+
+	// Dark is the color used in the light theme
+	Dark Color
+}
 
 // ARGB creates Color using alpha, red, green and blue components
 func ARGB[T int | uint | int8 | uint8](alpha, red, green, blue T) Color {
@@ -210,4 +219,39 @@ func writeColorCSS(buffer *strings.Builder, lightColor, darkColor Color, session
 	} else {
 		buffer.WriteString(lightColor.cssString())
 	}
+}
+
+func parseColorPair(obj DataObject) (ColorPair, bool) {
+
+	var err error
+	result := ColorPair{}
+
+	for property := range obj.Properties() {
+		if property.Type() != TextNode {
+			return ColorPair{}, false
+		}
+
+		switch property.Tag() {
+		case "light":
+			result.Light, err = stringToColor(property.Text())
+			if err != nil {
+				return ColorPair{}, false
+			}
+
+		case "dark":
+			result.Dark, err = stringToColor(property.Text())
+			if err != nil {
+				return ColorPair{}, false
+			}
+
+		default:
+			return ColorPair{}, false
+		}
+	}
+
+	return result, true
+}
+
+func (pair ColorPair) String() string {
+	return fmt.Sprintf("_{ light = %s, dark = %s }", pair.Light.String(), pair.Dark.String())
 }
