@@ -1427,8 +1427,8 @@ func (popup *popupData) createLayerView() GridLayout {
 		layerParams[ClickEvent] = popup.cancel
 	}
 
-	if color, ok := colorProperty(popup, OutsideColor, session); ok {
-		layerParams[BackgroundColor] = color
+	if value := popup.getRaw(OutsideColor); value != nil {
+		layerParams[BackgroundColor] = value
 	}
 
 	if value := popup.getRaw(OutsideFilter); value != nil {

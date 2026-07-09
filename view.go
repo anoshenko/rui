@@ -1019,8 +1019,12 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 			AccentColor:     string(AccentColor),
 		}
 		if cssTag, ok := colorTags[tag]; ok {
-			if color, ok := colorProperty(view, tag, session); ok {
-				session.updateCSSProperty(htmlID, cssTag, color.cssString())
+			if lightColor, darkColor, ok := colorProperty(view, tag, session); ok {
+				buffer := allocStringBuilder()
+				defer freeStringBuilder(buffer)
+
+				writeColorCSS(buffer, lightColor, darkColor, session)
+				session.updateCSSProperty(htmlID, cssTag, buffer.String())
 			} else {
 				session.updateCSSProperty(htmlID, cssTag, "")
 			}

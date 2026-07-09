@@ -9,6 +9,7 @@
 }
 
 :root {
+  color-scheme: light dark;
   --tooltip-arrow-size: 6px;
   --tooltip-background: white;
   --tooltip-text-color: black;

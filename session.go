@@ -154,6 +154,8 @@ type Session interface {
 	getCurrentTheme() Theme
 	registerAnimation(props []AnimatedProperty) string
 
+	getColor(tag string, darkMode bool) (Color, bool)
+	lightDarkSupport() bool
 	resolveConstants(value string) (string, bool)
 	checkboxOffImage(accentColor Color) string
 	checkboxOnImage(accentColor Color) string
@@ -215,6 +217,7 @@ type sessionData struct {
 	currentTheme     Theme
 	darkTheme        bool
 	touchScreen      bool
+	lightDark        bool
 	screenWidth      int
 	screenHeight     int
 	textDirection    int
@@ -770,6 +773,10 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 		} else {
 			session.pixelRatio = f
 		}
+	}
+
+	if value, ok := params.PropertyValue("light-dark"); ok {
+		session.lightDark = (value == "1" || value == "true")
 	}
 }
 

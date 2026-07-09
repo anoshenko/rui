@@ -76,8 +76,11 @@ func outlineSet(properties Properties, tag PropertyName, value any) []PropertyNa
 func (outline *outlinePropertyData) ViewOutline(session Session) ViewOutline {
 	style, _ := valueToEnum(outline.getRaw(Style), BorderStyle, session, NoneLine)
 	width, _ := sizeProperty(outline, Width, session)
-	color, _ := colorProperty(outline, ColorTag, session)
-	return ViewOutline{Style: style, Width: width, Color: color}
+	lightColor, darkColor, _ := colorProperty(outline, ColorTag, session)
+	if session.DarkTheme() {
+		return ViewOutline{Style: style, Width: width, Color: darkColor}
+	}
+	return ViewOutline{Style: style, Width: width, Color: lightColor}
 }
 
 // ViewOutline describes parameters of a view border

@@ -256,6 +256,7 @@ func writeViewStyleCSS(style Properties, builder cssBuilder, session Session, ig
 		property PropertyName
 		cssTag   string
 	}
+
 	colorProperties := []propertyCss{
 		//{BackgroundColor, string(BackgroundColor)},
 		{TextColor, "color"},
@@ -263,9 +264,13 @@ func writeViewStyleCSS(style Properties, builder cssBuilder, session Session, ig
 		{CaretColor, string(CaretColor)},
 		{AccentColor, string(AccentColor)},
 	}
+
 	for _, p := range colorProperties {
-		if color, ok := colorProperty(style, p.property, session); ok && color != 0 {
-			builder.add(p.cssTag, color.cssString())
+		lightColor, darkColor, ok := colorProperty(style, p.property, session)
+		if ok && (lightColor != 0 || darkColor != 0) {
+			builder.addWriter(p.cssTag, func(buffer *strings.Builder) {
+				writeColorCSS(buffer, lightColor, darkColor, session)
+			})
 		}
 	}
 
@@ -280,9 +285,11 @@ func writeViewStyleCSS(style Properties, builder cssBuilder, session Session, ig
 	if background := backgroundCSS(style, session); background != "" {
 		builder.add("background", background)
 	} else {
-		backgroundColor, _ := colorProperty(style, BackgroundColor, session)
-		if backgroundColor != 0 {
-			builder.add("background-color", backgroundColor.cssString())
+		lightColor, darkColor, ok := colorProperty(style, BackgroundColor, session)
+		if ok && (lightColor != 0 || darkColor != 0) {
+			builder.addWriter("background-color", func(buffer *strings.Builder) {
+				writeColorCSS(buffer, lightColor, darkColor, session)
+			})
 		}
 	}
 

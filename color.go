@@ -197,3 +197,17 @@ func stringToColor(text string) (Color, error) {
 
 	return 0, errors.New(`Invalid color format: "` + text + `"`)
 }
+
+func writeColorCSS(buffer *strings.Builder, lightColor, darkColor Color, session Session) {
+	if session.lightDarkSupport() {
+		buffer.WriteString("light-dark(")
+		buffer.WriteString(lightColor.cssString())
+		buffer.WriteRune(',')
+		buffer.WriteString(darkColor.cssString())
+		buffer.WriteRune(')')
+	} else if session.DarkTheme() {
+		buffer.WriteString(darkColor.cssString())
+	} else {
+		buffer.WriteString(lightColor.cssString())
+	}
+}

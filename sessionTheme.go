@@ -124,12 +124,15 @@ func (session *sessionData) getCurrentTheme() Theme {
 	return defaultTheme
 }
 
-// Color return the color with "tag" name or 0 if it is not exists
-func (session *sessionData) Color(tag string) (Color, bool) {
+func (session *sessionData) lightDarkSupport() bool {
+	return session.lightDark
+}
+
+func (session *sessionData) getColor(tag string, darkMode bool) (Color, bool) {
 	tags := []string{tag}
 	theme := session.getCurrentTheme()
 	for {
-		result := theme.color(tag, session.darkTheme)
+		result := theme.color(tag, darkMode)
 		if result == "" {
 			ErrorLogF(`"%v" color not found`, tag)
 			return 0, false
@@ -152,6 +155,11 @@ func (session *sessionData) Color(tag string) (Color, bool) {
 
 		tags = append(tags, tag)
 	}
+}
+
+// Color return the color with "tag" name or 0 if it is not exists
+func (session *sessionData) Color(tag string) (Color, bool) {
+	return session.getColor(tag, session.darkTheme)
 }
 
 func (session *sessionData) ImageConstant(tag string) (string, bool) {

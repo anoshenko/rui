@@ -129,7 +129,10 @@ func getColumnSeparatorProperty(properties Properties) ColumnSeparatorProperty {
 func (separator *columnSeparatorProperty) ViewBorder(session Session) ViewBorder {
 	style, _ := valueToEnum(separator.getRaw(Style), BorderStyle, session, NoneLine)
 	width, _ := sizeProperty(separator, Width, session)
-	color, _ := colorProperty(separator, ColorTag, session)
+	color, darkColor, _ := colorProperty(separator, ColorTag, session)
+	if session.DarkTheme() {
+		color = darkColor
+	}
 
 	return ViewBorder{
 		Style: style,
@@ -139,28 +142,29 @@ func (separator *columnSeparatorProperty) ViewBorder(session Session) ViewBorder
 }
 
 func (separator *columnSeparatorProperty) cssValue(session Session) string {
-	value := separator.ViewBorder(session)
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	if value.Width.Type != Auto && value.Width.Type != SizeInFraction &&
-		(value.Width.Value > 0 || value.Width.Type == SizeFunction) {
-		buffer.WriteString(value.Width.cssString("", session))
+	width, ok := sizeProperty(separator, Width, session)
+	if ok && width.Type != Auto && width.Type != SizeInFraction && (width.Value > 0 || width.Type == SizeFunction) {
+		buffer.WriteString(width.cssString("", session))
 	}
 
 	styles := enumProperties[BorderStyle].cssValues
-	if value.Style > 0 && value.Style < len(styles) {
+	style, _ := valueToEnum(separator.getRaw(Style), BorderStyle, session, NoneLine)
+	if style > 0 && style < len(styles) {
 		if buffer.Len() > 0 {
 			buffer.WriteRune(' ')
 		}
-		buffer.WriteString(styles[value.Style])
+		buffer.WriteString(styles[style])
 	}
 
-	if value.Color != 0 {
+	lightColor, darkColor, ok := colorProperty(separator, ColorTag, session)
+	if ok && (lightColor != 0 || darkColor != 0) {
 		if buffer.Len() > 0 {
 			buffer.WriteRune(' ')
 		}
-		buffer.WriteString(value.Color.cssString())
+		writeColorCSS(buffer, lightColor, darkColor, session)
 	}
 
 	return buffer.String()

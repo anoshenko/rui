@@ -56,25 +56,11 @@ function sessionInfo() {
 		message += ",pixel-ratio=" + pixelRatio;
 	}
 
-	/*
-	if (localStorage.length > 0) {
-		message += ",storage="
-		lead = "_{"
-		for (let i = 0; i < localStorage.length; i++) {
-			let key = localStorage.key(i)
-			let value = localStorage.getItem(key)
-			key = key.replaceAll(/\\/g, "\\\\")
-			key = key.replaceAll(/\"/g, "\\\"")
-			key = key.replaceAll(/\'/g, "\\\'")
-			value = value.replaceAll(/\\/g, "\\\\")
-			value = value.replaceAll(/\"/g, "\\\"")
-			value = value.replaceAll(/\'/g, "\\\'")
-			message += lead + "\"" + key + "\"=\"" + value + "\""
-			lead = ","
-		}
-		message += "}"
+	if (CSS.supports('color', 'light-dark(red, blue)')) {
+		message += ",light-dark=1";
+	} else {
+		message += ",light-dark=0";
 	}
-	*/
 	
 	return message + "}";
 }

@@ -765,22 +765,32 @@ func (border *borderProperty) deleteTag(tag PropertyName) bool {
 
 func (border *borderProperty) ViewBorders(session Session) ViewBorders {
 
-	defStyle, _ := valueToEnum(border.getRaw(Style), BorderStyle, session, NoneLine)
-	defWidth, _ := sizeProperty(border, Width, session)
-	defColor, _ := colorProperty(border, ColorTag, session)
+	defaultStyle, _ := valueToEnum(border.getRaw(Style), BorderStyle, session, NoneLine)
+	defaultWidth, _ := sizeProperty(border, Width, session)
+	defaultLightColor, defaultDarkColor, _ := colorProperty(border, ColorTag, session)
 
 	getBorder := func(prefix PropertyName) ViewBorder {
 		var result ViewBorder
 		var ok bool
 		if result.Style, ok = valueToEnum(border.getRaw(prefix+Style), BorderStyle, session, NoneLine); !ok {
-			result.Style = defStyle
+			result.Style = defaultStyle
 		}
 		if result.Width, ok = sizeProperty(border, prefix+Width, session); !ok {
-			result.Width = defWidth
+			result.Width = defaultWidth
 		}
-		if result.Color, ok = colorProperty(border, prefix+ColorTag, session); !ok {
-			result.Color = defColor
+
+		lightColor, darkColor, ok := colorProperty(border, prefix+ColorTag, session)
+		if !ok {
+			lightColor = defaultLightColor
+			darkColor = defaultDarkColor
 		}
+
+		if session.DarkTheme() {
+			result.Color = darkColor
+		} else {
+			result.Color = lightColor
+		}
+
 		return result
 	}
 
@@ -850,7 +860,7 @@ func (border *borderProperty) cssWidthValue(session Session) string {
 
 func (border *borderProperty) cssColorValue(session Session) string {
 	var builder cssValueBuilder
-	border.cssColor(&builder, session)
+	border.cssColor(&builder, session) // TODO !!!
 	return builder.finish()
 }
 

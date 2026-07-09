@@ -52,6 +52,7 @@ var disabledStyles = []string{
 
 type cssBuilder interface {
 	add(key, value string)
+	addWriter(key string, writer func(buffer *strings.Builder))
 	addValues(key, separator string, values ...string)
 }
 
@@ -94,6 +95,19 @@ func (builder *viewCSSBuilder) add(key, value string) {
 	}
 }
 
+func (builder *viewCSSBuilder) addWriter(key string, writer func(buffer *strings.Builder)) {
+	if builder.buffer == nil {
+		builder.buffer = allocStringBuilder()
+	} else if builder.buffer.Len() > 0 {
+		builder.buffer.WriteRune(' ')
+	}
+
+	builder.buffer.WriteString(key)
+	builder.buffer.WriteString(": ")
+	writer(builder.buffer)
+	builder.buffer.WriteRune(';')
+}
+
 func (builder *viewCSSBuilder) addValues(key, separator string, values ...string) {
 	if len(values) == 0 {
 		return
@@ -134,6 +148,13 @@ func (builder *cssValueBuilder) add(key, value string) {
 		}
 		builder.buffer.WriteString(value)
 	}
+}
+
+func (builder *cssValueBuilder) addWriter(key string, writer func(buffer *strings.Builder)) {
+	if builder.buffer == nil {
+		builder.buffer = allocStringBuilder()
+	}
+	writer(builder.buffer)
 }
 
 func (builder *cssValueBuilder) addValues(key, separator string, values ...string) {
@@ -270,6 +291,20 @@ func (builder *cssStyleBuilder) add(key, value string) {
 		builder.buffer.WriteString(value)
 		builder.buffer.WriteString(`;\n`)
 	}
+}
+
+func (builder *cssStyleBuilder) addWriter(key string, writer func(buffer *strings.Builder)) {
+	if builder.buffer == nil {
+		builder.init(0)
+	}
+	if builder.media {
+		builder.buffer.WriteString(`\t`)
+	}
+	builder.buffer.WriteString(`\t`)
+	builder.buffer.WriteString(key)
+	builder.buffer.WriteString(": ")
+	writer(builder.buffer)
+	builder.buffer.WriteString(`;\n`)
 }
 
 func (builder *cssStyleBuilder) addValues(key, separator string, values ...string) {

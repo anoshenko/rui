@@ -186,13 +186,19 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 // If it is not specified then a value from the first argument (view) is returned.
 func GetColorPickerValue(view View, subviewID ...string) Color {
 	if view = getSubview(view, subviewID); view != nil {
-		if value, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
-			return value
+		if lightColor, darkColor, ok := colorProperty(view, ColorPickerValue, view.Session()); ok {
+			if view.Session().DarkTheme() {
+				return darkColor
+			}
+			return lightColor
 		}
 		for _, tag := range []PropertyName{ColorPickerValue, Value, ColorTag} {
 			if value := valueFromStyle(view, tag); value != nil {
-				if result, ok := valueToColor(value, view.Session()); ok {
-					return result
+				if lightColor, darkColor, ok := valueToColor(value, view.Session()); ok {
+					if view.Session().DarkTheme() {
+						return darkColor
+					}
+					return lightColor
 				}
 			}
 		}

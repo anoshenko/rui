@@ -748,12 +748,18 @@ func floatStyledProperty(view View, subviewID []string, tag PropertyName, defaul
 
 func colorStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) Color {
 	if view = getSubview(view, subviewID); view != nil {
-		if value, ok := colorProperty(view, tag, view.Session()); ok {
-			return value
+		if lightColor, darkColor, ok := colorProperty(view, tag, view.Session()); ok {
+			if view.Session().DarkTheme() {
+				return darkColor
+			}
+			return lightColor
 		}
 		if value := valueFromStyle(view, tag); value != nil {
-			if color, ok := valueToColor(value, view.Session()); ok {
-				return color
+			if lightColor, darkColor, ok := valueToColor(value, view.Session()); ok {
+				if view.Session().DarkTheme() {
+					return darkColor
+				}
+				return lightColor
 			}
 		}
 		if inherit {

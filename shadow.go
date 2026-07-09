@@ -205,13 +205,13 @@ func (shadow *shadowPropertyData) init() {
 }
 
 func (shadow *shadowPropertyData) cssStyle(buffer *strings.Builder, session Session, lead string) bool {
-	color, _ := colorProperty(shadow, ColorTag, session)
+	lightColor, darkColor, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
 	blurRadius, _ := sizeProperty(shadow, BlurRadius, session)
 	spreadRadius, _ := sizeProperty(shadow, SpreadRadius, session)
 
-	if color.Alpha() == 0 ||
+	if (lightColor.Alpha() == 0 && darkColor.Alpha() == 0) ||
 		((offsetX.Type == Auto || offsetX.Value == 0) &&
 			(offsetY.Type == Auto || offsetY.Value == 0) &&
 			(blurRadius.Type == Auto || blurRadius.Value == 0) &&
@@ -232,17 +232,17 @@ func (shadow *shadowPropertyData) cssStyle(buffer *strings.Builder, session Sess
 	buffer.WriteByte(' ')
 	buffer.WriteString(spreadRadius.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(color.cssString())
+	writeColorCSS(buffer, lightColor, darkColor, session)
 	return true
 }
 
 func (shadow *shadowPropertyData) cssTextStyle(buffer *strings.Builder, session Session, lead string) bool {
-	color, _ := colorProperty(shadow, ColorTag, session)
+	lightColor, darkColor, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
 	blurRadius, _ := sizeProperty(shadow, BlurRadius, session)
 
-	if color.Alpha() == 0 ||
+	if (lightColor.Alpha() == 0 && darkColor.Alpha() == 0) ||
 		((offsetX.Type == Auto || offsetX.Value == 0) &&
 			(offsetY.Type == Auto || offsetY.Value == 0) &&
 			(blurRadius.Type == Auto || blurRadius.Value == 0)) {
@@ -256,18 +256,18 @@ func (shadow *shadowPropertyData) cssTextStyle(buffer *strings.Builder, session 
 	buffer.WriteByte(' ')
 	buffer.WriteString(blurRadius.cssString("0", session))
 	buffer.WriteByte(' ')
-	buffer.WriteString(color.cssString())
+	writeColorCSS(buffer, lightColor, darkColor, session)
 	return true
 }
 
 func (shadow *shadowPropertyData) visible(session Session) bool {
-	color, _ := colorProperty(shadow, ColorTag, session)
+	lightColor, darkColor, _ := colorProperty(shadow, ColorTag, session)
 	offsetX, _ := sizeProperty(shadow, XOffset, session)
 	offsetY, _ := sizeProperty(shadow, YOffset, session)
 	blurRadius, _ := sizeProperty(shadow, BlurRadius, session)
 	spreadRadius, _ := sizeProperty(shadow, SpreadRadius, session)
 
-	if color.Alpha() == 0 ||
+	if (lightColor.Alpha() == 0 && darkColor.Alpha() == 0) ||
 		((offsetX.Type == Auto || offsetX.Value == 0) &&
 			(offsetY.Type == Auto || offsetY.Value == 0) &&
 			(blurRadius.Type == Auto || blurRadius.Value == 0) &&

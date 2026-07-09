@@ -81,24 +81,28 @@ func angleProperty(properties Properties, tag PropertyName, session Session) (An
 	return AngleUnit{Type: 0, Value: 0}, false
 }
 
-func valueToColor(value any, session Session) (Color, bool) {
+func valueToColor(value any, session Session) (Color, Color, bool) {
 	if value != nil {
 		switch value := value.(type) {
 		case Color:
-			return value, true
+			return value, value, true
 
 		case string:
 			if ok, constName := isConstantName(value); ok {
-				return session.Color(constName)
+				lightColor, ok1 := session.getColor(constName, false)
+				darkColor, ok2 := session.getColor(constName, true)
+				return lightColor, darkColor, ok1 && ok2
 			}
-			return StringToColor(value)
+			if color, ok := StringToColor(value); ok {
+				return color, color, true
+			}
 		}
 	}
 
-	return Color(0), false
+	return Color(0), Color(0), false
 }
 
-func colorProperty(properties Properties, tag PropertyName, session Session) (Color, bool) {
+func colorProperty(properties Properties, tag PropertyName, session Session) (Color, Color, bool) {
 	return valueToColor(properties.getRaw(tag), session)
 }
 

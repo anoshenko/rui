@@ -203,10 +203,10 @@ func backgroundCSS(properties Properties, session Session) string {
 			}
 
 			if buffer.Len() > 0 {
-				backgroundColor, _ := colorProperty(properties, BackgroundColor, session)
-				if backgroundColor != 0 {
+				lightColor, darkColor, ok := colorProperty(properties, BackgroundColor, session)
+				if ok && (lightColor != 0 || darkColor != 0) {
 					buffer.WriteRune(' ')
-					buffer.WriteString(backgroundColor.cssString())
+					writeColorCSS(buffer, lightColor, darkColor, session)
 				}
 				return buffer.String()
 			}
