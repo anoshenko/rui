@@ -2,7 +2,8 @@
 
 * Removed "style-disabled" property and GetDisabledStyle function
 * Added GoogleFonts field to AppParams
-* Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded
+* Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded, GetBackgroundColorPair, 
+GetAccentColorPair, GetTextColorPair, GetTextLineColor, GetCaretColorPair, GetColumnSeparatorColorPair
 * Added ClientSession interface
 * Added ClientSession, Popups, PopupDefault, PopupDefaultsSeq, and SetPopupDefaults methods to Session interface
 * Removed ClientItem, SetClientItem, RemoveClientItem, and RemoveAllClientItems methods from Session interface

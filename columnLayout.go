@@ -181,18 +181,21 @@ func (columnLayout *columnLayoutData) propertyChanged(tag PropertyName) {
 // GetColumnCount returns int value which specifies number of columns into which the content of
 // ColumnLayout is break. If the return value is 0 then the number of columns is calculated
 // based on the "column-width" property.
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnCount(view View, subviewID ...string) int {
 	return intStyledProperty(view, subviewID, ColumnCount, 0)
 }
 
 // GetColumnWidth returns SizeUnit value which specifies the width of each column of ColumnLayout.
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnWidth(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ColumnWidth, false)
 }
 
 // GetColumnGap returns SizeUnit property which specifies the size of the gap (gutter) between columns of ColumnLayout.
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnGap(view View, subviewID ...string) SizeUnit {
 	return sizeStyledProperty(view, subviewID, ColumnGap, false)
@@ -217,6 +220,7 @@ func getColumnSeparator(view View, subviewID []string) ViewBorder {
 
 // GetColumnSeparator returns ViewBorder struct which specifies the line drawn between
 // columns in a multi-column ColumnLayout.
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnSeparator(view View, subviewID ...string) ViewBorder {
 	return getColumnSeparator(view, subviewID)
@@ -224,7 +228,9 @@ func GetColumnSeparator(view View, subviewID ...string) ViewBorder {
 
 // ColumnSeparatorStyle returns int value which specifies the style of the line drawn between
 // columns in a multi-column layout.
+//
 // Valid values are NoneLine (0), SolidLine (1), DashedLine (2), DottedLine (3), and DoubleLine (4).
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnSeparatorStyle(view View, subviewID ...string) int {
 	border := getColumnSeparator(view, subviewID)
@@ -233,18 +239,29 @@ func GetColumnSeparatorStyle(view View, subviewID ...string) int {
 
 // ColumnSeparatorWidth returns SizeUnit value which specifies the width of the line drawn between
 // columns in a multi-column layout.
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnSeparatorWidth(view View, subviewID ...string) SizeUnit {
 	border := getColumnSeparator(view, subviewID)
 	return border.Width
 }
 
-// ColumnSeparatorColor returns Color value which specifies the color of the line drawn between
+// ColumnSeparatorColor returns Color value which specifies the current theme color of the line drawn between
 // columns in a multi-column layout.
+//
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnSeparatorColor(view View, subviewID ...string) Color {
 	border := getColumnSeparator(view, subviewID)
 	return border.CurrentColor(view.Session())
+}
+
+// ColumnSeparatorColorPair returns ColorPair value which specifies the light and dark theme color of the line drawn between
+// columns in a multi-column layout.
+//
+// If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
+func GetColumnSeparatorColorPair(view View, subviewID ...string) ColorPair {
+	border := getColumnSeparator(view, subviewID)
+	return border.Color
 }
 
 // GetColumnFill returns a "column-fill" property value of the subview.

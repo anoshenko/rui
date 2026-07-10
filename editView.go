@@ -541,10 +541,18 @@ func AppendEditText(view View, subviewID string, text string) {
 	}
 }
 
-// GetCaretColor returns the color of the text input caret.
+// GetCaretColor returns the current theme color of the text input caret.
 //
 // The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
 // If it is not specified then a value from the first argument (view) is returned.
 func GetCaretColor(view View, subviewID ...string) Color {
 	return colorStyledProperty(view, subviewID, CaretColor, false)
+}
+
+// GetCaretColorPair returns the light and dark theme color of the text input caret.
+//
+// The second argument (subviewID) specifies the path to the child element whose value needs to be returned.
+// If it is not specified then a value from the first argument (view) is returned.
+func GetCaretColorPair(view View, subviewID ...string) ColorPair {
+	return colorPairStyledProperty(view, subviewID, CaretColor, false)
 }
