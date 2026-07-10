@@ -11,6 +11,7 @@
 * Added ViewSeq add ViewCount methods to ParentView interface
 * Added ToBoundsProperty method to Bounds struct
 * Added ColorPair type
+* In ViewBorder structure: the type of Color field is replaced by ColorPair and added CurrentColor method
 
 # v0.20.0
 

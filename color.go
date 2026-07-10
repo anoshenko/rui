@@ -255,3 +255,18 @@ func parseColorPair(obj DataObject) (ColorPair, bool) {
 func (pair ColorPair) String() string {
 	return fmt.Sprintf("_{ light = %s, dark = %s }", pair.Light.String(), pair.Dark.String())
 }
+
+func (pair ColorPair) cssString(session Session) string {
+
+	if session.lightDarkSupport() {
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+		writeColorCSS(buffer, pair.Light, pair.Dark, session)
+		return buffer.String()
+	}
+
+	if session.DarkTheme() {
+		return pair.Dark.cssString()
+	}
+	return pair.Light.cssString()
+}

@@ -244,7 +244,7 @@ func GetColumnSeparatorWidth(view View, subviewID ...string) SizeUnit {
 // If the second argument (subviewID) is not specified or it is "" then a top position of the first argument (view) is returned
 func GetColumnSeparatorColor(view View, subviewID ...string) Color {
 	border := getColumnSeparator(view, subviewID)
-	return border.Color
+	return border.CurrentColor(view.Session())
 }
 
 // GetColumnFill returns a "column-fill" property value of the subview.

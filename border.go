@@ -772,23 +772,18 @@ func (border *borderProperty) ViewBorders(session Session) ViewBorders {
 	getBorder := func(prefix PropertyName) ViewBorder {
 		var result ViewBorder
 		var ok bool
+
 		if result.Style, ok = valueToEnum(border.getRaw(prefix+Style), BorderStyle, session, NoneLine); !ok {
 			result.Style = defaultStyle
 		}
+
 		if result.Width, ok = sizeProperty(border, prefix+Width, session); !ok {
 			result.Width = defaultWidth
 		}
 
-		lightColor, darkColor, ok := colorProperty(border, prefix+ColorTag, session)
-		if !ok {
-			lightColor = defaultLightColor
-			darkColor = defaultDarkColor
-		}
-
-		if session.DarkTheme() {
-			result.Color = darkColor
-		} else {
-			result.Color = lightColor
+		if result.Color.Light, result.Color.Dark, ok = colorProperty(border, prefix+ColorTag, session); !ok {
+			result.Color.Light = defaultLightColor
+			result.Color.Dark = defaultDarkColor
 		}
 
 		return result
@@ -837,12 +832,15 @@ func (border *borderProperty) cssColor(builder cssBuilder, session Session) {
 	if borders.Top.Color == borders.Right.Color &&
 		borders.Top.Color == borders.Left.Color &&
 		borders.Top.Color == borders.Bottom.Color {
-		if borders.Top.Color != 0 {
-			builder.add("border-color", borders.Top.Color.cssString())
+		if borders.Top.Color.Light != 0 || borders.Top.Color.Dark != 0 {
+			builder.add("border-color", borders.Top.Color.cssString(session))
 		}
 	} else {
-		builder.addValues("border-color", " ", borders.Top.Color.cssString(),
-			borders.Right.Color.cssString(), borders.Bottom.Color.cssString(), borders.Left.Color.cssString())
+		builder.addValues("border-color", " ",
+			borders.Top.Color.cssString(session),
+			borders.Right.Color.cssString(session),
+			borders.Bottom.Color.cssString(session),
+			borders.Left.Color.cssString(session))
 	}
 }
 
@@ -870,7 +868,7 @@ type ViewBorder struct {
 	Style int
 
 	// Color of the border line
-	Color Color
+	Color ColorPair
 
 	// Width of the border line
 	Width SizeUnit
@@ -879,6 +877,14 @@ type ViewBorder struct {
 // ViewBorders describes the top, right, bottom, and left border of a view
 type ViewBorders struct {
 	Top, Right, Bottom, Left ViewBorder
+}
+
+// CurrentColor returns the border color used in the current theme.
+func (border *ViewBorder) CurrentColor(session Session) Color {
+	if session.DarkTheme() {
+		return border.Color.Dark
+	}
+	return border.Color.Light
 }
 
 // AllTheSame returns true if all borders are the same

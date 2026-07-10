@@ -129,15 +129,12 @@ func getColumnSeparatorProperty(properties Properties) ColumnSeparatorProperty {
 func (separator *columnSeparatorProperty) ViewBorder(session Session) ViewBorder {
 	style, _ := valueToEnum(separator.getRaw(Style), BorderStyle, session, NoneLine)
 	width, _ := sizeProperty(separator, Width, session)
-	color, darkColor, _ := colorProperty(separator, ColorTag, session)
-	if session.DarkTheme() {
-		color = darkColor
-	}
+	lightColor, darkColor, _ := colorProperty(separator, ColorTag, session)
 
 	return ViewBorder{
 		Style: style,
 		Width: width,
-		Color: color,
+		Color: ColorPair{Light: lightColor, Dark: darkColor},
 	}
 }
 
