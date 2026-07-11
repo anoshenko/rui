@@ -35,7 +35,6 @@ type httpBridge struct {
 	responseBuffer strings.Builder
 	response       chan string
 	remoteAddress  string
-	//conn *websocket.Conn
 }
 
 type canvasVar struct {
@@ -235,6 +234,10 @@ func (bridge *webBridge) callFunc(funcName string, args ...any) bool {
 		return bridge.writeMessage(funcText)
 	}
 	return false
+}
+
+func (bridge *webBridge) localStorageRequest(funcName string, args ...any) {
+	bridge.callFuncImmediately(funcName, args...)
 }
 
 func (bridge *webBridge) updateInnerHTML(htmlID, html string) {

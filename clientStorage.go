@@ -91,9 +91,9 @@ func (storage *clientStorageData) Request(result func(key, value string), key ..
 	}
 
 	if buffer.Len() == 0 {
-		storage.bridge.callFunc("localStorageGetAll", request)
+		storage.bridge.localStorageRequest("localStorageGetAll", request)
 	} else {
-		storage.bridge.callFunc("localStorageGet", request, buffer.String())
+		storage.bridge.localStorageRequest("localStorageGet", request, buffer.String())
 	}
 }
 

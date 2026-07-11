@@ -14,6 +14,7 @@ type bridge interface {
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
 	callFunc(funcName string, args ...any) bool
+	localStorageRequest(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
 	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)

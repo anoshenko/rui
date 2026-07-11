@@ -53,6 +53,10 @@ func (bridge *wasmBridge) callFunc(funcName string, args ...any) bool {
 	return true
 }
 
+func (bridge *wasmBridge) localStorageRequest(funcName string, args ...any) {
+	bridge.callFunc(funcName, args...)
+}
+
 func (bridge *wasmBridge) updateInnerHTML(htmlID, html string) {
 	if ProtocolInDebugLog {
 		DebugLog(fmt.Sprintf("%s.innerHTML = '%s'", htmlID, html))
