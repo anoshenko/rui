@@ -44,7 +44,7 @@ func ViewByID(rootView View, id string, ids ...string) View {
 }
 
 func viewByID(rootView ParentView, id string) View {
-	for _, view := range rootView.Views() {
+	for view := range rootView.ViewSeq() {
 		if view != nil {
 			if view.ID() == id {
 				return view

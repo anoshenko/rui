@@ -1,6 +1,9 @@
 package rui
 
-import "strings"
+import (
+	"iter"
+	"strings"
+)
 
 // Constants for [DetailsView] specific properties and events
 const (
@@ -78,6 +81,29 @@ func (detailsView *detailsViewData) Views() []View {
 		}
 	}
 	return views
+}
+
+func (detailsView *detailsViewData) ViewSeq() iter.Seq[View] {
+	if detailsView.views == nil {
+		detailsView.views = []View{}
+	}
+
+	return func(yield func(View) bool) {
+		if summary := detailsView.Get(Summary); summary != nil {
+			switch summary := summary.(type) {
+			case View:
+				if !yield(summary) {
+					return
+				}
+			}
+		}
+
+		for _, view := range detailsView.views {
+			if !yield(view) {
+				return
+			}
+		}
+	}
 }
 
 func (detailsView *detailsViewData) setFunc(tag PropertyName, value any) []PropertyName {

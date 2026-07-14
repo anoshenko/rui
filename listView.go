@@ -3,6 +3,7 @@ package rui
 import (
 	"fmt"
 	"iter"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -159,7 +160,7 @@ func (listView *listViewData) init(session Session) {
 }
 
 func (listView *listViewData) Views() []View {
-	return listView.items
+	return slices.Clone(listView.items)
 }
 
 func (listView *listViewData) ViewSeq() iter.Seq[View] {

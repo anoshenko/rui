@@ -2,6 +2,7 @@ package rui
 
 import (
 	"iter"
+	"slices"
 	"strings"
 )
 
@@ -68,12 +69,8 @@ func (container *viewsContainerData) setParentID(parentID string) {
 func (container *viewsContainerData) Views() []View {
 	if container.views == nil {
 		container.views = []View{}
-	} else if count := len(container.views); count > 0 {
-		views := make([]View, count)
-		copy(views, container.views)
-		return views
 	}
-	return []View{}
+	return slices.Clone(container.views)
 }
 
 func (container *viewsContainerData) ViewSeq() iter.Seq[View] {

@@ -3,6 +3,7 @@ package rui
 import (
 	"fmt"
 	"iter"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -1692,7 +1693,7 @@ func (table *tableViewData) ReloadCell(row, column int) {
 }
 
 func (table *tableViewData) Views() []View {
-	return table.cellViews
+	return slices.Clone(table.cellViews)
 }
 
 func (table *tableViewData) ViewSeq() iter.Seq[View] {

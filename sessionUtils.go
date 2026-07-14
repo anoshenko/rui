@@ -45,7 +45,7 @@ func viewByHTMLID(id string, startView View) View {
 			return startView
 		}
 		if container, ok := startView.(ParentView); ok {
-			for _, view := range container.Views() {
+			for view := range container.ViewSeq() {
 				if view != nil {
 					if v := viewByHTMLID(id, view); v != nil {
 						return v
