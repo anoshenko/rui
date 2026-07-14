@@ -106,6 +106,7 @@ func (bridge *wasmBridge) close() {
 	bridge.closeEvent <- NewDataObject("close")
 }
 
+/*
 func (bridge *wasmBridge) writeMessage(script string) bool {
 	if ProtocolInDebugLog {
 		DebugLog("Run script:")
@@ -117,6 +118,7 @@ func (bridge *wasmBridge) writeMessage(script string) bool {
 
 	return true
 }
+*/
 
 func (bridge *wasmBridge) prepareCSS(css string) string {
 	css = strings.ReplaceAll(css, `\t`, "\t")
