@@ -155,6 +155,15 @@ func setSessionIDCookie(w http.ResponseWriter, sessionID int) {
 	http.SetCookie(w, &cookie)
 }
 
+func getSessionIDCookie(req *http.Request) (int, error) {
+	cookie, err := req.Cookie("session")
+	if err != nil {
+		return 0, err
+	}
+
+	return strconv.Atoi(cookie.Value)
+}
+
 func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 
 	if reqBody, err := io.ReadAll(req.Body); err == nil {

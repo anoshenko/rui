@@ -44,6 +44,7 @@ func (session *sessionData) ClientStorage() ClientStorage {
 	if session.clientStorage == nil {
 		storage := new(clientStorageData)
 		storage.bridge = session.bridge
+		storage.getResult = map[int]func(string, string){}
 		session.clientStorage = storage
 	}
 	return session.clientStorage
