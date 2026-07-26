@@ -114,7 +114,12 @@ func valueToColor(value any, session Session) (Color, Color, bool) {
 }
 
 func colorProperty(properties Properties, tag PropertyName, session Session) (Color, Color, bool) {
-	return valueToColor(properties.getRaw(tag), session)
+	value := properties.getRaw(tag)
+	if value == nil {
+		return 0, 0, false
+	}
+
+	return valueToColor(value, session)
 }
 
 func valueToEnum(value any, tag PropertyName, session Session, defaultValue int) (int, bool) {
