@@ -110,6 +110,10 @@ func (bridge *webBridge) initBridge() {
 	bridge.updateScripts = map[string]*strings.Builder{}
 }
 
+func (bridge *webBridge) writeScript(script string) {
+	bridge.writeMessage(script)
+}
+
 func (bridge *webBridge) startUpdateScript(htmlID string) bool {
 	if _, ok := bridge.updateScripts[htmlID]; ok {
 		return false

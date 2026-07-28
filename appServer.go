@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -43,6 +44,7 @@ type application struct {
 	params            AppParams
 	createContentFunc func(Session) SessionContent
 	sessions          map[int]sessionInfo
+	usedSessionIds    []int
 }
 
 func (app *application) getStartPage() string {
@@ -50,7 +52,7 @@ func (app *application) getStartPage() string {
 	defer freeStringBuilder(buffer)
 
 	buffer.WriteString("<!DOCTYPE html>\n<html>\n")
-	getStartPage(buffer, app.params)
+	getStartPage(buffer, app.nextSessionID(), app.params)
 	buffer.WriteString("\n</html>")
 	return buffer.String()
 }
@@ -80,14 +82,23 @@ func (app *application) Finish() {
 	}
 }
 
+func (app *application) getCreateContentFunc() func(Session) SessionContent {
+	return app.createContentFunc
+}
+
 func (app *application) nextSessionID() int {
-	n := rand.Intn(0x7FFFFFFE) + 1
-	_, ok := app.sessions[n]
-	for ok {
-		n = rand.Intn(0x7FFFFFFE) + 1
-		_, ok = app.sessions[n]
+	if app.usedSessionIds == nil {
+		app.usedSessionIds = []int{}
 	}
-	return n
+
+	for {
+		n := rand.Intn(0x7FFFFFFE) + 1
+		if !slices.Contains(app.usedSessionIds, n) {
+			app.usedSessionIds = append(app.usedSessionIds, n)
+			slices.Sort(app.usedSessionIds)
+			return n
+		}
+	}
 }
 
 func (app *application) removeSession(id int) {
@@ -166,77 +177,95 @@ func getSessionIDCookie(req *http.Request) (int, error) {
 
 func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 
-	if reqBody, err := io.ReadAll(req.Body); err == nil {
-		message := string(reqBody)
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		ErrorLog(err.Error())
+		return
+	}
 
-		if ProtocolInDebugLog {
-			DebugLog(message)
-		}
+	message := string(reqBody)
+	if ProtocolInDebugLog {
+		DebugLog(message)
+	}
 
-		obj, err := ParseDataText(message)
-		if err != nil {
-			ErrorLog(err.Error())
+	obj, err := ParseDataText(message)
+	if err != nil {
+		ErrorLog(err.Error())
+		return
+	}
+
+	sessionID, ok := getSessionID(obj)
+	if !ok {
+		return
+	}
+
+	var session Session = nil
+	var response chan string = nil
+	if info, ok := app.sessions[sessionID]; ok && info.response != nil {
+		response = info.response
+		session = info.session
+	}
+
+	command := obj.Tag()
+
+	if session == nil || command == "startSession" {
+		events := make(chan DataObject, 1024)
+		bridge := createHttpBridge(req)
+		response = bridge.response
+
+		session = app.createSession(obj, events, bridge, response)
+		if session == nil {
 			return
 		}
 
-		var session Session = nil
-		var response chan string = nil
+		go sessionEventHandler(session, events, bridge)
 
-		if cookie, err := req.Cookie("session"); err == nil {
-			sessionID, err := strconv.Atoi(cookie.Value)
-			if err != nil {
-				ErrorLog(err.Error())
-			} else if info, ok := app.sessions[sessionID]; ok && info.response != nil {
-				response = info.response
-				session = info.session
-			}
-		}
-
-		command := obj.Tag()
-		startSession := false
-
-		if session == nil || command == "startSession" {
-			events := make(chan DataObject, 1024)
-			bridge := createHttpBridge(req)
-			response = bridge.response
-			answer := ""
-			session, answer = app.startSession(obj, events, bridge, response)
-
-			bridge.writeMessage(answer)
-			session.onStart()
-			if command == "session-resume" {
-				session.onResume()
-			}
+		start := func() {
+			startSession(session, app.createContentFunc)
 			bridge.sendResponse()
-
-			setSessionIDCookie(w, session.ID())
-			startSession = true
-
-			go sessionEventHandler(session, events, bridge)
 		}
+		go start()
+	}
 
-		if !startSession {
-			switch command {
-			case "nop":
-				session.sendResponse()
+	switch command {
 
-			case "session-close":
-				session.onFinish()
-				session.App().removeSession(session.ID())
-				return
+	case "startSession":
+		// do nothing
 
-			default:
-				if !session.handleAnswer(command, obj) {
-					session.addToEventsQueue(obj)
-				}
-			}
-		}
+	case "nop":
+		session.sendResponse()
 
-		io.WriteString(w, <-response)
-		for len(response) > 0 {
-			io.WriteString(w, <-response)
+	case "session-close":
+		session.onFinish()
+		session.App().removeSession(session.ID())
+		return
+
+	default:
+		if !session.handleAnswer(command, obj) {
+			session.addToEventsQueue(obj)
 		}
 	}
+
+	io.WriteString(w, <-response)
+	for len(response) > 0 {
+		io.WriteString(w, <-response)
+	}
+}
+
+func getSessionID(obj DataObject) (int, bool) {
+	sessionText, ok := obj.PropertyValue("session")
+	if !ok {
+		ErrorLog(`"session" key not found`)
+		return 0, false
+	}
+
+	sessionID, err := strconv.Atoi(sessionText)
+	if err != nil {
+		ErrorLog(`"session" key text strconv.Atoi error: ` + err.Error())
+		return 0, false
+	}
+
+	return sessionID, true
 }
 
 func (app *application) socketReader(bridge *wsBridge) {
@@ -262,33 +291,23 @@ func (app *application) socketReader(bridge *wsBridge) {
 
 		switch command := obj.Tag(); command {
 		case "startSession":
-			answer := ""
-			if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
-				if !bridge.writeMessage(answer) {
-					return
-				}
-				session.onStart()
+			if session = app.createSession(obj, events, bridge, nil); session != nil {
+				go startSession(session, app.createContentFunc)
 				go sessionEventHandler(session, events, bridge)
 			}
 
 		case "reconnect":
 			session = nil
-			if sessionText, ok := obj.PropertyValue("session"); ok {
-				if sessionID, err := strconv.Atoi(sessionText); err == nil {
-					if info, ok := app.sessions[sessionID]; ok {
-						session = info.session
-						session.setBridge(events, bridge)
+			if sessionID, ok := getSessionID(obj); ok {
+				if info, ok := app.sessions[sessionID]; ok {
+					session = info.session
+					session.setBridge(events, bridge)
 
-						go sessionEventHandler(session, events, bridge)
-						session.onReconnect()
-					} else {
-						DebugLogF("Session #%d not exists", sessionID)
-					}
+					go sessionEventHandler(session, events, bridge)
+					session.onReconnect()
 				} else {
-					ErrorLog(`strconv.Atoi(sessionText) error: ` + err.Error())
+					DebugLogF("Session #%d not exists", sessionID)
 				}
-			} else {
-				ErrorLog(`"session" key not found`)
 			}
 
 			if session == nil {
@@ -327,37 +346,42 @@ func sessionEventHandler(session Session, events chan DataObject, bridge bridge)
 			session.onFinish()
 			session.App().removeSession(session.ID())
 			bridge.close()
+			return
 
 		default:
-			session.handleEvent(command, data)
+			go session.handleEvent(command, data)
 		}
 	}
 }
 
-func (app *application) startSession(params DataObject, events chan DataObject,
-	bridge bridge, response chan string) (Session, string) {
+func (app *application) createSession(params DataObject, events chan DataObject,
+	bridge bridge, response chan string) Session {
 
-	if app.createContentFunc == nil {
-		return nil, ""
+	sessionID, ok := getSessionID(params)
+	if !ok || app.createContentFunc == nil {
+		return nil
 	}
 
-	session := newSession(app, app.nextSessionID(), "", params)
+	session := newSession(app, sessionID, "", params)
 	session.setBridge(events, bridge)
-	if !session.setContent(app.createContentFunc(session)) {
-		return nil, ""
-	}
 
-	app.sessions[session.ID()] = sessionInfo{
+	app.sessions[sessionID] = sessionInfo{
 		session:  session,
 		response: response,
+	}
+
+	return session
+}
+
+func startSession(session Session, createContentFunc func(Session) SessionContent) {
+
+	if !session.setContent(createContentFunc(session)) {
+		return
 	}
 
 	answer := allocStringBuilder()
 	defer freeStringBuilder(answer)
 
-	answer.WriteString("sessionID = '")
-	answer.WriteString(strconv.Itoa(session.ID()))
-	answer.WriteString("';\n")
 	session.writeInitScript(answer)
 	answerText := answer.String()
 
@@ -365,7 +389,9 @@ func (app *application) startSession(params DataObject, events chan DataObject,
 		DebugLog("Start session:")
 		DebugLog(answerText)
 	}
-	return session, answerText
+
+	session.writeScript(answerText)
+	session.onStart()
 }
 
 var apps = []*application{}

@@ -25,6 +25,16 @@ func createWasmBridge(close chan DataObject) bridge {
 	return bridge
 }
 
+func (bridge *wasmBridge) writeScript(script string) {
+	if ProtocolInDebugLog {
+		DebugLog("Run script:")
+		DebugLog(script)
+	}
+
+	window := js.Global().Get("window")
+	window.Call("execScript", script)
+}
+
 func (bridge *wasmBridge) startUpdateScript(htmlID string) bool {
 	return false
 }

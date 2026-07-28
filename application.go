@@ -2,6 +2,7 @@ package rui
 
 import (
 	_ "embed"
+	"strconv"
 	"strings"
 )
 
@@ -23,6 +24,7 @@ type Application interface {
 	Params() AppParams
 
 	removeSession(id int)
+	getCreateContentFunc() func(Session) SessionContent
 }
 
 // AppParams defines parameters of the app
@@ -66,7 +68,7 @@ type AppParams struct {
 	GoogleFonts string
 }
 
-func getStartPage(buffer *strings.Builder, params AppParams) {
+func getStartPage(buffer *strings.Builder, sessionID int, params AppParams) {
 	buffer.WriteString(`<head>
 		<meta charset="utf-8">
 		<title>`)
@@ -104,7 +106,12 @@ func getStartPage(buffer *strings.Builder, params AppParams) {
 	buffer.WriteString(appStyles)
 	buffer.WriteString(`</style>
 		<style id="ruiAnimations"></style>
-		<script src="/script.js"></script>
+		<script>
+const sessionID = `)
+	buffer.WriteString(strconv.Itoa(sessionID))
+	buffer.WriteString(`;
+	</script>
+	<script src="/script.js"></script>
 	</head>
 	<body id="body" onkeydown="keyDownEvent(this, event)">
 		<div class="ruiRoot" id="ruiRootView"></div>

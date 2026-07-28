@@ -139,7 +139,7 @@ func (storage *clientStorageData) handleEvent(command string, data DataObject) {
 		}
 		delete(storage.getResult, request)
 
-		text, ok := data.PropertyValue("error")
+		text, ok := data.PropertyValue("values")
 		if !ok {
 			ErrorLog("'values' property not found (command: storageValues)")
 			return

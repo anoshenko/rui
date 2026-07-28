@@ -11,6 +11,7 @@ import (
 )
 
 type bridge interface {
+	writeScript(script string)
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
 	callFunc(funcName string, args ...any) bool
@@ -175,6 +176,7 @@ type Session interface {
 	updateCSSProperty(htmlID, property, value string)
 	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
+	writeScript(script string)
 	startUpdateScript(htmlID string) bool
 	finishUpdateScript(htmlID string)
 	sendResponse()
@@ -505,6 +507,14 @@ func (session *sessionData) removeProperty(htmlID, property string) {
 		} else {
 			ErrorLog("No connection")
 		}
+	}
+}
+
+func (session *sessionData) writeScript(script string) {
+	if session.bridge != nil {
+		session.bridge.writeScript(script)
+	} else {
+		ErrorLog("No connection")
 	}
 }
 
