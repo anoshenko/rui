@@ -588,9 +588,23 @@ func (popup *popupData) Get(tag PropertyName) any {
 			popup.layerView = popup.createLayerView()
 		}
 		return popup.layerView
+
+	case DismissEvent:
+		if value := popup.getRaw(DismissEvent); value != nil {
+			if listeners, ok := value.([]popupListener); ok {
+				if count := len(listeners); count > 0 {
+					result := make([]any, 0, count)
+					for _, listener := range listeners {
+						result = append(result, listener.rawListener())
+					}
+					return result
+				}
+			}
+		}
+		return nil
 	}
 
-	return popup.properties[tag]
+	return popup.getRaw(tag)
 }
 
 func (popup *popupData) arrowType() int {
