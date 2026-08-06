@@ -169,7 +169,7 @@ type Session interface {
 	styleProperty(styleTag string, propertyTag PropertyName) any
 
 	setBridge(events chan DataObject, bridge bridge)
-	writeInitScript(writer *strings.Builder)
+	writeInitScript()
 	callFunc(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
 	appendToInnerHTML(htmlID, html string)
@@ -294,6 +294,9 @@ func (session *sessionData) ID() int {
 }
 
 func (session *sessionData) setBridge(events chan DataObject, bridge bridge) {
+	if session.events != nil {
+		close(session.events)
+	}
 	session.events = events
 	session.bridge = bridge
 }
@@ -351,23 +354,39 @@ func (session *sessionData) RootView() View {
 	return session.rootView
 }
 
-func (session *sessionData) writeInitScript(writer *strings.Builder) {
+func (session *sessionData) writeInitScript() {
+
+	if session.bridge == nil {
+		return
+	}
+
+	if ProtocolInDebugLog {
+		DebugLog("Start session:")
+	}
+
 	if css := session.getCurrentTheme().cssText(session); css != "" {
 		css = strings.ReplaceAll(css, "\n", `\n`)
 		css = strings.ReplaceAll(css, "\t", `\t`)
-		writer.WriteString(`document.querySelector('style').textContent += "`)
-		writer.WriteString(css)
-		writer.WriteString("\";\n")
+
+		script := `document.querySelector('style').textContent += "` + css + "\";\n"
+		session.bridge.writeScript(script)
+
+		if ProtocolInDebugLog {
+			DebugLog(script)
+		}
 	}
 
 	if session.rootView != nil {
-		writer.WriteString(`document.getElementById('ruiRootView').innerHTML = '`)
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
 		viewHTML(session.rootView, buffer, "")
-		text := strings.ReplaceAll(buffer.String(), "'", `\'`)
-		writer.WriteString(text)
-		writer.WriteString("';\nscanElementsSize();")
+
+		html := buffer.String()
+		session.bridge.callFunc("updateInnerHTML", "ruiRootView", html)
+
+		if ProtocolInDebugLog {
+			DebugLog(html)
+		}
 	}
 
 	session.updateTooltipConstants()
@@ -666,7 +685,7 @@ func (session *sessionData) handleAnswer(command string, data DataObject) bool {
 	switch command {
 	case "answer":
 		if session.bridge != nil {
-			session.bridge.answerReceived(data)
+			go session.bridge.answerReceived(data)
 		}
 
 	case "imageLoaded":
@@ -674,6 +693,11 @@ func (session *sessionData) handleAnswer(command string, data DataObject) bool {
 
 	case "imageError":
 		session.imageManager().imageLoadError(data)
+
+	case "storageError", "storageValues":
+		if session.clientStorage != nil {
+			session.clientStorage.handleEvent(command, data)
+		}
 
 	default:
 		return false
@@ -793,6 +817,12 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 
 func (session *sessionData) handleEvent(command string, data DataObject) {
 	switch command {
+	case "start-session":
+		if session.setContent(session.App().getCreateContentFunc()(session)) {
+			session.writeInitScript()
+			session.onStart()
+		}
+
 	case "session-pause":
 		session.onPause()
 
@@ -823,11 +853,6 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 
 	case "sessionInfo":
 		session.handleSessionInfo(data)
-
-	case "storageError", "storageSuccess", "storageValues":
-		if session.clientStorage != nil {
-			session.clientStorage.handleEvent(command, data)
-		}
 
 	default:
 		if viewID, ok := data.PropertyValue("id"); ok {
@@ -931,7 +956,9 @@ func (session *sessionData) OpenURL(urlStr string) {
 }
 
 func (session *sessionData) addToEventsQueue(data DataObject) {
-	session.events <- data
+	if session.events != nil {
+		session.events <- data
+	}
 }
 
 func (session *sessionData) StartTimer(ms int, timerFunc func(Session)) int {

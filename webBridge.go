@@ -84,7 +84,7 @@ func createSocketBridge(w http.ResponseWriter, req *http.Request) *wsBridge {
 func createHttpBridge(req *http.Request) *httpBridge {
 	bridge := new(httpBridge)
 	bridge.initBridge()
-	bridge.response = make(chan string, 10)
+	bridge.response = make(chan string, 100)
 	bridge.writeMessage = func(script string) bool {
 		if script != "" {
 			if ProtocolInDebugLog {
@@ -139,14 +139,31 @@ func (bridge *webBridge) finishUpdateScript(htmlID string) {
 func (bridge *webBridge) argToString(arg any) (string, bool) {
 	switch arg := arg.(type) {
 	case string:
-		arg = strings.ReplaceAll(arg, "\\", `\\`)
-		arg = strings.ReplaceAll(arg, "'", `\'`)
-		arg = strings.ReplaceAll(arg, "\n", `\n`)
-		arg = strings.ReplaceAll(arg, "\r", `\r`)
-		arg = strings.ReplaceAll(arg, "\t", `\t`)
-		arg = strings.ReplaceAll(arg, "\b", `\b`)
-		arg = strings.ReplaceAll(arg, "\f", `\f`)
-		arg = strings.ReplaceAll(arg, "\v", `\v`)
+		escChars := []struct{ esc, repl string }{
+			{esc: "\\", repl: `\\`},
+			{esc: "'", repl: `\'`},
+			{esc: "\b", repl: `\b`},
+			{esc: "\t", repl: `\t`},
+			{esc: "\n", repl: `\n`},
+			{esc: "\v", repl: `\v`},
+			{esc: "\r", repl: `\r`},
+			{esc: "\f", repl: `\f`},
+		}
+
+		for _, s := range escChars {
+			if strings.Contains(arg, s.esc) {
+				arg = strings.ReplaceAll(arg, s.esc, s.repl)
+			}
+		}
+
+		for n := range 0x20 {
+			esc := string([]rune{rune(n)})
+			if strings.Contains(arg, esc) {
+				repl := fmt.Sprintf(`\x%02d`, n)
+				arg = strings.ReplaceAll(arg, esc, repl)
+			}
+		}
+
 		return `'` + arg + `'`, true
 
 	case rune:

@@ -1,4 +1,3 @@
-//let sessionID = "0"
 let windowFocus = true
 
 window.onresize = function() {
@@ -18,11 +17,16 @@ function reloadPage() {
 	location.reload();
 }
 
-function sessionInfo() {
+function sessionInfo(messageID) {
 
-	const touch_screen = (('ontouchstart' in document.documentElement) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)) ? "1" : "0";
-	let message = "startSession{session=" + sessionID + ",touch=" + touch_screen 
+	let message = messageID + "{session=" + sessionID
 	
+	if (('ontouchstart' in document.documentElement) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)) {
+		message += ",touch=1"
+	} else {
+		message += ",touch=0"
+	}
+
 	const style = window.getComputedStyle(document.body);
 	if (style) {
 		const direction = style.getPropertyValue('direction');
@@ -65,8 +69,12 @@ function sessionInfo() {
 	return message + "}";
 }
 
+function sendReconnectMessage() {
+	sendMessage( sessionInfo("reconnect") );
+}
+
 function restartSession() {
-	sendMessage( sessionInfo() );
+	sendMessage( sessionInfo("start-session") );
 }
 
 function getIntAttribute(element, tag) {

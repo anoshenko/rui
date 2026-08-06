@@ -128,6 +128,9 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, app.getStartPage())
 
+		case "/e":
+			app.sseHandler(w, req)
+
 		case "/ws":
 			if bridge := createSocketBridge(w, req); bridge != nil {
 				go app.socketReader(bridge)
@@ -157,6 +160,7 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+/*
 func setSessionIDCookie(w http.ResponseWriter, sessionID int) {
 	cookie := http.Cookie{
 		Name:     "session",
@@ -174,6 +178,7 @@ func getSessionIDCookie(req *http.Request) (int, error) {
 
 	return strconv.Atoi(cookie.Value)
 }
+*/
 
 func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 
@@ -208,7 +213,12 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 
 	command := obj.Tag()
 
-	if session == nil || command == "startSession" {
+	if session == nil {
+		if command != "start-session" {
+			io.WriteString(w, "reloadPage();")
+			return
+		}
+
 		events := make(chan DataObject, 1024)
 		bridge := createHttpBridge(req)
 		response = bridge.response
@@ -219,30 +229,25 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		go sessionEventHandler(session, events, bridge)
-
-		start := func() {
-			startSession(session, app.createContentFunc)
-			bridge.sendResponse()
-		}
-		go start()
 	}
 
 	switch command {
-
-	case "startSession":
-		// do nothing
-
-	case "nop":
-		session.sendResponse()
 
 	case "session-close":
 		session.onFinish()
 		session.App().removeSession(session.ID())
 		return
 
+	case "nop":
+		if len(response) == 0 {
+			session.addToEventsQueue(obj)
+		}
+
 	default:
 		if !session.handleAnswer(command, obj) {
 			session.addToEventsQueue(obj)
+		} else {
+			io.WriteString(w, "sendNop();")
 		}
 	}
 
@@ -250,6 +255,20 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 	for len(response) > 0 {
 		io.WriteString(w, <-response)
 	}
+}
+
+func (app *application) sseHandler(w http.ResponseWriter, req *http.Request) {
+	/*
+		sessionID, err := strconv.Atoi(req.URL.Query().Get("id"))
+		if err != nil {
+			ErrorLog("SessionID error: " + err.Error())
+			return
+		}
+
+		if sessionInfo, ok := app.sessions[sessionID]; ok {
+
+		}
+	*/
 }
 
 func getSessionID(obj DataObject) (int, bool) {
@@ -286,14 +305,14 @@ func (app *application) socketReader(bridge *wsBridge) {
 		obj, err := ParseDataText(message)
 		if err != nil {
 			ErrorLog(err.Error())
-			return
+			continue
 		}
 
 		switch command := obj.Tag(); command {
-		case "startSession":
+		case "start-session":
 			if session = app.createSession(obj, events, bridge, nil); session != nil {
-				go startSession(session, app.createContentFunc)
 				go sessionEventHandler(session, events, bridge)
+				events <- obj
 			}
 
 		case "reconnect":
@@ -311,16 +330,6 @@ func (app *application) socketReader(bridge *wsBridge) {
 			}
 
 			if session == nil {
-				/* answer := ""
-				if session, answer = app.startSession(obj, events, bridge, nil); session != nil {
-					if !bridge.writeMessage(answer) {
-						return
-					}
-					session.onStart()
-					go sessionEventHandler(session, events, bridge)
-					bridge.writeMessage("restartSession();")
-				}
-				*/
 				bridge.writeMessage("reloadPage();")
 				return
 			}
@@ -339,6 +348,7 @@ func sessionEventHandler(session Session, events chan DataObject, bridge bridge)
 
 		switch command := data.Tag(); command {
 		case "disconnect":
+			session.setBridge(nil, nil)
 			session.onDisconnect()
 			return
 
@@ -348,8 +358,11 @@ func sessionEventHandler(session Session, events chan DataObject, bridge bridge)
 			bridge.close()
 			return
 
+		case "nop":
+			session.sendResponse()
+
 		default:
-			go session.handleEvent(command, data)
+			session.handleEvent(command, data)
 		}
 	}
 }
@@ -371,27 +384,6 @@ func (app *application) createSession(params DataObject, events chan DataObject,
 	}
 
 	return session
-}
-
-func startSession(session Session, createContentFunc func(Session) SessionContent) {
-
-	if !session.setContent(createContentFunc(session)) {
-		return
-	}
-
-	answer := allocStringBuilder()
-	defer freeStringBuilder(answer)
-
-	session.writeInitScript(answer)
-	answerText := answer.String()
-
-	if ProtocolInDebugLog {
-		DebugLog("Start session:")
-		DebugLog(answerText)
-	}
-
-	session.writeScript(answerText)
-	session.onStart()
 }
 
 var apps = []*application{}

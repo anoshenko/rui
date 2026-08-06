@@ -1,9 +1,9 @@
-let socket
+let socket;
 
 function sendMessage(message) {
 	if (!socket) {
 		createSocket(function() {
-			sendMessage( "reconnect{session=" + sessionID + "}" );
+			sendReconnectMessage();
 			if (!windowFocus) {
 				windowFocus = true;
 				sendMessage( "session-resume{session=" + sessionID +"}" );
@@ -16,13 +16,13 @@ function sendMessage(message) {
 }
 
 function createSocket(onopen) {
-	let socketUrl = document.location.protocol == "https:" ? "wss://" : "ws://" 
-	socketUrl += document.location.hostname
-	const port = document.location.port
+	let socketUrl = document.location.protocol == "https:" ? "wss://" : "ws://" ;
+	socketUrl += document.location.hostname;
+	const port = document.location.port;
 	if (port) {
-		socketUrl += ":" + port
+		socketUrl += ":" + port;
 	}
-	socketUrl += window.location.pathname + "ws"
+	socketUrl += window.location.pathname + "ws";
 
 	socket = new WebSocket(socketUrl);
 	socket.onopen = onopen;
@@ -35,19 +35,19 @@ function createSocket(onopen) {
 
 function closeSocket() {
 	if (socket) {
-		socket.close()
+		socket.close();
 	}
 }
 
 window.onload = createSocket(function() {
-	sendMessage( sessionInfo() );
+	sendMessage( sessionInfo("start-session") );
 });
 
 window.onfocus = function() {
-	windowFocus = true
+	windowFocus = true;
 	if (!socket) {
 		createSocket(function() {
-			sendMessage( "reconnect{session=" + sessionID + "}" );
+			sendReconnectMessage();
 			sendMessage( "session-resume{session=" + sessionID +"}" );
 		});
 	} else {
@@ -55,18 +55,14 @@ window.onfocus = function() {
 	}
 }
 
-function onSocketReopen() {
-	sendMessage( "reconnect{session=" + sessionID + "}" );
-}
-
 function socketReconnect() {
 	if (!socket) {
-		createSocket(onSocketReopen);
+		createSocket(sendReconnectMessage);
 	}
 }
 
 function onSocketClose(event) {
-	console.log("socket closed")
+	console.log("socket closed");
 	socket = null;
 	if (!event.wasClean && windowFocus) {
 		window.setTimeout(socketReconnect, 10000);

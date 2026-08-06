@@ -4,6 +4,7 @@ import (
 	"iter"
 	"slices"
 	"strings"
+	"sync"
 )
 
 // Properties interface of properties map
@@ -37,6 +38,7 @@ type Properties interface {
 type propertyList struct {
 	properties map[PropertyName]any
 	normalize  func(PropertyName) PropertyName
+	mutex      sync.Mutex
 }
 
 type dataProperty struct {
@@ -60,10 +62,15 @@ func (properties *propertyList) init() {
 }
 
 func (properties *propertyList) IsEmpty() bool {
+	properties.mutex.Lock()
+	defer properties.mutex.Unlock()
 	return len(properties.properties) == 0
 }
 
 func (properties *propertyList) getRaw(tag PropertyName) any {
+	properties.mutex.Lock()
+	defer properties.mutex.Unlock()
+
 	if value, ok := properties.properties[tag]; ok {
 		return value
 	}
@@ -71,11 +78,13 @@ func (properties *propertyList) getRaw(tag PropertyName) any {
 }
 
 func (properties *propertyList) setRaw(tag PropertyName, value any) {
+	properties.mutex.Lock()
 	if value == nil {
 		delete(properties.properties, tag)
 	} else {
 		properties.properties[tag] = value
 	}
+	properties.mutex.Unlock()
 }
 
 /*
@@ -83,8 +92,11 @@ func (properties *propertyList) setRaw(tag PropertyName, value any) {
 		properties.remove(properties, properties.normalize(tag))
 	}
 */
+
 func (properties *propertyList) Clear() {
+	properties.mutex.Lock()
 	properties.properties = map[PropertyName]any{}
+	properties.mutex.Unlock()
 }
 
 func (properties *propertyList) All() iter.Seq2[PropertyName, any] {
@@ -98,10 +110,13 @@ func (properties *propertyList) All() iter.Seq2[PropertyName, any] {
 }
 
 func (properties *propertyList) AllTags() []PropertyName {
+	properties.mutex.Lock()
 	tags := make([]PropertyName, 0, len(properties.properties))
 	for tag := range properties.properties {
 		tags = append(tags, tag)
 	}
+	properties.mutex.Unlock()
+
 	slices.Sort(tags)
 	return tags
 }

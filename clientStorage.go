@@ -130,8 +130,6 @@ func (storage *clientStorageData) handleEvent(command string, data DataObject) {
 			ErrorLog(text)
 		}
 
-	//case "storageSuccess":
-
 	case "storageValues":
 		fn, ok := storage.getResult[request]
 		if !ok {
