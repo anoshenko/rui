@@ -1052,6 +1052,38 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		buffer.WriteRune(']')
 		return buffer.String()
 
+	case []PopupButton:
+		if len(value) == 0 {
+			return ""
+		}
+
+		buffer := allocStringBuilder()
+		defer freeStringBuilder(buffer)
+
+		lead := indent + "\t_{ title = "
+
+		buffer.WriteString("[\n")
+		for _, button := range value {
+			buffer.WriteString(lead)
+			writeString(buffer, button.Title)
+			switch button.Type {
+			case CancelButton:
+				buffer.WriteString(`, type = cancel`)
+
+			case DefaultButton:
+				buffer.WriteString(`, type = default`)
+			}
+
+			if button.Binding != "" {
+				buffer.WriteString(`, click = `)
+				writeString(buffer, button.Binding)
+			}
+			buffer.WriteString(" },\n")
+		}
+		buffer.WriteString(indent)
+		buffer.WriteRune(']')
+		return buffer.String()
+
 	default:
 		return ""
 	}
