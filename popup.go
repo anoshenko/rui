@@ -294,6 +294,8 @@ type PopupButton struct {
 
 	// OnClick is the handler function that gets called when the button is pressed
 	OnClick func(Popup)
+
+	Binding string
 }
 
 type popupButton struct {
@@ -599,6 +601,29 @@ func (popup *popupData) Get(tag PropertyName) any {
 					}
 					return result
 				}
+			}
+		}
+		return nil
+
+	case Buttons:
+		if value := popup.getRaw(DismissEvent); value != nil {
+			if buttons, ok := value.([]popupButton); ok {
+				result := make([]PopupButton, 0, len(buttons))
+				for _, button := range buttons {
+					btn := PopupButton{
+						Title: button.title,
+						Type:  button.buttonType,
+					}
+					switch listener := button.onClick.rawListener().(type) {
+					case string:
+						btn.Binding = listener
+
+					case func(Popup):
+						btn.OnClick = listener
+					}
+					result = append(result, btn)
+				}
+				return result
 			}
 		}
 		return nil
