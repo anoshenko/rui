@@ -606,7 +606,7 @@ func (popup *popupData) Get(tag PropertyName) any {
 		return nil
 
 	case Buttons:
-		if value := popup.getRaw(DismissEvent); value != nil {
+		if value := popup.getRaw(Buttons); value != nil {
 			if buttons, ok := value.([]popupButton); ok {
 				result := make([]PopupButton, 0, len(buttons))
 				for _, button := range buttons {
@@ -614,12 +614,14 @@ func (popup *popupData) Get(tag PropertyName) any {
 						Title: button.title,
 						Type:  button.buttonType,
 					}
-					switch listener := button.onClick.rawListener().(type) {
-					case string:
-						btn.Binding = listener
+					if button.onClick != nil {
+						switch listener := button.onClick.rawListener().(type) {
+						case string:
+							btn.Binding = listener
 
-					case func(Popup):
-						btn.OnClick = listener
+						case func(Popup):
+							btn.OnClick = listener
+						}
 					}
 					result = append(result, btn)
 				}
@@ -960,6 +962,9 @@ func (popup *popupData) setButtons(value any) bool {
 		}
 		if button.OnClick != nil {
 			result.onClick = newPopupListener1(button.OnClick)
+		}
+		if button.Binding != "" {
+			result.onClick = newPopupListenerBinding(button.Binding, false)
 		}
 		return result
 	}
