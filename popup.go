@@ -1819,8 +1819,7 @@ func (data *popupListenerBinding) Run(popup Popup) {
 		args = []reflect.Value{}
 
 	case 1:
-		inType := methodType.In(0)
-		if inType == reflect.TypeOf(popup) {
+		if equalType(methodType.In(0), reflect.TypeOf(popup)) {
 			args = []reflect.Value{reflect.ValueOf(popup)}
 		}
 	}
