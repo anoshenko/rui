@@ -108,7 +108,7 @@ func (button *checkboxData) getFunc(tag PropertyName) any {
 		}
 		return nil
 	}
-	return button.viewData.getFunc(tag)
+	return button.viewsContainerData.getFunc(tag)
 }
 
 func (button *checkboxData) setFunc(tag PropertyName, value any) []PropertyName {
