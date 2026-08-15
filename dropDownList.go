@@ -255,7 +255,7 @@ func (list *dropDownListData) handleCommand(self View, command PropertyName, dat
 				items := GetDropDownItems(list)
 				if GetCurrent(list) != number && number >= 0 && number < len(items) {
 					old := GetCurrent(list)
-					list.properties[Current] = number
+					list.setRaw(Current, number)
 					for _, listener := range getTwoArgEventListeners[DropDownList, int](list, nil, DropDownEvent) {
 						listener.Run(list, number, old)
 					}

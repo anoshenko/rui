@@ -593,7 +593,7 @@ func (animation *animationData) String() string {
 
 	for _, tag := range animation.AllTags() {
 		if tag != PropertyTag {
-			if value, ok := animation.properties[tag]; ok && value != nil {
+			if value := animation.getRaw(tag); value != nil {
 				text := propertyValueToString(tag, value, "\t")
 				if text != "" {
 					buffer.WriteString("\n\t")

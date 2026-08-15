@@ -105,9 +105,9 @@ func (image *backgroundImage) Tag() string {
 
 func (image *backgroundImage) Clone() BackgroundElement {
 	result := NewBackgroundImage(nil)
-	for tag, value := range image.properties {
-		result.setRaw(tag, value)
-	}
+	image.mutex.Lock()
+	result.setAll(image.properties)
+	image.mutex.Unlock()
 	return result
 }
 

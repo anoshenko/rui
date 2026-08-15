@@ -165,7 +165,7 @@ func (picker *colorPickerData) handleCommand(self View, command PropertyName, da
 		if text, ok := data.PropertyValue("text"); ok {
 			if color, ok := StringToColor(text); ok {
 				oldColor := GetColorPickerValue(picker)
-				picker.properties[ColorPickerValue] = color
+				picker.setRaw(ColorPickerValue, color)
 				if color != oldColor {
 					for _, listener := range getTwoArgEventListeners[ColorPicker, Color](picker, nil, ColorChangedEvent) {
 						listener.Run(picker, color, oldColor)

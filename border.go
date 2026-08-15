@@ -393,6 +393,9 @@ func (border *borderProperty) writeString(buffer *strings.Builder, indent string
 		}
 	}
 
+	border.mutex.Lock()
+	defer border.mutex.Unlock()
+
 	for _, tag := range []PropertyName{Style, Width, ColorTag} {
 		if value, ok := border.properties[tag]; ok {
 			write(tag, value)
@@ -722,7 +725,7 @@ func (border *borderProperty) deleteTag(tag PropertyName) bool {
 
 	case Left, Right, Top, Bottom:
 		if border.Get(Style) != nil {
-			border.properties[tag+"-"+Style] = 0
+			border.setRaw(tag+"-"+Style, 0)
 			result = true
 			removeTags([]PropertyName{tag + "-" + ColorTag, tag + "-" + Width})
 		} else {
@@ -732,7 +735,7 @@ func (border *borderProperty) deleteTag(tag PropertyName) bool {
 	case LeftStyle, RightStyle, TopStyle, BottomStyle:
 		if border.getRaw(tag) != nil {
 			if border.Get(Style) != nil {
-				border.properties[tag] = 0
+				border.setRaw(tag, 0)
 				result = true
 			} else {
 				removeTags([]PropertyName{tag})
@@ -742,7 +745,7 @@ func (border *borderProperty) deleteTag(tag PropertyName) bool {
 	case LeftWidth, RightWidth, TopWidth, BottomWidth:
 		if border.getRaw(tag) != nil {
 			if border.Get(Width) != nil {
-				border.properties[tag] = AutoSize()
+				border.setRaw(tag, AutoSize())
 				result = true
 			} else {
 				removeTags([]PropertyName{tag})
@@ -752,7 +755,7 @@ func (border *borderProperty) deleteTag(tag PropertyName) bool {
 	case LeftColor, RightColor, TopColor, BottomColor:
 		if border.getRaw(tag) != nil {
 			if border.Get(ColorTag) != nil {
-				border.properties[tag] = 0
+				border.setRaw(tag, 0)
 				result = true
 			} else {
 				removeTags([]PropertyName{tag})

@@ -986,7 +986,7 @@ func (listView *listViewData) handleCommand(self View, command PropertyName, dat
 		}
 
 	case "itemUnselected":
-		if _, ok := listView.properties[Current]; ok {
+		if listView.getRaw(Current) != nil {
 			listView.handleCurrent(-1)
 		}
 
@@ -1003,7 +1003,7 @@ func (listView *listViewData) handleCommand(self View, command PropertyName, dat
 }
 
 func (listView *listViewData) handleCurrent(number int) {
-	listView.properties[Current] = number
+	listView.setRaw(Current, number)
 	for _, listener := range getOneArgEventListeners[ListView, int](listView, nil, ListItemSelectedEvent) {
 		listener.Run(listView, number)
 	}

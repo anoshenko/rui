@@ -329,7 +329,7 @@ func (picker *timePickerData) handleCommand(self View, command PropertyName, dat
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, ok := stringToTime(text); ok {
 				oldValue := GetTimePickerValue(picker)
-				picker.properties[TimePickerValue] = value
+				picker.setRaw(TimePickerValue, value)
 				if value != oldValue {
 					for _, listener := range getTwoArgEventListeners[TimePicker, time.Time](picker, nil, TimeChangedEvent) {
 						listener.Run(picker, value, oldValue)

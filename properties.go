@@ -2,6 +2,7 @@ package rui
 
 import (
 	"iter"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -19,6 +20,7 @@ type Properties interface {
 	// a description of the error is written to the log
 	Set(tag PropertyName, value any) bool
 	setRaw(tag PropertyName, value any)
+	setAll(properties map[PropertyName]any)
 
 	// Remove removes the property with name defined by the argument
 	Remove(tag PropertyName)
@@ -56,9 +58,6 @@ func defaultNormalize(tag PropertyName) PropertyName {
 func (properties *propertyList) init() {
 	properties.properties = map[PropertyName]any{}
 	properties.normalize = defaultNormalize
-	//properties.getFunc = properties.getRaw
-	//properties.set = propertiesSet
-	//properties.remove = propertiesRemove
 }
 
 func (properties *propertyList) IsEmpty() bool {
@@ -87,6 +86,12 @@ func (properties *propertyList) setRaw(tag PropertyName, value any) {
 	properties.mutex.Unlock()
 }
 
+func (properties *propertyList) setAll(props map[PropertyName]any) {
+	properties.mutex.Lock()
+	maps.Copy(properties.properties, props)
+	properties.mutex.Unlock()
+}
+
 /*
 	func (properties *propertyList) Remove(tag PropertyName) {
 		properties.remove(properties, properties.normalize(tag))
@@ -100,6 +105,8 @@ func (properties *propertyList) Clear() {
 }
 
 func (properties *propertyList) All() iter.Seq2[PropertyName, any] {
+	properties.mutex.Lock()
+	defer properties.mutex.Unlock()
 	return func(yield func(PropertyName, any) bool) {
 		for tag, value := range properties.properties {
 			if !yield(tag, value) {
@@ -204,6 +211,9 @@ func (data *dataProperty) Remove(tag PropertyName) {
 }
 
 func (data *dataProperty) writeToBuffer(buffer *strings.Builder, indent string, objectName string, tags []PropertyName) {
+	data.mutex.Lock()
+	defer data.mutex.Unlock()
+
 	buffer.WriteString(objectName)
 	buffer.WriteString("{ ")
 	comma := false

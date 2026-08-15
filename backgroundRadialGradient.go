@@ -109,9 +109,9 @@ func (gradient *backgroundRadialGradient) Tag() string {
 
 func (image *backgroundRadialGradient) Clone() BackgroundElement {
 	result := NewBackgroundRadialGradient(nil)
-	for tag, value := range image.properties {
-		result.setRaw(tag, value)
-	}
+	image.mutex.Lock()
+	result.setAll(image.properties)
+	image.mutex.Unlock()
 	return result
 }
 
@@ -221,7 +221,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 		shapeText = `ellipse `
 	}
 
-	if value, ok := gradient.properties[RadialGradientRadius]; ok {
+	if value := gradient.getRaw(RadialGradientRadius); value != nil {
 		switch value := value.(type) {
 		case string:
 			if text, ok := session.resolveConstants(value); ok {

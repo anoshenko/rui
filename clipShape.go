@@ -243,7 +243,7 @@ func (clip *insetClipData) writeString(buffer *strings.Builder, indent string) {
 	buffer.WriteString("inset { ")
 	comma := false
 	for _, tag := range []PropertyName{Top, Right, Bottom, Left, Radius} {
-		if value, ok := clip.properties[tag]; ok {
+		if value := clip.getRaw(tag); value != nil {
 			text := propertyValueToString(tag, value, indent)
 			if text != "" {
 				if comma {
@@ -319,7 +319,7 @@ func (clip *circleClipData) writeString(buffer *strings.Builder, indent string) 
 	buffer.WriteString("circle { ")
 	comma := false
 	for _, tag := range []PropertyName{Radius, X, Y} {
-		if value, ok := clip.properties[tag]; ok {
+		if value := clip.getRaw(tag); value != nil {
 			text := propertyValueToString(tag, value, indent)
 			if text != "" {
 				if comma {
@@ -399,7 +399,7 @@ func (clip *ellipseClipData) writeString(buffer *strings.Builder, indent string)
 	buffer.WriteString("ellipse { ")
 	comma := false
 	for _, tag := range []PropertyName{RadiusX, RadiusY, X, Y} {
-		if value, ok := clip.properties[tag]; ok {
+		if value := clip.getRaw(tag); value != nil {
 			text := propertyValueToString(tag, value, indent)
 			if text != "" {
 				if comma {

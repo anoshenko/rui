@@ -189,7 +189,7 @@ func newFilterProperty(obj DataObject) FilterProperty {
 		}
 	}
 
-	if len(filter.properties) > 0 {
+	if !filter.IsEmpty() {
 		return filter
 	}
 	ErrorLog("Empty view filter")

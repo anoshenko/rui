@@ -268,7 +268,7 @@ func (edit *editViewData) AppendText(text string) {
 			if textValue, ok := value.(string); ok {
 				oldText := textValue
 				textValue += text
-				edit.properties[Text] = textValue
+				edit.setRaw(Text, textValue)
 				edit.session.callFunc("appendToInnerHTML", edit.htmlID(), text)
 				edit.session.callFunc("appendToInputValue", edit.htmlID(), text)
 				edit.textChanged(textValue, oldText)

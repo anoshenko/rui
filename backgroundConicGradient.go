@@ -141,9 +141,9 @@ func (gradient *backgroundConicGradient) Tag() string {
 
 func (image *backgroundConicGradient) Clone() BackgroundElement {
 	result := NewBackgroundConicGradient(nil)
-	for tag, value := range image.properties {
-		result.setRaw(tag, value)
-	}
+	image.mutex.Lock()
+	result.setAll(image.properties)
+	image.mutex.Unlock()
 	return result
 }
 
@@ -268,7 +268,7 @@ func (gradient *backgroundConicGradient) parseGradientText(value string) []Backg
 func (gradient *backgroundConicGradient) cssStyle(session Session) string {
 
 	points := []BackgroundGradientAngle{}
-	if value, ok := gradient.properties[Gradient]; ok {
+	if value := gradient.getRaw(Gradient); value != nil {
 		switch value := value.(type) {
 		case string:
 			if text, ok := session.resolveConstants(value); ok && text != "" {

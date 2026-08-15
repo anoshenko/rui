@@ -93,7 +93,7 @@ func (animation *animationData) onAnimationEnd(view View, _ PropertyName) {
 		animationView := animation.view
 		listener := animation.listener
 
-		if value, ok := animation.properties[PropertyTag]; ok {
+		if value := animation.getRaw(PropertyTag); value != nil {
 			if props, ok := value.([]AnimatedProperty); ok {
 				for _, prop := range props {
 					animationView.setRaw(prop.Tag, prop.To)
@@ -119,7 +119,7 @@ func (animation *animationData) onAnimationCancel(view View, _ PropertyName) {
 		animationView := animation.view
 		listener := animation.listener
 
-		if value, ok := animation.properties[PropertyTag]; ok {
+		if value := animation.getRaw(PropertyTag); value != nil {
 			if props, ok := value.([]AnimatedProperty); ok {
 				for _, prop := range props {
 					animationView.Set(prop.Tag, prop.To)

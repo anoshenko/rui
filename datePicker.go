@@ -354,7 +354,7 @@ func (picker *datePickerData) handleCommand(self View, command PropertyName, dat
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, err := time.Parse(dateFormat, text); err == nil {
 				oldValue := GetDatePickerValue(picker)
-				picker.properties[DatePickerValue] = value
+				picker.setRaw(DatePickerValue, value)
 				if value != oldValue {
 					for _, listener := range getTwoArgEventListeners[DatePicker, time.Time](picker, nil, DateChangedEvent) {
 						listener.Run(picker, value, oldValue)

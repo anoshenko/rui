@@ -289,7 +289,7 @@ func (picker *numberPickerData) handleCommand(self View, command PropertyName, d
 		if text, ok := data.PropertyValue("text"); ok {
 			if value, err := strconv.ParseFloat(text, 32); err == nil {
 				oldValue := GetNumberPickerValue(picker)
-				picker.properties[NumberPickerValue] = text
+				picker.setRaw(NumberPickerValue, text)
 				if value != oldValue {
 					for _, listener := range getTwoArgEventListeners[NumberPicker, float64](picker, nil, NumberChangedEvent) {
 						listener.Run(picker, value, oldValue)

@@ -1428,11 +1428,13 @@ func (popup *popupData) createLayerView() GridLayout {
 		CellHorizontalAlign,
 	}
 
+	popup.mutex.Lock()
 	for tag, value := range popup.properties {
 		if !slices.Contains(popupProperties, tag) {
 			params[tag] = value
 		}
 	}
+	popup.mutex.Unlock()
 
 	views := make([]View, 0, 3)
 	if title := popup.createTitleView(); title != nil {
@@ -1507,9 +1509,9 @@ func NewPopup(view View, param Params) Popup {
 	}
 
 	popup := new(popupData)
+	popup.init()
 	popup.session = view.Session()
 	popup.contentView = view
-	popup.properties = map[PropertyName]any{}
 	popup.hotkeys = map[string]func(Popup){}
 
 	for tag, value := range popup.session.PopupDefaultsSeq() {
@@ -1547,8 +1549,8 @@ func CreatePopupFromObject(session Session, object DataObject, binding any) Popu
 	}
 
 	popup := new(popupData)
+	popup.init()
 	popup.session = session
-	popup.properties = map[PropertyName]any{}
 	popup.hotkeys = map[string]func(Popup){}
 
 	for key, value := range object.ToParams() {

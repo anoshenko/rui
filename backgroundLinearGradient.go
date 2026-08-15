@@ -253,8 +253,8 @@ func (point *BackgroundGradientPoint) String() string {
 
 func (gradient *backgroundGradient) writeGradient(session Session, buffer *strings.Builder) bool {
 
-	value, ok := gradient.properties[Gradient]
-	if !ok {
+	value := gradient.getRaw(Gradient)
+	if value == nil {
 		return false
 	}
 
@@ -322,9 +322,9 @@ func (gradient *backgroundLinearGradient) Tag() string {
 
 func (image *backgroundLinearGradient) Clone() BackgroundElement {
 	result := NewBackgroundLinearGradient(nil)
-	for tag, value := range image.properties {
-		result.setRaw(tag, value)
-	}
+	image.mutex.Lock()
+	result.setAll(image.properties)
+	image.mutex.Unlock()
 	return result
 }
 
@@ -361,7 +361,7 @@ func (gradient *backgroundLinearGradient) cssStyle(session Session) string {
 		buffer.WriteString(`linear-gradient(`)
 	}
 
-	if value, ok := gradient.properties[Direction]; ok {
+	if value := gradient.getRaw(Direction); value != nil {
 		switch value := value.(type) {
 		case string:
 			if text, ok := session.resolveConstants(value); ok {

@@ -171,7 +171,7 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 	summary := false
 	hidden := IsSummaryMarkerHidden(detailsView)
 
-	if value, ok := detailsView.properties[Summary]; ok {
+	if value := detailsView.getRaw(Summary); value != nil {
 
 		switch value := value.(type) {
 		case string:
@@ -217,7 +217,7 @@ func (detailsView *detailsViewData) htmlSubviews(self View, buffer *strings.Buil
 func (detailsView *detailsViewData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	if command == "details-open" {
 		if n, ok := dataIntProperty(data, "open"); ok {
-			detailsView.properties[Expanded] = (n != 0)
+			detailsView.setRaw(Expanded, n != 0)
 			detailsView.runChangeListener(Expanded)
 		}
 		return true

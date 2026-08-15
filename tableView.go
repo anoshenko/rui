@@ -1201,7 +1201,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						}
 					}
 
-					if len(view.properties) > 0 {
+					if !view.IsEmpty() {
 						view.cssStyle(view, &cssBuilder)
 					}
 
