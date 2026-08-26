@@ -357,7 +357,8 @@ type popupListenerBinding struct {
 type popupData struct {
 	propertyList
 	session                 Session
-	layerView               GridLayout
+	layerBackgroudView      ColumnLayout
+	layerContentView        GridLayout
 	popupView               GridLayout
 	contentContainer        ColumnLayout
 	contentView             View
@@ -586,10 +587,10 @@ func (popup *popupData) Get(tag PropertyName) any {
 		return popup.contentView
 
 	case "layer-view":
-		if popup.layerView == nil {
-			popup.layerView = popup.createLayerView()
+		if popup.layerBackgroudView == nil {
+			popup.createLayerView()
 		}
-		return popup.layerView
+		return popup.layerBackgroudView
 
 	case DismissEvent:
 		if value := popup.getRaw(DismissEvent); value != nil {
@@ -799,7 +800,7 @@ func (popup *popupData) Remove(tag PropertyName) {
 }
 
 func (popup *popupData) propertyChanged(tag PropertyName) {
-	if popup.layerView == nil {
+	if popup.layerBackgroudView == nil {
 		return
 	}
 
@@ -808,9 +809,9 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 		popup.contentContainer.Set(Content, popup.contentView)
 
 	case Arrow, ArrowWidth, ArrowSize, ArrowAlign, ArrowOffset:
-		popup.layerView.RemoveViewByID(popupArrowID)
+		popup.layerContentView.RemoveViewByID(popupArrowID)
 		if location := popup.arrowType(); location != NoneArrow {
-			popup.layerView.Append(popup.createArrowView(location))
+			popup.layerContentView.Append(popup.createArrowView(location))
 		}
 
 	case Buttons:
@@ -821,9 +822,9 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 
 	case Margin:
 		if margin, ok := getBounds(popup, Margin, popup.session); ok {
-			popup.layerView.Set(Padding, margin)
+			popup.layerContentView.Set(Padding, margin)
 		} else {
-			popup.layerView.Remove(Padding)
+			popup.layerContentView.Remove(Padding)
 		}
 
 	case Title, CloseButton:
@@ -844,39 +845,39 @@ func (popup *popupData) propertyChanged(tag PropertyName) {
 	case OutsideClose:
 		outsideClose, _ := boolProperty(popup, OutsideClose, popup.session)
 		if outsideClose {
-			popup.layerView.Set(ClickEvent, popup.cancel)
+			popup.layerContentView.Set(ClickEvent, popup.cancel)
 		} else {
-			popup.layerView.Set(ClickEvent, func() {})
+			popup.layerContentView.Set(ClickEvent, func() {})
 		}
 
 	case ShowDuration, ShowTiming:
 		animation := popup.animationProperty()
 		opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
 		if opacity != 1 {
-			popup.layerView.SetTransition(Opacity, animation)
+			popup.layerBackgroudView.SetTransition(Opacity, animation)
 		}
 		transform := getTransformProperty(popup, ShowTransform)
 		if transform != nil {
-			popup.layerView.SetTransition(Transform, animation)
+			popup.layerContentView.SetTransition(Transform, animation)
 		}
 
 	case ShowOpacity:
 		opacity, _ := floatProperty(popup, ShowOpacity, popup.session, 1)
 		if opacity != 1 {
-			popup.layerView.SetTransition(Opacity, popup.animationProperty())
+			popup.layerBackgroudView.SetTransition(Opacity, popup.animationProperty())
 		}
 
 	case ShowTransform:
 		transform := getTransformProperty(popup, ShowTransform)
 		if transform != nil {
-			popup.layerView.SetTransition(Transform, popup.animationProperty())
+			popup.layerContentView.SetTransition(Transform, popup.animationProperty())
 		}
 
 	case OutsideColor:
-		popup.layerView.Set(BackgroundColor, popup.Get(OutsideColor))
+		popup.layerBackgroudView.Set(BackgroundColor, popup.Get(OutsideColor))
 
 	case OutsideFilter:
-		popup.layerView.Set(BackdropFilter, popup.Get(OutsideFilter))
+		popup.layerBackgroudView.Set(BackdropFilter, popup.Get(OutsideFilter))
 
 	default:
 		if popup.supported(tag) {
@@ -1094,25 +1095,30 @@ func (popup *popupData) showTransformAndOpacity() (TransformProperty, float64) {
 func (popup *popupData) showAnimation() {
 	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
-		htmlID := popup.layerView.htmlID()
-
 		session := popup.Session()
-		session.updateProperty(htmlID, "ontransitionend", "scanElementsSize()")
-		session.updateProperty(htmlID, "ontransitioncancel", "scanElementsSize()")
+
+		var eventID string
+		if transform != nil {
+			eventID = popup.layerContentView.htmlID()
+		} else {
+			eventID = popup.layerBackgroudView.htmlID()
+		}
+		session.updateProperty(eventID, "ontransitionend", "scanElementsSize()")
+		session.updateProperty(eventID, "ontransitioncancel", "scanElementsSize()")
 
 		animation := popup.animationProperty()
 		if opacity != 1 {
-			popup.layerView.SetTransition(Opacity, animation)
+			popup.layerBackgroudView.SetTransition(Opacity, animation)
 		}
 		if transform != nil {
-			popup.layerView.SetTransition(Transform, animation)
+			popup.layerContentView.SetTransition(Transform, animation)
 		}
 
 		if opacity != 1 {
-			session.updateCSSProperty(htmlID, string(Opacity), "1")
+			session.updateCSSProperty(popup.layerBackgroudView.htmlID(), string(Opacity), "1")
 		}
 		if transform != nil {
-			session.updateCSSProperty(htmlID, string(Transform), "")
+			session.updateCSSProperty(popup.layerContentView.htmlID(), string(Transform), "")
 		}
 	}
 }
@@ -1121,18 +1127,22 @@ func (popup *popupData) dismissAnimation(listener func(View, PropertyName)) bool
 	transform, opacity := popup.showTransformAndOpacity()
 	if opacity != 1 || transform != nil {
 		session := popup.Session()
-		popup.layerView.Set(TransitionEndEvent, listener)
-		popup.layerView.Set(TransitionCancelEvent, listener)
 
-		htmlID := popup.layerView.htmlID()
+		if transform != nil {
+			popup.layerContentView.Set(TransitionEndEvent, listener)
+			popup.layerContentView.Set(TransitionCancelEvent, listener)
+		} else {
+			popup.layerBackgroudView.Set(TransitionEndEvent, listener)
+			popup.layerBackgroudView.Set(TransitionCancelEvent, listener)
+		}
+
 		if opacity != 1 {
-			session.updateCSSProperty(htmlID, string(Opacity), fmt.Sprintf("%.2f", opacity))
+			session.updateCSSProperty(popup.layerBackgroudView.htmlID(), string(Opacity), fmt.Sprintf("%.2f", opacity))
 		}
 		if transform != nil {
-			session.updateCSSProperty(htmlID, string(Transform), transform.transformCSS(session))
+			session.updateCSSProperty(popup.layerContentView.htmlID(), string(Transform), transform.transformCSS(session))
 		}
 
-		//Set(popup.layerView, popupArrowID, Visibility, Invisible)
 		popup.dismissAnimationRunning = true
 		return true
 	}
@@ -1140,32 +1150,32 @@ func (popup *popupData) dismissAnimation(listener func(View, PropertyName)) bool
 }
 
 func (popup *popupData) html(hidden bool) string {
-	if popup.layerView == nil {
-		popup.layerView = popup.createLayerView()
+	if popup.layerBackgroudView == nil {
+		popup.createLayerView()
 	}
 
 	if hidden {
-		popup.layerView.Set(Visibility, Invisible)
+		popup.layerBackgroudView.Set(Visibility, Invisible)
 	}
 
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	viewHTML(popup.layerView, buffer, "")
+	viewHTML(popup.layerBackgroudView, buffer, "")
 	return buffer.String()
 }
 
 func (popup *popupData) viewByHTMLID(id string) View {
-	if popup.layerView != nil {
-		return viewByHTMLID(id, popup.layerView)
+	if popup.layerBackgroudView != nil {
+		return viewByHTMLID(id, popup.layerBackgroudView)
 	}
 	return nil
 }
 
 func (popup *popupData) onDismiss() {
-	if popup.layerView != nil {
-		popup.Session().callFunc("removeView", popup.layerView.htmlID())
-		popup.layerView = nil
+	if popup.layerBackgroudView != nil {
+		popup.Session().callFunc("removeView", popup.layerBackgroudView.htmlID())
+		popup.layerBackgroudView = nil
 
 		if value := popup.getRaw(DismissEvent); value != nil {
 			if listeners, ok := value.([]popupListener); ok {
@@ -1375,7 +1385,7 @@ func (popup *popupData) createContentContainer() ColumnLayout {
 	return popup.contentContainer
 }
 
-func (popup *popupData) createLayerView() GridLayout {
+func (popup *popupData) createLayerView() {
 
 	session := popup.session
 
@@ -1473,33 +1483,41 @@ func (popup *popupData) createLayerView() GridLayout {
 		layerParams[ClickEvent] = popup.cancel
 	}
 
+	popup.layerContentView = NewGridLayout(session, layerParams)
+
+	backgroundParams := Params{
+		Width:   Percent(100),
+		Height:  Percent(100),
+		Margin:  Px(0),
+		Padding: Px(0),
+		Content: []View{popup.layerContentView},
+	}
+
 	if value := popup.getRaw(OutsideColor); value != nil {
-		layerParams[BackgroundColor] = value
+		backgroundParams[BackgroundColor] = value
 	}
 
 	if value := popup.getRaw(OutsideFilter); value != nil {
 		if filter, ok := value.(FilterProperty); ok {
-			layerParams[BackdropFilter] = filter
+			backgroundParams[BackdropFilter] = filter
 		}
 	}
 
-	popup.layerView = NewGridLayout(session, layerParams)
+	popup.layerBackgroudView = NewColumnLayout(session, backgroundParams)
 
 	opacity, _ := floatProperty(popup, ShowOpacity, session, 1)
 	transform := getTransformProperty(popup, ShowTransform)
 	if opacity != 1 || transform != nil {
 		animation := popup.animationProperty()
 		if opacity != 1 {
-			popup.layerView.Set(Opacity, opacity)
-			popup.layerView.SetTransition(Opacity, animation)
+			popup.layerBackgroudView.Set(Opacity, opacity)
+			popup.layerBackgroudView.SetTransition(Opacity, animation)
 		}
 		if transform != nil {
-			popup.layerView.Set(Transform, transform)
-			popup.layerView.SetTransition(Transform, animation)
+			popup.layerContentView.Set(Transform, transform)
+			popup.layerContentView.SetTransition(Transform, animation)
 		}
 	}
-
-	return popup.layerView
 }
 
 // NewPopup creates a new Popup
