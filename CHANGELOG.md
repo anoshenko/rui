@@ -3,9 +3,10 @@
 * Removed "style-disabled" property and GetDisabledStyle function
 * Added GoogleFonts field to AppParams
 * Added functions: GetWhiteSpace, GetWordBreak, ScrollIntoViewIfNeeded, GetBackgroundColorPair, 
-GetAccentColorPair, GetTextColorPair, GetTextLineColor, GetCaretColorPair, GetColumnSeparatorColorPair
+GetAccentColorPair, GetTextColorPair, GetTextLineColor, GetCaretColorPair, GetColumnSeparatorColorPair, ReloadListViewItem
 * Added ClientSession interface
 * Added ClientSession, Popups, PopupDefault, PopupDefaultsSeq, and SetPopupDefaults methods to Session interface
+* Added ReloadListViewItem method to ListView interface
 * Removed ClientItem, SetClientItem, RemoveClientItem, and RemoveAllClientItems methods from Session interface
 * Added DismissWithoutAnimation add SetHotKey methods to Popup interface
 * Added "outside-color" add "outside-filter" properties to Popup interface

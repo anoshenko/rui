@@ -121,8 +121,12 @@ const (
 type ListView interface {
 	View
 	ParentView
+
 	// ReloadListViewData updates ListView content
 	ReloadListViewData()
+
+	// ReloadListViewItem updates the contents of the item at the given index.
+	ReloadListViewItem(index int)
 
 	getItemFrames() []Frame
 }
@@ -445,9 +449,8 @@ func (listView *listViewData) getAdapter() ListAdapter {
 }
 
 func (listView *listViewData) ReloadListViewData() {
-	itemCount := 0
 	if adapter := listView.getAdapter(); adapter != nil {
-		itemCount = adapter.ListSize()
+		itemCount := adapter.ListSize()
 
 		if itemCount != len(listView.items) {
 			listView.items = make([]View, itemCount)
@@ -463,6 +466,25 @@ func (listView *listViewData) ReloadListViewData() {
 	}
 
 	updateInnerHTML(listView.htmlID(), listView.session)
+}
+
+func (listView *listViewData) ReloadListViewItem(index int) {
+	adapter := listView.getAdapter()
+	if adapter == nil || index < 0 || index >= adapter.ListSize() || index >= len(listView.items) {
+		return
+	}
+
+	listView.items[index] = adapter.ListItem(index, listView.Session())
+
+	if view := listView.items[index]; view != nil {
+		html := allocStringBuilder()
+		defer freeStringBuilder(html)
+
+		listView.session.callFunc("hideTooltip")
+
+		viewHTML(view, html, "")
+		listView.session.updateInnerHTML(listView.htmlID()+"-"+strconv.Itoa(index), html.String())
+	}
 }
 
 func (listView *listViewData) getItemFrames() []Frame {
@@ -1281,11 +1303,23 @@ func GetListViewAdapter(view View, subviewID ...string) ListAdapter {
 }
 
 // ReloadListViewData updates ListView content
+//
 // If the second argument (subviewID) is not specified or it is "" then content the first argument (view) is updated.
 func ReloadListViewData(view View, subviewID ...string) {
 	if view = getSubview(view, subviewID); view != nil {
 		if listView, ok := view.(ListView); ok {
 			listView.ReloadListViewData()
+		}
+	}
+}
+
+// ReloadListViewItem updates updates the contents of the ListView item at the given index.
+//
+// If the second argument (subviewID) is not specified or it is "" then content the first argument (view) is updated.
+func ReloadListViewItem(index int, view View, subviewID ...string) {
+	if view = getSubview(view, subviewID); view != nil {
+		if listView, ok := view.(ListView); ok {
+			listView.ReloadListViewItem(index)
 		}
 	}
 }
