@@ -305,7 +305,8 @@ func writeViewStyleCSS(style Properties, builder cssBuilder, session Session, ig
 	for _, tag := range []PropertyName{
 		Overflow, TextAlign, TextTransform, TextWeight, TextLineStyle, WritingMode, TextDirection,
 		VerticalTextOrientation, CellVerticalAlign, CellHorizontalAlign, GridAutoFlow, Cursor,
-		WhiteSpace, WordBreak, TextOverflow, Float, TableVerticalAlign, Resize, MixBlendMode, BackgroundBlendMode} {
+		WhiteSpace, WordBreak, TextOverflow, TextWrap,
+		Float, TableVerticalAlign, Resize, MixBlendMode, BackgroundBlendMode} {
 
 		if data, ok := enumProperties[tag]; ok {
 			if tag != VerticalTextOrientation || (writingMode != VerticalLeftToRight && writingMode != VerticalRightToLeft) {
