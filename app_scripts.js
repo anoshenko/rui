@@ -219,6 +219,22 @@ function appendElement(elementId, content) {
 	}
 }
 
+function appendElementAfter(elementId, content) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.insertAdjacentHTML("afterend", content);
+		scanElementsSize();
+	}
+}
+
+function insertElementAtStart(elementId, content) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.insertAdjacentHTML("afterbegin", content);
+		scanElementsSize();
+	}
+}
+
 function appendToInputValue(elementId, content) {
 	const element = document.getElementById(elementId);
 	if (element) {

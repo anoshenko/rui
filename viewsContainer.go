@@ -116,10 +116,14 @@ func (container *viewsContainerData) Append(view View) {
 	}
 }
 
-func (container *viewsContainerData) insert(view View, index int) bool {
+func (container *viewsContainerData) insert(view View, index int) int {
 	if view != nil {
-		if container.views == nil || index < 0 || index >= len(container.views) {
-			return container.append(view)
+		count := len(container.views)
+		if count == 0 || index < 0 || index >= count {
+			if container.append(view) {
+				return len(container.views) - 1
+			}
+			return -1
 		}
 
 		view.setParentID(container.htmlID())
@@ -128,15 +132,28 @@ func (container *viewsContainerData) insert(view View, index int) bool {
 		} else {
 			container.views = append([]View{view}, container.views...)
 		}
-		return true
+		return index
 	}
-	return false
+	return -1
 }
 
 // Insert inserts a view to the "index" position in the list of a view children
 func (container *viewsContainerData) Insert(view View, index int) {
-	if container.insert(view, index) && container.created {
-		updateInnerHTML(container.htmlID(), container.Session())
+	index = container.insert(view, index)
+	if index >= 0 && container.created {
+		html := allocStringBuilder()
+		defer freeStringBuilder(html)
+
+		viewHTML(view, html, "")
+		if index == 0 {
+			container.Session().callFunc("insertElementAtStart", container.htmlID(), html.String())
+		} else if index >= len(container.views)-1 {
+			container.Session().callFunc("appendElement", container.htmlID(), html.String())
+		} else {
+			container.Session().callFunc("appendElementAfter", container.views[index-1].htmlID(), html.String())
+		}
+
+		//updateInnerHTML(container.htmlID(), container.Session())
 		container.runChangeListener(Content)
 	}
 }
