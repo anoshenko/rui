@@ -1462,15 +1462,17 @@ func (popup *popupData) createLayerView() {
 	popup.popupView = NewGridLayout(session, params)
 
 	layerParams := Params{
-		Style:      popupLayerID,
-		MaxWidth:   Percent(100),
-		MaxHeight:  Percent(100),
+		Width:      Percent(100),
+		Height:     Percent(100),
+		Margin:     Px(0),
 		CellWidth:  popup.layerCellWidth(),
 		CellHeight: popup.layerCellHeight(),
 	}
 
 	if margin, ok := getBounds(popup, Margin, session); ok {
 		layerParams[Padding] = margin
+	} else {
+		layerParams[Padding] = Px(0)
 	}
 
 	if location := popup.arrowType(); location != NoneArrow {
@@ -1486,10 +1488,7 @@ func (popup *popupData) createLayerView() {
 	popup.layerContentView = NewGridLayout(session, layerParams)
 
 	backgroundParams := Params{
-		Width:   Percent(100),
-		Height:  Percent(100),
-		Margin:  Px(0),
-		Padding: Px(0),
+		Style:   popupLayerID,
 		Content: []View{popup.layerContentView},
 	}
 
