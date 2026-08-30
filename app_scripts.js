@@ -211,6 +211,14 @@ function appendToInnerHTML(elementId, content) {
 	}
 }
 
+function appendElement(elementId, content) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.insertAdjacentHTML("beforeend", content);
+		scanElementsSize();
+	}
+}
+
 function appendToInputValue(elementId, content) {
 	const element = document.getElementById(elementId);
 	if (element) {

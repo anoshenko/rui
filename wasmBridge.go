@@ -79,19 +79,6 @@ func (bridge *wasmBridge) updateInnerHTML(htmlID, html string) {
 	}
 }
 
-func (bridge *wasmBridge) appendToInnerHTML(htmlID, html string) {
-	if ProtocolInDebugLog {
-		DebugLog(fmt.Sprintf("%s.innerHTML += '%s'", htmlID, html))
-	}
-
-	element := js.Global().Get("document").Call("getElementById", htmlID)
-	if !element.IsUndefined() && !element.IsNull() {
-		oldHtml := element.Get("innerHTML").String()
-		element.Set("innerHTML", oldHtml+html)
-		js.Global().Call("scanElementsSize")
-	}
-}
-
 func (bridge *wasmBridge) updateCSSProperty(htmlID, property, value string) {
 	if ProtocolInDebugLog {
 		DebugLog(fmt.Sprintf("%s.style[%s] = '%s'", htmlID, property, value))

@@ -677,7 +677,7 @@ func (layout *stackLayoutData) Append(view View) {
 		if count > 0 {
 			session.updateCSSProperty(layout.views[count-1].htmlID()+"page", "visibility", "hidden")
 		}
-		session.appendToInnerHTML(stackID, buffer.String())
+		session.callFunc("appendElement", stackID, buffer.String())
 
 		layout.runChangeListener(Content)
 	}
@@ -713,7 +713,7 @@ func (layout *stackLayoutData) Insert(view View, index int) {
 	buffer.WriteString(`</div>`)
 
 	session := layout.Session()
-	session.appendToInnerHTML(stackID, buffer.String())
+	session.callFunc("appendElement", stackID, buffer.String())
 
 	layout.runChangeListener(Content)
 }
@@ -805,7 +805,7 @@ func (layout *stackLayoutData) Push(view View, onPushFinished ...func()) {
 	viewHTML(view, buffer, "")
 	buffer.WriteString(`</div>`)
 
-	session.appendToInnerHTML(layout.htmlID(), buffer.String())
+	session.callFunc("appendElement", layout.htmlID(), buffer.String())
 
 	if prevPeek != "" {
 		mirror := transformMirror(transform, session)

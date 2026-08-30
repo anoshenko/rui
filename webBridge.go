@@ -265,10 +265,6 @@ func (bridge *webBridge) updateInnerHTML(htmlID, html string) {
 	bridge.callFunc("updateInnerHTML", htmlID, html)
 }
 
-func (bridge *webBridge) appendToInnerHTML(htmlID, html string) {
-	bridge.callFunc("appendToInnerHTML", htmlID, html)
-}
-
 func (bridge *webBridge) updateCSSProperty(htmlID, property, value string) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
 		buffer.WriteString(`element.style['`)

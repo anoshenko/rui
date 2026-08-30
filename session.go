@@ -17,7 +17,6 @@ type bridge interface {
 	callFunc(funcName string, args ...any) bool
 	localStorageRequest(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
-	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)
 	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
@@ -172,7 +171,6 @@ type Session interface {
 	writeInitScript()
 	callFunc(funcName string, args ...any)
 	updateInnerHTML(htmlID, html string)
-	appendToInnerHTML(htmlID, html string)
 	updateCSSProperty(htmlID, property, value string)
 	updateProperty(htmlID, property string, value any)
 	removeProperty(htmlID, property string)
@@ -483,16 +481,6 @@ func (session *sessionData) updateInnerHTML(htmlID, html string) {
 	if !session.ignoreViewUpdates() {
 		if session.bridge != nil {
 			session.bridge.updateInnerHTML(htmlID, html)
-		} else {
-			ErrorLog("No connection")
-		}
-	}
-}
-
-func (session *sessionData) appendToInnerHTML(htmlID, html string) {
-	if !session.ignoreViewUpdates() {
-		if session.bridge != nil {
-			session.bridge.appendToInnerHTML(htmlID, html)
 		} else {
 			ErrorLog("No connection")
 		}

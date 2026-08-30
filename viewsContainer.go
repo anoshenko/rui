@@ -111,7 +111,7 @@ func (container *viewsContainerData) Append(view View) {
 		defer freeStringBuilder(buffer)
 
 		viewHTML(view, buffer, "")
-		container.Session().appendToInnerHTML(container.htmlID(), buffer.String())
+		container.Session().callFunc("appendElement", container.htmlID(), buffer.String())
 		container.runChangeListener(Content)
 	}
 }

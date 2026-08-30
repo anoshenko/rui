@@ -1704,7 +1704,7 @@ func (manager *popupManager) showPopup(popup Popup) {
 
 	session := popup.Session()
 	session.callFunc("blurCurrent")
-	session.appendToInnerHTML(popupLayerID, popup.html(false))
+	session.callFunc("appendElement", popupLayerID, popup.html(false))
 
 	session.updateCSSProperty("ruiTooltipLayer", "visibility", "hidden")
 	session.updateCSSProperty("ruiTooltipLayer", "opacity", "0")
