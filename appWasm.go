@@ -63,6 +63,10 @@ func (app *wasmApp) handleMessage(this js.Value, args []js.Value) any {
 func (app *wasmApp) removeSession(id int) {
 }
 
+func (app *wasmApp) getCreateContentFunc() func(Session) SessionContent {
+	return app.createContentFunc
+}
+
 func (app *wasmApp) createSession() Session {
 	obj, _ := ParseDataText(js.Global().Call("sessionInfo", "").String())
 	session := newSession(app, 0, "", obj)
