@@ -252,21 +252,15 @@ func (imageView *imageViewData) htmlProperties(self View, buffer *strings.Builde
 
 	if imageResource, ok := imageProperty(imageView, Source, imageView.Session()); ok && imageResource != "" {
 		if src, srcset := imageViewSrc(imageView, imageResource); src != "" {
-			buffer.WriteString(` src="`)
-			buffer.WriteString(src)
-			buffer.WriteString(`"`)
+			writeStrings(buffer, ` src="`, src, `"`)
 			if srcset != "" {
-				buffer.WriteString(` srcset="`)
-				buffer.WriteString(srcset)
-				buffer.WriteString(`"`)
+				writeStrings(buffer, ` srcset="`, srcset, `"`)
 			}
 		}
 	}
 
 	if text := GetImageViewAltText(imageView); text != "" {
-		buffer.WriteString(` alt="`)
-		buffer.WriteString(text)
-		buffer.WriteString(`"`)
+		writeStrings(buffer, ` alt="`, text, `"`)
 	}
 
 	buffer.WriteString(` onload="imageLoaded(this, event)"`)

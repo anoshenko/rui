@@ -377,64 +377,44 @@ func (resizable *resizableData) htmlSubviews(self View, buffer *strings.Builder)
 		top = 2
 
 		if leftSide {
-			buffer.WriteString(`<div onmousedown="startResize(this, -1, -1, event)" style="cursor: nwse-resize; width: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`; height: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`;`)
+			writeStrings(buffer, `<div onmousedown="startResize(this, -1, -1, event)" style="cursor: nwse-resize; width: `,
+				w, `; height: `, w, `;`)
 			writePos(1, 2, 1, 2)
 		}
 
-		buffer.WriteString(`<div onmousedown="startResize(this, 0, -1, event)" style="cursor: ns-resize; width: 100%; height: `)
-		buffer.WriteString(w)
-		buffer.WriteString(`;`)
+		writeStrings(buffer, `<div onmousedown="startResize(this, 0, -1, event)" style="cursor: ns-resize; width: 100%; height: `, w, `;`)
 		writePos(left, left+1, 1, 2)
 
 		if rightSide {
-			buffer.WriteString(`<div onmousedown="startResize(this, 1, -1, event)" style="cursor: nesw-resize; width: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`; height: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`;`)
+			writeStrings(buffer, `<div onmousedown="startResize(this, 1, -1, event)" style="cursor: nesw-resize; width: `,
+				w, `; height: `, w, `;`)
 			writePos(left+1, left+2, 1, 2)
 		}
 	}
 
 	if leftSide {
-		buffer.WriteString(`<div onmousedown="startResize(this, -1, 0, event)" style="cursor: ew-resize; width: `)
-		buffer.WriteString(w)
-		buffer.WriteString(`; height: 100%;`)
+		writeStrings(buffer, `<div onmousedown="startResize(this, -1, 0, event)" style="cursor: ew-resize; width: `, w, `; height: 100%;`)
 		writePos(1, 2, top, top+1)
 	}
 
 	if rightSide {
-		buffer.WriteString(`<div onmousedown="startResize(this, 1, 0, event)" style="cursor: ew-resize; width: `)
-		buffer.WriteString(w)
-		buffer.WriteString(`; height: 100%;`)
+		writeStrings(buffer, `<div onmousedown="startResize(this, 1, 0, event)" style="cursor: ew-resize; width: `, w, `; height: 100%;`)
 		writePos(left+1, left+2, top, top+1)
 	}
 
 	if (side & BottomSide) != 0 {
 		if leftSide {
-			buffer.WriteString(`<div onmousedown="startResize(this, -1, 1, event)" style="cursor: nesw-resize; width: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`; height: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`;`)
+			writeStrings(buffer, `<div onmousedown="startResize(this, -1, 1, event)" style="cursor: nesw-resize; width: `,
+				w, `; height: `, w, `;`)
 			writePos(1, 2, top+1, top+2)
 		}
 
-		buffer.WriteString(`<div onmousedown="startResize(this, 0, 1, event)" style="cursor: ns-resize; width: 100%; height: `)
-		buffer.WriteString(w)
-		buffer.WriteString(`;`)
+		writeStrings(buffer, `<div onmousedown="startResize(this, 0, 1, event)" style="cursor: ns-resize; width: 100%; height: `, w, `;`)
 		writePos(left, left+1, top+1, top+2)
 
 		if rightSide {
-			buffer.WriteString(`<div onmousedown="startResize(this, 1, 1, event)" style="cursor: nwse-resize; width: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`; height: `)
-			buffer.WriteString(w)
-			buffer.WriteString(`;`)
+			writeStrings(buffer, `<div onmousedown="startResize(this, 1, 1, event)" style="cursor: nwse-resize; width: `,
+				w, `; height: `, w, `;`)
 			writePos(left+1, left+2, top+1, top+2)
 		}
 	}

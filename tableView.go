@@ -999,19 +999,13 @@ func tableViewCellID(view View, row, column int) string {
 func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 
 	if content := GetTableContent(table); content != nil {
-		buffer.WriteString(` data-rows="`)
-		buffer.WriteString(strconv.Itoa(content.RowCount()))
-		buffer.WriteString(`" data-columns="`)
-		buffer.WriteString(strconv.Itoa(content.ColumnCount()))
-		buffer.WriteRune('"')
+		writeStrings(buffer, ` data-rows="`, strconv.Itoa(content.RowCount()),
+			`" data-columns="`, strconv.Itoa(content.ColumnCount()), `"`)
 	}
 
 	if selectionMode := GetTableSelectionMode(table); selectionMode != NoneSelection {
-		buffer.WriteString(` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`)
-		buffer.WriteString(tableViewCurrentStyle(table))
-		buffer.WriteString(`" data-bluritemstyle="`)
-		buffer.WriteString(tableViewCurrentInactiveStyle(table))
-		buffer.WriteRune('"')
+		writeStrings(buffer, ` onfocus="tableViewFocusEvent(this, event)" onblur="tableViewBlurEvent(this, event)" data-focusitemstyle="`,
+			tableViewCurrentStyle(table), `" data-bluritemstyle="`, tableViewCurrentInactiveStyle(table), `"`)
 
 		current := tableViewCurrent(table)
 
@@ -1019,17 +1013,13 @@ func (table *tableViewData) htmlProperties(self View, buffer *strings.Builder) {
 		case RowSelection:
 			buffer.WriteString(` data-selection="row" onkeydown="tableViewRowKeyDownEvent(this, event)"`)
 			if current.Row >= 0 {
-				buffer.WriteString(` data-current="`)
-				buffer.WriteString(tableViewRowID(table, current.Row))
-				buffer.WriteRune('"')
+				writeStrings(buffer, ` data-current="`, tableViewRowID(table, current.Row), `"`)
 			}
 
 		case CellSelection:
 			buffer.WriteString(` data-selection="cell" onkeydown="tableViewCellKeyDownEvent(this, event)"`)
 			if current.Row >= 0 && current.Column >= 0 {
-				buffer.WriteString(` data-current="`)
-				buffer.WriteString(tableViewCellID(table, current.Row, current.Column))
-				buffer.WriteRune('"')
+				writeStrings(buffer, ` data-current="`, tableViewCellID(table, current.Row, current.Column), `"`)
 			}
 		}
 	}
@@ -1116,9 +1106,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				}
 			}
 
-			buffer.WriteString(`<tr id="`)
-			buffer.WriteString(tableViewRowID(table, row))
-			buffer.WriteRune('"')
+			writeStrings(buffer, `<tr id="`, tableViewRowID(table, row), `"`)
 
 			if selectionMode == RowSelection {
 				if row == current.Row {
@@ -1139,9 +1127,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 			}
 
 			if cssBuilder.buffer.Len() > 0 {
-				buffer.WriteString(` style="`)
-				buffer.WriteString(cssBuilder.buffer.String())
-				buffer.WriteString(`"`)
+				writeStrings(buffer, ` style="`, cssBuilder.buffer.String(), `"`)
 			}
 			buffer.WriteString(">")
 
@@ -1205,11 +1191,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						view.cssStyle(view, &cssBuilder)
 					}
 
-					buffer.WriteRune('<')
-					buffer.WriteString(cellTag)
-					buffer.WriteString(` id="`)
-					buffer.WriteString(tableViewCellID(table, row, column))
-					buffer.WriteString(`" class="ruiView`)
+					writeStrings(buffer, `<`, cellTag, ` id="`, tableViewCellID(table, row, column), `" class="ruiView`)
 
 					if selectionMode == CellSelection && row == current.Row && column == current.Column {
 						buffer.WriteRune(' ')
@@ -1229,9 +1211,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					}
 
 					if columnSpan > 1 {
-						buffer.WriteString(` colspan="`)
-						buffer.WriteString(strconv.Itoa(columnSpan))
-						buffer.WriteRune('"')
+						writeStrings(buffer, ` colspan="`, strconv.Itoa(columnSpan), `"`)
 						for c := column + 1; c < column+columnSpan; c++ {
 							ignoreCells = append(ignoreCells, struct {
 								row    int
@@ -1241,9 +1221,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					}
 
 					if rowSpan > 1 {
-						buffer.WriteString(` rowspan="`)
-						buffer.WriteString(strconv.Itoa(rowSpan))
-						buffer.WriteRune('"')
+						writeStrings(buffer, ` rowspan="`, strconv.Itoa(rowSpan), `"`)
 						if columnSpan < 1 {
 							columnSpan = 1
 						}
@@ -1258,9 +1236,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					}
 
 					if cssBuilder.buffer.Len() > 0 {
-						buffer.WriteString(` style="`)
-						buffer.WriteString(cssBuilder.buffer.String())
-						buffer.WriteRune('"')
+						writeStrings(buffer, ` style="`, cssBuilder.buffer.String(), `"`)
 					}
 					buffer.WriteRune('>')
 
@@ -1275,18 +1251,14 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 							table.cellViews = append(table.cellViews, value)
 
 						case Color:
-							buffer.WriteString(`<div style="display: inline; height: 1em; background-color: `)
-							buffer.WriteString(value.cssString())
-							buffer.WriteString(`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `)
-							buffer.WriteString(value.String())
+							writeStrings(buffer, `<div style="display: inline; height: 1em; background-color: `,
+									value.cssString(), `">&nbsp;&nbsp;&nbsp;&nbsp;</div> `, value.String())
 							if namedColors == nil {
 								namedColors = NamedColors()
 							}
 							for _, namedColor := range namedColors {
 								if namedColor.Color == value {
-									buffer.WriteString(" (")
-									buffer.WriteString(namedColor.Name)
-									buffer.WriteRune(')')
+									writeStrings(buffer, " (", namedColor.Name, `)`)
 									break
 								}
 							}
@@ -1319,9 +1291,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 						}
 					*/
 
-					buffer.WriteString(`</`)
-					buffer.WriteString(cellTag)
-					buffer.WriteRune('>')
+					writeStrings(buffer, `</`, cellTag, `>`)
 				}
 			}
 
@@ -1342,9 +1312,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 			}
 
 			if cssBuilder.buffer.Len() > 0 {
-				buffer.WriteString(`<col style="`)
-				buffer.WriteString(cssBuilder.buffer.String())
-				buffer.WriteString(`">`)
+				writeStrings(buffer, `<col style="`, cssBuilder.buffer.String(), `">`)
 			} else {
 				buffer.WriteString("<col>")
 			}
@@ -1376,12 +1344,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 			switch value := value.(type) {
 			case string:
 				if style, ok := session.resolveConstants(value); ok {
-					buffer.WriteString(` class="`)
-					buffer.WriteString(style)
-					buffer.WriteString(`" style="vertical-align: `)
-					buffer.WriteString(vAlign)
-					buffer.WriteString(`;">`)
-
+					writeStrings(buffer, ` class="`, style, `" style="vertical-align: `, vAlign, `;">`)
 					return table.cellBorderFromStyle(style), table.cellPaddingFromStyle(style)
 				}
 
@@ -1415,18 +1378,14 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 
 				view.cssStyle(view, &cssBuilder)
 				if cssBuilder.buffer.Len() > 0 {
-					buffer.WriteString(` style="`)
-					buffer.WriteString(cssBuilder.buffer.String())
-					buffer.WriteString(`"`)
+					writeStrings(buffer, ` style="`, cssBuilder.buffer.String(), `"`)
 				}
 				buffer.WriteRune('>')
 				return border, padding
 			}
 		}
 
-		buffer.WriteString(` style="vertical-align: `)
-		buffer.WriteString(vAlign)
-		buffer.WriteString(`;">`)
+		writeStrings(buffer, ` style="vertical-align: `, vAlign, `;">`)
 		return nil, nil
 	}
 
@@ -1454,9 +1413,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	}
 
 	if rowCount > footHeight+headHeight {
-		buffer.WriteString(`<tbody  style="vertical-align: `)
-		buffer.WriteString(vAlign)
-		buffer.WriteString(`;">`)
+		writeStrings(buffer, `<tbody  style="vertical-align: `, vAlign, `;">`)
 		tableCSS(headHeight, rowCount-footHeight, "td", cellBorder, cellPadding)
 		buffer.WriteString("</tbody>")
 	}
@@ -1543,17 +1500,13 @@ func (table *tableViewData) writeCellHtml(adapter TableAdapter, row, column int,
 		table.cellViews = append(table.cellViews, value)
 
 	case Color:
-		buffer.WriteString(`<div style="display: inline; height: 1em; background-color: `)
-		buffer.WriteString(value.cssString())
-		buffer.WriteString(`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `)
-		buffer.WriteString(value.String())
+		writeStrings(buffer, `<div style="display: inline; height: 1em; background-color: `, value.cssString(),
+			`">&nbsp;&nbsp;&nbsp;&nbsp;</div> `, value.String())
 
 		namedColors := NamedColors()
 		for _, namedColor := range namedColors {
 			if namedColor.Color == value {
-				buffer.WriteString(" (")
-				buffer.WriteString(namedColor.Name)
-				buffer.WriteRune(')')
+				writeStrings(buffer, " (", namedColor.Name, ")")
 				break
 			}
 		}

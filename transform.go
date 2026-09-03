@@ -467,38 +467,22 @@ func (transform *transformPropertyData) transformCSS(session Session) string {
 	defer freeStringBuilder(buffer)
 
 	if perspective, ok := sizeProperty(transform, Perspective, session); ok && perspective.Type != Auto && perspective.Value != 0 {
-		buffer.WriteString(`perspective(`)
-		buffer.WriteString(perspective.cssString("0", session))
-		buffer.WriteString(") ")
+		writeStrings(buffer, `perspective(`, perspective.cssString("0", session), `) `)
 	}
 
 	skewX, skewY, skewOK := transform.getSkew(session)
 	if skewOK {
-		buffer.WriteString(`skew(`)
-		buffer.WriteString(skewX.cssString())
-		buffer.WriteRune(',')
-		buffer.WriteString(skewY.cssString())
-		buffer.WriteString(") ")
+		writeStrings(buffer, `skew(`, skewX.cssString(), `,`, skewY.cssString(), `) `)
 	}
 
 	x, y, z := transform.getTranslate(session)
 	if z.Type != Auto && z.Value != 0 {
 
-		buffer.WriteString(`translate3d(`)
-		buffer.WriteString(x.cssString("0px", session))
-		buffer.WriteRune(',')
-		buffer.WriteString(y.cssString("0px", session))
-		buffer.WriteRune(',')
-		buffer.WriteString(z.cssString("0px", session))
-		buffer.WriteString(") ")
+		writeStrings(buffer, `translate3d(`, x.cssString("0px", session), `,`, y.cssString("0px", session), `,`, z.cssString("0px", session), `) `)
 
 	} else if (x.Type != Auto && x.Value != 0) || (y.Type != Auto && y.Value != 0) {
 
-		buffer.WriteString(`translate(`)
-		buffer.WriteString(x.cssString("0px", session))
-		buffer.WriteRune(',')
-		buffer.WriteString(y.cssString("0px", session))
-		buffer.WriteString(") ")
+		writeStrings(buffer, `translate(`, x.cssString("0px", session), `,`, y.cssString("0px", session), `) `)
 	}
 
 	scaleX, okScaleX := floatTextProperty(transform, ScaleX, session, 1)
@@ -506,21 +490,11 @@ func (transform *transformPropertyData) transformCSS(session Session) string {
 	scaleZ, okScaleZ := floatTextProperty(transform, ScaleZ, session, 1)
 	if okScaleZ {
 
-		buffer.WriteString(`scale3d(`)
-		buffer.WriteString(scaleX)
-		buffer.WriteRune(',')
-		buffer.WriteString(scaleY)
-		buffer.WriteRune(',')
-		buffer.WriteString(scaleZ)
-		buffer.WriteString(") ")
+		writeStrings(buffer, `scale3d(`, scaleX, `,`, scaleY, `,`, scaleZ, `) `)
 
 	} else if okScaleX || okScaleY {
 
-		buffer.WriteString(`scale(`)
-		buffer.WriteString(scaleX)
-		buffer.WriteRune(',')
-		buffer.WriteString(scaleY)
-		buffer.WriteString(") ")
+		writeStrings(buffer, `scale(`, scaleX, `,`, scaleY, `) `)
 	}
 
 	if angle, ok := angleProperty(transform, Rotate, session); ok {
@@ -530,21 +504,11 @@ func (transform *transformPropertyData) transformCSS(session Session) string {
 
 		if xOK || yOK || zOK {
 
-			buffer.WriteString(`rotate3d(`)
-			buffer.WriteString(rotateX)
-			buffer.WriteRune(',')
-			buffer.WriteString(rotateY)
-			buffer.WriteRune(',')
-			buffer.WriteString(rotateZ)
-			buffer.WriteRune(',')
-			buffer.WriteString(angle.cssString())
-			buffer.WriteString(") ")
+			writeStrings(buffer, `rotate3d(`, rotateX, `,`, rotateY, `,`, rotateZ, `,`, angle.cssString(), `) `)
 
 		} else {
 
-			buffer.WriteString(`rotate(`)
-			buffer.WriteString(angle.cssString())
-			buffer.WriteString(") ")
+			writeStrings(buffer, `rotate(`, angle.cssString(), `) `)
 		}
 	}
 

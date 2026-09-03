@@ -209,11 +209,7 @@ func stringToColor(text string) (Color, error) {
 
 func writeColorCSS(buffer *strings.Builder, lightColor, darkColor Color, session Session) {
 	if session.lightDarkSupport() {
-		buffer.WriteString("light-dark(")
-		buffer.WriteString(lightColor.cssString())
-		buffer.WriteRune(',')
-		buffer.WriteString(darkColor.cssString())
-		buffer.WriteRune(')')
+		writeStrings(buffer, "light-dark(", lightColor.cssString(), ",", darkColor.cssString(), ")")
 	} else if session.DarkTheme() {
 		buffer.WriteString(darkColor.cssString())
 	} else {

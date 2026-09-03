@@ -39,10 +39,7 @@ func focusEventsHtml(view View, buffer *strings.Builder) {
 	if view.Focusable() {
 		for _, tag := range []PropertyName{FocusEvent, LostFocusEvent} {
 			if js, ok := eventJsFunc[tag]; ok {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
+				writeStrings(buffer, js.jsEvent, `="`, js.jsFunc, `(this, event)" `)
 			}
 		}
 	}

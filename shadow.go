@@ -224,14 +224,8 @@ func (shadow *shadowPropertyData) cssStyle(buffer *strings.Builder, session Sess
 		buffer.WriteString("inset ")
 	}
 
-	buffer.WriteString(offsetX.cssString("0", session))
-	buffer.WriteByte(' ')
-	buffer.WriteString(offsetY.cssString("0", session))
-	buffer.WriteByte(' ')
-	buffer.WriteString(blurRadius.cssString("0", session))
-	buffer.WriteByte(' ')
-	buffer.WriteString(spreadRadius.cssString("0", session))
-	buffer.WriteByte(' ')
+	writeStrings(buffer, offsetX.cssString("0", session), " ", offsetY.cssString("0", session), " ",
+		blurRadius.cssString("0", session), " ", spreadRadius.cssString("0", session), " ")
 	writeColorCSS(buffer, lightColor, darkColor, session)
 	return true
 }
@@ -249,13 +243,8 @@ func (shadow *shadowPropertyData) cssTextStyle(buffer *strings.Builder, session 
 		return false
 	}
 
-	buffer.WriteString(lead)
-	buffer.WriteString(offsetX.cssString("0", session))
-	buffer.WriteByte(' ')
-	buffer.WriteString(offsetY.cssString("0", session))
-	buffer.WriteByte(' ')
-	buffer.WriteString(blurRadius.cssString("0", session))
-	buffer.WriteByte(' ')
+	writeStrings(buffer, lead, offsetX.cssString("0", session), " ", offsetY.cssString("0", session),
+		" ", blurRadius.cssString("0", session), " ")
 	writeColorCSS(buffer, lightColor, darkColor, session)
 	return true
 }

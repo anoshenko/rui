@@ -135,9 +135,7 @@ func (image *backgroundImage) cssStyle(session Session) string {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
 
-		buffer.WriteString(`url(`)
-		buffer.WriteString(src)
-		buffer.WriteRune(')')
+		writeStrings(buffer, `url(`, src, ")")
 
 		attachment, _ := enumProperty(image, Attachment, session, NoRepeat)
 		values := enumProperties[Attachment].values
@@ -177,10 +175,7 @@ func (image *backgroundImage) cssStyle(session Session) string {
 			height, _ := sizeProperty(image, Height, session)
 
 			if width.Type != Auto || height.Type != Auto {
-				buffer.WriteString(` / `)
-				buffer.WriteString(width.cssString("auto", session))
-				buffer.WriteRune(' ')
-				buffer.WriteString(height.cssString("auto", session))
+				writeStrings(buffer, ` / `, width.cssString("auto", session), " ", height.cssString("auto", session))
 			}
 		}
 

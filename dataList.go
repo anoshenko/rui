@@ -283,9 +283,8 @@ func getDataListProperty(properties Properties) []string {
 func dataListHtmlSubviews(view View, buffer *strings.Builder, normalizeItem func(text string, session Session) string) {
 	if items := getDataListProperty(view); len(items) > 0 {
 		session := view.Session()
-		buffer.WriteString(`<datalist id="`)
-		buffer.WriteString(dataListID(view))
-		buffer.WriteString(`">`)
+
+		writeStrings(buffer, `<datalist id="`, dataListID(view), `">`)
 		for _, text := range items {
 			text = normalizeItem(text, session)
 
@@ -295,9 +294,7 @@ func dataListHtmlSubviews(view View, buffer *strings.Builder, normalizeItem func
 			if strings.ContainsRune(text, '\n') {
 				text = strings.ReplaceAll(text, "\n", `\n`)
 			}
-			buffer.WriteString(`<option value="`)
-			buffer.WriteString(textToHtml(text))
-			buffer.WriteString(`"></option>`)
+			writeStrings(buffer, `<option value="`, textToHtml(text), `"></option>`)
 		}
 		buffer.WriteString(`</datalist>`)
 	}
@@ -305,9 +302,7 @@ func dataListHtmlSubviews(view View, buffer *strings.Builder, normalizeItem func
 
 func dataListHtmlProperties(view View, buffer *strings.Builder) {
 	if len(getDataListProperty(view)) > 0 {
-		buffer.WriteString(` list="`)
-		buffer.WriteString(dataListID(view))
-		buffer.WriteString(`"`)
+		writeStrings(buffer, ` list="`, dataListID(view), `"`)
 	}
 }
 

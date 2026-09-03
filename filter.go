@@ -236,10 +236,7 @@ func (filter *filterData) cssStyle(session Session) string {
 	defer freeStringBuilder(buffer)
 
 	if value, ok := floatTextProperty(filter, Blur, session, 0); ok {
-		buffer.WriteString(string(Blur))
-		buffer.WriteRune('(')
-		buffer.WriteString(value)
-		buffer.WriteString("px)")
+		writeStrings(buffer, string(Blur), "(", value, "px)")
 	}
 
 	for _, tag := range []PropertyName{Brightness, Contrast, Saturate, Grayscale, Invert, Opacity, Sepia} {
@@ -247,10 +244,7 @@ func (filter *filterData) cssStyle(session Session) string {
 			if buffer.Len() > 0 {
 				buffer.WriteRune(' ')
 			}
-			buffer.WriteString(string(tag))
-			buffer.WriteRune('(')
-			buffer.WriteString(value)
-			buffer.WriteString("%)")
+			writeStrings(buffer, string(tag), "(", value, "%)")
 		}
 	}
 
@@ -258,10 +252,7 @@ func (filter *filterData) cssStyle(session Session) string {
 		if buffer.Len() > 0 {
 			buffer.WriteRune(' ')
 		}
-		buffer.WriteString(string(HueRotate))
-		buffer.WriteRune('(')
-		buffer.WriteString(value.cssString())
-		buffer.WriteRune(')')
+		writeStrings(buffer, string(HueRotate), "(", value.cssString(), ")")
 	}
 
 	var lead string

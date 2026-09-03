@@ -596,47 +596,30 @@ func (animation *animationData) String() string {
 			if value := animation.getRaw(tag); value != nil {
 				text := propertyValueToString(tag, value, "\t")
 				if text != "" {
-					buffer.WriteString("\n\t")
-					buffer.WriteString(string(tag))
-					buffer.WriteString(" = ")
-					buffer.WriteString(text)
-					buffer.WriteRune(',')
+					writeStrings(buffer, "\n\t", string(tag), " = ", text, `,`)
 				}
 			}
 		}
 	}
 
 	writeProperty := func(prop AnimatedProperty, indent string) {
-		buffer.WriteString(string(prop.Tag))
-		buffer.WriteString("{\n")
-		buffer.WriteString(indent)
-		buffer.WriteString("from = ")
-		buffer.WriteString(propertyValueToString("from", prop.From, indent))
-		buffer.WriteString(",\n")
-		buffer.WriteString(indent)
-		buffer.WriteString("to = ")
-		buffer.WriteString(propertyValueToString("to", prop.To, indent))
+		writeStrings(buffer, string(prop.Tag),
+			"{\n", indent, "from = ", propertyValueToString("from", prop.From, indent),
+			",\n", indent, "to = ", propertyValueToString("to", prop.To, indent))
+
 		for key, value := range prop.KeyFrames {
 			tag := strconv.Itoa(key) + "%"
 			text := propertyValueToString(PropertyName(tag), value, indent)
 			if text != "" {
-				buffer.WriteString(",\n")
-				buffer.WriteString(indent)
-				buffer.WriteString(tag)
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
+				writeStrings(buffer, ",\n", indent, tag, " = ", text)
 			}
 		}
-		buffer.WriteString("\n")
-		buffer.WriteString(indent[1:])
-		buffer.WriteString("}")
+		writeStrings(buffer, "\n", indent[1:], "}")
 	}
 
 	if props := animation.animatedProperties(); len(props) > 0 {
 
-		buffer.WriteString("\n\t")
-		buffer.WriteString(string(PropertyTag))
-		buffer.WriteString(" = ")
+		writeStrings(buffer, "\n\t", string(PropertyTag), " = ")
 		if len(props) > 1 {
 			buffer.WriteString("[\n")
 			for _, prop := range props {
@@ -728,10 +711,7 @@ func (animation *animationData) writeTransitionString(tag PropertyName, buffer *
 		if value := animation.getRaw(name); value != nil {
 			text := propertyValueToString(name, value, "")
 			if text != "" {
-				buffer.WriteString(lead)
-				buffer.WriteString(string(name))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
+				writeStrings(buffer, lead, string(name), " = ", text)
 				lead = ", "
 				return true
 			}
@@ -748,13 +728,9 @@ func (animation *animationData) writeTransitionString(tag PropertyName, buffer *
 
 	if value := animation.getRaw(TimingFunction); value != nil {
 		if timingFunction, ok := value.(string); ok && timingFunction != "" {
-			buffer.WriteString(lead)
-			buffer.WriteString(string(TimingFunction))
-			buffer.WriteString(" = ")
+			writeStrings(buffer, lead, string(TimingFunction), " = ")
 			if strings.ContainsAny(timingFunction, " ,()") {
-				buffer.WriteRune('"')
-				buffer.WriteString(timingFunction)
-				buffer.WriteRune('"')
+				writeStrings(buffer, `"`, timingFunction, `"`)
 			} else {
 				buffer.WriteString(timingFunction)
 			}
@@ -776,49 +752,30 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 				if value := animation.Get(tag); value != nil {
 					text := propertyValueToString(tag, value, indent2)
 					if text != "" {
-						buffer.WriteRune('\n')
-						buffer.WriteString(indent2)
-						buffer.WriteString(string(tag))
-						buffer.WriteString(" = ")
-						buffer.WriteString(text)
-						buffer.WriteRune(',')
+						writeStrings(buffer, "\n", indent2, string(tag), " = ", text, ",")
 					}
 				}
 			}
 		}
 
 		writeProperty := func(prop AnimatedProperty, indent string) {
-			buffer.WriteString(string(prop.Tag))
-			buffer.WriteString("{\n")
 			indent2 := indent + "\t"
-			buffer.WriteString(indent2)
-			buffer.WriteString("from = ")
-			buffer.WriteString(propertyValueToString("from", prop.From, indent2))
-			buffer.WriteString(",\n")
-			buffer.WriteString(indent2)
-			buffer.WriteString("to = ")
-			buffer.WriteString(propertyValueToString("to", prop.To, indent2))
+			writeStrings(buffer, string(prop.Tag),
+				"{\n", indent2, "from = ", propertyValueToString("from", prop.From, indent2),
+				",\n", indent2, "to = ", propertyValueToString("to", prop.To, indent2))
+
 			for key, value := range prop.KeyFrames {
 				text := propertyValueToString(PropertyName(tag), value, indent2)
 				if text != "" {
-					buffer.WriteString(",\n")
-					buffer.WriteString(indent2)
-					tag := strconv.Itoa(key) + "%"
-					buffer.WriteString(tag)
-					buffer.WriteString(" = ")
-					buffer.WriteString(text)
+					writeStrings(buffer, ",\n", indent2, strconv.Itoa(key), "% = ", text)
 				}
 			}
-			buffer.WriteString(",\n")
-			buffer.WriteString(indent)
-			buffer.WriteString("},")
+
+			writeStrings(buffer, ",\n", indent, "},")
 		}
 
 		if props, ok := animation.Get(PropertyTag).([]AnimatedProperty); ok && props != nil && len(props) > 0 {
-			buffer.WriteRune('\n')
-			buffer.WriteString(indent2)
-			buffer.WriteString(string(PropertyTag))
-			buffer.WriteString(" = ")
+			writeStrings(buffer, "\n", indent2, string(PropertyTag), " = ")
 			if len(props) > 1 {
 				buffer.WriteString("[\n")
 				for _, prop := range props {
@@ -832,9 +789,7 @@ func (animation *animationData) writeAnimationString(tag PropertyName, buffer *s
 				writeProperty(props[0], indent2)
 			}
 		}
-		buffer.WriteRune('\n')
-		buffer.WriteString(indent)
-		buffer.WriteString("},\n")
+		writeStrings(buffer, "\n", indent, "},\n")
 	}
 
 	writeAnimation(animation, buffer, indent)

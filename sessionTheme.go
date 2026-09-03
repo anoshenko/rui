@@ -234,11 +234,8 @@ func (session *sessionData) checkboxImage(checked bool, accentColor Color) strin
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`<div style="width: 18px; height: 18px; background-color: `)
-	buffer.WriteString(backgroundColor.cssString())
-	buffer.WriteString(`; border: 1px solid `)
-	buffer.WriteString(borderColor.cssString())
-	buffer.WriteString(`; border-radius: 4px;">`)
+	writeStrings(buffer, `<div style="width: 18px; height: 18px; background-color: `, backgroundColor.cssString(),
+		`; border: 1px solid `, borderColor.cssString(), `; border-radius: 4px;">`)
 	if checked {
 		buffer.WriteString(checkImage)
 	}

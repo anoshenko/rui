@@ -946,13 +946,9 @@ func (player *mediaPlayerData) htmlSubviews(self View, buffer *strings.Builder) 
 			session := player.session
 			for _, src := range sources {
 				if url, ok := session.resolveConstants(src.Url); ok && url != "" {
-					buffer.WriteString(`<source src="`)
-					buffer.WriteString(url)
-					buffer.WriteRune('"')
+					writeStrings(buffer, `<source src="`, url, `"`)
 					if mime, ok := session.resolveConstants(src.MimeType); ok && mime != "" {
-						buffer.WriteString(` type="`)
-						buffer.WriteString(mime)
-						buffer.WriteRune('"')
+						writeStrings(buffer, ` type="`, mime, `"`)
 					}
 					buffer.WriteRune('>')
 				}
@@ -972,18 +968,12 @@ func (player *mediaPlayerData) htmlProperties(self View, buffer *strings.Builder
 
 	if value, ok := enumProperty(player, Preload, player.session, 0); ok {
 		values := enumProperties[Preload].values
-		buffer.WriteString(` preload="`)
-		buffer.WriteString(values[value])
-		buffer.WriteRune('"')
+		writeStrings(buffer, ` preload="`, values[value], `"`)
 	}
 
 	for tag, cssTag := range mediaPlayerEvents() {
 		if value := player.getRaw(tag); value != nil {
-			buffer.WriteString(` `)
-			buffer.WriteString(cssTag)
-			buffer.WriteString(`="playerEvent(this, '`)
-			buffer.WriteString(string(tag))
-			buffer.WriteString(`')"`)
+			writeStrings(buffer, ` `, cssTag, `="playerEvent(this, '`, string(tag), `')"`)
 		}
 	}
 

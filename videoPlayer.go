@@ -106,20 +106,14 @@ func (player *videoPlayerData) htmlProperties(self View, buffer *strings.Builder
 	session := player.Session()
 
 	if size, ok := floatTextProperty(player, VideoWidth, session, 0); ok && size != "0" {
-		buffer.WriteString(` width="`)
-		buffer.WriteString(size)
-		buffer.WriteString(`"`)
+		writeStrings(buffer, ` width="`, size, `"`)
 	}
 
 	if size, ok := floatTextProperty(player, VideoHeight, session, 0); ok && size != "0" {
-		buffer.WriteString(` height="`)
-		buffer.WriteString(size)
-		buffer.WriteString(`"`)
+		writeStrings(buffer, ` height="`, size, `"`)
 	}
 
 	if url, ok := stringProperty(player, Poster, session); ok && url != "" {
-		buffer.WriteString(` poster="`)
-		buffer.WriteString(url)
-		buffer.WriteString(`"`)
+		writeStrings(buffer, ` poster="`, url, `"`)
 	}
 }

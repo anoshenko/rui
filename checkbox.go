@@ -199,13 +199,11 @@ func (button *checkboxData) cssStyle(self View, builder cssBuilder) {
 }
 
 func checkboxHtml(button View, buffer *strings.Builder, checked bool) (int, int) {
-	//func (button *checkboxData) htmlCheckbox(buffer *strings.Builder, checked bool) (int, int) {
+
 	vAlign := GetCheckboxVerticalAlign(button)
 	hAlign := GetCheckboxHorizontalAlign(button)
 
-	buffer.WriteString(`<div id="`)
-	buffer.WriteString(button.htmlID())
-	buffer.WriteString(`checkbox" style="display: grid;`)
+	writeStrings(buffer, `<div id="`, button.htmlID(), `checkbox" style="display: grid;`)
 	if hAlign == CenterAlign {
 		buffer.WriteString(" justify-items: center; grid-column-start: 1; grid-column-end: 2;")
 		if vAlign == BottomAlign {
@@ -253,9 +251,7 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 
 	vCheckboxAlign, hCheckboxAlign := checkboxHtml(button, buffer, IsCheckboxChecked(button))
 
-	buffer.WriteString(`<div id="`)
-	buffer.WriteString(button.htmlID())
-	buffer.WriteString(`content" style="display: grid;`)
+	writeStrings(buffer, `<div id="`, button.htmlID(), `content" style="display: grid;`)
 	if hCheckboxAlign == LeftAlign {
 		buffer.WriteString(" grid-column-start: 2; grid-column-end: 3;")
 	} else {
@@ -268,15 +264,9 @@ func (button *checkboxData) htmlSubviews(self View, buffer *strings.Builder) {
 		buffer.WriteString(" grid-row-start: 1; grid-row-end: 2;")
 	}
 
-	buffer.WriteString(" align-items: ")
-	buffer.WriteString(checkboxVerticalAlignCSS(button))
-	buffer.WriteRune(';')
-
-	buffer.WriteString(" justify-items: ")
-	buffer.WriteString(checkboxHorizontalAlignCSS(button))
-	buffer.WriteRune(';')
-
-	buffer.WriteString(`">`)
+	writeStrings(buffer,
+		" align-items: ", checkboxVerticalAlignCSS(button), `;`,
+		" justify-items: ", checkboxHorizontalAlignCSS(button), `;">`)
 	button.viewsContainerData.htmlSubviews(self, buffer)
 	buffer.WriteString(`</div>`)
 }

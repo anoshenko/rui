@@ -916,9 +916,7 @@ func (theme *theme) String() string {
 
 	writeString := func(text string) {
 		if isQuotesNeeded(text) {
-			buffer.WriteRune('"')
-			buffer.WriteString(replaceEscapeSymbols(text))
-			buffer.WriteRune('"')
+			writeStrings(buffer, `"`, replaceEscapeSymbols(text), `"`)
 		} else {
 			buffer.WriteString(text)
 		}
@@ -930,9 +928,7 @@ func (theme *theme) String() string {
 			return
 		}
 
-		buffer.WriteString("\t")
-		buffer.WriteString(tag)
-		buffer.WriteString(" = _{\n")
+		writeStrings(buffer, "\t", tag, " = _{\n")
 
 		tags := make([]string, 0, count)
 		for name := range constants {

@@ -69,59 +69,48 @@ type AppParams struct {
 }
 
 func getStartPage(buffer *strings.Builder, sessionID int, params AppParams) {
-	buffer.WriteString(`<head>
-		<meta charset="utf-8">
-		<title>`)
-	buffer.WriteString(params.Title)
-	buffer.WriteString("</title>")
+	writeStrings(buffer, `<head>
+	<meta charset="utf-8">
+	<title>`, params.Title, "</title>")
+
 	if params.Icon != "" {
-		buffer.WriteString(`
-		<link rel="icon" href="`)
-		buffer.WriteString(params.Icon)
-		buffer.WriteString(`">`)
+		writeStrings(buffer, `
+	<link rel="icon" href="`, params.Icon, `">`)
 	}
 
 	if params.TitleColor != 0 {
-		buffer.WriteString(`
-		<meta name="theme-color" content="`)
-		buffer.WriteString(params.TitleColor.cssString())
-		buffer.WriteString(`">`)
+		writeStrings(buffer, `
+	<meta name="theme-color" content="`, params.TitleColor.cssString(), `">`)
 	}
 
 	buffer.WriteString(`
-		<base target="_blank" rel="noopener">
-		<meta name="viewport" content="width=device-width">`)
+	<base target="_blank" rel="noopener">
+	<meta name="viewport" content="width=device-width">`)
 
 	if params.GoogleFonts != "" {
-		buffer.WriteString(`
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="`)
-		buffer.WriteString(params.GoogleFonts)
-		buffer.WriteString(`" rel="stylesheet">`)
+		writeStrings(buffer, `
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="`, params.GoogleFonts, `" rel="stylesheet">`)
 	}
 
-	buffer.WriteString(`
-		<style>`)
-	buffer.WriteString(appStyles)
-	buffer.WriteString(`</style>
-		<style id="ruiAnimations"></style>
-		<script>
-const sessionID = `)
-	buffer.WriteString(strconv.Itoa(sessionID))
-	buffer.WriteString(`;
+	writeStrings(buffer, `
+	<style>`, appStyles, `</style>
+	<style id="ruiAnimations"></style>
+	<script>
+const sessionID = `, strconv.Itoa(sessionID), `;
 	</script>
 	<script src="/script.js"></script>
-	</head>
-	<body id="body" onkeydown="keyDownEvent(this, event)">
-		<div class="ruiRoot" id="ruiRootView"></div>
-		<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate; z-index: 10001;"></div>
-		<div class="ruiTooltipLayer" id="ruiTooltipLayer" style="visibility: hidden; opacity: 0; z-index: 10002;">
-			<div id="ruiTooltipText" class="ruiTooltipText"></div>
-			<div id="ruiTooltipTopArrow" class="ruiTooltipTopArrow"></div>
-			<div id="ruiTooltipBottomArrow" class="ruiTooltipBottomArrow"></div>
-		</div>
+</head>
+<body id="body" onkeydown="keyDownEvent(this, event)">
+	<div class="ruiRoot" id="ruiRootView"></div>
+	<div class="ruiPopupLayer" id="ruiPopupLayer" style="visibility: hidden; isolation: isolate; z-index: 10001;"></div>
+	<div class="ruiTooltipLayer" id="ruiTooltipLayer" style="visibility: hidden; opacity: 0; z-index: 10002;">
+		<div id="ruiTooltipText" class="ruiTooltipText"></div>
+		<div id="ruiTooltipTopArrow" class="ruiTooltipTopArrow"></div>
+		<div id="ruiTooltipBottomArrow" class="ruiTooltipBottomArrow"></div>
+	</div>
 		
-		<a id="ruiDownloader" download style="display: none;"></a>
-	</body>`)
+	<a id="ruiDownloader" download style="display: none;"></a>
+</body>`)
 }

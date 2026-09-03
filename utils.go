@@ -130,3 +130,9 @@ func textToHtml(text string) string {
 
 	return text
 }
+
+func writeStrings(buffer *strings.Builder, strs ...string) {
+	for _, str := range strs {
+		buffer.WriteString(str)
+	}
+}

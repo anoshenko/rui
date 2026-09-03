@@ -249,9 +249,7 @@ func (clip *insetClipData) writeString(buffer *strings.Builder, indent string) {
 				if comma {
 					buffer.WriteString(", ")
 				}
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
+				writeStrings(buffer, string(tag), " = ", text)
 				comma = true
 			}
 		}
@@ -325,9 +323,7 @@ func (clip *circleClipData) writeString(buffer *strings.Builder, indent string) 
 				if comma {
 					buffer.WriteString(", ")
 				}
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
+				writeStrings(buffer, string(tag), " = ", text)
 				comma = true
 			}
 		}
@@ -341,18 +337,12 @@ func (clip *circleClipData) cssStyle(session Session) string {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString("circle(")
 	r, _ := sizeProperty(clip, Radius, session)
-	buffer.WriteString(r.cssString("50%", session))
-
-	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("50%", session))
-	buffer.WriteRune(' ')
-
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("50%", session))
-	buffer.WriteRune(')')
+
+	writeStrings(buffer, "circle(", r.cssString("50%", session),
+		" at ", x.cssString("50%", session), " ", y.cssString("50%", session), ")")
 
 	return buffer.String()
 }
@@ -405,9 +395,7 @@ func (clip *ellipseClipData) writeString(buffer *strings.Builder, indent string)
 				if comma {
 					buffer.WriteString(", ")
 				}
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
+				writeStrings(buffer, string(tag), " = ", text)
 				comma = true
 			}
 		}
@@ -423,19 +411,11 @@ func (clip *ellipseClipData) cssStyle(session Session) string {
 
 	rx, _ := sizeProperty(clip, RadiusX, session)
 	ry, _ := sizeProperty(clip, RadiusX, session)
-	buffer.WriteString("ellipse(")
-	buffer.WriteString(rx.cssString("50%", session))
-	buffer.WriteRune(' ')
-	buffer.WriteString(ry.cssString("50%", session))
-
-	buffer.WriteString(" at ")
 	x, _ := sizeProperty(clip, X, session)
-	buffer.WriteString(x.cssString("50%", session))
-	buffer.WriteRune(' ')
-
 	y, _ := sizeProperty(clip, Y, session)
-	buffer.WriteString(y.cssString("50%", session))
-	buffer.WriteRune(')')
+
+	writeStrings(buffer, "ellipse(", rx.cssString("50%", session), " ", ry.cssString("50%", session),
+		" at ", x.cssString("50%", session), " ", y.cssString("50%", session), ")")
 
 	return buffer.String()
 }

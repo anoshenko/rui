@@ -258,9 +258,7 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 	picker.viewData.htmlProperties(self, buffer)
 
 	if accept := acceptPropertyCSS(picker); accept != "" {
-		buffer.WriteString(` accept="`)
-		buffer.WriteString(accept)
-		buffer.WriteRune('"')
+		writeStrings(buffer, ` accept="`, accept, `"`)
 	}
 
 	buffer.WriteString(` type="file"`)

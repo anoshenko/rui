@@ -91,13 +91,8 @@ func (progress *progressBarData) htmlTag() string {
 func (progress *progressBarData) htmlProperties(self View, buffer *strings.Builder) {
 	progress.viewData.htmlProperties(self, buffer)
 
-	buffer.WriteString(` max="`)
-	buffer.WriteString(strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 64))
-	buffer.WriteByte('"')
-
-	buffer.WriteString(` value="`)
-	buffer.WriteString(strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 64))
-	buffer.WriteByte('"')
+	writeStrings(buffer, ` max="`, strconv.FormatFloat(GetProgressBarMax(progress), 'f', -1, 64), `"`,
+		` value="`, strconv.FormatFloat(GetProgressBarValue(progress), 'f', -1, 64), `"`)
 }
 
 // GetProgressBarMax returns the max value of ProgressBar subview.

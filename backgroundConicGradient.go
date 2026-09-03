@@ -314,10 +314,7 @@ func (gradient *backgroundConicGradient) cssStyle(session Session) string {
 		if comma {
 			buffer.WriteRune(' ')
 		}
-		buffer.WriteString("at ")
-		buffer.WriteString(x.cssString("50%", session))
-		buffer.WriteString(" ")
-		buffer.WriteString(y.cssString("50%", session))
+		writeStrings(buffer, "at ", x.cssString("50%", session), " ", y.cssString("50%", session))
 		comma = true
 	}
 

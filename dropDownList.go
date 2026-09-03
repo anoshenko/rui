@@ -1,6 +1,7 @@
 package rui
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -211,13 +212,7 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 		disabledItems := GetDropDownDisabledItems(list)
 		separators := GetDropDownItemSeparators(list)
 		for i, item := range items {
-			disabled := false
-			for _, index := range disabledItems {
-				if i == index {
-					disabled = true
-					break
-				}
-			}
+			disabled := slices.Contains(disabledItems, i)
 
 			if disabled {
 				buffer.WriteString("<option disabled>")
@@ -232,11 +227,8 @@ func (list *dropDownListData) htmlSubviews(self View, buffer *strings.Builder) {
 
 			buffer.WriteString(textToHtml(item))
 			buffer.WriteString("</option>")
-			for _, index := range separators {
-				if i == index {
-					buffer.WriteString("<hr>")
-					break
-				}
+			if slices.Contains(separators, i) {
+				buffer.WriteString("<hr>")
 			}
 		}
 	}

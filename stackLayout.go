@@ -585,11 +585,7 @@ func (layout *stackLayoutData) moveToFrontByIndex(index int, onShow []func(View)
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`stackTransitionEndEvent('`)
-	buffer.WriteString(layout.htmlID())
-	buffer.WriteString(`', 'move-`)
-	buffer.WriteString(view.htmlID())
-	buffer.WriteString(`', event)`)
+	writeStrings(buffer, `stackTransitionEndEvent('`, layout.htmlID(), `', 'move-`, view.htmlID(), `', event)`)
 
 	listener := buffer.String()
 
@@ -667,9 +663,7 @@ func (layout *stackLayoutData) Append(view View) {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
 
-		buffer.WriteString(`<div id="`)
-		buffer.WriteString(view.htmlID())
-		buffer.WriteString(`page" class="ruiStackPageLayout">`)
+		writeStrings(buffer, `<div id="`, view.htmlID(), `page" class="ruiStackPageLayout">`)
 		viewHTML(view, buffer, "")
 		buffer.WriteString(`</div>`)
 
@@ -706,9 +700,7 @@ func (layout *stackLayoutData) Insert(view View, index int) {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`<div id="`)
-	buffer.WriteString(view.htmlID())
-	buffer.WriteString(`page" class="ruiStackPageLayout" style="visibility: hidden;">`)
+	writeStrings(buffer, `<div id="`, view.htmlID(), `page" class="ruiStackPageLayout" style="visibility: hidden;">`)
 	viewHTML(view, buffer, "")
 	buffer.WriteString(`</div>`)
 
@@ -782,25 +774,15 @@ func (layout *stackLayoutData) Push(view View, onPushFinished ...func()) {
 	view.setParentID(layout.htmlID())
 	layout.views = append(layout.views, view)
 
-	session := layout.Session()
-
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`<div id="`)
-	buffer.WriteString(htmlID)
-	buffer.WriteString(`page" class="ruiStackPageLayout" ontransitionend="stackTransitionEndEvent('`)
-	buffer.WriteString(layout.htmlID())
-	buffer.WriteString(`', 'push-`)
-	buffer.WriteString(htmlID)
-	buffer.WriteString(`', event)" style="z-index: 100; transform: `)
-	buffer.WriteString(transform.transformCSS(layout.session))
-	buffer.WriteRune(';')
-
+	session := layout.Session()
 	transitionCSS := layout.pushTransitionCSS()
-	buffer.WriteString(" transition: ")
-	buffer.WriteString(transitionCSS)
-	buffer.WriteString(`;">`)
+
+	writeStrings(buffer, `<div id="`, htmlID, `page" class="ruiStackPageLayout" `,
+		`ontransitionend="stackTransitionEndEvent('`, layout.htmlID(), `', 'push-`, htmlID, `', event)" `,
+		`style="z-index: 100; transform: `, transform.transformCSS(layout.session), `; transition: `, transitionCSS, `;">`)
 
 	viewHTML(view, buffer, "")
 	buffer.WriteString(`</div>`)
@@ -854,11 +836,7 @@ func (layout *stackLayoutData) Pop(onPopFinished ...func(View)) bool {
 	buffer := allocStringBuilder()
 	defer freeStringBuilder(buffer)
 
-	buffer.WriteString(`stackTransitionEndEvent('`)
-	buffer.WriteString(layout.htmlID())
-	buffer.WriteString(`', 'pop-`)
-	buffer.WriteString(htmlID)
-	buffer.WriteString(`', event)`)
+	writeStrings(buffer, `stackTransitionEndEvent('`, layout.htmlID(), `', 'pop-`, htmlID, `', event)`)
 
 	listener := buffer.String()
 	pageID := htmlID + "page"
@@ -892,10 +870,7 @@ func (layout *stackLayoutData) htmlSubviews(self View, buffer *strings.Builder) 
 	if count := len(layout.views); count > 0 {
 		peek := count - 1
 		for i, view := range layout.views {
-			buffer.WriteString(`<div id="`)
-			buffer.WriteString(view.htmlID())
-			buffer.WriteString(`page`)
-			buffer.WriteString(`" class="ruiStackPageLayout"`)
+			writeStrings(buffer, `<div id="`, view.htmlID(), `page" class="ruiStackPageLayout"`)
 			if i != peek {
 				buffer.WriteString(` style="visibility: hidden;"`)
 			}

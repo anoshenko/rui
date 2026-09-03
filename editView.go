@@ -352,9 +352,7 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 	}
 
 	if maxLength := GetMaxLength(edit); maxLength > 0 {
-		buffer.WriteString(` maxlength="`)
-		buffer.WriteString(strconv.Itoa(maxLength))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` maxlength="`, strconv.Itoa(maxLength), `"`)
 	}
 
 	convertText := func(text string) string {
@@ -368,23 +366,17 @@ func (edit *editViewData) htmlProperties(self View, buffer *strings.Builder) {
 	}
 
 	if hint := GetHint(edit); hint != "" {
-		buffer.WriteString(` placeholder="`)
-		buffer.WriteString(convertText(hint))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` placeholder="`, convertText(hint), `"`)
 	}
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 	if pattern := GetEditViewPattern(edit); pattern != "" {
-		buffer.WriteString(` pattern="`)
-		buffer.WriteString(convertText(pattern))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` pattern="`, convertText(pattern), `"`)
 	}
 
 	if editType != MultiLineText {
 		if text := GetText(edit); text != "" {
-			buffer.WriteString(` value="`)
-			buffer.WriteString(convertText(text))
-			buffer.WriteByte('"')
+			writeStrings(buffer, ` value="`, convertText(text), `"`)
 		}
 	}
 

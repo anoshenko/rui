@@ -120,9 +120,7 @@ func (bridge *webBridge) startUpdateScript(htmlID string) bool {
 	}
 	buffer := allocStringBuilder()
 	bridge.updateScripts[htmlID] = buffer
-	buffer.WriteString("{\nlet element = document.getElementById('")
-	buffer.WriteString(htmlID)
-	buffer.WriteString("');\nif (element) {\n")
+	writeStrings(buffer, "{\nlet element = document.getElementById('", htmlID, "');\nif (element) {\n")
 	return true
 }
 
@@ -267,11 +265,7 @@ func (bridge *webBridge) updateInnerHTML(htmlID, html string) {
 
 func (bridge *webBridge) updateCSSProperty(htmlID, property, value string) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
-		buffer.WriteString(`element.style['`)
-		buffer.WriteString(property)
-		buffer.WriteString(`'] = '`)
-		buffer.WriteString(value)
-		buffer.WriteString("';\n")
+		writeStrings(buffer, `element.style['`, property, `'] = '`, value, "';\n")
 	} else {
 		bridge.callFunc("updateCSSProperty", htmlID, property, value)
 	}
@@ -280,11 +274,7 @@ func (bridge *webBridge) updateCSSProperty(htmlID, property, value string) {
 func (bridge *webBridge) updateProperty(htmlID, property string, value any) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
 		if val, ok := bridge.argToString(value); ok {
-			buffer.WriteString(`element.setAttribute('`)
-			buffer.WriteString(property)
-			buffer.WriteString(`', `)
-			buffer.WriteString(val)
-			buffer.WriteString(");\n")
+			writeStrings(buffer, `element.setAttribute('`, property, `', `, val, ");\n")
 		}
 	} else {
 		bridge.callFunc("updateProperty", htmlID, property, value)
@@ -293,11 +283,7 @@ func (bridge *webBridge) updateProperty(htmlID, property string, value any) {
 
 func (bridge *webBridge) removeProperty(htmlID, property string) {
 	if buffer, ok := bridge.updateScripts[htmlID]; ok {
-		buffer.WriteString(`if (element.hasAttribute('`)
-		buffer.WriteString(property)
-		buffer.WriteString(`')) { element.removeAttribute('`)
-		buffer.WriteString(property)
-		buffer.WriteString("');}\n")
+		writeStrings(buffer, `if (element.hasAttribute('`, property, `')) { element.removeAttribute('`, property, "');}\n")
 	} else {
 		bridge.callFunc("removeProperty", htmlID, property)
 	}
@@ -323,15 +309,11 @@ func (bridge *webBridge) setAnimationCSS(css string) {
 
 func (bridge *webBridge) canvasStart(htmlID string) {
 	bridge.canvasBuffer.Reset()
-	bridge.canvasBuffer.WriteString("{\nconst ctx = getCanvasContext('")
-	bridge.canvasBuffer.WriteString(htmlID)
-	bridge.canvasBuffer.WriteString(`');`)
+	writeStrings(&bridge.canvasBuffer, "{\nconst ctx = getCanvasContext('", htmlID, `');`)
 }
 
 func (bridge *webBridge) callCanvasFunc(funcName string, args ...any) {
-	bridge.canvasBuffer.WriteString("\nctx.")
-	bridge.canvasBuffer.WriteString(funcName)
-	bridge.canvasBuffer.WriteRune('(')
+	writeStrings(&bridge.canvasBuffer, "\nctx.", funcName, `(`)
 	for i, arg := range args {
 		if i > 0 {
 			bridge.canvasBuffer.WriteString(", ")
@@ -343,22 +325,14 @@ func (bridge *webBridge) callCanvasFunc(funcName string, args ...any) {
 }
 
 func (bridge *webBridge) updateCanvasProperty(property string, value any) {
-	bridge.canvasBuffer.WriteString("\nctx.")
-	bridge.canvasBuffer.WriteString(property)
-	bridge.canvasBuffer.WriteString(" = ")
 	argText, _ := bridge.argToString(value)
-	bridge.canvasBuffer.WriteString(argText)
-	bridge.canvasBuffer.WriteString(";")
+	writeStrings(&bridge.canvasBuffer, "\nctx.", property, " = ", argText, ";")
 }
 
 func (bridge *webBridge) createCanvasVar(funcName string, args ...any) any {
 	bridge.canvasVarNumber++
 	result := canvasVar{name: fmt.Sprintf("v%d", bridge.canvasVarNumber)}
-	bridge.canvasBuffer.WriteString("\nlet ")
-	bridge.canvasBuffer.WriteString(result.name)
-	bridge.canvasBuffer.WriteString(" = ctx.")
-	bridge.canvasBuffer.WriteString(funcName)
-	bridge.canvasBuffer.WriteRune('(')
+	writeStrings(&bridge.canvasBuffer, "\nlet ", result.name, " = ctx.", funcName, "(")
 	for i, arg := range args {
 		if i > 0 {
 			bridge.canvasBuffer.WriteString(", ")
@@ -373,9 +347,7 @@ func (bridge *webBridge) createCanvasVar(funcName string, args ...any) any {
 func (bridge *webBridge) createPath2D(arg string) any {
 	bridge.canvasVarNumber++
 	result := canvasVar{name: fmt.Sprintf("v%d", bridge.canvasVarNumber)}
-	bridge.canvasBuffer.WriteString("\nlet ")
-	bridge.canvasBuffer.WriteString(result.name)
-	bridge.canvasBuffer.WriteString(` = new Path2D(`)
+	writeStrings(&bridge.canvasBuffer, "\nlet ", result.name, ` = new Path2D(`)
 	if arg != "" {
 		argText, _ := bridge.argToString(arg)
 		bridge.canvasBuffer.WriteString(argText)
@@ -389,11 +361,7 @@ func (bridge *webBridge) callCanvasVarFunc(v any, funcName string, args ...any) 
 	if !ok {
 		return
 	}
-	bridge.canvasBuffer.WriteString("\n")
-	bridge.canvasBuffer.WriteString(varName.name)
-	bridge.canvasBuffer.WriteRune('.')
-	bridge.canvasBuffer.WriteString(funcName)
-	bridge.canvasBuffer.WriteRune('(')
+	writeStrings(&bridge.canvasBuffer, "\n", varName.name, ".", funcName, "(")
 	for i, arg := range args {
 		if i > 0 {
 			bridge.canvasBuffer.WriteString(", ")
@@ -406,17 +374,11 @@ func (bridge *webBridge) callCanvasVarFunc(v any, funcName string, args ...any) 
 
 func (bridge *webBridge) callCanvasImageFunc(url string, property string, funcName string, args ...any) {
 
-	bridge.canvasBuffer.WriteString("\nimg = images.get('")
-	bridge.canvasBuffer.WriteString(url)
-	bridge.canvasBuffer.WriteString("');\nif (img) {\n")
+	writeStrings(&bridge.canvasBuffer, "\nimg = images.get('", url, "');\nif (img) {\n")
 	if property != "" {
-		bridge.canvasBuffer.WriteString("ctx.")
-		bridge.canvasBuffer.WriteString(property)
-		bridge.canvasBuffer.WriteString(" = ")
+		writeStrings(&bridge.canvasBuffer, "ctx.", property, " = ")
 	}
-	bridge.canvasBuffer.WriteString("ctx.")
-	bridge.canvasBuffer.WriteString(funcName)
-	bridge.canvasBuffer.WriteString("(img")
+	writeStrings(&bridge.canvasBuffer, "ctx.", funcName, "(img")
 	for _, arg := range args {
 		bridge.canvasBuffer.WriteString(", ")
 		argText, _ := bridge.argToString(arg)

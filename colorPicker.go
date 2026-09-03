@@ -147,11 +147,8 @@ func (picker *colorPickerData) htmlSubviews(self View, buffer *strings.Builder) 
 func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder) {
 	picker.viewData.htmlProperties(self, buffer)
 
-	buffer.WriteString(` type="color" value="`)
-	buffer.WriteString(GetColorPickerValue(picker).rgbString())
-	buffer.WriteByte('"')
-
-	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
+	writeStrings(buffer, ` type="color" value="`, GetColorPickerValue(picker).rgbString(), `"`,
+		` oninput="editViewInputEvent(this)"`)
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}

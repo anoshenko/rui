@@ -523,13 +523,9 @@ func (tabsLayout *tabsLayoutData) RemoveView(index int) View {
 
 func (tabsLayout *tabsLayoutData) htmlProperties(self View, buffer *strings.Builder) {
 	tabsLayout.viewsContainerData.htmlProperties(self, buffer)
-	buffer.WriteString(` data-inactiveTabStyle="`)
-	buffer.WriteString(tabsLayoutInactiveTabStyle(tabsLayout))
-	buffer.WriteString(`" data-activeTabStyle="`)
-	buffer.WriteString(tabsLayoutActiveTabStyle(tabsLayout))
-	buffer.WriteString(`" data-current="`)
-	buffer.WriteString(strconv.Itoa(GetCurrent(tabsLayout)))
-	buffer.WriteRune('"')
+	writeStrings(buffer, ` data-inactiveTabStyle="`, tabsLayoutInactiveTabStyle(tabsLayout),
+		`" data-activeTabStyle="`, tabsLayoutActiveTabStyle(tabsLayout),
+		`" data-current="`, strconv.Itoa(GetCurrent(tabsLayout)), `"`)
 }
 
 func (tabsLayout *tabsLayoutData) cssStyle(self View, builder cssBuilder) {
@@ -560,9 +556,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 
 	if location != HiddenTabs {
 
-		buffer.WriteString(`<div class="`)
-		buffer.WriteString(tabsLayout.tabBarStyle())
-		buffer.WriteString(`" style="display: flex;`)
+		writeStrings(buffer, `<div class="`, tabsLayout.tabBarStyle(), `" style="display: flex;`)
 
 		switch location {
 		case LeftTabs, LeftListTabs, TopTabs:
@@ -622,37 +616,20 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 				title, _ = tabsLayout.Session().GetString(title)
 			}
 
-			buffer.WriteString(`<div id="`)
-			buffer.WriteString(tabsLayoutID)
-			buffer.WriteByte('-')
-			buffer.WriteString(strconv.Itoa(n))
-			buffer.WriteString(`" class="`)
+			writeStrings(buffer, `<div id="`, tabsLayoutID, `-`, strconv.Itoa(n), `" class="`)
 			if n == current {
 				buffer.WriteString(activeStyle)
 			} else {
 				buffer.WriteString(inactiveStyle)
 			}
-			buffer.WriteString(`" tabindex="0" onclick="tabClickEvent(this, '`)
-			buffer.WriteString(tabsLayoutID)
-			buffer.WriteString(`', `)
-			buffer.WriteString(strconv.Itoa(n))
-			buffer.WriteString(`, event)" onkeydown="tabKeyClickEvent('`)
-			buffer.WriteString(tabsLayoutID)
-			buffer.WriteString(`', `)
-			buffer.WriteString(strconv.Itoa(n))
-			buffer.WriteString(`, event)" style="`)
-			buffer.WriteString(tabStyle)
-			buffer.WriteString(`" data-container="`)
-			buffer.WriteString(tabsLayoutID)
-			buffer.WriteString(`" data-view="`)
-			buffer.WriteString(tabsLayoutID)
-			buffer.WriteString(`-page`)
-			buffer.WriteString(strconv.Itoa(n))
-			buffer.WriteString(`">`)
+			writeStrings(buffer, `" tabindex="0" `,
+				`onclick="tabClickEvent(this, '`, tabsLayoutID, `', `, strconv.Itoa(n), `, event)" `,
+				`onkeydown="tabKeyClickEvent('`, tabsLayoutID, `', `, strconv.Itoa(n), `, event)" `,
+				`style="`, tabStyle, `" data-container="`, tabsLayoutID,
+				`" data-view="`, tabsLayoutID, `-page`, strconv.Itoa(n), `">`)
 
 			if icon != "" {
-				buffer.WriteString(`<img id="`)
-				buffer.WriteString(view.htmlID())
+				writeStrings(buffer, `<img id="`, view.htmlID())
 				switch location {
 				case LeftTabs:
 					buffer.WriteString(`-icon" style="grid-row-start: 3; grid-row-end: 4; grid-column-start: 1; grid-column-end: 2;" src="`)
@@ -663,31 +640,20 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 				default:
 					buffer.WriteString(`-icon" style="grid-row-start: 1; grid-row-end: 2; grid-column-start: 1; grid-column-end: 2;" src="`)
 				}
-				buffer.WriteString(icon)
-				buffer.WriteString(`">`)
+				writeStrings(buffer, icon, `">`)
 			}
 
-			buffer.WriteString(`<div id="`)
-			buffer.WriteString(view.htmlID())
-			buffer.WriteString(`-title"`)
-			buffer.WriteString(titleStyle)
-			buffer.WriteString(textToHtml(title))
-			buffer.WriteString(`</div>`)
+			writeStrings(buffer, `<div id="`, view.htmlID(), `-title"`, titleStyle, textToHtml(title), `</div>`)
 
 			close, ok := boolProperty(view, TabCloseButton, tabsLayout.session)
 			if !ok {
 				close = closeButton
 			}
 			if close {
-				buffer.WriteString(`<div class="ruiTabCloseButton" tabindex="0" onclick="tabCloseClickEvent(this, '`)
-				buffer.WriteString(tabsLayoutID)
-				buffer.WriteString(`', `)
-				buffer.WriteString(strconv.Itoa(n))
-				buffer.WriteString(`, event)" onkeydown="tabCloseKeyClickEvent('`)
-				buffer.WriteString(tabsLayoutID)
-				buffer.WriteString(`', `)
-				buffer.WriteString(strconv.Itoa(n))
-				buffer.WriteString(`, event)" style="display: grid; `)
+				writeStrings(buffer, `<div class="ruiTabCloseButton" tabindex="0" `,
+					`onclick="tabCloseClickEvent(this, '`, tabsLayoutID, `', `, strconv.Itoa(n), `, event)" `,
+					`onkeydown="tabCloseKeyClickEvent('`, tabsLayoutID, `', `, strconv.Itoa(n), `, event)" `,
+					`style="display: grid; `)
 
 				switch location {
 				case LeftTabs:
@@ -710,10 +676,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 	}
 
 	for n, view := range tabsLayout.views {
-		buffer.WriteString(`<div id="`)
-		buffer.WriteString(tabsLayoutID)
-		buffer.WriteString(`-page`)
-		buffer.WriteString(strconv.Itoa(n))
+		writeStrings(buffer, `<div id="`, tabsLayoutID, `-page`, strconv.Itoa(n))
 
 		if current != n {
 			buffer.WriteString(`" style="display: grid; align-items: stretch; justify-items: stretch; visibility: hidden; `)

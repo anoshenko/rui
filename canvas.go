@@ -615,19 +615,16 @@ func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params Font
 
 	case SizeInPercent:
 		if params.LineHeight.Value != 100 {
-			buffer.WriteString("/")
-			buffer.WriteString(strconv.FormatFloat(params.LineHeight.Value/100, 'g', -1, 64))
+			writeStrings(buffer, "/", strconv.FormatFloat(params.LineHeight.Value/100, 'g', -1, 64))
 		}
 
 	case SizeInFraction:
 		if params.LineHeight.Value != 1 {
-			buffer.WriteString("/")
-			buffer.WriteString(strconv.FormatFloat(params.LineHeight.Value, 'g', -1, 64))
+			writeStrings(buffer, "/", strconv.FormatFloat(params.LineHeight.Value, 'g', -1, 64))
 		}
 
 	default:
-		buffer.WriteString("/")
-		buffer.WriteString(params.LineHeight.cssString("", canvas.View().Session()))
+		writeStrings(buffer, "/", params.LineHeight.cssString("", canvas.View().Session()))
 	}
 
 	lead := " "
@@ -636,9 +633,7 @@ func (canvas *canvasData) fontWithParams(name string, size SizeUnit, params Font
 		buffer.WriteString(lead)
 		lead = ","
 		if strings.ContainsRune(font, ' ') {
-			buffer.WriteRune('"')
-			buffer.WriteString(font)
-			buffer.WriteRune('"')
+			writeStrings(buffer, `"`, font, `"`)
 		} else {
 			buffer.WriteString(font)
 		}

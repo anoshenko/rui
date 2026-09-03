@@ -45,10 +45,7 @@ func viewEventsHtml[T any](view View, events []PropertyName, buffer *strings.Bui
 	for _, tag := range events {
 		if js, ok := eventJsFunc[tag]; ok {
 			if value := getOneArgEventListeners[View, T](view, nil, tag); len(value) > 0 {
-				buffer.WriteString(js.jsEvent)
-				buffer.WriteString(`="`)
-				buffer.WriteString(js.jsFunc)
-				buffer.WriteString(`(this, event)" `)
+				writeStrings(buffer, js.jsEvent, `="`, js.jsFunc, `(this, event)" `)
 			}
 		}
 	}

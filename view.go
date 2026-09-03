@@ -1096,50 +1096,38 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 	if htmlTag == "" {
 		htmlTag = view.htmlTag()
 	}
-	//viewHTMLTag := view.htmlTag()
-	buffer.WriteRune('<')
-	buffer.WriteString(htmlTag)
-	buffer.WriteString(` id="`)
-	buffer.WriteString(view.htmlID())
-	buffer.WriteRune('"')
+
+	writeStrings(buffer, `<`, htmlTag, ` id="`, view.htmlID(), `"`)
 
 	if cls := view.htmlClass(); cls != "" {
-		buffer.WriteString(` class="`)
-		buffer.WriteString(cls)
-		buffer.WriteRune('"')
+		writeStrings(buffer, ` class="`, cls, `"`)
 	}
 
 	cssBuilder := viewCSSBuilder{buffer: allocStringBuilder()}
 	view.cssStyle(view, &cssBuilder)
 
 	if style := cssBuilder.finish(); style != "" {
-		buffer.WriteString(` style="`)
-		buffer.WriteString(style)
-		buffer.WriteRune('"')
-	}
-
-	buffer.WriteRune(' ')
-	view.htmlProperties(view, buffer)
-
-	if view.isNoResizeEvent() {
-		buffer.WriteString(` data-noresize="1" `)
+		writeStrings(buffer, ` style="`, style, `" `)
 	} else {
 		buffer.WriteRune(' ')
 	}
 
+	view.htmlProperties(view, buffer)
+
+	if view.isNoResizeEvent() {
+		buffer.WriteString(` data-noresize="1"`)
+	}
+
 	if tabIndex := GetTabIndex(view); tabIndex >= 0 {
-		buffer.WriteString(`tabindex="`)
-		buffer.WriteString(strconv.Itoa(tabIndex))
-		buffer.WriteString(`" `)
+		writeStrings(buffer, ` tabindex="`, strconv.Itoa(tabIndex), `"`)
 	}
 
 	if tooltip := GetTooltip(view); tooltip != "" {
-		buffer.WriteString(`data-tooltip=" `)
-		buffer.WriteString(tooltip)
-		buffer.WriteString(`" onmouseenter="mouseEnterEvent(this, event)" onmouseleave="mouseLeaveEvent(this, event)" `)
+		writeStrings(buffer, ` data-tooltip=" `, tooltip,
+			`" onmouseenter="mouseEnterEvent(this, event)" onmouseleave="mouseLeaveEvent(this, event)"`)
 	}
 
-	buffer.WriteString(`onscroll="scrollEvent(this, event)" `)
+	buffer.WriteString(` onscroll="scrollEvent(this, event)" `)
 
 	focusEventsHtml(view, buffer)
 	keyEventsHtml(view, buffer)
@@ -1155,9 +1143,7 @@ func viewHTML(view View, buffer *strings.Builder, htmlTag string) {
 	buffer.WriteRune('>')
 	view.htmlSubviews(view, buffer)
 	if view.closeHTMLTag() {
-		buffer.WriteString(`</`)
-		buffer.WriteString(htmlTag)
-		buffer.WriteRune('>')
+		writeStrings(buffer, `</`, htmlTag, `>`)
 	}
 }
 

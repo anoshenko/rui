@@ -771,43 +771,31 @@ func (radius BoxRadius) String() string {
 	buffer.WriteString("_{ ")
 
 	if radius.TopLeftX.Equal(radius.TopLeftY) {
-		buffer.WriteString("top-left = ")
-		buffer.WriteString(radius.TopLeftX.String())
+		writeStrings(buffer, "top-left = ", radius.TopLeftX.String())
 	} else {
-		buffer.WriteString("top-left-x = ")
-		buffer.WriteString(radius.TopLeftX.String())
-		buffer.WriteString("top-left-y = ")
-		buffer.WriteString(radius.TopLeftY.String())
+		writeStrings(buffer, "top-left-x = ", radius.TopLeftX.String(),
+			", top-left-y = ", radius.TopLeftY.String())
 	}
 
 	if radius.TopRightX.Equal(radius.TopRightY) {
-		buffer.WriteString(", top-right = ")
-		buffer.WriteString(radius.TopRightX.String())
+		writeStrings(buffer, ", top-right = ", radius.TopRightX.String())
 	} else {
-		buffer.WriteString(", top-right-x = ")
-		buffer.WriteString(radius.TopRightX.String())
-		buffer.WriteString(", top-right-y = ")
-		buffer.WriteString(radius.TopRightY.String())
+		writeStrings(buffer, ", top-right-x = ", radius.TopRightX.String(),
+			", top-right-y = ", radius.TopRightY.String())
 	}
 
 	if radius.BottomLeftX.Equal(radius.BottomLeftY) {
-		buffer.WriteString(", bottom-left = ")
-		buffer.WriteString(radius.BottomLeftX.String())
+		writeStrings(buffer, ", bottom-left = ", radius.BottomLeftX.String())
 	} else {
-		buffer.WriteString(", bottom-left-x = ")
-		buffer.WriteString(radius.BottomLeftX.String())
-		buffer.WriteString(", bottom-left-y = ")
-		buffer.WriteString(radius.BottomLeftY.String())
+		writeStrings(buffer, ", bottom-left-x = ", radius.BottomLeftX.String(),
+			", bottom-left-y = ", radius.BottomLeftY.String())
 	}
 
 	if radius.BottomRightX.Equal(radius.BottomRightY) {
-		buffer.WriteString(", bottom-right = ")
-		buffer.WriteString(radius.BottomRightX.String())
+		writeStrings(buffer, ", bottom-right = ", radius.BottomRightX.String())
 	} else {
-		buffer.WriteString(", bottom-right-x = ")
-		buffer.WriteString(radius.BottomRightX.String())
-		buffer.WriteString(", bottom-right-y = ")
-		buffer.WriteString(radius.BottomRightY.String())
+		writeStrings(buffer, ", bottom-right-x = ", radius.BottomRightX.String(),
+			", bottom-right-y = ", radius.BottomRightY.String())
 	}
 
 	buffer.WriteString(" }")
@@ -835,32 +823,24 @@ func (radius BoxRadius) cssValue(builder cssBuilder, session Session) {
 	if radius.AllAnglesIsEqual() {
 
 		if !radius.TopLeftX.Equal(radius.TopLeftY) {
-			buffer.WriteString(" / ")
-			buffer.WriteString(radius.TopLeftY.cssString("0", session))
+			writeStrings(buffer, " / ", radius.TopLeftY.cssString("0", session))
 		}
 
 	} else {
 
-		buffer.WriteRune(' ')
-		buffer.WriteString(radius.TopRightX.cssString("0", session))
-		buffer.WriteRune(' ')
-		buffer.WriteString(radius.BottomRightX.cssString("0", session))
-		buffer.WriteRune(' ')
-		buffer.WriteString(radius.BottomLeftX.cssString("0", session))
+		writeStrings(buffer, " ", radius.TopRightX.cssString("0", session),
+			" ", radius.BottomRightX.cssString("0", session),
+			" ", radius.BottomLeftX.cssString("0", session))
 
 		if !radius.TopLeftX.Equal(radius.TopLeftY) ||
 			!radius.TopRightX.Equal(radius.TopRightY) ||
 			!radius.BottomLeftX.Equal(radius.BottomLeftY) ||
 			!radius.BottomRightX.Equal(radius.BottomRightY) {
 
-			buffer.WriteString(" / ")
-			buffer.WriteString(radius.TopLeftY.cssString("0", session))
-			buffer.WriteRune(' ')
-			buffer.WriteString(radius.TopRightY.cssString("0", session))
-			buffer.WriteRune(' ')
-			buffer.WriteString(radius.BottomRightY.cssString("0", session))
-			buffer.WriteRune(' ')
-			buffer.WriteString(radius.BottomLeftY.cssString("0", session))
+			writeStrings(buffer, " / ", radius.TopLeftY.cssString("0", session),
+				" ", radius.TopRightY.cssString("0", session),
+				" ", radius.BottomRightY.cssString("0", session),
+				" ", radius.BottomLeftY.cssString("0", session))
 		}
 	}
 

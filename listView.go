@@ -494,30 +494,22 @@ func (listView *listViewData) getItemFrames() []Frame {
 func (listView *listViewData) itemAlign(buffer *strings.Builder) {
 	values := enumProperties[ItemHorizontalAlign].cssValues
 	if hAlign := GetListItemHorizontalAlign(listView); hAlign >= 0 && hAlign < len(values) {
-		buffer.WriteString(" justify-items: ")
-		buffer.WriteString(values[hAlign])
-		buffer.WriteRune(';')
+		writeStrings(buffer, " justify-items: ", values[hAlign], ";")
 	}
 
 	values = enumProperties[ItemVerticalAlign].cssValues
 	if vAlign := GetListItemVerticalAlign(listView); vAlign >= 0 && vAlign < len(values) {
-		buffer.WriteString(" align-items: ")
-		buffer.WriteString(values[vAlign])
-		buffer.WriteRune(';')
+		writeStrings(buffer, " align-items: ", values[vAlign], ";")
 	}
 }
 
 func (listView *listViewData) itemSize(buffer *strings.Builder) {
 	if itemWidth := GetListItemWidth(listView); itemWidth.Type != Auto {
-		buffer.WriteString(` min-width: `)
-		buffer.WriteString(itemWidth.cssString("", listView.Session()))
-		buffer.WriteRune(';')
+		writeStrings(buffer, ` min-width: `, itemWidth.cssString("", listView.Session()), ";")
 	}
 
 	if itemHeight := GetListItemHeight(listView); itemHeight.Type != Auto {
-		buffer.WriteString(` min-height: `)
-		buffer.WriteString(itemHeight.cssString("", listView.Session()))
-		buffer.WriteRune(';')
+		writeStrings(buffer, ` min-height: `, itemHeight.cssString("", listView.Session()), ";")
 	}
 }
 
@@ -610,9 +602,7 @@ func (listView *listViewData) checkboxItemDiv(hCheckboxAlign, vCheckboxAlign int
 	}
 
 	if gap, ok := sizeConstant(listView.session, "ruiCheckboxGap"); ok && gap.Type != Auto {
-		itemStyleBuilder.WriteString(` grid-gap: `)
-		itemStyleBuilder.WriteString(gap.cssString("auto", listView.Session()))
-		itemStyleBuilder.WriteRune(';')
+		writeStrings(itemStyleBuilder, ` grid-gap: `, gap.cssString("auto", listView.Session()), ";")
 	}
 
 	itemStyleBuilder.WriteString(`">`)
@@ -690,12 +680,8 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 	enabledItems := listView.itemEnabledAdapter(adapter)
 
 	for i := range count {
-		buffer.WriteString(`<div id="`)
-		buffer.WriteString(listViewID)
-		buffer.WriteRune('-')
-		buffer.WriteString(strconv.Itoa(i))
-		buffer.WriteString(`" class="ruiView `)
-		buffer.WriteString(listView.listItemStyle())
+		writeStrings(buffer, `<div id="`, listViewID, "-", strconv.Itoa(i),
+			`" class="ruiView `, listView.listItemStyle())
 		if i == current {
 			buffer.WriteRune(' ')
 			buffer.WriteString(listViewCurrentInactiveStyle(listView))
@@ -710,15 +696,10 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 		}
 		buffer.WriteString(itemDiv)
 
-		checked := false
-		for _, index := range checkedItems {
-			if index == i {
-				buffer.WriteString(onDiv)
-				checked = true
-				break
-			}
-		}
-		if !checked {
+		checked := slices.Contains(checkedItems, i)
+		if checked {
+			buffer.WriteString(onDiv)
+		} else {
 			buffer.WriteString(offDiv)
 		}
 		buffer.WriteString(contentDiv)
@@ -753,18 +734,12 @@ func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *
 	enabledItems := listView.itemEnabledAdapter(adapter)
 
 	for i := range count {
-		buffer.WriteString(`<div id="`)
-		buffer.WriteString(listViewID)
-		buffer.WriteRune('-')
-		buffer.WriteString(strconv.Itoa(i))
-		buffer.WriteString(`" class="ruiView `)
-		buffer.WriteString(listView.listItemStyle())
+		writeStrings(buffer, `<div id="`, listViewID, "-", strconv.Itoa(i),
+			`" class="ruiView `, listView.listItemStyle())
 		if i == current {
-			buffer.WriteRune(' ')
-			buffer.WriteString(listViewCurrentInactiveStyle(listView))
+			writeStrings(buffer, " ", listViewCurrentInactiveStyle(listView))
 		}
-		buffer.WriteString(`" `)
-		buffer.WriteString(itemStyle)
+		writeStrings(buffer, `" `, itemStyle)
 		if enabledItems != nil && !enabledItems.IsListItemEnabled(i) {
 			buffer.WriteString(` inert`)
 		}
@@ -814,20 +789,15 @@ func (listView *listViewData) updateCheckboxItem(index int, checked bool) {
 
 func (listView *listViewData) htmlProperties(self View, buffer *strings.Builder) {
 	listView.viewData.htmlProperties(self, buffer)
-	buffer.WriteString(`onfocus="listViewFocusEvent(this, event)" onblur="listViewBlurEvent(this, event)"`)
-	buffer.WriteString(` onkeydown="listViewKeyDownEvent(this, event)" data-focusitemstyle="`)
-	buffer.WriteString(listViewCurrentStyle(listView))
-	buffer.WriteString(`" data-bluritemstyle="`)
-	buffer.WriteString(listViewCurrentInactiveStyle(listView))
-	buffer.WriteString(`"`)
+
+	writeStrings(buffer, `onfocus="listViewFocusEvent(this, event)" onblur="listViewBlurEvent(this, event)"`,
+		` onkeydown="listViewKeyDownEvent(this, event)"`,
+		` data-focusitemstyle="`, listViewCurrentStyle(listView),
+		`" data-bluritemstyle="`, listViewCurrentInactiveStyle(listView), `"`)
 
 	if adapter := listView.getAdapter(); adapter != nil {
 		if current := GetCurrent(listView); current >= 0 && current < adapter.ListSize() {
-			buffer.WriteString(` data-current="`)
-			buffer.WriteString(listView.htmlID())
-			buffer.WriteRune('-')
-			buffer.WriteString(strconv.Itoa(current))
-			buffer.WriteRune('"')
+			writeStrings(buffer, ` data-current="`, listView.htmlID(), "-", strconv.Itoa(current), `"`)
 		}
 	}
 	listView.viewData.htmlProperties(self, buffer)
@@ -852,15 +822,11 @@ func listDiv(listView View, buffer *strings.Builder) {
 	buffer.WriteString(`<div style="display: flex; align-content: stretch;`)
 
 	if gap := GetListRowGap(listView); gap.Type != Auto {
-		buffer.WriteString(` row-gap: `)
-		buffer.WriteString(gap.cssString("0", listView.Session()))
-		buffer.WriteRune(';')
+		writeStrings(buffer, ` row-gap: `, gap.cssString("0", listView.Session()), ";")
 	}
 
 	if gap := GetListColumnGap(listView); gap.Type != Auto {
-		buffer.WriteString(` column-gap: `)
-		buffer.WriteString(gap.cssString("0", listView.Session()))
-		buffer.WriteRune(';')
+		writeStrings(buffer, ` column-gap: `, gap.cssString("0", listView.Session()), ";")
 	}
 
 	wrap := GetListWrap(listView)
@@ -881,8 +847,7 @@ func listDiv(listView View, buffer *strings.Builder) {
 		}
 	}
 
-	buffer.WriteString(` flex-flow: `)
-	buffer.WriteString(enumProperties[Orientation].cssValues[orientation])
+	writeStrings(buffer, ` flex-flow: `, enumProperties[Orientation].cssValues[orientation])
 
 	switch wrap {
 	case ListWrapOn:
@@ -930,11 +895,7 @@ func listDiv(listView View, buffer *strings.Builder) {
 	}
 
 	if value != "" {
-		buffer.WriteRune(' ')
-		buffer.WriteString(hAlignTag)
-		buffer.WriteString(`: `)
-		buffer.WriteString(value)
-		buffer.WriteRune(';')
+		writeStrings(buffer, " ", hAlignTag, `: `, value, ";")
 	}
 
 	value = ""
@@ -963,11 +924,7 @@ func listDiv(listView View, buffer *strings.Builder) {
 	}
 
 	if value != "" {
-		buffer.WriteRune(' ')
-		buffer.WriteString(vAlignTag)
-		buffer.WriteString(`: `)
-		buffer.WriteString(value)
-		buffer.WriteRune(';')
+		writeStrings(buffer, " ", vAlignTag, `: `, value, ";")
 	}
 
 	buffer.WriteString(`">`)

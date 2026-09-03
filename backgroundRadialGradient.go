@@ -227,18 +227,12 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			if text, ok := session.resolveConstants(value); ok {
 				values := enumProperties[RadialGradientRadius]
 				if n, ok := enumStringToInt(text, values.values, false); ok {
-					buffer.WriteString(shapeText)
+					writeStrings(buffer, shapeText, values.cssValues[n], " ")
 					shapeText = ""
-					buffer.WriteString(values.cssValues[n])
-					buffer.WriteString(" ")
 				} else {
 					if r, ok := StringToSizeUnit(text); ok && r.Type != Auto {
-						buffer.WriteString("ellipse ")
+						writeStrings(buffer, "ellipse ", r.cssString("", session), " ", r.cssString("", session), " ")
 						shapeText = ""
-						buffer.WriteString(r.cssString("", session))
-						buffer.WriteString(" ")
-						buffer.WriteString(r.cssString("", session))
-						buffer.WriteString(" ")
 					} else {
 						ErrorLog(`Invalid radial gradient radius: ` + text)
 					}
@@ -250,29 +244,20 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 		case int:
 			values := enumProperties[RadialGradientRadius].cssValues
 			if value >= 0 && value < len(values) {
-				buffer.WriteString(shapeText)
+				writeStrings(buffer, shapeText, values[value], " ")
 				shapeText = ""
-				buffer.WriteString(values[value])
-				buffer.WriteString(" ")
 			} else {
 				ErrorLogF(`Invalid radial gradient radius: %d`, value)
 			}
 
 		case SizeUnit:
 			if value.Type != Auto {
-				buffer.WriteString("ellipse ")
+				writeStrings(buffer, "ellipse ", value.cssString("", session), " ", value.cssString("", session), " ")
 				shapeText = ""
-				buffer.WriteString(value.cssString("", session))
-				buffer.WriteString(" ")
-				buffer.WriteString(value.cssString("", session))
-				buffer.WriteString(" ")
 			}
 
 		case []SizeUnit:
-			count := len(value)
-			if count > 2 {
-				count = 2
-			}
+			count := max(len(value), 2)
 			buffer.WriteString("ellipse ")
 			shapeText = ""
 			for i := range count {
@@ -281,10 +266,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 			}
 
 		case []any:
-			count := len(value)
-			if count > 2 {
-				count = 2
-			}
+			count := max(len(value), 2)
 			buffer.WriteString("ellipse ")
 			shapeText = ""
 			for i := range count {
@@ -316,13 +298,7 @@ func (gradient *backgroundRadialGradient) cssStyle(session Session) string {
 	x, _ := sizeProperty(gradient, CenterX, session)
 	y, _ := sizeProperty(gradient, CenterX, session)
 	if x.Type != Auto || y.Type != Auto {
-		if shapeText != "" {
-			buffer.WriteString(shapeText)
-		}
-		buffer.WriteString("at ")
-		buffer.WriteString(x.cssString("50%", session))
-		buffer.WriteString(" ")
-		buffer.WriteString(y.cssString("50%", session))
+		writeStrings(buffer, shapeText, "at ", x.cssString("50%", session), " ", y.cssString("50%", session))
 	} else if shapeText != "" {
 		buffer.WriteString(shapeText)
 	}

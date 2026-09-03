@@ -319,26 +319,18 @@ func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder)
 	buffer.WriteString(` type="date"`)
 
 	if min, ok := getDateProperty(picker, DatePickerMin, Min); ok {
-		buffer.WriteString(` min="`)
-		buffer.WriteString(min.Format(dateFormat))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` min="`, min.Format(dateFormat), `"`)
 	}
 
 	if max, ok := getDateProperty(picker, DatePickerMax, Max); ok {
-		buffer.WriteString(` max="`)
-		buffer.WriteString(max.Format(dateFormat))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` max="`, max.Format(dateFormat), `"`)
 	}
 
 	if step, ok := intProperty(picker, DatePickerStep, picker.Session(), 0); ok && step > 0 {
-		buffer.WriteString(` step="`)
-		buffer.WriteString(strconv.Itoa(step))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` step="`, strconv.Itoa(step), `"`)
 	}
 
-	buffer.WriteString(` value="`)
-	buffer.WriteString(GetDatePickerValue(picker).Format(dateFormat))
-	buffer.WriteByte('"')
+	writeStrings(buffer, ` value="`, GetDatePickerValue(picker).Format(dateFormat), `"`)
 
 	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 	if picker.getRaw(ClickEvent) == nil {

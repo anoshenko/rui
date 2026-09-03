@@ -132,26 +132,19 @@ func (properties *propertyList) AllTags() []PropertyName {
 func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 	indent string, objectTag string, tags []PropertyName) {
 
-	buffer.WriteString(objectTag)
-	buffer.WriteString(" {\n")
-
+	writeStrings(buffer, objectTag, " {\n")
 	indent2 := indent + "\t"
 
 	for _, tag := range tags {
 		if value, ok := properties.properties[tag]; ok {
 			text := propertyValueToString(tag, value, indent2)
 			if text != "" {
-				buffer.WriteString(indent2)
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
-				buffer.WriteString(",\n")
+				writeStrings(buffer, indent2, string(tag), " = ", text, ",\n")
 			}
 		}
 	}
 
-	buffer.WriteString(indent)
-	buffer.WriteString("}")
+	writeStrings(buffer, indent, "}")
 }
 */
 
@@ -214,8 +207,7 @@ func (data *dataProperty) writeToBuffer(buffer *strings.Builder, indent string, 
 	data.mutex.Lock()
 	defer data.mutex.Unlock()
 
-	buffer.WriteString(objectName)
-	buffer.WriteString("{ ")
+	writeStrings(buffer, objectName, "{ ")
 	comma := false
 	for _, tag := range tags {
 		if value, ok := data.properties[tag]; ok {
@@ -224,9 +216,7 @@ func (data *dataProperty) writeToBuffer(buffer *strings.Builder, indent string, 
 				if comma {
 					buffer.WriteString(", ")
 				}
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
+				writeStrings(buffer, string(tag), " = ", text)
 				comma = true
 			}
 		}

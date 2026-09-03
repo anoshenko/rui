@@ -415,9 +415,7 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 	}
 
 	if dragData := base64DragData(view); dragData != "" {
-		buffer.WriteString(`draggable="true" data-drag="`)
-		buffer.WriteString(dragData)
-		buffer.WriteString(`" ondragstart="dragStartEvent(this, event)" `)
+		writeStrings(buffer, `draggable="true" data-drag="`, dragData, `" ondragstart="dragStartEvent(this, event)" `)
 	} else if len(getOneArgEventListeners[View, DragAndDropEvent](view, nil, DragStartEvent)) > 0 {
 		buffer.WriteString(` ondragstart="dragStartEvent(this, event)" `)
 	}
@@ -444,9 +442,7 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 	}
 
 	if img := GetDragImage(view); img != "" {
-		buffer.WriteString(` data-drag-image="`)
-		buffer.WriteString(img)
-		buffer.WriteString(`" `)
+		writeStrings(buffer, ` data-drag-image="`, img, `" `)
 	}
 
 	if f := GetDragImageXOffset(view); f != 0 {
@@ -463,9 +459,7 @@ func dragAndDropHtml(view View, buffer *strings.Builder) {
 
 	effects := []string{"undefined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"}
 	if n := GetDropEffectAllowed(view); n > 0 && n < len(effects) {
-		buffer.WriteString(` data-drop-effect-allowed="`)
-		buffer.WriteString(effects[n])
-		buffer.WriteString(`" `)
+		writeStrings(buffer, ` data-drop-effect-allowed="`, effects[n], `" `)
 	}
 }
 

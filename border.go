@@ -386,9 +386,7 @@ func (border *borderProperty) writeString(buffer *strings.Builder, indent string
 			if comma {
 				buffer.WriteString(", ")
 			}
-			buffer.WriteString(string(tag))
-			buffer.WriteString(" = ")
-			buffer.WriteString(text)
+			writeStrings(buffer, string(tag), " = ", text)
 			comma = true
 		}
 	}

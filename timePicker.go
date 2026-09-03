@@ -294,28 +294,20 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 	buffer.WriteString(` type="time"`)
 
 	if min, ok := getTimeProperty(picker, TimePickerMin, Min); ok {
-		buffer.WriteString(` min="`)
-		buffer.WriteString(min.Format(timeFormat))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` min="`, min.Format(timeFormat), `"`)
 	}
 
 	if max, ok := getTimeProperty(picker, TimePickerMax, Max); ok {
-		buffer.WriteString(` max="`)
-		buffer.WriteString(max.Format(timeFormat))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` max="`, max.Format(timeFormat), `"`)
 	}
 
 	if step, ok := intProperty(picker, TimePickerStep, picker.Session(), 0); ok && step > 0 {
-		buffer.WriteString(` step="`)
-		buffer.WriteString(strconv.Itoa(step))
-		buffer.WriteByte('"')
+		writeStrings(buffer, ` step="`, strconv.Itoa(step), `"`)
 	}
 
-	buffer.WriteString(` value="`)
-	buffer.WriteString(GetTimePickerValue(picker).Format(timeFormat))
-	buffer.WriteByte('"')
+	writeStrings(buffer, ` value="`, GetTimePickerValue(picker).Format(timeFormat),
+		`" oninput="editViewInputEvent(this)"`)
 
-	buffer.WriteString(` oninput="editViewInputEvent(this)"`)
 	if picker.getRaw(ClickEvent) == nil {
 		buffer.WriteString(` onclick="stopEventPropagation(this, event)"`)
 	}

@@ -611,9 +611,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 
 	writeString := func(buffer *strings.Builder, text string) string {
 		if isQuotesNeeded(text) {
-			buffer.WriteRune('"')
-			buffer.WriteString(replaceEscapeSymbols(text))
-			buffer.WriteRune('"')
+			writeStrings(buffer, `"`, replaceEscapeSymbols(text), `"`)
 		} else {
 			buffer.WriteString(text)
 		}
@@ -623,9 +621,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 	writeObjectNameString := func(buffer *strings.Builder, text string) string {
 		textEscaped := replaceEscapeSymbols(text)
 		if isQuotesNeededForObjectName(textEscaped) {
-			buffer.WriteRune('"')
-			buffer.WriteString(textEscaped)
-			buffer.WriteRune('"')
+			writeStrings(buffer, `"`, textEscaped, `"`)
 		} else {
 			buffer.WriteString(text)
 		}
@@ -1091,19 +1087,14 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 }
 
 func writeViewStyle(name string, view Properties, buffer *strings.Builder, indent string, excludeTags []PropertyName) {
-	buffer.WriteString(name)
-	buffer.WriteString(" {\n")
+	writeStrings(buffer, name, " {\n")
 	indent += "\t"
 
 	writeProperty := func(tag PropertyName, value any) {
 		if !slices.Contains(excludeTags, tag) {
 			text := propertyValueToString(tag, value, indent)
 			if text != "" {
-				buffer.WriteString(indent)
-				buffer.WriteString(string(tag))
-				buffer.WriteString(" = ")
-				buffer.WriteString(text)
-				buffer.WriteString(",\n")
+				writeStrings(buffer, indent, string(tag), " = ", text, ",\n")
 			}
 		}
 	}
@@ -1167,8 +1158,7 @@ func writeViewStyle(name string, view Properties, buffer *strings.Builder, inden
 	}
 
 	indent = indent[:len(indent)-1]
-	buffer.WriteString(indent)
-	buffer.WriteString("}")
+	writeStrings(buffer, indent, "}")
 }
 
 func runStringWriter(writer stringWriter) string {

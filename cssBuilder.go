@@ -88,10 +88,7 @@ func (builder *viewCSSBuilder) add(key, value string) {
 			builder.buffer.WriteRune(' ')
 		}
 
-		builder.buffer.WriteString(key)
-		builder.buffer.WriteString(": ")
-		builder.buffer.WriteString(value)
-		builder.buffer.WriteRune(';')
+		writeStrings(builder.buffer, key, ": ", value, ";")
 	}
 }
 
@@ -193,9 +190,7 @@ func (builder *cssStyleBuilder) startMedia(rule string) {
 	if builder.buffer == nil {
 		builder.init(0)
 	}
-	builder.buffer.WriteString(`@media screen`)
-	builder.buffer.WriteString(rule)
-	builder.buffer.WriteString(` {\n`)
+	writeStrings(builder.buffer, `@media screen`, rule, ` {\n`)
 	builder.media = true
 }
 
@@ -247,9 +242,7 @@ func (builder *cssStyleBuilder) startAnimation(name string) {
 	}
 
 	builder.media = true
-	builder.buffer.WriteString(`\n@keyframes `)
-	builder.buffer.WriteString(name)
-	builder.buffer.WriteString(` {\n`)
+	writeStrings(builder.buffer, `\n@keyframes `, name, ` {\n`)
 }
 
 func (builder *cssStyleBuilder) endAnimation() {
@@ -265,9 +258,7 @@ func (builder *cssStyleBuilder) startAnimationFrame(name string) {
 		builder.init(0)
 	}
 
-	builder.buffer.WriteString(`\t`)
-	builder.buffer.WriteString(name)
-	builder.buffer.WriteString(` {\n`)
+	writeStrings(builder.buffer, `\t`, name, ` {\n`)
 }
 
 func (builder *cssStyleBuilder) endAnimationFrame() {
@@ -285,11 +276,7 @@ func (builder *cssStyleBuilder) add(key, value string) {
 		if builder.media {
 			builder.buffer.WriteString(`\t`)
 		}
-		builder.buffer.WriteString(`\t`)
-		builder.buffer.WriteString(key)
-		builder.buffer.WriteString(`: `)
-		builder.buffer.WriteString(value)
-		builder.buffer.WriteString(`;\n`)
+		writeStrings(builder.buffer, `\t`, key, `: `, value, `;\n`)
 	}
 }
 
@@ -300,9 +287,7 @@ func (builder *cssStyleBuilder) addWriter(key string, writer func(buffer *string
 	if builder.media {
 		builder.buffer.WriteString(`\t`)
 	}
-	builder.buffer.WriteString(`\t`)
-	builder.buffer.WriteString(key)
-	builder.buffer.WriteString(": ")
+	writeStrings(builder.buffer, `\t`, key, ": ")
 	writer(builder.buffer)
 	builder.buffer.WriteString(`;\n`)
 }
@@ -318,9 +303,7 @@ func (builder *cssStyleBuilder) addValues(key, separator string, values ...strin
 	if builder.media {
 		builder.buffer.WriteString(`\t`)
 	}
-	builder.buffer.WriteString(`\t`)
-	builder.buffer.WriteString(key)
-	builder.buffer.WriteString(`: `)
+	writeStrings(builder.buffer, `\t`, key, `: `)
 	for i, value := range values {
 		if i > 0 {
 			builder.buffer.WriteString(separator)
