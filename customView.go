@@ -75,6 +75,13 @@ func (customView *CustomViewData) setRaw(tag PropertyName, value any) {
 	customView.superView.setRaw(tag, value)
 }
 
+func (customView *CustomViewData) setContent(value any) bool {
+	if container, ok := customView.superView.(ViewsContainer); ok {
+		return container.setContent(value)
+	}
+	return false
+}
+
 func (customView *CustomViewData) setAll(props map[PropertyName]any) {
 	customView.superView.setAll(props)
 }
