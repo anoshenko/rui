@@ -1521,7 +1521,7 @@ function setTableCellCursorByID(tableID, row, column) {
 function setTableCellCursor(element, row, column) {
 	const cellID = element.id + "-" + row + "-" + column;
 	const cell = document.getElementById(cellID);
-	if (!cell || cell.getAttribute("inert") != null) {
+	if (!cell || cell.getAttribute("data-non-selectable") == 1) {
 		return false;
 	}
 
@@ -1712,7 +1712,7 @@ function setTableRowCursorByID(tableID, row) {
 function setTableRowCursor(element, row) {
 	const tableRowID = element.id + "-" + row;
 	const tableRow = document.getElementById(tableRowID);
-	if (!tableRow || tableRow.getAttribute("inert") != null) {
+	if (!tableRow || tableRow.getAttribute("data-non-selectable") == 1) {
 		return false;
 	}
 

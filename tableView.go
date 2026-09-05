@@ -1122,7 +1122,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 				buffer.WriteString(` onclick="tableRowClickEvent(this, event)"`)
 
 				if allowRowSelection != nil && !allowRowSelection.AllowRowSelection(row) {
-					buffer.WriteString(` inert`)
+					buffer.WriteString(` data-non-selectable=1`)
 				}
 			}
 
@@ -1206,7 +1206,7 @@ func (table *tableViewData) htmlSubviews(self View, buffer *strings.Builder) {
 					if selectionMode == CellSelection {
 						buffer.WriteString(` onclick="tableCellClickEvent(this, event)"`)
 						if allowCellSelection != nil && !allowCellSelection.AllowCellSelection(row, column) {
-							buffer.WriteString(` inert`)
+							buffer.WriteString(` data-non-selectable=1`)
 						}
 					}
 
