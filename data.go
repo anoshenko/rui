@@ -186,21 +186,25 @@ func (object *dataObject) PropertyByTag(tag string) DataNode {
 
 func (object *dataObject) RemovePropertyByTag(tag string) DataNode {
 	if object.property != nil {
-		for i, node := range object.property {
-			if node.Tag() == tag {
-				switch i {
-				case 0:
-					object.property = object.property[1:]
+		index := slices.IndexFunc(object.property, func(node DataNode) bool {
+			return node.Tag() == tag
+		})
 
-				case len(object.property) - 1:
-					object.property = object.property[:len(object.property)-1]
+		if index >= 0 {
+			node := object.property[index]
 
-				default:
-					object.property = append(object.property[:i], object.property[i+1:]...)
-				}
+			switch index {
+			case 0:
+				object.property = object.property[1:]
 
-				return node
+			case len(object.property) - 1:
+				object.property = object.property[:len(object.property)-1]
+
+			default:
+				object.property = append(object.property[:index], object.property[index+1:]...)
 			}
+
+			return node
 		}
 	}
 	return nil
