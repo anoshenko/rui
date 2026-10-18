@@ -157,7 +157,7 @@ const (
 )
 
 func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) {
-	if propertyName, ok := data.PropertyValue("property"); ok {
+	if propertyName, ok := data.PropertyText("property"); ok {
 		property := PropertyName(propertyName)
 		if tag == TransitionEndEvent || tag == TransitionCancelEvent {
 			if animation, ok := view.singleTransition[property]; ok {
@@ -177,7 +177,7 @@ func (view *viewData) handleTransitionEvents(tag PropertyName, data DataObject) 
 func (view *viewData) handleAnimationEvents(tag PropertyName, data DataObject) {
 	if listeners := getOneArgEventListeners[View, string](view, nil, tag); len(listeners) > 0 {
 		id := ""
-		if name, ok := data.PropertyValue("name"); ok {
+		if name, ok := data.PropertyText("name"); ok {
 			for _, animation := range GetAnimation(view) {
 				if name == animation.animationName() {
 					id, _ = stringProperty(animation, ID, view.Session())

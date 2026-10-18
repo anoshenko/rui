@@ -101,15 +101,15 @@ func (manager *imageManager) imageLoaded(obj DataObject) {
 		return
 	}
 
-	if url, ok := obj.PropertyValue("url"); ok {
+	if url, ok := obj.PropertyText("url"); ok {
 		if image, ok := manager.images[url]; ok {
 			image.loadingStatus = ImageReady
-			if width, ok := obj.PropertyValue("width"); ok {
+			if width, ok := obj.PropertyText("width"); ok {
 				if w, err := strconv.ParseFloat(width, 64); err == nil {
 					image.width = w
 				}
 			}
-			if height, ok := obj.PropertyValue("height"); ok {
+			if height, ok := obj.PropertyText("height"); ok {
 				if h, err := strconv.ParseFloat(height, 64); err == nil {
 					image.height = h
 				}
@@ -127,11 +127,11 @@ func (manager *imageManager) imageLoadError(obj DataObject) {
 		return
 	}
 
-	if url, ok := obj.PropertyValue("url"); ok {
+	if url, ok := obj.PropertyText("url"); ok {
 		if image, ok := manager.images[url]; ok {
 			delete(manager.images, url)
 
-			text, _ := obj.PropertyValue("message")
+			text, _ := obj.PropertyText("message")
 			image.setLoadingError(text)
 
 			if image.listener != nil {

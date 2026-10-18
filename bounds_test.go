@@ -66,7 +66,7 @@ func TestBoundsSet(t *testing.T) {
 	}
 
 	for _, tag := range []string{"padding-left", "padding-top", "padding-right", "padding-bottom"} {
-		if old, ok := obj.PropertyValue(tag); ok {
+		if old, ok := obj.PropertyText(tag); ok {
 			ignoreTestLog = true
 			obj.SetPropertyValue(tag, "x")
 			if bounds.setProperty(obj, "padding", session) {

@@ -703,7 +703,7 @@ func (tabsLayout *tabsLayoutData) htmlSubviews(self View, buffer *strings.Builde
 func (tabsLayout *tabsLayoutData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "tabClick":
-		if numberText, ok := data.PropertyValue("number"); ok {
+		if numberText, ok := data.PropertyText("number"); ok {
 			if number, err := strconv.Atoi(numberText); err == nil {
 				current := GetCurrent(tabsLayout)
 				if current != number {
@@ -716,7 +716,7 @@ func (tabsLayout *tabsLayoutData) handleCommand(self View, command PropertyName,
 		return true
 
 	case "tabCloseClick":
-		if numberText, ok := data.PropertyValue("number"); ok {
+		if numberText, ok := data.PropertyText("number"); ok {
 			if number, err := strconv.Atoi(numberText); err == nil {
 				for _, listener := range getOneArgEventListeners[TabsLayout, int](tabsLayout, nil, TabCloseEvent) {
 					listener.Run(tabsLayout, number)

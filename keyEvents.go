@@ -416,14 +416,12 @@ type KeyEvent struct {
 
 func (event *KeyEvent) init(data DataObject) {
 	getBool := func(tag string) bool {
-		if value, ok := data.PropertyValue(tag); ok && value == "1" {
-			return true
-		}
-		return false
+		value, ok := data.PropertyText(tag)
+		return ok && value == "1"
 	}
 
-	event.Key, _ = data.PropertyValue("key")
-	code, _ := data.PropertyValue("code")
+	event.Key, _ = data.PropertyText("key")
+	code, _ := data.PropertyText("code")
 	event.Code = KeyCode(code)
 	event.TimeStamp = getTimeStamp(data)
 	event.Repeat = getBool("repeat")

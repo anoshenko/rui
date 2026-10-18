@@ -245,12 +245,16 @@ func parseAnimation(obj DataObject) AnimationProperty {
 	animation := new(animationData)
 	animation.init()
 
-	for node := range obj.Properties() {
-		tag := PropertyName(node.Tag())
-		if node.Type() == TextNode {
-			animation.Set(tag, node.Text())
-		} else {
-			animation.Set(tag, node)
+	for tag, node := range obj.Properties() {
+		switch node.Type() {
+		case TextDataValue:
+			animation.Set(PropertyName(tag), node.String())
+
+		case ObjectDataValue:
+			animation.Set(PropertyName(tag), node.Object())
+
+		case ArrayDataValue:
+			animation.Set(PropertyName(tag), node.Array())
 		}
 	}
 	return animation
@@ -418,6 +422,47 @@ func normalizeAnimation(tag PropertyName) PropertyName {
 }
 
 func animationSet(properties Properties, tag PropertyName, value any) []PropertyName {
+
+	parseObject := func(obj DataObject) (AnimatedProperty, bool) {
+		result := AnimatedProperty{}
+		for tag, value := range obj.Properties() {
+			if value.Type() == TextDataValue {
+				propTag := strings.ToLower(tag)
+				switch propTag {
+				case "from", "0", "0%":
+					result.From = value.String()
+
+				case "to", "100", "100%":
+					result.To = value.String()
+
+				default:
+					tagLen := len(propTag)
+					if tagLen > 0 && propTag[tagLen-1] == '%' {
+						propTag = propTag[:tagLen-1]
+					}
+					n, err := strconv.Atoi(propTag)
+					if err != nil {
+						ErrorLog(err.Error())
+					} else if n < 0 || n > 100 {
+						ErrorLogF(`key-frame "%d" is out of range`, n)
+					} else {
+						if result.KeyFrames == nil {
+							result.KeyFrames = map[int]any{n: value.String()}
+						} else {
+							result.KeyFrames[n] = value.String()
+						}
+					}
+				}
+			}
+		}
+
+		if len(obj.Tag()) > 0 {
+			result.Tag = PropertyName(obj.Tag())
+		}
+
+		return result, result.From != nil && result.To != nil
+	}
+
 	switch tag {
 	case ID:
 		if text, ok := value.(string); ok {
@@ -486,72 +531,38 @@ func animationSet(properties Properties, tag PropertyName, value any) []Property
 				ErrorLog("[]AnimatedProperty is empty")
 			}
 
-		case DataNode:
-			parseObject := func(obj DataObject) (AnimatedProperty, bool) {
-				result := AnimatedProperty{}
-				for node := range obj.Properties() {
-					if node.Type() == TextNode {
-						propTag := strings.ToLower(node.Tag())
-						switch propTag {
-						case "from", "0", "0%":
-							result.From = node.Text()
-
-						case "to", "100", "100%":
-							result.To = node.Text()
-
-						default:
-							tagLen := len(propTag)
-							if tagLen > 0 && propTag[tagLen-1] == '%' {
-								propTag = propTag[:tagLen-1]
-							}
-							n, err := strconv.Atoi(propTag)
-							if err != nil {
-								ErrorLog(err.Error())
-							} else if n < 0 || n > 100 {
-								ErrorLogF(`key-frame "%d" is out of range`, n)
-							} else {
-								if result.KeyFrames == nil {
-									result.KeyFrames = map[int]any{n: node.Text()}
-								} else {
-									result.KeyFrames[n] = node.Text()
-								}
-							}
-						}
-					}
-				}
-
-				if len(obj.Tag()) > 0 {
-					result.Tag = PropertyName(obj.Tag())
-				}
-
-				if result.From != nil && result.To != nil {
-					return result, true
-				}
-				return result, false
+		case DataObject:
+			if prop, ok := parseObject(value); ok {
+				properties.setRaw(tag, []AnimatedProperty{prop})
+				return []PropertyName{tag}
 			}
 
-			switch value.Type() {
-			case ObjectNode:
-				if prop, ok := parseObject(value.Object()); ok {
-					properties.setRaw(tag, []AnimatedProperty{prop})
-					return []PropertyName{tag}
-				}
-
-			case ArrayNode:
-				props := []AnimatedProperty{}
-				for val := range value.ArrayElements() {
-					if val.IsObject() {
-						if prop, ok := parseObject(val.Object()); ok {
-							props = append(props, prop)
-						}
-					} else {
-						notCompatibleType(tag, val)
+		case DataArray:
+			props := []AnimatedProperty{}
+			for val := range value.Elements() {
+				if val.Type() == ObjectDataValue {
+					if prop, ok := parseObject(val.Object()); ok {
+						props = append(props, prop)
 					}
+				} else {
+					notCompatibleType(tag, val)
 				}
-				if len(props) > 0 {
-					properties.setRaw(tag, props)
-					return []PropertyName{tag}
-				}
+			}
+			if len(props) > 0 {
+				properties.setRaw(tag, props)
+				return []PropertyName{tag}
+			}
+
+		case DataValue:
+			switch value.Type() {
+			case TextDataValue:
+				return animationSet(properties, tag, value.String())
+
+			case ObjectDataValue:
+				return animationSet(properties, tag, value.Object())
+
+			case ArrayDataValue:
+				return animationSet(properties, tag, value.Array())
 
 			default:
 				notCompatibleType(tag, value)
@@ -1088,25 +1099,38 @@ func setAnimationProperty(properties Properties, tag PropertyName, value any) bo
 			return true
 		}
 
-	case DataNode:
+	case DataArray:
 		animations := []AnimationProperty{}
 		result := true
-		for i := range value.ArraySize() {
-			if obj := value.ArrayElement(i).Object(); obj != nil {
+		for val := range value.Elements() {
+			if obj := val.Object(); obj != nil {
 				if anim := parseAnimation(obj); anim.hasAnimatedProperty() {
 					animations = append(animations, anim)
 				} else {
 					result = false
 				}
 			} else {
-				notCompatibleType(tag, value.ArrayElement(i))
+				notCompatibleType(tag, val)
 				result = false
 			}
 		}
+
 		if result && len(animations) > 0 {
 			set(animations)
 		}
 		return result
+
+	case DataValue:
+		switch value.Type() {
+		case TextDataValue:
+			return setAnimationProperty(properties, tag, value.String())
+
+		case ObjectDataValue:
+			return setAnimationProperty(properties, tag, value.Object())
+
+		case ArrayDataValue:
+			return setAnimationProperty(properties, tag, value.Array())
+		}
 	}
 
 	notCompatibleType(tag, value)

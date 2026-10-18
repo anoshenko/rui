@@ -159,7 +159,7 @@ func (picker *colorPickerData) htmlProperties(self View, buffer *strings.Builder
 func (picker *colorPickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
-		if text, ok := data.PropertyValue("text"); ok {
+		if text, ok := data.PropertyText("text"); ok {
 			if color, ok := StringToColor(text); ok {
 				oldColor := GetColorPickerValue(picker)
 				picker.setRaw(ColorPickerValue, color)

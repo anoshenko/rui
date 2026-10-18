@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 )
 
 // ViewStyle interface of the style of view
@@ -566,67 +565,7 @@ func viewStyleGet(style Properties, tag PropertyName) any {
 	return style.getRaw(tag)
 }
 
-func isQuotesNeeded(text string) bool {
-	if len(text) == 1 {
-		simple := (text[0] >= '0' && text[0] <= '9') || (text[0] >= 'A' && text[0] <= 'Z') || (text[0] >= 'a' && text[0] <= 'z')
-		return !simple
-	} else {
-		for _, ch := range text {
-			if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-				ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == '.' ||
-				ch == ':' || ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
-			} else {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func isQuotesNeededForObjectName(name string) bool {
-	for _, char := range name {
-		if unicode.IsSpace(char) ||
-			slices.Contains([]rune{'=', '{', '}', '[', ']', ',', ' ', '\t', '\n', '\'', '"', '`', '/'}, char) {
-			return true
-		}
-	}
-	return false
-}
-
-func replaceEscapeSymbols(text string) string {
-	replace := []struct{ old, new string }{
-		{old: "\\", new: `\\`},
-		{old: "\t", new: `\t`},
-		{old: "\r", new: `\r`},
-		{old: "\n", new: `\n`},
-		{old: "\"", new: `\"`},
-	}
-	for _, s := range replace {
-		text = strings.ReplaceAll(text, s.old, s.new)
-	}
-	return text
-}
-
 func propertyValueToString(tag PropertyName, value any, indent string) string {
-
-	writeString := func(buffer *strings.Builder, text string) string {
-		if isQuotesNeeded(text) {
-			writeStrings(buffer, `"`, replaceEscapeSymbols(text), `"`)
-		} else {
-			buffer.WriteString(text)
-		}
-		return text
-	}
-
-	writeObjectNameString := func(buffer *strings.Builder, text string) string {
-		textEscaped := replaceEscapeSymbols(text)
-		if isQuotesNeededForObjectName(textEscaped) {
-			writeStrings(buffer, `"`, textEscaped, `"`)
-		} else {
-			buffer.WriteString(text)
-		}
-		return text
-	}
 
 	switch value := value.(type) {
 	case string:
@@ -652,7 +591,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 			lead := "["
 			for _, text := range value {
 				buffer.WriteString(lead)
-				writeString(buffer, text)
+				writeRuiText(buffer, text, false)
 				lead = ", "
 			}
 		} else {
@@ -660,7 +599,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 			for _, text := range value {
 				buffer.WriteString(indent)
 				buffer.WriteRune('\t')
-				writeString(buffer, text)
+				writeRuiText(buffer, text, false)
 				buffer.WriteString(",\n")
 			}
 			buffer.WriteString(indent)
@@ -683,9 +622,9 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 			for _, key := range keys {
 				buffer.WriteString(indent)
 				buffer.WriteRune('\t')
-				writeObjectNameString(buffer, key)
+				writeRuiText(buffer, key, true)
 				buffer.WriteString(" = ")
-				writeString(buffer, value[key])
+				writeRuiText(buffer, value[key], false)
 				buffer.WriteString(",\n")
 			}
 			buffer.WriteString(indent)
@@ -1006,9 +945,9 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		for key, listener := range value {
 			if text, ok := listener.(string); ok && text != "" {
 				buffer.WriteString(indent2)
-				writeString(buffer, string(key))
+				writeRuiText(buffer, string(key), true)
 				buffer.WriteString(" = ")
-				writeString(buffer, text)
+				writeRuiText(buffer, text, false)
 				buffer.WriteString(",\n")
 			}
 		}
@@ -1029,7 +968,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		buffer.WriteString("[\n")
 		for _, button := range value {
 			buffer.WriteString(lead)
-			writeString(buffer, button.title)
+			writeRuiText(buffer, button.title, false)
 			switch button.buttonType {
 			case CancelButton:
 				buffer.WriteString(`, type = cancel`)
@@ -1040,7 +979,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 			if button.onClick != nil {
 				if text, ok := button.onClick.rawListener().(string); ok {
 					buffer.WriteString(`, click = `)
-					writeString(buffer, text)
+					writeRuiText(buffer, text, true)
 				}
 			}
 			buffer.WriteString(" },\n")
@@ -1062,7 +1001,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 		buffer.WriteString("[\n")
 		for _, button := range value {
 			buffer.WriteString(lead)
-			writeString(buffer, button.Title)
+			writeRuiText(buffer, button.Title, false)
 			switch button.Type {
 			case CancelButton:
 				buffer.WriteString(`, type = cancel`)
@@ -1073,7 +1012,7 @@ func propertyValueToString(tag PropertyName, value any, indent string) string {
 
 			if button.Binding != "" {
 				buffer.WriteString(`, click = `)
-				writeString(buffer, button.Binding)
+				writeRuiText(buffer, button.Binding, true)
 			}
 			buffer.WriteString(" },\n")
 		}

@@ -343,7 +343,7 @@ func (picker *datePickerData) htmlProperties(self View, buffer *strings.Builder)
 func (picker *datePickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
-		if text, ok := data.PropertyValue("text"); ok {
+		if text, ok := data.PropertyText("text"); ok {
 			if value, err := time.Parse(dateFormat, text); err == nil {
 				oldValue := GetDatePickerValue(picker)
 				picker.setRaw(DatePickerValue, value)

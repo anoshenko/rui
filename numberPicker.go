@@ -286,7 +286,7 @@ func (picker *numberPickerData) htmlProperties(self View, buffer *strings.Builde
 func (picker *numberPickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
-		if text, ok := data.PropertyValue("text"); ok {
+		if text, ok := data.PropertyText("text"); ok {
 			if value, err := strconv.ParseFloat(text, 32); err == nil {
 				oldValue := GetNumberPickerValue(picker)
 				picker.setRaw(NumberPickerValue, text)

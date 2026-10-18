@@ -219,7 +219,7 @@ func (container *viewsContainerData) htmlSubviews(self View, buffer *strings.Bui
 	}
 }
 
-func viewFromTextValue(text string, session Session) View {
+func viewFromTextDataValue(text string, session Session) View {
 	if data, err := ParseDataText(text); err == nil {
 		if view := CreateViewFromObject(session, data, nil); view != nil {
 			return view
@@ -299,12 +299,12 @@ func (container *viewsContainerData) setContent(value any) bool {
 		container.views = value
 
 	case string:
-		container.views = []View{viewFromTextValue(value, session)}
+		container.views = []View{viewFromTextDataValue(value, session)}
 
 	case []string:
 		views := []View{}
 		for _, text := range value {
-			views = append(views, viewFromTextValue(text, session))
+			views = append(views, viewFromTextDataValue(text, session))
 		}
 		container.views = views
 
@@ -316,7 +316,7 @@ func (container *viewsContainerData) setContent(value any) bool {
 				views = append(views, v)
 
 			case string:
-				views = append(views, viewFromTextValue(v, session))
+				views = append(views, viewFromTextDataValue(v, session))
 
 			default:
 				notCompatibleType(Content, value)
@@ -332,18 +332,35 @@ func (container *viewsContainerData) setContent(value any) bool {
 			return false
 		}
 
-	case []DataValue:
+	case DataArray:
 		views := []View{}
-		for _, data := range value {
-			if data.IsObject() {
+		for data := range value.Elements() {
+			switch data.Type() {
+			case ObjectDataValue:
 				if view := CreateViewFromObject(session, data.Object(), nil); view != nil {
 					views = append(views, view)
 				}
-			} else {
-				views = append(views, viewFromTextValue(data.Value(), session))
+
+			case TextDataValue:
+				views = append(views, viewFromTextDataValue(data.String(), session))
+
+			case ArrayDataValue:
+				// not supported
 			}
 		}
 		container.views = views
+
+	case DataValue:
+		switch value.Type() {
+		case ObjectDataValue:
+			return container.setContent(value.Object())
+
+		case TextDataValue:
+			return container.setContent(value.String())
+
+		case ArrayDataValue:
+			return container.setContent(value.Array())
+		}
 
 	default:
 		notCompatibleType(Content, value)

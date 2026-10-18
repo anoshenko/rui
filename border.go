@@ -205,15 +205,12 @@ func newBorderProperty(value any) BorderProperty {
 		case BorderProperty:
 			return value
 
-		case DataNode:
-			if value.Type() == ObjectNode {
+		case DataValue:
+			if value.Type() == ObjectDataValue {
 				_ = border.setBorderObject(value.Object())
 			} else {
 				return nil
 			}
-
-		case DataObject:
-			_ = border.setBorderObject(value)
 
 		case ViewBorder:
 			border.properties[Style] = value.Style
@@ -434,17 +431,20 @@ func (border *borderProperty) String() string {
 }
 
 func (border *borderProperty) setBorderObject(obj DataObject) bool {
+	if obj == nil {
+		return false
+	}
+
 	result := true
-	for node := range obj.Properties() {
-		tag := PropertyName(node.Tag())
+	for tag, node := range obj.Properties() {
 		switch node.Type() {
-		case TextNode:
-			if borderSet(border, tag, node.Text()) == nil {
+		case TextDataValue:
+			if borderSet(border, PropertyName(tag), node.String()) == nil {
 				result = false
 			}
 
-		case ObjectNode:
-			if borderSet(border, tag, node.Object()) == nil {
+		case ObjectDataValue:
+			if borderSet(border, PropertyName(tag), node.Object()) == nil {
 				result = false
 			}
 
@@ -535,21 +535,21 @@ func borderSet(properties Properties, tag PropertyName, value any) []PropertyNam
 
 	setSingleBorderObject := func(prefix PropertyName, obj DataObject) []PropertyName {
 		result := []PropertyName{}
-		if text, ok := obj.PropertyValue(string(Style)); ok {
+		if text, ok := obj.PropertyText(string(Style)); ok {
 			props := setEnumProperty(properties, prefix+"-style", text, enumProperties[BorderStyle].values)
 			if props == nil {
 				return nil
 			}
 			result = append(result, props...)
 		}
-		if text, ok := obj.PropertyValue(string(ColorTag)); ok {
+		if text, ok := obj.PropertyText(string(ColorTag)); ok {
 			props := setColorProperty(properties, prefix+"-color", text)
 			if props == nil && len(result) == 0 {
 				return nil
 			}
 			result = append(result, props...)
 		}
-		if text, ok := obj.PropertyValue("width"); ok {
+		if text, ok := obj.PropertyText("width"); ok {
 			props := setSizeProperty(properties, prefix+"-width", text)
 			if props == nil && len(result) == 0 {
 				return nil

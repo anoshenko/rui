@@ -222,20 +222,20 @@ func parseColorPair(obj DataObject) (ColorPair, bool) {
 	var err error
 	result := ColorPair{}
 
-	for property := range obj.Properties() {
-		if property.Type() != TextNode {
+	for tag, property := range obj.Properties() {
+		if property.Type() != TextDataValue {
 			return ColorPair{}, false
 		}
 
-		switch property.Tag() {
+		switch tag {
 		case "light":
-			result.Light, err = stringToColor(property.Text())
+			result.Light, err = stringToColor(property.String())
 			if err != nil {
 				return ColorPair{}, false
 			}
 
 		case "dark":
-			result.Dark, err = stringToColor(property.Text())
+			result.Dark, err = stringToColor(property.String())
 			if err != nil {
 				return ColorPair{}, false
 			}

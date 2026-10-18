@@ -423,7 +423,7 @@ func (bridge *webBridge) canvasTextMetrics(htmlID, font, text string) TextMetric
 
 func (bridge *webBridge) htmlPropertyValue(htmlID, name string) string {
 	if data, ok := bridge.remoteValue("getPropertyValue", htmlID, name); ok {
-		if value, ok := data.PropertyValue("value"); ok {
+		if value, ok := data.PropertyText("value"); ok {
 			return value
 		}
 	}
@@ -431,7 +431,7 @@ func (bridge *webBridge) htmlPropertyValue(htmlID, name string) string {
 }
 
 func (bridge *webBridge) answerReceived(answer DataObject) {
-	if text, ok := answer.PropertyValue("answerID"); ok {
+	if text, ok := answer.PropertyText("answerID"); ok {
 		if id, err := strconv.Atoi(text); err == nil {
 			if chanel, ok := bridge.answer[id]; ok {
 				chanel <- answer

@@ -318,7 +318,7 @@ func (picker *timePickerData) htmlProperties(self View, buffer *strings.Builder)
 func (picker *timePickerData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "textChanged":
-		if text, ok := data.PropertyValue("text"); ok {
+		if text, ok := data.PropertyText("text"); ok {
 			if value, ok := stringToTime(text); ok {
 				oldValue := GetTimePickerValue(picker)
 				picker.setRaw(TimePickerValue, value)

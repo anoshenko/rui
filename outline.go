@@ -134,7 +134,7 @@ func setOutlineProperty(properties Properties, value any) []PropertyName {
 	case DataObject:
 		outline := NewOutlineProperty(nil)
 		for _, tag := range []PropertyName{Style, Width, ColorTag} {
-			if text, ok := value.PropertyValue(string(tag)); ok && text != "" {
+			if text, ok := value.PropertyText(string(tag)); ok && text != "" {
 				outline.Set(tag, text)
 			}
 		}

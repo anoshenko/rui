@@ -188,14 +188,16 @@ func parseIndicesArray(value any) ([]any, bool) {
 	case string:
 		return parseIndicesArray(strings.Split(value, ","))
 
-	case []DataValue:
-		items := make([]string, 0, len(value))
-		for _, val := range value {
-			if !val.IsObject() {
-				items = append(items, val.Value())
+	case DataValue:
+		if array := value.Array(); array != nil {
+			items := make([]string, 0, array.Size())
+			for val := range array.Elements() {
+				if val.Type() == TextDataValue {
+					items = append(items, val.String())
+				}
 			}
+			return parseIndicesArray(items)
 		}
-		return parseIndicesArray(items)
 	}
 
 	return nil, false
@@ -242,7 +244,7 @@ func (list *dropDownListData) htmlProperties(self View, buffer *strings.Builder)
 func (list *dropDownListData) handleCommand(self View, command PropertyName, data DataObject) bool {
 	switch command {
 	case "itemSelected":
-		if text, ok := data.PropertyValue("number"); ok {
+		if text, ok := data.PropertyText("number"); ok {
 			if number, err := strconv.Atoi(text); err == nil {
 				items := GetDropDownItems(list)
 				if GetCurrent(list) != number && number >= 0 && number < len(items) {

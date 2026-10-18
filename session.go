@@ -701,7 +701,7 @@ func (session *sessionData) handleAnswer(command string, data DataObject) bool {
 
 func (session *sessionData) handleRootSize(data DataObject) {
 	getValue := func(tag string) int {
-		if value, ok := data.PropertyValue(tag); ok {
+		if value, ok := data.PropertyText(tag); ok {
 			float, err := strconv.ParseFloat(value, 64)
 			if err == nil {
 				return int(float)
@@ -722,75 +722,78 @@ func (session *sessionData) handleRootSize(data DataObject) {
 }
 
 func (session *sessionData) handleResize(data DataObject) {
-	if node := data.PropertyByTag("views"); node != nil && node.Type() == ArrayNode {
-		for el := range node.ArrayElements() {
-			if el.IsObject() {
-				obj := el.Object()
-				getFloat := func(tag string) float64 {
-					if value, ok := obj.PropertyValue(tag); ok {
-						f, err := strconv.ParseFloat(value, 64)
-						if err == nil {
-							return f
-						}
-						ErrorLog(`Resize event error: ` + err.Error())
-					} else {
-						ErrorLogF(`Resize event error: the property "%s" not found`, tag)
+	array := data.PropertyArray("views")
+	if array == nil {
+		ErrorLog(`Resize event error: invalid "views" property`)
+		return
+	}
+
+	for el := range array.Elements() {
+		if obj := el.Object(); obj != nil {
+
+			getFloat := func(tag string) float64 {
+				if value, ok := obj.PropertyText(tag); ok {
+					f, err := strconv.ParseFloat(value, 64)
+					if err == nil {
+						return f
 					}
-					return 0
-				}
-				if viewID, ok := obj.PropertyValue("id"); ok {
-					if n := strings.IndexRune(viewID, '-'); n > 0 {
-						if view := session.viewByHTMLID(viewID[:n]); view != nil {
-							view.onItemResize(view, viewID[n+1:], getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
-						} else {
-							DebugLogF(`View with id == %s not found`, viewID[:n])
-						}
-					} else if view := session.viewByHTMLID(viewID); view != nil {
-						view.onResize(view, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
-						view.setScroll(getFloat("scroll-x"), getFloat("scroll-y"), getFloat("scroll-width"), getFloat("scroll-height"))
-					} else {
-						DebugLogF(`View with id == %s not found`, viewID)
-					}
+					ErrorLog(`Resize event error: ` + err.Error())
 				} else {
-					ErrorLog(`"id" property not found`)
+					ErrorLogF(`Resize event error: the property "%s" not found`, tag)
+				}
+				return 0
+			}
+
+			if viewID, ok := obj.PropertyText("id"); ok {
+				if n := strings.IndexRune(viewID, '-'); n > 0 {
+					if view := session.viewByHTMLID(viewID[:n]); view != nil {
+						view.onItemResize(view, viewID[n+1:], getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
+					} else {
+						DebugLogF(`View with id == %s not found`, viewID[:n])
+					}
+				} else if view := session.viewByHTMLID(viewID); view != nil {
+					view.onResize(view, getFloat("x"), getFloat("y"), getFloat("width"), getFloat("height"))
+					view.setScroll(getFloat("scroll-x"), getFloat("scroll-y"), getFloat("scroll-width"), getFloat("scroll-height"))
+				} else {
+					DebugLogF(`View with id == %s not found`, viewID)
 				}
 			} else {
-				ErrorLog(`Resize event error: views element is not object`)
+				ErrorLog(`"id" property not found`)
 			}
+		} else {
+			ErrorLog(`Resize event error: views element is not object`)
 		}
-	} else {
-		ErrorLog(`Resize event error: invalid "views" property`)
 	}
 }
 
 func (session *sessionData) handleSessionInfo(params DataObject) {
-	if value, ok := params.PropertyValue("touch"); ok {
+	if value, ok := params.PropertyText("touch"); ok {
 		session.touchScreen = (value == "1" || value == "true")
 	}
 
-	if value, ok := params.PropertyValue("user-agent"); ok {
+	if value, ok := params.PropertyText("user-agent"); ok {
 		session.userAgent = value
 	}
 
-	if value, ok := params.PropertyValue("direction"); ok {
+	if value, ok := params.PropertyText("direction"); ok {
 		if value == "rtl" {
 			session.textDirection = RightToLeftDirection
 		}
 	}
 
-	if value, ok := params.PropertyValue("language"); ok {
+	if value, ok := params.PropertyText("language"); ok {
 		session.language = value
 	}
 
-	if value, ok := params.PropertyValue("languages"); ok {
+	if value, ok := params.PropertyText("languages"); ok {
 		session.languages = strings.Split(value, ",")
 	}
 
-	if value, ok := params.PropertyValue("dark"); ok {
+	if value, ok := params.PropertyText("dark"); ok {
 		session.darkTheme = (value == "1" || value == "true")
 	}
 
-	if value, ok := params.PropertyValue("pixel-ratio"); ok {
+	if value, ok := params.PropertyText("pixel-ratio"); ok {
 		if f, err := strconv.ParseFloat(value, 64); err != nil {
 			ErrorLog(err.Error())
 		} else {
@@ -798,7 +801,7 @@ func (session *sessionData) handleSessionInfo(params DataObject) {
 		}
 	}
 
-	if value, ok := params.PropertyValue("light-dark"); ok {
+	if value, ok := params.PropertyText("light-dark"); ok {
 		session.lightDark = (value == "1" || value == "true")
 	}
 }
@@ -818,7 +821,7 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 		session.onResume()
 
 	case "timer":
-		if text, ok := data.PropertyValue("timerID"); ok {
+		if text, ok := data.PropertyText("timerID"); ok {
 			timerID, err := strconv.Atoi(text)
 			if err == nil {
 				if fn, ok := session.timers[timerID]; ok {
@@ -843,7 +846,7 @@ func (session *sessionData) handleEvent(command string, data DataObject) {
 		session.handleSessionInfo(data)
 
 	default:
-		if viewID, ok := data.PropertyValue("id"); ok {
+		if viewID, ok := data.PropertyText("id"); ok {
 			if viewID != "body" {
 				if view := session.viewByHTMLID(viewID); view != nil {
 					view.handleCommand(view, PropertyName(command), data)

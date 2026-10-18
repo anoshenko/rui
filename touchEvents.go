@@ -154,26 +154,25 @@ func (event *TouchEvent) init(data DataObject) {
 
 	event.Touches = []Touch{}
 	event.TimeStamp = getTimeStamp(data)
-	if node := data.PropertyByTag("touches"); node != nil && node.Type() == ArrayNode {
-		for i := range node.ArraySize() {
-			if element := node.ArrayElement(i); element != nil && element.IsObject() {
-				if obj := element.Object(); obj != nil {
-					var touch Touch
-					if value, ok := obj.PropertyValue("identifier"); ok {
-						touch.Identifier, _ = strconv.Atoi(value)
-					}
-					touch.X = dataFloatProperty(obj, "x")
-					touch.Y = dataFloatProperty(obj, "y")
-					touch.ClientX = dataFloatProperty(obj, "clientX")
-					touch.ClientY = dataFloatProperty(obj, "clientY")
-					touch.ScreenX = dataFloatProperty(obj, "screenX")
-					touch.ScreenY = dataFloatProperty(obj, "screenY")
-					touch.RadiusX = dataFloatProperty(obj, "radiusX")
-					touch.RadiusY = dataFloatProperty(obj, "radiusY")
-					touch.RotationAngle = dataFloatProperty(obj, "rotationAngle")
-					touch.Force = dataFloatProperty(obj, "force")
-					event.Touches = append(event.Touches, touch)
+	if array := data.PropertyArray("touches"); array != nil {
+		for element := range array.Elements() {
+			if obj := element.Object(); obj != nil {
+				touch := Touch{
+					X:             dataFloatProperty(obj, "x"),
+					Y:             dataFloatProperty(obj, "y"),
+					ClientX:       dataFloatProperty(obj, "clientX"),
+					ClientY:       dataFloatProperty(obj, "clientY"),
+					ScreenX:       dataFloatProperty(obj, "screenX"),
+					ScreenY:       dataFloatProperty(obj, "screenY"),
+					RadiusX:       dataFloatProperty(obj, "radiusX"),
+					RadiusY:       dataFloatProperty(obj, "radiusY"),
+					RotationAngle: dataFloatProperty(obj, "rotationAngle"),
+					Force:         dataFloatProperty(obj, "force"),
 				}
+				if value, ok := obj.PropertyText("identifier"); ok {
+					touch.Identifier, _ = strconv.Atoi(value)
+				}
+				event.Touches = append(event.Touches, touch)
 			}
 		}
 	}

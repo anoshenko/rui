@@ -189,20 +189,22 @@ func setGridCellSize(properties Properties, tag PropertyName, value any) []Prope
 				return nil
 			}
 
-		case []DataValue:
-			count := len(value)
-			if count == 0 {
+		case DataValue:
+			array := value.Array()
+			if array == nil || array.Size() == 0 {
 				invalidPropertyValue(tag, value)
 				return nil
 			}
-			values := make([]string, count)
-			for i, val := range value {
-				if val.IsObject() {
+
+			values := make([]string, 0, array.Size())
+			for val := range array.Elements() {
+				if val.Type() != TextDataValue {
 					invalidPropertyValue(tag, value)
 					return nil
 				}
-				values[i] = val.Value()
+				values = append(values, val.String())
 			}
+
 			if !setValues(values) {
 				return nil
 			}

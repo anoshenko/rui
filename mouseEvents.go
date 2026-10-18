@@ -245,7 +245,7 @@ type MouseEvent struct {
 }
 
 func getTimeStamp(data DataObject) uint64 {
-	if value, ok := data.PropertyValue("timeStamp"); ok {
+	if value, ok := data.PropertyText("timeStamp"); ok {
 		if index := strings.Index(value, "."); index > 0 {
 			value = value[:index]
 		}

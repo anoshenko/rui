@@ -113,7 +113,7 @@ func (storage *clientStorageData) RemoveAll() {
 
 func (storage *clientStorageData) handleEvent(command string, data DataObject) {
 	request := 0
-	if text, ok := data.PropertyValue("request"); ok {
+	if text, ok := data.PropertyText("request"); ok {
 		var err error
 		if request, err = strconv.Atoi(text); err != nil {
 			ErrorLog(err.Error())
@@ -126,7 +126,7 @@ func (storage *clientStorageData) handleEvent(command string, data DataObject) {
 
 	switch command {
 	case "storageError":
-		if text, ok := data.PropertyValue("error"); ok {
+		if text, ok := data.PropertyText("error"); ok {
 			ErrorLog(text)
 		}
 
@@ -137,7 +137,7 @@ func (storage *clientStorageData) handleEvent(command string, data DataObject) {
 		}
 		delete(storage.getResult, request)
 
-		text, ok := data.PropertyValue("values")
+		text, ok := data.PropertyText("values")
 		if !ok {
 			ErrorLog("'values' property not found (command: storageValues)")
 			return

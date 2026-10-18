@@ -30,27 +30,23 @@ func TestParseDataText(t *testing.T) {
 		if obj.Tag() != "obj1" {
 			t.Error(`obj.Tag() != "obj1"`)
 		}
-		if !obj.IsObject() {
-			t.Error(`!obj.IsObject()`)
+		if obj.Type() != ObjectDataValue {
+			t.Error(`obj.Type() != ObjectDataValue`)
 		}
 		if obj.PropertyCount() != 4 {
 			t.Error(`obj.PropertyCount() != 4`)
 		}
 
-		if obj.Property(-1) != nil {
-			t.Error(`obj.Property(-1) != nil`)
+		if val, ok := obj.PropertyText("key1"); !ok || val != "val1" {
+			t.Errorf(`obj.PropertyText("key1") result: ("%s",%v)`, val, ok)
 		}
 
-		if val, ok := obj.PropertyValue("key1"); !ok || val != "val1" {
-			t.Errorf(`obj.PropertyValue("key1") result: ("%s",%v)`, val, ok)
+		if val, ok := obj.PropertyText("key3"); !ok || val != "\n \t \\ \r \" ' \x4F\x4e \u01Ea" {
+			t.Errorf(`obj.PropertyText("key3") result: ("%s",%v)`, val, ok)
 		}
 
-		if val, ok := obj.PropertyValue("key3"); !ok || val != "\n \t \\ \r \" ' \x4F\x4e \u01Ea" {
-			t.Errorf(`obj.PropertyValue("key3") result: ("%s",%v)`, val, ok)
-		}
-
-		if val, ok := obj.PropertyValue("key4"); !ok || val != `\n \t \\ \r \" ' \x8F \UF80a` {
-			t.Errorf(`obj.PropertyValue("key4") result: ("%s",%v)`, val, ok)
+		if val, ok := obj.PropertyText("key4"); !ok || val != `\n \t \\ \r \" ' \x8F \UF80a` {
+			t.Errorf(`obj.PropertyText("key4") result: ("%s",%v)`, val, ok)
 		}
 
 		if o := obj.PropertyObject("key2"); o == nil {
@@ -65,47 +61,41 @@ func TestParseDataText(t *testing.T) {
 			t.Error(`obj.PropertyObject("key5") != nil`)
 		}
 
-		if val, ok := obj.PropertyValue("key2"); ok {
-			t.Errorf(`obj.PropertyValue("key2") result: ("%s",%v)`, val, ok)
+		if val, ok := obj.PropertyText("key2"); ok {
+			t.Errorf(`obj.PropertyText("key2") result: ("%s",%v)`, val, ok)
 		}
 
-		if val, ok := obj.PropertyValue("key5"); ok {
-			t.Errorf(`obj.PropertyValue("key5") result: ("%s",%v)`, val, ok)
+		if val, ok := obj.PropertyText("key5"); ok {
+			t.Errorf(`obj.PropertyText("key5") result: ("%s",%v)`, val, ok)
 		}
 
-		testKey := func(obj DataObject, index int, tag string, nodeType DataNodeType) DataNode {
-			key := obj.Property(index)
+		testKey := func(obj DataObject, tag string, nodeType DataValueType) DataValue {
+			key := obj.Property(tag)
 			if key == nil {
-				t.Errorf(`%s.Property(%d) == nil`, obj.Tag(), index)
-			} else {
-				if key.Tag() != tag {
-					t.Errorf(`%s.Property(%d).Tag() != "%s"`, obj.Tag(), index, tag)
-				}
+				t.Errorf(`%s.Property(%s) == nil`, obj.Tag(), tag)
+			} else if key.Type() != nodeType {
+				switch nodeType {
+				case TextDataValue:
+					t.Errorf(`%s.Property(%s) is not text`, obj.Tag(), tag)
 
-				if key.Type() != nodeType {
-					switch nodeType {
-					case TextNode:
-						t.Errorf(`%s.Property(%d) is not text`, obj.Tag(), index)
+				case ObjectDataValue:
+					t.Errorf(`%s.Property(%s) is not object`, obj.Tag(), tag)
 
-					case ObjectNode:
-						t.Errorf(`%s.Property(%d) is not object`, obj.Tag(), index)
-
-					case ArrayNode:
-						t.Errorf(`%s.Property(%d) is not array`, obj.Tag(), index)
-					}
+				case ArrayDataValue:
+					t.Errorf(`%s.Property(%s) is not array`, obj.Tag(), tag)
 				}
 			}
 
 			return key
 		}
 
-		if key := testKey(obj, 0, "key1", TextNode); key != nil {
-			if key.Text() != "val1" {
+		if key := testKey(obj, "key1", TextDataValue); key != nil {
+			if key.String() != "val1" {
 				t.Error(`key1.Value() != "val1"`)
 			}
 		}
 
-		if key := testKey(obj, 1, "key2", ObjectNode); key != nil {
+		if key := testKey(obj, "key2", ObjectDataValue); key != nil {
 			o := key.Object()
 			if o == nil {
 				t.Error(`key2.Value().Object() == nil`)
@@ -116,59 +106,81 @@ func TestParseDataText(t *testing.T) {
 
 				type testKeyData struct {
 					tag      string
-					nodeType DataNodeType
+					nodeType DataValueType
 				}
 
 				data := []testKeyData{
-					{tag: "key2.1", nodeType: ArrayNode},
-					{tag: "key 2.2", nodeType: TextNode},
-					{tag: "key2.3", nodeType: ObjectNode},
-					{tag: "key2.4", nodeType: ObjectNode},
-					{tag: "key2.5", nodeType: ArrayNode},
+					{tag: "key2.1", nodeType: ArrayDataValue},
+					{tag: "key 2.2", nodeType: TextDataValue},
+					{tag: "key2.3", nodeType: ObjectDataValue},
+					{tag: "key2.4", nodeType: ObjectDataValue},
+					{tag: "key2.5", nodeType: ArrayDataValue},
 				}
 
-				for i, d := range data {
-					testKey(o, i, d.tag, d.nodeType)
+				for _, d := range data {
+					testKey(o, d.tag, d.nodeType)
 				}
 			}
 		}
 
-		node1 := obj.Property(1)
+		node1 := obj.Property("key2")
 		if node1 == nil {
-			t.Error("obj.Property(1) != nil")
-		} else if node1.Type() != ObjectNode {
-			t.Error("obj.Property(1).Type() != ObjectNode")
+			t.Error("obj.Property(\"key2\") == nil")
+		} else if node1.Type() != ObjectDataValue {
+			t.Error("obj.Property(\"key2\").Type() != ObjectNode")
 		} else if obj := node1.Object(); obj != nil {
-			if key := obj.Property(0); key != nil {
-				if key.Type() != ArrayNode {
-					t.Error("obj.Property(1).Object().Property(0)..Type() != ArrayNode")
+			if key := obj.Property("key2.1"); key != nil {
+				if key.Type() != ArrayDataValue {
+					t.Error("obj.Property(\"key2\").Object().Property(\"key2.1\").Type() != ArrayNode")
 				} else {
-					if key.ArraySize() != 3 {
-						t.Error("obj.Property(1).Object().Property(0).ArraySize() != 3")
-					}
+					array := key.Array()
+					if array == nil {
+						t.Error("obj.Property(\"key2\").Object().Property(\"key2.1\").Array() == nil")
+					} else {
 
-					if e := key.ArrayElement(0); e == nil {
-						t.Error("obj.Property(1).Object().Property(0).ArrayElement(0) == nil")
-					} else if e.IsObject() {
-						t.Error("obj.Property(1).Object().Property(0).ArrayElement(0).IsObject() == true")
-					}
+						if array.Size() != 3 {
+							t.Error("obj.Property(\"key2\").Object().Property(\"key2.1\").Array().Size() != 3")
+						}
 
-					if e := key.ArrayElement(2); e == nil {
-						t.Error("obj.Property(1).Object().Property(0).ArrayElement(2) == nil")
-					} else if !e.IsObject() {
-						t.Error("obj.Property(1).Object().Property(0).ArrayElement(2).IsObject() == false")
-					} else if e.Value() != "" {
-						t.Error(`obj.Property(1).Object().Property(0).ArrayElement(2).Value() != ""`)
-					}
+						for i, tp := range []DataValueType{TextDataValue, ObjectDataValue, ObjectDataValue} {
+							if e := array.Element(i); e == nil {
+								t.Error("obj.Property(\"key2\").Object().Property(\"key2.1\").Array().Element(0) == nil")
+							} else if e.Type() != tp {
+								t.Errorf("obj.Property(\"key2\").Object().Property(\"key2.1\").Array().Element(0).Type() != %d", tp)
+							}
+						}
 
-					if e := key.ArrayElement(3); e != nil {
-						t.Error("obj.Property(1).Object().Property(0).ArrayElement(3) != nil")
+						if e := array.Element(3); e != nil {
+							t.Error("obj.Property(\"key2\").Object().Property(\"key2.1\").Array().Element(3) != nil")
+						}
 					}
 				}
 			}
 		} else {
-			t.Error("obj.Property(1).Object() == nil")
+			t.Error("obj.Property(\"key 2.2\").Object() == nil")
 		}
+	}
+
+	expected := `obj1{
+	key1 = val1,
+	key2 = obj2{
+		key2.1 = [
+			val2.1,
+			obj2.2{},
+			obj2.3{},
+		],
+		"key 2.2" = "val 2.2",
+		key2.3 = _{},
+		key2.4 = obj2.3{
+			text = " ",
+		},
+		key2.5 = [],
+	},
+	key3 = "\n \t \\ \r \" ' ON Ǫ",
+	key4 = "\\n \\t \\\\ \\r \\\" ' \\x8F \\UF80a",
+}`
+	if expected != obj.String() {
+		t.Error("obj.String() result fail")
 	}
 
 	failText := []string{

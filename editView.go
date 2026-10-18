@@ -387,7 +387,7 @@ func (edit *editViewData) handleCommand(self View, command PropertyName, data Da
 	switch command {
 	case "textChanged":
 		oldText := GetText(edit)
-		if text, ok := data.PropertyValue("text"); ok {
+		if text, ok := data.PropertyText("text"); ok {
 			edit.setRaw(Text, text)
 			if text != oldText {
 				edit.textChanged(text, oldText)

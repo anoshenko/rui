@@ -270,7 +270,7 @@ func (bridge *wasmBridge) htmlPropertyValue(htmlID, name string) string {
 }
 
 func (bridge *wasmBridge) answerReceived(answer DataObject) {
-	if text, ok := answer.PropertyValue("answerID"); ok {
+	if text, ok := answer.PropertyText("answerID"); ok {
 		if id, err := strconv.Atoi(text); err == nil {
 			if chanel, ok := bridge.answer[id]; ok {
 				chanel <- answer

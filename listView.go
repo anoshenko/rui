@@ -354,35 +354,61 @@ func (listView *listViewData) setItems(value any) []PropertyName {
 	case []string:
 		adapter = NewTextListAdapter(value, nil)
 
-	case []DataValue:
-		hasObject := false
-		for _, val := range value {
-			if val.IsObject() {
-				hasObject = true
-				break
+	case DataValue:
+		switch value.Type() {
+		case ObjectDataValue:
+			if view := CreateViewFromObject(session, value.Object(), nil); view != nil {
+				adapter = NewViewListAdapter([]View{view})
+			} else {
+				return nil
 			}
-		}
 
-		if hasObject {
-			items := make([]View, len(value))
-			for i, val := range value {
-				if val.IsObject() {
-					if view := CreateViewFromObject(session, val.Object(), nil); view != nil {
-						items[i] = view
-					} else {
-						return nil
-					}
-				} else {
-					items[i] = NewTextView(session, Params{Text: val.Value()})
+		case TextDataValue:
+			adapter = NewTextListAdapter([]string{value.String()}, nil)
+
+		case ArrayDataValue:
+			array := value.Array()
+			if array == nil {
+				return nil
+			}
+
+			hasObject := false
+			for val := range array.Elements() {
+				switch val.Type() {
+				case ObjectDataValue:
+					hasObject = true
+
+				case ArrayDataValue:
+					return nil
 				}
 			}
-			adapter = NewViewListAdapter(items)
-		} else {
-			items := make([]string, len(value))
-			for i, val := range value {
-				items[i] = val.Value()
+
+			if hasObject {
+				items := make([]View, 0, array.Size())
+				for val := range array.Elements() {
+					switch val.Type() {
+					case TextDataValue:
+						items = append(items, NewTextView(session, Params{Text: val.String()}))
+
+					case ObjectDataValue:
+						if view := CreateViewFromObject(session, val.Object(), nil); view != nil {
+							items = append(items, view)
+						} else {
+							return nil
+						}
+
+					default:
+						return nil
+					}
+				}
+				adapter = NewViewListAdapter(items)
+			} else {
+				items := make([]string, array.Size())
+				for val := range array.Elements() {
+					items = append(items, val.String())
+				}
+				adapter = NewTextListAdapter(items, nil)
 			}
-			adapter = NewTextListAdapter(items, nil)
 		}
 
 	case []any:

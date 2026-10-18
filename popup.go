@@ -939,15 +939,15 @@ func (popup *popupData) setButtons(value any) bool {
 	popupButtonFromObject := func(obj DataObject) popupButton {
 		var button popupButton
 
-		button.title, _ = obj.PropertyValue(string(Title))
+		button.title, _ = obj.PropertyText(string(Title))
 
-		if text, ok := obj.PropertyValue("type"); ok {
+		if text, ok := obj.PropertyText("type"); ok {
 			text, _ = popup.session.resolveConstants(text)
 			t, _ := enumStringToInt(text, []string{"normal", "default", "cancel"}, true)
 			button.buttonType = PopupButtonType(t)
 		}
 
-		if fn, ok := obj.PropertyValue("click"); ok {
+		if fn, ok := obj.PropertyText("click"); ok {
 			button.onClick = newPopupListenerBinding(fn, true)
 		} else if button.buttonType == CancelButton {
 			button.onClick = newPopupListener0(popup.Dismiss)
@@ -984,20 +984,36 @@ func (popup *popupData) setButtons(value any) bool {
 	case []popupButton:
 		popup.setRaw(Buttons, value)
 
-	case DataObject:
-		popup.setRaw(Buttons, []popupButton{popupButtonFromObject(value)})
-
-	case []DataValue:
-		buttons := make([]popupButton, 0, len(value))
-		for _, val := range value {
-			if val.IsObject() {
-				buttons = append(buttons, popupButtonFromObject(val.Object()))
-			} else {
-				notCompatibleType(Buttons, val)
+	case DataValue:
+		switch value.Type() {
+		case ObjectDataValue:
+			obj := value.Object()
+			if obj == nil {
+				return false
 			}
-		}
-		if len(buttons) > 0 {
-			popup.setRaw(Buttons, buttons)
+			popup.setRaw(Buttons, []popupButton{popupButtonFromObject(obj)})
+
+		case ArrayDataValue:
+			array := value.Array()
+			if array == nil {
+				return false
+			}
+
+			buttons := make([]popupButton, 0, array.Size())
+			for val := range array.Elements() {
+				if obj := val.Object(); obj != nil {
+					buttons = append(buttons, popupButtonFromObject(obj))
+				} else {
+					notCompatibleType(Buttons, val)
+					return false
+				}
+			}
+			if len(buttons) > 0 {
+				popup.setRaw(Buttons, buttons)
+			}
+
+		default:
+			return false
 		}
 
 	case []any:
@@ -1570,8 +1586,8 @@ func CreatePopupFromObject(session Session, object DataObject, binding any) Popu
 	popup.session = session
 	popup.hotkeys = map[string]func(Popup){}
 
-	for key, value := range object.ToParams() {
-		popup.Set(key, value)
+	for key, value := range object.Properties() {
+		popup.Set(PropertyName(key), value)
 	}
 
 	if binding != nil {

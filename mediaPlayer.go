@@ -659,7 +659,9 @@ func (player *mediaPlayerData) setFunc(tag PropertyName, value any) []PropertyNa
 }
 
 func setMediaPlayerSource(properties Properties, value any) []PropertyName {
+
 	switch value := value.(type) {
+
 	case string:
 		src := MediaSource{Url: value, MimeType: ""}
 		properties.setRaw(Source, []MediaSource{src})
@@ -670,39 +672,73 @@ func setMediaPlayerSource(properties Properties, value any) []PropertyName {
 	case []MediaSource:
 		properties.setRaw(Source, value)
 
-	case DataObject:
-		url, ok := value.PropertyValue("src")
-		if !ok || url == "" {
-			invalidPropertyValue(Source, value)
-			return nil
-		}
+	case DataValue:
+		switch value.Type() {
+		case ObjectDataValue:
+			obj := value.Object()
+			if obj == nil {
+				invalidPropertyValue(Source, value)
+				return nil
+			}
 
-		mimeType, _ := value.PropertyValue("mime-type")
-		src := MediaSource{Url: url, MimeType: mimeType}
-		properties.setRaw(Source, []MediaSource{src})
+			url, ok := obj.PropertyText("src")
+			if !ok || url == "" {
+				invalidPropertyValue(Source, value)
+				return nil
+			}
 
-	case []DataValue:
-		src := []MediaSource{}
-		for _, val := range value {
-			if val.IsObject() {
-				obj := val.Object()
-				if url, ok := obj.PropertyValue("src"); ok && url != "" {
-					mimeType, _ := obj.PropertyValue("mime-type")
-					src = append(src, MediaSource{Url: url, MimeType: mimeType})
-				} else {
+			mimeType, _ := obj.PropertyText("mime-type")
+			src := MediaSource{Url: url, MimeType: mimeType}
+			properties.setRaw(Source, []MediaSource{src})
+
+		case ArrayDataValue:
+			array := value.Array()
+			if array == nil {
+				invalidPropertyValue(Source, value)
+				return nil
+			}
+
+			src := make([]MediaSource, 0, array.Size())
+			for val := range array.Elements() {
+				switch val.Type() {
+				case ObjectDataValue:
+					obj := val.Object()
+					if obj == nil {
+						invalidPropertyValue(Source, value)
+						return nil
+					}
+
+					if url, ok := obj.PropertyText("src"); ok && url != "" {
+						mimeType, _ := obj.PropertyText("mime-type")
+						src = append(src, MediaSource{Url: url, MimeType: mimeType})
+					} else {
+						invalidPropertyValue(Source, value)
+						return nil
+					}
+
+				case TextDataValue:
+					src = append(src, MediaSource{Url: val.String(), MimeType: ""})
+
+				default:
 					invalidPropertyValue(Source, value)
 					return nil
 				}
-			} else {
-				src = append(src, MediaSource{Url: val.Value(), MimeType: ""})
 			}
-		}
 
-		if len(src) == 0 {
+			if len(src) == 0 {
+				invalidPropertyValue(Source, value)
+				return nil
+			}
+			properties.setRaw(Source, src)
+
+		case TextDataValue:
+			src := MediaSource{Url: value.String(), MimeType: ""}
+			properties.setRaw(Source, []MediaSource{src})
+
+		default:
 			invalidPropertyValue(Source, value)
 			return nil
 		}
-		properties.setRaw(Source, src)
 
 	default:
 		notCompatibleType(Source, value)
@@ -1019,7 +1055,7 @@ func (player *mediaPlayerData) handleCommand(self View, command PropertyName, da
 		if value := player.getRaw(command); value != nil {
 			if listeners, ok := value.([]mediaPlayerErrorListener); ok {
 				code, _ := dataIntProperty(data, "code")
-				message, _ := data.PropertyValue("message")
+				message, _ := data.PropertyText("message")
 				for _, listener := range listeners {
 					listener.Run(player, code, message)
 				}

@@ -289,16 +289,39 @@ func setShadowProperty(properties Properties, tag PropertyName, value any) bool 
 		}
 
 	case DataValue:
-		if !value.IsObject() {
+		switch value.Type() {
+		case ObjectDataValue:
+			obj := value.Object()
+			if obj == nil {
+				return false
+			}
+			properties.setRaw(tag, []ShadowProperty{parseShadowProperty(obj)})
+
+		case ArrayDataValue:
+			array := value.Array()
+			if array == nil {
+				return false
+			}
+			shadows := make([]ShadowProperty, 0, array.Size())
+			for data := range array.Elements() {
+				if obj := data.Object(); obj != nil {
+					shadows = append(shadows, parseShadowProperty(obj))
+				}
+			}
+			if len(shadows) == 0 {
+				return false
+			}
+			properties.setRaw(tag, shadows)
+
+		default:
 			return false
 		}
-		properties.setRaw(tag, []ShadowProperty{parseShadowProperty(value.Object())})
 
 	case []DataValue:
-		shadows := []ShadowProperty{}
+		shadows := make([]ShadowProperty, 0, len(value))
 		for _, data := range value {
-			if data.IsObject() {
-				shadows = append(shadows, parseShadowProperty(data.Object()))
+			if obj := data.Object(); obj != nil {
+				shadows = append(shadows, parseShadowProperty(obj))
 			}
 		}
 		if len(shadows) == 0 {

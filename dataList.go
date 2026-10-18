@@ -127,14 +127,21 @@ func anyToStringArray(value any, dateTimeFormat string) ([]string, bool) {
 	case []string:
 		return value, true
 
-	case []DataValue:
-		items := make([]string, 0, len(value))
-		for _, val := range value {
-			if !val.IsObject() {
-				items = append(items, val.Value())
+	case DataValue:
+		switch value.Type() {
+		case TextDataValue:
+			return []string{value.String()}, true
+
+		case ArrayDataValue:
+			array := value.Array()
+			items := make([]string, 0, array.Size())
+			for val := range array.Elements() {
+				if val.Type() == TextDataValue {
+					items = append(items, val.String())
+				}
 			}
+			return items, true
 		}
-		return items, true
 
 	case []fmt.Stringer:
 		items := make([]string, len(value))

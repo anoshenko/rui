@@ -177,7 +177,7 @@ func (event *PointerEvent) init(data DataObject) {
 	event.TiltX = dataFloatProperty(data, "tiltX")
 	event.TiltY = dataFloatProperty(data, "tiltY")
 	event.Twist = dataFloatProperty(data, "twist")
-	value, _ := data.PropertyValue("pointerType")
+	value, _ := data.PropertyText("pointerType")
 	event.PointerType = value
 	event.IsPrimary = dataBoolProperty(data, "isPrimary")
 }

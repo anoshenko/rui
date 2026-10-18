@@ -36,7 +36,7 @@ func newColumnSeparatorProperty(value any) ColumnSeparatorProperty {
 		separator := new(columnSeparatorProperty)
 		separator.init()
 		for _, tag := range []PropertyName{Style, Width, ColorTag} {
-			if val, ok := value.PropertyValue(string(tag)); ok && val != "" {
+			if val, ok := value.PropertyText(string(tag)); ok && val != "" {
 				propertiesSet(separator, tag, value)
 			}
 		}

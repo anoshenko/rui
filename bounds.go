@@ -265,7 +265,7 @@ func setBoundsProperty(properties Properties, tag PropertyName, value any) []Pro
 	case DataObject:
 		bounds := NewBoundsProperty(nil)
 		for _, tag := range []PropertyName{Top, Right, Bottom, Left} {
-			if text, ok := value.PropertyValue(string(tag)); ok {
+			if text, ok := value.PropertyText(string(tag)); ok {
 				if !bounds.Set(tag, text) {
 					notCompatibleType(tag, value)
 					return nil

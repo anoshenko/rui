@@ -978,7 +978,7 @@ func setRadiusProperty(properties Properties, value any) []PropertyName {
 		radius := NewRadiusProperty(nil)
 		for _, tag := range []PropertyName{X, Y, TopLeft, TopRight, BottomLeft, BottomRight, TopLeftX, TopLeftY,
 			TopRightX, TopRightY, BottomLeftX, BottomLeftY, BottomRightX, BottomRightY} {
-			if value, ok := value.PropertyValue(string(tag)); ok {
+			if value, ok := value.PropertyText(string(tag)); ok {
 				radius.Set(tag, value)
 			}
 		}

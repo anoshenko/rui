@@ -149,28 +149,33 @@ func (properties *propertyList) writeToBuffer(buffer *strings.Builder,
 */
 
 func parseProperties(properties Properties, object DataObject) {
-	for node := range object.Properties() {
+	for tag, node := range object.Properties() {
 		switch node.Type() {
-		case TextNode:
-			properties.Set(PropertyName(node.Tag()), node.Text())
+		case TextDataValue:
+			properties.Set(PropertyName(tag), node.String())
 
-		case ObjectNode:
-			properties.Set(PropertyName(node.Tag()), node.Object())
+		case ObjectDataValue:
+			properties.Set(PropertyName(tag), node.Object())
 
-		case ArrayNode:
-			switch node.ArraySize() {
+		case ArrayDataValue:
+			array := node.Array()
+			if array == nil {
+				return
+			}
+
+			switch array.Size() {
 			case 0:
 				// do nothing
 
 			case 1:
-				if v := node.ArrayElement(0); v.IsObject() {
-					properties.Set(PropertyName(node.Tag()), v.Object())
+				if v := array.Element(0); v.Type() == TextDataValue {
+					properties.Set(PropertyName(tag), v.String())
 				} else {
-					properties.Set(PropertyName(node.Tag()), v.Value())
+					properties.Set(PropertyName(tag), v)
 				}
 
 			default:
-				properties.Set(PropertyName(node.Tag()), node.Array())
+				properties.Set(PropertyName(tag), array)
 			}
 		}
 	}

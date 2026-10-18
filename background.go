@@ -47,6 +47,10 @@ type backgroundElement struct {
 }
 
 func createBackground(obj DataObject) BackgroundElement {
+	if obj == nil {
+		return nil
+	}
+
 	var result BackgroundElement = nil
 
 	switch obj.Tag() {
@@ -66,11 +70,9 @@ func createBackground(obj DataObject) BackgroundElement {
 		return nil
 	}
 
-	for node := range obj.Properties() {
-		if node.Type() == TextNode {
-			if value := node.Text(); value != "" {
-				result.Set(PropertyName(node.Tag()), value)
-			}
+	for tag, text := range obj.TextProperties() {
+		if text != "" {
+			result.Set(PropertyName(tag), text)
 		}
 	}
 
@@ -96,30 +98,47 @@ func parseBackgroundValue(value any) []BackgroundElement {
 	case []BackgroundElement:
 		return value
 
-	case []DataValue:
-		background := []BackgroundElement{}
-		for _, el := range value {
-			if el.IsObject() {
-				if element := createBackground(el.Object()); element != nil {
-					background = append(background, element)
-				} else {
-					return nil
-				}
-			} else if element := parseBackgroundText(el.Value()); element != nil {
-				background = append(background, element)
-			} else {
-				return nil
+	case DataValue:
+		switch value.Type() {
+		case TextDataValue:
+			if element := parseBackgroundText(value.String()); element != nil {
+				return []BackgroundElement{element}
 			}
-		}
-		return background
 
-	case DataObject:
-		if element := createBackground(value); element != nil {
-			return []BackgroundElement{element}
+		case ObjectDataValue:
+			if element := createBackground(value.Object()); element != nil {
+				return []BackgroundElement{element}
+			}
+
+		case ArrayDataValue:
+			if array := value.Array(); array != nil {
+				background := make([]BackgroundElement, 0, array.Size())
+				for element := range array.Elements() {
+					switch element.Type() {
+					case ObjectDataValue:
+						if element := createBackground(element.Object()); element != nil {
+							background = append(background, element)
+						} else {
+							return nil
+						}
+
+					case TextDataValue:
+						if element := parseBackgroundText(element.String()); element != nil {
+							background = append(background, element)
+						} else {
+							return nil
+						}
+
+					case ArrayDataValue:
+						return nil
+					}
+				}
+				return background
+			}
 		}
 
 	case []DataObject:
-		background := []BackgroundElement{}
+		background := make([]BackgroundElement, 0, len(value))
 		for _, obj := range value {
 			if element := createBackground(obj); element != nil {
 				background = append(background, element)
@@ -164,7 +183,6 @@ func parseBackgroundValue(value any) []BackgroundElement {
 			}
 		}
 		return elements
-
 	}
 
 	return nil

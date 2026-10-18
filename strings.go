@@ -62,10 +62,8 @@ func loadStringResources(text string) {
 			table = map[string]string{}
 		}
 
-		for prop := range obj.Properties() {
-			if prop.Type() == TextNode {
-				table[prop.Tag()] = prop.Text()
-			}
+		for tag, text := range obj.TextProperties() {
+			table[tag] = text
 		}
 
 		stringResources[lang] = table
@@ -73,9 +71,9 @@ func loadStringResources(text string) {
 
 	tag := data.Tag()
 	if tag == "strings" {
-		for prop := range data.Properties() {
-			if prop.Type() == ObjectNode {
-				parseStrings(prop.Object(), prop.Tag())
+		for tag, prop := range data.Properties() {
+			if prop.Type() == ObjectDataValue {
+				parseStrings(prop.Object(), tag)
 			}
 		}
 

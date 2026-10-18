@@ -54,7 +54,7 @@ func GetLocalIP() string {
 }
 
 func dataIntProperty(data DataObject, tag string) (int, bool) {
-	if value, ok := data.PropertyValue(tag); ok {
+	if value, ok := data.PropertyText(tag); ok {
 		if n, err := strconv.Atoi(value); err == nil {
 			return n, true
 		}
@@ -63,14 +63,14 @@ func dataIntProperty(data DataObject, tag string) (int, bool) {
 }
 
 func dataBoolProperty(data DataObject, tag string) bool {
-	if value, ok := data.PropertyValue(tag); ok && value == "1" {
+	if value, ok := data.PropertyText(tag); ok && value == "1" {
 		return true
 	}
 	return false
 }
 
 func dataFloatProperty(data DataObject, tag string) float64 {
-	if value, ok := data.PropertyValue(tag); ok {
+	if value, ok := data.PropertyText(tag); ok {
 		if n, err := strconv.ParseFloat(value, 64); err == nil {
 			return n
 		}
@@ -134,5 +134,56 @@ func textToHtml(text string) string {
 func writeStrings(buffer *strings.Builder, strs ...string) {
 	for _, str := range strs {
 		buffer.WriteString(str)
+	}
+}
+
+func isQuotesNeeded(text string) bool {
+	switch len(text) {
+	case 0:
+		return true
+
+	case 1:
+		simple := (text[0] >= '0' && text[0] <= '9') || (text[0] >= 'A' && text[0] <= 'Z') ||
+			(text[0] >= 'a' && text[0] <= 'z') || text[0] == '_'
+		return !simple
+	}
+
+	for _, ch := range text {
+		if (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+			ch == '+' || ch == '-' || ch == '@' || ch == '/' || ch == '_' || ch == '.' ||
+			ch == ':' || ch == '#' || ch == '%' || ch == 'π' || ch == '°' {
+		} else {
+			return true
+		}
+	}
+
+	return false
+}
+
+func replaceEscapeSymbols(text string) string {
+	replace := []struct{ old, new string }{
+		{old: "\\", new: `\\`},
+		{old: "\t", new: `\t`},
+		{old: "\r", new: `\r`},
+		{old: "\n", new: `\n`},
+		{old: "\"", new: `\"`},
+	}
+	for _, s := range replace {
+		text = strings.ReplaceAll(text, s.old, s.new)
+	}
+	return text
+}
+
+func writeRuiText(buffer *strings.Builder, text string, objectName bool) {
+	if isQuotesNeeded(text) || (objectName && strings.Contains(text, "/")) {
+		if strings.ContainsAny(text, "\\\t\r\n\"") {
+			text = replaceEscapeSymbols(text)
+		}
+
+		buffer.WriteRune('"')
+		buffer.WriteString(text)
+		buffer.WriteRune('"')
+	} else {
+		buffer.WriteString(text)
 	}
 }

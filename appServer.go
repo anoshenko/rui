@@ -272,7 +272,7 @@ func (app *application) sseHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func getSessionID(obj DataObject) (int, bool) {
-	sessionText, ok := obj.PropertyValue("session")
+	sessionText, ok := obj.PropertyText("session")
 	if !ok {
 		ErrorLog(`"session" key not found`)
 		return 0, false

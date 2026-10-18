@@ -78,14 +78,19 @@ func RegisterViewCreator(tag string, creator func(Session) View) bool {
 // If the function fails, it returns nil and an error message is written to the log.
 func CreateViewFromObject(session Session, object DataObject, binding any) View {
 	if session == nil {
-		ErrorLog(`Session must not be nil`)
+		ErrorLog(`CreateViewFromObject: session must not be nil`)
+		return nil
+	}
+
+	if object == nil {
+		ErrorLog(`CreateViewFromObject: object must not be nil`)
 		return nil
 	}
 
 	tag := object.Tag()
 	creator, ok := viewCreators()[strings.ToLower(tag)]
 	if !ok {
-		ErrorLog(`Unknown view type "` + tag + `"`)
+		ErrorLog(`CreateViewFromObject: unknown view type "` + tag + `"`)
 		return nil
 	}
 

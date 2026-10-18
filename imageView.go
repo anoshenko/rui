@@ -315,7 +315,7 @@ func (imageView *imageViewData) handleCommand(self View, command PropertyName, d
 	case "imageViewLoaded":
 		imageView.naturalWidth = dataFloatProperty(data, "natural-width")
 		imageView.naturalHeight = dataFloatProperty(data, "natural-height")
-		imageView.currentSrc, _ = data.PropertyValue("current-src")
+		imageView.currentSrc, _ = data.PropertyText("current-src")
 
 		for _, listener := range getNoArgEventListeners[ImageView](imageView, nil, LoadedEvent) {
 			listener.Run(imageView)

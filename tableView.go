@@ -643,11 +643,33 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 	setLineStyle := func() []PropertyName {
 		params := []Params{}
 		switch value := value.(type) {
+		case Params:
+			params = []Params{value}
+
 		case []Params:
 			params = value
 
-		case DataNode:
-			params = value.ArrayAsParams()
+		case DataValue:
+			switch value.Type() {
+			case ObjectDataValue:
+				if obj := value.Object(); obj != nil {
+					if objParams := obj.ToParams(); len(objParams) > 0 {
+						params = []Params{objParams}
+					}
+				}
+
+			case ArrayDataValue:
+				if array := value.Array(); array != nil {
+					params = make([]Params, 0, array.Size())
+					for element := range array.Elements() {
+						if obj := element.Object(); obj != nil {
+							if objParams := obj.ToParams(); len(objParams) > 0 {
+								params = append(params, objParams)
+							}
+						}
+					}
+				}
+			}
 
 		default:
 			notCompatibleType(tag, params)
@@ -751,20 +773,18 @@ func (table *tableViewData) setFunc(tag PropertyName, value any) []PropertyName 
 
 		case DataObject:
 			params := Params{}
-			for prop := range value.Properties() {
-				if prop.Type() == TextNode {
-					params[PropertyName(prop.Tag())] = prop.Text()
-				}
+			for tag, prop := range value.TextProperties() {
+				params[PropertyName(tag)] = prop
 			}
 			return table.setFunc(tag, params)
 
-		case DataNode:
+		case DataValue:
 			switch value.Type() {
-			case ObjectNode:
+			case ObjectDataValue:
 				return table.setFunc(tag, value.Object())
 
-			case TextNode:
-				table.setRaw(tag, value.Text())
+			case TextDataValue:
+				table.setRaw(tag, value.String())
 
 			default:
 				notCompatibleType(tag, value)

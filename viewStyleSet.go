@@ -54,31 +54,33 @@ func setTransitionProperty(properties Properties, value any) bool {
 		}
 		return false
 
-	case DataNode:
+	case DataValue:
 		switch value.Type() {
-		case ObjectNode:
+		case ObjectDataValue:
 			if setObject(value.Object()) {
 				properties.setRaw(Transition, transitions)
 				return true
 			}
 			return false
 
-		case ArrayNode:
-			for i := range value.ArraySize() {
-				if obj := value.ArrayElement(i).Object(); obj != nil {
-					if !setObject(obj) {
+		case ArrayDataValue:
+			if array := value.Array(); array != nil {
+				for element := range array.Elements() {
+					if obj := element.Object(); obj != nil {
+						if !setObject(obj) {
+							return false
+						}
+					} else {
+						notCompatibleType(Transition, element)
 						return false
 					}
-				} else {
-					notCompatibleType(Transition, value.ArrayElement(i))
-					return false
 				}
+				if len(transitions) == 0 {
+					transitions = nil
+				}
+				properties.setRaw(Transition, transitions)
+				return true
 			}
-			if len(transitions) == 0 {
-				transitions = nil
-			}
-			properties.setRaw(Transition, transitions)
-			return true
 		}
 	}
 
@@ -268,11 +270,16 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 		case Params:
 			style.setRaw(tag, value)
 
-		case DataObject:
-			if params := value.ToParams(); len(params) > 0 {
-				style.setRaw(tag, params)
+		case DataValue:
+			if obj := value.Object(); obj != nil {
+				if params := obj.ToParams(); len(params) > 0 {
+					style.setRaw(tag, params)
+				} else {
+					style.setRaw(tag, nil)
+				}
 			} else {
-				style.setRaw(tag, nil)
+				notCompatibleType(tag, value)
+				return nil
 			}
 
 		default:
@@ -289,23 +296,16 @@ func viewStyleSet(style Properties, tag PropertyName, value any) []PropertyName 
 		case Params:
 			style.setRaw(tag, value)
 
-		case DataObject:
-			if params := value.ToParams(); len(params) > 0 {
-				style.setRaw(tag, params)
-			} else {
-				style.setRaw(tag, nil)
-			}
-
-		case DataNode:
+		case DataValue:
 			switch value.Type() {
-			case TextNode:
-				if text := value.Text(); text != "" {
+			case TextDataValue:
+				if text := value.String(); text != "" {
 					style.setRaw(tag, text)
 				} else {
 					style.setRaw(tag, nil)
 				}
 
-			case ObjectNode:
+			case ObjectDataValue:
 				if obj := value.Object(); obj != nil {
 					if params := obj.ToParams(); len(params) > 0 {
 						style.setRaw(tag, params)

@@ -171,13 +171,12 @@ func NewFilterProperty(params Params) FilterProperty {
 func newFilterProperty(obj DataObject) FilterProperty {
 	filter := new(filterData)
 	filter.init()
-	for node := range obj.Properties() {
-		tag := node.Tag()
+	for tag, node := range obj.Properties() {
 		switch node.Type() {
-		case TextNode:
-			filter.Set(PropertyName(tag), node.Text())
+		case TextDataValue:
+			filter.Set(PropertyName(tag), node.String())
 
-		case ObjectNode:
+		case ObjectDataValue:
 			if tag == string(HueRotate) {
 				// TODO
 			} else {
@@ -286,15 +285,9 @@ func setFilterProperty(properties Properties, tag PropertyName, value any) []Pro
 			}
 		}
 
-	case DataObject:
-		if filter := newFilterProperty(value); filter != nil {
-			properties.setRaw(tag, filter)
-			return []PropertyName{tag}
-		}
-
 	case DataValue:
-		if value.IsObject() {
-			if filter := newFilterProperty(value.Object()); filter != nil {
+		if obj := value.Object(); obj != nil {
+			if filter := newFilterProperty(obj); filter != nil {
 				properties.setRaw(tag, filter)
 				return []PropertyName{tag}
 			}

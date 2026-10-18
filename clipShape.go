@@ -582,7 +582,7 @@ func parseClipShapeProperty(obj DataObject) ClipShapeProperty {
 		clip := new(insetClipData)
 		clip.init()
 		for _, tag := range []PropertyName{Top, Right, Bottom, Left, Radius, RadiusX, RadiusY} {
-			if value, ok := obj.PropertyValue(string(tag)); ok {
+			if value, ok := obj.PropertyText(string(tag)); ok {
 				insetClipDataSet(clip, tag, value)
 			}
 		}
@@ -592,7 +592,7 @@ func parseClipShapeProperty(obj DataObject) ClipShapeProperty {
 		clip := new(circleClipData)
 		clip.init()
 		for _, tag := range []PropertyName{X, Y, Radius} {
-			if value, ok := obj.PropertyValue(string(tag)); ok {
+			if value, ok := obj.PropertyText(string(tag)); ok {
 				circleClipDataSet(clip, tag, value)
 			}
 		}
@@ -602,7 +602,7 @@ func parseClipShapeProperty(obj DataObject) ClipShapeProperty {
 		clip := new(ellipseClipData)
 		clip.init()
 		for _, tag := range []PropertyName{X, Y, RadiusX, RadiusY} {
-			if value, ok := obj.PropertyValue(string(tag)); ok {
+			if value, ok := obj.PropertyText(string(tag)); ok {
 				ellipseClipDataSet(clip, tag, value)
 			}
 		}
@@ -611,7 +611,7 @@ func parseClipShapeProperty(obj DataObject) ClipShapeProperty {
 	case "polygon":
 		clip := new(polygonClipData)
 		clip.init()
-		if value, ok := obj.PropertyValue(string(Points)); ok {
+		if value, ok := obj.PropertyText(string(Points)); ok {
 			polygonClipDataSet(clip, Points, value)
 		}
 		return clip
@@ -645,7 +645,7 @@ func setClipShapePropertyProperty(properties Properties, tag PropertyName, value
 		}
 
 	case DataValue:
-		if value.IsObject() {
+		if value.Type() == ObjectDataValue {
 			if clip := parseClipShapeProperty(value.Object()); clip != nil {
 				properties.setRaw(tag, clip)
 				return []PropertyName{tag}

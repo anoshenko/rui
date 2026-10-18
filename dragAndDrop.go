@@ -228,7 +228,7 @@ func (event *DragAndDropEvent) init(session Session, data DataObject) {
 	event.MouseEvent.init(data)
 
 	event.Data = map[string]string{}
-	if value, ok := data.PropertyValue("data"); ok {
+	if value, ok := data.PropertyText("data"); ok {
 		for line := range strings.SplitSeq(value, ";") {
 			if mimeData, data, ok := strings.Cut(line, ":"); ok {
 				mime, err := base64.StdEncoding.DecodeString(mimeData)
@@ -246,11 +246,11 @@ func (event *DragAndDropEvent) init(session Session, data DataObject) {
 		}
 	}
 
-	if targetId, ok := data.PropertyValue("target"); ok {
+	if targetId, ok := data.PropertyText("target"); ok {
 		event.Target = session.viewByHTMLID(targetId)
 	}
 
-	if effect, ok := data.PropertyValue("effect-allowed"); ok {
+	if effect, ok := data.PropertyText("effect-allowed"); ok {
 		for i, value := range []string{"undefined", "copy", "move", "copyMove", "link", "copyLink", "linkMove", "all"} {
 			if value == effect {
 				event.EffectAllowed = i
@@ -259,7 +259,7 @@ func (event *DragAndDropEvent) init(session Session, data DataObject) {
 		}
 	}
 
-	if effect, ok := data.PropertyValue("drop-effect"); ok && effect != "" {
+	if effect, ok := data.PropertyText("drop-effect"); ok && effect != "" {
 		for i, value := range []string{"none", "copy", "move", "", "link"} {
 			if value == effect {
 				event.DropEffect = i

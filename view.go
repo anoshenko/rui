@@ -424,12 +424,11 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 		return []PropertyName{Binding}
 
 	case changeListeners:
-		switch value := value.(type) {
-		case DataObject:
-			for node := range value.Properties() {
-				if node.Type() == TextNode {
-					if text := node.Text(); text != "" {
-						view.changeListener[PropertyName(node.Tag())] = newOneArgListenerBinding[View, PropertyName](text)
+		if value, ok := value.(DataObject); ok {
+			for tag, node := range value.Properties() {
+				if node.Type() == TextDataValue {
+					if text := node.String(); text != "" {
+						view.changeListener[PropertyName(tag)] = newOneArgListenerBinding[View, PropertyName](text)
 					}
 				}
 			}
@@ -437,11 +436,6 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 				view.setRaw(changeListeners, view.changeListener)
 			}
 			return []PropertyName{tag}
-
-		case DataNode:
-			if value.Type() == ObjectNode {
-				return view.setFunc(tag, value.Object())
-			}
 		}
 		return []PropertyName{}
 
@@ -548,38 +542,32 @@ func (view *viewData) setFunc(tag PropertyName, value any) []PropertyName {
 				}
 			}
 
-		case DataObject:
-			data := map[string]string{}
-			for node := range value.Properties() {
-				if node.Type() == TextNode {
-					data[node.Tag()] = node.Text()
-				} else {
-					invalidPropertyValue(DragData, value)
-					return nil
+		case DataValue:
+			switch value.Type() {
+			case TextDataValue:
+				return view.setFunc(DragData, value.String())
+
+			case ObjectDataValue:
+				if obj := value.Object(); obj != nil {
+					data := map[string]string{}
+					for tag, node := range obj.Properties() {
+						if node.Type() == TextDataValue {
+							data[tag] = node.String()
+						} else {
+							invalidPropertyValue(DragData, value)
+							return nil
+						}
+					}
+					if len(data) == 0 {
+						view.setRaw(DragData, nil)
+					} else {
+						view.setRaw(DragData, data)
+					}
+					return []PropertyName{DragData}
 				}
 			}
-			if len(data) == 0 {
-				view.setRaw(DragData, nil)
-			} else {
-				view.setRaw(DragData, data)
-			}
-
-		case DataNode:
-			switch value.Type() {
-			case TextNode:
-				return view.setFunc(DragData, value.Text())
-
-			case ObjectNode:
-				return view.setFunc(DragData, value.Object())
-			}
 			invalidPropertyValue(DragData, value)
-			return nil
-
-		case DataValue:
-			if value.IsObject() {
-				return view.setFunc(DragData, value.Object())
-			}
-			return view.setFunc(DragData, value.Value())
+			return []PropertyName{}
 
 		default:
 			notCompatibleType(DragData, value)
@@ -1205,14 +1193,14 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 		view.onScroll(view, dataFloatProperty(data, "x"), dataFloatProperty(data, "y"), dataFloatProperty(data, "width"), dataFloatProperty(data, "height"))
 
 	case "widthChanged":
-		if value, ok := data.PropertyValue("width"); ok {
+		if value, ok := data.PropertyText("width"); ok {
 			if width, ok := StringToSizeUnit(value); ok {
 				self.setRaw(Width, width)
 			}
 		}
 
 	case "heightChanged":
-		if value, ok := data.PropertyValue("height"); ok {
+		if value, ok := data.PropertyText("height"); ok {
 			if height, ok := StringToSizeUnit(value); ok {
 				self.setRaw(Height, height)
 			}
@@ -1221,7 +1209,7 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 		/*
 			case "resize":
 				floatProperty := func(tag string) float64 {
-					if value, ok := data.PropertyValue(tag); ok {
+					if value, ok := data.PropertyText(tag); ok {
 						if result, err := strconv.ParseFloat(value, 64); err == nil {
 							return result
 						}
@@ -1240,7 +1228,7 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 		if listener := view.fileLoader[key]; listener != nil {
 			delete(view.fileLoader, key)
 
-			if base64Data, ok := data.PropertyValue("data"); ok {
+			if base64Data, ok := data.PropertyText("data"); ok {
 				if index := strings.LastIndex(base64Data, ","); index >= 0 {
 					base64Data = base64Data[index+1:]
 				}
@@ -1258,7 +1246,7 @@ func (view *viewData) handleCommand(self View, command PropertyName, data DataOb
 		file := dataToFileInfo(data)
 		key := file.key()
 
-		if error, ok := data.PropertyValue("error"); ok {
+		if error, ok := data.PropertyText("error"); ok {
 			ErrorLogF(`Load "%s" file error: %s`, file.Name, error)
 		}
 

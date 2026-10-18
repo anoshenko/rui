@@ -88,24 +88,23 @@ type filePickerData struct {
 	//loader map[int]func(FileInfo, []byte)
 }
 
-func dataToFileInfo(node DataValue) FileInfo {
+func dataToFileInfo(obj DataObject) FileInfo {
 	var file FileInfo
-	if obj := node.Object(); obj != nil {
-		file.Name, _ = obj.PropertyValue("name")
-		file.MimeType, _ = obj.PropertyValue("mime-type")
+	file.Name, _ = obj.PropertyText("name")
+	file.MimeType, _ = obj.PropertyText("mime-type")
 
-		if size, ok := obj.PropertyValue("size"); ok {
-			if n, err := strconv.ParseInt(size, 10, 64); err == nil {
-				file.Size = n
-			}
-		}
-
-		if value, ok := obj.PropertyValue("last-modified"); ok {
-			if n, err := strconv.ParseInt(value, 10, 64); err == nil {
-				file.LastModified = time.UnixMilli(n)
-			}
+	if size, ok := obj.PropertyText("size"); ok {
+		if n, err := strconv.ParseInt(size, 10, 64); err == nil {
+			file.Size = n
 		}
 	}
+
+	if value, ok := obj.PropertyText("last-modified"); ok {
+		if n, err := strconv.ParseInt(value, 10, 64); err == nil {
+			file.LastModified = time.UnixMilli(n)
+		}
+	}
+
 	return file
 }
 
@@ -273,15 +272,24 @@ func (picker *filePickerData) htmlProperties(self View, buffer *strings.Builder)
 }
 
 func parseFilesTag(data DataObject) []FileInfo {
-	if node := data.PropertyByTag("files"); node != nil && node.Type() == ArrayNode {
-		count := node.ArraySize()
-		files := make([]FileInfo, count)
-		for i := range count {
-			if value := node.ArrayElement(i); value != nil {
-				files[i] = dataToFileInfo(value)
+	if node := data.Property("files"); node != nil {
+		switch node.Type() {
+		case ArrayDataValue:
+			if array := node.Array(); array != nil {
+				files := make([]FileInfo, 0, array.Size())
+				for value := range array.Elements() {
+					if obj := value.Object(); obj != nil {
+						files = append(files, dataToFileInfo(obj))
+					}
+				}
+				return files
+			}
+
+		case ObjectDataValue:
+			if obj := node.Object(); obj != nil {
+				return []FileInfo{dataToFileInfo(obj)}
 			}
 		}
-		return files
 	}
 	return nil
 }
