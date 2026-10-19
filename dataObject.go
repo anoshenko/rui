@@ -418,8 +418,14 @@ func copyToReflectSlice(array DataArray, value reflect.Value) {
 
 	case reflect.Uint32:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseUint(text, 10, 32); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(uint32(n)))
+			if len(text) > 0 {
+				if text[0] == '#' {
+					if n, err := strconv.ParseUint(text[1:], 16, 32); err == nil {
+						val = reflect.Append(val, reflect.ValueOf(uint32(n)))
+					}
+				} else if n, err := strconv.ParseUint(text, 10, 32); err == nil {
+					val = reflect.Append(val, reflect.ValueOf(uint32(n)))
+				}
 			}
 		}
 
@@ -534,10 +540,10 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		for text := range array.TextElements() {
+			if i >= maxSize {
+				break
+			}
 			if n, err := strconv.ParseInt(text, 10, 64); err == nil {
-				if i >= maxSize {
-					break
-				}
 				value := val.Index(i)
 				value.SetInt(n)
 				i++
@@ -546,13 +552,21 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseUint(text, 10, 64); err == nil {
-				if i >= maxSize {
-					break
+			if i >= maxSize {
+				break
+			}
+			if len(text) > 0 {
+				if text[0] == '#' {
+					if n, err := strconv.ParseUint(text[1:], 16, 64); err == nil {
+						value := val.Index(i)
+						value.SetUint(n)
+						i++
+					}
+				} else if n, err := strconv.ParseUint(text, 10, 64); err == nil {
+					value := val.Index(i)
+					value.SetUint(n)
+					i++
 				}
-				value := val.Index(i)
-				value.SetUint(n)
-				i++
 			}
 		}
 
@@ -718,8 +732,14 @@ func copyToReflectValue(data DataValue, value reflect.Value) {
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		if data.Type() == TextDataValue {
-			if n, err := strconv.ParseUint(data.String(), 10, 64); err == nil {
-				value.SetUint(n)
+			if text := data.String(); len(text) > 0 {
+				if text[0] == '#' {
+					if n, err := strconv.ParseUint(text[1:], 16, 64); err == nil {
+						value.SetUint(n)
+					}
+				} else if n, err := strconv.ParseUint(text, 10, 64); err == nil {
+					value.SetUint(n)
+				}
 			}
 		}
 
