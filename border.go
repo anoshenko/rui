@@ -782,9 +782,9 @@ func (border *borderProperty) ViewBorders(session Session) ViewBorders {
 			result.Width = defaultWidth
 		}
 
-		if result.Color.Light, result.Color.Dark, ok = colorProperty(border, prefix+ColorTag, session); !ok {
-			result.Color.Light = defaultLightColor
-			result.Color.Dark = defaultDarkColor
+		if result.Color.LightMode, result.Color.DarkMode, ok = colorProperty(border, prefix+ColorTag, session); !ok {
+			result.Color.LightMode = defaultLightColor
+			result.Color.DarkMode = defaultDarkColor
 		}
 
 		return result
@@ -833,7 +833,7 @@ func (border *borderProperty) cssColor(builder cssBuilder, session Session) {
 	if borders.Top.Color == borders.Right.Color &&
 		borders.Top.Color == borders.Left.Color &&
 		borders.Top.Color == borders.Bottom.Color {
-		if borders.Top.Color.Light != 0 || borders.Top.Color.Dark != 0 {
+		if borders.Top.Color.LightMode != 0 || borders.Top.Color.DarkMode != 0 {
 			builder.add("border-color", borders.Top.Color.cssString(session))
 		}
 	} else {
@@ -883,9 +883,9 @@ type ViewBorders struct {
 // CurrentColor returns the border color used in the current theme.
 func (border *ViewBorder) CurrentColor(session Session) Color {
 	if session.DarkTheme() {
-		return border.Color.Dark
+		return border.Color.DarkMode
 	}
-	return border.Color.Light
+	return border.Color.LightMode
 }
 
 // AllTheSame returns true if all borders are the same

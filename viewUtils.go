@@ -782,11 +782,11 @@ func floatStyledProperty(view View, subviewID []string, tag PropertyName, defaul
 func colorPairStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) ColorPair {
 	if view = getSubview(view, subviewID); view != nil {
 		if lightColor, darkColor, ok := colorProperty(view, tag, view.Session()); ok {
-			return ColorPair{Light: lightColor, Dark: darkColor}
+			return ColorPair{LightMode: lightColor, DarkMode: darkColor}
 		}
 		if value := valueFromStyle(view, tag); value != nil {
 			if lightColor, darkColor, ok := valueToColor(value, view.Session()); ok {
-				return ColorPair{Light: lightColor, Dark: darkColor}
+				return ColorPair{LightMode: lightColor, DarkMode: darkColor}
 			}
 		}
 		if inherit {
@@ -795,15 +795,15 @@ func colorPairStyledProperty(view View, subviewID []string, tag PropertyName, in
 			}
 		}
 	}
-	return ColorPair{Light: Color(0), Dark: Color(0)}
+	return ColorPair{LightMode: Color(0), DarkMode: Color(0)}
 }
 
 func colorStyledProperty(view View, subviewID []string, tag PropertyName, inherit bool) Color {
 	color := colorPairStyledProperty(view, subviewID, tag, inherit)
 	if view.Session().DarkTheme() {
-		return color.Dark
+		return color.DarkMode
 	}
-	return color.Light
+	return color.LightMode
 }
 
 func transformStyledProperty(view View, subviewID []string, tag PropertyName) TransformProperty {

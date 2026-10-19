@@ -134,7 +134,7 @@ func (separator *columnSeparatorProperty) ViewBorder(session Session) ViewBorder
 	return ViewBorder{
 		Style: style,
 		Width: width,
-		Color: ColorPair{Light: lightColor, Dark: darkColor},
+		Color: ColorPair{LightMode: lightColor, DarkMode: darkColor},
 	}
 }
 

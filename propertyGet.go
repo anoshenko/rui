@@ -88,7 +88,7 @@ func valueToColor(value any, session Session) (Color, Color, bool) {
 			return value, value, true
 
 		case ColorPair:
-			return value.Light, value.Dark, true
+			return value.LightMode, value.DarkMode, true
 
 		case string:
 			if ok, constName := isConstantName(value); ok {
@@ -103,7 +103,7 @@ func valueToColor(value any, session Session) (Color, Color, bool) {
 
 			if obj, err := ParseDataText(value); err == nil {
 				if colorPair, ok := parseColorPair(obj); ok {
-					return colorPair.Light, colorPair.Dark, true
+					return colorPair.LightMode, colorPair.DarkMode, true
 				}
 			}
 		}

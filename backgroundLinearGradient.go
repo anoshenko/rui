@@ -207,9 +207,9 @@ func (point *BackgroundGradientPoint) color(session Session) (Color, bool) {
 
 		case ColorPair:
 			if session.DarkTheme() {
-				return color.Dark, true
+				return color.DarkMode, true
 			}
-			return color.Light, true
+			return color.LightMode, true
 
 		default:
 			if n, ok := isInt(point.Color); ok {

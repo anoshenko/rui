@@ -14,10 +14,10 @@ type Color uint32
 // ColorPair represents the color pair in argb format
 type ColorPair struct {
 	// Light is the color used in the light theme
-	Light Color
+	LightMode Color
 
 	// Dark is the color used in the light theme
-	Dark Color
+	DarkMode Color
 }
 
 // ARGB creates Color using alpha, red, green and blue components
@@ -229,13 +229,13 @@ func parseColorPair(obj DataObject) (ColorPair, bool) {
 
 		switch tag {
 		case "light":
-			result.Light, err = stringToColor(property.String())
+			result.LightMode, err = stringToColor(property.String())
 			if err != nil {
 				return ColorPair{}, false
 			}
 
 		case "dark":
-			result.Dark, err = stringToColor(property.String())
+			result.DarkMode, err = stringToColor(property.String())
 			if err != nil {
 				return ColorPair{}, false
 			}
@@ -249,7 +249,7 @@ func parseColorPair(obj DataObject) (ColorPair, bool) {
 }
 
 func (pair ColorPair) String() string {
-	return fmt.Sprintf("_{ light = %s, dark = %s }", pair.Light.String(), pair.Dark.String())
+	return fmt.Sprintf("_{ light = %s, dark = %s }", pair.LightMode.String(), pair.DarkMode.String())
 }
 
 func (pair ColorPair) cssString(session Session) string {
@@ -257,12 +257,12 @@ func (pair ColorPair) cssString(session Session) string {
 	if session.lightDarkSupport() {
 		buffer := allocStringBuilder()
 		defer freeStringBuilder(buffer)
-		writeColorCSS(buffer, pair.Light, pair.Dark, session)
+		writeColorCSS(buffer, pair.LightMode, pair.DarkMode, session)
 		return buffer.String()
 	}
 
 	if session.DarkTheme() {
-		return pair.Dark.cssString()
+		return pair.DarkMode.cssString()
 	}
-	return pair.Light.cssString()
+	return pair.LightMode.cssString()
 }
