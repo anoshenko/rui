@@ -14,6 +14,7 @@ GetAccentColorPair, GetTextColorPair, GetTextLineColor, GetCaretColorPair, GetCo
 * Added ToBoundsProperty method to Bounds struct
 * Added ColorPair type
 * In ViewBorder structure: the type of Color field is replaced by ColorPair and added CurrentColor method
+* Work with rui data files has been redesigned
 
 # v0.20.0
 
