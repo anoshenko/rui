@@ -335,7 +335,7 @@ func (app *application) socketReader(bridge *wsBridge) {
 			}
 
 		default:
-			if !session.handleAnswer(command, obj) {
+			if session != nil && !session.handleAnswer(command, obj) {
 				events <- obj
 			}
 		}

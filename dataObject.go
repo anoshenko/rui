@@ -250,7 +250,7 @@ func (object *dataObject) RemoveProperty(tag string) DataValue {
 }
 
 func (object *dataObject) PropertyText(tag string, tags ...string) (string, bool) {
-	if node := object.Property(tag, tag); node != nil && node.Type() == TextDataValue {
+	if node := object.Property(tag); node != nil && node.Type() == TextDataValue {
 		return node.String(), true
 	}
 	return "", false
