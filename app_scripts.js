@@ -135,6 +135,8 @@ function scanElementsSize() {
 function scrollEvent(element, event) {
 	sendMessage("scroll{session=" + sessionID + ",id=" + element.id + ",x=" + element.scrollLeft + 
 		",y=" + element.scrollTop + ",width=" + element.scrollWidth + ",height=" + element.scrollHeight + "}");
+		
+	hideTooltip();	
 }
 
 function updateCSSRule(selector, ruleText) {
@@ -2060,101 +2062,70 @@ function localStorageClear() {
 	}
 }
 
-function showTooltip(element, tooltip) {
-	const layer = document.getElementById("ruiTooltipLayer");
-	if (!layer) {
+function showTooltip(element, tooltipText) {
+	const tooltip = document.getElementById("ruiTooltip");
+	const topArrow = document.getElementById("ruiTooltipTopArrow");
+	const bottomArrow = document.getElementById("ruiTooltipBottomArrow");
+	const tooltipBox = document.getElementById("ruiTooltipText");
+
+	if (!tooltip || !topArrow || !bottomArrow || !tooltipBox) {
 		return;
 	}
 
-	layer.style.left = "0px";
-	layer.style.right = "0px";
+	topArrow.style.display = "";
+	tooltipBox.innerHTML = tooltipText;
 
-	const tooltipBox = document.getElementById("ruiTooltipText");
-	if (tooltipBox) {
-		tooltipBox.innerHTML = tooltip;
-	}
+	const arrowSize = topArrow.offsetHeight;
+	const tooltipHeight = tooltipBox.offsetHeight + arrowSize;
+	const screenWidth = document.body.offsetWidth;
+	const screenHeight = document.body.offsetHeight;
+	const elementRect = element.getBoundingClientRect();
+	let arrow = topArrow;
 
-	let scrollLeft = element.parentElement.scrollLeft;
-	let scrollTop = element.parentElement.scrollTop;
-	let left = element.offsetLeft - scrollLeft;
-	let top = element.offsetTop - scrollTop;
-	let width = element.offsetWidth;
-	let height = element.offsetHeight;
-	let parent = element.offsetParent;
-
-	while (parent) {
-
-		left += parent.offsetLeft;
-		top += parent.offsetTop;
-		if (parent.parentElement) {
-			left -= parent.parentElement.scrollLeft;
-			top -= parent.parentElement.scrollTop;
-		}
-
-		width = parent.offsetWidth;
-		height = parent.offsetHeight;
-		parent = parent.offsetParent;
-	}
-
-	if (element.offsetWidth >= tooltipBox.offsetWidth) {
-		layer.style.left = left + "px";
-		layer.style.justifyItems = "start";
+	if (elementRect.top >= tooltipHeight) {
+		topArrow.style.display = "none";
+		bottomArrow.style.display = "";
+		arrow = bottomArrow;
+		tooltip.style.top = (elementRect.top - tooltipHeight) + "px";
+	} else if (screenHeight - elementRect.bottom >= tooltipHeight) {
+		bottomArrow.style.display = "none";
+		tooltip.style.top = (elementRect.bottom) + "px";
 	} else {
-		const rightOff = width - (left + element.offsetWidth);
-		if (left > rightOff) {
-			if (width - left < tooltipBox.offsetWidth) {
-				layer.style.right = rightOff + "px";
-				layer.style.justifyItems = "end";
-			} else {
-				layer.style.left = (left - rightOff) + "px";
-				layer.style.right = "0px";
-				layer.style.justifyItems = "center";
-			}
+		return;
+	}
+
+	const xCenter = (elementRect.left + elementRect.right) / 2;
+	const tooltipWidth = tooltip.offsetWidth;
+	let left = xCenter - tooltipWidth / 2;
+	let right = left + tooltipWidth;
+
+	if (left >= 0 && right < screenWidth) {
+		tooltip.style.left = left + "px";
+		tooltip.style.justifyItems = "center";
+		arrow.style.marginLeft = "0px";
+		arrow.style.marginRight = "0px";
+	} else {
+		if (left < 0) {
+			left = 0;
 		} else {
-			if (width - rightOff < tooltipBox.offsetWidth) {
-				layer.style.left = left + "px";
-				layer.style.justifyItems = "start";
-			} else {
-				layer.style.right = (rightOff - left) + "px";
-				layer.style.justifyItems = "center";
-			}
+			left = screenWidth - tooltipWidth;
 		}
+		tooltip.style.left = left + "px";
+		tooltip.style.justifyItems = "left";
+		arrow.style.marginLeft = (xCenter - left - arrowSize)  + "px";
+		arrow.style.marginRight = "0px";
 	}
 
-	const bottomOff = height - (top + element.offsetHeight);
-	let arrow = document.getElementById("ruiTooltipTopArrow");
+	tooltip.style.visibility = "visible";
+	tooltip.style.opacity = 1;
+}
 
-	if (bottomOff < arrow.offsetHeight + tooltipBox.offsetHeight) {
-		if (arrow) {
-			arrow.style.visibility = "hidden";
-		}
-
-		arrow = document.getElementById("ruiTooltipBottomArrow");
-		if (arrow) {
-			arrow.style.visibility = "visible";
-		}
-
-		layer.style.top = "0px";
-		layer.style.bottom = height - top - arrow.offsetHeight / 2 + "px"; 
-		layer.style.gridTemplateRows = "1fr auto auto"
-
-	} else {
-		if (arrow) {
-			arrow.style.visibility = "visible";
-		}
-
-		layer.style.top = top + element.offsetHeight - arrow.offsetHeight / 2 + "px";
-		layer.style.bottom = "0px";
-		layer.style.gridTemplateRows = "auto auto 1fr"
-
-		arrow = document.getElementById("ruiTooltipBottomArrow");
-		if (arrow) {
-			arrow.style.visibility = "hidden";
-		}
+function hideTooltip() {
+	const layer = document.getElementById("ruiTooltip");
+	if (layer && layer.style.visibility != "hidden") {
+		layer.style.opacity = 0;
+		layer.style.visibility = "hidden";
 	}
-	
-	layer.style.visibility = "visible";
-	layer.style.opacity = 1;
 }
 
 function mouseEnterEvent(element, event) {
@@ -2172,22 +2143,10 @@ function mouseLeaveEvent(element, event) {
 	event.stopPropagation();
 
 	if (element.getAttribute("data-tooltip")) {
-		const layer = document.getElementById("ruiTooltipLayer");
-		if (layer) {
-			layer.style.opacity = 0;
-			layer.style.visibility = "hidden";
-		}
+		hideTooltip()
 	}
 
 	sendMessage("mouse-leave{session=" + sessionID + ",id=" + element.id + mouseEventData(element, event) + "}");
-}
-
-function hideTooltip() {
-	const layer = document.getElementById("ruiTooltipLayer");
-	if (layer) {
-		layer.style.opacity = 0;
-		layer.style.visibility = "hidden";
-	}
 }
 
 function stopEventPropagation(element, event) {

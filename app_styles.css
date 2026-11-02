@@ -10,7 +10,8 @@
 
 :root {
   color-scheme: light dark;
-  --tooltip-arrow-size: 6px;
+  --tooltip-arrow-width: 10px;
+  --tooltip-arrow-height: 6px;
   --tooltip-background: white;
   --tooltip-text-color: black;
   --tooltip-shadow-color: gray;
@@ -98,49 +99,45 @@ ul:focus {
   padding: 0;
 }
 
-.ruiTooltipLayer {
+.ruiTooltip {
   display: grid;
-  grid-template-rows: 1fr auto 1fr;
+  grid-template-rows: auto auto auto;
   justify-items: center;
   align-items: center;
   position: absolute;
   top: 0px;
-  bottom: 0px;
-  right: 0px;
   left: 0px;
   transition: opacity 0.5s ease-out;
-  filter: drop-shadow(0px 0px 2px var(--tooltip-shadow-color));
+  filter: drop-shadow(0px 0px 1px var(--tooltip-shadow-color));
 }
 
 .ruiTooltipTopArrow {
   grid-row-start: 1; 
   grid-row-end: 2;
-  border-width: var(--tooltip-arrow-size); 
-  border-style: solid; 
-  border-color: transparent transparent var(--tooltip-background) transparent;
-  margin-left: 12px;
-  margin-right: 12px;
+  width: var(--tooltip-arrow-width);
+  height: var(--tooltip-arrow-height);
+  background-color: var(--tooltip-background);
+  clip-path: polygon(0% 100%, 100% 100%, 50% 0%);
 }
 
 .ruiTooltipBottomArrow {
   grid-row-start: 3; 
   grid-row-end: 4;
-  border-width: var(--tooltip-arrow-size); 
-  border-style: solid; 
-  border-color: var(--tooltip-background) transparent transparent transparent;
-  margin-left: 12px;
-  margin-right: 12px;
+  width: var(--tooltip-arrow-width);
+  height: var(--tooltip-arrow-height);
+  background-color: var(--tooltip-background);
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
 }
 
 .ruiTooltipText {
+  max-width: 100%;
   grid-row-start: 2; 
   grid-row-end: 3;
   padding: 4px 8px 4px 8px; 
-  margin-left: 8px;
-  margin-right: 8px;
+  margin-left: 1px;
+  margin-right: 1px;
   background-color: var(--tooltip-background); 
   color: var(--tooltip-text-color);
-  /*box-shadow: 0px 0px 4px 2px #8888;*/
   border-radius: 4px;
 }
 
