@@ -237,6 +237,16 @@ function insertElementAtStart(elementId, content) {
 	}
 }
 
+function replaceElement(elementId, html) {
+	const element = document.getElementById(elementId);
+	if (element) {
+		const div = document.createElement("div");
+		div.innerHTML = html
+		element.replaceWith(div.firstChild);
+		scanElementsSize();
+	}
+}
+
 function appendToInputValue(elementId, content) {
 	const element = document.getElementById(elementId);
 	if (element) {

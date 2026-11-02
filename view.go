@@ -989,6 +989,15 @@ func (view *viewData) propertyChanged(tag PropertyName) {
 			session.updateCSSProperty(htmlID, string(Opacity), "")
 		}
 
+	case Semantics:
+		htmlID := view.htmlID()
+		if v := session.viewByHTMLID(htmlID); v != nil {
+			buffer := allocStringBuilder()
+			defer freeStringBuilder(buffer)
+			viewHTML(v, buffer, "")
+			session.callFunc("replaceElement", htmlID, buffer.String())
+		}
+
 	default:
 		if cssTag, ok := sizeProperties[tag]; ok && cssTag != "" {
 			if size, ok := sizeProperty(view, tag, session); ok {
