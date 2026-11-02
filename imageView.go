@@ -174,7 +174,7 @@ func (imageView *imageViewData) propertyChanged(tag PropertyName) {
 		}
 
 	case AltText:
-		updateInnerHTML(htmlID, session)
+		session.updateProperty(htmlID, "alt", GetImageViewAltText(imageView))
 
 	case ImageVerticalAlign, ImageHorizontalAlign:
 		updateCSSStyle(htmlID, session)
