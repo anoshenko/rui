@@ -119,6 +119,11 @@ type gridLayoutData struct {
 
 // NewGridLayout create new GridLayout object and return it
 func NewGridLayout(session Session, params Params) GridLayout {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(gridLayoutData)
 	view.init(session)
 	setInitParams(view, params)

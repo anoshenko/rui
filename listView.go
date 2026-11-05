@@ -139,6 +139,11 @@ type listViewData struct {
 
 // NewListView creates the new list view
 func NewListView(session Session, params Params) ListView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(listViewData)
 	view.init(session)
 	setInitParams(view, params)

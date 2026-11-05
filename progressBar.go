@@ -39,6 +39,11 @@ type progressBarData struct {
 
 // NewProgressBar create new ProgressBar object and return it
 func NewProgressBar(session Session, params Params) ProgressBar {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(progressBarData)
 	view.init(session)
 	setInitParams(view, params)

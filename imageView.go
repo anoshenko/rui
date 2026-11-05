@@ -81,6 +81,11 @@ type imageViewData struct {
 
 // NewImageView create new ImageView object and return it
 func NewImageView(session Session, params Params) ImageView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(imageViewData)
 	view.init(session)
 	setInitParams(view, params)

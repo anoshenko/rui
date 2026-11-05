@@ -143,6 +143,11 @@ func (manager *imageManager) imageLoadError(obj DataObject) {
 
 // LoadImage starts the async image loading by url
 func LoadImage(url string, onLoaded func(Image), session Session) Image {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	if ok, constName := isConstantName(url); ok {
 		if image, ok := session.ImageConstant(constName); ok {
 			url = image

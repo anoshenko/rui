@@ -18,6 +18,11 @@ type svgImageViewData struct {
 
 // NewSvgImageView create new SvgImageView object and return it
 func NewSvgImageView(session Session, params Params) SvgImageView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(svgImageViewData)
 	view.init(session)
 	setInitParams(view, params)

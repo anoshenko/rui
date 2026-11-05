@@ -48,6 +48,11 @@ type videoPlayerData struct {
 
 // NewVideoPlayer create new MediaPlayer object and return it
 func NewVideoPlayer(session Session, params Params) VideoPlayer {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(videoPlayerData)
 	view.init(session)
 	setInitParams(view, params)

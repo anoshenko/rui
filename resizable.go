@@ -67,6 +67,11 @@ type resizableData struct {
 
 // NewResizable create new Resizable object and return it
 func NewResizable(session Session, params Params) Resizable {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(resizableData)
 	view.init(session)
 	setInitParams(view, params)

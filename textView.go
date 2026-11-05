@@ -16,6 +16,11 @@ type textViewData struct {
 
 // NewTextView create new TextView object and return it
 func NewTextView(session Session, params Params) TextView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(textViewData)
 	view.init(session)
 	setInitParams(view, params)

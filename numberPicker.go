@@ -114,6 +114,11 @@ type numberPickerData struct {
 
 // NewNumberPicker create new NumberPicker object and return it
 func NewNumberPicker(session Session, params Params) NumberPicker {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(numberPickerData)
 	view.init(session)
 	setInitParams(view, params)

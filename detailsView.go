@@ -53,6 +53,11 @@ type detailsViewData struct {
 
 // NewDetailsView create new DetailsView object and return it
 func NewDetailsView(session Session, params Params) DetailsView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(detailsViewData)
 	view.init(session)
 	setInitParams(view, params)

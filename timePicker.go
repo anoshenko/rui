@@ -105,6 +105,11 @@ type timePickerData struct {
 
 // NewTimePicker create new TimePicker object and return it
 func NewTimePicker(session Session, params Params) TimePicker {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(timePickerData)
 	view.init(session)
 	setInitParams(view, params)

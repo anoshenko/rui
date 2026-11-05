@@ -126,6 +126,11 @@ type columnLayoutData struct {
 
 // NewColumnLayout create new ColumnLayout object and return it
 func NewColumnLayout(session Session, params Params) ColumnLayout {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(columnLayoutData)
 	view.init(session)
 	setInitParams(view, params)

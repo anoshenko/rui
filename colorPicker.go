@@ -50,6 +50,11 @@ type colorPickerData struct {
 
 // NewColorPicker create new ColorPicker object and return it
 func NewColorPicker(session Session, params Params) ColorPicker {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(colorPickerData)
 	view.init(session)
 	setInitParams(view, params)

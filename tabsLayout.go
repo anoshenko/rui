@@ -147,6 +147,11 @@ type tabsLayoutData struct {
 
 // NewTabsLayout create new TabsLayout object and return it
 func NewTabsLayout(session Session, params Params) TabsLayout {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(tabsLayoutData)
 	view.init(session)
 	setInitParams(view, params)

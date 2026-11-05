@@ -11,6 +11,11 @@ type audioPlayerData struct {
 
 // NewAudioPlayer create new MediaPlayer object and return it
 func NewAudioPlayer(session Session, params Params) AudioPlayer {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(audioPlayerData)
 	view.init(session)
 	setInitParams(view, params)

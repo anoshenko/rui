@@ -1538,6 +1538,7 @@ func (popup *popupData) createLayerView() {
 // NewPopup creates a new Popup
 func NewPopup(view View, param Params) Popup {
 	if view == nil {
+		ErrorLog(`the View argument cannot be nil`)
 		return nil
 	}
 
@@ -1567,7 +1568,7 @@ func NewPopup(view View, param Params) Popup {
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromObject(session Session, object DataObject, binding any) Popup {
 	if session == nil {
-		ErrorLog(`"session" argument is nil`)
+		ErrorLog(`the Session argument cannot be nil`)
 		return nil
 	}
 
@@ -1604,6 +1605,11 @@ func CreatePopupFromObject(session Session, object DataObject, binding any) Popu
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromText(session Session, text string, binding any) Popup {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	data, err := ParseDataText(text)
 	if err != nil {
 		ErrorLog(err.Error())
@@ -1621,6 +1627,11 @@ func CreatePopupFromText(session Session, text string, binding any) Popup {
 //
 // If the function fails, it returns nil and an error message is written to the log.
 func CreatePopupFromResources(session Session, name string, binding any) Popup {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	if strings.ToLower(filepath.Ext(name)) != ".rui" {
 		name += ".rui"
 	}

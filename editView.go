@@ -106,6 +106,11 @@ type editViewData struct {
 
 // NewEditView create new EditView object and return it
 func NewEditView(session Session, params Params) EditView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(editViewData)
 	view.init(session)
 	setInitParams(view, params)

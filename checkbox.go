@@ -35,6 +35,11 @@ type checkboxData struct {
 
 // NewCheckbox create new Checkbox object and return it
 func NewCheckbox(session Session, params Params) Checkbox {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(checkboxData)
 	view.init(session)
 	setInitParams(view, params)

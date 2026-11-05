@@ -46,6 +46,11 @@ type listLayoutData struct {
 
 // NewListLayout create new ListLayout object and return it
 func NewListLayout(session Session, params Params) ListLayout {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(listLayoutData)
 	view.init(session)
 	setInitParams(view, params)

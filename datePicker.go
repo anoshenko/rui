@@ -123,6 +123,11 @@ type datePickerData struct {
 
 // NewDatePicker create new DatePicker object and return it
 func NewDatePicker(session Session, params Params) DatePicker {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(datePickerData)
 	view.init(session)
 	setInitParams(view, params)

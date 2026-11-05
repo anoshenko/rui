@@ -24,6 +24,11 @@ type canvasViewData struct {
 
 // NewCanvasView creates the new custom draw view
 func NewCanvasView(session Session, params Params) CanvasView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(canvasViewData)
 	view.init(session)
 	setInitParams(view, params)

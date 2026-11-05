@@ -13,6 +13,11 @@ type absoluteLayoutData struct {
 
 // NewAbsoluteLayout create new AbsoluteLayout object and return it
 func NewAbsoluteLayout(session Session, params Params) AbsoluteLayout {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(absoluteLayoutData)
 	view.init(session)
 	setInitParams(view, params)

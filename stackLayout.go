@@ -311,6 +311,11 @@ type stackLayoutData struct {
 
 // NewStackLayout create new StackLayout object and return it
 func NewStackLayout(session Session, params Params) StackLayout {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(stackLayoutData)
 	view.init(session)
 	setInitParams(view, params)

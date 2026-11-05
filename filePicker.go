@@ -114,6 +114,11 @@ func (file FileInfo) key() string {
 
 // NewFilePicker create new FilePicker object and return it
 func NewFilePicker(session Session, params Params) FilePicker {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(filePickerData)
 	view.init(session)
 	setInitParams(view, params)

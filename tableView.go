@@ -578,6 +578,11 @@ type tableCellView struct {
 
 // NewTableView create new TableView object and return it
 func NewTableView(session Session, params Params) TableView {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(tableViewData)
 	view.init(session)
 	setInitParams(view, params)

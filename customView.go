@@ -28,6 +28,16 @@ type CustomViewData struct {
 
 // InitCustomView initializes fields of CustomView by default values
 func InitCustomView(customView CustomView, tag string, session Session, params Params) bool {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return false
+	}
+
+	if customView == nil {
+		ErrorLog(`the customView argument cannot be nil`)
+		return false
+	}
+
 	customView.setTag(tag)
 	if view := customView.CreateSuperView(session); view != nil {
 		customView.setSuperView(view)

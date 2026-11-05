@@ -37,6 +37,11 @@ type dropDownListData struct {
 
 // NewDropDownList create new DropDownList object and return it
 func NewDropDownList(session Session, params Params) DropDownList {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(dropDownListData)
 	view.init(session)
 	setInitParams(view, params)

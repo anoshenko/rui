@@ -13,6 +13,11 @@ type buttonData struct {
 
 // NewButton create new Button object and return it
 func NewButton(session Session, params Params) Button {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	button := new(buttonData)
 	button.init(session)
 	setInitParams(button, params)

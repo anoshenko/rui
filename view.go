@@ -142,6 +142,11 @@ func newView(session Session) View {
 
 // NewView create new View object and return it
 func NewView(session Session, params Params) View {
+	if session == nil {
+		ErrorLog(`the Session argument cannot be nil`)
+		return nil
+	}
+
 	view := new(viewData)
 	view.init(session)
 	setInitParams(view, params)
