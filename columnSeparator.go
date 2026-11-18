@@ -4,7 +4,9 @@ import (
 	"fmt"
 )
 
-// ColumnSeparatorProperty is the interface of a view separator data
+// ColumnSeparatorProperty is the interface of a view separator data It is created by one of the following functions:
+//   - [NewColumnSeparatorProperty];
+//   - [NewColumnSeparator];
 type ColumnSeparatorProperty interface {
 	Properties
 	fmt.Stringer
@@ -81,8 +83,8 @@ func NewColumnSeparatorProperty(params Params) ColumnSeparatorProperty {
 // Arguments:
 //   - style - determines the line style. Valid values: 0 ([NoneLine]), 1 ([SolidLine]), 2 ([DashedLine]), 3 ([DottedLine]), or 4 ([DoubleLine]);
 //   - color - determines the line color;
-//   - width - determines the line thickness.
-func NewColumnSeparator(style int, color Color, width SizeUnit) ColumnSeparatorProperty {
+//   - width - determines the line thickness. If the type int or float64 is used, the size is specified in pixels.
+func NewColumnSeparator[WidthType SizeUnit | int | float64](style int, color Color, width WidthType) ColumnSeparatorProperty {
 	return NewColumnSeparatorProperty(Params{
 		Width:    width,
 		Style:    style,

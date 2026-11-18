@@ -2,7 +2,7 @@ package rui
 
 import "strings"
 
-// Button represent a Button view
+// Button represents an interface for working with the Button view.
 type Button interface {
 	ListLayout
 }
@@ -11,7 +11,7 @@ type buttonData struct {
 	listLayoutData
 }
 
-// NewButton create new Button object and return it
+// NewButton create new [Button] object and return its interface
 func NewButton(session Session, params Params) Button {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

@@ -286,10 +286,11 @@ type transformPropertyData struct {
 // NewTransform creates a new transform property data and return its interface
 //
 // The following properties can be used:
-//
-// [Perspective] ("perspective"), [TranslateX] ("translate-x"), [TranslateY] ("translate-y"), [TranslateZ] ("translate-z"),
-// [ScaleX] ("scale-x"), [ScaleY] ("scale-y"), [ScaleZ] ("scale-z"), [Rotate] ("rotate"), [RotateX] ("rotate-x"),
-// [RotateY] ("rotate-y"), [RotateZ] ("rotate-z"), [SkewX] ("skew-x"), and [SkewY] ("skew-y")
+//   - [Perspective] ("perspective");
+//   - [TranslateX] ("translate-x"), [TranslateY] ("translate-y"), [TranslateZ] ("translate-z");
+//   - [ScaleX] ("scale-x"), [ScaleY] ("scale-y"), [ScaleZ] ("scale-z"),
+//   - [Rotate] ("rotate"), [RotateX] ("rotate-x"), [RotateY] ("rotate-y"), [RotateZ] ("rotate-z");
+//   - [SkewX] ("skew-x"), and [SkewY] ("skew-y").
 func NewTransformProperty(params Params) TransformProperty {
 	transform := new(transformPropertyData)
 	transform.init()

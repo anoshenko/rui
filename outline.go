@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// OutlineProperty defines a view's outside border
+// OutlineProperty defines a view's outside border. It is created by the [NewOutlineProperty] function.
 type OutlineProperty interface {
 	Properties
 	stringWriter
@@ -23,7 +23,7 @@ type outlinePropertyData struct {
 //
 // The following properties can be used:
 //   - [ColorTag] ("color") - Determines the line color (Color);
-//   - [Width] ("width") -  Determines the line thickness (SizeUnit).
+//   - [Width] ("width") -  Determines the line thickness ([SizeUnit]).
 func NewOutlineProperty(params Params) OutlineProperty {
 	outline := new(outlinePropertyData)
 	outline.init()

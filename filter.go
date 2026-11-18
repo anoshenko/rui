@@ -128,8 +128,19 @@ const (
 	Sepia PropertyName = "sepia"
 )
 
-// FilterProperty defines an applied to a View a graphical effects like blur or color shift.
-// Allowable properties are Blur, Brightness, Contrast, DropShadow, Grayscale, HueRotate, Invert, Opacity, Saturate, and Sepia
+// FilterProperty defines an applied to a View a graphical effects like blur or color shift. It is created by the [NewFilterProperty] function.
+//
+// Allowable properties are
+//   - [Blur];
+//   - [Brightness];
+//   - [Contrast];
+//   - [DropShadow];
+//   - [Grayscale];
+//   - [HueRotate];
+//   - [Invert];
+//   - [Opacity];
+//   - [Saturate];
+//   - [Sepia].
 type FilterProperty interface {
 	Properties
 	fmt.Stringer
@@ -147,7 +158,7 @@ type filterData struct {
 //   - [Blur] ("blur") - Gaussian blur in pixels (type: float64, value: 0…10000);
 //   - [Brightness] ("brightness") - Brightness change in percents (type: float64, value: 0…10000);
 //   - [Contrast] ("contrast") - Contrast change in percents (type: float64, value: 0…10000);
-//   - [DropShadow] ("drop-shadow") - Adding shadow (type: []ShadowProperty);
+//   - [DropShadow] ("drop-shadow") - Adding shadow (type: [][ShadowProperty]);
 //   - [Grayscale] ("grayscale") - Converting to grayscale in percents (type: float64, value: 0…100);
 //   - [HueRotate] ("hue-rotate") - Hue rotation (type: AngleUnit);
 //   - [Invert] ("invert") - Invert colors in percents (type: float64, value: 0…100);

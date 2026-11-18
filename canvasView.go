@@ -4,10 +4,12 @@ import "reflect"
 
 // DrawFunction is the constant for "draw-function" property tag.
 //
-// Used by `CanvasView`.
+// Used by [CanvasView].
 // Property sets the draw function of `CanvasView`.
 //
-// Supported types: `func(Canvas)`.
+// Supported types:
+//
+//	func(Canvas)
 const DrawFunction PropertyName = "draw-function"
 
 // CanvasView represents an interface for working with the CanvasView view.

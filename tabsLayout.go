@@ -148,7 +148,7 @@ const (
 //   - [TabCloseEvent] ("tab-close-event");
 //   - [CurrentTabChangedEvent] ("current-tab-changed").
 //
-// Elements placed within a GridLayout container can have additional properties:
+// Elements placed within a TabsLayout container can have additional properties:
 //   - [Title] ("title");
 //   - [Icon] ("icon");
 //   - [TabCloseButton] ("tab-close-button").

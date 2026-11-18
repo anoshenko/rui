@@ -5,7 +5,9 @@ import (
 	"strings"
 )
 
-// BorderProperty is an interface of a bounds property data
+// BorderProperty is an interface of a bounds property data. It is created by one of the following functions:
+//   - [NewBoundsProperty];
+//   - [NewBounds].
 type BoundsProperty interface {
 	Properties
 	fmt.Stringer
@@ -21,7 +23,11 @@ type boundsPropertyData struct {
 
 // NewBoundsProperty creates the new BoundsProperty object.
 //
-// The following SizeUnit properties can be used: "left" ([Left]), "right" ([Right]), "top" ([Top]), and "bottom" ([Bottom]).
+// The following SizeUnit properties can be used:
+//   - [Left] ("left");
+//   - [Right] ("right");
+//   - [Top] ("top");
+//   - [Bottom] ("bottom").
 func NewBoundsProperty(params Params) BoundsProperty {
 	bounds := new(boundsPropertyData)
 	bounds.init()

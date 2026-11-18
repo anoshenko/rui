@@ -9,7 +9,7 @@ import (
 const (
 	// Summary is the constant for "summary" property tag.
 	//
-	// Used by DetailsView.
+	// Used by [DetailsView].
 	// The content of this property is used as the label for the disclosure widget.
 	//
 	// Supported types:
@@ -19,7 +19,7 @@ const (
 
 	// Expanded is the constant for "expanded" property tag.
 	//
-	// Used by DetailsView.
+	// Used by [DetailsView].
 	// Controls the content expanded state of the details view. Default value is false.
 	//
 	// Supported types: bool, int, string.
@@ -31,7 +31,7 @@ const (
 
 	// HideSummaryMarker is the constant for "hide-summary-marker" property tag.
 	//
-	// Used by DetailsView.
+	// Used by [DetailsView].
 	// Allows you to hide the summary marker (▶︎). Default value is false.
 	//
 	// Supported types: bool, int, string.

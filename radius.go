@@ -388,7 +388,11 @@ const (
 	BottomRightY PropertyName = "bottom-right-y"
 )
 
-// RadiusProperty is a description of the [View] (shape) elliptical corner radius.
+// RadiusProperty is a description of the [View] (shape) elliptical corner radius.. It is created by one of the following functions:
+//   - [NewRadiusProperty];
+//   - [NewEllipticRadius];
+//   - [NewRadii];
+//   - [];
 type RadiusProperty interface {
 	Properties
 	stringWriter
@@ -402,7 +406,7 @@ type radiusPropertyData struct {
 	dataProperty
 }
 
-// NewRadiusProperty creates the new RadiusProperty
+// NewRadiusProperty creates the new [RadiusProperty] object
 //
 // The following properties can be used:
 //   - "x" (X) - Determines the x-axis elliptic rounding radius of an element's outer border edge;

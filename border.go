@@ -174,7 +174,7 @@ const (
 	BottomColor PropertyName = "bottom-color"
 )
 
-// BorderProperty is the interface of a view border data
+// BorderProperty is the interface of a view border data. It is created by the [NewBorder] function.
 type BorderProperty interface {
 	Properties
 	fmt.Stringer
@@ -257,12 +257,12 @@ func newBorderProperty(value any) BorderProperty {
 	return border
 }
 
-// NewBorder creates the new BorderProperty.
+// NewBorder creates the new [BorderProperty].
 //
 // The following properties can be used:
-//   - "style" ([Style]). Determines the line style (int). Valid values: 0 ([NoneLine]), 1 ([SolidLine]), 2 ([DashedLine]), 3 ([DottedLine]), or 4 ([DoubleLine]);
-//   - "color" ([ColorTag]). Determines the line color (Color);
-//   - "width" ([Width]). Determines the line thickness (SizeUnit).
+//   - [Style], [LeftStyle], [RightStyle], [TopStyle], and [BottomStyle] - Determines the line style (int). Valid values: 0 ([NoneLine]), 1 ([SolidLine]), 2 ([DashedLine]), 3 ([DottedLine]), or 4 ([DoubleLine]);
+//   - [ColorTag], [LeftColor], [RightColor], [TopColor], and [BottomColor] - Determines the line color ([Color]);
+//   - [Width], [LeftWidth], [RightWidth], [TopWidth], and [BottomWidth] - Determines the line thickness ([SizeUnit]).
 func NewBorder(params Params) BorderProperty {
 	border := new(borderProperty)
 	border.init()

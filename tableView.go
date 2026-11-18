@@ -551,7 +551,30 @@ type CellIndex struct {
 	Row, Column int
 }
 
-// TableView represents a TableView view
+// TableView represents an interface for working with the TableView view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [TableVerticalAlign];
+//   - [HeadHeight];
+//   - [HeadStyle];
+//   - [FootHeight];
+//   - [FootStyle];
+//   - [RowSpan];
+//   - [ColumnSpan];
+//   - [RowStyle];
+//   - [ColumnStyle];
+//   - [CellStyle];
+//   - [CellPadding], [CellPaddingLeft], [CellPaddingRight], [CellPaddingTop], [CellPaddingBottom];
+//   - [CellBorder], [CellBorderLeft], [CellBorderRight], [CellBorderTop], [CellBorderBottom];
+//   - [CellBorderStyle], [CellBorderLeftStyle], [CellBorderRightStyle], [CellBorderTopStyle], [CellBorderBottomStyle];
+//   - [CellBorderWidth], [CellBorderLeftWidth], [CellBorderRightWidth], [CellBorderTopWidth], [CellBorderBottomWidth];
+//   - [CellBorderColor], [CellBorderLeftColor], [CellBorderRightColor], [CellBorderTopColor], [CellBorderBottomColor];
+//   - [SelectionMode];
+//   - [TableCellClickedEvent];
+//   - [TableCellSelectedEvent];
+//   - [TableRowClickedEvent];
+//   - [TableRowSelectedEvent];
+//   - [AllowSelection].
 type TableView interface {
 	View
 	ParentView

@@ -28,7 +28,13 @@ const (
 	PolygonClip ClipShape = "polygon"
 )
 
-// ClipShapeProperty defines a View clipping area
+// ClipShapeProperty defines a View clipping area. It is created by one of the following functions:
+//   - [NewClipShapeProperty];
+//   - [NewInsetClip];
+//   - [NewCircleClip];
+//   - [NewEllipseClip];
+//   - [NewPolygonClip];
+//   - [NewPolygonPointsClip].
 type ClipShapeProperty interface {
 	Properties
 	fmt.Stringer

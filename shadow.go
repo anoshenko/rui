@@ -107,7 +107,11 @@ const (
 	SpreadRadius PropertyName = "spread-radius"
 )
 
-// ShadowProperty contains attributes of the view shadow
+// ShadowProperty contains attributes of the view shadow. It is created by one of the following functions:
+//   - [NewShadowProperty];
+//   - [NewShadow];
+//   - [NewInsetShadow];
+//   - [NewTextShadow].
 type ShadowProperty interface {
 	Properties
 	fmt.Stringer
