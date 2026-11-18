@@ -17,27 +17,38 @@ type SizeUnitType uint8
 const (
 	// Auto is the SizeUnit type: default value.
 	Auto SizeUnitType = 0
+
 	// SizeInPixel is the SizeUnit type: the Value field specifies the size in pixels.
 	SizeInPixel SizeUnitType = 1
+
 	// SizeInEM is the SizeUnit type: the Value field specifies the size in em.
 	SizeInEM SizeUnitType = 2
+
 	// SizeInEX is the SizeUnit type: the Value field specifies the size in em.
 	SizeInEX SizeUnitType = 3
+
 	// SizeInPercent is the SizeUnit type: the Value field specifies the size in percents of the parent size.
 	SizeInPercent SizeUnitType = 4
+
 	// SizeInPt is the SizeUnit type: the Value field specifies the size in pt (1/72 inch).
 	SizeInPt SizeUnitType = 5
+
 	// SizeInPc is the SizeUnit type: the Value field specifies the size in pc (1pc = 12pt).
 	SizeInPc SizeUnitType = 6
+
 	// SizeInInch is the SizeUnit type: the Value field specifies the size in inches.
 	SizeInInch SizeUnitType = 7
+
 	// SizeInMM is the SizeUnit type: the Value field specifies the size in millimeters.
 	SizeInMM SizeUnitType = 8
+
 	// SizeInCM is the SizeUnit type: the Value field specifies the size in centimeters.
 	SizeInCM SizeUnitType = 9
+
 	// SizeInFraction is the SizeUnit type: the Value field specifies the size in fraction.
 	// Used only for "cell-width" and "cell-height" property.
 	SizeInFraction SizeUnitType = 10
+
 	// SizeFunction is the SizeUnit type: the Function field specifies the size function.
 	// "min", "max", "clamp", "sum", "sub", "mul", and "div" functions are available.
 	SizeFunction = 11

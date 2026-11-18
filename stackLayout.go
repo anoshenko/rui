@@ -247,7 +247,27 @@ const (
 	PushSkewY PropertyName = "push-skew-y"
 )
 
-// StackLayout represents a StackLayout view
+// StackLayout represents an interface for working with the StackLayout container.
+// In a StackLayout container, child elements are arranged in a stack, and only the top element is accessible.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [MoveToFrontAnimation] ("move-to-front-animation");
+//   - [PushTransform] ("push-transform");
+//   - [PushDuration] ("push-duration");
+//   - [PushTiming] ("push-timing");
+//   - [PushPerspective] ("push-perspective");
+//   - [PushTranslateX] ("push-translate-x");
+//   - [PushTranslateY] ("push-translate-y");
+//   - [PushTranslateZ] ("push-translate-z");
+//   - [PushScaleX] ("push-scale-x");
+//   - [PushScaleY] ("push-scale-y");
+//   - [PushScaleZ] ("push-scale-z");
+//   - [PushRotate] ("push-rotate");
+//   - [PushRotateX] ("push-rotate-x");
+//   - [PushRotateY] ("push-rotate-y");
+//   - [PushRotateZ] ("push-rotate-z");
+//   - [PushSkewX] ("push-skew-x");
+//   - [PushSkewY] ("push-skew-y").
 type StackLayout interface {
 	ViewsContainer
 
@@ -309,7 +329,7 @@ type stackLayoutData struct {
 	onMoveFinished map[string]popFinished
 }
 
-// NewStackLayout create new StackLayout object and return it
+// NewStackLayout create a new [StackLayout] object and return its interface
 func NewStackLayout(session Session, params Params) StackLayout {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

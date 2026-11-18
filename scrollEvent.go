@@ -2,7 +2,7 @@ package rui
 
 // ScrollEvent is the constant for "scroll-event" property tag.
 //
-// Used by View.
+// Used by [View].
 // Is fired when the content of the view is scrolled.
 //
 // General listener format:

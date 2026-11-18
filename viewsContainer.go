@@ -18,7 +18,14 @@ type ParentView interface {
 	ViewCount() int
 }
 
-// ViewsContainer represent a mutable list-container of views
+// ViewsContainer represents an interface for working with the ViewsContainer view.
+//
+// You cannot create a View of this type. This interface serves as the base for all View containers:
+//
+// [ListLayout], [GridLayout], [ColumnLayout], [StackLayout], [AbsoluteLayout], [TabsLayout], [Checkbox].
+//
+// It extends the [View] interface and supports all its properties, and also has one additional property:
+//   - [Content] ("content").
 type ViewsContainer interface {
 	View
 	ParentView

@@ -115,7 +115,18 @@ const (
 	ColumnSpanAll PropertyName = "column-span-all"
 )
 
-// ColumnLayout represent a ColumnLayout view
+// ColumnLayout represents an interface for working with the ColumnLayout container.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [ColumnCount] ("column-count");
+//   - [ColumnWidth] ("column-width");
+//   - [ColumnGap] ("column-gap");
+//   - [ColumnSeparator] ("column-separator");
+//   - [ColumnSeparatorStyle] ("column-separator-style");
+//   - [ColumnSeparatorWidth] ("column-separator-width");
+//   - [ColumnSeparatorColor] ("column-separator-color");
+//   - [ColumnFill] ("column-fill");
+//   - [ColumnSpanAll] ("column-span-all").
 type ColumnLayout interface {
 	ViewsContainer
 }
@@ -124,7 +135,7 @@ type columnLayoutData struct {
 	viewsContainerData
 }
 
-// NewColumnLayout create new ColumnLayout object and return it
+// NewColumnLayout create a new [ColumnLayout] object and return its interface
 func NewColumnLayout(session Session, params Params) ColumnLayout {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

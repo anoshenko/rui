@@ -103,7 +103,23 @@ type GridCellRowSpanAdapter interface {
 	GridCellRowSpan(row, column int) int
 }
 
-// GridLayout represents a GridLayout view
+// GridLayout represents an interface for working with the GridLayout container.
+// In a GridLayout container, child elements are positioned within the cells of a rectangular grid.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [CellVerticalAlign] ("cell-vertical-align");
+//   - [CellHorizontalAlign] ("cell-horizontal-align");
+//   - [CellWidth] ("cell-width");
+//   - [CellHeight] ("cell-height");
+//   - [GridRowGap] ("grid-row-gap");
+//   - [GridColumnGap] ("grid-column-gap");
+//   - [GridAutoFlow] ("grid-auto-flow");
+//
+// Elements placed within a GridLayout container can have additional properties:
+//   - [Row] ("row");
+//   - [Column] ("column");
+//   - [CellVerticalSelfAlign] ("cell-vertical-self-align");
+//   - [CellHorizontalSelfAlign] ("cell-horizontal-self-align").
 type GridLayout interface {
 	ViewsContainer
 
@@ -117,7 +133,7 @@ type gridLayoutData struct {
 	adapter GridAdapter
 }
 
-// NewGridLayout create new GridLayout object and return it
+// NewGridLayout create a new [GridLayout] object and return its interface
 func NewGridLayout(session Session, params Params) GridLayout {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

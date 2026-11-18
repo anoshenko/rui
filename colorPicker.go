@@ -39,7 +39,11 @@ const (
 	ColorPickerValue PropertyName = "color-picker-value"
 )
 
-// ColorPicker represent a ColorPicker view
+// ColorPicker represents an interface for working with the ColorPicker view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [ColorPickerValue] ("color-picker-value");
+//   - [ColorChangedEvent] ("color-changed").
 type ColorPicker interface {
 	View
 }
@@ -48,7 +52,7 @@ type colorPickerData struct {
 	viewData
 }
 
-// NewColorPicker create new ColorPicker object and return it
+// NewColorPicker create a new [ColorPicker] object and return its interface
 func NewColorPicker(session Session, params Params) ColorPicker {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

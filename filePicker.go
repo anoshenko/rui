@@ -18,8 +18,8 @@ const (
 	//  func(picker rui.FilePicker, files []rui.FileInfo).
 	//
 	// where:
-	// picker - Interface of a file picker which generated this event,
-	// files - Array of description of selected files.
+	//   - picker - Interface of a file picker which generated this event,
+	//   - files - Array of description of selected files.
 	//
 	// Allowed listener formats:
 	//  func(picker rui.FilePicker)
@@ -71,12 +71,19 @@ type FileInfo struct {
 	data []byte
 }
 
-// FilePicker represents the FilePicker view
+// FilePicker represents an interface for working with the FilePicker view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Accept] ("accept");
+//   - [Multiple] ("multiple");
+//   - [FileSelectedEvent] ("file-selected-event").
 type FilePicker interface {
 	View
+
 	// Files returns the list of selected files.
 	// If there are no files selected then an empty slice is returned (the result is always not nil)
 	Files() []FileInfo
+
 	// LoadFile loads the content of the selected file. This function is asynchronous.
 	// The "result" function will be called after loading the data.
 	LoadFile(file FileInfo, result func(FileInfo, []byte))
@@ -112,7 +119,7 @@ func (file FileInfo) key() string {
 	return fmt.Sprintf("%s:%d", file.Name, int(file.Size))
 }
 
-// NewFilePicker create new FilePicker object and return it
+// NewFilePicker create a new [FilePicker] object and return its interface
 func NewFilePicker(session Session, params Params) FilePicker {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

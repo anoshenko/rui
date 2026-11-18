@@ -1535,7 +1535,30 @@ func (popup *popupData) createLayerView() {
 	}
 }
 
-// NewPopup creates a new Popup
+// NewPopup creates a new [Popup] object and return its interface
+//
+// You can use all [View] properties, as well as the following properties:
+//   - [Content] ("content");
+//   - [Title] ("title");
+//   - [TitleStyle] ("title-style");
+//   - [CloseButton] ("close-button");
+//   - [OutsideClose] ("outside-close");
+//   - [OutsideColor] ("outside-color");
+//   - [OutsideFilter] ("outside-filter");
+//   - [Buttons] ("buttons");
+//   - [ButtonsAlign] ("buttons-align");
+//   - [VerticalAlign] ("vertical-align");
+//   - [HorizontalAlign] ("horizontal-align");
+//   - [DismissEvent] ("dismiss-event");
+//   - [Arrow] ("arrow");
+//   - [ArrowAlign] ("arrow-align");
+//   - [ArrowSize] ("arrow-size");
+//   - [ArrowWidth] ("arrow-width");
+//   - [ArrowOffset] ("arrow-offset");
+//   - [ShowTransform] ("show-transform");
+//   - [ShowDuration] ("show-duration");
+//   - [ShowTiming] ("show-timing");
+//   - [ShowOpacity] ("show-opacity").
 func NewPopup(view View, param Params) Popup {
 	if view == nil {
 		ErrorLog(`the View argument cannot be nil`)

@@ -8,7 +8,7 @@ import (
 const (
 	// TouchStart is the constant for "touch-start" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when one or more touch points are placed on the touch surface.
 	//
 	// General listener format:
@@ -28,7 +28,7 @@ const (
 
 	// TouchEnd is the constant for "touch-end" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when one or more touch points are removed from the touch surface.
 	//
 	// General listener format:
@@ -48,7 +48,7 @@ const (
 
 	// TouchMove is the constant for "touch-move" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when one or more touch points are moved along the touch surface.
 	//
 	// General listener format:
@@ -68,7 +68,7 @@ const (
 
 	// TouchCancel is the constant for "touch-cancel" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when one or more touch points have been disrupted in an implementation-specific manner (for example, too many
 	// touch points are created).
 	//

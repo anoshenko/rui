@@ -10,14 +10,14 @@ import (
 const (
 	// DragData is the constant for "drag-data" property tag.
 	//
-	// Used by View:
+	// Used by [View]:
 	//
 	// Supported types: map[string]string.
 	DragData PropertyName = "drag-data"
 
 	// DragImage is the constant for "drag-image" property tag.
 	//
-	// Used by View:
+	// Used by [View]:
 	// An url of image to use for the drag feedback image.
 	//
 	// Supported type: string.
@@ -25,7 +25,7 @@ const (
 
 	// DragImageXOffset is the constant for "drag-image-x-offset" property tag.
 	//
-	// Used by View:
+	// Used by [View]:
 	// The horizontal offset in pixels within the drag feedback image.
 	//
 	// Supported types: float, int, string.
@@ -33,7 +33,7 @@ const (
 
 	// DragImageYOffset is the constant for "drag-image-y-offset" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// The vertical offset in pixels within the drag feedback image.
 	//
 	// Supported types: float, int, string.
@@ -41,7 +41,7 @@ const (
 
 	// DropEffect is the constant for "drop-effect" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls the feedback (typically visual) the user is given during a drag and drop operation.
 	// It will affect which cursor is displayed while dragging. For example, when the user hovers over a target drop element,
 	// the browser's cursor may indicate which type of operation will occur.
@@ -57,7 +57,7 @@ const (
 
 	// DropEffectAllowed is the constant for "drop-effect-allowed" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the effect that is allowed for a drag operation.
 	// The copy operation is used to indicate that the data being dragged will be copied
 	// from its present location to the drop location.
@@ -80,7 +80,7 @@ const (
 
 	// DragStartEvent is the constant for "drag-start-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when the user starts dragging an element or text selection.
 	//
 	// General listener format:
@@ -98,7 +98,7 @@ const (
 
 	// DragEndEvent is the constant for "drag-end-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when a drag operation ends (by releasing a mouse button or hitting the escape key).
 	//
 	// General listener format:
@@ -116,7 +116,7 @@ const (
 
 	// DragEnterEvent is the constant for "drag-enter-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when a dragged element or text selection enters a valid drop target.
 	//
 	// General listener format:
@@ -134,7 +134,7 @@ const (
 
 	// DragLeaveEvent is the constant for "drag-leave-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when a dragged element or text selection leaves a valid drop target.
 	//
 	// General listener format:
@@ -152,7 +152,7 @@ const (
 
 	// DragOverEvent is the constant for "drag-over-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when an element or text selection is being dragged over a valid drop target (every few hundred milliseconds).
 	//
 	// General listener format:
@@ -170,7 +170,7 @@ const (
 
 	// DropEvent is the constant for "drop-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when an element or text selection is dropped on a valid drop target.
 	//
 	// General listener format:

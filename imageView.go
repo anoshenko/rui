@@ -7,16 +7,27 @@ import (
 
 // Constants which represent [ImageView] specific properties and events
 const (
+	// SrcSet is the constant for "srcset" property tag.
+	//
+	// Used by [ImageView].
+	//
+	// String which identifies one or more image candidate strings, separated using comma(,) each specifying image resources
+	// to use under given screen density. This property is only used if building an application for js/wasm platform.
+	//
+	// Supported types: string.
+	SrcSet PropertyName = "srcset"
+
 	// LoadedEvent is the constant for "loaded-event" property tag.
 	//
-	// Used by ImageView.
+	// Used by [ImageView].
+	//
 	// Occur when the image has been loaded.
 	//
 	// General listener format:
 	//  func(image rui.ImageView)
 	//
 	// where:
-	// image - Interface of an image view which generated this event.
+	//   - image - Interface of an image view which generated this event.
 	//
 	// Allowed listener formats:
 	//  func()
@@ -24,14 +35,15 @@ const (
 
 	// ErrorEvent is the constant for "error-event" property tag.
 	//
-	// Used by ImageView.
+	// Used by [ImageView].
+	//
 	// Occur when the image loading has been failed.
 	//
 	// General listener format:
 	//  func(image rui.ImageView)
 	//
 	// where:
-	// image - Interface of an image view which generated this event.
+	//   - image - Interface of an image view which generated this event.
 	//
 	// Allowed listener formats:
 	//  func()
@@ -61,12 +73,24 @@ const (
 	ScaleDownFit = 4
 )
 
-// ImageView represents an ImageView view
+// ImageView represents an interface for working with the ImageView view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Source] ("src");
+//   - [SrcSet] ("srcset");
+//   - [Fit] ("fit");
+//   - [AltText] ("alt-text");
+//   - [ImageVerticalAlign] ("image-vertical-align");
+//   - [ImageHorizontalAlign] ("image-horizontal-align");
+//   - [LoadedEvent] ("loaded-event");
+//   - [ErrorEvent] ("error-event").
 type ImageView interface {
 	View
+
 	// NaturalSize returns the intrinsic, density-corrected size (width, height) of the image in pixels.
 	// If the image hasn't been loaded yet or an load error has occurred, then (0, 0) is returned.
 	NaturalSize() (float64, float64)
+
 	// CurrentSource() return the full URL of the image currently visible in the ImageView.
 	// If the image hasn't been loaded yet or an load error has occurred, then "" is returned.
 	CurrentSource() string
@@ -79,7 +103,7 @@ type imageViewData struct {
 	currentSrc    string
 }
 
-// NewImageView create new ImageView object and return it
+// NewImageView create a new [ImageView] object and return its interface
 func NewImageView(session Session, params Params) ImageView {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

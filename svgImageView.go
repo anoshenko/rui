@@ -7,7 +7,12 @@ import (
 	"strings"
 )
 
-// SvgImageView represents an SvgImageView view
+// SvgImageView  represents an interface for working with the SvgImageView view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Content] ("content");
+//   - [VerticalAlign] ("vertical-align");
+//   - [HorizontalAlign] ("horizontal-align").
 type SvgImageView interface {
 	View
 }
@@ -16,7 +21,7 @@ type svgImageViewData struct {
 	viewData
 }
 
-// NewSvgImageView create new SvgImageView object and return it
+// NewSvgImageView create a new [SvgImageView] object and return its interface
 func NewSvgImageView(session Session, params Params) SvgImageView {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

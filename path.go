@@ -63,7 +63,7 @@ type pathData struct {
 	varName any
 }
 
-// NewPath creates a new empty Path
+// NewPath creates a new empty [Path]
 func (canvas *canvasData) NewPath() Path {
 	path := new(pathData)
 	path.session = canvas.session

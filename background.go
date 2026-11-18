@@ -27,7 +27,11 @@ const (
 	ContentBox = 2
 )
 
-// BackgroundElement describes the background element
+// BackgroundElement describes a background element that is created by one of the following functions:
+//   - [NewBackgroundImage];
+//   - [NewBackgroundLinearGradient];
+//   - [NewBackgroundRadialGradient];
+//   - [NewBackgroundConicGradient].
 type BackgroundElement interface {
 	Properties
 	fmt.Stringer

@@ -2,7 +2,15 @@ package rui
 
 import "strings"
 
-// AbsoluteLayout represent an AbsoluteLayout view where child views can be arbitrary positioned
+// AbsoluteLayout represents an interface for working with the AbsoluteLayout container where child views can be arbitrary.
+//
+// It extends the [ViewsContainer] interface and supports all its properties.
+//
+// Elements placed within a AbsoluteLayout container can have additional properties:
+//   - [Left] ("left");
+//   - [Top] ("top");
+//   - [Right] ("right");
+//   - [Bottom] ("bottom").
 type AbsoluteLayout interface {
 	ViewsContainer
 }
@@ -11,7 +19,7 @@ type absoluteLayoutData struct {
 	viewsContainerData
 }
 
-// NewAbsoluteLayout create new AbsoluteLayout object and return it
+// NewAbsoluteLayout create a new [AbsoluteLayout] object and return its interface
 func NewAbsoluteLayout(session Session, params Params) AbsoluteLayout {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

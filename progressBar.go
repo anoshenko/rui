@@ -28,7 +28,11 @@ const (
 	ProgressBarValue PropertyName = "progress-value"
 )
 
-// ProgressBar represents a ProgressBar view
+// ProgressBar represents an interface for working with the ProgressBar view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [ProgressBarMax] ("progress-max");
+//   - [ProgressBarValue] ("progress-value").
 type ProgressBar interface {
 	View
 }
@@ -37,7 +41,7 @@ type progressBarData struct {
 	viewData
 }
 
-// NewProgressBar create new ProgressBar object and return it
+// NewProgressBar creates a new [ProgressBar] object and return its interface
 func NewProgressBar(session Session, params Params) ProgressBar {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

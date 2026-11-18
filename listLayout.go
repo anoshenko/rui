@@ -31,9 +31,19 @@ const (
 	ListWrapReverse = 2
 )
 
-// ListLayout represents a ListLayout view
+// ListLayout represents an interface for working with the ListLayout container.
+// In a ListLayout container, child elements are arranged in a vertical or horizontal list.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [Orientation] ("orientation");
+//   - [VerticalAlign] ("vertical-align");
+//   - [HorizontalAlign] ("horizontal-align");
+//   - [ListRowGap] ("list-row-gap");
+//   - [ListColumnGap] ("list-column-gap");
+//   - [ListWrap] ("list-wrap").
 type ListLayout interface {
 	ViewsContainer
+
 	// UpdateContent updates child Views if the "content" property value is set to ListAdapter,
 	// otherwise does nothing
 	UpdateContent()
@@ -44,7 +54,7 @@ type listLayoutData struct {
 	adapter ListAdapter
 }
 
-// NewListLayout create new ListLayout object and return it
+// NewListLayout create a new [ListLayout] object and return its interface
 func NewListLayout(session Session, params Params) ListLayout {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

@@ -135,7 +135,23 @@ const (
 	HiddenTabs = 6
 )
 
-// TabsLayout represents a TabsLayout view
+// TabsLayout represents an interface for working with the TabsLayout container.
+// In a TabsLayout container, child elements are arranged in a stack, and only the top element is accessible.
+// Each element has a tab that is used to bring that element to the foreground.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [Tabs] ("tabs");
+//   - [TabBarStyle] ("tab-bar-style");
+//   - [TabStyle] ("tab-style");
+//   - [CurrentTabStyle] ("current-tab-style");
+//   - [TabCloseButton] ("tab-close-button");
+//   - [TabCloseEvent] ("tab-close-event");
+//   - [CurrentTabChangedEvent] ("current-tab-changed").
+//
+// Elements placed within a GridLayout container can have additional properties:
+//   - [Title] ("title");
+//   - [Icon] ("icon");
+//   - [TabCloseButton] ("tab-close-button").
 type TabsLayout interface {
 	ViewsContainer
 	ListAdapter
@@ -145,7 +161,7 @@ type tabsLayoutData struct {
 	viewsContainerData
 }
 
-// NewTabsLayout create new TabsLayout object and return it
+// NewTabsLayout create a new [TabsLayout] object and return its interface
 func NewTabsLayout(session Session, params Params) TabsLayout {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

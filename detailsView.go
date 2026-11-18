@@ -42,7 +42,12 @@ const (
 	HideSummaryMarker PropertyName = "hide-summary-marker"
 )
 
-// DetailsView represent a DetailsView view, which is a collapsible container of views
+// DetailsView represents a DetailsView view, which is a collapsible container of views.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [Summary] ("summary");
+//   - [Expanded] ("expanded");
+//   - [HideSummaryMarker] ("hide-summary-marker").
 type DetailsView interface {
 	ViewsContainer
 }
@@ -51,7 +56,7 @@ type detailsViewData struct {
 	viewsContainerData
 }
 
-// NewDetailsView create new DetailsView object and return it
+// NewDetailsView create a new [DetailsView] object and return its interface
 func NewDetailsView(session Session, params Params) DetailsView {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

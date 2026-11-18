@@ -112,7 +112,14 @@ const (
 	dateFormat = "2006-01-02"
 )
 
-// DatePicker represent a DatePicker view
+// DatePicker represents an interface for working with the DatePicker view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [DatePickerMin] ("date-picker-min");
+//   - [DatePickerMax] ("date-picker-max");
+//   - [DatePickerStep] ("date-picker-step");
+//   - [DatePickerValue] ("date-picker-value");
+//   - [DateChangedEvent] ("date-changed").
 type DatePicker interface {
 	View
 }
@@ -121,7 +128,7 @@ type datePickerData struct {
 	viewData
 }
 
-// NewDatePicker create new DatePicker object and return it
+// NewDatePicker creates a new [DatePicker] object and return its interface
 func NewDatePicker(session Session, params Params) DatePicker {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

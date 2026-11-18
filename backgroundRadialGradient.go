@@ -42,11 +42,11 @@ type backgroundRadialGradient struct {
 // NewBackgroundRadialGradient creates the new background radial gradient.
 //
 // The following properties can be used:
-//   - "gradient" ([Gradient]) - Describes gradient stop points. This is a mandatory property while describing background gradients.
-//   - "center-x" ([CenterX]), "center-y" ([CenterY]) - Defines the gradient center point coordinates.
-//   - "radial-gradient-radius" ([RadialGradientRadius]) - Defines radius of the radial gradient.
-//   - "radial-gradient-shape" ([RadialGradientShape]) - Defines shape of the radial gradient.
-//   - "repeating" ([Repeating]) - Defines whether stop points needs to be repeated after the last one.
+//   - [Gradient] ("gradient") - Describes gradient stop points. This is a mandatory property while describing background gradients;
+//   - [CenterX] ("center-x"), [CenterY] ("center-y") - Defines the gradient center point coordinates;
+//   - [RadialGradientRadius] ("radial-gradient-radius") - Defines radius of the radial gradient;
+//   - [RadialGradientShape] ("radial-gradient-shape") - Defines shape of the radial gradient;
+//   - [Repeating] ("repeating") - Defines whether stop points needs to be repeated after the last one.
 func NewBackgroundRadialGradient(params Params) BackgroundElement {
 	result := new(backgroundRadialGradient)
 	result.init()

@@ -9,7 +9,7 @@ import (
 const (
 	// Radius is the constant for "radius" property tag.
 	//
-	// Used by View, BackgroundElement, ClipShapeProperty.
+	// Used by [View], BackgroundElement, ClipShapeProperty.
 	//
 	// Usage in View:
 	// Specifies the corners rounding radius of an element's outer border edge.
@@ -41,7 +41,7 @@ const (
 
 	// RadiusX is the constant for "radius-x" property tag.
 	//
-	// Used by View, ClipShapeProperty.
+	// Used by [View], ClipShapeProperty.
 	//
 	// Usage in View:
 	// Specifies the x-axis corners elliptic rounding radius of an element's outer border edge.
@@ -62,7 +62,7 @@ const (
 
 	// RadiusY is the constant for "radius-y" property tag.
 	//
-	// Used by View, ClipShapeProperty.
+	// Used by [View], ClipShapeProperty.
 	//
 	// Usage in View:
 	// Specifies the y-axis corners elliptic rounding radius of an element's outer border edge.
@@ -83,7 +83,7 @@ const (
 
 	// RadiusTopLeft is the constant for "radius-top-left" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the top-left corner rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -94,7 +94,7 @@ const (
 
 	// RadiusTopLeftX is the constant for "radius-top-left-x" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the x-axis top-left corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -105,7 +105,7 @@ const (
 
 	// RadiusTopLeftY is the constant for "radius-top-left-y" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the y-axis top-left corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -116,7 +116,7 @@ const (
 
 	// RadiusTopRight is the constant for "radius-top-right" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the top-right corner rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -127,7 +127,7 @@ const (
 
 	// RadiusTopRightX is the constant for "radius-top-right-x" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -138,7 +138,7 @@ const (
 
 	// RadiusTopRightY is the constant for "radius-top-right-y" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -149,7 +149,7 @@ const (
 
 	// RadiusBottomLeft is the constant for "radius-bottom-left" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the bottom-left corner rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -160,7 +160,7 @@ const (
 
 	// RadiusBottomLeftX is the constant for "radius-bottom-left-x" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the x-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -171,7 +171,7 @@ const (
 
 	// RadiusBottomLeftY is the constant for "radius-bottom-left-y" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the y-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -182,7 +182,7 @@ const (
 
 	// RadiusBottomRight is the constant for "radius-bottom-right" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the bottom-right corner rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -193,7 +193,7 @@ const (
 
 	// RadiusBottomRightX is the constant for "radius-bottom-right-x" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the x-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -204,7 +204,7 @@ const (
 
 	// RadiusBottomRightY is the constant for "radius-bottom-right-y" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the y-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -405,19 +405,19 @@ type radiusPropertyData struct {
 // NewRadiusProperty creates the new RadiusProperty
 //
 // The following properties can be used:
-//   - "x" (X) - Determines the x-axis elliptic rounding radius of an element's outer border edge.
-//   - "y" (Y) - Determines the y-axis corner elliptic rounding radius of an element's outer border edge.
-//   - "top-left" (TopLeft) - Determines the top-left corner rounding radius of an element's outer border edge.
-//   - "top-left-x" (TopLeftX) - Determines the x-axis top-left corner elliptic rounding radius of an element's outer border edge.
-//   - "top-left-y" (TopLeftY) - Determines the y-axis top-left corner elliptic rounding radius of an element's outer border edge.
-//   - "top-right" (TopRight) -  Determines the top-right corner rounding radius of an element's outer border edge.
-//   - "top-right-x" (TopRightX) - Determines the x-axis top-right corner elliptic rounding radius of an element's outer border edge.
-//   - "top-right-y" (TopRightY) - Determines the y-axis top-right corner elliptic rounding radius of an element's outer border edge.
-//   - "bottom-left" (BottomLeft) - Determines the bottom-left corner rounding radius of an element's outer border edge.
-//   - "bottom-left-x" (BottomLeftX) - Determines the x-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
-//   - "bottom-left-y" (BottomLeftY) -  Determines the y-axis bottom-left corner elliptic rounding radius of an element's outer border edge.
-//   - "bottom-right" (BottomRight) - Determines the bottom-right corner rounding radius of an element's outer border edge.
-//   - "bottom-right-x" (BottomRightX) - Determines the x-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
+//   - "x" (X) - Determines the x-axis elliptic rounding radius of an element's outer border edge;
+//   - "y" (Y) - Determines the y-axis corner elliptic rounding radius of an element's outer border edge;
+//   - "top-left" (TopLeft) - Determines the top-left corner rounding radius of an element's outer border edge;
+//   - "top-left-x" (TopLeftX) - Determines the x-axis top-left corner elliptic rounding radius of an element's outer border edge;
+//   - "top-left-y" (TopLeftY) - Determines the y-axis top-left corner elliptic rounding radius of an element's outer border edge;
+//   - "top-right" (TopRight) -  Determines the top-right corner rounding radius of an element's outer border edge;
+//   - "top-right-x" (TopRightX) - Determines the x-axis top-right corner elliptic rounding radius of an element's outer border edge;
+//   - "top-right-y" (TopRightY) - Determines the y-axis top-right corner elliptic rounding radius of an element's outer border edge;
+//   - "bottom-left" (BottomLeft) - Determines the bottom-left corner rounding radius of an element's outer border edge;
+//   - "bottom-left-x" (BottomLeftX) - Determines the x-axis bottom-left corner elliptic rounding radius of an element's outer border edge;
+//   - "bottom-left-y" (BottomLeftY) -  Determines the y-axis bottom-left corner elliptic rounding radius of an element's outer border edge;
+//   - "bottom-right" (BottomRight) - Determines the bottom-right corner rounding radius of an element's outer border edge;
+//   - "bottom-right-x" (BottomRightX) - Determines the x-axis bottom-right corner elliptic rounding radius of an element's outer border edge;
 //   - "bottom-right-y" (BottomRightY) - Determines the y-axis bottom-right corner elliptic rounding radius of an element's outer border edge.
 func NewRadiusProperty(params Params) RadiusProperty {
 	result := new(radiusPropertyData)

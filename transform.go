@@ -10,7 +10,7 @@ import (
 const (
 	// Transform is the constant for "transform" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specify translation, scale and rotation over x, y and z axes as well as a distortion of a view along x and y axes.
 	//
 	// Supported types: TransformProperty, string.
@@ -24,7 +24,7 @@ const (
 
 	// Perspective is the constant for "perspective" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	// Distance between the z-plane and the user in order to give a 3D-positioned element some perspective. Each 3D element
 	// with z > 0 becomes larger, each 3D-element with z < 0 becomes smaller. The default value is 0 (no 3D effects).
 	//
@@ -36,7 +36,7 @@ const (
 
 	// PerspectiveOriginX is the constant for "perspective-origin-x" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// x-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective"
 	// property. The default value is 50%.
 	//
@@ -48,7 +48,7 @@ const (
 
 	// PerspectiveOriginY is the constant for "perspective-origin-y" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// y-coordinate of the position at which the viewer is looking. It is used as the vanishing point by the "perspective"
 	// property. The default value is 50%.
 	//
@@ -60,7 +60,7 @@ const (
 
 	// BackfaceVisible is the constant for "backface-visibility" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether the back face of a view is visible when turned towards the user. Default value is true.
 	//
 	// Supported types: bool, int, string.
@@ -72,7 +72,7 @@ const (
 
 	// TransformOriginX is the constant for "transform-origin-x" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// x-coordinate of the point around which a view transformation is applied. The default value is 50%.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -83,7 +83,7 @@ const (
 
 	// TransformOriginY is the constant for "transform-origin-y" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// y-coordinate of the point around which a view transformation is applied. The default value is 50%.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -94,7 +94,7 @@ const (
 
 	// TransformOriginZ is the constant for "transform-origin-z" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// z-coordinate of the point around which a view transformation is applied. The default value is 50%.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -105,7 +105,7 @@ const (
 
 	// TranslateX is the constant for "translate-x" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// x-axis translation value of a 2D/3D translation.
 	//
@@ -117,7 +117,7 @@ const (
 
 	// TranslateY is the constant for "translate-y" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// x-axis translation value of a 2D/3D translation.
 	//
@@ -129,7 +129,7 @@ const (
 
 	// TranslateZ is the constant for "translate-z" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// z-axis translation value of a 3D translation.
 	//
@@ -141,7 +141,7 @@ const (
 
 	// ScaleX is the constant for "scale-x" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// x-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
@@ -153,7 +153,7 @@ const (
 
 	// ScaleY is the constant for "scale-y" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// y-axis scaling value of a 2D/3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
@@ -165,7 +165,7 @@ const (
 
 	// ScaleZ is the constant for "scale-z" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// z-axis scaling value of a 3D scale. The original scale is 1. Values between 0 and 1 are used to decrease original
 	// scale, more than 1 - to increase. The default value is 1.
@@ -177,7 +177,7 @@ const (
 
 	// Rotate is the constant for "rotate" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// Angle of the view rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise.
 	//
@@ -195,7 +195,7 @@ const (
 
 	// RotateX is the constant for "rotate-x" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// x-coordinate of the vector denoting the axis of rotation in range 0 to 1.
 	//
@@ -206,7 +206,7 @@ const (
 
 	// RotateY is the constant for "rotate-y" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// y-coordinate of the vector denoting the axis of rotation in range 0 to 1.
 	//
@@ -217,7 +217,7 @@ const (
 
 	// RotateZ is the constant for "rotate-z" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// z-coordinate of the vector denoting the axis of rotation in range 0 to 1.
 	//
@@ -228,7 +228,7 @@ const (
 
 	// SkewX is the constant for "skew-x" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// Angle to use to distort the element along the abscissa. The default value is 0.
 	//
@@ -246,7 +246,7 @@ const (
 
 	// SkewY is the constant for "skew-y" property tag.
 	//
-	// Used by View, TransformProperty.
+	// Used by [View], TransformProperty.
 	//
 	// Angle to use to distort the element along the ordinate. The default value is 0.
 	//

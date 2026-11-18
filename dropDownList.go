@@ -6,27 +6,66 @@ import (
 	"strings"
 )
 
-// DropDownEvent is the constant for "drop-down-event" property tag.
-//
-// Used by DropDownList.
-// Occur when a list item becomes selected.
-//
-// General listener format:
-//
-//	func(list rui.DropDownList, index int)
-//
-// where:
-//   - list - Interface of a drop down list which generated this event,
-//   - index - Index of a newly selected item.
-//
-// Allowed listener formats:
-//
-//	func(index int)
-//	func(list rui.DropDownList)
-//	func()
-const DropDownEvent PropertyName = "drop-down-event"
+const (
+	// DisabledItems is the constant for "disabled-items" property tag.
+	//
+	// Used by DropDownList.
+	// An array of disabled(non selectable) items indices.
+	//
+	// Supported types: []int, string, []string, []any containing  elements of string or int.
+	//
+	// Internal type is []int, other types converted to it during assignment.
+	// Rules of conversion.
+	//   - []int - Array of indices.
+	//   - string - Single index value or multiple index values separated by comma(,).
+	//   - []string - Array of indices in text format.
+	//   - []any - Array of strings or integer values.
+	DisabledItems PropertyName = "disabled-items"
 
-// DropDownList represent a DropDownList view
+	// ItemSeparators is the constant for "item-separators" property tag.
+	//
+	// Used by DropDownList.
+	// An array of indices of DropDownList items after which a separator should be added.
+	//
+	// Supported types: []int, string, []string, []any containing  elements of string or int.
+	//
+	// Internal type is []int, other types converted to it during assignment.
+	// Rules of conversion.
+	//   - []int - Array of indices.
+	//   - string - Single index value or multiple index values separated by comma(,).
+	//   - []string - Array of indices in text format.
+	//   - []any - Array of strings or integer values.
+	ItemSeparators PropertyName = "item-separators"
+
+	// DropDownEvent is the constant for "drop-down-event" property tag.
+	//
+	// Used by DropDownList.
+	// Occur when a list item becomes selected.
+	//
+	// General listener format:
+	//
+	//	func(list rui.DropDownList, index int)
+	//
+	// where:
+	//   - list - Interface of a drop down list which generated this event,
+	//   - index - Index of a newly selected item.
+	//
+	// Allowed listener formats:
+	//
+	//	func(index int)
+	//	func(list rui.DropDownList)
+	//	func()
+	DropDownEvent PropertyName = "drop-down-event"
+)
+
+// DropDownList represents an interface for working with the DropDownList view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Items] ("items");
+//   - [DisabledItems] ("disabled-items");
+//   - [ItemSeparators] ("item-separators");
+//   - [Current] ("current");
+//   - [DropDownEvent] ("drop-down-event").
 type DropDownList interface {
 	View
 }
@@ -35,7 +74,7 @@ type dropDownListData struct {
 	viewData
 }
 
-// NewDropDownList create new DropDownList object and return it
+// NewDropDownList creates a new [DropDownList] object and return its interface
 func NewDropDownList(session Session, params Params) DropDownList {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

@@ -7,6 +7,63 @@ import (
 
 // Constants for [EditView] specific properties and events
 const (
+	// Hint is the constant for "hint" property tag.
+	//
+	// Used by EditView.
+	// Sets a hint to the user of what can be entered in the control.
+	//
+	// Supported types: string.
+	Hint PropertyName = "hint"
+
+	// MaxLength is the constant for "max-length" property tag.
+	//
+	// Used by EditView.
+	// Sets the maximum number of characters that the user can enter.
+	//
+	// Supported types: int, string.
+	//
+	// Values:
+	//   - positive value - Maximum number of characters.
+	//   - 0 or negative value - The maximum number of characters is not limited.
+	MaxLength PropertyName = "max-length"
+
+	// EditWrap is the constant for "edit-wrap" property tag.
+	//
+	// Used by EditView.
+	// Controls whether the text will wrap around when edit view border has been reached. Default value is false.
+	//
+	// Supported types: bool, int, string.
+	//
+	// Values:
+	//   - true, 1, "true", "yes", "on", or "1" - Text wrapped to the next line.
+	//   - false, 0, "false", "no", "off", or "0" - Do not wrap text. Horizontal scrolling will appear if necessary.
+	EditWrap PropertyName = "edit-wrap"
+
+	// CaretColor is the constant for "caret-color" property tag.
+	//
+	// Used by EditView.
+	//
+	// Sets the color of the insertion caret, the visible marker where the next character typed will be inserted. This is
+	// sometimes referred to as the text input cursor.
+	//
+	// Supported types: Color, ColorPair, string.
+	//
+	// Internal type is Color, other types converted to it during assignment.
+	// See [Color] description for more details.
+	CaretColor PropertyName = "caret-color"
+
+	// ReadOnly is the constant for "readonly" property tag.
+	//
+	// Used by EditView.
+	// Controls whether the user can modify value or not. Default value is false.
+	//
+	// Supported types: bool, int, string.
+	//
+	// Values:
+	//   - true, 1, "true", "yes", "on", or "1" - User not able to modify the value.
+	//   - false, 0, "false", "no", "off", or "0" - Value can be modified.
+	ReadOnly PropertyName = "readonly"
+
 	// EditTextChangedEvent is the constant for "edit-text-changed" property tag.
 	//
 	// Used by EditView.
@@ -53,6 +110,12 @@ const (
 	// Supported types: string.
 	EditViewPattern PropertyName = "edit-view-pattern"
 
+	// Pattern is the constant for "pattern" property tag.
+	//
+	// Used by EditView.
+	// Same as "edit-view-pattern" [EditViewPattern].
+	Pattern PropertyName = "pattern"
+
 	// Spellcheck is the constant for "spellcheck" property tag.
 	//
 	// Used by EditView.
@@ -91,20 +154,32 @@ const (
 	MultiLineText = 6
 )
 
-// EditView represent an EditView view
+// EditView represents an interface for working with the EditView view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Text] ("text");
+//   - [Hint] ("hint");
+//   - [MaxLength] ("maxlength");
+//   - [ReadOnly] ("readonly");
+//   - [DataList] ("data-list");
+//   - [EditViewType] ("edit-view-type");
+//   - [EditViewPattern] ("edit-view-pattern");
+//   - [EditWrap] ("edit-wrap");
+//   - [CaretColor] ("caret-color");
+//   - [Spellcheck] ("spellcheck");
+//   - [EditTextChangedEvent] ("edit-text-changed").
 type EditView interface {
 	View
 
 	// AppendText appends text to the current text of an EditView view
 	AppendText(text string)
-	textChanged(newText, oldText string)
 }
 
 type editViewData struct {
 	viewData
 }
 
-// NewEditView create new EditView object and return it
+// NewEditView creates a new [EditView] object and return its interface
 func NewEditView(session Session, params Params) EditView {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

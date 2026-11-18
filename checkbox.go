@@ -24,7 +24,17 @@ import (
 //	func()
 const CheckboxChangedEvent PropertyName = "checkbox-event"
 
-// Checkbox represent a Checkbox view
+// Checkbox represents an interface for working with the NumberPicker view.
+//
+// It extends the [ViewsContainer] interface and supports all its properties, and also has the following additional properties:
+//   - [Checked] ("checked");
+//   - [CheckboxVerticalAlign] ("checkbox-vertical-align");
+//   - [CheckboxHorizontalAlign] ("checkbox-horizontal-align");
+//   - [VerticalAlign] ("vertical-align");
+//   - [HorizontalAlign] ("horizontal-align"");
+//   - [GridRowGap] ("grid-row-gap");
+//   - [GridColumnGap] ("grid-column-gap");
+//   - [CheckboxChangedEvent] ("checkbox-event").
 type Checkbox interface {
 	ViewsContainer
 }
@@ -33,7 +43,7 @@ type checkboxData struct {
 	viewsContainerData
 }
 
-// NewCheckbox create new Checkbox object and return it
+// NewCheckbox creates a new [Checkbox] object and return its interface
 func NewCheckbox(session Session, params Params) Checkbox {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

@@ -5,7 +5,23 @@ import (
 	"strings"
 )
 
-// TextView represents a TextView view
+// TextOverflow is the constant for "text-overflow" property tag.
+//
+// Used by TextView.
+// Sets how hidden overflow content is signaled to users. Default value is "clip".
+//
+// Supported types: int, string.
+//
+// Values:
+//   - 0 (TextOverflowClip) or "clip" - Text is clipped at the border.
+//   - 1 (TextOverflowEllipsis) or "ellipsis" - At the end of the visible part of the text "…" is displayed.
+const TextOverflow PropertyName = "text-overflow"
+
+// TextView represents an interface for working with the TextView view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Text] ("text");
+//   - [TextOverflow] ("text-overflow").
 type TextView interface {
 	View
 }
@@ -14,7 +30,7 @@ type textViewData struct {
 	viewData
 }
 
-// NewTextView create new TextView object and return it
+// NewTextView create a interface new [TextView] object and return its interface
 func NewTextView(session Session, params Params) TextView {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

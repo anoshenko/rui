@@ -6,7 +6,7 @@ import "strings"
 const (
 	// KeyDownEvent is the constant for "key-down-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when a key is pressed.
 	//
 	// General listener format:
@@ -26,7 +26,7 @@ const (
 
 	// KeyUpEvent is the constant for "key-up-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when a key is released.
 	//
 	// General listener format:

@@ -4,7 +4,7 @@ package rui
 const (
 	// PointerDown is the constant for "pointer-down" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Fired when a pointer becomes active. For mouse, it is fired when the device transitions from no buttons depressed to at
 	// least one button depressed. For touch, it is fired when physical contact is made with the digitizer. For pen, it is
 	// fired when the stylus makes physical contact with the digitizer.
@@ -26,7 +26,7 @@ const (
 
 	// PointerUp is the constant for "pointer-up" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when a pointer is no longer active.
 	//
 	// General listener format:
@@ -46,7 +46,7 @@ const (
 
 	// PointerMove is the constant for "pointer-move" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when a pointer changes coordinates.
 	//
 	// General listener format:
@@ -66,7 +66,7 @@ const (
 
 	// PointerCancel is the constant for "pointer-cancel" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired if the pointer will no longer be able to generate events (for example the related device is deactivated).
 	//
 	// General listener format:
@@ -86,7 +86,7 @@ const (
 
 	// PointerOut is the constant for "pointer-out" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired for several reasons including: pointing device is moved out of the hit test boundaries of an element; firing
 	// the "pointer-up" event for a device that does not support hover (see "pointer-up"); after firing the "pointer-cancel"
 	// event (see "pointer-cancel"); when a pen stylus leaves the hover range detectable by the digitizer.
@@ -108,7 +108,7 @@ const (
 
 	// PointerOver is the constant for "pointer-over" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired when a pointing device is moved into an view's hit test boundaries.
 	//
 	// General listener format:

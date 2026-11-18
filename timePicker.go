@@ -94,7 +94,14 @@ const (
 	timeFormat = "15:04:05"
 )
 
-// TimePicker represents a TimePicker view
+// TimePicker represents an interface for working with the TimePicker view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [TimePickerMin] ("time-picker-min");
+//   - [TimePickerMax] ("time-picker-max");
+//   - [TimePickerStep] ("time-picker-step");
+//   - [TimePickerValue] ("time-picker-value");
+//   - [TimeChangedEvent] ("time-changed").
 type TimePicker interface {
 	View
 }
@@ -103,7 +110,7 @@ type timePickerData struct {
 	viewData
 }
 
-// NewTimePicker create new TimePicker object and return it
+// NewTimePicker create a new [TimePicker] object and return its interface
 func NewTimePicker(session Session, params Params) TimePicker {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

@@ -2,7 +2,7 @@ package rui
 
 // ResizeEvent is the constant for "resize-event" property tag.
 //
-// Used by View.
+// Used by [View].
 // Is fired when the view changes its size.
 //
 // General listener format:

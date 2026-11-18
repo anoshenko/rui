@@ -958,12 +958,18 @@ func reflectValueToDataValue(value reflect.Value) DataValue {
 func parseFieldTag(tag string) map[string]string {
 	result := map[string]string{}
 	for line := range strings.SplitSeq(tag, ";") {
-		pair := strings.SplitN(line, "=", 2)
-		if len(pair) == 2 {
-			key := strings.Trim(pair[0], " \t")
-			value := strings.Trim(pair[1], " \t")
-			if key != "" && value != "" {
-				result[key] = value
+		switch index := strings.Index(line, "="); index {
+		case -1:
+			if key := strings.Trim(line, " \t"); key != "" {
+				result[key] = ""
+			}
+
+		case 0:
+			// do nothing
+
+		default:
+			if key := strings.Trim(line[:index], " \t"); key != "" {
+				result[key] = strings.Trim(line[index+1:], " \t")
 			}
 		}
 	}

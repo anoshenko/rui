@@ -117,7 +117,27 @@ const (
 	MultipleCheckbox = 2
 )
 
-// ListView represents a ListView view
+// ListView represents an interface for working with the ListView view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Items] ("items");
+//   - [Current] ("current");
+//   - [Checked] ("checked");
+//   - [Orientation] ("orientation");
+//   - [ListWrap] ("list-wrap");
+//   - [ListRowGap] ("list-row-gap");
+//   - [ListColumnGap] ("list-column-gap");
+//   - [ItemWidth] ("item-width");
+//   - [ItemHeight] ("item-height");
+//   - [ItemHorizontalAlign] ("item-horizontal-align");
+//   - [ItemVerticalAlign] ("item-vertical-align");
+//   - [ItemCheckbox] ("checkbox");
+//   - [CheckboxHorizontalAlign] ("checkbox-horizontal-align");
+//   - [CheckboxVerticalAlign] ("checkbox-vertical-align");
+//   - [ListItemStyle] ("list-item-style");
+//   - [CurrentStyle] ("current-style");
+//   - [CurrentInactiveStyle] ("current-inactive-style");
+//   - [AccentColor] ("accent-color").
 type ListView interface {
 	View
 	ParentView
@@ -137,7 +157,7 @@ type listViewData struct {
 	itemFrame []Frame
 }
 
-// NewListView creates the new list view
+// NewListView creates a new [ListView] object and return its interface
 func NewListView(session Session, params Params) ListView {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

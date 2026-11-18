@@ -10,7 +10,10 @@ import "reflect"
 // Supported types: `func(Canvas)`.
 const DrawFunction PropertyName = "draw-function"
 
-// CanvasView interface of a custom draw view
+// CanvasView represents an interface for working with the CanvasView view.
+//
+// It extends the [View] interface and supports all its properties, and also has one additional property:
+//   - [DrawFunction] ("draw-function").
 type CanvasView interface {
 	View
 

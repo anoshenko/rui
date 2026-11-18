@@ -73,7 +73,7 @@ const (
 
 	// Disabled is the constant for "disabled" property tag.
 	//
-	// Used by ViewsContainer.
+	// Used by [View]sContainer.
 	// Controls whether the view can receive focus and which style to use. Default value is false.
 	//
 	// Supported types: bool, int, string.
@@ -85,7 +85,7 @@ const (
 
 	// Focusable is the constant for "focusable" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether view can receive focus.
 	//
 	// Supported types: bool, int, string.
@@ -97,7 +97,7 @@ const (
 
 	// Semantics is the constant for "semantics" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Defines the semantic meaning of the view. This property may have no visible effect, but it allows search engines to
 	// understand the structure of your application. It also helps to voice the interface to systems for people with
 	// disabilities.
@@ -129,7 +129,7 @@ const (
 
 	// Visibility is the constant for "visibility" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the visibility of the view.
 	//
 	// Supported types: int, string.
@@ -142,7 +142,7 @@ const (
 
 	// ZIndex is the constant for "z-index" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the z-order of a positioned view. Overlapping views with a larger z-index cover those with a smaller one.
 	//
 	// Supported types: int, string.
@@ -154,7 +154,7 @@ const (
 
 	// Opacity is the constant for "opacity" property tag.
 	//
-	// Used by View, FilterProperty.
+	// Used by [View], FilterProperty.
 	//
 	// # Usage in View:
 	//
@@ -177,7 +177,7 @@ const (
 
 	// Overflow is the constant for "overflow" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the desired behavior for an element's overflow i.e. when an element's content is too big to fit in its block
 	// formatting context in both directions.
 	//
@@ -192,7 +192,7 @@ const (
 
 	// Row is the constant for "row" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Row of the view inside the container like GridLayout.
 	//
 	// Supported types: Range, int, string.
@@ -206,7 +206,7 @@ const (
 
 	// Column is the constant for "column" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Column of the view inside the container like GridLayout.
 	//
 	// Supported types: Range, int, string.
@@ -220,7 +220,7 @@ const (
 
 	// Left is the constant for "left" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShapeProperty.
+	// Used by [View], BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -252,7 +252,7 @@ const (
 
 	// Right is the constant for "right" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShapeProperty.
+	// Used by [View], BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -284,7 +284,7 @@ const (
 
 	// Top is the constant for "top" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShapeProperty.
+	// Used by [View], BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -316,7 +316,7 @@ const (
 
 	// Bottom is the constant for "bottom" property tag.
 	//
-	// Used by View, BoundsProperty, ClipShapeProperty.
+	// Used by [View], BoundsProperty, ClipShapeProperty.
 	//
 	// # Usage in View:
 	//
@@ -389,7 +389,7 @@ const (
 
 	// Height is the constant for "height" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's height.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -400,7 +400,7 @@ const (
 
 	// MinWidth is the constant for "min-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's minimal width.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -411,7 +411,7 @@ const (
 
 	// MinHeight is the constant for "min-height" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's minimal height.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -422,7 +422,7 @@ const (
 
 	// MaxWidth is the constant for "max-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's maximal width.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -433,7 +433,7 @@ const (
 
 	// MaxHeight is the constant for "max-height" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's maximal height.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -444,7 +444,7 @@ const (
 
 	// Margin is the constant for "margin" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the margin area on all four sides of an element.
 	//
 	// Supported types: BoundsProperty, Bounds, SizeUnit, float32, float64, int, string.
@@ -463,7 +463,7 @@ const (
 
 	// MarginLeft is the constant for "margin-left" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the margin area on the left of a view. A positive value places it farther from its neighbors, while a negative
 	// value places it closer.
 	//
@@ -475,7 +475,7 @@ const (
 
 	// MarginRight is the constant for "margin-right" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the margin area on the right of a view. A positive value places it farther from its neighbors, while a negative
 	// value places it closer.
 	//
@@ -487,7 +487,7 @@ const (
 
 	// MarginTop is the constant for "margin-top" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the margin area on the top of a view. A positive value places it farther from its neighbors, while a negative value
 	// places it closer.
 	//
@@ -499,7 +499,7 @@ const (
 
 	// MarginBottom is the constant for "margin-bottom" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the margin area on the bottom of a view. A positive value places it farther from its neighbors, while a negative
 	// value places it closer.
 	//
@@ -511,7 +511,7 @@ const (
 
 	// Padding is the constant for "padding" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the padding area on all four sides of a view at once. An element's padding area is the space between its content
 	// and its border.
 	//
@@ -531,7 +531,7 @@ const (
 
 	// PaddingLeft is the constant for "padding-left" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the width of the padding area to the left of a view.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -542,7 +542,7 @@ const (
 
 	// PaddingRight is the constant for "padding-right" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the width of the padding area to the right of a view.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -553,7 +553,7 @@ const (
 
 	// PaddingTop is the constant for "padding-top" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the height of the padding area to the top of a view.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -564,7 +564,7 @@ const (
 
 	// PaddingBottom is the constant for "padding-bottom" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the height of the padding area to the bottom of a view.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -575,7 +575,7 @@ const (
 
 	// AccentColor is the constant for "accent-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the accent color for UI controls generated by some elements.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -586,7 +586,7 @@ const (
 
 	// BackgroundColor is the constant for "background-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the background color of a view.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -597,7 +597,7 @@ const (
 
 	// Background is the constant for "background" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set one or more background images and/or gradients for the view.
 	//
 	// Supported types: BackgroundElement, []BackgroundElement, string.
@@ -611,7 +611,7 @@ const (
 
 	// Mask is the constant for "mask" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set one or more images and/or gradients as the view mask.
 	// As mask is used only alpha channel of images and/or gradients.
 	//
@@ -626,7 +626,7 @@ const (
 
 	// Cursor is the constant for "cursor" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the type of mouse cursor, if any, to show when the mouse pointer is over the view.
 	//
 	// Supported types: int, string.
@@ -672,7 +672,7 @@ const (
 
 	// Border is the constant for "border" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's border. It sets the values of a border width, style, and color.
 	//
 	// Supported types: BorderProperty, ViewBorder, ViewBorders.
@@ -687,7 +687,7 @@ const (
 
 	// BorderLeft is the constant for "border-left" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's left border. It sets the values of a border width, style, and color.
 	//
 	// Supported types: ViewBorder, BorderProperty, string.
@@ -698,7 +698,7 @@ const (
 
 	// BorderRight is the constant for "border-right" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's right border. It sets the values of a border width, style, and color.
 	//
 	// Supported types: ViewBorder, BorderProperty, string.
@@ -709,7 +709,7 @@ const (
 
 	// BorderTop is the constant for "border-top" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's top border. It sets the values of a border width, style, and color.
 	//
 	// Supported types: ViewBorder, BorderProperty, string.
@@ -720,7 +720,7 @@ const (
 
 	// BorderBottom is the constant for "border-bottom" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's bottom border. It sets the values of a border width, style, and color.
 	//
 	// Supported types: ViewBorder, BorderProperty, string.
@@ -731,7 +731,7 @@ const (
 
 	// BorderStyle is the constant for "border-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line style for all four sides of a view's border.
 	//
 	// Supported types: int, string.
@@ -746,7 +746,7 @@ const (
 
 	// BorderLeftStyle is the constant for "border-left-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line style of a view's left border.
 	//
 	// Supported types: int, string.
@@ -761,7 +761,7 @@ const (
 
 	// BorderRightStyle is the constant for "border-right-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line style of a view's right border.
 	//
 	// Supported types: int, string.
@@ -776,7 +776,7 @@ const (
 
 	// BorderTopStyle is the constant for "border-top-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line style of a view's top border.
 	//
 	// Supported types: int, string.
@@ -791,7 +791,7 @@ const (
 
 	// BorderBottomStyle is the constant for "border-bottom-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the line style of a view's bottom border.
 	//
 	// Supported types: int, string.
@@ -806,7 +806,7 @@ const (
 
 	// BorderWidth is the constant for "border-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line width for all four sides of a view's border.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -817,7 +817,7 @@ const (
 
 	// BorderLeftWidth is the constant for "border-left-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line width of a view's left border.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -828,7 +828,7 @@ const (
 
 	// BorderRightWidth is the constant for "border-right-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line width of a view's right border.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -839,7 +839,7 @@ const (
 
 	// BorderTopWidth is the constant for "border-top-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line width of a view's top border.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -850,7 +850,7 @@ const (
 
 	// BorderBottomWidth is the constant for "border-bottom-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line width of a view's bottom border.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -861,7 +861,7 @@ const (
 
 	// BorderColor is the constant for "border-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line color for all four sides of a view's border.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -872,7 +872,7 @@ const (
 
 	// BorderLeftColor is the constant for "border-left-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line color of a view's left border.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -883,7 +883,7 @@ const (
 
 	// BorderRightColor is the constant for "border-right-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line color of a view's right border.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -894,7 +894,7 @@ const (
 
 	// BorderTopColor is the constant for "border-top-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line color of a view's top border.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -905,7 +905,7 @@ const (
 
 	// BorderBottomColor is the constant for "border-bottom-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the line color of a view's bottom border.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -916,7 +916,7 @@ const (
 
 	// Outline is the constant for "outline" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set a view's outline. It sets the values of an outline width, style, and color.
 	//
 	// Supported types: OutlineProperty, ViewOutline, ViewBorder.
@@ -927,7 +927,7 @@ const (
 
 	// OutlineStyle is the constant for "outline-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the style of an view's outline.
 	//
 	// Supported types: int, string.
@@ -942,7 +942,7 @@ const (
 
 	// OutlineColor is the constant for "outline-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the color of an view's outline.
 	//
 	// Supported types: Color, ColorPair, string.
@@ -953,7 +953,7 @@ const (
 
 	// OutlineWidth is the constant for "outline-width" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the width of an view's outline.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -964,7 +964,7 @@ const (
 
 	// OutlineOffset is the constant for "outline-offset" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the amount of space between an outline and the edge or border of a view.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -975,7 +975,7 @@ const (
 
 	// Shadow is the constant for "shadow" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Adds shadow effects around a view's frame. A shadow is described by X and Y offsets relative to the element, blur,
 	// spread radius and color.
 	//
@@ -992,7 +992,7 @@ const (
 
 	// FontName is the constant for "font-name" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies a prioritized list of one or more font family names and/or generic family names for the view. Values are
 	// separated by commas to indicate that they are alternatives. This is an inherited property, i.e. if it is not defined,
 	// then the value of the parent view is used.
@@ -1002,7 +1002,7 @@ const (
 
 	// TextColor is the constant for "text-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the foreground color value of a view's text and text decorations. This is an inherited property, i.e. if it is not
 	// defined, then the value of the parent view is used.
 	//
@@ -1014,7 +1014,7 @@ const (
 
 	// TextSize is the constant for "text-size" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the size of the font. This is an inherited property, i.e. if it is not defined, then the value of the parent view
 	// is used.
 	//
@@ -1026,7 +1026,7 @@ const (
 
 	// Italic is the constant for "italic" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether the text is displayed in italics. This is an inherited property, i.e. if it is not defined, then the
 	// value of the parent view is used. Default value is false.
 	//
@@ -1039,7 +1039,7 @@ const (
 
 	// SmallCaps is the constant for "small-caps" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether to use small caps characters while displaying the text. This is an inherited property, i.e. if it is
 	// not defined, then the value of the parent view is used. Default value is false.
 	//
@@ -1052,7 +1052,7 @@ const (
 
 	// Strikethrough is the constant for "strikethrough" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether to draw line over the text. This is an inherited property, i.e. if it is not defined, then the value
 	// of the parent view is used. Default value is false.
 	//
@@ -1065,7 +1065,7 @@ const (
 
 	// Overline is the constant for "overline" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether the line needs to be displayed on top of the text. This is an inherited property, i.e. if it is not
 	// defined, then the value of the parent view is used. Default value is false.
 	//
@@ -1078,7 +1078,7 @@ const (
 
 	// Underline is the constant for "underline" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether to draw line below the text, This is an inherited property, i.e. if it is not defined, then the value
 	// of the parent view is used. Default value is false.
 	//
@@ -1091,7 +1091,7 @@ const (
 
 	// TextLineThickness is the constant for "text-line-thickness" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the stroke thickness of the decoration line that is used on text in an element, such as a strikethrough, underline,
 	// or overline. This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	//
@@ -1103,7 +1103,7 @@ const (
 
 	// TextLineStyle is the constant for "text-line-style" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the style of the lines specified by "strikethrough", "overline" and "underline" properties. This is an inherited
 	// property, i.e. if it is not defined, then the value of the parent view is used.
 	//
@@ -1119,7 +1119,7 @@ const (
 
 	// TextLineColor is the constant for "text-line-color" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the color of the lines specified by "strikethrough", "overline" and "underline" properties. This is an inherited
 	// property, i.e. if it is not defined, then the value of the parent view is used.
 	//
@@ -1131,7 +1131,7 @@ const (
 
 	// TextWeight is the constant for "text-weight" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets weight of the text.
 	//
 	// Supported types: int, string.
@@ -1178,7 +1178,7 @@ const (
 
 	// TextIndent is the constant for "text-indent" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Determines the size of the indent(empty space) before the first line of text. This is an inherited property, i.e. if it
 	// is not defined, then the value of the parent view is used.
 	//
@@ -1190,7 +1190,7 @@ const (
 
 	// TextShadow is the constant for "text-shadow" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specify shadow for the text.
 	//
 	// Supported types: ShadowProperty, []ShadowProperty, string.
@@ -1206,7 +1206,7 @@ const (
 
 	// TextWrap is the constant for "text-wrap" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls how text inside the view is wrapped. Default value is "wrap".
 	//
 	// Supported types: int, string.
@@ -1219,7 +1219,7 @@ const (
 
 	// TabSize is the constant for "tab-size" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the width of tab characters (U+0009) in spaces. This is an inherited property, i.e. if it is not defined, then the
 	// value of the parent view is used. Default value is 8.
 	//
@@ -1232,7 +1232,7 @@ const (
 
 	// LetterSpacing is the constant for "letter-spacing" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the horizontal spacing behavior between text characters. This value is added to the natural spacing between
 	// characters while rendering the text. Positive values of letter-spacing causes characters to spread farther apart, while
 	// negative values of letter-spacing bring characters closer together. This is an inherited property, i.e. if it is not
@@ -1246,7 +1246,7 @@ const (
 
 	// WordSpacing is the constant for "word-spacing" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the length of space between words and between tags. This is an inherited property, i.e. if it is not defined, then
 	// the value of the parent view is used.
 	//
@@ -1258,7 +1258,7 @@ const (
 
 	// LineHeight is the constant for "line-height" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the height of a line box. It's commonly used to set the distance between lines of text. This is an inherited
 	// property, i.e. if it is not defined, then the value of the parent view is used.
 	//
@@ -1270,7 +1270,7 @@ const (
 
 	// WhiteSpace is the constant for "white-space" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets how white space inside an element is handled. This is an inherited property, i.e. if it is not defined, then the
 	// value of the parent view is used.
 	//
@@ -1295,7 +1295,7 @@ const (
 
 	// WordBreak is the constant for "word-break" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set whether line breaks appear wherever the text would otherwise overflow its content box. This is an inherited
 	// property, i.e. if it is not defined, then the value of the parent view is used. Default value is "normal".
 	//
@@ -1310,7 +1310,7 @@ const (
 
 	// TextTransform is the constant for "text-transform" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies how to capitalize an element's text. It can be used to make text appear in all-uppercase or all-lowercase, or
 	// with each word capitalized. This is an inherited property, i.e. if it is not defined, then the value of the parent view
 	// is used.
@@ -1326,7 +1326,7 @@ const (
 
 	// TextDirection is the constant for "text-direction" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets the direction of text, table columns, and horizontal overflow. This is an inherited property, i.e. if it is not
 	// defined, then the value of the parent view is used. Default value is "system".
 	//
@@ -1340,7 +1340,7 @@ const (
 
 	// WritingMode is the constant for "writing-mode" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set whether lines of text are laid out horizontally or vertically, as well as the direction in which blocks progress.
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used. Default value is
 	// "horizontal-top-to-bottom".
@@ -1356,7 +1356,7 @@ const (
 
 	// VerticalTextOrientation is the constant for "vertical-text-orientation" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Set the orientation of the text characters in a line. It only affects text in vertical mode ("writing-mode" property).
 	// This is an inherited property, i.e. if it is not defined, then the value of the parent view is used.
 	//
@@ -1367,53 +1367,9 @@ const (
 	//   - 1 (UprightTextOrientation) or "upright" - Symbols are arranged normally(vertically).
 	VerticalTextOrientation PropertyName = "vertical-text-orientation"
 
-	// TextOverflow is the constant for "text-overflow" property tag.
-	//
-	// Used by TextView.
-	// Sets how hidden overflow content is signaled to users. Default value is "clip".
-	//
-	// Supported types: int, string.
-	//
-	// Values:
-	//   - 0 (TextOverflowClip) or "clip" - Text is clipped at the border.
-	//   - 1 (TextOverflowEllipsis) or "ellipsis" - At the end of the visible part of the text "…" is displayed.
-	TextOverflow PropertyName = "text-overflow"
-
-	// Hint is the constant for "hint" property tag.
-	//
-	// Used by EditView.
-	// Sets a hint to the user of what can be entered in the control.
-	//
-	// Supported types: string.
-	Hint PropertyName = "hint"
-
-	// MaxLength is the constant for "max-length" property tag.
-	//
-	// Used by EditView.
-	// Sets the maximum number of characters that the user can enter.
-	//
-	// Supported types: int, string.
-	//
-	// Values:
-	//   - positive value - Maximum number of characters.
-	//   - 0 or negative value - The maximum number of characters is not limited.
-	MaxLength PropertyName = "max-length"
-
-	// ReadOnly is the constant for "readonly" property tag.
-	//
-	// Used by EditView.
-	// Controls whether the user can modify value or not. Default value is false.
-	//
-	// Supported types: bool, int, string.
-	//
-	// Values:
-	//   - true, 1, "true", "yes", "on", or "1" - User not able to modify the value.
-	//   - false, 0, "false", "no", "off", or "0" - Value can be modified.
-	ReadOnly PropertyName = "readonly"
-
 	// Content is the constant for "content" property tag.
 	//
-	// Used by ViewsContainer, GridLayout, ListLayout, Resizable, StackLayout, SvgImageView, TableView.
+	// Used by [View]sContainer, GridLayout, ListLayout, Resizable, StackLayout, SvgImageView, TableView.
 	//
 	// # Usage in ViewsContainer:
 	//
@@ -1542,36 +1498,6 @@ const (
 	// Internal type is ListAdapter internal implementation, other types converted to it during assignment.
 	Items PropertyName = "items"
 
-	// DisabledItems is the constant for "disabled-items" property tag.
-	//
-	// Used by DropDownList.
-	// An array of disabled(non selectable) items indices.
-	//
-	// Supported types: []int, string, []string, []any containing  elements of string or int.
-	//
-	// Internal type is []int, other types converted to it during assignment.
-	// Rules of conversion.
-	//   - []int - Array of indices.
-	//   - string - Single index value or multiple index values separated by comma(,).
-	//   - []string - Array of indices in text format.
-	//   - []any - Array of strings or integer values.
-	DisabledItems PropertyName = "disabled-items"
-
-	// ItemSeparators is the constant for "item-separators" property tag.
-	//
-	// Used by DropDownList.
-	// An array of indices of DropDownList items after which a separator should be added.
-	//
-	// Supported types: []int, string, []string, []any containing  elements of string or int.
-	//
-	// Internal type is []int, other types converted to it during assignment.
-	// Rules of conversion.
-	//   - []int - Array of indices.
-	//   - string - Single index value or multiple index values separated by comma(,).
-	//   - []string - Array of indices in text format.
-	//   - []any - Array of strings or integer values.
-	ItemSeparators PropertyName = "item-separators"
-
 	// Current is the constant for "current" property tag.
 	//
 	// Used by DropDownList, ListView, TableView, TabsLayout.
@@ -1631,12 +1557,6 @@ const (
 	// Same as "number-picker-type" [NumberPickerType].
 	Type PropertyName = "type"
 
-	// Pattern is the constant for "pattern" property tag.
-	//
-	// Used by EditView.
-	// Same as "edit-view-pattern" [EditViewPattern].
-	Pattern PropertyName = "pattern"
-
 	// GridAutoFlow is the constant for "grid-auto-flow" property tag.
 	//
 	// Used by GridLayout.
@@ -1675,7 +1595,7 @@ const (
 
 	// CellHeight is the constant for "cell-height" property tag.
 	//
-	// Used by GridLayout:
+	// Used by GridLayout, Checkbox:
 	// Set a fixed height of GridLayout cells regardless of the size of the child elements. Each element in the array
 	// determines the size of the corresponding row. By default, the sizes of the cells are calculated based on the sizes of
 	// the child views placed in them.
@@ -1697,7 +1617,7 @@ const (
 
 	// GridRowGap is the constant for "grid-row-gap" property tag.
 	//
-	// Used by GridLayout.
+	// Used by GridLayout, Checkbox.
 	// Space between rows.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -1708,7 +1628,7 @@ const (
 
 	// GridColumnGap is the constant for "grid-column-gap" property tag.
 	//
-	// Used by GridLayout.
+	// Used by GridLayout, Checkbox.
 	// Space between columns.
 	//
 	// Supported types: SizeUnit, SizeFunc, string, float, int.
@@ -1749,18 +1669,9 @@ const (
 	// Internal type is []MediaSource, other types converted to it during assignment.
 	Source PropertyName = "src"
 
-	// SrcSet is the constant for "srcset" property tag.
-	//
-	// Used by ImageView.
-	// String which identifies one or more image candidate strings, separated using comma(,) each specifying image resources
-	// to use under given screen density. This property is only used if building an application for js/wasm platform.
-	//
-	// Supported types: string.
-	SrcSet PropertyName = "srcset"
-
 	// Fit is the constant for "fit" property tag.
 	//
-	// Used by ImageView, BackgroundElement.
+	// Used by [ImageView], [BackgroundElement].
 	//
 	// # Usage in ImageView
 	//
@@ -1790,7 +1701,7 @@ const (
 
 	// Repeat is the constant for "repeat" property tag.
 	//
-	// Used by BackgroundElement.
+	// Used by [BackgroundElement].
 	// Used for image background only. Specifying the repetition of the image. Default value is "no-repeat".
 	//
 	// Supported types: int, string.
@@ -1820,7 +1731,7 @@ const (
 
 	// BackgroundClip is the constant for "background-clip" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Determines how the background color and/or background image will be displayed below the box borders.
 	//
 	// Supported types: int, string.
@@ -1833,7 +1744,7 @@ const (
 
 	// BackgroundOrigin is the constant for "background-origin" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Determines the background's origin: from the border start, inside the border, or inside the padding.
 	//
 	// Supported types: int, string.
@@ -1846,7 +1757,7 @@ const (
 
 	// MaskClip is the constant for "mask-clip" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Determines how image/gradient masks will be used below the box borders.
 	//
 	// Supported types: int, string.
@@ -1859,7 +1770,7 @@ const (
 
 	// MaskOrigin is the constant for "mask-origin" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Determines the mask's origin: from the border start, inside the border, or inside the padding.
 	//
 	// Supported types: int, string.
@@ -1899,13 +1810,13 @@ const (
 	// See AngleUnit description for more details.
 	//
 	// Values:
-	//   - 0 (ToTopGradient) or "to-top" - Line goes from bottom to top.
-	//   - 1 (ToRightTopGradient) or "to-right-top" - From bottom left to top right.
-	//   - 2 (ToRightGradient) or "to-right" - From left to right.
-	//   - 3 (ToRightBottomGradient) or "to-right-bottom" - From top left to bottom right.
-	//   - 4 (ToBottomGradient) or "to-bottom" - From top to bottom.
-	//   - 5 (ToLeftBottomGradient) or "to-left-bottom" - From the upper right corner to the lower left.
-	//   - 6 (ToLeftGradient) or "to-left" - From right to left.
+	//   - 0 (ToTopGradient) or "to-top" - Line goes from bottom to top;
+	//   - 1 (ToRightTopGradient) or "to-right-top" - From bottom left to top right;
+	//   - 2 (ToRightGradient) or "to-right" - From left to right;
+	//   - 3 (ToRightBottomGradient) or "to-right-bottom" - From top left to bottom right;
+	//   - 4 (ToBottomGradient) or "to-bottom" - From top to bottom;
+	//   - 5 (ToLeftBottomGradient) or "to-left-bottom" - From the upper right corner to the lower left;
+	//   - 6 (ToLeftGradient) or "to-left" - From right to left;
 	//   - 7 (ToLeftTopGradient) or "to-left-top" - From the bottom right corner to the top left.
 	Direction PropertyName = "direction"
 
@@ -2051,31 +1962,6 @@ const (
 	//   - 1 (ListWrapOn) or "on" - Starts a new column or row of elements as necessary. The new column is positioned towards the end.
 	//   - 2 (ListWrapReverse) or "reverse" - Starts a new column or row of elements as necessary. The new column is positioned towards the beginning.
 	ListWrap PropertyName = "list-wrap"
-
-	// EditWrap is the constant for "edit-wrap" property tag.
-	//
-	// Used by EditView.
-	// Controls whether the text will wrap around when edit view border has been reached. Default value is false.
-	//
-	// Supported types: bool, int, string.
-	//
-	// Values:
-	//   - true, 1, "true", "yes", "on", or "1" - Text wrapped to the next line.
-	//   - false, 0, "false", "no", "off", or "0" - Do not wrap text. Horizontal scrolling will appear if necessary.
-	EditWrap PropertyName = "edit-wrap"
-
-	// CaretColor is the constant for "caret-color" property tag.
-	//
-	// Used by EditView.
-	//
-	// Sets the color of the insertion caret, the visible marker where the next character typed will be inserted. This is
-	// sometimes referred to as the text input cursor.
-	//
-	// Supported types: Color, ColorPair, string.
-	//
-	// Internal type is Color, other types converted to it during assignment.
-	// See [Color] description for more details.
-	CaretColor PropertyName = "caret-color"
 
 	// Min is the constant for "min" property tag.
 	//
@@ -2494,7 +2380,7 @@ const (
 
 	// Filter is the constant for "filter" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Applies graphical effects to a view, such as blurring, color shifting, changing brightness/contrast, etc.
 	//
 	// Supported types: FilterProperty.
@@ -2504,7 +2390,7 @@ const (
 
 	// BackdropFilter is the constant for "backdrop-filter" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Applies graphical effects to the area behind a view, such as blurring, color shifting, changing brightness/contrast,
 	// etc.
 	//
@@ -2515,7 +2401,7 @@ const (
 
 	// Clip is the constant for "clip" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Creates a clipping region that sets what part of a view should be shown.
 	//
 	// Supported types: ClipShapeProperty, string.
@@ -2534,7 +2420,7 @@ const (
 
 	// ShapeOutside is the constant for "shape-outside" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// __WARNING__ Currently not supported. Property defines a shape(which may be non-rectangular) around which adjacent
 	// inline content should wrap. By default, inline content wraps around its margin box. Property provides a way to
 	// customize this wrapping, making it possible to wrap text around complex objects rather than simple boxes.
@@ -2547,7 +2433,7 @@ const (
 
 	// Float is the constant for "float" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Places a view on the left or right side of its container, allowing text and inline views to wrap around it.
 	//
 	// Supported types: int, string.
@@ -2560,7 +2446,7 @@ const (
 
 	// UserData is the constant for "user-data" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Can contain any user data.
 	//
 	// Supported types: any.
@@ -2568,7 +2454,7 @@ const (
 
 	// Resize is the constant for "resize" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets whether view is resizable, and if so, in which directions. Default value is "none".
 	//
 	// Supported types: int, string.
@@ -2582,7 +2468,7 @@ const (
 
 	// UserSelect is the constant for "user-select" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Controls whether the user can select the text. This is an inherited property, i.e. if it is not defined, then the value
 	// of the parent view is used. Default value is false.
 	//
@@ -2595,7 +2481,7 @@ const (
 
 	// Order is the constant for "Order" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	//
 	// Set the order to layout an item in a ViewsContainer container. Items in a container are sorted by
 	// ascending order value and then by their addition to container order.
@@ -2609,7 +2495,7 @@ const (
 
 	// BackgroundBlendMode is the constant for "background-blend-mode" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets how view's background images should blend with each other and with the view's background color.
 	//
 	// Supported types: int, string.
@@ -2652,7 +2538,7 @@ const (
 
 	// MixBlendMode is the constant for "mix-blend-mode" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets how view's content should blend with the content of the view's parent and the view's background.
 	//
 	// Supported types: int, string.
@@ -2695,7 +2581,7 @@ const (
 
 	// TabIndex is the constant for "tabindex" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Indicates that view can be focused, and where it participates in sequential keyboard navigation(usually with the Tab
 	// key).
 	//
@@ -2709,7 +2595,7 @@ const (
 
 	// Tooltip is the constant for "tooltip" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Specifies the tooltip text. Tooltip pops up when hovering the mouse cursor over the view. HTML tags are supported when
 	// formatting tooltip text.
 	//

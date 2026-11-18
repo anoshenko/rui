@@ -33,7 +33,7 @@ const (
 
 	// NumberPickerType is the constant for "number-picker-type" property tag.
 	//
-	// Used by NumberPicker.
+	// Used by [NumberPicker].
 	// Sets the visual representation.
 	//
 	// Supported types: int, string.
@@ -45,7 +45,7 @@ const (
 
 	// NumberPickerMin is the constant for "number-picker-min" property tag.
 	//
-	// Used by NumberPicker.
+	// Used by [NumberPicker].
 	// Set the minimum value. The default value is 0.
 	//
 	// Supported types: float, int, string.
@@ -55,7 +55,7 @@ const (
 
 	// NumberPickerMax is the constant for "number-picker-max" property tag.
 	//
-	// Used by NumberPicker.
+	// Used by [NumberPicker].
 	// Set the maximum value. The default value is 1.
 	//
 	// Supported types: float, int, string.
@@ -65,7 +65,7 @@ const (
 
 	// NumberPickerStep is the constant for "number-picker-step" property tag.
 	//
-	// Used by NumberPicker.
+	// Used by [NumberPicker].
 	// Set the value change step.
 	//
 	// Supported types: float, int, string.
@@ -75,7 +75,7 @@ const (
 
 	// NumberPickerValue is the constant for "number-picker-value" property tag.
 	//
-	// Used by NumberPicker.
+	// Used by [NumberPicker].
 	// Current value. The default value is 0.
 	//
 	// Supported types: float, int, string.
@@ -94,16 +94,25 @@ const (
 	NumberPickerPrecision PropertyName = "number-picker-precision"
 )
 
-// Constants which describe values of the "number-picker-type" property of a [NumberPicker]
+// Constants which describe values of the "number-picker-type" ([NumberPickerType]) property of a [NumberPicker]
 const (
-	// NumberEditor - type of NumberPicker. NumberPicker is presented by editor
+	// NumberEditor is values of the "number-picker-type" ([NumberPickerType]) property. [NumberPicker] is presented by editor.
 	NumberEditor = 0
 
-	// NumberSlider - type of NumberPicker. NumberPicker is presented by slider
+	// NumberSlider is values of the "number-picker-type" ([NumberPickerType]) property. NumberPicker is presented by slider.
 	NumberSlider = 1
 )
 
-// NumberPicker represents a NumberPicker view
+// NumberPicker represents an interface for working with the NumberPicker view.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [NumberPickerType] ("number-picker-type");
+//   - [NumberPickerMin] ("number-picker-min");
+//   - [NumberPickerMax] ("number-picker-max");
+//   - [NumberPickerStep] ("number-picker-step");
+//   - [NumberPickerValue] ("number-picker-value");
+//   - [NumberPickerPrecision] ("number-picker-precision");
+//   - [NumberChangedEvent] ("number-changed").
 type NumberPicker interface {
 	View
 }
@@ -112,7 +121,7 @@ type numberPickerData struct {
 	viewData
 }
 
-// NewNumberPicker create new NumberPicker object and return it
+// NewNumberPicker create new [NumberPicker] object and return it
 func NewNumberPicker(session Session, params Params) NumberPicker {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

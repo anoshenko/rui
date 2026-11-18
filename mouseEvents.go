@@ -9,7 +9,7 @@ import (
 const (
 	// ClickEvent is the constant for "click-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Occur when the user clicks on the view.
 	//
 	// General listener format:
@@ -29,7 +29,7 @@ const (
 
 	// DoubleClickEvent is the constant for "double-click-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Occur when the user double clicks on the view.
 	//
 	// General listener format:
@@ -49,7 +49,7 @@ const (
 
 	// MouseDown is the constant for "mouse-down" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired at a View when a pointing device button is pressed while the pointer is inside the view.
 	//
 	// General listener format:
@@ -69,7 +69,7 @@ const (
 
 	// MouseUp is the constant for "mouse-up" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired at a View when a button on a pointing device (such as a mouse or trackpad) is released while the pointer is
 	// located inside it. "mouse-up" events are the counterpoint to "mouse-down" events.
 	//
@@ -90,7 +90,7 @@ const (
 
 	// MouseMove is the constant for "mouse-move" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired at a view when a pointing device(usually a mouse) is moved while the cursor's hotspot is inside it.
 	//
 	// General listener format:
@@ -110,7 +110,7 @@ const (
 
 	// MouseOut is the constant for "mouse-out" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired at a View when a pointing device (usually a mouse) is used to move the cursor so that it is no longer
 	// contained within the view or one of its children. "mouse-out" is also delivered to a view if the cursor enters a child
 	// view, because the child view obscures the visible area of the view.
@@ -132,7 +132,7 @@ const (
 
 	// MouseOver is the constant for "mouse-over" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Is fired at a View when a pointing device (such as a mouse or trackpad) is used to move the cursor onto the view or one
 	// of its child views.
 	//
@@ -153,7 +153,7 @@ const (
 
 	// ContextMenuEvent is the constant for "context-menu-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Occur when the user calls the context menu by the right mouse clicking.
 	//
 	// General listener format:

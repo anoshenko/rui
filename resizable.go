@@ -55,7 +55,12 @@ const (
 	AllSides = TopSide | RightSide | BottomSide | LeftSide
 )
 
-// Resizable represents a Resizable view
+// Resizable represents an interface for working with the Resizable container.
+//
+// It extends the [View] interface and supports all its properties, and also has the following additional properties:
+//   - [Content] ("content");
+//   - [Side] ("side");
+//   - [ResizeBorderWidth] ("resize-border-width").
 type Resizable interface {
 	View
 	ParentView
@@ -65,7 +70,7 @@ type resizableData struct {
 	viewData
 }
 
-// NewResizable create new Resizable object and return it
+// NewResizable create a new [Resizable] object and return it
 func NewResizable(session Session, params Params) Resizable {
 	if session == nil {
 		ErrorLog(`the Session argument cannot be nil`)

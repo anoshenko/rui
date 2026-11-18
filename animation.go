@@ -12,7 +12,7 @@ import (
 const (
 	// Animation is the constant for "animation" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Sets and starts animations.
 	//
 	// Supported types: AnimationProperty, []AnimationProperty.
@@ -35,7 +35,7 @@ const (
 
 	// Transition is the constant for "transition" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	//
 	// Sets transition animation of view properties. Each provided property must contain AnimationProperty which describe how
 	// particular property will be animated on property value change. Transition animation can be applied to properties of the
@@ -314,11 +314,11 @@ func NewTransitionAnimation(timingFunc string, duration float64, delay float64) 
 }
 
 // NewTransitionAnimation creates the animation scenario.
-//   - id - specifies the animation identifier.
+//   - id - specifies the animation identifier;
 //   - timingFunc - specifies how an animation progresses through the duration of each cycle. If it is "" then "easy" function is used (see [TimingFunction]);
 //   - duration - specifies the length of time in seconds that an animation takes to complete one cycle. Must be > 0;
 //   - delay - specifies the amount of time in seconds to wait from applying the animation to an element before beginning to perform
-//     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation.
+//     the animation. The animation can start later, immediately from its beginning or immediately and partway through the animation;
 //   - direction - specifies whether an animation should play forward, backward,
 //     or alternate back and forth between playing the sequence forward and backward. Only the following values ​​can be used:
 //     0 (NormalAnimation), 1 (ReverseAnimation), 2 (AlternateAnimation), and 3 (AlternateReverseAnimation);

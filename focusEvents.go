@@ -6,7 +6,7 @@ import "strings"
 const (
 	// FocusEvent is the constant for "focus-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Occur when the view takes input focus.
 	//
 	// General listener format:
@@ -21,7 +21,7 @@ const (
 
 	// LostFocusEvent is the constant for "lost-focus-event" property tag.
 	//
-	// Used by View.
+	// Used by [View].
 	// Occur when the View lost input focus.
 	//
 	// General listener format:
