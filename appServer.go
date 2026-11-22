@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/acme/autocert"
@@ -44,6 +45,7 @@ type application struct {
 	params            AppParams
 	createContentFunc func(Session) SessionContent
 	sessions          map[int]sessionInfo
+	sessionsMutex     sync.Mutex
 	usedSessionIds    []int
 }
 
@@ -66,6 +68,7 @@ func (app *application) Params() AppParams {
 }
 
 func (app *application) Finish() {
+	app.sessionsMutex.Lock()
 	for _, session := range app.sessions {
 		session.session.close()
 		if session.response != nil {
@@ -73,6 +76,7 @@ func (app *application) Finish() {
 			session.response = nil
 		}
 	}
+	app.sessionsMutex.Unlock()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -102,6 +106,9 @@ func (app *application) nextSessionID() int {
 }
 
 func (app *application) removeSession(id int) {
+	app.sessionsMutex.Lock()
+	defer app.sessionsMutex.Unlock()
+
 	if info, ok := app.sessions[id]; ok {
 		if info.response != nil {
 			close(info.response)
@@ -206,10 +213,13 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 
 	var session Session = nil
 	var response chan string = nil
+
+	app.sessionsMutex.Lock()
 	if info, ok := app.sessions[sessionID]; ok && info.response != nil {
 		response = info.response
 		session = info.session
 	}
+	app.sessionsMutex.Unlock()
 
 	command := obj.Tag()
 
@@ -265,9 +275,11 @@ func (app *application) sseHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		app.sessionsMutex.Lock()
 		if sessionInfo, ok := app.sessions[sessionID]; ok {
 
 		}
+		app.sessionsMutex.Unlock()
 	*/
 }
 
@@ -318,7 +330,11 @@ func (app *application) socketReader(bridge *wsBridge) {
 		case "reconnect":
 			session = nil
 			if sessionID, ok := getSessionID(obj); ok {
-				if info, ok := app.sessions[sessionID]; ok {
+				app.sessionsMutex.Lock()
+				info, ok := app.sessions[sessionID]
+				app.sessionsMutex.Unlock()
+
+				if ok {
 					session = info.session
 					session.setBridge(events, bridge)
 
@@ -378,10 +394,12 @@ func (app *application) createSession(params DataObject, events chan DataObject,
 	session := newSession(app, sessionID, "", params)
 	session.setBridge(events, bridge)
 
+	app.sessionsMutex.Lock()
 	app.sessions[sessionID] = sessionInfo{
 		session:  session,
 		response: response,
 	}
+	app.sessionsMutex.Unlock()
 
 	return session
 }
