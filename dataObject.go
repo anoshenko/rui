@@ -250,21 +250,21 @@ func (object *dataObject) RemoveProperty(tag string) DataValue {
 }
 
 func (object *dataObject) PropertyText(tag string, tags ...string) (string, bool) {
-	if node := object.Property(tag); node != nil && node.Type() == TextDataValue {
+	if node := object.Property(tag, tags...); node != nil && node.Type() == TextDataValue {
 		return node.String(), true
 	}
 	return "", false
 }
 
 func (object *dataObject) PropertyObject(tag string, tags ...string) DataObject {
-	if node := object.Property(tag); node != nil {
+	if node := object.Property(tag, tags...); node != nil {
 		return node.Object()
 	}
 	return nil
 }
 
 func (object *dataObject) PropertyArray(tag string, tags ...string) DataArray {
-	if node := object.Property(tag); node != nil {
+	if node := object.Property(tag, tags...); node != nil {
 		return node.Array()
 	}
 	return nil
