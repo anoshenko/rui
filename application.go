@@ -100,7 +100,7 @@ func getStartPage(buffer *strings.Builder, sessionID int, params AppParams) {
 	<script>
 const sessionID = `, strconv.Itoa(sessionID), `;
 	</script>
-	<script src="/script.js"></script>
+	<script src="script.js"></script>
 </head>
 <body id="body" onkeydown="keyDownEvent(this, event)">
 	<div class="ruiRoot" id="ruiRootView"></div>
