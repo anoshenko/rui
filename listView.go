@@ -525,17 +525,46 @@ func (listView *listViewData) ReloadListViewItem(index int) {
 		return
 	}
 
+	listView.session.callFunc("hideTooltip")
+
 	listView.items[index] = adapter.ListItem(index, listView.Session())
-
-	if view := listView.items[index]; view != nil {
-		html := allocStringBuilder()
-		defer freeStringBuilder(html)
-
-		listView.session.callFunc("hideTooltip")
-
-		viewHTML(view, html, "")
-		listView.session.updateInnerHTML(listView.htmlID()+"-"+strconv.Itoa(index), html.String())
+	itemView := listView.items[index]
+	if itemView == nil {
+		listView.session.updateInnerHTML(listView.htmlID()+"-"+strconv.Itoa(index), "")
+		return
 	}
+
+	html := allocStringBuilder()
+	defer freeStringBuilder(html)
+
+	checkbox := GetListViewCheckbox(listView)
+	if checkbox == NoneCheckbox {
+
+		viewHTML(itemView, html, "")
+
+	} else {
+
+		hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
+		vCheckboxAlign := GetListViewCheckboxVerticalAlign(listView)
+
+		html.WriteString(listView.checkboxItemDiv(hCheckboxAlign, vCheckboxAlign))
+
+		onDiv, offDiv, contentDiv := listView.getDivs(checkbox, hCheckboxAlign, vCheckboxAlign)
+		checked := slices.Contains(GetListViewCheckedItems(listView), index)
+
+		if checked {
+			html.WriteString(onDiv)
+		} else {
+			html.WriteString(offDiv)
+		}
+		html.WriteString(contentDiv)
+
+		viewHTML(itemView, html, "")
+
+		html.WriteString(`</div></div>`)
+	}
+
+	listView.session.updateInnerHTML(listView.htmlID()+"-"+strconv.Itoa(index), html.String())
 }
 
 func (listView *listViewData) getItemFrames() []Frame {
@@ -717,7 +746,6 @@ func (listView *listViewData) itemEnabledAdapter(adapter ListAdapter) ListItemEn
 }
 
 func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *strings.Builder, checkbox int) {
-	count := adapter.ListSize()
 	listViewID := listView.htmlID()
 
 	hCheckboxAlign := GetListViewCheckboxHorizontalAlign(listView)
@@ -730,7 +758,7 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 	checkedItems := GetListViewCheckedItems(listView)
 	enabledItems := listView.itemEnabledAdapter(adapter)
 
-	for i := range count {
+	writeItem := func(i int) {
 		writeStrings(buffer, `<div id="`, listViewID, "-", strconv.Itoa(i),
 			`" class="ruiView `, listView.listItemStyle())
 		if i == current {
@@ -764,10 +792,13 @@ func (listView *listViewData) checkboxSubviews(adapter ListAdapter, buffer *stri
 
 		buffer.WriteString(`</div></div></div>`)
 	}
+
+	for i := range adapter.ListSize() {
+		writeItem(i)
+	}
 }
 
 func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *strings.Builder) {
-	count := adapter.ListSize()
 	listViewID := listView.htmlID()
 
 	itemStyleBuilder := allocStringBuilder()
@@ -784,7 +815,7 @@ func (listView *listViewData) noneCheckboxSubviews(adapter ListAdapter, buffer *
 	current := GetCurrent(listView)
 	enabledItems := listView.itemEnabledAdapter(adapter)
 
-	for i := range count {
+	for i := range adapter.ListSize() {
 		writeStrings(buffer, `<div id="`, listViewID, "-", strconv.Itoa(i),
 			`" class="ruiView `, listView.listItemStyle())
 		if i == current {
@@ -983,11 +1014,7 @@ func listDiv(listView View, buffer *strings.Builder) {
 
 func (listView *listViewData) htmlSubviews(self View, buffer *strings.Builder) {
 	adapter := listView.getAdapter()
-	if adapter == nil {
-		return
-	}
-
-	if listSize := adapter.ListSize(); listSize == 0 {
+	if adapter == nil || adapter.ListSize() == 0 {
 		return
 	}
 
