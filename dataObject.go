@@ -343,11 +343,78 @@ func (object *dataObject) ToParams() Params {
 	return params
 }
 
+func textToReflectString(elemType reflect.Type, text string) reflect.Value {
+	elem := reflect.New(elemType).Elem()
+	elem.SetString(text)
+	return elem
+}
+
+func textToReflectInt(elemType reflect.Type, text string, bitSize int) (reflect.Value, bool) {
+	elem := reflect.New(elemType).Elem()
+	n, err := strconv.ParseInt(text, 0, bitSize)
+	if err != nil {
+		ErrorLog(err.Error())
+		return elem, false
+	}
+
+	elem.SetInt(n)
+	return elem, true
+}
+
+func textToReflectUint(elemType reflect.Type, text string, bitSize int) (reflect.Value, bool) {
+	var n uint64
+	var err error
+
+	if len(text) > 0 && text[0] == '#' {
+		n, err = strconv.ParseUint(text[1:], 16, bitSize)
+	} else {
+		n, err = strconv.ParseUint(text, 0, bitSize)
+	}
+
+	elem := reflect.New(elemType).Elem()
+	if err != nil {
+		ErrorLog(err.Error())
+		return elem, false
+	}
+
+	elem.SetUint(n)
+	return elem, true
+}
+
+func textToReflectFloat(elemType reflect.Type, text string, bitSize int) (reflect.Value, bool) {
+	elem := reflect.New(elemType).Elem()
+	n, err := strconv.ParseFloat(text, bitSize)
+	if err != nil {
+		ErrorLog(err.Error())
+		return elem, false
+	}
+	elem.SetFloat(n)
+	return elem, true
+}
+
+func textToReflectBool(elemType reflect.Type, text string) (reflect.Value, bool) {
+	elem := reflect.New(elemType).Elem()
+	switch strings.ToLower(text) {
+	case "true", "1", "on":
+		elem.SetBool(true)
+
+	case "false", "0", "off":
+		elem.SetBool(false)
+
+	default:
+		ErrorLogF(`unsupported bool value: "%s"`, text)
+		return elem, false
+	}
+	return elem, true
+}
+
 func copyToReflectSlice(array DataArray, value reflect.Value) {
 	val := reflect.New(value.Type())
 	val = val.Elem()
 
-	switch val.Type().Elem().Kind() {
+	elemType := val.Type().Elem()
+
+	switch elemType.Kind() {
 	case reflect.Pointer:
 		for data := range array.Elements() {
 			s := reflect.New(val.Type().Elem()).Elem()
@@ -357,107 +424,83 @@ func copyToReflectSlice(array DataArray, value reflect.Value) {
 
 	case reflect.String:
 		for text := range array.TextElements() {
-			val = reflect.Append(val, reflect.ValueOf(text))
+			val = reflect.Append(val, textToReflectString(elemType, text))
 		}
 
-	case reflect.Int:
+	case reflect.Int, reflect.Int64:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseInt(text, 10, 64); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(int(n)))
+			if elem, ok := textToReflectInt(elemType, text, 64); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Int8:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseInt(text, 10, 8); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(int8(n)))
+			if elem, ok := textToReflectInt(elemType, text, 8); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Int16:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseInt(text, 10, 16); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(int16(n)))
+			if elem, ok := textToReflectInt(elemType, text, 16); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Int32:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseInt(text, 10, 32); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(int32(n)))
+			if elem, ok := textToReflectInt(elemType, text, 32); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
-	case reflect.Int64:
+	case reflect.Uint, reflect.Uint64:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseInt(text, 10, 64); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(n))
-			}
-		}
-
-	case reflect.Uint:
-		for text := range array.TextElements() {
-			if n, err := strconv.ParseUint(text, 10, 64); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(uint(n)))
+			if elem, ok := textToReflectUint(elemType, text, 64); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Uint8:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseUint(text, 10, 8); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(uint8(n)))
+			if elem, ok := textToReflectUint(elemType, text, 8); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Uint16:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseUint(text, 10, 16); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(uint16(n)))
+			if elem, ok := textToReflectUint(elemType, text, 16); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Uint32:
 		for text := range array.TextElements() {
-			if len(text) > 0 {
-				if text[0] == '#' {
-					if n, err := strconv.ParseUint(text[1:], 16, 32); err == nil {
-						val = reflect.Append(val, reflect.ValueOf(uint32(n)))
-					}
-				} else if n, err := strconv.ParseUint(text, 10, 32); err == nil {
-					val = reflect.Append(val, reflect.ValueOf(uint32(n)))
-				}
-			}
-		}
-
-	case reflect.Uint64:
-		for text := range array.TextElements() {
-			if n, err := strconv.ParseUint(text, 10, 64); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(n))
+			if elem, ok := textToReflectUint(elemType, text, 32); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Float32:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseFloat(text, 32); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(float32(n)))
+			if elem, ok := textToReflectFloat(elemType, text, 32); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Float64:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseFloat(text, 64); err == nil {
-				val = reflect.Append(val, reflect.ValueOf(n))
+			if elem, ok := textToReflectFloat(elemType, text, 64); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 
 	case reflect.Bool:
 		for text := range array.TextElements() {
-			switch text {
-			case "true", "1":
-				val = reflect.Append(val, reflect.ValueOf(true))
-
-			case "false", "0":
-				val = reflect.Append(val, reflect.ValueOf(false))
+			if elem, ok := textToReflectBool(elemType, text); ok {
+				val = reflect.Append(val, elem)
 			}
 		}
 

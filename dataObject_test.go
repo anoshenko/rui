@@ -6,11 +6,14 @@ type TestDataXY struct {
 	X float32
 	Y float64
 }
+
+type TestInt int
+
 type TestDataObjectStruct struct {
-	Items      []string `rui:"id=items"`
-	Items2     [2]string
-	Int_a      []int `rui:"id=intArray"`
-	Int_a2     [3]int
+	Items      []PropertyName `rui:"id=items"`
+	Items2     [2]PropertyName
+	Int_a      []TestInt `rui:"id=intArray"`
+	Int_a2     [3]TestInt
 	Int8_a     []int8
 	Int16_a    []int16
 	Int32_a    []int32
@@ -25,17 +28,17 @@ type TestDataObjectStruct struct {
 	Float64_a  []float64
 	Bool_a     []bool
 	Bool_a2    [2]bool
-	Text       string `rui:"id=text"`
-	Int        int    `rui:"id=int"`
-	Int8       int    `rui:"id=int8"`
-	Int16      int    `rui:"id=int16"`
-	Int32      int    `rui:"id=int32"`
-	Int64      int    `rui:"id=int64"`
-	Uint       uint   `rui:"id=uint"`
-	Uint8      uint   `rui:"id=uint8"`
-	Uint16     uint   `rui:"id=uint16"`
-	Uint32     uint   `rui:"id=uint32"`
-	Uint64     uint   `rui:"id=uint64"`
+	Text       string  `rui:"id=text"`
+	Int        TestInt `rui:"id=int"`
+	Int8       int     `rui:"id=int8"`
+	Int16      int     `rui:"id=int16"`
+	Int32      int     `rui:"id=int32"`
+	Int64      int     `rui:"id=int64"`
+	Uint       uint    `rui:"id=uint"`
+	Uint8      uint    `rui:"id=uint8"`
+	Uint16     uint    `rui:"id=uint16"`
+	Uint32     uint    `rui:"id=uint32"`
+	Uint64     uint    `rui:"id=uint64"`
 	Float32    float32
 	Float64    float64
 	Flag       bool
@@ -46,16 +49,16 @@ type TestDataObjectStruct struct {
 	Matrix2    [2][]int
 	Matrix3    [][3]int
 	Matrix4    [2][3]int
-	Map        map[string]int
+	Map        map[PropertyName]PropertyName
 }
 
 func TestDataObject(t *testing.T) {
 
 	data := TestDataObjectStruct{
-		Items:      []string{"Item 1", "Item2"},
-		Items2:     [2]string{"Item 3", "Item4"},
-		Int_a:      []int{-1, 2, 3},
-		Int_a2:     [3]int{0, 1, 2},
+		Items:      []PropertyName{PropertyName("Item 1"), PropertyName("Item2")},
+		Items2:     [2]PropertyName{"Item 3", "Item4"},
+		Int_a:      []TestInt{-1, 2, 3},
+		Int_a2:     [3]TestInt{0, 1, 2},
 		Int8_a:     []int8{4, 5, 6},
 		Int16_a:    []int16{7, 8, 9},
 		Int32_a:    []int32{10, 11, 12},
@@ -103,9 +106,9 @@ func TestDataObject(t *testing.T) {
 			{41, 42, 43},
 			{44, 45, 46},
 		},
-		Map: map[string]int{
-			"key 1": 12,
-			"key2":  25,
+		Map: map[PropertyName]PropertyName{
+			"key 1": "12",
+			"key2":  "25",
 		},
 	}
 
