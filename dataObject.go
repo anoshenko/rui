@@ -402,7 +402,7 @@ func textToReflectBool(elemType reflect.Type, text string) (reflect.Value, bool)
 		elem.SetBool(false)
 
 	default:
-		ErrorLogF(`unsupported bool value: "%s"`, text)
+		ErrorLogF(`invalid bool value: "%s"`, text)
 		return elem, false
 	}
 	return elem, true
@@ -564,6 +564,7 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 	case reflect.Pointer:
 		for data := range array.Elements() {
 			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
 				break
 			}
 			value := val.Index(i)
@@ -574,6 +575,7 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 	case reflect.String:
 		for text := range array.TextElements() {
 			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
 				break
 			}
 			value := val.Index(i)
@@ -584,72 +586,91 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		for text := range array.TextElements() {
 			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
 				break
 			}
-			if n, err := strconv.ParseInt(text, 10, 64); err == nil {
+			n, err := strconv.ParseInt(text, 0, 64)
+			if err == nil {
 				value := val.Index(i)
 				value.SetInt(n)
 				i++
+			} else {
+				ErrorLog(err.Error())
 			}
 		}
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		for text := range array.TextElements() {
 			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
 				break
 			}
+
 			if len(text) > 0 {
+				var n uint64
+				var err error
 				if text[0] == '#' {
-					if n, err := strconv.ParseUint(text[1:], 16, 64); err == nil {
-						value := val.Index(i)
-						value.SetUint(n)
-						i++
-					}
-				} else if n, err := strconv.ParseUint(text, 10, 64); err == nil {
+					n, err = strconv.ParseUint(text[1:], 16, 64)
+				} else {
+					n, err = strconv.ParseUint(text, 0, 64)
+				}
+				if err == nil {
 					value := val.Index(i)
 					value.SetUint(n)
 					i++
+				} else {
+					ErrorLog(err.Error())
 				}
 			}
 		}
 
 	case reflect.Float32, reflect.Float64:
 		for text := range array.TextElements() {
-			if n, err := strconv.ParseFloat(text, 64); err == nil {
-				if i >= maxSize {
-					break
-				}
+			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
+				break
+			}
+
+			n, err := strconv.ParseFloat(text, 64)
+			if err == nil {
 				value := val.Index(i)
 				value.SetFloat(n)
 				i++
+			} else {
+				ErrorLog(err.Error())
 			}
 		}
 
 	case reflect.Bool:
 		for text := range array.TextElements() {
 			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
 				break
 			}
 
-			switch text {
-			case "true", "1":
+			switch strings.ToLower(text) {
+			case "true", "1", "on":
 				value := val.Index(i)
 				value.SetBool(true)
 				i++
 
-			case "false", "0":
+			case "false", "0", "off":
 				value := val.Index(i)
 				value.SetBool(false)
 				i++
+
+			default:
+				ErrorLog(`invalid bool value: "` + text + `"`)
 			}
 		}
 
 	case reflect.Struct:
 		for data := range array.Elements() {
+			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
+				break
+			}
 			if obj := data.Object(); obj != nil {
-				if i >= maxSize {
-					break
-				}
 				value := val.Index(i)
 				copyToReflectStruct(obj, value)
 				i++
@@ -658,10 +679,11 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 
 	case reflect.Map:
 		for data := range array.Elements() {
+			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
+				break
+			}
 			if obj := data.Object(); obj != nil {
-				if i >= maxSize {
-					break
-				}
 				value := val.Index(i)
 				copyToReflectMap(obj, value)
 				i++
@@ -670,10 +692,11 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 
 	case reflect.Slice:
 		for data := range array.Elements() {
+			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
+				break
+			}
 			if array := data.Array(); array != nil {
-				if i >= maxSize {
-					break
-				}
 				value := val.Index(i)
 				copyToReflectSlice(array, value)
 				i++
@@ -682,10 +705,11 @@ func copyToReflectArray(array DataArray, val reflect.Value) {
 
 	case reflect.Array:
 		for data := range array.Elements() {
+			if i >= maxSize {
+				ErrorLogF("array to small (DataArray.Size() == %d, array size == %d)", array.Size(), maxSize)
+				break
+			}
 			if array := data.Array(); array != nil {
-				if i >= maxSize {
-					break
-				}
 				value := val.Index(i)
 				copyToReflectArray(array, value)
 				i++
@@ -712,12 +736,12 @@ func copyToReflectMap(object DataObject, val reflect.Value) {
 			key.SetString(tag)
 
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			if n, err := strconv.ParseInt(tag, 10, 64); err == nil {
+			if n, err := strconv.ParseInt(tag, 0, 64); err == nil {
 				key.SetInt(n)
 			}
 
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			if n, err := strconv.ParseUint(tag, 10, 64); err == nil {
+			if n, err := strconv.ParseUint(tag, 0, 64); err == nil {
 				key.SetUint(n)
 			}
 
@@ -768,7 +792,7 @@ func copyToReflectValue(data DataValue, value reflect.Value) {
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		if data.Type() == TextDataValue {
-			if n, err := strconv.ParseInt(data.String(), 10, 64); err == nil {
+			if n, err := strconv.ParseInt(data.String(), 0, 64); err == nil {
 				value.SetInt(n)
 			}
 		}
@@ -780,7 +804,7 @@ func copyToReflectValue(data DataValue, value reflect.Value) {
 					if n, err := strconv.ParseUint(text[1:], 16, 64); err == nil {
 						value.SetUint(n)
 					}
-				} else if n, err := strconv.ParseUint(text, 10, 64); err == nil {
+				} else if n, err := strconv.ParseUint(text, 0, 64); err == nil {
 					value.SetUint(n)
 				}
 			}
