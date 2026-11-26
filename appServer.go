@@ -45,8 +45,8 @@ type application struct {
 	params            AppParams
 	createContentFunc func(Session) SessionContent
 	sessions          map[int]sessionInfo
-	sessionsMutex     sync.Mutex
 	usedSessionIds    []int
+	sessionsMutex     sync.Mutex
 }
 
 func (app *application) getStartPage() string {
@@ -91,6 +91,9 @@ func (app *application) getCreateContentFunc() func(Session) SessionContent {
 }
 
 func (app *application) nextSessionID() int {
+	app.sessionsMutex.Lock()
+	defer app.sessionsMutex.Unlock()
+
 	if app.usedSessionIds == nil {
 		app.usedSessionIds = []int{}
 	}
