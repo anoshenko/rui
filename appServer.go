@@ -38,6 +38,7 @@ func errorLog(text string) {
 type sessionInfo struct {
 	session  Session
 	response chan string
+	origin   string
 }
 
 type application struct {
@@ -143,7 +144,7 @@ func (app *application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 		case "/ws":
 			if bridge := createSocketBridge(w, req); bridge != nil {
-				go app.socketReader(bridge)
+				go app.socketReader(bridge, req)
 			}
 
 		case "/script.js":
@@ -218,11 +219,14 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 	var response chan string = nil
 
 	app.sessionsMutex.Lock()
-	if info, ok := app.sessions[sessionID]; ok && info.response != nil {
+	info, ok := app.sessions[sessionID]
+	app.sessionsMutex.Unlock()
+
+	origin := req.Header.Get("Origin")
+	if ok && info.response != nil && info.origin == origin {
 		response = info.response
 		session = info.session
 	}
-	app.sessionsMutex.Unlock()
 
 	command := obj.Tag()
 
@@ -236,7 +240,7 @@ func (app *application) postHandler(w http.ResponseWriter, req *http.Request) {
 		bridge := createHttpBridge(req)
 		response = bridge.response
 
-		session = app.createSession(obj, events, bridge, response)
+		session = app.createSession(obj, events, bridge, response, origin)
 		if session == nil {
 			return
 		}
@@ -302,7 +306,7 @@ func getSessionID(obj DataObject) (int, bool) {
 	return sessionID, true
 }
 
-func (app *application) socketReader(bridge *wsBridge) {
+func (app *application) socketReader(bridge *wsBridge, req *http.Request) {
 	var session Session
 	events := make(chan DataObject, 1024)
 
@@ -325,10 +329,12 @@ func (app *application) socketReader(bridge *wsBridge) {
 
 		switch command := obj.Tag(); command {
 		case "start-session":
-			if session = app.createSession(obj, events, bridge, nil); session != nil {
-				go sessionEventHandler(session, events, bridge)
-				events <- obj
+			session = app.createSession(obj, events, bridge, nil, req.Header.Get("Origin"))
+			if session == nil {
+				return
 			}
+			go sessionEventHandler(session, events, bridge)
+			events <- obj
 
 		case "reconnect":
 			session = nil
@@ -337,14 +343,16 @@ func (app *application) socketReader(bridge *wsBridge) {
 				info, ok := app.sessions[sessionID]
 				app.sessionsMutex.Unlock()
 
-				if ok {
+				if !ok {
+					DebugLogF("Session #%d not exists", sessionID)
+				} else if info.origin != req.Header.Get("Origin") {
+					DebugLogF("Origin of session #%d does not match the reconnect origin", sessionID)
+				} else {
 					session = info.session
 					session.setBridge(events, bridge)
 
 					go sessionEventHandler(session, events, bridge)
 					session.onReconnect()
-				} else {
-					DebugLogF("Session #%d not exists", sessionID)
 				}
 			}
 
@@ -387,7 +395,7 @@ func sessionEventHandler(session Session, events chan DataObject, bridge bridge)
 }
 
 func (app *application) createSession(params DataObject, events chan DataObject,
-	bridge bridge, response chan string) Session {
+	bridge bridge, response chan string, origin string) Session {
 
 	sessionID, ok := getSessionID(params)
 	if !ok || app.createContentFunc == nil {
@@ -401,6 +409,7 @@ func (app *application) createSession(params DataObject, events chan DataObject,
 	app.sessions[sessionID] = sessionInfo{
 		session:  session,
 		response: response,
+		origin:   origin,
 	}
 	app.sessionsMutex.Unlock()
 
